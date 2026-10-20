@@ -36,6 +36,42 @@
         }
       }
     },
+    "%@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%2$@"
+          }
+        }
+      },
+      "comment": "A body in the sky and where it is: Jupiter 32° up in the southeast"
+    },
     "%@ and %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1432,6 +1468,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "この時間は空の約%lld%%"
+          }
+        }
+      }
+    },
+    "About %lld%% of the sky, an early look counted as it stands": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etwa %lld %% des Himmels, eine erste Einschätzung, unverändert gezählt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %lld%% of the sky, an early look counted as it stands"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca del %lld%% del cielo, una vista anticipada contada tal cual"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Environ %lld %% du ciel, une tendance comptée telle quelle"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空の約%lld%%。そのまま計算した早めの見通し"
           }
         }
       }
@@ -3641,6 +3712,41 @@
         }
       }
     },
+    "Drawn as seen at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dargestellt, wie er um %@ zu sehen ist"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drawn as seen at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dibujada como se ve: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dessinée telle qu’on la voit à %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@の時点の見え方で描いています"
+          }
+        }
+      }
+    },
     "Drawn for Nyx between catalog stars.": {
       "extractionState": "manual",
       "localizations": {
@@ -3816,6 +3922,41 @@
         }
       }
     },
+    "Early look · forecast counted as it stands": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erste Einschätzung · Vorhersage unverändert gezählt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Early look · forecast counted as it stands"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista anticipada · pronóstico contado tal cual"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tendance · prévision comptée telle quelle"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早めの見通し · 予報をそのまま計算しています"
+          }
+        }
+      }
+    },
     "Early look · forecast eased toward usual clouds": {
       "extractionState": "manual",
       "localizations": {
@@ -3847,6 +3988,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "早めの見通し · 予報を平年の雲量に寄せています"
+          }
+        }
+      }
+    },
+    "Early look: forecast %lld days out, counted as it stands. There are no usual clouds for this place.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erste Einschätzung: Vorhersage für %lld Tage im Voraus, unverändert gezählt. Für diesen Ort ist keine übliche Bewölkung bekannt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Early look: forecast %lld days out, counted as it stands. There are no usual clouds for this place."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista anticipada: pronóstico a %lld días, contado tal cual. No se conoce la nubosidad habitual de este lugar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tendance : prévision à %lld jours, comptée telle quelle. La nébulosité habituelle de ce lieu n’est pas connue."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早めの見通し：%lld日先の予報をそのまま計算しています。この場所の平年の雲量はわかりません。"
           }
         }
       }
@@ -4652,6 +4828,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "最大瞬間風速%@"
+          }
+        }
+      }
+    },
+    "Handoff offers the park and night on screen to your own devices signed in to the same Apple Account, so you can continue there.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handoff bietet den Park und die Nacht auf dem Bildschirm deinen eigenen Geräten an, die mit demselben Apple Account angemeldet sind, damit du dort weitermachen kannst."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handoff offers the park and night on screen to your own devices signed in to the same Apple Account, so you can continue there."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handoff ofrece el parque y la noche en pantalla a tus propios dispositivos con sesión iniciada en la misma Cuenta de Apple, para que continúes allí."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handoff propose le parc et la nuit affichés à l’écran à vos propres appareils connectés au même compte Apple, pour que vous puissiez y continuer."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handoffは、画面上の公園と夜を、同じApple Accountでサインインしている自分のデバイスに渡し、そこで続けられるようにします。"
           }
         }
       }
@@ -6542,41 +6753,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "月、%1$@、輝面比%2$lldパーセント"
-          }
-        }
-      }
-    },
-    "Moon, %@, %lld percent lit, as seen at %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mond, %@, zu %lld Prozent beleuchtet, gesehen in %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon, %@, %lld percent lit, as seen at %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna, %@, %lld por ciento iluminada, vista en %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lune, %@, éclairée à %lld pour cent, vue à %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月、%1$@、輝面比%2$lldパーセント、%3$@の時点の見え方"
           }
         }
       }
@@ -8576,37 +8752,37 @@
         }
       }
     },
-    "Only the four optional updates below leave this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared.": {
+    "Only the four optional updates below go out to the internet from this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nur die vier optionalen Aktualisierungen unten verlassen diese Apple Vision Pro, jede mit einem eigenen Schalter. Dein Standort wird hier nie abgefragt, und nichts wird gemessen oder geteilt."
+            "value": "Nur die vier optionalen Aktualisierungen unten gehen von dieser Apple Vision Pro ins Internet, jede mit einem eigenen Schalter. Dein Standort wird hier nie abgefragt, und nichts wird gemessen oder geteilt."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Only the four optional updates below leave this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared."
+            "value": "Only the four optional updates below go out to the internet from this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Solo las cuatro actualizaciones opcionales de abajo salen de este Apple Vision Pro, cada una con su propio interruptor. Aquí nunca se pide tu ubicación, y nada se mide ni se comparte."
+            "value": "Solo las cuatro actualizaciones opcionales de abajo salen a internet desde este Apple Vision Pro, cada una con su propio interruptor. Aquí nunca se pide tu ubicación, y nada se mide ni se comparte."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seules les quatre mises à jour facultatives ci-dessous quittent cet Apple Vision Pro, chacune avec son propre interrupteur. Votre position n’est jamais demandée ici, et rien n’est mesuré ni partagé."
+            "value": "Seules les quatre mises à jour facultatives ci-dessous partent sur Internet depuis cet Apple Vision Pro, chacune avec son propre interrupteur. Votre position n’est jamais demandée ici, et rien n’est mesuré ni partagé."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "このApple Vision Proから外に出るのは、下にある4つのオプションの更新だけで、それぞれに個別のスイッチがあります。ここでは位置情報を要求することはなく、何も測定したり共有したりしません。"
+            "value": "このApple Vision Proからインターネットに出ていくのは、下にある4つのオプションの更新だけで、それぞれに個別のスイッチがあります。ここでは位置情報を要求することはなく、何も測定したり共有したりしません。"
           }
         }
       }

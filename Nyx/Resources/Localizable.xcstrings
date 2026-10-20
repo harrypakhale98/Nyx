@@ -2858,6 +2858,41 @@
         }
       }
     },
+    "%@, %lld percent lit, as seen %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, zu %2$lld Prozent beleuchtet, gesehen %3$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld percent lit, as seen %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, %2$lld por ciento iluminada, vista %3$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, éclairée à %2$lld pour cent, vue %3$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、輝面比%2$lldパーセント（%3$@）"
+          }
+        }
+      }
+    },
     "%@, %lld percent lit, lit from the %@": {
       "extractionState": "manual",
       "localizations": {
@@ -4658,6 +4693,76 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld km straight-line from %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld km Luftlinie von %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld km straight-line from %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld km en línea recta de %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld km à vol d’oiseau depuis %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@から直線距離で%1$lld km"
+          }
+        }
+      }
+    },
+    "%lld miles straight-line from %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Meilen Luftlinie von %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld miles straight-line from %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld millas en línea recta de %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld miles à vol d’oiseau depuis %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@から直線距離で%1$lldマイル"
           }
         }
       }
@@ -14160,66 +14265,135 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle %lld · %lld Nächte"
+            "value": "Bortle %1$lld · %#@nights@"
+          },
+          "substitutions": {
+            "nights": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "eine Nacht"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg Nächte"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle %lld · %lld nights"
+            "value": "Bortle %1$lld · %#@nights@"
+          },
+          "substitutions": {
+            "nights": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "one night"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg nights"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle %lld · %lld noches"
+            "value": "Bortle %1$lld · %#@nights@"
+          },
+          "substitutions": {
+            "nights": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "una noche"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg noches"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle %lld · %lld nuits"
+            "value": "Bortle %1$lld · %#@nights@"
+          },
+          "substitutions": {
+            "nights": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "une nuit"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg nuits"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ボートル%1$lld · %2$lld夜"
-          }
-        }
-      }
-    },
-    "Bortle %lld · one night": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bortle %lld · eine Nacht"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bortle %lld · one night"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bortle %lld · una noche"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bortle %lld · une nuit"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ボートル%lld · 1夜"
+            "value": "ボートル%1$lld · %#@nights@夜"
+          },
+          "substitutions": {
+            "nights": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -16374,41 +16548,6 @@
         }
       }
     },
-    "Closed: %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gesperrt: %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Closed: %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cerrado: %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fermé : %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "閉鎖：%@"
-          }
-        }
-      }
-    },
     "Closest around %@, %@. A fine sight by eye or in binoculars.": {
       "extractionState": "manual",
       "localizations": {
@@ -17305,6 +17444,101 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存したスポットの雲"
+          }
+        }
+      }
+    },
+    "Clouds at your saved spots is off in Nyx on iPhone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "„Wolken an deinen gespeicherten Plätzen“ ist in Nyx auf dem iPad ausgeschaltet."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "„Wolken an deinen gespeicherten Plätzen“ ist in Nyx auf dem iPhone ausgeschaltet."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Clouds at your saved spots is off in Nyx on iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Clouds at your saved spots is off in Nyx on iPhone."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nubes en tus sitios guardados está desactivado en Nyx en el iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nubes en tus sitios guardados está desactivado en Nyx en el iPhone."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nuages à vos lieux enregistrés est désactivé dans Nyx sur l’iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nuages à vos lieux enregistrés est désactivé dans Nyx sur l’iPhone."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "iPadのNyxで「保存したスポットの雲」がオフになっています。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "iPhoneのNyxで「保存したスポットの雲」がオフになっています。"
+                }
+              }
+            }
           }
         }
       }
@@ -19500,41 +19734,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "今週末、%2$@から%1$@以内でいちばん暗い場所"
-          }
-        }
-      }
-    },
-    "Darkest saved place": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dunkelster gespeicherter Ort"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Darkest saved place"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lugar guardado más oscuro"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lieu enregistré le plus sombre"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存した場所でいちばん暗い"
           }
         }
       }
@@ -22214,6 +22413,41 @@
         }
       }
     },
+    "Early look · forecast counted as it stands": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erste Einschätzung · Vorhersage unverändert gezählt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Early look · forecast counted as it stands"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista anticipada · pronóstico contado tal cual"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tendance · prévision comptée telle quelle"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早めの見通し · 予報をそのまま計算しています"
+          }
+        }
+      }
+    },
     "Early look · forecast eased toward usual clouds": {
       "extractionState": "manual",
       "localizations": {
@@ -22245,6 +22479,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "早めの見通し · 予報を平年の雲量に寄せています"
+          }
+        }
+      }
+    },
+    "Early look: a forecast of %lld%% from %lld days out, counted as it stands.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erste Einschätzung: eine Vorhersage von %1$lld %% aus %2$lld Tagen Abstand, unverändert gezählt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Early look: a forecast of %lld%% from %lld days out, counted as it stands."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista anticipada: un pronóstico de %lld%% a %lld días, contado tal cual."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tendance : une prévision de %lld %% à %lld jours, comptée telle quelle."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早めの見通し：%2$lld日先の雲量予報%1$lld%%を、そのまま計算しています。"
           }
         }
       }
@@ -22284,6 +22553,41 @@
         }
       }
     },
+    "Early look: forecast %lld days out, counted as it stands. There are no usual clouds for this place.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erste Einschätzung: Vorhersage für %lld Tage im Voraus, unverändert gezählt. Für diesen Ort ist keine übliche Bewölkung bekannt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Early look: forecast %lld days out, counted as it stands. There are no usual clouds for this place."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista anticipada: pronóstico a %lld días, contado tal cual. No se conoce la nubosidad habitual de este lugar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tendance : prévision à %lld jours, comptée telle quelle. La nébulosité habituelle de ce lieu n’est pas connue."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早めの見通し：%lld日先の予報をそのまま計算しています。この場所の平年の雲量はわかりません。"
+          }
+        }
+      }
+    },
     "Early look: forecast %lld days out, eased toward usual clouds.": {
       "extractionState": "manual",
       "localizations": {
@@ -22315,41 +22619,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "早めの見通し：%lld日先の予報を、平年の雲量に寄せています。"
-          }
-        }
-      }
-    },
-    "Early look: the forecast is eased toward usual clouds.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Erste Einschätzung: Die Vorhersage wird an die übliche Bewölkung angenähert."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Early look: the forecast is eased toward usual clouds."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vista anticipada: el pronóstico se ajusta hacia la nubosidad habitual."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tendance : la prévision est rapprochée de la nébulosité habituelle."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "早めの見通し：予報を平年の雲量に寄せています。"
           }
         }
       }
@@ -30569,6 +30838,41 @@
         }
       }
     },
+    "Journal export": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journal-Export"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journal export"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportación del diario"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportation du journal"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ジャーナルの書き出し"
+          }
+        }
+      }
+    },
     "Journal import": {
       "extractionState": "manual",
       "localizations": {
@@ -38413,6 +38717,76 @@
         }
       }
     },
+    "Nights marked %@ count the forecast as it stands: there are no usual clouds for those places.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächte mit %@ zählen die Vorhersage unverändert: Für diese Orte ist keine übliche Bewölkung bekannt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights marked %@ count the forecast as it stands: there are no usual clouds for those places."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches marcadas %@ cuentan el pronóstico tal cual: no se conoce la nubosidad habitual de esos lugares."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nuits marquées %@ comptent la prévision telle quelle : la nébulosité habituelle de ces lieux n’est pas connue."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@と表示された夜は、予報をそのまま計算しています。これらの場所の平年の雲量はわかりません。"
+          }
+        }
+      }
+    },
+    "Nights marked %@ ease the forecast toward each park's usual clouds for the month, or count it as it stands where those are not known.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bei Nächten mit %@ wird die Vorhersage an die übliche Bewölkung des Parks in diesem Monat angenähert oder, wo diese unbekannt ist, unverändert gezählt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights marked %@ ease the forecast toward each park's usual clouds for the month, or count it as it stands where those are not known."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En las noches marcadas %@, el pronóstico se ajusta hacia la nubosidad habitual de cada parque en ese mes, o se cuenta tal cual donde no se conoce."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour les nuits marquées %@, la prévision est rapprochée de la nébulosité habituelle du mois pour chaque parc, ou comptée telle quelle là où elle n’est pas connue."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@と表示された夜は、予報を各公園のその月の平年の雲量に寄せています。平年の雲量がわからない場所では、予報をそのまま計算しています。"
+          }
+        }
+      }
+    },
     "Nights marked %@ ease the forecast toward each park's usual clouds for the month.": {
       "extractionState": "manual",
       "localizations": {
@@ -42671,6 +43045,101 @@
         }
       }
     },
+    "Nyx on iPhone no longer sends this place.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx auf dem iPad sendet diesen Ort nicht mehr."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx auf dem iPhone sendet diesen Ort nicht mehr."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx on iPad no longer sends this place."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx on iPhone no longer sends this place."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx en el iPad ya no envía este lugar."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx en el iPhone ya no envía este lugar."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx sur l’iPad n’envoie plus ce lieu."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx sur l’iPhone n’envoie plus ce lieu."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "iPadのNyxからこの場所が送られなくなりました。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "iPhoneのNyxからこの場所が送られなくなりました。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Nyx on iPhone sends your saved parks and cloud forecasts. Until then, scores use each park's usual clouds.": {
       "extractionState": "manual",
       "localizations": {
@@ -45006,37 +45475,37 @@
       },
       "extractionState": "manual"
     },
-    "Open-Meteo forecasts cover up to 16 days. The U.S. national parks are asked for together, up to 50 in each request, and each request carries only the public coordinates of each park's main viewing spot; parks and dark-sky places elsewhere are asked for by whole regions, and saved spots in a request of their own. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone. An old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here.": {
+    "Open-Meteo forecasts cover up to 16 days. The U.S. national parks are asked for together, up to 50 in each request, and each request carries only the public coordinates of each park's main viewing spot; parks and dark-sky places elsewhere are asked for by whole regions, and saved spots in a request of their own. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone. Where a place has no usual clouds for the month, an early look counts the forecast as it stands, and past ten days the score counts the Moon and darkness only. Where usual clouds are known, an old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die Vorhersagen von Open-Meteo reichen bis zu 16 Tage weit. Die US-Nationalparks werden gemeinsam abgefragt, bis zu 50 pro Anfrage, und jede Anfrage enthält nur die öffentlichen Koordinaten des wichtigsten Beobachtungsplatzes jedes Parks; Parks und Dunkelorte anderswo werden nach ganzen Regionen abgefragt und gespeicherte Plätze in einer eigenen Anfrage. Die Wolken werden über die gesamte Phase echter Dunkelheit gemittelt; in Nächten ohne sie von Sonnenuntergang bis Sonnenaufgang oder, unter der Mitternachtssonne, über die vier Stunden um den tiefsten Sonnenstand. Eine Vorhersage zählt voll bis etwa drei Tage vor einer Nacht. Von dort bis zu zehn Tagen wird sie an die übliche Bewölkung des Parks im jeweiligen Monat angenähert, und diese Nächte sind als erste Einschätzung markiert; nach zehn Tagen oder ohne Vorhersage zählt allein die übliche Bewölkung. Eine alte Vorhersage wird nie verworfen; sie zählt nur weniger, sodass eine Nacht offline nie klarer wirken kann, als ihre Wolken erlauben. Eine Vorhersage, die eine Nacht nicht vollständig abdeckt, wird nicht verwendet. Am Haleakalā, dessen Gipfel über der Passatinversion liegt, zählt der Wert mittelhohe und hohe Wolken, wenn diese Vorhersage verfügbar ist. Die Daten von Open-Meteo stehen unter CC BY 4.0. Nyx verändert sie: Die Wolken jeder Nacht werden über deren echte Dunkelheit gemittelt und an die übliche Bewölkung angenähert, wie hier beschrieben."
+            "value": "Die Vorhersagen von Open-Meteo reichen bis zu 16 Tage weit. Die US-Nationalparks werden gemeinsam abgefragt, bis zu 50 pro Anfrage, und jede Anfrage enthält nur die öffentlichen Koordinaten des wichtigsten Beobachtungsplatzes jedes Parks; Parks und Dunkelorte anderswo werden nach ganzen Regionen abgefragt und gespeicherte Plätze in einer eigenen Anfrage. Die Wolken werden über die gesamte Phase echter Dunkelheit gemittelt; in Nächten ohne sie von Sonnenuntergang bis Sonnenaufgang oder, unter der Mitternachtssonne, über die vier Stunden um den tiefsten Sonnenstand. Eine Vorhersage zählt voll bis etwa drei Tage vor einer Nacht. Von dort bis zu zehn Tagen wird sie an die übliche Bewölkung des Parks im jeweiligen Monat angenähert, und diese Nächte sind als erste Einschätzung markiert; nach zehn Tagen oder ohne Vorhersage zählt allein die übliche Bewölkung. Wo für einen Ort keine übliche Bewölkung für den Monat bekannt ist, zählt eine erste Einschätzung die Vorhersage unverändert, und nach zehn Tagen berücksichtigt der Wert nur Mond und Dunkelheit. Wo die übliche Bewölkung bekannt ist, wird eine alte Vorhersage nie verworfen; sie zählt nur weniger, sodass eine Nacht offline nie klarer wirken kann, als ihre Wolken erlauben. Eine Vorhersage, die eine Nacht nicht vollständig abdeckt, wird nicht verwendet. Am Haleakalā, dessen Gipfel über der Passatinversion liegt, zählt der Wert mittelhohe und hohe Wolken, wenn diese Vorhersage verfügbar ist. Die Daten von Open-Meteo stehen unter CC BY 4.0. Nyx verändert sie: Die Wolken jeder Nacht werden über deren echte Dunkelheit gemittelt und an die übliche Bewölkung angenähert, wie hier beschrieben."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open-Meteo forecasts cover up to 16 days. The U.S. national parks are asked for together, up to 50 in each request, and each request carries only the public coordinates of each park's main viewing spot; parks and dark-sky places elsewhere are asked for by whole regions, and saved spots in a request of their own. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone. An old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here."
+            "value": "Open-Meteo forecasts cover up to 16 days. The U.S. national parks are asked for together, up to 50 in each request, and each request carries only the public coordinates of each park's main viewing spot; parks and dark-sky places elsewhere are asked for by whole regions, and saved spots in a request of their own. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone. Where a place has no usual clouds for the month, an early look counts the forecast as it stands, and past ten days the score counts the Moon and darkness only. Where usual clouds are known, an old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los pronósticos de Open-Meteo cubren hasta 16 días. Se pide por los parques nacionales de EE. UU. juntos, hasta 50 en cada solicitud, y cada solicitud lleva solo las coordenadas públicas del punto de observación principal de cada parque; los parques y lugares de cielo oscuro de otros países se piden por regiones completas, y los sitios guardados en una solicitud aparte. Las nubes se promedian sobre todo el periodo de oscuridad total; en noches sin ella, de la puesta a la salida del sol, o en las cuatro horas alrededor del punto más bajo del Sol bajo el sol de medianoche. Un pronóstico cuenta por completo hasta unos tres días antes de una noche. De ahí hasta diez días se ajusta hacia la nubosidad habitual del parque en ese mes, y esas noches se marcan como vista anticipada; pasados diez días, o sin pronóstico, cuenta solo la nubosidad habitual. Un pronóstico viejo nunca se descarta; simplemente cuenta menos, así que quedarte sin conexión no puede hacer que una noche se vea más despejada de lo que permiten sus nubes. Un pronóstico con cobertura incompleta de una noche no se usa. En Haleakalā, cuya cumbre está por encima de la inversión de los vientos alisios, el índice cuenta las nubes medias y altas cuando ese pronóstico está disponible. Los datos de Open-Meteo tienen licencia CC BY 4.0. Nyx los modifica: las nubes de cada noche se promedian sobre la oscuridad total de esa noche y se ajustan hacia la nubosidad habitual, como se describe aquí."
+            "value": "Los pronósticos de Open-Meteo cubren hasta 16 días. Se pide por los parques nacionales de EE. UU. juntos, hasta 50 en cada solicitud, y cada solicitud lleva solo las coordenadas públicas del punto de observación principal de cada parque; los parques y lugares de cielo oscuro de otros países se piden por regiones completas, y los sitios guardados en una solicitud aparte. Las nubes se promedian sobre todo el periodo de oscuridad total; en noches sin ella, de la puesta a la salida del sol, o en las cuatro horas alrededor del punto más bajo del Sol bajo el sol de medianoche. Un pronóstico cuenta por completo hasta unos tres días antes de una noche. De ahí hasta diez días se ajusta hacia la nubosidad habitual del parque en ese mes, y esas noches se marcan como vista anticipada; pasados diez días, o sin pronóstico, cuenta solo la nubosidad habitual. Donde no se conoce la nubosidad habitual de un lugar para el mes, una vista anticipada cuenta el pronóstico tal cual y, pasados diez días, el índice solo cuenta la Luna y la oscuridad. Donde se conoce la nubosidad habitual, un pronóstico viejo nunca se descarta; simplemente cuenta menos, así que quedarte sin conexión no puede hacer que una noche se vea más despejada de lo que permiten sus nubes. Un pronóstico con cobertura incompleta de una noche no se usa. En Haleakalā, cuya cumbre está por encima de la inversión de los vientos alisios, el índice cuenta las nubes medias y altas cuando ese pronóstico está disponible. Los datos de Open-Meteo tienen licencia CC BY 4.0. Nyx los modifica: las nubes de cada noche se promedian sobre la oscuridad total de esa noche y se ajustan hacia la nubosidad habitual, como se describe aquí."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les prévisions d’Open-Meteo couvrent jusqu’à 16 jours. Les parcs nationaux des États-Unis sont demandés ensemble, jusqu’à 50 par requête, et chaque requête ne contient que les coordonnées publiques du principal point d’observation de chaque parc ; les parcs et sites de ciel étoilé d’ailleurs sont demandés par régions entières, et les lieux enregistrés dans une requête à part. Les nuages sont moyennés sur toute la période d’obscurité totale ; les nuits qui n’en ont pas, du coucher au lever du soleil, ou sur les quatre heures autour du point le plus bas du Soleil sous le soleil de minuit. Une prévision compte pleinement jusqu’à environ trois jours avant une nuit. De là jusqu’à dix jours, elle est rapprochée de la nébulosité habituelle du parc pour le mois, et ces nuits sont marquées comme tendance ; au-delà de dix jours, ou sans prévision, seule la nébulosité habituelle compte. Une ancienne prévision n’est jamais abandonnée ; elle compte simplement moins, si bien que passer hors ligne ne peut pas rendre une nuit plus dégagée que ses nuages ne le permettent. Une prévision qui ne couvre pas entièrement une nuit n’est pas utilisée. À Haleakalā, dont le sommet domine l’inversion des alizés, l’indice compte les nuages moyens et hauts quand cette prévision est disponible. Les données d’Open-Meteo sont sous licence CC BY 4.0. Nyx les modifie : les nuages de chaque nuit sont moyennés sur l’obscurité totale de cette nuit et rapprochés de la nébulosité habituelle, comme décrit ici."
+            "value": "Les prévisions d’Open-Meteo couvrent jusqu’à 16 jours. Les parcs nationaux des États-Unis sont demandés ensemble, jusqu’à 50 par requête, et chaque requête ne contient que les coordonnées publiques du principal point d’observation de chaque parc ; les parcs et sites de ciel étoilé d’ailleurs sont demandés par régions entières, et les lieux enregistrés dans une requête à part. Les nuages sont moyennés sur toute la période d’obscurité totale ; les nuits qui n’en ont pas, du coucher au lever du soleil, ou sur les quatre heures autour du point le plus bas du Soleil sous le soleil de minuit. Une prévision compte pleinement jusqu’à environ trois jours avant une nuit. De là jusqu’à dix jours, elle est rapprochée de la nébulosité habituelle du parc pour le mois, et ces nuits sont marquées comme tendance ; au-delà de dix jours, ou sans prévision, seule la nébulosité habituelle compte. Là où la nébulosité habituelle d’un lieu pour le mois n’est pas connue, une tendance compte la prévision telle quelle, et au-delà de dix jours l’indice ne compte que la Lune et l’obscurité. Là où la nébulosité habituelle est connue, une ancienne prévision n’est jamais abandonnée ; elle compte simplement moins, si bien que passer hors ligne ne peut pas rendre une nuit plus dégagée que ses nuages ne le permettent. Une prévision qui ne couvre pas entièrement une nuit n’est pas utilisée. À Haleakalā, dont le sommet domine l’inversion des alizés, l’indice compte les nuages moyens et hauts quand cette prévision est disponible. Les données d’Open-Meteo sont sous licence CC BY 4.0. Nyx les modifie : les nuages de chaque nuit sont moyennés sur l’obscurité totale de cette nuit et rapprochés de la nébulosité habituelle, comme décrit ici."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open-Meteoの予報は最大16日先までをカバーします。米国の国立公園はまとめて問い合わせ、1回のリクエストには最大50か所を含めます。各リクエストに含まれるのは、各公園の主な観察スポットの公開された座標だけです。ほかの地域の公園や暗い空の場所は地域単位でまとめて、保存したスポットは別のリクエストで問い合わせます。雲量は完全に暗い時間全体で平均します。完全に暗い時間がない夜は日の入りから日の出まで、白夜のときは太陽が最も低くなる時刻の前後4時間で平均します。予報は、その夜の約3日前まではそのまま使います。そこから10日前までは公園のその月の平年の雲量に寄せ、これらの夜には早めの見通しと表示します。10日より先、または予報がない場合は、平年の雲量だけを使います。古い予報を捨てることはありません。影響を小さくして使うだけです。そのため、オフラインになっても、実際の雲より晴れているように見えることはありません。夜の一部しかカバーしていない予報は使いません。山頂が貿易風逆転層より上にあるHaleakalāでは、中層雲と上層雲の予報がある場合は、それを計算に入れます。Open-MeteoのデータはCC BY 4.0でライセンスされています。Nyxはこれに手を加えています。ここで説明しているように、各夜の雲量をその夜の完全に暗い時間で平均し、平年の雲量に寄せています。"
+            "value": "Open-Meteoの予報は最大16日先までをカバーします。米国の国立公園はまとめて問い合わせ、1回のリクエストには最大50か所を含めます。各リクエストに含まれるのは、各公園の主な観察スポットの公開された座標だけです。ほかの地域の公園や暗い空の場所は地域単位でまとめて、保存したスポットは別のリクエストで問い合わせます。雲量は完全に暗い時間全体で平均します。完全に暗い時間がない夜は日の入りから日の出まで、白夜のときは太陽が最も低くなる時刻の前後4時間で平均します。予報は、その夜の約3日前まではそのまま使います。そこから10日前までは公園のその月の平年の雲量に寄せ、これらの夜には早めの見通しと表示します。10日より先、または予報がない場合は、平年の雲量だけを使います。その月の平年の雲量がわからない場所では、早めの見通しは予報をそのまま計算し、10日より先は月と暗さだけで計算します。平年の雲量がわかっている場所では、古い予報を捨てることはありません。影響を小さくして使うだけです。そのため、オフラインになっても、実際の雲より晴れているように見えることはありません。夜の一部しかカバーしていない予報は使いません。山頂が貿易風逆転層より上にあるHaleakalāでは、中層雲と上層雲の予報がある場合は、それを計算に入れます。Open-MeteoのデータはCC BY 4.0でライセンスされています。Nyxはこれに手を加えています。ここで説明しているように、各夜の雲量をその夜の完全に暗い時間で平均し、平年の雲量に寄せています。"
           }
         }
       }
@@ -51671,6 +52140,41 @@
         }
       }
     },
+    "Same as Tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie „Heute Nacht“"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Same as Tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igual que en Esta noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comme dans Ce soir"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「今夜」と同じ"
+          }
+        }
+      }
+    },
     "Satellite night lights: %@. Context only; not part of the score.": {
       "extractionState": "manual",
       "localizations": {
@@ -56500,6 +57004,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "塗りつぶし：予報。半分塗り：早めの見通し。白抜き：平年の雲量。リングはその週でいちばんよい夜を示します。"
+          }
+        }
+      }
+    },
+    "Solid: full forecast. Half-filled: an early look, the forecast counted as it stands.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gefüllt: vollständige Vorhersage. Halb gefüllt: erste Einschätzung, die Vorhersage unverändert gezählt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solid: full forecast. Half-filled: an early look, the forecast counted as it stands."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relleno: pronóstico completo. Medio relleno: vista anticipada, el pronóstico contado tal cual."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plein : prévision complète. À moitié plein : tendance, la prévision comptée telle quelle."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "塗りつぶし：予報がそろっています。半分塗り：早めの見通しで、予報をそのまま計算しています。"
+          }
+        }
+      }
+    },
+    "Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds, or counted as it stands where those are not known.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gefüllt: vollständige Vorhersage. Halb gefüllt: erste Einschätzung, die Vorhersage an die übliche Bewölkung angenähert oder, wo diese unbekannt ist, unverändert gezählt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds, or counted as it stands where those are not known."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relleno: pronóstico completo. Medio relleno: vista anticipada, el pronóstico ajustado hacia la nubosidad habitual, o contado tal cual donde no se conoce."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plein : prévision complète. À moitié plein : tendance, la prévision rapprochée de la nébulosité habituelle, ou comptée telle quelle là où elle n’est pas connue."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "塗りつぶし：予報がそろっています。半分塗り：早めの見通しで、予報を平年の雲量に寄せています。平年の雲量がわからない場所では、予報をそのまま計算しています。"
           }
         }
       }
@@ -62092,37 +62666,37 @@
         }
       }
     },
-    "The darkness score at a place, or at your darkest saved place.": {
+    "The darkness score at a place you choose, or at the place Tonight shows.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Der Dunkelheitswert an einem Ort oder an deinem dunkelsten gespeicherten Ort."
+            "value": "Der Dunkelheitswert an einem Ort deiner Wahl oder an dem Ort, den „Heute Nacht“ zeigt."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The darkness score at a place, or at your darkest saved place."
+            "value": "The darkness score at a place you choose, or at the place Tonight shows."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El índice de oscuridad en un lugar o en tu lugar guardado más oscuro."
+            "value": "El índice de oscuridad en un lugar que elijas o en el lugar que muestra Esta noche."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "L’indice d’obscurité dans un lieu, ou dans votre lieu enregistré le plus sombre."
+            "value": "L’indice d’obscurité dans un lieu de votre choix, ou dans le lieu affiché dans Ce soir."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "場所、または保存した場所のうちいちばん暗い場所の暗さスコア。"
+            "value": "選んだ場所、または「今夜」に表示される場所の暗さスコア。"
           }
         }
       }
@@ -62368,6 +62942,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "4つの要素の合計は%lldです。スコアには、適用される上限のうち最も低いものを使います。"
+          }
+        }
+      }
+    },
+    "The hourly forecast averaged over true darkness, counted as it stands: there are no usual clouds for this place. Model agreement and cloud layers are context; smoke or haze can cap the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die stündliche Vorhersage, gemittelt über die echte Dunkelheit, unverändert gezählt: Für diesen Ort ist keine übliche Bewölkung bekannt. Übereinstimmung der Modelle und Wolkenschichten sind Kontext; Rauch oder Dunst können den Wert begrenzen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The hourly forecast averaged over true darkness, counted as it stands: there are no usual clouds for this place. Model agreement and cloud layers are context; smoke or haze can cap the score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El pronóstico por hora, promediado durante la oscuridad total y contado tal cual: no se conoce la nubosidad habitual de este lugar. La coincidencia entre modelos y las capas de nubes son contexto; el humo o la bruma pueden limitar el índice."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La prévision horaire moyennée sur l’obscurité totale, comptée telle quelle : la nébulosité habituelle de ce lieu n’est pas connue. La concordance des modèles et les couches nuageuses servent de contexte ; la fumée ou la brume peuvent plafonner l’indice."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1時間ごとの予報を完全に暗い時間で平均し、そのまま計算しています。この場所の平年の雲量はわかりません。モデルの一致度と雲の層は参考情報です。煙やもやはスコアの上限を下げることがあります。"
+          }
+        }
+      }
+    },
+    "The hourly forecast averaged over true darkness, counted as it stands: there are no usual clouds for this place. With no forecast, the score counts the Moon and darkness only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die stündliche Vorhersage, gemittelt über die echte Dunkelheit, unverändert gezählt: Für diesen Ort ist keine übliche Bewölkung bekannt. Ohne Vorhersage berücksichtigt der Wert nur Mond und Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The hourly forecast averaged over true darkness, counted as it stands: there are no usual clouds for this place. With no forecast, the score counts the Moon and darkness only."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El pronóstico por hora, promediado durante la oscuridad total y contado tal cual: no se conoce la nubosidad habitual de este lugar. Sin pronóstico, el índice solo cuenta la Luna y la oscuridad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La prévision horaire moyennée sur l’obscurité totale, comptée telle quelle : la nébulosité habituelle de ce lieu n’est pas connue. Sans prévision, l’indice ne compte que la Lune et l’obscurité."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1時間ごとの予報を完全に暗い時間で平均し、そのまま計算しています。この場所の平年の雲量はわかりません。予報がない場合は、月と暗さだけで計算します。"
           }
         }
       }
@@ -78297,6 +78941,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "砂丘"
+          }
+        }
+      }
+    },
+    "early look: a %lld%% cloud forecast %lld days out, counted as it stands; no usual clouds are known for this place": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "erste Einschätzung: %lld %% Wolken vorhergesagt, %lld Tage im Voraus, unverändert gezählt; für diesen Ort ist keine übliche Bewölkung bekannt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "early look: a %lld%% cloud forecast %lld days out, counted as it stands; no usual clouds are known for this place"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vista anticipada: pronóstico de %lld%% de nubes a %lld días, contado tal cual; no se conoce la nubosidad habitual de este lugar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tendance : une prévision de %lld %% de nuages à %lld jours, comptée telle quelle ; la nébulosité habituelle de ce lieu n’est pas connue"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早めの見通し：%2$lld日先の雲量予報%1$lld%%をそのまま計算したもの（この場所の平年の雲量は不明）"
           }
         }
       }
