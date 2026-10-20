@@ -110,7 +110,7 @@ struct SkyHighlightTests {
     }
     /// Highlights reach every surface through one layout: the iPhone card and the watch page list
     /// the same rows and mentions.
-    @Test func highlightsShareOneLayout() throws {
+    @MainActor @Test func highlightsShareOneLayout() throws {
         let deva=try park("deva")
         let night=try sky(deva, 2026, 11, 1)
         let up=WhatsUp(park: deva, sky: night, isTonight: false)
