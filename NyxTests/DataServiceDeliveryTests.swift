@@ -434,7 +434,9 @@ struct DataServiceDeliveryTests {
         #expect(kind("Road Reopened After Closure", "Information") == .notice)
         #expect(kind("Road Reopened After Closure", "Park Closure") == .notice)
         #expect(kind("Tioga Road Has Reopened", "Park Closure") == .notice)
-        #expect(kind("Kolob Canyons Road Now Open", "Park Closure") == .notice)
+        #expect(kind("Kolob Canyons Road Now Open", "Information") == .notice)
+        #expect(kind("Kolob Canyons Road Now Open", "Park Closure") == .closure)
+        #expect(kind("Road Is Open to High-Clearance Vehicles", "Park Closure") == .closure)
         #expect(kind("Going-to-the-Sun Road Has Reopened", "Park Closure") == .notice)
         for title in ["Tioga Road Reopens May 30", "Going-to-the-Sun Road Expected to Reopen June 15", "Generals Highway Reopening Delayed",
                       "Partial Reopening of Kolob Canyons Road", "Road Has Been Closed Due to Snow; Will Reopen When Safe",
