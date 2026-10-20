@@ -19,6 +19,7 @@ struct JournalView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @State private var exporting:JournalDocument?
+    @State private var staged:URL?
     @State private var importing=false
     @State private var importResult:String?
     @State private var exportFailed=false
@@ -93,9 +94,10 @@ struct JournalView: View {
             // The package gathered on disk is cleared once the exporter has copied it, or was cancelled.
             .fileExporter(isPresented:Binding(get:{ exporting != nil },set:{ if !$0 { exporting=nil } }),document:exporting,contentTypes:[.nyxJournal],
                           defaultFilename:String(localized:"Nyx Journal \(Date.now.formatted(.iso8601.year().month().day()))")) { result in
-                Task.detached(priority:.utility) { JournalExport.clear() }
+                let done=staged;staged=nil
+                Task.detached(priority:.utility) { JournalExport.clear(done) }
                 if case .failure=result { exportFailed=true }
-            } onCancellation:{ Task.detached(priority:.utility) { JournalExport.clear() } }
+            } onCancellation:{ let done=staged;staged=nil;Task.detached(priority:.utility) { JournalExport.clear(done) } }
             .fileImporter(isPresented:$importing,allowedContentTypes:[.nyxJournal]) { result in
                 if case .success(let url)=result { Task { await importJournal(url) } }
             }
@@ -136,7 +138,7 @@ struct JournalView: View {
         Task {
             let package=await Task.detached(priority:.userInitiated) { try? JournalExport.stage(container) }.value
             working=nil
-            if let package { exporting=JournalDocument(package:package) } else { exportFailed=true }
+            if let package { staged=package;exporting=JournalDocument(package:package) } else { exportFailed=true }
         }
     }
     /// Reads the package's manifest off the main thread (every count and file size checked, no
@@ -615,14 +617,12 @@ struct JournalDetailView:View {
         if let park=model.park(entry.parkID) {
             let night=model.night(park,on:entry.date)
             let moon=AstronomyEngine().moon(for:night)
-            // VoiceOver reads the Moon once: the line under "The Moon that night" speaks the disc's
-            // fuller description (its lit side and the moment it shows), and the disc itself is quiet.
+            // VoiceOver reads the Moon once, from the line under "The Moon that night"; the disc is quiet.
             HStack(spacing:18) {
                 MoonView(geometry:moon.geometry).frame(width:64,height:64).accessibilityHidden(true)
                 VStack(alignment:.leading,spacing:4) {
                     Text("The Moon that night").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
                     Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.system(.title3,design:.serif))
-                        .accessibilityLabel(MoonView.label(moon.geometry,moment:String(localized:"at \(park.time(moon.moment))")))
                     Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted)
                 }
             }
