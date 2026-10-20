@@ -301,12 +301,12 @@ nonisolated final class HostBackoff: Sendable {
         var strikes: Int
     }
     private let state: Mutex<[String: Hold]>
-    private let file: URL?
+    private let writer: OrderedWriter
     private let random: @Sendable () -> Double
     /// `file` nil keeps the holds in memory only (tests, and services that do not persist).
     /// `random` (0..<1) spreads the waits; tests pin it.
     init(file: URL?, now: Date = .now, random: @escaping @Sendable () -> Double = { Double.random(in: 0..<1) }) {
-        self.file=file; self.random=random
+        self.writer=OrderedWriter(file: file); self.random=random
         let data=file.flatMap { try? Data(contentsOf: $0) }
         // Earlier versions kept a date per host; it reads as a first refusal.
         let stored=data.flatMap { try? JSONDecoder().decode([String: Hold].self, from: $0) }
@@ -324,23 +324,38 @@ nonisolated final class HostBackoff: Sendable {
     func record(_ error: any Error, host: String, now: Date = .now) {
         guard Backoff.delay(after: error) != nil else { return }
         let jitter=random()
-        let snapshot=state.withLock { holds -> [String: Hold] in
+        let (snapshot, ticket)=state.withLock { holds -> ([String: Hold], Int) in
             let previous=holds[host]
             let strikes=previous.map { now.timeIntervalSince($0.until)<86400 ? $0.strikes+1 : 1 } ?? 1
             let wait=Backoff.wait(after: error, strike: strikes, now: now, jitter: jitter) ?? 0
             holds[host]=Hold(until: max(previous?.until ?? .distantPast, now.addingTimeInterval(wait)), strikes: strikes)
             holds=holds.filter { $0.value.until>now.addingTimeInterval(-86400) }
-            return holds
+            return (holds, writer.ticket())
         }
-        save(snapshot)
+        writer.write(snapshot, ticket: ticket)
     }
     /// The host answered: its streak is over.
     func succeeded(_ host: String) {
-        let snapshot=state.withLock { holds -> [String: Hold]? in holds.removeValue(forKey: host) == nil ? nil : holds }
-        if let snapshot { save(snapshot) }
+        let changed=state.withLock { holds -> ([String: Hold], Int)? in holds.removeValue(forKey: host) == nil ? nil : (holds, writer.ticket()) }
+        if case let (snapshot, ticket)?=changed { writer.write(snapshot, ticket: ticket) }
     }
-    private func save(_ holds: [String: Hold]) {
-        if let file, let data=try? JSONEncoder().encode(holds) { try? data.write(to: file, options: .atomic) }
+}
+/// Writes snapshots of one file's contents in the order they were taken. A snapshot is taken (and
+/// numbered with `ticket`) under its owner's lock, then written outside it, so the disk is never held
+/// under that lock; a snapshot older than one already written is dropped, so the file never goes back.
+nonisolated final class OrderedWriter: Sendable {
+    private let file: URL?
+    private let order=Mutex<(taken: Int, written: Int)>((0, 0))
+    init(file: URL?) { self.file=file }
+    /// The number of a snapshot taken now; called under the lock the snapshot is taken under.
+    func ticket() -> Int { order.withLock { $0.taken+=1; return $0.taken } }
+    func write<T: Encodable>(_ value: T, ticket: Int) {
+        guard let file, let data=try? JSONEncoder().encode(value) else { return }
+        order.withLock { order in
+            guard ticket>order.written else { return }
+            try? data.write(to: file, options: .atomic)
+            order.written=ticket
+        }
     }
 }
 /// What Open-Meteo counts a request as. Its free service is limited in "calls", not requests, and
@@ -393,10 +408,10 @@ nonisolated final class CallLedger: Sendable {
         var calls: Double
     }
     private let state: Mutex<[Entry]>
-    private let file: URL?
+    private let writer: OrderedWriter
     /// `file` nil keeps the ledger in memory only (tests, and services that do not persist).
     init(file: URL?, now: Date = .now) {
-        self.file=file
+        self.writer=OrderedWriter(file: file)
         let stored=file.flatMap { try? Data(contentsOf: $0) }.flatMap { try? JSONDecoder().decode([Entry].self, from: $0) } ?? []
         state=Mutex(stored.filter { $0.date>now.addingTimeInterval(-Self.kept) && $0.date<now.addingTimeInterval(3600) })
     }
@@ -428,28 +443,28 @@ nonisolated final class CallLedger: Sendable {
     /// (nothing counted) when it does not fit.
     func reserve(_ host: String, calls: Double, caps: CallBudget.Caps, now: Date = .now) -> UUID? {
         let id=UUID()
-        let snapshot=state.withLock { entries -> [Entry]? in
+        let reserved=state.withLock { entries -> ([Entry], Int)? in
             guard Self.fits(entries, host: host, calls: calls, caps: caps, now: now) else { return nil }
             entries=entries.filter { $0.date>now.addingTimeInterval(-Self.kept) }
             entries.append(Entry(id: id, date: now, host: host, calls: calls))
-            return entries
+            return (entries, writer.ticket())
         }
-        guard let snapshot else { return nil }
-        save(snapshot)
+        guard case let (snapshot, ticket)?=reserved else { return nil }
+        writer.write(snapshot, ticket: ticket)
         return id
     }
     /// What the request finally counted as (a refused request is one call).
     func settle(_ id: UUID, calls: Double) {
-        let snapshot=state.withLock { entries -> [Entry] in
+        let (snapshot, ticket)=state.withLock { entries -> ([Entry], Int) in
             if let index=entries.firstIndex(where: { $0.id == id }) { entries[index].calls=calls }
-            return entries
+            return (entries, writer.ticket())
         }
-        save(snapshot)
+        writer.write(snapshot, ticket: ticket)
     }
     /// The request never reached the service (offline, a switch turned off, Low Data Mode).
     func cancel(_ id: UUID) {
-        let snapshot=state.withLock { entries -> [Entry] in entries.removeAll { $0.id == id }; return entries }
-        save(snapshot)
+        let (snapshot, ticket)=state.withLock { entries -> ([Entry], Int) in entries.removeAll { $0.id == id }; return (entries, writer.ticket()) }
+        writer.write(snapshot, ticket: ticket)
     }
     /// Requests to Open-Meteo's hosts since local midnight, and the calls they count as.
     func today(now: Date = .now, calendar: Calendar = .current) -> (requests: Int, calls: Double) {
@@ -458,9 +473,6 @@ nonisolated final class CallLedger: Sendable {
             let today=entries.filter { $0.date >= start && $0.host.hasSuffix("open-meteo.com") }
             return (today.count, today.reduce(0) { $0+$1.calls })
         }
-    }
-    private func save(_ entries: [Entry]) {
-        if let file, let data=try? JSONEncoder().encode(entries) { try? data.write(to: file, options: .atomic) }
     }
 }
 /// How long a forecast is used before it is asked for again, by what it is. Open-Meteo's models
@@ -480,6 +492,26 @@ nonisolated enum ForecastReuse {
         guard let updated else { return true }
         let age=now.timeIntervalSince(updated)
         return age>=normal || (force && age>=forced)
+    }
+    /// After a request the service answered with nothing usable for a place (a refusal, or an answer
+    /// Nyx cannot read, such as a renamed field), that place is asked again an hour later, or ten
+    /// minutes later when pulled to refresh: never on every refresh, however often the screens ask.
+    static let retry: TimeInterval=3600
+    static let retryForced: TimeInterval=600
+    /// Whether a place last tried at `tried` (nil: never, or it succeeded since) may be asked again.
+    static func retryable(_ tried: Date?, now: Date, force: Bool) -> Bool { due(tried, now: now, force: force, normal: retry, forced: retryForced) }
+}
+/// Hands what a service has just kept to whoever shows it (the planner), as it lands: a request that
+/// outlives the screen that asked (it went back, or a background refresh ran out of time) still
+/// reaches the screens. Each delivery is its own task, so deliveries can arrive out of order; the
+/// receiver keeps only what is newer than what it has.
+nonisolated final class StoreObserver<Value: Sendable>: Sendable {
+    private let handler=Mutex<(@Sendable (Value) async -> Void)?>(nil)
+    init() {}
+    func set(_ handler: @escaping @Sendable (Value) async -> Void) { self.handler.withLock { $0=handler } }
+    func send(_ value: Value) {
+        guard let handler=handler.withLock({ $0 }) else { return }
+        Task { await handler(value) }
     }
 }
 /// One request to an Open-Meteo host, sent only while the host is not cooling down and the
@@ -729,8 +761,12 @@ nonisolated protocol WeatherProviding: Sendable {
     /// True when the parks' or spots' forecast was due but not asked for, because the service asked
     /// Nyx to wait or this device's budget was spent; false again once a request succeeds.
     func heldBack() async -> Bool
+    /// Called with every forecast the service keeps from a request, as it lands (`StoreObserver`).
+    func observe(_ handler: @escaping @Sendable ([String: Forecast]) async -> Void)
 }
 nonisolated extension WeatherProviding {
+    /// A provider that never fetches (a test double) has nothing to hand on.
+    func observe(_ handler: @escaping @Sendable ([String: Forecast]) async -> Void) {}
     func spotForecasts(for spots: [Park], network: Bool, force: Bool) async -> [String: Forecast] { [:] }
     func catalogForecasts(_ requests: [[Park]], network: Bool, force: Bool) async -> [String: Forecast] { [:] }
     func heldBack() async -> Bool { false }
@@ -763,6 +799,8 @@ actor WeatherService: WeatherProviding {
     private var held=false
     /// Where the spots' switch is read; tests use their own suite.
     private let suite: String?
+    private let observer=StoreObserver<[String: Forecast]>()
+    nonisolated func observe(_ handler: @escaping @Sendable ([String: Forecast]) async -> Void) { observer.set(handler) }
     init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, suite: String? = nil,
          ledger: CallLedger? = nil, budget: CallBudget = .standard, clock: @escaping @Sendable () -> Date = { .now }) {
         self.transport=transport; self.persist=persist; self.clock=clock; self.suite=suite; self.budget=budget
@@ -939,10 +977,12 @@ actor WeatherService: WeatherProviding {
         return grid.byID.compactMapValues { byPoint[$0] }
     }
     private func keep(_ fetched: [String: Forecast]) {
+        var kept: [String: Forecast]=[:]
         for (id, forecast) in fetched where memory[id].map({ $0.updated < forecast.updated }) ?? true {
-            memory[id]=forecast
+            memory[id]=forecast; kept[id]=forecast
             if persist { CacheDirectory.write(forecast, name: SpotForecast.cacheName(id)) }
         }
+        if !kept.isEmpty { observer.send(kept) }
     }
     /// One caller has stopped waiting. A finished request leaves `inFlight`; one nobody waits for
     /// any more is cancelled, so a background refresh out of time leaves nothing running.

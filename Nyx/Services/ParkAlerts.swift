@@ -12,14 +12,19 @@ extension ParkAlert {
     /// worst outcome is a long drive to a closed road, so anything that reads as a closure of a
     /// place counts, and so does anything NPS files as "Park Closure" unless it is only about an
     /// amenity ("No Water or Bathrooms at Kīpahulu", "Gas Pumps … Closed at Night").
+    /// A reopening is not a closure ("Road Reopened After Closure", even filed as "Park Closure"),
+    /// unless the headline says something is shut now ("Road Reopens; Upper Loop Remains Closed",
+    /// "Road Reopened, Trail Closed"); a closure it only looks back on ("After Being Closed") is over.
     nonisolated var kind: AlertKind {
         let text = " " + Park.folded(title) + " "
         func has(_ words: [String]) -> Bool { words.contains { text.contains(" \($0) ") } }
-        let reopened=has(["reopened","reopens","reopen","reopening"]) && !has(["closed","closure","closures"])
+        let shutNow=has(["remains closed","remain closed","still closed","stays closed","remains shut","still shut","remains inaccessible","remains impassable"])
+            || has(["closed","closes","closing","shut"]) && !has(["after being closed","was closed","had been closed","has been closed","been closed"])
+        let reopened=has(["reopened","reopens","reopen","reopening"]) && !shutNow
         let closing = !reopened && has(Self.closureWords)
         let amenityOnly=has(Self.amenityWords) && !has(Self.placeWords)
         let category=category.lowercased()
-        if (closing || category.contains("closure")) && !amenityOnly { return .closure }
+        if (closing || category.contains("closure") && !reopened) && !amenityOnly { return .closure }
         if category.contains("danger") { return .danger }
         if category.contains("caution") { return .caution }
         return .notice

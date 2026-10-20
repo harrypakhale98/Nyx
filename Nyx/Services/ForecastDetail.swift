@@ -67,6 +67,22 @@ nonisolated struct ForecastDetail: Codable, Sendable, Equatable {
     static let modelKeys=["cloud_cover_gfs_seamless","cloud_cover_ecmwf_ifs025","cloud_cover_icon_seamless"]
     static let layerKeys=["cloud_cover_low","cloud_cover_mid","cloud_cover_high","temperature_2m","dew_point_2m","wind_gusts_10m","visibility"]
     static let airKeys=["aerosol_optical_depth","pm2_5"]
+    /// What a place's answer must hold to be kept: what the score reads. A summit above the inversion
+    /// is scored from its mid and high cloud, and smoke from aerosol optical depth; the rest of the
+    /// layers and fine particles are context, kept when they come whole. So if Open-Meteo renamed a
+    /// context field, the score's part still arrives. The models are kept only all three together:
+    /// their agreement needs every one.
+    static let layerRequired=["cloud_cover_mid","cloud_cover_high"]
+    static let airRequired=["aerosol_optical_depth"]
+    /// This detail with each of `fresh`'s parts that is newer (by `updated`) or missing here: what
+    /// a service hands on can land out of order, and an older part must never replace a newer one.
+    func newer(_ fresh: ForecastDetail) -> ForecastDetail {
+        func pick(_ kept: HourlySeries?, _ other: HourlySeries?) -> HourlySeries? {
+            guard let other else { return kept }
+            return kept.map { $0.updated>other.updated ? $0 : other } ?? other
+        }
+        return ForecastDetail(models: pick(models, fresh.models), layers: pick(layers, fresh.layers), air: pick(air, fresh.air))
+    }
     /// Asked for with the layers and kept when they come back whole, but never required: a series
     /// without them is still a series. Ten variables in all, so the request still counts as one
     /// Open-Meteo call per place.
