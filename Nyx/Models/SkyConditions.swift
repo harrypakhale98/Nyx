@@ -103,14 +103,16 @@ nonisolated enum NightFill: Sendable, Hashable { case full, half, hollow }
 /// parts, then takes the lowest of that sum and these caps.
 nonisolated enum ScoreLimit: Sendable, Equatable {
     case darkness(Int)
+    case moonlight(Int)
     case clouds(Int)
     case skyGlow(Int)
     case smoke(Int)
-    var cap: Int { switch self { case .darkness(let c), .clouds(let c), .skyGlow(let c), .smoke(let c): c } }
+    var cap: Int { switch self { case .darkness(let c), .moonlight(let c), .clouds(let c), .skyGlow(let c), .smoke(let c): c } }
     /// "Clouds limit tonight to 55."
     func sentence(tonight: Bool) -> String {
         switch self {
         case .darkness(let c): tonight ? String(localized: "Short hours of true darkness limit tonight to \(c).") : String(localized: "Short hours of true darkness limit this night to \(c).")
+        case .moonlight(let c): tonight ? String(localized: "Moonlight limits tonight to \(c).") : String(localized: "Moonlight limits this night to \(c).")
         case .clouds(let c): tonight ? String(localized: "Clouds limit tonight to \(c).") : String(localized: "Clouds limit this night to \(c).")
         case .skyGlow(let c): tonight ? String(localized: "Sky glow limits tonight to \(c).") : String(localized: "Sky glow limits this night to \(c).")
         case .smoke(let c): tonight ? String(localized: "Smoke or haze limits tonight to \(c).") : String(localized: "Smoke or haze limits this night to \(c).")
