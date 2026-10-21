@@ -137,7 +137,7 @@ struct SkyGridTests {
         #expect(climate.sentence(extremes, on: try evening(extremes, 2027, 1, 15)) == "January nights here are rarely clear, by an estimate.")
         #expect(climate.sentence(extremes, on: try evening(extremes, 2027, 9, 15)) == "Nearly every September night here is mostly clear, by an estimate.")
         let samoa = place("pin:samoa", -14.28, -170.7, zone: "Pacific/Pago_Pago")
-        #expect(climate.typical(samoa, on: try evening(samoa, 2027, 7, 1)) == CloudClimate.Typical(month: 7, cloud: 60, clear: 25, estimated: true))
+        #expect(climate.typical(samoa, on: try evening(samoa, 2027, 7, 15)) == CloudClimate.Typical(month: 7, cloud: 60, clear: 25, estimated: true))
         #expect(climate.typical(place("pin:sea", 35, -119.9), on: .now) == nil)
         // Without a grid (every hand-built climate, and `load`) nothing changes.
         #expect(CloudClimate(parks: [:]).typical(here, on: .now) == nil)
@@ -176,7 +176,9 @@ struct SkyGridTests {
         // The cloud layer alone adds the month's usual clouds and nothing about light.
         let clouds = try home(SkyGrid(bundle: bundle, layers: [.clouds]))
         #expect(clouds.light == .assumed && clouds.place.bortleEstimate == HomeSky.assumedBortle && clouds.estimate == nil && clouds.skyClass == nil)
-        #expect(clouds.usualClouds == CloudClimate.Typical(month: 12, cloud: 75, clear: 15, estimated: true))
+        // December 13: the month's 75% eased two days toward November's (`CloudClimate.typical`).
+        let usual = try #require(clouds.usualClouds)
+        #expect(usual.month == 12 && usual.clear == 15 && usual.estimated && abs(usual.cloud-75) <= 7)
         #expect(clouds.usualCloudsTitle == "Usual clouds for December" && clouds.usualCloudsLine == "About 2 in 10 December nights here are mostly clear.")
         #expect(clouds.shower?.detail == bare.shower?.detail && clouds.planets.map(\.spoken) == bare.planets.map(\.spoken))
     }
@@ -187,7 +189,7 @@ struct SkyGridTests {
         #expect(abs(magnitude-21.9) < 1e-9 && lit.place.bortleEstimate == 2 && lit.skyClass == "Bortle 2")
         #expect(lit.skyLine?.contains("Estimated from satellite data") == true && lit.summary.contains("Sky brightness: Bortle 2."))
         let estimate = try #require(lit.estimate)
-        #expect(estimate.basis == .usual && estimate.usualCloud == 75)
+        #expect(estimate.basis == .usual && estimate.usualCloud == lit.usualClouds?.cloud && abs((estimate.usualCloud ?? 0)-75) <= 7)
         if let shower = lit.shower { #expect(shower.detail.contains("Bortle 2 sky, estimated from satellite data") && !shower.detail.contains("suburban")) }
         // At sea or off the grid the assumed sky returns.
         let sea = try home(grid, 35, -119.9), offGrid = try home(grid, 50, 10)

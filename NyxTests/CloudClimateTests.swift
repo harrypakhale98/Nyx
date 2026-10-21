@@ -78,4 +78,19 @@ struct CloudClimateTests {
         #expect(NightPlanner.best([b, a])?.park.id == "deva")
         #expect(b.typicalClouds?.contains("November") == true)
     }
+    /// Usual clouds ease between months instead of stepping on the 1st: the 15th keeps the month's
+    /// own value, and October 31 and November 1 at Death Valley read within a point of each other.
+    @Test func usualCloudsEaseBetweenMonths() throws {
+        let climate = CloudClimate.shared
+        let deva = try #require(try ParkData.load().first { $0.id == "deva" })
+        let october = try #require(climate.typical(deva, on: try evening(deva, 2026, 10, 15)))
+        let november = try #require(climate.typical(deva, on: try evening(deva, 2026, 11, 15)))
+        let last = try #require(climate.typical(deva, on: try evening(deva, 2026, 10, 31))?.cloud)
+        let first = try #require(climate.typical(deva, on: try evening(deva, 2026, 11, 1))?.cloud)
+        #expect(abs(first-last) < 1)
+        #expect(min(october.cloud, november.cloud) <= last && last <= max(october.cloud, november.cloud))
+        // The month and its share of clear nights stay the month's own, for its sentence.
+        #expect(climate.typical(deva, on: try evening(deva, 2026, 10, 31))?.month == 10)
+        #expect(climate.typical(deva, on: try evening(deva, 2026, 10, 31))?.clear == october.clear)
+    }
 }
