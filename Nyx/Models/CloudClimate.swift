@@ -22,7 +22,10 @@ nonisolated struct CloudClimate: Decodable, Sendable {
     /// One park's month.
     struct Typical: Sendable, Equatable {
         let month: Int
-        let cloud: Double
+        /// The usual cloud for this night: the month's own value on the 15th, eased linearly toward
+        /// the neighbouring month's on either side (`typical(_:on:)`).
+        var cloud: Double
+        /// The month's share of mostly clear nights, for its sentence; never eased.
         let clear: Double
         /// True when the month comes from the world grid (`SkyGrid`), whose share of clear nights is
         /// estimated from the month's cloud rather than counted night by night: its sentences say so.
@@ -64,8 +67,26 @@ nonisolated struct CloudClimate: Decodable, Sendable {
     /// anywhere else, the grid's cell, marked `estimated`.
     /// Anywhere else, the months the iPhone carried for the place (off the phone), marked `estimated`
     /// as the grid's are.
+    ///
+    /// Climate does not step on the first of a month, so neither does the cloud a score reads: it is
+    /// the month's value on the 15th and moves linearly to the next month's 15th. Without this, the
+    /// last night of a clear October could outrank a new Moon on a cloudier November's first week.
     func typical(_ park: Park, on evening: Date) -> Typical? {
-        let month = park.calendar.component(.month, from: evening)
+        let calendar = park.calendar
+        let month = calendar.component(.month, from: evening), day = calendar.component(.day, from: evening)
+        guard var typical = monthly(park, month: month) else { return nil }
+        let towards = day < 15 ? (month+10)%12+1 : month%12+1
+        // The days between the two 15ths: the earlier month's length.
+        let earlier: Date? = day < 15 ? calendar.date(byAdding: .month, value: -1, to: evening) : evening
+        let span = Double(earlier.flatMap { calendar.range(of: .day, in: .month, for: $0)?.count } ?? 30)
+        if day != 15, let neighbour = monthly(park, month: towards) {
+            let fraction = Double(abs(day-15))/span
+            typical.cloud = typical.cloud*(1-fraction)+neighbour.cloud*fraction
+        }
+        return typical
+    }
+    /// One month's usual clouds at `park`, as recorded.
+    private func monthly(_ park: Park, month: Int) -> Typical? {
         if let entry = parks[park.id] {
             guard let value = entry.month(month) else { return nil }
             return Typical(month: month, cloud: value.cloud, clear: value.clear)

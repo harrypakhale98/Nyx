@@ -71,7 +71,8 @@ import Testing
     }
 
     /// A world place's usual clouds, carried to the widgets and the watch as whole percents, score
-    /// its nights exactly as the iPhone's grid does: the grid holds whole percents itself.
+    /// its nights exactly as the iPhone's grid does: the grid holds whole percents itself, and both
+    /// ease them between months the same way.
     @Test func carriedUsualCloudsScoreAsOnTheIPhone() throws {
         let place = try #require(ParkLibrary.catalog().first { CloudClimate.shared.months(for: $0) != nil })
         let months = try #require(CloudClimate.shared.carriedMonths(for: [place])[place.id])
@@ -82,7 +83,6 @@ import Testing
             let phone = NightPlanner.night(park: place, sky: sky, forecast: nil, detail: nil, now: now)
             let wrist = NightPlanner.night(park: place, sky: sky, forecast: nil, detail: nil, now: now, climate: carried)
             #expect(phone.usualCloud != nil && phone.usualCloud == wrist.usualCloud && phone.score.value == wrist.score.value, "day \(day)")
-            if let usual = phone.usualCloud { #expect(usual == usual.rounded()) }
         }
     }
 
