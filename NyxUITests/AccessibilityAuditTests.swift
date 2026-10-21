@@ -12,7 +12,7 @@ import AppIntents
 final class AccessibilityAuditTests:XCTestCase {
     private var screens:[String] {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
-        return ["tonight","parks","parks-map","calendar","journal","learn","detail","breakdown","editor","entry",
+        return ["tonight","parks","parks-map","calendar","best","journal","learn","detail","breakdown","editor","entry",
                 "onboarding","settings","privacy","data","article","share","river","skyarc","whatsup",
                 "field","field-compass","alarm-explainer","light","listen","accessibility","trip","constellation","recap","icons","first-light","sky","ask:answered"]
         // Not "live-activity": that DEBUG page redraws Lock Screen and Dynamic Island faces outside the
@@ -23,7 +23,7 @@ final class AccessibilityAuditTests:XCTestCase {
     private var keyScreens:[String] {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
         // Learn since 2026-10-13: its cards broke titles mid-word at AX5 on a wide iPad, which only this pass would see.
-        return ["tonight","parks","parks-map","detail","plan","journal","settings","field","river","editor","learn"]
+        return ["tonight","parks","parks-map","detail","plan","best","journal","settings","field","river","editor","learn"]
     }
 
     func testEveryScreenPassesTheAudit() throws { try audit(state:"offline",screens:screens) }
@@ -226,6 +226,8 @@ final class AccessibilityAuditTests:XCTestCase {
         // My free nights' hero score stops at 150 pt (about three times AX5 body text) so "100" still fits the
         // width; "#" matches a label of digits only. Checked in a system AX5 capture (2026-10-08).
         ("trip","#"),
+        // Plan's best nights: the same hero numeral, capped the same way.
+        ("best","#"),
         // An unlabelled element of the system search bar (no frame; reported at AX5 only).
         ("parks",""),
     ]

@@ -12,6 +12,9 @@ import CoreLocation
     /// parks. Set from the store by `setSpots`; `park(_:)` finds them by their `pin:` id.
     private(set) var spots: [Park] = []
     @ObservationIgnored private var spotIndex: [String:Int] = [:]
+    /// Plan's best nights with the key they were ranked for (`BestNightsView`), so a return to the
+    /// page, or a switch between Plan's modes, shows them again without ranking every night again.
+    @ObservationIgnored var bestNightsKept:(key:String,ranking:BestNightsInReach)?
     /// Every place Nyx scores here: the catalogue, then the saved spots.
     var places: [Park] { parks+spots }
     /// The world catalogue (`catalog.json`): national parks worldwide and certified dark-sky places,

@@ -58,9 +58,8 @@ struct RadiusTests {
         #expect(SearchRadius.steps(.kilometers) == [150_000, 300_000, 800_000, 1_500_000])
         #expect(SearchRadius.steps(.miles).contains(SearchRadius.standard(.miles)) && SearchRadius.steps(.kilometers).contains(SearchRadius.standard(.kilometers)))
         #expect(SearchRadius.wider(.miles) == 500*mile && SearchRadius.wider(.kilometers) == 800_000)
-        #expect(SearchRadius.tripSteps(.miles) == [100, 200, 300, 500, 1000].map { $0*mile } && SearchRadius.tripSteps(.kilometers).count == 5)
         #expect(SearchRadius.hopSteps(.miles) == [100, 200, 300, 500].map { $0*mile } && SearchRadius.hopSteps(.kilometers).count == 4)
-        #expect(SearchRadius.tripStandard(.miles) == 300*mile && SearchRadius.tripSteps(.kilometers).contains(SearchRadius.tripStandard(.kilometers)))
+        #expect(SearchRadius.tripStandard(.miles) == 300*mile && SearchRadius.hopSteps(.kilometers).contains(SearchRadius.tripStandard(.kilometers)))
         // A radius set in the other unit is offered beside the steps, never replaced by one.
         let kept=SearchRadius.choices(SearchRadius.steps(.kilometers), keeping: 200*mile)
         #expect(kept.count == 5 && kept.contains(200*mile) && kept == kept.sorted())

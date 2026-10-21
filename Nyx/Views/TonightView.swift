@@ -6,7 +6,6 @@ struct TonightView: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @MotionReduced private var reduceMotion: Bool
     @Environment(\.nyxAccess) private var access
-    @ScaledMetric(relativeTo:.subheadline) private var dotSize=3.0
     @State private var shooting=0.0
     @State private var refreshed=0
     /// The subtle double tap: Tonight's answer is a night a reminder would announce.
@@ -22,27 +21,12 @@ struct TonightView: View {
     @State private var chooseHome=false
     /// A save from a park row's menu could not be stored.
     @State private var saveFailed=false
-    /// "Near me" chosen in the starting-point sheet: the location explainer follows once it closes.
-    @State private var nearMeAfterPicker=false
     @Namespace private var zoom
-    /// The explainer only before iOS's first prompt; once answered, Near me just finds you.
-    private func nearMe() { if location.needsPermission { explainLocation=true } else { location.request() } }
+    private func nearMe() { StartingPointSheets.nearMe(model) { explainLocation=true } }
     private var candidates:[Park] { reach().places }
-    /// Everything within `radiusMeters` (the chosen radius by default) of where distances are measured
-    /// from (`TonightReach`): from a US starting point with only US places in range, the national parks
-    /// exactly as before the world catalogue; otherwise every place in range, catalogue and spots too.
-    private func reach(radiusMeters:Double?=nil)->(places:[Park],world:Bool) {
-        let parks=model.nearby(latitude:location.latitude,longitude:location.longitude,radiusMeters:radiusMeters)
-        guard !model.catalog.isEmpty, let from=from else { return (parks,false) }
-        let everything=model.places(near:from.latitude,longitude:from.longitude,radiusMeters:radiusMeters ?? model.radiusMeters)
-        let places=TonightReach.candidates(parks:parks,places:everything,originInUS:USOutline.contains(latitude:from.latitude,longitude:from.longitude))
-        return (places,places != parks)
-    }
-    /// The device's location under "Near me", else the starting point.
-    private var from:(latitude:Double,longitude:Double)? {
-        if let lat=location.latitude, let lon=location.longitude { return (lat,lon) }
-        return model.origin
-    }
+    /// Everything in reach (`PlanModel.placesInReach`), as Plan's best nights and the trip planner see it.
+    private func reach(radiusMeters:Double?=nil)->(places:[Park],world:Bool) { model.placesInReach(radiusMeters:radiusMeters) }
+    private var from:(latitude:Double,longitude:Double)? { model.reachOrigin }
     /// Ranked once per update of the page (the body reads it into `best` and passes it down). Abroad a
     /// radius can hold hundreds of places: until their nights are worked out off the main thread
     /// (`prepared`), the page ranks a shortlist (`TonightReach.shortlist`), never hundreds at once.
@@ -89,7 +73,7 @@ struct TonightView: View {
                     // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                     FoldColumns(narrow:.trailing,narrowMax:500,spacing:36) {
                         VStack(spacing:26) { hero(park,others:Array(best.dropFirst())); farther(than:park,shortlist:widerList); darkArea(all); ahead(park) }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:22) { startingPoint(heading:false); more(best); fromHome; extras }.frame(maxWidth:.infinity,alignment:.leading)
+                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe); more(best); fromHome; extras }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
                     weekAcross
@@ -98,14 +82,14 @@ struct TonightView: View {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
-                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil,shortlist:widerList);darkArea(all);startingPoint(heading:false);fromHome }
+                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil,shortlist:widerList);darkArea(all);StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe);fromHome }
                     else if let park=best.first {
                         hero(park,others:Array(best.dropFirst()))
                         farther(than:park,shortlist:widerList)
                         darkArea(all)
                         // The answer, then the alternatives; then where "within reach" is measured from.
                         more(best)
-                        startingPoint(heading:best.count>1)
+                        StartingPointPanel(heading:best.count>1,choose:{ chooseHome=true },nearMe:nearMe)
                         fromHome
                     }
                     extras
@@ -122,16 +106,7 @@ struct TonightView: View {
             // ⌘R's note says a forecast's time as the pull does, in the answer's own time.
             .environment(\.refreshTimeZone,best.first?.timeZone)
             .navigationDestination(for:ZoomRoute.self) { route in ParkDetailView(park:route.park).modifier(ParkTransition(sourceID:route.source,namespace:zoom)).onAppear { ReviewPrompt.noteNightViewed(score:model.night(route.park).score.value) } }
-            .sheet(isPresented:$chooseHome,onDismiss:{ if nearMeAfterPicker { nearMeAfterPicker=false; nearMe() } }) {
-                NavigationStack { StartingPointPicker(nearMe:{ nearMeAfterPicker=true },selectedParkID:model.homeID,selectedPlace:model.homePlace,locationOff:location.denied || DebugScenario.state=="no-location") { choice in
-                    switch choice {
-                    case .park(let id): model.choose(parkID:id)
-                    case .place(let place): model.choose(place)
-                    }
-                    location.clear()
-                } }.nyxPresentation().presentationDetents([.large])
-            }
-            .sheet(isPresented:$explainLocation) { PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a city or a park.",action:"Use my location") { explainLocation=false;location.request() }.nyxPresentation() }
+            .modifier(StartingPointSheets(choosing:$chooseHome,explaining:$explainLocation))
             .parkSaveAlert(isPresented:$saveFailed,journalUnavailable:model.journalUnavailable)
             // Keyed on the places in reach, not the raw fix: a location that moves a few metres, or a
             // catalogue that arrives with nothing new in range, never cancels and re-sends the request.
@@ -156,8 +131,6 @@ struct TonightView: View {
                 }
                 await model.refresh(all)
             }
-            // A location found is a starting point chosen.
-            .onChange(of:location.latitude != nil) { _,found in if found, DebugScenario.screen == nil { model.startChosen=true } }
             // The answer here is the one the widgets and Apple Watch follow too (`PlanModel.tonightPickID`):
             // once a starting point is chosen, and never one the loader is about to replace. Stamped
             // again when the night turns over (`model.today`), so the same place picked again tonight
@@ -507,79 +480,6 @@ struct TonightView: View {
             }
         }.buttonStyle(.capsuleAction).padding(.top,4)
         .accessibilityHint(hint)
-    }
-    /// The starting point is a chosen park, a city or town, or the device location: one at a time.
-    /// "From Joshua Tree · 200 mi ⌃" on the first line; how the distance is measured under it, with
-    /// Near me trailing that line in full words. Below the alternatives it carries its own heading,
-    /// so the headings rotor finds it.
-    @ViewBuilder private func startingPoint(heading:Bool)->some View {
-        if heading { Eyebrow(text:"Starting point") }
-        Panel { VStack(alignment:.leading,spacing:0) {
-            ViewThatFits(in:.horizontal) {
-                HStack(spacing:6) { origin(wraps:false); dot; radiusMenu }
-                // A long name, or accessibility sizes: the name wraps and the radius goes underneath.
-                VStack(alignment:.leading,spacing:4) { origin(wraps:true); radiusMenu }
-            }
-            ViewThatFits(in:.horizontal) {
-                HStack(spacing:8) { crowFlies; Spacer(minLength:8); locationControl }
-                VStack(alignment:.leading,spacing:8) { crowFlies; locationControl }
-            }
-            if location.denied || DebugScenario.state=="no-location" { Text("Location is off. Choose your city or the park closest to you.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
-            if let message=location.message { Text(message).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
-        }
-        // The layouts settle on their first pass; a surrounding animation must not morph one into another.
-        .transaction { $0.animation=nil }
-        // One container, so the accessibility audit can find the row (`startingPoint`).
-        .accessibilityElement(children:.contain).accessibilityIdentifier("startingPoint") }
-    }
-    /// Heard with the radius it qualifies ("Radius, 200 mi, as the crow flies"), so not read again here.
-    /// It keeps the starting point's icon column (the same symbol, hidden, at the same size), so its
-    /// words start under "From", not under the pin; at accessibility sizes, where the radius sits at
-    /// the leading edge under a wrapped name, it aligns with the radius instead.
-    private var crowFlies: some View {
-        Label {
-            Text("as the crow flies").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-        } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:originSymbol).hidden() } }
-        .font(.subheadline).accessibilityHidden(true)
-    }
-    /// The starting point's symbol: a pin for a park, a building for a city or town, the arrow for the device.
-    private var originSymbol:String { location.latitude != nil ? "location.fill" : model.homePlace == nil ? "mappin.and.ellipse" : "building.2" }
-    /// The separator between the starting point and its radius, drawn as a shape rather than a "·"
-    /// glyph: a four-point character is mostly anti-aliasing, which the contrast audit measures as text.
-    private var dot: some View { Circle().fill(palette.muted).frame(width:dotSize,height:dotSize).accessibilityHidden(true) }
-    private func origin(wraps:Bool)->some View {
-        Button { chooseHome=true } label:{
-            Group {
-                if location.latitude==nil { Label(String(localized:"From \(model.homePlace?.label ?? model.originName)"),systemImage:originSymbol) }
-                else { Label("From your location",systemImage:originSymbol) }
-            }.multilineTextAlignment(.leading).fixedSize(horizontal:!wraps,vertical:true)
-        }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a city, town or park to start from")
-    }
-    /// Near me (or Settings when location is off), always in words: it is the main way into location.
-    @ViewBuilder private var locationControl:some View {
-        if location.locating { ProgressView().accessibilityLabel("Finding your location") }
-        else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true).accessibilityLabel("Turn on location in Settings").accessibilityInputLabels([Text("Settings"),Text("Turn on location")]) }
-        else if location.latitude==nil { Button { nearMe() } label:{ Label("Near me",systemImage:"location").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true).accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
-    }
-    /// The radius as the distance itself in amber with the system's up-down chevrons; a menu of four
-    /// distances in the locale's unit (`SearchRadius`), and the current one too when it was set in the
-    /// other unit. A plain label, so "200 mi" sits on the row's text with no control inset of its own.
-    private var radiusMenu:some View {
-        @Bindable var model=model
-        let distance=SearchRadius.label(model.radiusMeters)
-        return Menu {
-            Picker("Radius",selection:$model.radiusMeters) {
-                ForEach(SearchRadius.choices(SearchRadius.steps(),keeping:model.radiusMeters),id:\.self) { meters in Text(SearchRadius.label(meters)).tag(meters) }
-            }.pickerStyle(.inline)
-        } label:{
-            HStack(spacing:4) {
-                Text(distance)
-                Image(systemName:"chevron.up.chevron.down").font(.caption.weight(.semibold)).accessibilityHidden(true)
-            }
-            .font(.subheadline).foregroundStyle(palette.accent).frame(minWidth:44,minHeight:44).contentShape(Rectangle())
-        }
-        .buttonStyle(.plain).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true)
-        .accessibilityLabel("Radius").accessibilityValue(Phrase.clauses([distance,String(localized:"as the crow flies")])).accessibilityInputLabels([Text("Radius"),Text("Distance")])
     }
 }
 /// Tonight's answer and the moment "tonight" is judged from: either changing hands the pick on.
