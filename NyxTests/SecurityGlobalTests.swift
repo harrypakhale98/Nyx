@@ -183,7 +183,7 @@ struct SecurityGlobalTests {
         #expect(try context.fetch(FetchDescriptor<SavedSpot>()).isEmpty)
         let message=JournalView.importMessage(summary)
         #expect(message.contains(String(localized: "Nights: \(2). Photos: \(0). Spots: \(2).")) && message.contains(String(localized: "Already in your journal, so skipped: \(1).")))
-        #expect(message.contains(String(localized: "Spots arrive in Your spots unfollowed. Follow one to get its reminders.")))
+        #expect(message.contains(String(localized: "Spots arrive in Your spots without reminders. Open one and add it to widgets and reminders.")))
         #expect(!JournalView.importMessage(JournalImport.Summary(nights: 1, photos: 0, alreadyHere: 0, spots: 0)).contains("Spots"))
         let result=try prepared.merge(into: context)
         #expect(result.added == 1 && result.skipped == 1)

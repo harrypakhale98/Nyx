@@ -9681,6 +9681,41 @@
         }
       }
     },
+    "Add": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinzufügen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "追加"
+          }
+        }
+      }
+    },
     "Add %@ on %@ to Calendar": {
       "extractionState": "manual",
       "localizations": {
@@ -9995,6 +10030,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "カレンダーに追加"
+          }
+        }
+      }
+    },
+    "Add to widgets and reminders": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu Widgets und Erinnerungen hinzufügen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to widgets and reminders"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir a widgets y recordatorios"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter aux widgets et aux rappels"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ウィジェットとリマインダーに追加"
           }
         }
       }
@@ -15784,6 +15854,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "3000 K以下の暖色の電球を選んでください。"
+          }
+        }
+      }
+    },
+    "Choose what Nyx asks the internet for: cloud forecasts, smoke and haze, the aurora forecast, and park alerts and programs. Each has its own switch.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle, was Nyx aus dem Internet abruft: Wolkenvorhersagen, Rauch und Dunst, die Polarlichtvorhersage sowie Parkmeldungen und Programme. Jedes hat einen eigenen Schalter."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose what Nyx asks the internet for: cloud forecasts, smoke and haze, the aurora forecast, and park alerts and programs. Each has its own switch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige qué pide Nyx a internet: previsiones de nubes, humo y bruma, la previsión de auroras, y avisos y programas de los parques. Cada uno tiene su propio interruptor."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez ce que Nyx demande à internet : prévisions de nuages, fumée et brume, prévision d’aurores, et alertes et programmes des parcs. Chacun a son propre interrupteur."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxがインターネットから取得するものを選べます。雲の予報、煙ともや、オーロラ予報、公園のお知らせとプログラム。それぞれに個別のスイッチがあります。"
           }
         }
       }
@@ -25483,41 +25588,6 @@
         }
       }
     },
-    "Follow this spot": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Diesen Platz verfolgen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Follow this spot"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seguir este sitio"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Suivre ce lieu"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "このスポットをフォロー"
-          }
-        }
-      }
-    },
     "Follow tonight": {
       "extractionState": "manual",
       "localizations": {
@@ -25584,41 +25654,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "ロック画面で今夜をフォロー"
-          }
-        }
-      }
-    },
-    "Followed spots appear in widgets, reminders and on Apple Watch.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verfolgte Plätze erscheinen in Widgets, Erinnerungen und auf der Apple Watch."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Followed spots appear in widgets, reminders and on Apple Watch."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los sitios que sigues aparecen en los widgets, los recordatorios y el Apple Watch."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les lieux suivis apparaissent dans les widgets, les rappels et sur l’Apple Watch."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "フォローしたスポットは、ウィジェット、リマインダー、Apple Watchに表示されます。"
           }
         }
       }
@@ -27778,37 +27813,37 @@
         }
       }
     },
-    "Gives it nights and a score, and lets Nyx follow it on your widgets, Apple Watch and reminders.": {
+    "Gives it nights and a score. You can then add it to your widgets, Apple Watch and reminders.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gibt ihm Nächte und einen Wert, und Nyx folgt ihm in deinen Widgets, auf der Apple Watch und in Erinnerungen."
+            "value": "Gibt ihm Nächte und einen Wert. Danach kannst du ihn zu Widgets, Apple Watch und Erinnerungen hinzufügen."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gives it nights and a score, and lets Nyx follow it on your widgets, Apple Watch and reminders."
+            "value": "Gives it nights and a score. You can then add it to your widgets, Apple Watch and reminders."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le da noches y un índice, y Nyx lo sigue en tus widgets, el Apple Watch y los recordatorios."
+            "value": "Le da noches y un índice. Después puedes añadirlo a tus widgets, el Apple Watch y los recordatorios."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lui donne des nuits et un indice, et permet à Nyx de le suivre sur vos widgets, l’Apple Watch et dans les rappels."
+            "value": "Lui donne des nuits et un indice. Vous pourrez ensuite l’ajouter à vos widgets, à l’Apple Watch et aux rappels."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この場所に夜ごとのスコアが付き、ウィジェット、Apple Watch、リマインダーでNyxが追えるようになります。"
+            "value": "夜ごとのスコアが付きます。その後、ウィジェット、Apple Watch、リマインダーに追加できます。"
           }
         }
       }
@@ -35647,37 +35682,107 @@
         }
       }
     },
-    "Moonlight contributes 40%, clouds 25%, sky glow (estimated) 20%, and true darkness 15%. Moonlight follows the Moon's phase and its height through true darkness (Krisciunas and Schaefer, 1991), so a low crescent costs less than a high gibbous Moon. The four parts are added, then the weakest link caps the sum: clouds hold a night to 100 minus 0.9 points for each percent of cloud (overcast at most 10, half cloud 55); sky glow holds a Bortle 3 park to 89, Bortle 4 to 84, Bortle 5 to 74, Bortle 6 to 59 and brighter skies to 39, so only Bortle 2 or darker can read Pristine; heavy smoke or haze (aerosol optical depth 0.5 or more) holds a night to 59, and lighter smoke (0.25 to 0.5) to 74. No true darkness caps a night below 40, and that cap lifts gradually over the first three hours of true darkness. The breakdown names the cap that applies. When scores tie, parks with darker skies in NASA's satellite night lights come first, then longer true darkness.": {
+    "Moonlight contributes 40%, clouds 25%, sky glow (estimated) 20%, and true darkness 15%. Moonlight follows the Moon's phase and its height through true darkness (Krisciunas and Schaefer, 1991), so a low crescent costs less than a high gibbous Moon. The four parts are added, then the weakest link caps the sum: clouds hold a night to 100 minus 0.9 points for each percent of cloud (overcast at most 10, half cloud 55); sky glow holds a Bortle 3 park to 89, Bortle 4 to 84, Bortle 5 to 74, Bortle 6 to 59 and brighter skies to 39, so only Bortle 2 or darker can read Pristine; heavy smoke or haze (aerosol optical depth 0.5 or more) holds a night to 59, and lighter smoke (0.25 to 0.5) to 74. Moonlight caps it as well, at 100 minus 61 times the moonlight to the power of two thirds, so a full Moon high through true darkness holds a night near 40, as a town's sky glow would, and a half Moon up for the evening keeps a night out of Pristine. No true darkness caps a night below 40, and that cap lifts gradually over the first three hours of true darkness. The breakdown names the cap that applies. When scores tie, parks with darker skies in NASA's satellite night lights come first, then longer true darkness.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mondlicht zählt 40 %, Wolken 25 %, Himmelsaufhellung (geschätzt) 20 % und echte Dunkelheit 15 %. Das Mondlicht folgt der Mondphase und der Höhe des Mondes während der echten Dunkelheit (Krisciunas und Schaefer, 1991), daher kostet eine tief stehende Sichel weniger als ein hoch stehender, fast voller Mond. Die vier Teile werden addiert, dann begrenzt das schwächste Glied die Summe: Wolken halten eine Nacht bei 100 minus 0,9 Punkten je Prozent Bewölkung (bedeckt höchstens 10, halb bewölkt 55); Himmelsaufhellung hält einen Park der Bortle-Klasse 3 bei 89, Klasse 4 bei 84, Klasse 5 bei 74, Klasse 6 bei 59 und hellere Himmel bei 39, sodass nur Bortle 2 oder dunkler „Makellos“ erreichen kann; dichter Rauch oder Dunst (aerosoloptische Dicke 0,5 oder mehr) hält eine Nacht bei 59, leichterer Rauch (0,25 bis 0,5) bei 74. Ohne echte Dunkelheit bleibt eine Nacht unter 40, und diese Grenze hebt sich schrittweise über die ersten drei Stunden echter Dunkelheit. Die Aufschlüsselung nennt die geltende Grenze. Bei gleichem Wert stehen Parks mit dunklerem Himmel in den NASA-Satellitendaten der Nachtlichter vorn, dann längere echte Dunkelheit."
+            "value": "Mondlicht zählt 40 %, Wolken 25 %, Himmelsaufhellung (geschätzt) 20 % und echte Dunkelheit 15 %. Das Mondlicht folgt der Mondphase und der Höhe des Mondes während der echten Dunkelheit (Krisciunas und Schaefer, 1991), daher kostet eine tief stehende Sichel weniger als ein hoch stehender, fast voller Mond. Die vier Teile werden addiert, dann begrenzt das schwächste Glied die Summe: Wolken halten eine Nacht bei 100 minus 0,9 Punkten je Prozent Bewölkung (bedeckt höchstens 10, halb bewölkt 55); Himmelsaufhellung hält einen Park der Bortle-Klasse 3 bei 89, Klasse 4 bei 84, Klasse 5 bei 74, Klasse 6 bei 59 und hellere Himmel bei 39, sodass nur Bortle 2 oder dunkler „Makellos“ erreichen kann; dichter Rauch oder Dunst (aerosoloptische Dicke 0,5 oder mehr) hält eine Nacht bei 59, leichterer Rauch (0,25 bis 0,5) bei 74. Auch das Mondlicht begrenzt die Summe, auf 100 minus 61 mal das Mondlicht hoch zwei Drittel: Ein hoch stehender Vollmond während der echten Dunkelheit hält eine Nacht bei etwa 40, wie es die Aufhellung einer Stadt täte, und ein Halbmond am Abendhimmel hält eine Nacht unter „Makellos“. Ohne echte Dunkelheit bleibt eine Nacht unter 40, und diese Grenze hebt sich schrittweise über die ersten drei Stunden echter Dunkelheit. Die Aufschlüsselung nennt die geltende Grenze. Bei gleichem Wert stehen Parks mit dunklerem Himmel in den NASA-Satellitendaten der Nachtlichter vorn, dann längere echte Dunkelheit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moonlight contributes 40%, clouds 25%, sky glow (estimated) 20%, and true darkness 15%. Moonlight follows the Moon's phase and its height through true darkness (Krisciunas and Schaefer, 1991), so a low crescent costs less than a high gibbous Moon. The four parts are added, then the weakest link caps the sum: clouds hold a night to 100 minus 0.9 points for each percent of cloud (overcast at most 10, half cloud 55); sky glow holds a Bortle 3 park to 89, Bortle 4 to 84, Bortle 5 to 74, Bortle 6 to 59 and brighter skies to 39, so only Bortle 2 or darker can read Pristine; heavy smoke or haze (aerosol optical depth 0.5 or more) holds a night to 59, and lighter smoke (0.25 to 0.5) to 74. No true darkness caps a night below 40, and that cap lifts gradually over the first three hours of true darkness. The breakdown names the cap that applies. When scores tie, parks with darker skies in NASA's satellite night lights come first, then longer true darkness."
+            "value": "Moonlight contributes 40%, clouds 25%, sky glow (estimated) 20%, and true darkness 15%. Moonlight follows the Moon's phase and its height through true darkness (Krisciunas and Schaefer, 1991), so a low crescent costs less than a high gibbous Moon. The four parts are added, then the weakest link caps the sum: clouds hold a night to 100 minus 0.9 points for each percent of cloud (overcast at most 10, half cloud 55); sky glow holds a Bortle 3 park to 89, Bortle 4 to 84, Bortle 5 to 74, Bortle 6 to 59 and brighter skies to 39, so only Bortle 2 or darker can read Pristine; heavy smoke or haze (aerosol optical depth 0.5 or more) holds a night to 59, and lighter smoke (0.25 to 0.5) to 74. Moonlight caps it as well, at 100 minus 61 times the moonlight to the power of two thirds, so a full Moon high through true darkness holds a night near 40, as a town's sky glow would, and a half Moon up for the evening keeps a night out of Pristine. No true darkness caps a night below 40, and that cap lifts gradually over the first three hours of true darkness. The breakdown names the cap that applies. When scores tie, parks with darker skies in NASA's satellite night lights come first, then longer true darkness."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La luz de la Luna aporta el 40%, las nubes el 25%, el resplandor del cielo (estimado) el 20% y la oscuridad total el 15%. La luz de la Luna sigue su fase y su altura durante la oscuridad total (Krisciunas y Schaefer, 1991), así que una Luna delgada y baja pesa menos que una Luna gibosa alta. Las cuatro partes se suman y después el eslabón más débil limita el total: las nubes limitan una noche a 100 menos 0.9 puntos por cada por ciento de nubes (cielo cubierto, como máximo 10; medio cubierto, 55); el resplandor del cielo limita un parque de Bortle 3 a 89, Bortle 4 a 84, Bortle 5 a 74, Bortle 6 a 59 y los cielos más brillantes a 39, así que solo un Bortle 2 o más oscuro puede llegar a Prístina; el humo o la bruma densos (profundidad óptica de aerosoles de 0.5 o más) limitan una noche a 59, y el humo más ligero (0.25 a 0.5), a 74. Sin oscuridad total, una noche queda por debajo de 40, y ese límite se levanta poco a poco durante las primeras tres horas de oscuridad total. El desglose indica el límite que aplica. Cuando los índices empatan, van primero los parques con cielos más oscuros en las luces nocturnas satelitales de la NASA y después los de oscuridad total más larga."
+            "value": "La luz de la Luna aporta el 40%, las nubes el 25%, el resplandor del cielo (estimado) el 20% y la oscuridad total el 15%. La luz de la Luna sigue su fase y su altura durante la oscuridad total (Krisciunas y Schaefer, 1991), así que una Luna delgada y baja pesa menos que una Luna gibosa alta. Las cuatro partes se suman y después el eslabón más débil limita el total: las nubes limitan una noche a 100 menos 0.9 puntos por cada por ciento de nubes (cielo cubierto, como máximo 10; medio cubierto, 55); el resplandor del cielo limita un parque de Bortle 3 a 89, Bortle 4 a 84, Bortle 5 a 74, Bortle 6 a 59 y los cielos más brillantes a 39, así que solo un Bortle 2 o más oscuro puede llegar a Prístina; el humo o la bruma densos (profundidad óptica de aerosoles de 0.5 o más) limitan una noche a 59, y el humo más ligero (0.25 a 0.5), a 74. La luz de la Luna también limita el total, a 100 menos 61 veces la luz de la Luna elevada a dos tercios, así que una Luna llena alta durante la oscuridad total deja una noche cerca de 40, como lo haría el resplandor de un pueblo, y una media Luna en el cielo al anochecer deja la noche fuera de Prístina. Sin oscuridad total, una noche queda por debajo de 40, y ese límite se levanta poco a poco durante las primeras tres horas de oscuridad total. El desglose indica el límite que aplica. Cuando los índices empatan, van primero los parques con cielos más oscuros en las luces nocturnas satelitales de la NASA y después los de oscuridad total más larga."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le clair de lune compte pour 40 %, les nuages pour 25 %, le halo lumineux (estimé) pour 20 % et l’obscurité totale pour 15 %. Le clair de lune suit la phase de la Lune et sa hauteur pendant l’obscurité totale (Krisciunas et Schaefer, 1991) : un fin croissant bas pèse moins qu’une Lune gibbeuse haute. Les quatre composantes s’additionnent, puis le maillon faible plafonne la somme : les nuages limitent une nuit à 100 moins 0,9 point par pour cent de nuages (ciel couvert, 10 au plus ; à moitié nuageux, 55) ; le halo lumineux limite un parc Bortle 3 à 89, Bortle 4 à 84, Bortle 5 à 74, Bortle 6 à 59 et les ciels plus lumineux à 39, si bien que seul un Bortle 2 ou plus sombre peut atteindre Immaculée ; une fumée ou une brume épaisse (épaisseur optique des aérosols de 0,5 ou plus) limite une nuit à 59, et une fumée plus légère (0,25 à 0,5) à 74. Sans obscurité totale, une nuit reste sous 40, et ce plafond se lève progressivement pendant les trois premières heures d’obscurité totale. Le détail nomme le plafond qui s’applique. En cas d’égalité, les parcs au ciel le plus noir selon les lumières nocturnes satellite de la NASA passent en premier, puis ceux à l’obscurité totale la plus longue."
+            "value": "Le clair de lune compte pour 40 %, les nuages pour 25 %, le halo lumineux (estimé) pour 20 % et l’obscurité totale pour 15 %. Le clair de lune suit la phase de la Lune et sa hauteur pendant l’obscurité totale (Krisciunas et Schaefer, 1991) : un fin croissant bas pèse moins qu’une Lune gibbeuse haute. Les quatre composantes s’additionnent, puis le maillon faible plafonne la somme : les nuages limitent une nuit à 100 moins 0,9 point par pour cent de nuages (ciel couvert, 10 au plus ; à moitié nuageux, 55) ; le halo lumineux limite un parc Bortle 3 à 89, Bortle 4 à 84, Bortle 5 à 74, Bortle 6 à 59 et les ciels plus lumineux à 39, si bien que seul un Bortle 2 ou plus sombre peut atteindre Immaculée ; une fumée ou une brume épaisse (épaisseur optique des aérosols de 0,5 ou plus) limite une nuit à 59, et une fumée plus légère (0,25 à 0,5) à 74. Le clair de lune plafonne aussi la somme, à 100 moins 61 fois le clair de lune à la puissance deux tiers : une pleine lune haute pendant l’obscurité totale limite une nuit à 40 environ, comme le ferait le halo d’une ville, et une demi-lune dans le ciel du soir tient une nuit hors d’Immaculée. Sans obscurité totale, une nuit reste sous 40, et ce plafond se lève progressivement pendant les trois premières heures d’obscurité totale. Le détail nomme le plafond qui s’applique. En cas d’égalité, les parcs au ciel le plus noir selon les lumières nocturnes satellite de la NASA passent en premier, puis ceux à l’obscurité totale la plus longue."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "配分は、月明かり40%、雲25%、夜空の明るさ（推定）20%、完全に暗い時間15%です。月明かりは、完全に暗い時間における月の満ち欠けと高度によります（Krisciunas and Schaefer, 1991）。そのため、低い三日月は高い位置にある満月前後の月より影響が小さくなります。4つの要素を足し合わせたうえで、最も弱い要素が合計の上限を決めます。雲は、雲量1パーセントにつき0.9ポイントを100から引いた値が上限です（全天曇りで最大10、雲量半分で55）。夜空の明るさによる上限は、ボートル3の公園で89、ボートル4で84、ボートル5で74、ボートル6で59、それより明るい空では39です。そのため、「極上」になるのはボートル2以下の空だけです。濃い煙やもや（エアロゾル光学的厚さ0.5以上）では最大59、それより薄い煙（0.25〜0.5）では最大74です。完全に暗い時間がない夜は40未満に制限され、この上限は完全に暗い時間の最初の3時間で段階的に解除されます。内訳には、適用される上限が表示されます。スコアが同じ場合は、NASAの衛星による夜間光で空が暗い公園を先にし、次に完全に暗い時間が長い公園を先にします。"
+            "value": "配分は、月明かり40%、雲25%、夜空の明るさ（推定）20%、完全に暗い時間15%です。月明かりは、完全に暗い時間における月の満ち欠けと高度によります（Krisciunas and Schaefer, 1991）。そのため、低い三日月は高い位置にある満月前後の月より影響が小さくなります。4つの要素を足し合わせたうえで、最も弱い要素が合計の上限を決めます。雲は、雲量1パーセントにつき0.9ポイントを100から引いた値が上限です（全天曇りで最大10、雲量半分で55）。夜空の明るさによる上限は、ボートル3の公園で89、ボートル4で84、ボートル5で74、ボートル6で59、それより明るい空では39です。そのため、「極上」になるのはボートル2以下の空だけです。濃い煙やもや（エアロゾル光学的厚さ0.5以上）では最大59、それより薄い煙（0.25〜0.5）では最大74です。月明かりにも上限があり、100から「61×月明かりの3分の2乗」を引いた値です。そのため、完全に暗い時間に高く昇る満月の夜は、町の明かりと同じく40前後に抑えられ、宵に半月が出ている夜は「極上」になりません。完全に暗い時間がない夜は40未満に制限され、この上限は完全に暗い時間の最初の3時間で段階的に解除されます。内訳には、適用される上限が表示されます。スコアが同じ場合は、NASAの衛星による夜間光で空が暗い公園を先にし、次に完全に暗い時間が長い公園を先にします。"
+          }
+        }
+      }
+    },
+    "Moonlight limits this night to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondlicht begrenzt den Wert dieser Nacht auf %lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonlight limits this night to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La luz de la Luna limita esa noche a %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le clair de lune limite cette nuit à %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月明かりのため、この夜は最大%lld点です。"
+          }
+        }
+      }
+    },
+    "Moonlight limits tonight to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondlicht begrenzt den Wert heute Nacht auf %lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonlight limits tonight to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La luz de la Luna limita esta noche a %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le clair de lune limite cette nuit à %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月明かりのため、今夜は最大%lld点です。"
           }
         }
       }
@@ -42105,7 +42210,7 @@
         }
       }
     },
-    "Nyx can remind you about promising nights at saved parks. These notifications are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access.": {
+    "Nyx can remind you the evening before a Pristine night, 90 or higher, at a park or place you save or a spot you add: only with a full cloud forecast, up to five days ahead, and at most once a week for each place. It can also mark the peak of a major meteor shower. Reminders are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -42114,13 +42219,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx kann dich an vielversprechende Nächte in gespeicherten Parks erinnern. Diese Mitteilungen werden auf diesem iPad geplant. Sie sind Schätzungen, keine Bestätigung von klarem Himmel oder Zugang."
+                  "value": "Nyx kann dich am Abend vor einer Nacht mit „Makellos“ (90 oder mehr) erinnern, an einem gespeicherten Park oder Ort oder einem hinzugefügten Platz: nur mit vollständiger Wolkenvorhersage, bis zu fünf Tage im Voraus und höchstens einmal pro Woche für jeden Ort. Nyx kann auch den Höhepunkt eines großen Meteorstroms melden. Erinnerungen werden auf diesem iPad geplant. Sie sind Schätzungen, keine Bestätigung von klarem Himmel oder Zugang."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx kann dich an vielversprechende Nächte in gespeicherten Parks erinnern. Diese Mitteilungen werden auf diesem iPhone geplant. Sie sind Schätzungen, keine Bestätigung von klarem Himmel oder Zugang."
+                  "value": "Nyx kann dich am Abend vor einer Nacht mit „Makellos“ (90 oder mehr) erinnern, an einem gespeicherten Park oder Ort oder einem hinzugefügten Platz: nur mit vollständiger Wolkenvorhersage, bis zu fünf Tage im Voraus und höchstens einmal pro Woche für jeden Ort. Nyx kann auch den Höhepunkt eines großen Meteorstroms melden. Erinnerungen werden auf diesem iPhone geplant. Sie sind Schätzungen, keine Bestätigung von klarem Himmel oder Zugang."
                 }
               }
             }
@@ -42132,13 +42237,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx can remind you about promising nights at saved parks. These notifications are scheduled on this iPad. They are estimates, not confirmations of clear skies or access."
+                  "value": "Nyx can remind you the evening before a Pristine night, 90 or higher, at a park or place you save or a spot you add: only with a full cloud forecast, up to five days ahead, and at most once a week for each place. It can also mark the peak of a major meteor shower. Reminders are scheduled on this iPad. They are estimates, not confirmations of clear skies or access."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx can remind you about promising nights at saved parks. These notifications are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access."
+                  "value": "Nyx can remind you the evening before a Pristine night, 90 or higher, at a park or place you save or a spot you add: only with a full cloud forecast, up to five days ahead, and at most once a week for each place. It can also mark the peak of a major meteor shower. Reminders are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access."
                 }
               }
             }
@@ -42150,13 +42255,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx puede avisarte de noches prometedoras en tus parques guardados. Estas notificaciones se programan en este iPad. Son estimaciones, no confirmaciones de cielo despejado ni de acceso."
+                  "value": "Nyx puede avisarte la tarde anterior a una noche Prístina, de 90 o más, en un parque o lugar que guardes o un sitio que añadas: solo con una previsión de nubes completa, con hasta cinco días de antelación y como mucho una vez por semana para cada lugar. También puede avisarte del máximo de una gran lluvia de meteoros. Los recordatorios se programan en este iPad. Son estimaciones, no confirmaciones de cielo despejado ni de acceso."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx puede avisarte de noches prometedoras en tus parques guardados. Estas notificaciones se programan en este iPhone. Son estimaciones, no confirmaciones de cielo despejado ni de acceso."
+                  "value": "Nyx puede avisarte la tarde anterior a una noche Prístina, de 90 o más, en un parque o lugar que guardes o un sitio que añadas: solo con una previsión de nubes completa, con hasta cinco días de antelación y como mucho una vez por semana para cada lugar. También puede avisarte del máximo de una gran lluvia de meteoros. Los recordatorios se programan en este iPhone. Son estimaciones, no confirmaciones de cielo despejado ni de acceso."
                 }
               }
             }
@@ -42168,13 +42273,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx peut vous rappeler les nuits prometteuses dans vos parcs enregistrés. Ces notifications sont programmées sur cet iPad. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
+                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit Immaculée, de 90 ou plus, dans un parc ou un lieu enregistré, ou un lieu ajouté : seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance et au plus une fois par semaine pour chaque lieu. Nyx peut aussi signaler le maximum d’une grande pluie d’étoiles filantes. Les rappels sont programmés sur cet iPad. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx peut vous rappeler les nuits prometteuses dans vos parcs enregistrés. Ces notifications sont programmées sur cet iPhone. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
+                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit Immaculée, de 90 ou plus, dans un parc ou un lieu enregistré, ou un lieu ajouté : seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance et au plus une fois par semaine pour chaque lieu. Nyx peut aussi signaler le maximum d’une grande pluie d’étoiles filantes. Les rappels sont programmés sur cet iPhone. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
                 }
               }
             }
@@ -42186,13 +42291,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyxは、保存した公園でよさそうな夜があるとリマインダーで知らせることができます。これらの通知はこのiPadで予約されます。推定であり、晴れることや公園に入れることを保証するものではありません。"
+                  "value": "Nyxは、保存した公園や場所、追加したスポットで90以上の「極上」の夜があるとき、その前日の夕方にお知らせします。対象は雲の予報がそろった5日先までの夜で、各場所につき週1回までです。大きな流星群の極大日もお知らせできます。リマインダーはこのiPad上で設定されます。これは見込みであり、晴天や通行を保証するものではありません。"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyxは、保存した公園でよさそうな夜があるとリマインダーで知らせることができます。これらの通知はこのiPhoneで予約されます。推定であり、晴れることや公園に入れることを保証するものではありません。"
+                  "value": "Nyxは、保存した公園や場所、追加したスポットで90以上の「極上」の夜があるとき、その前日の夕方にお知らせします。対象は雲の予報がそろった5日先までの夜で、各場所につき週1回までです。大きな流星群の極大日もお知らせできます。リマインダーはこのiPhone上で設定されます。これは見込みであり、晴天や通行を保証するものではありません。"
                 }
               }
             }
@@ -42491,41 +42596,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyxは世界の国立公園と暗い空の場所を一夜ずつ比較します。どこへ行き、どの夜に休みを取ればよいかがわかります。"
-          }
-        }
-      }
-    },
-    "Nyx compares the %lld national parks night by night, so you know which park to drive to and which night to take off.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx vergleicht die %lld Nationalparks Nacht für Nacht, damit du weißt, zu welchem Park du fährst und welche Nacht du dir freinimmst."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx compares the %lld national parks night by night, so you know which park to drive to and which night to take off."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx compara los %lld parques nacionales noche a noche, para que sepas a qué parque manejar y qué noche tomarte libre."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx compare les %lld parcs nationaux nuit après nuit, pour que vous sachiez vers quel parc rouler et quelle nuit prendre."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyxは%lldの国立公園を一夜ずつ比較します。どの公園へ向かい、どの夜に休みを取ればよいかがわかります。"
           }
         }
       }
@@ -50705,6 +50775,41 @@
         }
       }
     },
+    "Remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "削除"
+          }
+        }
+      }
+    },
     "Remove from saved parks": {
       "extractionState": "manual",
       "localizations": {
@@ -50771,6 +50876,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存した場所から削除"
+          }
+        }
+      }
+    },
+    "Remove from widgets and reminders": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus Widgets und Erinnerungen entfernen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from widgets and reminders"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar de widgets y recordatorios"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer des widgets et des rappels"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ウィジェットとリマインダーから削除"
           }
         }
       }
@@ -53220,41 +53360,6 @@
         }
       }
     },
-    "Saved parks are kept with your journal, which could not be opened. Nothing was changed.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gespeicherte Parks liegen bei deinem Journal, das nicht geöffnet werden konnte. Nichts wurde geändert."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved parks are kept with your journal, which could not be opened. Nothing was changed."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los parques guardados se conservan junto con tu diario, que no se pudo abrir. No se cambió nada."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les parcs enregistrés sont conservés avec votre journal, qui n’a pas pu être ouvert. Rien n’a été modifié."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存した公園はジャーナルと一緒に保管されていますが、ジャーナルを開けませんでした。何も変更されていません。"
-          }
-        }
-      }
-    },
     "Saved parks only": {
       "extractionState": "manual",
       "localizations": {
@@ -53286,6 +53391,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存した公園のみ"
+          }
+        }
+      }
+    },
+    "Saved places unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gespeicherte Orte nicht verfügbar"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved places unavailable"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lugares guardados no disponibles"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lieux enregistrés indisponibles"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存した場所を利用できません"
           }
         }
       }
@@ -57463,37 +57603,72 @@
         }
       }
     },
-    "Spots arrive in Your spots unfollowed. Follow one to get its reminders.": {
+    "Spots arrive in Your spots without reminders. Open one and add it to widgets and reminders.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Plätze kommen unverfolgt unter „Deine Plätze“ an. Verfolge einen, um seine Erinnerungen zu bekommen."
+            "value": "Plätze erscheinen ohne Erinnerungen unter „Deine Plätze“. Öffne einen und füge ihn zu Widgets und Erinnerungen hinzu."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Spots arrive in Your spots unfollowed. Follow one to get its reminders."
+            "value": "Spots arrive in Your spots without reminders. Open one and add it to widgets and reminders."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los sitios llegan a Tus sitios sin seguir. Sigue uno para recibir sus recordatorios."
+            "value": "Los sitios llegan a Tus sitios sin recordatorios. Abre uno y añádelo a widgets y recordatorios."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les lieux arrivent dans Vos lieux sans être suivis. Suivez-en un pour recevoir ses rappels."
+            "value": "Les lieux arrivent dans Vos lieux sans rappels. Ouvrez-en un et ajoutez-le aux widgets et aux rappels."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "スポットはフォローしていない状態で「あなたのスポット」に入ります。リマインダーを受け取るには、スポットをフォローしてください。"
+            "value": "スポットはリマインダーなしで「あなたのスポット」に入ります。スポットを開いて、ウィジェットとリマインダーに追加してください。"
+          }
+        }
+      }
+    },
+    "Spots you add appear in widgets, reminders and on Apple Watch.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinzugefügte Plätze erscheinen in Widgets, Erinnerungen und auf der Apple Watch."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spots you add appear in widgets, reminders and on Apple Watch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los sitios que añadas aparecen en los widgets, los recordatorios y el Apple Watch."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les lieux ajoutés apparaissent dans les widgets, les rappels et sur l’Apple Watch."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "追加したスポットは、ウィジェット、リマインダー、Apple Watchに表示されます。"
           }
         }
       }
@@ -58894,41 +59069,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "この夜のフォローを停止"
-          }
-        }
-      }
-    },
-    "Stop following this spot": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Diesen Platz nicht mehr verfolgen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stop following this spot"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dejar de seguir este sitio"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ne plus suivre ce lieu"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "このスポットのフォローを停止"
           }
         }
       }
@@ -62382,6 +62522,101 @@
           "stringUnit": {
             "state": "translated",
             "value": "内蔵のNPSの一覧には%lldの国立公園が含まれています。ボートルクラスは控えめな推定値で、機器による測定値ではありません。Dark Skyの認定は2026年7月時点のInternational Dark Sky Parkの認定で、NPSのリストと照合しています。それ以降に認定された公園には、まだ印がありません。観察場所の座標はおおよそのもので、道案内ではありません。空の絵（今夜の空、ボートルの図、都市との比較）は、月のない夜の星を、Bortleの2001年のスケールが各クラスに示す最も暗い等級まで描いています。クラス2で約7.3等級、クラス8で約4.5等級です。最も暗い星はカタログからではなく、説明のために配置しています。公園のデータ：National Park Service。"
+          }
+        }
+      }
+    },
+    "The change could not be stored. Nothing was changed. If this iPhone is nearly full, free some space and try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Die Änderung konnte nicht gespeichert werden. Nichts wurde geändert. Wenn dieses iPad fast voll ist, gib Speicher frei und versuche es erneut."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Die Änderung konnte nicht gespeichert werden. Nichts wurde geändert. Wenn dieses iPhone fast voll ist, gib Speicher frei und versuche es erneut."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "The change could not be stored. Nothing was changed. If this iPad is nearly full, free some space and try again."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "The change could not be stored. Nothing was changed. If this iPhone is nearly full, free some space and try again."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "No se pudo guardar el cambio. No se cambió nada. Si este iPad está casi lleno, libera espacio y vuelve a intentarlo."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "No se pudo guardar el cambio. No se cambió nada. Si este iPhone está casi lleno, libera espacio y vuelve a intentarlo."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "La modification n’a pas pu être enregistrée. Rien n’a été modifié. Si cet iPad est presque plein, libérez de l’espace et réessayez."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "La modification n’a pas pu être enregistrée. Rien n’a été modifié. Si cet iPhone est presque plein, libérez de l’espace et réessayez."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "変更を保存できませんでした。変更はありません。iPadの空き容量が少ない場合は、容量を空けてもう一度お試しください。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "変更を保存できませんでした。変更はありません。iPhoneの空き容量が少ない場合は、容量を空けてもう一度お試しください。"
+                }
+              }
+            }
           }
         }
       }
@@ -75375,6 +75610,101 @@
         }
       }
     },
+    "Your saved places are stored with your journal on this iPhone, and that storage could not be opened. Nothing was changed. The Journal tab says more.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Deine gespeicherten Orte liegen mit deinem Journal auf diesem iPad, und dieser Speicher konnte nicht geöffnet werden. Nichts wurde geändert. Mehr dazu im Tab „Journal“."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Deine gespeicherten Orte liegen mit deinem Journal auf diesem iPhone, und dieser Speicher konnte nicht geöffnet werden. Nichts wurde geändert. Mehr dazu im Tab „Journal“."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Your saved places are stored with your journal on this iPad, and that storage could not be opened. Nothing was changed. The Journal tab says more."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Your saved places are stored with your journal on this iPhone, and that storage could not be opened. Nothing was changed. The Journal tab says more."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Tus lugares guardados se almacenan con tu diario en este iPad, y ese almacenamiento no se pudo abrir. No se cambió nada. La pestaña Diario da más detalles."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Tus lugares guardados se almacenan con tu diario en este iPhone, y ese almacenamiento no se pudo abrir. No se cambió nada. La pestaña Diario da más detalles."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vos lieux enregistrés sont conservés avec votre journal sur cet iPad, et ce stockage n’a pas pu être ouvert. Rien n’a été modifié. L’onglet Journal en dit plus."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vos lieux enregistrés sont conservés avec votre journal sur cet iPhone, et ce stockage n’a pas pu être ouvert. Rien n’a été modifié. L’onglet Journal en dit plus."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "保存した場所はこのiPadのジャーナルと一緒に保存されていますが、その保存領域を開けませんでした。変更はありません。詳しくは「ジャーナル」タブをご覧ください。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "保存した場所はこのiPhoneのジャーナルと一緒に保存されていますが、その保存領域を開けませんでした。変更はありません。詳しくは「ジャーナル」タブをご覧ください。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Your spot": {
       "extractionState": "manual",
       "localizations": {
@@ -79441,31 +79771,31 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Den Dunkelheitswert verstehen\n\nDer Dunkelheitswert beantwortet eine Frage: Wie dunkel und klar wird der Himmel in diesem Park in dieser Nacht sein? Er reicht von 0 bis 100. Nyx setzt ihn aus vier Teilen zusammen und prüft ihn dann am schwächsten Glied.\n\nDie vier Teile haben feste Gewichte. Der Mond zählt 40 Punkte: Eine Nacht ohne Mondlicht während der echten Dunkelheit erhält alle 40, ein Vollmond, der die ganze Nacht hoch am Himmel steht, keinen. Wolken zählen 25, gemittelt über die Stunden echter Dunkelheit. Die Himmelsaufhellung zählt 20, nach der geschätzten Bortle-Klasse des Parks. Die Länge der echten Dunkelheit zählt 15, und zehn Stunden oder mehr ergeben die volle Punktzahl. Echte Dunkelheit ist die Zeit, in der die Sonne mehr als 18 Grad unter dem Horizont steht und die Dämmerung den Himmel verlassen hat.\n\nNur zu addieren würde täuschen: Eine mondlose Nacht unter dichten Wolken käme trotzdem auf eine ansehnliche Zahl. Deshalb steigt der Wert nie über sein schwächstes Glied. Wolken begrenzen ihn: Halbe Bewölkung hält eine Nacht bei 55, volle Bedeckung bei 10. Die Himmelsaufhellung begrenzt ihn: Ein Park der Bortle-Klasse 3 kann höchstens 89 erreichen, sodass nur die dunkelsten Himmel „Makellos“ erreichen. Rauch oder Dunst in der Vorhersage begrenzt ihn auf 74, bei dichtem Rauch oder Dunst auf 59. Eine Nacht mit weniger als drei Stunden echter Dunkelheit wird ebenfalls begrenzt, und eine ganz ohne bleibt unter 40.\n\nEin Beispiel. Ein Park der Bortle-Klasse 2, eine schmale Mondsichel, die in der Abenddämmerung untergeht, neun Stunden echte Dunkelheit und eine Vorhersage von 40 % Bewölkung. Die Teile ergeben zusammen 86: 40 für den Mond, 15 für die Wolken, 17,5 für die Himmelsaufhellung und 13,5 für die Länge. Aber 40 % Bewölkung begrenzen die Nacht auf 64, also ist der Wert 64, „Gut“, und die Aufschlüsselung sagt, dass Wolken die Nacht auf 64 begrenzen.\n\nWolken sind der unsicherste Teil. Bis etwa drei Tage im Voraus nutzt Nyx die Wolkenvorhersage voll. Von dort bis zu zehn Tagen nähert es die Vorhersage an die übliche Bewölkung des Parks in diesem Monat an und nennt die Nacht eine erste Einschätzung, unter „Planen“ halb gefüllt gezeichnet. Nach zehn Tagen trägt eine Vorhersage wenig bei, daher beruht der Wert allein auf der üblichen Bewölkung, und die Nacht wird leer gezeichnet. Diese Werte ändern sich, je näher die Nacht rückt.\n\nDie Stufen sind einfach: Ab 90 ist „Makellos“, ab 75 „Sehr gut“, ab 60 „Gut“, ab 40 „Mäßig“, und alles darunter ist „Schlecht“.\n\nManches kann der Wert nicht wissen. Er weiß nicht, ob die Straße zu deinem Beobachtungsplatz offen ist: In den US-Nationalparks zeigt Nyx die Hinweise des Park Service neben dem Wert, aber sie können Stunden alt sein, und anderswo gibt es keine. Er sieht keinen beleuchteten Parkplatz, keine Laterne auf einem Campingplatz und keinen Bergkamm, der genau den Teil des Himmels verdeckt, für den du gekommen bist. Und er kennt deine Augen nicht: wie lange sie Zeit hatten, sich anzupassen, oder wie viel ein heller Bildschirm zunichtegemacht hat. Eine gut geplante Nacht mit „Gut“ kann besser sein als eine gehetzte mit „Sehr gut“."
+            "value": "Den Dunkelheitswert verstehen\n\nDer Dunkelheitswert beantwortet eine Frage: Wie dunkel und klar wird der Himmel in diesem Park in dieser Nacht sein? Er reicht von 0 bis 100. Nyx setzt ihn aus vier Teilen zusammen und prüft ihn dann am schwächsten Glied.\n\nDie vier Teile haben feste Gewichte. Der Mond zählt 40 Punkte: Eine Nacht ohne Mondlicht während der echten Dunkelheit erhält alle 40, ein Vollmond, der die ganze Nacht hoch am Himmel steht, keinen. Wolken zählen 25, gemittelt über die Stunden echter Dunkelheit. Die Himmelsaufhellung zählt 20, nach der geschätzten Bortle-Klasse des Parks. Die Länge der echten Dunkelheit zählt 15, und zehn Stunden oder mehr ergeben die volle Punktzahl. Echte Dunkelheit ist die Zeit, in der die Sonne mehr als 18 Grad unter dem Horizont steht und die Dämmerung den Himmel verlassen hat.\n\nNur zu addieren würde täuschen: Eine mondlose Nacht unter dichten Wolken käme trotzdem auf eine ansehnliche Zahl. Deshalb steigt der Wert nie über sein schwächstes Glied. Wolken begrenzen ihn: Halbe Bewölkung hält eine Nacht bei 55, volle Bedeckung bei 10. Die Himmelsaufhellung begrenzt ihn: Ein Park der Bortle-Klasse 3 kann höchstens 89 erreichen, sodass nur die dunkelsten Himmel „Makellos“ erreichen. Rauch oder Dunst in der Vorhersage begrenzt ihn auf 74, bei dichtem Rauch oder Dunst auf 59. Auch das Mondlicht begrenzt ihn: Ein hoch stehender Vollmond in den dunklen Stunden hellt den Himmel etwa so stark auf wie eine nahe Stadt und hält eine Nacht bei etwa 40, und ein Halbmond am Abendhimmel hält eine Nacht unter „Makellos“. Eine Nacht mit weniger als drei Stunden echter Dunkelheit wird ebenfalls begrenzt, und eine ganz ohne bleibt unter 40.\n\nEin Beispiel. Ein Park der Bortle-Klasse 2, eine schmale Mondsichel, die in der Abenddämmerung untergeht, neun Stunden echte Dunkelheit und eine Vorhersage von 40 % Bewölkung. Die Teile ergeben zusammen 86: 40 für den Mond, 15 für die Wolken, 17,5 für die Himmelsaufhellung und 13,5 für die Länge. Aber 40 % Bewölkung begrenzen die Nacht auf 64, also ist der Wert 64, „Gut“, und die Aufschlüsselung sagt, dass Wolken die Nacht auf 64 begrenzen.\n\nWolken sind der unsicherste Teil. Bis etwa drei Tage im Voraus nutzt Nyx die Wolkenvorhersage voll. Von dort bis zu zehn Tagen nähert es die Vorhersage an die übliche Bewölkung des Parks in diesem Monat an und nennt die Nacht eine erste Einschätzung, unter „Planen“ halb gefüllt gezeichnet. Nach zehn Tagen trägt eine Vorhersage wenig bei, daher beruht der Wert allein auf der üblichen Bewölkung, und die Nacht wird leer gezeichnet. Diese Werte ändern sich, je näher die Nacht rückt.\n\nDie Stufen sind einfach: Ab 90 ist „Makellos“, ab 75 „Sehr gut“, ab 60 „Gut“, ab 40 „Mäßig“, und alles darunter ist „Schlecht“.\n\nManches kann der Wert nicht wissen. Er weiß nicht, ob die Straße zu deinem Beobachtungsplatz offen ist: In den US-Nationalparks zeigt Nyx die Hinweise des Park Service neben dem Wert, aber sie können Stunden alt sein, und anderswo gibt es keine. Er sieht keinen beleuchteten Parkplatz, keine Laterne auf einem Campingplatz und keinen Bergkamm, der genau den Teil des Himmels verdeckt, für den du gekommen bist. Und er kennt deine Augen nicht: wie lange sie Zeit hatten, sich anzupassen, oder wie viel ein heller Bildschirm zunichtegemacht hat. Eine gut geplante Nacht mit „Gut“ kann besser sein als eine gehetzte mit „Sehr gut“."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reading the darkness score\n\nThe darkness score answers one question: how dark and clear will the sky be at this park on this night? It runs from 0 to 100. Nyx builds it from four parts, then checks it against the weakest link.\n\nThe four parts have fixed weights. The Moon counts for 40 points: a night with no moonlight during true darkness earns all 40, and a full moon high in the sky all night earns none. Clouds count for 25, averaged over the hours of true darkness. Sky glow counts for 20, from the park's estimated Bortle class. The length of true darkness counts for 15, and ten hours or more earns all of it. True darkness is the time when the Sun is more than 18 degrees below the horizon and twilight has left the sky.\n\nAdding alone would mislead: a moonless night under thick cloud would still add up to a respectable number. So the score never rises above its weakest link. Cloud caps it: half cover holds a night to 55, and full overcast to 10. Sky glow caps it: a Bortle 3 park can reach 89 at most, so only the darkest skies earn Pristine. Smoke or haze in the forecast caps it at 74, or at 59 when it is heavy. A night with less than three hours of true darkness is capped too, and one with none at all stays below 40.\n\nHere is one night. A Bortle 2 park, a thin crescent Moon that sets at dusk, nine hours of true darkness and a forecast of 40% cloud. The parts add up to 86: 40 for the Moon, 15 for clouds, 17.5 for sky glow and 13.5 for length. But 40% cloud caps the night at 64, so the score is 64, Good, and the breakdown says that clouds limit the night to 64.\n\nClouds are the least certain part. Up to about three days ahead, Nyx uses the cloud forecast in full. From there to ten days, it eases the forecast toward the park's usual clouds for that month and calls the night an early look, drawn half-filled in Plan. Beyond ten days a forecast adds little, so the score rests on the usual clouds alone and the night is drawn hollow. Those scores will change as the night comes closer.\n\nThe bands are simple: 90 and above is Pristine, 75 Excellent, 60 Good, 40 Fair, and anything lower is Poor.\n\nSome things the score cannot know. It does not know whether the road to your viewing spot is open: at the U.S. national parks Nyx shows the Park Service's alerts beside the score, but they can be hours old, and elsewhere it has none. It cannot see a lit parking lot, a lantern in a campground or a ridge that hides the part of the sky you came for. And it cannot know your eyes: how long they have had to adapt, or how much a bright screen has undone. A Good night you plan well can be better than an Excellent one you rush."
+            "value": "Reading the darkness score\n\nThe darkness score answers one question: how dark and clear will the sky be at this park on this night? It runs from 0 to 100. Nyx builds it from four parts, then checks it against the weakest link.\n\nThe four parts have fixed weights. The Moon counts for 40 points: a night with no moonlight during true darkness earns all 40, and a full moon high in the sky all night earns none. Clouds count for 25, averaged over the hours of true darkness. Sky glow counts for 20, from the park's estimated Bortle class. The length of true darkness counts for 15, and ten hours or more earns all of it. True darkness is the time when the Sun is more than 18 degrees below the horizon and twilight has left the sky.\n\nAdding alone would mislead: a moonless night under thick cloud would still add up to a respectable number. So the score never rises above its weakest link. Cloud caps it: half cover holds a night to 55, and full overcast to 10. Sky glow caps it: a Bortle 3 park can reach 89 at most, so only the darkest skies earn Pristine. Smoke or haze in the forecast caps it at 74, or at 59 when it is heavy. Moonlight caps it too: a full Moon high through the dark hours brightens the sky about as much as a nearby town and holds a night near 40, and a half Moon up for the evening keeps a night out of Pristine. A night with less than three hours of true darkness is capped too, and one with none at all stays below 40.\n\nHere is one night. A Bortle 2 park, a thin crescent Moon that sets at dusk, nine hours of true darkness and a forecast of 40% cloud. The parts add up to 86: 40 for the Moon, 15 for clouds, 17.5 for sky glow and 13.5 for length. But 40% cloud caps the night at 64, so the score is 64, Good, and the breakdown says that clouds limit the night to 64.\n\nClouds are the least certain part. Up to about three days ahead, Nyx uses the cloud forecast in full. From there to ten days, it eases the forecast toward the park's usual clouds for that month and calls the night an early look, drawn half-filled in Plan. Beyond ten days a forecast adds little, so the score rests on the usual clouds alone and the night is drawn hollow. Those scores will change as the night comes closer.\n\nThe bands are simple: 90 and above is Pristine, 75 Excellent, 60 Good, 40 Fair, and anything lower is Poor.\n\nSome things the score cannot know. It does not know whether the road to your viewing spot is open: at the U.S. national parks Nyx shows the Park Service's alerts beside the score, but they can be hours old, and elsewhere it has none. It cannot see a lit parking lot, a lantern in a campground or a ridge that hides the part of the sky you came for. And it cannot know your eyes: how long they have had to adapt, or how much a bright screen has undone. A Good night you plan well can be better than an Excellent one you rush."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cómo leer el índice de oscuridad\n\nEl índice de oscuridad responde una sola pregunta: ¿qué tan oscuro y despejado estará el cielo en este parque esta noche? Va de 0 a 100. Nyx lo construye con cuatro partes y luego lo contrasta con el eslabón más débil.\n\nLas cuatro partes tienen pesos fijos. La Luna cuenta 40 puntos: una noche sin luz de luna durante la oscuridad total gana los 40, y una Luna llena alta en el cielo toda la noche no gana ninguno. Las nubes cuentan 25, promediadas sobre las horas de oscuridad total. El resplandor del cielo cuenta 20, según la clase Bortle estimada del parque. La duración de la oscuridad total cuenta 15, y diez horas o más ganan todo. La oscuridad total es el tiempo en que el Sol está a más de 18 grados bajo el horizonte y el crepúsculo ya dejó el cielo.\n\nSumar no basta: una noche sin Luna bajo nubes espesas todavía sumaría un número respetable. Por eso el índice nunca sube por encima de su eslabón más débil. La nubosidad lo limita: con la mitad del cielo cubierto, una noche llega a 55 como máximo, y con el cielo cerrado, a 10. El resplandor del cielo lo limita: un parque Bortle 3 llega a 89 como máximo, así que solo los cielos más oscuros alcanzan Prístina. El humo o la bruma en el pronóstico lo limitan a 74, o a 59 cuando son densos. Una noche con menos de tres horas de oscuridad total también tiene límite, y una sin ninguna se queda por debajo de 40.\n\nVeamos una noche. Un parque Bortle 2, una Luna creciente muy delgada que se pone al anochecer, nueve horas de oscuridad total y un pronóstico de 40% de nubosidad. Las partes suman 86: 40 por la Luna, 15 por las nubes, 17.5 por el resplandor y 13.5 por la duración. Pero 40% de nubosidad limita la noche a 64, así que el índice es 64, Buena, y el desglose dice que las nubes limitan la noche a 64.\n\nLas nubes son la parte menos segura. Hasta unos tres días antes, Nyx usa el pronóstico de nubes completo. De ahí a diez días, lo ajusta hacia la nubosidad habitual del parque en ese mes y llama a la noche una vista anticipada, con el punto de medio relleno en Planear. Más allá de diez días, un pronóstico aporta poco, así que el índice se basa solo en la nubosidad habitual y la noche aparece sin relleno. Esos índices cambiarán conforme se acerque la noche.\n\nLas categorías son sencillas: 90 o más es Prístina, 75 Excelente, 60 Buena, 40 Regular, y cualquier valor menor es Mala.\n\nHay cosas que el índice no puede saber. No sabe si el camino a tu punto de observación está abierto: en los parques nacionales de EE. UU., Nyx muestra las alertas del National Park Service junto al índice, pero pueden tener horas de antigüedad, y en otros lugares no tiene ninguna. No puede ver un estacionamiento iluminado, una lámpara en un campamento ni una cresta que tape la parte del cielo que fuiste a ver. Y no conoce tus ojos: cuánto tiempo llevan adaptándose, o cuánto deshizo una pantalla brillante. Una noche Buena bien planeada puede ser mejor que una Excelente hecha con prisa."
+            "value": "Cómo leer el índice de oscuridad\n\nEl índice de oscuridad responde una sola pregunta: ¿qué tan oscuro y despejado estará el cielo en este parque esta noche? Va de 0 a 100. Nyx lo construye con cuatro partes y luego lo contrasta con el eslabón más débil.\n\nLas cuatro partes tienen pesos fijos. La Luna cuenta 40 puntos: una noche sin luz de luna durante la oscuridad total gana los 40, y una Luna llena alta en el cielo toda la noche no gana ninguno. Las nubes cuentan 25, promediadas sobre las horas de oscuridad total. El resplandor del cielo cuenta 20, según la clase Bortle estimada del parque. La duración de la oscuridad total cuenta 15, y diez horas o más ganan todo. La oscuridad total es el tiempo en que el Sol está a más de 18 grados bajo el horizonte y el crepúsculo ya dejó el cielo.\n\nSumar no basta: una noche sin Luna bajo nubes espesas todavía sumaría un número respetable. Por eso el índice nunca sube por encima de su eslabón más débil. La nubosidad lo limita: con la mitad del cielo cubierto, una noche llega a 55 como máximo, y con el cielo cerrado, a 10. El resplandor del cielo lo limita: un parque Bortle 3 llega a 89 como máximo, así que solo los cielos más oscuros alcanzan Prístina. El humo o la bruma en el pronóstico lo limitan a 74, o a 59 cuando son densos. La luz de la Luna también lo limita: una Luna llena alta durante las horas oscuras ilumina el cielo casi tanto como un pueblo cercano y deja una noche cerca de 40, y una media Luna en el cielo al anochecer deja la noche fuera de Prístina. Una noche con menos de tres horas de oscuridad total también tiene límite, y una sin ninguna se queda por debajo de 40.\n\nVeamos una noche. Un parque Bortle 2, una Luna creciente muy delgada que se pone al anochecer, nueve horas de oscuridad total y un pronóstico de 40% de nubosidad. Las partes suman 86: 40 por la Luna, 15 por las nubes, 17.5 por el resplandor y 13.5 por la duración. Pero 40% de nubosidad limita la noche a 64, así que el índice es 64, Buena, y el desglose dice que las nubes limitan la noche a 64.\n\nLas nubes son la parte menos segura. Hasta unos tres días antes, Nyx usa el pronóstico de nubes completo. De ahí a diez días, lo ajusta hacia la nubosidad habitual del parque en ese mes y llama a la noche una vista anticipada, con el punto de medio relleno en Planear. Más allá de diez días, un pronóstico aporta poco, así que el índice se basa solo en la nubosidad habitual y la noche aparece sin relleno. Esos índices cambiarán conforme se acerque la noche.\n\nLas categorías son sencillas: 90 o más es Prístina, 75 Excelente, 60 Buena, 40 Regular, y cualquier valor menor es Mala.\n\nHay cosas que el índice no puede saber. No sabe si el camino a tu punto de observación está abierto: en los parques nacionales de EE. UU., Nyx muestra las alertas del National Park Service junto al índice, pero pueden tener horas de antigüedad, y en otros lugares no tiene ninguna. No puede ver un estacionamiento iluminado, una lámpara en un campamento ni una cresta que tape la parte del cielo que fuiste a ver. Y no conoce tus ojos: cuánto tiempo llevan adaptándose, o cuánto deshizo una pantalla brillante. Una noche Buena bien planeada puede ser mejor que una Excelente hecha con prisa."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lire l’indice d’obscurité\n\nL’indice d’obscurité répond à une seule question : à quel point le ciel sera-t-il noir et dégagé dans ce parc, cette nuit-là ? Il va de 0 à 100. Nyx le construit à partir de quatre composantes, puis le confronte à son maillon le plus faible.\n\nLes quatre composantes ont des poids fixes. La Lune compte pour 40 points : une nuit sans clair de lune pendant l’obscurité totale les obtient tous, et une pleine lune haute dans le ciel toute la nuit n’en obtient aucun. Les nuages comptent pour 25, en moyenne sur les heures d’obscurité totale. Le halo lumineux compte pour 20, d’après la classe de Bortle estimée du parc. La durée de l’obscurité totale compte pour 15, et dix heures ou plus les obtiennent tous. L’obscurité totale, c’est le moment où le Soleil est à plus de 18 degrés sous l’horizon et où le crépuscule a quitté le ciel.\n\nLa simple addition serait trompeuse : une nuit sans lune sous d’épais nuages atteindrait quand même un total honorable. L’indice ne dépasse donc jamais son maillon le plus faible. Les nuages le plafonnent : un ciel à moitié couvert limite une nuit à 55, un ciel entièrement couvert à 10. Le halo lumineux le plafonne : un parc Bortle 3 peut atteindre 89 au plus, si bien que seuls les ciels les plus noirs obtiennent Immaculée. De la fumée ou de la brume dans la prévision le plafonne à 74, ou à 59 quand elle est épaisse. Une nuit de moins de trois heures d’obscurité totale est plafonnée elle aussi, et une nuit qui n’en a pas du tout reste sous 40.\n\nPrenons une nuit. Un parc Bortle 2, un fin croissant de Lune qui se couche au crépuscule, neuf heures d’obscurité totale et une prévision de 40 % de nuages. Les composantes totalisent 86 : 40 pour la Lune, 15 pour les nuages, 17,5 pour le halo lumineux et 13,5 pour la durée. Mais 40 % de nuages plafonnent la nuit à 64 : l’indice est donc de 64, Bonne, et le détail indique que les nuages limitent la nuit à 64.\n\nLes nuages sont la composante la plus incertaine. Jusqu’à environ trois jours à l’avance, Nyx utilise pleinement la prévision de nuages. De là jusqu’à dix jours, il rapproche la prévision de la nébulosité habituelle du parc pour ce mois et qualifie la nuit de tendance, dessinée à moitié pleine dans Planifier. Au-delà de dix jours, une prévision apporte peu : l’indice repose alors sur la seule nébulosité habituelle, et la nuit est dessinée vide. Ces indices changeront à mesure que la nuit approchera.\n\nLes niveaux sont simples : à partir de 90, Immaculée ; de 75, Excellente ; de 60, Bonne ; de 40, Passable ; en dessous, Médiocre.\n\nCertaines choses échappent à l’indice. Il ne sait pas si la route vers votre point d’observation est ouverte : dans les parcs nationaux des États-Unis, Nyx affiche les alertes du Park Service à côté de l’indice, mais elles peuvent dater de plusieurs heures, et ailleurs il n’en a aucune. Il ne voit ni un parking éclairé, ni une lanterne dans un camping, ni une crête qui cache la partie du ciel pour laquelle vous êtes venu. Et il ne connaît pas vos yeux : le temps qu’ils ont eu pour s’adapter, ni ce qu’un écran lumineux a défait. Une nuit Bonne bien préparée peut valoir mieux qu’une nuit Excellente vécue dans la hâte."
+            "value": "Lire l’indice d’obscurité\n\nL’indice d’obscurité répond à une seule question : à quel point le ciel sera-t-il noir et dégagé dans ce parc, cette nuit-là ? Il va de 0 à 100. Nyx le construit à partir de quatre composantes, puis le confronte à son maillon le plus faible.\n\nLes quatre composantes ont des poids fixes. La Lune compte pour 40 points : une nuit sans clair de lune pendant l’obscurité totale les obtient tous, et une pleine lune haute dans le ciel toute la nuit n’en obtient aucun. Les nuages comptent pour 25, en moyenne sur les heures d’obscurité totale. Le halo lumineux compte pour 20, d’après la classe de Bortle estimée du parc. La durée de l’obscurité totale compte pour 15, et dix heures ou plus les obtiennent tous. L’obscurité totale, c’est le moment où le Soleil est à plus de 18 degrés sous l’horizon et où le crépuscule a quitté le ciel.\n\nLa simple addition serait trompeuse : une nuit sans lune sous d’épais nuages atteindrait quand même un total honorable. L’indice ne dépasse donc jamais son maillon le plus faible. Les nuages le plafonnent : un ciel à moitié couvert limite une nuit à 55, un ciel entièrement couvert à 10. Le halo lumineux le plafonne : un parc Bortle 3 peut atteindre 89 au plus, si bien que seuls les ciels les plus noirs obtiennent Immaculée. De la fumée ou de la brume dans la prévision le plafonne à 74, ou à 59 quand elle est épaisse. Le clair de lune le plafonne aussi : une pleine lune haute pendant les heures sombres éclaire le ciel presque autant qu’une ville voisine et limite une nuit à 40 environ, et une demi-lune dans le ciel du soir tient une nuit hors d’Immaculée. Une nuit de moins de trois heures d’obscurité totale est plafonnée elle aussi, et une nuit qui n’en a pas du tout reste sous 40.\n\nPrenons une nuit. Un parc Bortle 2, un fin croissant de Lune qui se couche au crépuscule, neuf heures d’obscurité totale et une prévision de 40 % de nuages. Les composantes totalisent 86 : 40 pour la Lune, 15 pour les nuages, 17,5 pour le halo lumineux et 13,5 pour la durée. Mais 40 % de nuages plafonnent la nuit à 64 : l’indice est donc de 64, Bonne, et le détail indique que les nuages limitent la nuit à 64.\n\nLes nuages sont la composante la plus incertaine. Jusqu’à environ trois jours à l’avance, Nyx utilise pleinement la prévision de nuages. De là jusqu’à dix jours, il rapproche la prévision de la nébulosité habituelle du parc pour ce mois et qualifie la nuit de tendance, dessinée à moitié pleine dans Planifier. Au-delà de dix jours, une prévision apporte peu : l’indice repose alors sur la seule nébulosité habituelle, et la nuit est dessinée vide. Ces indices changeront à mesure que la nuit approchera.\n\nLes niveaux sont simples : à partir de 90, Immaculée ; de 75, Excellente ; de 60, Bonne ; de 40, Passable ; en dessous, Médiocre.\n\nCertaines choses échappent à l’indice. Il ne sait pas si la route vers votre point d’observation est ouverte : dans les parcs nationaux des États-Unis, Nyx affiche les alertes du Park Service à côté de l’indice, mais elles peuvent dater de plusieurs heures, et ailleurs il n’en a aucune. Il ne voit ni un parking éclairé, ni une lanterne dans un camping, ni une crête qui cache la partie du ciel pour laquelle vous êtes venu. Et il ne connaît pas vos yeux : le temps qu’ils ont eu pour s’adapter, ni ce qu’un écran lumineux a défait. Une nuit Bonne bien préparée peut valoir mieux qu’une nuit Excellente vécue dans la hâte."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "暗さスコアの読み方\n\n暗さスコアが答えるのは、一つの問いです。この夜、この公園の空はどれくらい暗く、晴れているか。スコアは0から100までで、Nyxは4つの要素から組み立て、最も弱い要素と照らし合わせて確かめます。\n\n4つの要素の配分は決まっています。月は40点です。完全に暗い時間に月明かりがまったくなければ40点すべてを得られ、満月が一晩中高い空にあれば0点です。雲は25点で、完全に暗い時間の平均です。夜空の明るさは20点で、公園の推定ボートルクラスによります。完全に暗い時間の長さは15点で、10時間以上あれば満点です。完全に暗い時間とは、太陽が地平線下18度より低くなり、空から薄明が消えている時間です。\n\n足し算だけでは誤解を招きます。厚い雲の下の月のない夜でも、合計はそれなりの数字になってしまうからです。そこでスコアは、最も弱い要素を超えないようにしています。雲には上限があり、雲量が半分なら最大55、全天曇りなら最大10です。夜空の明るさにも上限があり、ボートル3の公園は最大89なので、「極上」になるのは最も暗い空だけです。予報に煙やもやがあると最大74、濃い場合は最大59です。完全に暗い時間が3時間未満の夜にも上限があり、まったくない夜は40未満にとどまります。\n\nある夜の例です。ボートル2の公園、夕暮れに沈む細い三日月、9時間の完全に暗い時間、雲量予報40%。要素の合計は86点です。月40、雲15、夜空の明るさ17.5、長さ13.5。しかし雲量40%ではこの夜の上限が64になるので、スコアは64点、「好条件」です。内訳には、雲のためこの夜は最大64点と表示されます。\n\n雲は最も不確かな要素です。約3日先までは、Nyxは雲予報をそのまま使います。そこから10日先までは、予報をその公園のその月の平年の雲量に寄せ、その夜を早めの見通しとして、「計画」では半分塗りで描きます。10日より先では予報はあまり役に立たないので、スコアは平年の雲量だけに基づき、その夜は白抜きで描かれます。こうしたスコアは、夜が近づくにつれて変わります。\n\n評価の段階は単純です。90以上は「極上」、75以上は「上々」、60以上は「好条件」、40以上は「まずまず」、それより低いと「不向き」です。\n\nスコアにはわからないこともあります。観察スポットへの道路が開いているかどうかはわかりません。米国の国立公園では、National Park Serviceのアラートをスコアの横に表示しますが、数時間前の情報のこともあり、ほかの場所ではアラートはありません。明かりのついた駐車場、キャンプ場のランタン、見に来た方向の空を隠す稜線も、スコアには見えません。そしてあなたの目のこともわかりません。暗さに慣れるのにどれだけ時間をかけたか、明るい画面でどれだけ元に戻ってしまったか。よく計画した「好条件」の夜は、慌ただしく過ごす「上々」の夜よりよいものになりえます。"
+            "value": "暗さスコアの読み方\n\n暗さスコアが答えるのは、一つの問いです。この夜、この公園の空はどれくらい暗く、晴れているか。スコアは0から100までで、Nyxは4つの要素から組み立て、最も弱い要素と照らし合わせて確かめます。\n\n4つの要素の配分は決まっています。月は40点です。完全に暗い時間に月明かりがまったくなければ40点すべてを得られ、満月が一晩中高い空にあれば0点です。雲は25点で、完全に暗い時間の平均です。夜空の明るさは20点で、公園の推定ボートルクラスによります。完全に暗い時間の長さは15点で、10時間以上あれば満点です。完全に暗い時間とは、太陽が地平線下18度より低くなり、空から薄明が消えている時間です。\n\n足し算だけでは誤解を招きます。厚い雲の下の月のない夜でも、合計はそれなりの数字になってしまうからです。そこでスコアは、最も弱い要素を超えないようにしています。雲には上限があり、雲量が半分なら最大55、全天曇りなら最大10です。夜空の明るさにも上限があり、ボートル3の公園は最大89なので、「極上」になるのは最も暗い空だけです。予報に煙やもやがあると最大74、濃い場合は最大59です。月明かりにも上限があります。暗い時間に高く昇る満月は、近くの町と同じくらい空を明るくするため、その夜は40前後に抑えられます。宵に半月が出ている夜は「極上」になりません。完全に暗い時間が3時間未満の夜にも上限があり、まったくない夜は40未満にとどまります。\n\nある夜の例です。ボートル2の公園、夕暮れに沈む細い三日月、9時間の完全に暗い時間、雲量予報40%。要素の合計は86点です。月40、雲15、夜空の明るさ17.5、長さ13.5。しかし雲量40%ではこの夜の上限が64になるので、スコアは64点、「好条件」です。内訳には、雲のためこの夜は最大64点と表示されます。\n\n雲は最も不確かな要素です。約3日先までは、Nyxは雲予報をそのまま使います。そこから10日先までは、予報をその公園のその月の平年の雲量に寄せ、その夜を早めの見通しとして、「計画」では半分塗りで描きます。10日より先では予報はあまり役に立たないので、スコアは平年の雲量だけに基づき、その夜は白抜きで描かれます。こうしたスコアは、夜が近づくにつれて変わります。\n\n評価の段階は単純です。90以上は「極上」、75以上は「上々」、60以上は「好条件」、40以上は「まずまず」、それより低いと「不向き」です。\n\nスコアにはわからないこともあります。観察スポットへの道路が開いているかどうかはわかりません。米国の国立公園では、National Park Serviceのアラートをスコアの横に表示しますが、数時間前の情報のこともあり、ほかの場所ではアラートはありません。明かりのついた駐車場、キャンプ場のランタン、見に来た方向の空を隠す稜線も、スコアには見えません。そしてあなたの目のこともわかりません。暗さに慣れるのにどれだけ時間をかけたか、明るい画面でどれだけ元に戻ってしまったか。よく計画した「好条件」の夜は、慌ただしく過ごす「上々」の夜よりよいものになりえます。"
           }
         }
       }

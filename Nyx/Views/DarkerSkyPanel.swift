@@ -50,7 +50,7 @@ struct DarkerSkyPanel: View {
         } else if !model.journalUnavailable {
             Button { saving=true } label:{ Label("Save as a spot",systemImage:"mappin.and.ellipse").font(.footnote.weight(.medium)).frame(minHeight:44) }
                 .buttonStyle(.borderless).foregroundStyle(palette.accent)
-                .accessibilityHint("Gives it nights and a score, and lets Nyx follow it on your widgets, Apple Watch and reminders.")
+                .accessibilityHint("Gives it nights and a score. You can then add it to your widgets, Apple Watch and reminders.")
         }
         if let url=MapsHandOff.pin(latitude:coordinate.latitude,longitude:coordinate.longitude,label:SkyGrid.DarkArea.title) {
             Button { openURL(url) } label:{ Label("Show in Maps",systemImage:"map").font(.footnote.weight(.medium)).frame(minHeight:44) }

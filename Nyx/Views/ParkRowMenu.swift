@@ -10,7 +10,7 @@ struct ParkRowMenu: View {
     @Environment(\.modelContext) private var context
     @Query(sort:\SavedPark.savedAt) private var saved: [SavedPark]
     let park: Park
-    /// A save that could not be stored: the screen says "Unable to save" (`parkSaveAlert`).
+    /// A save that could not be stored: the screen says "Saved places unavailable" (`parkSaveAlert`).
     let failed: ()->Void
     /// Offered only where the list can ask before deleting a spot.
     var deleteSpot: ((Park)->Void)?=nil
@@ -43,10 +43,10 @@ extension View {
     func parkRowActions(_ park:Park,showsPlan:Bool=true,failed:@escaping ()->Void)->some View {
         contextMenu { ParkRowMenu(park:park,failed:failed,showsPlan:showsPlan) }.hoverEffect(.highlight).draggable(park)
     }
-    /// "Unable to save", after a save from a park row's menu could not be stored.
+    /// "Saved places unavailable", after saving or removing a park, place or spot could not be stored.
     func parkSaveAlert(isPresented:Binding<Bool>,journalUnavailable:Bool)->some View {
-        alert("Unable to save",isPresented:isPresented) { Button("OK",role:.cancel) {} } message:{
-            Text(journalUnavailable ? "Saved parks are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.")
+        alert("Saved places unavailable",isPresented:isPresented) { Button("OK",role:.cancel) {} } message:{
+            Text(journalUnavailable ? "Your saved places are stored with your journal on this iPhone, and that storage could not be opened. Nothing was changed. The Journal tab says more." : "The change could not be stored. Nothing was changed. If this iPhone is nearly full, free some space and try again.")
         }
     }
 }

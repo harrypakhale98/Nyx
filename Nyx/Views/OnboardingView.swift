@@ -11,19 +11,15 @@ struct OnboardingView:View {
     private var compactHeight:Bool { verticalSize == .compact }
     @Environment(\.nyx) private var palette
     @MotionReduced private var reduceMotion: Bool
-    @Environment(PlanModel.self) private var model
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @State private var page=DebugScenario.onboardingPage
     /// The fade above the page dots grows with the text, so a large line fades out rather than being sliced.
     @ScaledMetric(relativeTo:.body) private var fade=24.0
     let finish:()->Void
     private let titles:[LocalizedStringKey]=["Where and when\nthe sky is darkest","A darker sky.\nA clearer plan.","Made for dark eyes"]
-    /// The first page names the US national parks where the device is set to the United States, as it
-    /// always has; anywhere else, the parks and dark-sky places of every country that Nyx now scores.
+    /// The first page names what Nyx scores everywhere: the US parks are part of the world it covers.
     private var messages:[LocalizedStringKey] {[
-        HomeRegion.isUS(Locale.current.region?.identifier)
-            ? "Nyx compares the \(model.parks.isEmpty ? 63 : model.parks.count) national parks night by night, so you know which park to drive to and which night to take off."
-            : "Nyx compares national parks and dark-sky places around the world, night by night, so you know where to go and which night to take off.",
+        "Nyx compares national parks and dark-sky places around the world, night by night, so you know where to go and which night to take off.",
         "Moonlight, clouds, sky glow and true darkness become one score. Every estimate tells you what is still unknown.",
         "Turn the screen red at any time, here or from Control Center. Nyx has no account, no ads, no tracking. Your journal never leaves this phone.",
     ]}

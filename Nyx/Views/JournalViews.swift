@@ -184,7 +184,7 @@ struct JournalView: View {
         var lines=[summary.spots>0 ? String(localized:"Nights: \(summary.nights). Photos: \(summary.photos). Spots: \(summary.spots).")
                                    : String(localized:"Nights: \(summary.nights). Photos: \(summary.photos).")]
         if summary.alreadyHere>0 { lines.append(String(localized:"Already in your journal, so skipped: \(summary.alreadyHere).")) }
-        if summary.spots>0 { lines.append(String(localized:"Spots arrive in Your spots unfollowed. Follow one to get its reminders.")) }
+        if summary.spots>0 { lines.append(String(localized:"Spots arrive in Your spots without reminders. Open one and add it to widgets and reminders.")) }
         return lines.joined(separator:"\n")
     }
     /// A journal past `JournalImport`'s limits, with the limits in the reader's own numbers.

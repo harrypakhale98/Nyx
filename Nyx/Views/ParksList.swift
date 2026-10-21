@@ -376,11 +376,11 @@ struct ParksView: View {
     }
 }
 
-/// The bookmark's words, one place for the list's menu and a place's page: saving a park, following a
-/// spot, saving a place abroad (a town or a reserve is not a park).
+/// The bookmark's words, one place for the list's menu and a place's page: saving a park, adding a
+/// spot to widgets and reminders ("follow" is kept for a night on the Lock Screen), saving a place abroad (a town or a reserve is not a park).
 enum SaveWords {
     static func title(saved:Bool,spot:Bool,place:Bool)->LocalizedStringKey {
-        if spot { return saved ? "Stop following this spot" : "Follow this spot" }
+        if spot { return saved ? "Remove from widgets and reminders" : "Add to widgets and reminders" }
         if place { return saved ? "Remove from saved places" : "Save place" }
         return saved ? "Remove from saved parks" : "Save park"
     }

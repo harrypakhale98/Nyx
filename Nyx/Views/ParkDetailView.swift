@@ -212,7 +212,7 @@ struct ParkDetailView: View {
             .task { if DebugScenario.isEnabled("inspector") { try? await Task.sleep(for:.seconds(1)); if inspectorRoom { inspector=true } } }
             .modifier(ReportsVisiblePark(parkID:park.id))
             .fullScreenCover(isPresented:$showsSky) { TonightSkyView(night:night,isTonight:isTonight).environment(\.nyx,palette).nyxPresentation().modifier(DebugTypeSize()) }
-            .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text(model.journalUnavailable ? "Saved parks are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.") }
+            .parkSaveAlert(isPresented:$persistenceError,journalUnavailable:model.journalUnavailable)
             // Again whenever the river moves on (left open past sunrise, or a night chosen beyond it), or the
             // page is handed another place, which cancels the old place's build.
             .task(id:RiverPrep(park:park.id,start:riverStart)) {
@@ -299,9 +299,9 @@ private struct SaveButtonWords: ViewModifier {
     var place=false
     func body(content:Content)->some View {
         if spot {
-            content.accessibilityLabel(saved ? "Stop following this spot" : "Follow this spot")
-                .accessibilityHint("Followed spots appear in widgets, reminders and on Apple Watch.")
-                .accessibilityInputLabels(saved ? [Text("Stop following"),Text("Unsave")] : [Text("Follow"),Text("Save")])
+            content.accessibilityLabel(SaveWords.title(saved:saved,spot:true,place:false))
+                .accessibilityHint("Spots you add appear in widgets, reminders and on Apple Watch.")
+                .accessibilityInputLabels(saved ? [Text("Remove"),Text("Stop following"),Text("Unsave")] : [Text("Add"),Text("Follow"),Text("Save")])
         } else if place {
             content.accessibilityLabel(SaveWords.title(saved:saved,spot:false,place:true))
                 .accessibilityInputLabels(saved ? [Text("Remove from saved places"),Text("Unsave")] : [Text("Save"),Text("Save place")])
