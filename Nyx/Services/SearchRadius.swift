@@ -30,10 +30,9 @@ nonisolated enum SearchRadius {
     static func standard(_ system: System = System()) -> Double { system.pick([200], [300])[0] }
     /// The farther reach Tonight offers when the answer is thin: 500 miles, or 800 km.
     static func wider(_ system: System = System()) -> Double { system.pick([500], [800])[0] }
-    /// The trip planner's reaches, and its farthest hop between back-to-back nights.
-    static func tripSteps(_ system: System = System()) -> [Double] { system.pick([100, 200, 300, 500, 1000], [150, 300, 500, 800, 1500]) }
+    /// The trip planner's farthest hop between back-to-back nights (its reach is the one radius above).
     static func hopSteps(_ system: System = System()) -> [Double] { system.pick([100, 200, 300, 500], [150, 300, 500, 800]) }
-    /// The trip planner's starting reach and hop: 300 miles, or 500 km.
+    /// The trip planner's starting hop: 300 miles, or 500 km.
     static func tripStandard(_ system: System = System()) -> Double { system.pick([300], [500])[0] }
 
     /// The chosen radius in metres: as stored, else a radius kept in miles converted exactly, else

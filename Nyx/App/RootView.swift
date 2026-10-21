@@ -126,6 +126,8 @@ struct RootView:View {
         .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) } }
         .onAppear { LaunchSignposts.firstFrame() }
         .onAppear { if DebugScenario.screen == nil, (0..<SceneCommands.tabs.count).contains(savedTab) { commands.tab=savedTab } }
+        // A location found is a starting point chosen, from whichever screen asked (Tonight or Plan).
+        .onChange(of:model.location.latitude != nil) { _,found in if found, DebugScenario.screen == nil { model.startChosen=true } }
         .onChange(of:commands.tab) { _,tab in savedTab=tab }
         // Field mode can open from Tonight or Control Center before any park page has appeared; its dawn
         // "Keep this night" needs the journal's store.

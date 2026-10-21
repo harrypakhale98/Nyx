@@ -16,18 +16,14 @@ struct TripPlannerView: View {
     /// The chosen nights as seconds since 1970; 0 until chosen, which means from tonight for a week.
     @SceneStorage("tripFirst") private var firstStamp=0.0
     @SceneStorage("tripLast") private var lastStamp=0.0
-    /// In metres, from the locale's round numbers (`SearchRadius`): 300 miles each, or 500 km.
-    @SceneStorage("tripRadiusMeters") private var radius=SearchRadius.tripStandard()
+    /// The farthest hop between back-to-back nights, in metres (`SearchRadius`): 300 miles, or 500 km.
+    /// The starting point and the radius are Tonight's (`StartingPointPanel`), one for the whole app.
     @SceneStorage("tripHopMeters") private var maxHop=SearchRadius.tripStandard()
     @SceneStorage("tripWeekends") private var weekendsOnly=false
     /// On by default: a plan that ends at a ferry dock at midnight is not a plan.
     @SceneStorage("tripDrivable") private var drivableOnly=true
-    @State private var originID=""
-    /// A city or town to start from instead of a park.
-    @State private var originPlace:StartingPlace?
-    @State private var useDevice=false
-    @State private var device:CLLocationCoordinate2D?
     @State private var choosingStart=false
+    @State private var explainLocation=false
     @State private var plan:TripPlan?
     @State private var planning=false
     @State private var calendarStay:TripStay?
@@ -38,7 +34,6 @@ struct TripPlannerView: View {
     @State private var width=0.0
     /// The best night's numeral: the hero, scaling with Dynamic Type but never past the screen.
     @ScaledMetric(relativeTo:.largeTitle) private var heroSize=96.0
-    private var origin:Park? { model.park(originID) ?? model.home }
     /// The planning inputs on the left and the plan on the right, on a wide iPad.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
     /// Never earlier than last night: a window kept from another day starts again from tonight.
@@ -52,14 +47,17 @@ struct TripPlannerView: View {
         if clamped != last { lastStamp=clamped.timeIntervalSince1970 }
     }
     private var days:[TripDay] { TripPlanner.days(first:TripDay(first),last:TripDay(last),weekendsOnly:weekendsOnly) }
-    private var point:CLLocationCoordinate2D? {
-        if useDevice { return device }
-        if let originPlace { return CLLocationCoordinate2D(latitude:originPlace.latitude,longitude:originPlace.longitude) }
-        return origin.map { CLLocationCoordinate2D(latitude:$0.latitude,longitude:$0.longitude) }
+    /// Where distances are measured from: the device under Near me, else the starting point (`PlanModel.reachOrigin`).
+    private var point:CLLocationCoordinate2D? { model.reachOrigin.map { CLLocationCoordinate2D(latitude:$0.latitude,longitude:$0.longitude) } }
+    private var radius:Double { model.radiusMeters }
+    /// Which start the plan is from: the chosen park or place, or the device on a 0.05° grid, so a
+    /// location refreshed a few metres away never plans (and announces) the same trip again.
+    private var reachIdentity:String {
+        guard let lat=model.location.latitude, let lon=model.location.longitude else { return "\(model.homeID)-\(model.homePlace?.id ?? "")" }
+        return "here-\(Int((lat*20).rounded()))-\(Int((lon*20).rounded()))"
     }
-    private var originLabel:String { originPlace?.label ?? origin?.shortName ?? "" }
     /// What the person chose; a change is announced.
-    private var choices:String { "\(TripDay(first).iso)-\(TripDay(last).iso)-\(radius)-\(maxHop)-\(weekendsOnly)-\(drivableOnly)-\(originID)-\(originPlace?.id ?? "")-\(useDevice)-\(device?.latitude ?? 0)" }
+    private var choices:String { "\(TripDay(first).iso)-\(TripDay(last).iso)-\(radius)-\(maxHop)-\(weekendsOnly)-\(drivableOnly)-\(reachIdentity)" }
     /// The choices and the data under them: new clouds, smoke or a closure plan again, quietly.
     private var inputs:String { "\(choices)-\(model.dataRevision)" }
     var body: some View {
@@ -67,7 +65,7 @@ struct TripPlannerView: View {
             if wide {
                 // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                 FoldColumns(narrow:.leading,narrowMax:420,spacing:32) {
-                    VStack(alignment:.leading,spacing:22) { intro; Panel { controls } }.frame(maxWidth:.infinity,alignment:.leading)
+                    VStack(alignment:.leading,spacing:22) { intro; startingPoint; Panel { controls } }.frame(maxWidth:.infinity,alignment:.leading)
                     VStack(alignment:.leading,spacing:24) {
                         if let best=plan?.best { hero(best) }
                         results
@@ -78,6 +76,7 @@ struct TripPlannerView: View {
                     intro
                     // The answer first; the questions that shape it just below.
                     if let best=plan?.best { hero(best) }
+                    startingPoint
                     Panel { controls }
                     results
                 }.padding(24).readableColumn()
@@ -94,15 +93,7 @@ struct TripPlannerView: View {
         .toolbar { if let plan, !plan.stops.isEmpty { ToolbarItem(placement:.topBarTrailing) {
             ShareLink(item:TripPlanner.shareText(plan,distance:Self.miles)) { Label("Share plan",systemImage:"square.and.arrow.up") }.accessibilityLabel("Share plan")
         } } }
-        .sheet(isPresented:$choosingStart) {
-            NavigationStack { StartingPointPicker(nearMe:nil,selectedParkID:originPlace == nil ? origin?.id : nil,selectedPlace:originPlace) { choice in
-                switch choice {
-                case .park(let id): originID=id; originPlace=nil
-                case .place(let place): originPlace=place
-                }
-                useDevice=false
-            } }.nyxPresentation()
-        }
+        .modifier(StartingPointSheets(choosing:$choosingStart,explaining:$explainLocation))
         .sheet(item:$calendarStay) { stay in
             if let draft=CalendarDraft(stay:stay.stops) { CalendarEditor(draft:draft) { calendarStay=nil }.ignoresSafeArea().nyxPresentation() }
         }
@@ -111,17 +102,14 @@ struct TripPlannerView: View {
         .task {
             guard !prepared else { return }
             prepared=true
-            originID=model.homeID; originPlace=model.homePlace
             #if DEBUG
             if let date=DebugScenario.date { firstStamp=date.timeIntervalSince1970; lastStamp=date.addingTimeInterval(6*86400).timeIntervalSince1970 }
             else if DebugScenario.screen != nil { firstStamp=0; lastStamp=0 }
-            if DebugScenario.screen != nil { radius=SearchRadius.tripStandard(); maxHop=radius; weekendsOnly=false; drivableOnly=true }
+            if DebugScenario.screen != nil { maxHop=SearchRadius.tripStandard(); weekendsOnly=false; drivableOnly=true }
             if DebugScenario.state=="weekends" { weekendsOnly=true; lastStamp=first.addingTimeInterval(27*86400).timeIntervalSince1970 }
             // Boat and plane parks included, close in: `-nyx-park chis` shows the access notes in the plan.
-            if DebugScenario.state=="boats" { drivableOnly=false; radius=SearchRadius.tripSteps()[0] }
+            if DebugScenario.state=="boats" { drivableOnly=false }
             #endif
-            // Location only if it was already allowed: the trip planner never asks for it.
-            if DebugScenario.screen == nil, let fix=await OneShotLocation.current() { device=fix; useDevice=true }
             // Cached forecasts are enough; a refresh that is already due arrives in the background.
             Task { await model.refreshForecasts(watching:[]) }
         }
@@ -151,36 +139,19 @@ struct TripPlannerView: View {
     }
     @ViewBuilder private var controls:some View {
         VStack(alignment:.leading,spacing:16) {
-            VStack(alignment:.leading,spacing:8) {
-                Text("From").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
-                if device != nil {
-                    // Segments while both names fit; a long starting point turns it into a menu rather than being cut short.
-                    ViewThatFits(in:.horizontal) {
-                        Picker("Starting point",selection:$useDevice) { startOptions }.pickerStyle(.segmented)
-                        WrappingMenuPicker(title:"Starting point",selection:$useDevice,current:useDevice ? String(localized:"Your location") : originLabel,wraps:true) { startOptions }
-                    }
-                }
-                if !useDevice {
-                    Button { choosingStart=true } label:{
-                        // Starlight text with an amber mark, on its own solid indigo: iOS 26's lighter glass under the panel
-                        // otherwise sets the contrast of this control's text (amber text there fell short of 4.5:1).
-                        HStack { Label { Text(originLabel).foregroundStyle(palette.ink) } icon:{ Image(systemName:originPlace == nil ? "mappin.and.ellipse" : "building.2").foregroundStyle(palette.accent) }.fixedSize(horizontal:false,vertical:true); Spacer(minLength:8); Image(systemName:"chevron.up.chevron.down").imageScale(.small).foregroundStyle(palette.accent).accessibilityHidden(true) }
-                            .frame(minHeight:44).contentShape(Rectangle()).background(palette.panel)
-                    }.buttonStyle(.plain).accessibilityLabel("Starting point").accessibilityValue(originLabel).accessibilityInputLabels([Text("Starting point"),Text(originLabel)]).accessibilityHint("Choose a city, town or park")
-                }
-            }
-            Divider().overlay(palette.line)
             DatePicker("First night",selection:firstBinding,in:Date.now.addingTimeInterval(-86400)...Date.now.addingTimeInterval(365*86400),displayedComponents:.date)
             DatePicker("Last night",selection:lastBinding,in:first...TripPlanner.latestLast(first:first,weekendsOnly:weekendsOnly),displayedComponents:.date)
             Toggle(isOn:$weekendsOnly) { VStack(alignment:.leading,spacing:2) { Text("Weekends only"); Text("Nights before your days off").font(.caption).foregroundStyle(palette.muted) } }.tint(palette.controlTint)
             Text("\(days.count) nights, at most \(TripPlanner.maxNights)").font(.caption).foregroundStyle(palette.muted)
             Divider().overlay(palette.line)
-            distancePicker(title:"Within",selection:$radius,values:SearchRadius.tripSteps(),note:"as the crow flies")
             distancePicker(title:"Farthest between nights",selection:$maxHop,values:SearchRadius.hopSteps(),note:"straight line, back-to-back nights")
             Toggle(isOn:$drivableOnly) { VStack(alignment:.leading,spacing:2) { Text("Parks you can drive to"); Text("Leaves out parks reached only by boat or plane").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) } }.tint(palette.controlTint)
         }
     }
-    @ViewBuilder private var startOptions:some View { Text("Your location").tag(true); Text(originLabel).tag(false) }
+    /// The one starting point and radius, as Tonight shows them.
+    private var startingPoint:some View {
+        StartingPointPanel(choose:{ choosingStart=true },nearMe:{ StartingPointSheets.nearMe(model) { explainLocation=true } })
+    }
     private func distancePicker(title:LocalizedStringKey,selection:Binding<Double>,values:[Double],note:LocalizedStringKey)->some View {
         ViewThatFits(in:.horizontal) {
             HStack(alignment:.firstTextBaseline) { VStack(alignment:.leading,spacing:2) { Text(title).fixedSize(horizontal:false,vertical:true); Text(note).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }.layoutPriority(1); Spacer(minLength:8); menu(title:title,selection:selection,values:values) }

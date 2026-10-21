@@ -8647,6 +8647,41 @@
         }
       }
     },
+    "A place with a closure in its latest park alert ranks lower. Its score stays the same.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Ort mit einer Sperrung in der letzten Parkmeldung steht weiter unten. Sein Wert bleibt gleich."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A place with a closure in its latest park alert ranks lower. Its score stays the same."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un lugar con un cierre en su último aviso del parque baja en la lista. Su índice no cambia."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un lieu avec une fermeture dans sa dernière alerte de parc est classé plus bas. Son indice reste le même."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最新の公園のお知らせに閉鎖がある場所は、順位が下がります。スコアは変わりません。"
+          }
+        }
+      }
+    },
     "A quiet sky tonight": {
       "extractionState": "manual",
       "localizations": {
@@ -15374,41 +15409,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "都市を選択"
-          }
-        }
-      }
-    },
-    "Choose a city, town or park": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wähle eine Stadt, einen Ort oder einen Park"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose a city, town or park"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elige una ciudad, pueblo o parque"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisissez une ville, un village ou un parc"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "都市、町、公園を選択"
           }
         }
       }
@@ -26859,41 +26859,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "4つの要素、最も弱い要素、そして評価の段階"
-          }
-        }
-      }
-    },
-    "From": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Von"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "From"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Desde"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Départ"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "出発地"
           }
         }
       }
@@ -39092,6 +39057,41 @@
         }
       }
     },
+    "Nights past the forecast are ranked on each place's usual clouds and the Moon. Check again as they come closer.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächte jenseits der Vorhersage werden nach der üblichen Bewölkung jedes Ortes und dem Mond gereiht. Schau wieder nach, wenn sie näher rücken."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights past the forecast are ranked on each place's usual clouds and the Moon. Check again as they come closer."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches más allá del pronóstico se clasifican según la nubosidad habitual de cada lugar y la Luna. Vuelve a mirar cuando se acerquen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nuits au-delà de la prévision sont classées selon la nébulosité habituelle de chaque lieu et la Lune. Revenez à mesure qu’elles approchent."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報の範囲を超える夜は、各場所のふだんの雲と月をもとに順位を付けています。近づいたらもう一度確認してください。"
+          }
+        }
+      }
+    },
     "Nights recorded: %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -44690,41 +44690,6 @@
         }
       }
     },
-    "One park's month, or the best park for each night you are free.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Monat eines Parks oder der beste Park für jede Nacht, in der du frei hast."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "One park's month, or the best park for each night you are free."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El mes de un parque, o el mejor parque para cada noche que tengas libre."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le mois d’un parc, ou le meilleur parc pour chaque nuit où vous êtes libre."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一つの公園の1か月、または空いている夜ごとのいちばんよい公園。"
-          }
-        }
-      }
-    },
     "Only the Moon, the planets and a few bright stars remain.": {
       "extractionState": "manual",
       "localizations": {
@@ -46661,6 +46626,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "行ける範囲のほかの公園"
+          }
+        }
+      }
+    },
+    "Other places, each at its best": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andere Orte, jeder in seiner besten Nacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other places, each at its best"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otros lugares, cada uno en su mejor noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autres lieux, chacun à son meilleur"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ほかの場所、それぞれのいちばんよい夜"
           }
         }
       }
@@ -49906,6 +49906,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "レンジャーによる夜空のプログラム"
+          }
+        }
+      }
+    },
+    "Ranked from the %lld places with the darkest skies nearest your starting point, of %lld in reach.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gereiht aus den %lld Orten mit dem dunkelsten Himmel nahe deinem Ausgangspunkt, von %lld in Reichweite."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ranked from the %lld places with the darkest skies nearest your starting point, of %lld in reach."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clasificado entre los %lld lugares de cielo más oscuro cercanos a tu punto de partida, de %lld a tu alcance."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classé parmi les %lld lieux au ciel le plus noir près de votre point de départ, sur %lld à portée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行ける範囲の%2$lld か所のうち、出発地に近く空が最も暗い%1$lld か所から順位を付けています。"
+          }
+        }
+      }
+    },
+    "Ranking the nights in reach": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächte in Reichweite werden gereiht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ranking the nights in reach"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clasificando las noches a tu alcance"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classement des nuits à portée"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行ける範囲の夜を順位付けしています"
           }
         }
       }
@@ -60498,6 +60568,41 @@
         }
       }
     },
+    "The %lld best of %lld places in reach.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die %lld besten von %lld Orten in Reichweite."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The %lld best of %lld places in reach."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los %lld mejores de %lld lugares a tu alcance."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les %lld meilleurs des %lld lieux à portée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行ける範囲の%2$lld か所のうち、上位%1$lld か所です。"
+          }
+        }
+      }
+    },
     "The %lld parks with the darkest nights this week, of %lld %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -62072,6 +62177,41 @@
         }
       }
     },
+    "The best nights in reach this month, one park's month, or the best park for each night you are free.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die besten Nächte in Reichweite diesen Monat, der Monat eines Parks oder der beste Park für jede freie Nacht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The best nights in reach this month, one park's month, or the best park for each night you are free."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las mejores noches a tu alcance este mes, el mes de un parque o el mejor parque para cada noche libre."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les meilleures nuits à portée ce mois-ci, le mois d’un parc, ou le meilleur parc pour chaque nuit libre."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今月行ける範囲のよい夜、一つの公園の1か月、または空いている夜ごとのいちばんよい公園。"
+          }
+        }
+      }
+    },
     "The best of the next %lld nights: %@ at %@, %lld out of 100, %@. %@ Confirm park access before you go.": {
       "extractionState": "manual",
       "localizations": {
@@ -62757,6 +62897,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "中心部は%@の方向にある町の光の中に昇ります。"
+          }
+        }
+      }
+    },
+    "The darkest nights in reach over the next 30, one for each place.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die dunkelsten Nächte in Reichweite in den nächsten 30, eine für jeden Ort."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The darkest nights in reach over the next 30, one for each place."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches más oscuras a tu alcance en las próximas 30, una por cada lugar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nuits les plus noires à portée sur les 30 prochaines, une par lieu."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今後30夜のうち、行ける範囲でいちばん暗い夜を場所ごとに一つずつ。"
           }
         }
       }
@@ -72851,41 +73026,6 @@
         }
       }
     },
-    "Within": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Umkreis"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Within"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A menos de"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "À moins de"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "範囲"
-          }
-        }
-      }
-    },
     "Within about %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -75396,41 +75536,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "このデバイスがロックされている間、ジャーナルは開きません。ロックを解除してから、もう一度尋ねてください。"
-          }
-        }
-      }
-    },
-    "Your location": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dein Standort"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your location"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tu ubicación"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Votre position"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "現在地"
           }
         }
       }
