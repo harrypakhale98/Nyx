@@ -14,7 +14,7 @@ nonisolated struct ScoreEngine: ScoreProviding {
     /// astronomy, the cloud basis, the caps) that can move a score. Apple Watch compares it, with the
     /// bundled parks and usual clouds (`WatchContext.bundledData`), and says when its Nyx and the
     /// iPhone's would score the same night differently.
-    static let rulesVersion = 1
+    static let rulesVersion = 2
     /// Four parts are added, then the weakest link caps the sum.
     ///
     /// **Parts**: 40 moon + 25 clouds + 20 Bortle + 15 duration.
@@ -29,6 +29,11 @@ nonisolated struct ScoreEngine: ScoreProviding {
     /// **Caps** (the score is the lowest of the sum and each cap; `DarknessScore.limit` names the
     /// one that binds, so the breakdown can say it in plain words):
     /// - Darkness: no true darkness caps at 39 (Poor), lifting smoothly over the first three hours.
+    /// - Moonlight: 100 − 61 × moonlight^(2/3), the same moonlight the Moon's points use. No Moon
+    ///   caps nothing; a full Moon high through the dark hours brightens the sky about as much as a
+    ///   Bortle 7 town and caps near 39, as the sky-glow cap does there; a first-quarter Moon up for
+    ///   the evening keeps a night out of Pristine. Rules version 2 (2026-10-20); before it a full
+    ///   Moon at a dark park could read Good.
     /// - Clouds: 100 − 0.9 × cloud% (overcast 10, 80% 28, 50% 55, 30% 73, 10% 91). Additive clouds
     ///   alone could never pull a moonless desert night below Good; a cap can.
     /// - Sky glow: Bortle 1–2 100, 3 89, 4 84, 5 74, 6 59, 7 and above 39. "Pristine" needs a
@@ -45,8 +50,9 @@ nonisolated struct ScoreEngine: ScoreProviding {
         let length = 15 * min(1,max(0,sky.darkHours)/10)
         let divisor = cloudPoints == nil ? 0.75 : 1.0
         let sum = max(0, Int(((moon+(cloudPoints ?? 0)+glow+length)/divisor).rounded()))
-        // In order of precedence on a tie: the darkness first, then the clouds, smoke and glow.
-        let caps: [ScoreLimit] = [.darkness(Self.cap(darkHours: sky.darkHours)), cloud.map { .clouds(Self.cloudCap($0)) },
+        // In order of precedence on a tie: the darkness and the Moon first (both fixed by the sky, so the
+        // named cap does not change when a forecast arrives), then the clouds, smoke and glow.
+        let caps: [ScoreLimit] = [.darkness(Self.cap(darkHours: sky.darkHours)), .moonlight(Self.moonCap(light)), cloud.map { .clouds(Self.cloudCap($0)) },
                                   aerosol.flatMap(Self.smokeCap).map { .smoke($0) }, .skyGlow(Self.glowCap(bortle: bortle))].compactMap { $0 }
         let binding = caps.filter { $0.cap<sum }.min { $0.cap<$1.cap }
         return DarknessScore(value: binding?.cap ?? sum, moonPoints: moon/divisor, cloudPoints: cloudPoints,
@@ -56,6 +62,11 @@ nonisolated struct ScoreEngine: ScoreProviding {
     static func cap(darkHours: Double) -> Int {
         guard darkHours.isFinite, darkHours>0 else { return 39 }
         return min(100, Int((39 + 61*darkHours/3).rounded(.down)))
+    }
+    /// The highest score a night's moonlight allows (0 no Moon, 1 a full Moon at the zenith all night).
+    static func moonCap(_ moonlight: Double) -> Int {
+        guard moonlight.isFinite else { return 100 }
+        return Int((100 - 61*pow(min(1, max(0, moonlight)), 2.0/3)).rounded())
     }
     /// The highest score a night can reach under `cloud` percent cover.
     static func cloudCap(_ cloud: Double) -> Int { Int((100-0.9*min(100,max(0,cloud))).rounded()) }

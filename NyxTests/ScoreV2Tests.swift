@@ -36,6 +36,31 @@ import Testing
         } } }
         #expect([100.0, 80, 50, 30, 10].map(ScoreEngine.cloudCap) == [10, 28, 55, 73, 91])
     }
+    /// Moonlight is a weakest link like clouds: a full Moon high through the dark hours is a town's
+    /// sky, never Good; no Moon caps nothing; the cap only falls as moonlight rises.
+    @Test func brightMoonCapsTheScore() {
+        #expect([0.0, 0.08, 0.52, 1].map(ScoreEngine.moonCap) == [100, 89, 61, 39])
+        let full = scoring.score(sky: sky(moonlight: 1, dark: 10, illumination: 1), bortle: 1, cloudCover: 0)
+        #expect(full.value == 39)
+        #expect(full.limit == .moonlight(39))
+        #expect(full.limit?.sentence(tonight: true) == String(localized: "Moonlight limits tonight to 39."))
+        #expect(scoring.score(sky: sky(moonlight: 0, dark: 10), bortle: 1, cloudCover: 0).limit == nil)
+        let caps = stride(from: 0.0, through: 1, by: 0.01).map(ScoreEngine.moonCap)
+        #expect(zip(caps, caps.dropFirst()).allSatisfy { $0 >= $1 })
+    }
+    /// Real nights: Death Valley under the full Moon of October 26, 2026 is Fair at best, a
+    /// first-quarter evening is not Pristine, and the new Moon of December 9 is untouched.
+    @Test func realMoonlitNightsReadHonestly() throws {
+        let deva = try park("deva")
+        let fullMoon = scoring.score(sky: engine.conditions(for: deva, on: try evening(deva, "2026-10-26")), bortle: deva.bortleEstimate, cloudCover: 0)
+        #expect(fullMoon.value < 60)
+        if case .moonlight = fullMoon.limit {} else { Issue.record("expected a moonlight limit, got \(String(describing: fullMoon.limit))") }
+        let quarter = scoring.score(sky: engine.conditions(for: deva, on: try evening(deva, "2026-11-17")), bortle: deva.bortleEstimate, cloudCover: 0)
+        #expect(quarter.value < 90)
+        let newMoon = scoring.score(sky: engine.conditions(for: deva, on: try evening(deva, "2026-12-09")), bortle: deva.bortleEstimate, cloudCover: 0)
+        #expect(newMoon.value >= 90)
+        #expect(newMoon.limit == nil)
+    }
     /// Every real park, a month of nights, overcast: never Fair or better than 10.
     @Test func realOvercastNightsArePoor() throws {
         for park in parks {

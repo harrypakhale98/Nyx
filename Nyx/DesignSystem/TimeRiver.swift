@@ -377,7 +377,10 @@ struct TimeRiver: View {
     }
     private func agreementSpoken(_ night:Night)->String? {
         guard let outlook=outlooks[night.id], let agreement=outlook.agreement else { return nil }
-        guard agreement.band != .agree, let range=outlook.scoreRange, range.upperBound>range.lowerBound else { return String(localized:"Forecast models agree.") }
+        guard agreement.band != .agree else { return String(localized:"Forecast models agree.") }
+        // Models that differ on the clouds can still give one score when another cap (the Moon, sky
+        // glow) holds the night lower: then the clouds are what differ, and the river says so.
+        guard let range=outlook.scoreRange, range.upperBound>range.lowerBound else { return agreement.sentence(tonight:false) }
         return agreement.band == .roughly ? String(localized:"Forecast models roughly agree; the score could be \(range.lowerBound) to \(range.upperBound).")
             : String(localized:"Forecast models disagree; the score could be \(range.lowerBound) to \(range.upperBound).")
     }
