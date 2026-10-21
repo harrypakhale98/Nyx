@@ -327,8 +327,7 @@ struct TonightView: View {
             // Only the exceptions (no forecast yet, an early look); a full forecast is the norm and goes unsaid.
             // The gauge speaks this line, so VoiceOver does not hear it twice.
             if let basis { Text(basis).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true) }
-            // The dial's range mark in words, as the share card and the river say it (the gauge speaks it).
-            if let range { Text(ShareCard.rangeLine(range)).font(.caption).monospacedDigit().foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true) }
+            skyLine(night,range:range)
             // A forecast more than six hours old says when it is from.
             let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { Date.now.timeIntervalSince($0)>6*3600 ? $0 : nil } : nil
             // A place the Park Service does not run: Nyx cannot see its closures, and says so.
@@ -353,6 +352,30 @@ struct TonightView: View {
             nudge(park:park,tonight:night)
             fieldOffer(best:park)
         }.frame(maxWidth:.infinity)
+    }
+    /// One sky line under the dial, the first that applies: the forecast models disagreeing (said
+    /// first, because the best window rests on the same clouds), then a clear, dark stretch that is
+    /// only part of the night (a Moon up all evening, cloud clearing late), else the models' range
+    /// in words, as the share card and the river say it (the gauge speaks the range).
+    @ViewBuilder private func skyLine(_ night:Night,range:ClosedRange<Int>?)->some View {
+        if let agreement=model.outlook(night)?.agreement, agreement.band == .disagree {
+            Text(agreement.sentence(tonight:true)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+                .fixedSize(horizontal:false,vertical:true).padding(.horizontal,12)
+        } else if let window=partialWindow(night) {
+            // At accessibility sizes the glyph would take a column of its own: the words alone.
+            Label { Text(window.line(park:night.park)).fixedSize(horizontal:false,vertical:true) } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:"sparkles").accessibilityHidden(true) } }
+                .font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.center).padding(.horizontal,12)
+                .accessibilityElement(children:.combine)
+        } else if let range {
+            Text(ShareCard.rangeLine(range)).font(.caption).monospacedDigit().foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true)
+        }
+    }
+    /// Tonight's best clear window when it is still ahead and covers at most three quarters of the
+    /// true darkness: a score earned late in the night must not read as an evening's promise.
+    private func partialWindow(_ night:Night)->ClearWindow? {
+        guard let window=model.clearWindow(night), window.interval.end>Date.now, night.sky.darkHours>0,
+              window.interval.duration<=0.75*night.sky.darkHours*3600 else { return nil }
+        return window
     }
     private func forecastAsOf(_ park:Park,_ updated:Date)->some View {
         Text("Forecast as of \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)

@@ -37,7 +37,16 @@ struct SettingsView:View {
                 NavigationLink("Sound and touch") { SoundAndTouchView() }
                 Text("Hear a night as sound, feel the Moon's phase, and see how Nyx adapts to VoiceOver, Voice Control and your display settings.").font(.caption).foregroundStyle(palette.muted)
             }.listRowBackground(palette.panel)
-            Section("Privacy and data") { NavigationLink("Your privacy") { PrivacyView() };NavigationLink("About the data") { AboutDataView() } }.listRowBackground(palette.panel)
+            Section("Privacy and data") {
+                // The data switches live on the privacy page; the row says so, since they decide what Nyx can show.
+                NavigationLink { PrivacyView() } label:{
+                    VStack(alignment:.leading,spacing:4) {
+                        Text("Your privacy")
+                        Text("Choose what Nyx asks the internet for: cloud forecasts, smoke and haze, the aurora forecast, and park alerts and programs. Each has its own switch.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    }.padding(.vertical,4)
+                }
+                NavigationLink("About the data") { AboutDataView() }
+            }.listRowBackground(palette.panel)
             Section("About the sky") {
                 NavigationLink { LearnView() } label:{
                     VStack(alignment:.leading,spacing:4) {
@@ -83,7 +92,7 @@ struct RemindersExplainer:View {
     @Environment(\.dismiss) private var dismiss
     let decided:(Bool)->Void
     var body:some View {
-        PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Nyx can remind you about promising nights at saved parks. These notifications are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access.",action:"Enable reminders") {
+        PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Nyx can remind you the evening before a Pristine night, 90 or higher, at a park or place you save or a spot you add: only with a full cloud forecast, up to five days ahead, and at most once a week for each place. It can also mark the peak of a major meteor shower. Reminders are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access.",action:"Enable reminders") {
             dismiss()
             Task { decided(await NotificationScheduler().requestAuthorization()) }
         }
@@ -188,7 +197,7 @@ struct AboutDataView:View {
     var body:some View {
         ScrollView { VStack(alignment:.leading,spacing:24) {
             Text("An honest view of the sky").font(.system(.largeTitle,design:.serif))
-            block("The score","Moonlight contributes 40%, clouds 25%, sky glow (estimated) 20%, and true darkness 15%. Moonlight follows the Moon's phase and its height through true darkness (Krisciunas and Schaefer, 1991), so a low crescent costs less than a high gibbous Moon. The four parts are added, then the weakest link caps the sum: clouds hold a night to 100 minus 0.9 points for each percent of cloud (overcast at most 10, half cloud 55); sky glow holds a Bortle 3 park to 89, Bortle 4 to 84, Bortle 5 to 74, Bortle 6 to 59 and brighter skies to 39, so only Bortle 2 or darker can read Pristine; heavy smoke or haze (aerosol optical depth 0.5 or more) holds a night to 59, and lighter smoke (0.25 to 0.5) to 74. No true darkness caps a night below 40, and that cap lifts gradually over the first three hours of true darkness. The breakdown names the cap that applies. When scores tie, parks with darker skies in NASA's satellite night lights come first, then longer true darkness.")
+            block("The score","Moonlight contributes 40%, clouds 25%, sky glow (estimated) 20%, and true darkness 15%. Moonlight follows the Moon's phase and its height through true darkness (Krisciunas and Schaefer, 1991), so a low crescent costs less than a high gibbous Moon. The four parts are added, then the weakest link caps the sum: clouds hold a night to 100 minus 0.9 points for each percent of cloud (overcast at most 10, half cloud 55); sky glow holds a Bortle 3 park to 89, Bortle 4 to 84, Bortle 5 to 74, Bortle 6 to 59 and brighter skies to 39, so only Bortle 2 or darker can read Pristine; heavy smoke or haze (aerosol optical depth 0.5 or more) holds a night to 59, and lighter smoke (0.25 to 0.5) to 74. Moonlight caps it as well, at 100 minus 61 times the moonlight to the power of two thirds, so a full Moon high through true darkness holds a night near 40, as a town's sky glow would, and a half Moon up for the evening keeps a night out of Pristine. No true darkness caps a night below 40, and that cap lifts gradually over the first three hours of true darkness. The breakdown names the cap that applies. When scores tie, parks with darker skies in NASA's satellite night lights come first, then longer true darkness.")
             // Shown only after iOS has delivered a real MetricKit report; nothing is estimated in its place.
             if let reading=LuminanceProof.current {
                 VStack(alignment:.leading,spacing:10) {
