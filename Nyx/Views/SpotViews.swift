@@ -99,9 +99,7 @@ struct SpotPanel: View {
             Button("Delete spot",role:.destructive) { delete() }
             Button("Cancel",role:.cancel) {}
         } message:{ Text("It leaves your saved places, widgets and reminders. Journal entries written there keep their words and photos.") }
-        .alert("Unable to save",isPresented:$failed) { Button("OK",role:.cancel) {} } message:{
-            Text(model.journalUnavailable ? "Saved spots are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.")
-        }
+        .parkSaveAlert(isPresented:$failed,journalUnavailable:model.journalUnavailable)
     }
     @ViewBuilder private var editActions: some View {
         Button { newName=spot.name; renaming=true } label:{ Label("Rename",systemImage:"pencil").font(.footnote.weight(.medium)).frame(minHeight:44) }

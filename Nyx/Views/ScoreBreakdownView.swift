@@ -97,7 +97,7 @@ struct ScoreBreakdownView: View {
         case .usual:
             // "No cloud forecast yet." or "Cloud forecast unavailable.", as every surface says it.
             guard let usual=night.usualCloud else { return Sentences.join([night.noForecastSentence ?? "",String(localized:"This score counts the Moon and darkness only.")]) }
-            return Sentences.join([night.noForecastSentence ?? "",String(localized:"Usual clouds here this month: \(Int(usual.rounded()))%.")])
+            return Sentences.join([night.noForecastSentence ?? "",String(localized:"Usual clouds here at this time of year: \(Int(usual.rounded()))%.")])
         }
     }
     private var moonFact:String {

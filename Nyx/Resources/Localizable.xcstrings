@@ -14224,37 +14224,37 @@
         }
       }
     },
-    "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5, a record of past weather rebuilt from observations, averaged over each night's true darkness at the park's coordinates. Nights without a forecast are scored with these usual clouds and say so (\"No cloud forecast yet\"), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Contains modified Copernicus Climate Change Service information (2026), from ERA5, 2015 to 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
+    "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5, a record of past weather rebuilt from observations, averaged over each night's true darkness at the park's coordinates. A night uses its month's value on the 15th, moving gradually to the next month's, so scores do not jump on the 1st. Nights without a forecast are scored with these usual clouds and say so (\"No cloud forecast yet\"), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Contains modified Copernicus Climate Change Service information (2026), from ERA5, 2015 to 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jenseits der Vorhersage weiß Nyx, wie bewölkt die Nächte jedes Parks in jedem Monat üblicherweise sind: zehn Jahre (2015 bis 2024) ERA5, eine aus Beobachtungen rekonstruierte Aufzeichnung des vergangenen Wetters, gemittelt über die echte Dunkelheit jeder Nacht an den Koordinaten des Parks. Nächte ohne Vorhersage werden mit dieser üblichen Bewölkung bewertet und sagen das auch („Noch keine Wolkenvorhersage“), damit ein Park mit meist bedeckten Winternächten nicht mit einer Wüste gleichzieht und eine Nacht, die niemand vorhersagen kann, nie als klar gilt. Sie sagen auch, wie oft die Nächte dieses Monats überwiegend klar sind (unter 30 % Bewölkung). Es ist ein langjähriger Mittelwert, nie eine Vorhersage. Enthält veränderte Informationen des Copernicus Climate Change Service (2026), aus ERA5, 2015 bis 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), gelesen aus seiner stündlichen Zeitreihe (DOI 10.24381/1cf1ad76) und von Nyx über die echte Dunkelheit jeder Nacht gemittelt. Lizenziert unter CC BY 4.0. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
+            "value": "Jenseits der Vorhersage weiß Nyx, wie bewölkt die Nächte jedes Parks in jedem Monat üblicherweise sind: zehn Jahre (2015 bis 2024) ERA5, eine aus Beobachtungen rekonstruierte Aufzeichnung des vergangenen Wetters, gemittelt über die echte Dunkelheit jeder Nacht an den Koordinaten des Parks. Eine Nacht nutzt am 15. den Wert ihres Monats und nähert sich schrittweise dem des nächsten Monats, damit die Werte am 1. nicht springen. Nächte ohne Vorhersage werden mit dieser üblichen Bewölkung bewertet und sagen das auch („Noch keine Wolkenvorhersage“), damit ein Park mit meist bedeckten Winternächten nicht mit einer Wüste gleichzieht und eine Nacht, die niemand vorhersagen kann, nie als klar gilt. Sie sagen auch, wie oft die Nächte dieses Monats überwiegend klar sind (unter 30 % Bewölkung). Es ist ein langjähriger Mittelwert, nie eine Vorhersage. Enthält veränderte Informationen des Copernicus Climate Change Service (2026), aus ERA5, 2015 bis 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), gelesen aus seiner stündlichen Zeitreihe (DOI 10.24381/1cf1ad76) und von Nyx über die echte Dunkelheit jeder Nacht gemittelt. Lizenziert unter CC BY 4.0. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5, a record of past weather rebuilt from observations, averaged over each night's true darkness at the park's coordinates. Nights without a forecast are scored with these usual clouds and say so (\"No cloud forecast yet\"), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Contains modified Copernicus Climate Change Service information (2026), from ERA5, 2015 to 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
+            "value": "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5, a record of past weather rebuilt from observations, averaged over each night's true darkness at the park's coordinates. A night uses its month's value on the 15th, moving gradually to the next month's, so scores do not jump on the 1st. Nights without a forecast are scored with these usual clouds and say so (\"No cloud forecast yet\"), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Contains modified Copernicus Climate Change Service information (2026), from ERA5, 2015 to 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Más allá del pronóstico, Nyx sabe cuán nubladas suelen ser las noches de cada parque en cada mes: diez años (2015 a 2024) de ERA5, un registro del clima pasado reconstruido a partir de observaciones, promediados sobre la oscuridad total de cada noche en las coordenadas del parque. Las noches sin pronóstico se calculan con estas nubes habituales y lo indican (“Aún sin pronóstico de nubes”), para que un parque cuyas noches de invierno suelen estar cubiertas no empate con un desierto y una noche que nadie puede pronosticar nunca se trate como despejada. También indican con qué frecuencia las noches de ese mes están mayormente despejadas (menos del 30% de nubes). Es un promedio a largo plazo, nunca un pronóstico. Contiene información modificada del Servicio de Cambio Climático de Copernicus (2026), de ERA5, 2015 a 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), leída de su serie horaria (DOI 10.24381/1cf1ad76) y promediada por Nyx sobre la oscuridad total de cada noche. Con licencia CC BY 4.0. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
+            "value": "Más allá del pronóstico, Nyx sabe cuán nubladas suelen ser las noches de cada parque en cada mes: diez años (2015 a 2024) de ERA5, un registro del clima pasado reconstruido a partir de observaciones, promediados sobre la oscuridad total de cada noche en las coordenadas del parque. Cada noche usa el valor de su mes el día 15 y avanza poco a poco hacia el del mes siguiente, así que los índices no saltan el día 1. Las noches sin pronóstico se calculan con estas nubes habituales y lo indican (“Aún sin pronóstico de nubes”), para que un parque cuyas noches de invierno suelen estar cubiertas no empate con un desierto y una noche que nadie puede pronosticar nunca se trate como despejada. También indican con qué frecuencia las noches de ese mes están mayormente despejadas (menos del 30% de nubes). Es un promedio a largo plazo, nunca un pronóstico. Contiene información modificada del Servicio de Cambio Climático de Copernicus (2026), de ERA5, 2015 a 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), leída de su serie horaria (DOI 10.24381/1cf1ad76) y promediada por Nyx sobre la oscuridad total de cada noche. Con licencia CC BY 4.0. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Au-delà de la prévision, Nyx sait à quel point les nuits de chaque parc sont habituellement nuageuses, mois par mois : dix ans (2015 à 2024) d’ERA5, une archive de la météo passée reconstituée à partir d’observations, moyennés sur l’obscurité totale de chaque nuit aux coordonnées du parc. Les nuits sans prévision sont notées avec cette nébulosité habituelle et le disent (« Pas encore de prévision de nuages »), afin qu’un parc dont les nuits d’hiver sont surtout couvertes ne fasse pas jeu égal avec un désert, et qu’une nuit que personne ne peut prévoir ne soit jamais traitée comme dégagée. Elles indiquent aussi à quelle fréquence les nuits de ce mois sont plutôt dégagées (moins de 30 % de nuages). C’est une moyenne à long terme, jamais une prévision. Contient des informations modifiées du Copernicus Climate Change Service (2026), issues d’ERA5, 2015 à 2024 (Hersbach et al. 2020 ; DOI 10.24381/cds.adbb2d47), lu dans sa série horaire (DOI 10.24381/1cf1ad76) et moyenné par Nyx sur l’obscurité totale de chaque nuit. Sous licence CC BY 4.0. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent."
+            "value": "Au-delà de la prévision, Nyx sait à quel point les nuits de chaque parc sont habituellement nuageuses, mois par mois : dix ans (2015 à 2024) d’ERA5, une archive de la météo passée reconstituée à partir d’observations, moyennés sur l’obscurité totale de chaque nuit aux coordonnées du parc. Une nuit utilise la valeur de son mois le 15 et glisse peu à peu vers celle du mois suivant, si bien que les indices ne sautent pas le 1er. Les nuits sans prévision sont notées avec cette nébulosité habituelle et le disent (« Pas encore de prévision de nuages »), afin qu’un parc dont les nuits d’hiver sont surtout couvertes ne fasse pas jeu égal avec un désert, et qu’une nuit que personne ne peut prévoir ne soit jamais traitée comme dégagée. Elles indiquent aussi à quelle fréquence les nuits de ce mois sont plutôt dégagées (moins de 30 % de nuages). C’est une moyenne à long terme, jamais une prévision. Contient des informations modifiées du Copernicus Climate Change Service (2026), issues d’ERA5, 2015 à 2024 (Hersbach et al. 2020 ; DOI 10.24381/cds.adbb2d47), lu dans sa série horaire (DOI 10.24381/1cf1ad76) et moyenné par Nyx sur l’obscurité totale de chaque nuit. Sous licence CC BY 4.0. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "予報の範囲を超えた夜については、各公園の夜が月ごとにどのくらい曇りやすいかをNyxは知っています。過去の観測から再構築された過去の天気の記録ERA5の10年分（2015〜2024年）を、公園の座標で各夜の完全に暗い時間について平均したものです。予報のない夜はこの平年の雲量でスコアを出し、そのことを表示します（「雲予報はまだありません」）。そのため、冬の夜がほとんど曇っている公園が砂漠と同点になることはなく、誰にも予報できない夜が晴れとして扱われることもありません。その月の夜がおおむね晴れる（雲量30%未満）頻度も示します。これは長期の平均で、予報ではありません。Copernicus Climate Change Serviceの情報（2026）を加工して含みます。ERA5、2015〜2024年（Hersbach et al. 2020、DOI 10.24381/cds.adbb2d47）。毎時の時系列（DOI 10.24381/1cf1ad76）から読み取り、Nyxが各夜の完全に暗い時間で平均しています。CC BY 4.0でライセンスされています。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。"
+            "value": "予報の範囲を超えた夜については、各公園の夜が月ごとにどのくらい曇りやすいかをNyxは知っています。過去の観測から再構築された過去の天気の記録ERA5の10年分（2015〜2024年）を、公園の座標で各夜の完全に暗い時間について平均したものです。各夜は15日にその月の値を使い、翌月の値へ少しずつ移っていくため、1日にスコアが急に変わることはありません。予報のない夜はこの平年の雲量でスコアを出し、そのことを表示します（「雲予報はまだありません」）。そのため、冬の夜がほとんど曇っている公園が砂漠と同点になることはなく、誰にも予報できない夜が晴れとして扱われることもありません。その月の夜がおおむね晴れる（雲量30%未満）頻度も示します。これは長期の平均で、予報ではありません。Copernicus Climate Change Serviceの情報（2026）を加工して含みます。ERA5、2015〜2024年（Hersbach et al. 2020、DOI 10.24381/cds.adbb2d47）。毎時の時系列（DOI 10.24381/1cf1ad76）から読み取り、Nyxが各夜の完全に暗い時間で平均しています。CC BY 4.0でライセンスされています。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。"
           }
         }
       }
@@ -26828,6 +26828,111 @@
         }
       }
     },
+    "Forget": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vergessen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forget"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Olvidar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oublier"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "消去"
+          }
+        }
+      }
+    },
+    "Forget these nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Nächte vergessen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forget these nights"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Olvidar estas noches"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oublier ces nuits"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "これらの夜を消去"
+          }
+        }
+      }
+    },
+    "Forget these nights?": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Nächte vergessen?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forget these nights?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Olvidar estas noches?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oublier ces nuits ?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "これらの夜を消去しますか？"
+          }
+        }
+      }
+    },
     "Four parts, the weakest link and the bands": {
       "extractionState": "manual",
       "localizations": {
@@ -31363,6 +31468,76 @@
         }
       }
     },
+    "Last night at %@, Nyx said %lld with %lld%% cloud. Looking back, the weather models put the cloud at %lld%%, and the score stays %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Nacht in %1$@ sagte Nyx %2$lld bei %3$lld%% Bewölkung. Im Rückblick setzen die Wettermodelle die Bewölkung bei %4$lld%% an, und der Wert bleibt bei %5$lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last night at %@, Nyx said %lld with %lld%% cloud. Looking back, the weather models put the cloud at %lld%%, and the score stays %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anoche en %1$@, Nyx dijo %2$lld con %3$lld%% de nubes. En retrospectiva, los modelos meteorológicos sitúan las nubes en %4$lld%%, y el índice se mantiene en %5$lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hier soir à %1$@, Nyx annonçait %2$lld avec %3$lld %% de nuages. Avec le recul, les modèles météo placent les nuages à %4$lld %%, et l’indice reste à %5$lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "昨夜の%1$@について、Nyxは雲量%3$lld%%で%2$lld点としていました。振り返ると、気象モデルは雲量を%4$lld%%としており、スコアは%5$lld点のままです。"
+          }
+        }
+      }
+    },
+    "Last night at %@, Nyx said %lld with %lld%% cloud. Looking back, the weather models put the cloud at %lld%%: about %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Nacht in %1$@ sagte Nyx %2$lld bei %3$lld%% Bewölkung. Im Rückblick setzen die Wettermodelle die Bewölkung bei %4$lld%% an: etwa %5$lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last night at %@, Nyx said %lld with %lld%% cloud. Looking back, the weather models put the cloud at %lld%%: about %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anoche en %1$@, Nyx dijo %2$lld con %3$lld%% de nubes. En retrospectiva, los modelos meteorológicos sitúan las nubes en %4$lld%%: unos %5$lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hier soir à %1$@, Nyx annonçait %2$lld avec %3$lld %% de nuages. Avec le recul, les modèles météo placent les nuages à %4$lld %% : environ %5$lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "昨夜の%1$@について、Nyxは雲量%3$lld%%で%2$lld点としていました。振り返ると、気象モデルは雲量を%4$lld%%としており、スコアは約%5$lld点です。"
+          }
+        }
+      }
+    },
     "Last quarter": {
       "extractionState": "manual",
       "localizations": {
@@ -32483,37 +32658,37 @@
         }
       }
     },
-    "Local reminders for saved parks with scores of 90 or higher. Forecasts may change. Upcoming nights are recalculated whenever Nyx opens.": {
+    "Local reminders for the parks and places you save, and the spots you add, when a night scores 90 or higher. Forecasts may change. Upcoming nights are recalculated whenever Nyx opens.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lokale Erinnerungen für gespeicherte Parks mit Werten ab 90. Vorhersagen können sich ändern. Kommende Nächte werden bei jedem Öffnen von Nyx neu berechnet."
+            "value": "Lokale Erinnerungen für gespeicherte Parks und Orte und hinzugefügte Plätze, wenn eine Nacht 90 oder mehr erreicht. Vorhersagen können sich ändern. Die kommenden Nächte werden bei jedem Öffnen von Nyx neu berechnet."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Local reminders for saved parks with scores of 90 or higher. Forecasts may change. Upcoming nights are recalculated whenever Nyx opens."
+            "value": "Local reminders for the parks and places you save, and the spots you add, when a night scores 90 or higher. Forecasts may change. Upcoming nights are recalculated whenever Nyx opens."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Recordatorios locales para parques guardados con un índice de 90 o más. Los pronósticos pueden cambiar. Las próximas noches se recalculan cada vez que abres Nyx."
+            "value": "Recordatorios locales para los parques y lugares que guardas y los sitios que añades, cuando una noche llega a 90 o más. Los pronósticos pueden cambiar. Las próximas noches se recalculan cada vez que abres Nyx."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rappels locaux pour les parcs enregistrés dont l’indice atteint 90 ou plus. Les prévisions peuvent changer. Les nuits à venir sont recalculées à chaque ouverture de Nyx."
+            "value": "Rappels locaux pour les parcs et lieux enregistrés et les lieux ajoutés, quand une nuit atteint 90 ou plus. Les prévisions peuvent changer. Les nuits à venir sont recalculées à chaque ouverture de Nyx."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "スコアが90以上になる保存した公園についての、ローカルのリマインダーです。予報は変わることがあります。この先の夜は、Nyxを開くたびに計算し直します。"
+            "value": "保存した公園や場所、追加したスポットで、夜のスコアが90以上になるときのローカルのリマインダーです。予報は変わることがあります。今後の夜はNyxを開くたびに再計算されます。"
           }
         }
       }
@@ -32924,6 +33099,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "参照したデータ"
+          }
+        }
+      }
+    },
+    "Looking back": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rückblick"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Looking back"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En retrospectiva"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avec le recul"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "振り返り"
           }
         }
       }
@@ -42273,13 +42483,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit Immaculée, de 90 ou plus, dans un parc ou un lieu enregistré, ou un lieu ajouté : seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance et au plus une fois par semaine pour chaque lieu. Nyx peut aussi signaler le maximum d’une grande pluie d’étoiles filantes. Les rappels sont programmés sur cet iPad. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
+                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit Immaculée, de 90 ou plus, dans un parc ou un lieu enregistré, ou un lieu ajouté : seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance et au plus une fois par semaine pour chaque lieu. Nyx peut aussi signaler le maximum d’une grande pluie d’étoiles filantes. Les rappels sont programmés sur cet iPad. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit Immaculée, de 90 ou plus, dans un parc ou un lieu enregistré, ou un lieu ajouté : seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance et au plus une fois par semaine pour chaque lieu. Nyx peut aussi signaler le maximum d’une grande pluie d’étoiles filantes. Les rappels sont programmés sur cet iPhone. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
+                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit Immaculée, de 90 ou plus, dans un parc ou un lieu enregistré, ou un lieu ajouté : seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance et au plus une fois par semaine pour chaque lieu. Nyx peut aussi signaler le maximum d’une grande pluie d’étoiles filantes. Les rappels sont programmés sur cet iPhone. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
                 }
               }
             }
@@ -43041,6 +43251,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyxは、National Park Service、NASA、DarkSky Internationalとは提携しておらず、これらの組織から推奨を受けているものでもありません。"
+          }
+        }
+      }
+    },
+    "Nyx lets go of what it said about past nights and what the weather models said afterwards. Your journal is not touched.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx vergisst, was es zu vergangenen Nächten gesagt hat und was die Wettermodelle danach sagten. Dein Journal bleibt unberührt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx lets go of what it said about past nights and what the weather models said afterwards. Your journal is not touched."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx olvida lo que dijo sobre noches pasadas y lo que dijeron después los modelos meteorológicos. Tu diario no se toca."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx oublie ce qu’il a dit des nuits passées et ce que les modèles météo ont dit ensuite. Votre journal n’est pas touché."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "過去の夜についてNyxが示した内容と、その後に気象モデルが示した内容を消去します。ジャーナルは変更されません。"
           }
         }
       }
@@ -44220,37 +44465,37 @@
         }
       }
     },
-    "On the peak night of a major shower, when at least 20 an hour are expected at a saved park with the Moon down. At most one a night.": {
+    "On the peak night of a major shower, when at least 20 an hour are expected at a place you save with the Moon down. At most one a night.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "In der Maximumsnacht eines großen Meteorstroms, wenn in einem gespeicherten Park bei untergegangenem Mond mindestens 20 pro Stunde erwartet werden. Höchstens eine pro Nacht."
+            "value": "In der Höhepunktnacht eines großen Meteorstroms, wenn an einem gespeicherten Ort bei untergegangenem Mond mindestens 20 pro Stunde erwartet werden. Höchstens eine pro Nacht."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "On the peak night of a major shower, when at least 20 an hour are expected at a saved park with the Moon down. At most one a night."
+            "value": "On the peak night of a major shower, when at least 20 an hour are expected at a place you save with the Moon down. At most one a night."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "En la noche de máximo de una lluvia importante, cuando se esperan al menos 20 por hora en un parque guardado con la Luna oculta. Como máximo, uno por noche."
+            "value": "En la noche de máxima actividad de una gran lluvia de meteoros, cuando se esperan al menos 20 por hora en un lugar que guardas con la Luna bajo el horizonte. Como mucho uno por noche."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La nuit du maximum d’une grande pluie de météores, quand au moins 20 par heure sont attendus dans un parc enregistré avec la Lune couchée. Une au plus par nuit."
+            "value": "La nuit du maximum d’une grande pluie d’étoiles filantes, quand au moins 20 par heure sont attendues dans un lieu enregistré, Lune couchée. Au plus un par nuit."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "主要な流星群の極大の夜に、月が沈んでいて、保存した公園で1時間に20個以上が予想されるとき。1夜に1回までです。"
+            "value": "大きな流星群の極大夜に、保存した場所で月が沈んでいて1時間に20個以上が見込まれるときにお知らせします。1夜につき最大1件です。"
           }
         }
       }
@@ -53496,41 +53741,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存した場所を利用できません"
-          }
-        }
-      }
-    },
-    "Saved spots are kept with your journal, which could not be opened. Nothing was changed.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gespeicherte Plätze liegen bei deinem Journal, das nicht geöffnet werden konnte. Nichts wurde geändert."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved spots are kept with your journal, which could not be opened. Nothing was changed."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los sitios guardados se conservan con tu diario, que no se pudo abrir. No se cambió nada."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les lieux enregistrés sont conservés avec votre journal, qui n’a pas pu être ouvert. Rien n’a été modifié."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存したスポットはジャーナルと一緒に保管されていますが、ジャーナルを開けませんでした。何も変更されていません。"
           }
         }
       }
@@ -65856,6 +66066,41 @@
         }
       }
     },
+    "This is the weather models' own look back at recent hours, not a measurement from the ground.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das ist der eigene Rückblick der Wettermodelle auf die letzten Stunden, keine Messung am Boden."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is the weather models' own look back at recent hours, not a measurement from the ground."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es la propia revisión de las últimas horas por parte de los modelos meteorológicos, no una medición desde el suelo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "C’est le regard des modèles météo eux-mêmes sur les dernières heures, pas une mesure au sol."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "これは気象モデル自身による直近数時間の振り返りで、地上での観測ではありません。"
+          }
+        }
+      }
+    },
     "This is where you are now. If you save it, its rounded position is asked about like any spot's. If you don't, nothing is sent.": {
       "extractionState": "manual",
       "localizations": {
@@ -69136,41 +69381,6 @@
         }
       }
     },
-    "Unable to save": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sichern nicht möglich"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unable to save"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No se pudo guardar"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enregistrement impossible"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存できません"
-          }
-        }
-      }
-    },
     "Unavailable": {
       "extractionState": "manual",
       "localizations": {
@@ -70376,37 +70586,37 @@
         }
       }
     },
-    "Usual clouds here this month: %lld%%.": {
+    "Usual clouds here at this time of year: %lld%%.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Übliche Bewölkung hier in diesem Monat: %lld %%."
+            "value": "Übliche Bewölkung hier zu dieser Jahreszeit: %lld%%."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Usual clouds here this month: %lld%%."
+            "value": "Usual clouds here at this time of year: %lld%%."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nubosidad habitual aquí este mes: %lld%%."
+            "value": "Nubosidad habitual aquí en esta época del año: %lld%%."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nébulosité habituelle ici ce mois-ci : %lld %%."
+            "value": "Nébulosité habituelle ici à cette période de l’année : %lld %%."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今月のここの平年の雲量：%lld%%。"
+            "value": "この時期のこの場所のふだんの雲量：%lld%%。"
           }
         }
       }
@@ -73026,6 +73236,41 @@
         }
       }
     },
+    "Within 10 points on %lld of the last %lld nights Nyx answered.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Innerhalb von 10 Punkten in %1$lld der letzten %2$lld Nächte, die Nyx beantwortet hat."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Within 10 points on %lld of the last %lld nights Nyx answered."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A menos de 10 puntos en %1$lld de las últimas %2$lld noches que Nyx respondió."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À moins de 10 points sur %1$lld des %2$lld dernières nuits auxquelles Nyx a répondu."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxが答えた直近%2$lld夜のうち%1$lld夜で、差は10点以内でした。"
+          }
+        }
+      }
+    },
     "Within about %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -74182,41 +74427,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "National Park Serviceのキー"
-          }
-        }
-      }
-    },
-    "Your changes could not be stored. Try again when space is available.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deine Änderungen konnten nicht gesichert werden. Versuch es noch einmal, wenn wieder Speicher frei ist."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your changes could not be stored. Try again when space is available."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No se pudieron guardar tus cambios. Inténtalo de nuevo cuando haya espacio."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vos modifications n’ont pas pu être enregistrées. Réessayez quand de l’espace sera disponible."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "変更を保存できませんでした。空き容量ができたら、もう一度試してください。"
           }
         }
       }
@@ -79894,7 +80104,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lire l’indice d’obscurité\n\nL’indice d’obscurité répond à une seule question : à quel point le ciel sera-t-il noir et dégagé dans ce parc, cette nuit-là ? Il va de 0 à 100. Nyx le construit à partir de quatre composantes, puis le confronte à son maillon le plus faible.\n\nLes quatre composantes ont des poids fixes. La Lune compte pour 40 points : une nuit sans clair de lune pendant l’obscurité totale les obtient tous, et une pleine lune haute dans le ciel toute la nuit n’en obtient aucun. Les nuages comptent pour 25, en moyenne sur les heures d’obscurité totale. Le halo lumineux compte pour 20, d’après la classe de Bortle estimée du parc. La durée de l’obscurité totale compte pour 15, et dix heures ou plus les obtiennent tous. L’obscurité totale, c’est le moment où le Soleil est à plus de 18 degrés sous l’horizon et où le crépuscule a quitté le ciel.\n\nLa simple addition serait trompeuse : une nuit sans lune sous d’épais nuages atteindrait quand même un total honorable. L’indice ne dépasse donc jamais son maillon le plus faible. Les nuages le plafonnent : un ciel à moitié couvert limite une nuit à 55, un ciel entièrement couvert à 10. Le halo lumineux le plafonne : un parc Bortle 3 peut atteindre 89 au plus, si bien que seuls les ciels les plus noirs obtiennent Immaculée. De la fumée ou de la brume dans la prévision le plafonne à 74, ou à 59 quand elle est épaisse. Le clair de lune le plafonne aussi : une pleine lune haute pendant les heures sombres éclaire le ciel presque autant qu’une ville voisine et limite une nuit à 40 environ, et une demi-lune dans le ciel du soir tient une nuit hors d’Immaculée. Une nuit de moins de trois heures d’obscurité totale est plafonnée elle aussi, et une nuit qui n’en a pas du tout reste sous 40.\n\nPrenons une nuit. Un parc Bortle 2, un fin croissant de Lune qui se couche au crépuscule, neuf heures d’obscurité totale et une prévision de 40 % de nuages. Les composantes totalisent 86 : 40 pour la Lune, 15 pour les nuages, 17,5 pour le halo lumineux et 13,5 pour la durée. Mais 40 % de nuages plafonnent la nuit à 64 : l’indice est donc de 64, Bonne, et le détail indique que les nuages limitent la nuit à 64.\n\nLes nuages sont la composante la plus incertaine. Jusqu’à environ trois jours à l’avance, Nyx utilise pleinement la prévision de nuages. De là jusqu’à dix jours, il rapproche la prévision de la nébulosité habituelle du parc pour ce mois et qualifie la nuit de tendance, dessinée à moitié pleine dans Planifier. Au-delà de dix jours, une prévision apporte peu : l’indice repose alors sur la seule nébulosité habituelle, et la nuit est dessinée vide. Ces indices changeront à mesure que la nuit approchera.\n\nLes niveaux sont simples : à partir de 90, Immaculée ; de 75, Excellente ; de 60, Bonne ; de 40, Passable ; en dessous, Médiocre.\n\nCertaines choses échappent à l’indice. Il ne sait pas si la route vers votre point d’observation est ouverte : dans les parcs nationaux des États-Unis, Nyx affiche les alertes du Park Service à côté de l’indice, mais elles peuvent dater de plusieurs heures, et ailleurs il n’en a aucune. Il ne voit ni un parking éclairé, ni une lanterne dans un camping, ni une crête qui cache la partie du ciel pour laquelle vous êtes venu. Et il ne connaît pas vos yeux : le temps qu’ils ont eu pour s’adapter, ni ce qu’un écran lumineux a défait. Une nuit Bonne bien préparée peut valoir mieux qu’une nuit Excellente vécue dans la hâte."
+            "value": "Lire l’indice d’obscurité\n\nL’indice d’obscurité répond à une seule question : à quel point le ciel sera-t-il noir et dégagé dans ce parc, cette nuit-là ? Il va de 0 à 100. Nyx le construit à partir de quatre composantes, puis le confronte à son maillon le plus faible.\n\nLes quatre composantes ont des poids fixes. La Lune compte pour 40 points : une nuit sans clair de lune pendant l’obscurité totale les obtient tous, et une pleine lune haute dans le ciel toute la nuit n’en obtient aucun. Les nuages comptent pour 25, en moyenne sur les heures d’obscurité totale. Le halo lumineux compte pour 20, d’après la classe de Bortle estimée du parc. La durée de l’obscurité totale compte pour 15, et dix heures ou plus les obtiennent tous. L’obscurité totale, c’est le moment où le Soleil est à plus de 18 degrés sous l’horizon et où le crépuscule a quitté le ciel.\n\nLa simple addition serait trompeuse : une nuit sans lune sous d’épais nuages atteindrait quand même un total honorable. L’indice ne dépasse donc jamais son maillon le plus faible. Les nuages le plafonnent : un ciel à moitié couvert limite une nuit à 55, un ciel entièrement couvert à 10. Le halo lumineux le plafonne : un parc Bortle 3 peut atteindre 89 au plus, si bien que seuls les ciels les plus noirs obtiennent Immaculée. De la fumée ou de la brume dans la prévision le plafonne à 74, ou à 59 quand elle est épaisse. Le clair de lune le plafonne aussi : une pleine lune haute pendant les heures sombres éclaire le ciel presque autant qu’une ville voisine et limite une nuit à 40 environ, et une demi-lune dans le ciel du soir tient une nuit hors d’Immaculée. Une nuit de moins de trois heures d’obscurité totale est plafonnée elle aussi, et une nuit qui n’en a pas du tout reste sous 40.\n\nPrenons une nuit. Un parc Bortle 2, un fin croissant de Lune qui se couche au crépuscule, neuf heures d’obscurité totale et une prévision de 40 % de nuages. Les composantes totalisent 86 : 40 pour la Lune, 15 pour les nuages, 17,5 pour le halo lumineux et 13,5 pour la durée. Mais 40 % de nuages plafonnent la nuit à 64 : l’indice est donc de 64, Bonne, et le détail indique que les nuages limitent la nuit à 64.\n\nLes nuages sont la composante la plus incertaine. Jusqu’à environ trois jours à l’avance, Nyx utilise pleinement la prévision de nuages. De là jusqu’à dix jours, il rapproche la prévision de la nébulosité habituelle du parc pour ce mois et qualifie la nuit de tendance, dessinée à moitié pleine dans Planifier. Au-delà de dix jours, une prévision apporte peu : l’indice repose alors sur la seule nébulosité habituelle, et la nuit est dessinée vide. Ces indices changeront à mesure que la nuit approchera.\n\nLes niveaux sont simples : à partir de 90, Immaculée ; de 75, Excellente ; de 60, Bonne ; de 40, Passable ; en dessous, Médiocre.\n\nCertaines choses échappent à l’indice. Il ne sait pas si la route vers votre point d’observation est ouverte : dans les parcs nationaux des États-Unis, Nyx affiche les alertes du Park Service à côté de l’indice, mais elles peuvent dater de plusieurs heures, et ailleurs il n’en a aucune. Il ne voit ni un parking éclairé, ni une lanterne dans un camping, ni une crête qui cache la partie du ciel pour laquelle vous êtes venu. Et il ne connaît pas vos yeux : le temps qu’ils ont eu pour s’adapter, ni ce qu’un écran lumineux a défait. Une nuit Bonne bien préparée peut valoir mieux qu’une nuit Excellente vécue dans la hâte."
           }
         },
         "ja": {

@@ -8,10 +8,13 @@ struct WatchModelRangeTests {
     private let t0 = 1_791_158_400.0 // 2026-10-05 00:00 UTC
 
     @MainActor @Test func theWatchShowsTheRangeTheIPhoneShows() throws {
-        let jotr = try park("jotr"), now = Date.now
+        // The week of the November 9, 2026 new Moon: near full Moon the Moon caps every night below
+        // the models' spread, and no range is drawn on either device (rightly), so the week is pinned.
+        let jotr = try park("jotr"), now = Date(timeIntervalSince1970: 1_794_182_400 + 20*3600)
         // The disagreeing-models fixture: a different spread each night, so some nights have a range.
         let fixture = try #require(DebugForecasts(state: "disagree", parks: [jotr], now: now))
-        let model = PlanModel()
+        let model = PlanModel(defaults: try #require(UserDefaults(suiteName: "WatchModelRangeTests")))
+        model.pinClock(now); model.presentOverride = now
         model.forecasts = fixture.forecasts; model.details = fixture.details
         let ranges = SavedSkySync.modelRanges(model, ids: ["jotr", "jotr"])
         #expect(!(ranges["jotr"] ?? [:]).isEmpty)
