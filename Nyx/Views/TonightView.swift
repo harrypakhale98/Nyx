@@ -73,7 +73,7 @@ struct TonightView: View {
                     // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                     FoldColumns(narrow:.trailing,narrowMax:500,spacing:36) {
                         VStack(spacing:26) { hero(park,others:Array(best.dropFirst())); farther(than:park,shortlist:widerList); darkArea(all); ahead(park) }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe); more(best); fromHome; extras }.frame(maxWidth:.infinity,alignment:.leading)
+                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe); more(best); fromHome; LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
                     weekAcross
@@ -91,6 +91,7 @@ struct TonightView: View {
                         more(best)
                         StartingPointPanel(heading:best.count>1,choose:{ chooseHome=true },nearMe:nearMe)
                         fromHome
+                        LookingBackPanel()
                     }
                     extras
                 }.padding(24).readableColumn()

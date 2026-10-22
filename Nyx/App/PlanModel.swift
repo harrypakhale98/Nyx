@@ -59,7 +59,7 @@ import CoreLocation
     }
     /// Everything worked out from the forecasts and their detail is let go when either changes.
     /// The widget, the watch and reminders follow too, once the changes settle (`SavedSkySync.noteChange`).
-    private func forecastsChanged() { outlookCache=[:]; nightMemo=[:]; journalScores=[:]; dataRevision+=1; savedSync.noteChange(self) }
+    private func forecastsChanged() { outlookCache=[:]; nightMemo=[:]; journalScores=[:]; dataRevision+=1; savedSync.noteChange(self); updateHindsight() }
     /// Counts every change to what a score or its caveats rest on: forecasts, their detail (smoke,
     /// layers, models) and closures. A screen that keeps a result worked out from them (the trip
     /// plan) works it out again when this moves, so it never disagrees with the calendar or a park's page.
@@ -146,8 +146,14 @@ import CoreLocation
             tonightPickNight=night
             if DebugScenario.screen == nil { defaults.set(tonightPickID,forKey:"tonightPick"); defaults.set(night,forKey:"tonightPickNight") }
             savedSync.noteChange(self)
+            updateHindsight()
         }
     }
+    /// "Looking back" (`Hindsight`): what Nyx said about Tonight's answers, and what the weather models
+    /// said afterwards, newest first. Kept on this device in `defaults` ("hindsight").
+    var hindsight:[HindsightRecord]=[]
+    /// Set once the records are read at launch, so nothing written before then replaces them.
+    @ObservationIgnored var hindsightLoaded=false
     /// The place-local night ("2026-10-16") `tonightPickID` was picked for.
     @ObservationIgnored private(set) var tonightPickNight: String?
     /// Tonight's pick while the night it was picked for is still tonight at that place; nil after,
@@ -236,6 +242,10 @@ import CoreLocation
     /// The moment "tonight" is judged from. Advanced only when some park's night turns over
     /// (at its sunrise or local noon), so open screens move on without constant redraws.
     private(set) var clock=Date.now
+    #if DEBUG
+    /// Tests pin the clock to a night of their choosing, so a result never depends on today's Moon.
+    func pinClock(_ date:Date) { clock=date }
+    #endif
     func tick(_ now:Date = .now) {
         // A saved spot far from every park (another continent) turns its night over at its own sunrise.
         guard (places+viewedCatalog).contains(where:{ $0.currentNight(at:clock) != $0.currentNight(at:now) }) else { return }
@@ -270,6 +280,8 @@ import CoreLocation
         defaults.register(defaults:["parksByScore":true])
         homeID=defaults.string(forKey:"homePark") ?? Park.defaultID
         homePlace=defaults.data(forKey:"homePlace").flatMap { try? JSONDecoder().decode(StartingPlace.self,from:$0) }
+        hindsight=DebugScenario.screen == nil ? defaults.data(forKey:"hindsight").flatMap { try? JSONDecoder().decode([HindsightRecord].self,from:$0) } ?? [] : []
+        hindsightLoaded=true
         tonightPickID=DebugScenario.screen == nil ? defaults.string(forKey:"tonightPick").flatMap(PlaceIDText.validated) : nil
         tonightPickNight=DebugScenario.screen == nil ? defaults.string(forKey:"tonightPickNight") : nil
         startChosen=defaults.object(forKey:"startChosen") as? Bool ?? (defaults.string(forKey:"homePark") != nil)
@@ -470,11 +482,16 @@ import CoreLocation
     /// always was, saved spots' rounded request, and for catalogue places their whole 10° tiles
     /// (`CatalogForecast.Regions`), never a place alone and never the device's position.
     func refreshForecasts(for places:[Park],force:Bool=false) async { await refreshForecasts(watching:places,force:force) }
-    /// The trip planner's candidates: every place within the radius (curated parks, catalogue places,
-    /// saved spots), at most `TripPlanner.maxCandidates` of them (`TripPlanner.limited`), sorted by id.
+    /// The trip planner's candidates: the places Tonight and Plan's best nights weigh from here
+    /// (`TonightReach.candidates`: from a US start with only US places in range, the national parks;
+    /// otherwise every place, catalogue and saved spots too), at most `TripPlanner.maxCandidates` of
+    /// them (`TripPlanner.limited`), sorted by id.
     func tripCandidates(latitude:Double,longitude:Double,radiusMeters:Double,drivableOnly:Bool=false)->[Park] {
-        TripPlanner.limited(TripPlanner.candidates(places(near:latitude,longitude:longitude,radiusMeters:radiusMeters),latitude:latitude,longitude:longitude,
-                                                   radiusMeters:radiusMeters,drivableOnly:drivableOnly),latitude:latitude,longitude:longitude)
+        let everything=places(near:latitude,longitude:longitude,radiusMeters:radiusMeters)
+        let reach=TonightReach.candidates(parks:nearby(latitude:latitude,longitude:longitude,radiusMeters:radiusMeters),places:everything,
+                                          originInUS:USOutline.contains(latitude:latitude,longitude:longitude))
+        return TripPlanner.limited(TripPlanner.candidates(reach,latitude:latitude,longitude:longitude,radiusMeters:radiusMeters,drivableOnly:drivableOnly),
+                                   latitude:latitude,longitude:longitude)
     }
     /// The saved spots, from the store (call it whenever they change). A spot new to this launch
     /// gets its cached forecast at once; a spot deleted is forgotten here, along with its forecast.

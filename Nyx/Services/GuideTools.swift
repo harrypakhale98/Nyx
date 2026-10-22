@@ -100,12 +100,12 @@ nonisolated struct NightLookup: Sendable {
     /// What a record's clouds rest on, in the app's words.
     static func basis(_ night: Night) -> String {
         switch night.basis {
-        case .forecast: return String(localized: "cloud forecast included, \(Int((night.cloudCover ?? 0).rounded()))% cloud")+smoke(night)
+        case .forecast: return String(localized: "cloud forecast included, \(Int((night.cloudCover ?? 0).rounded()))% cloud")+limit(night)
         case .blended(_, let lead):
             let cover=Int((night.cloudCover ?? 0).rounded()), days=max(1, Int(lead.rounded()))
             // With no usual clouds for the place, the forecast counts as it stands (`Night.basisCaption`).
             return (night.usualCloud == nil ? String(localized: "early look: a \(cover)% cloud forecast \(days) days out, counted as it stands; no usual clouds are known for this place")
-                : String(localized: "early look: a \(cover)% cloud forecast \(days) days out, eased toward usual clouds"))+smoke(night)
+                : String(localized: "early look: a \(cover)% cloud forecast \(days) days out, eased toward usual clouds"))+limit(night)
         case .usual:
             // "Not yet" beyond the forecast's reach, "unavailable" within it, and never "usual clouds"
             // where none are known, as every surface says it (`Night.basisLine`).
@@ -115,11 +115,12 @@ nonisolated struct NightLookup: Sendable {
             case (true, true): String(localized: "no cloud forecast yet; scored on the Moon and darkness only")
             case (false, true): String(localized: "cloud forecast unavailable; scored on the Moon and darkness only")
             }
-            return words+(night.typicalClouds.map { "; "+String(localized: "typically: \($0)") } ?? "")+smoke(night)
+            return words+(night.typicalClouds.map { "; "+String(localized: "typically: \($0)") } ?? "")+limit(night)
         }
     }
-    /// "; Smoke or haze limits this night to 59." when smoke or haze holds the score down.
-    private static func smoke(_ night: Night) -> String { night.smokeSentence().map { "; "+$0 } ?? "" }
+    /// "; Moonlight limits this night to 44." (or clouds, sky glow, smoke, short darkness) when a cap
+    /// holds the score down, so the model never has to guess why a clear night scored low.
+    private static func limit(_ night: Night) -> String { night.score.limit.map { "; "+$0.sentence(tonight: false) } ?? "" }
     /// The access note, so the model never recommends a ferry-only park as a drive.
     func access(_ park: Park) -> String {
         park.accessNote.map { "; "+String(localized: "getting there: \($0)") } ?? ""

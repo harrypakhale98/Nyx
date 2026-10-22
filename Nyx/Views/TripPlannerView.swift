@@ -3,7 +3,7 @@ import CoreLocation
 import EventKit
 import EventKitUI
 
-/// "I'm free Oct 10–17, within 300 miles": the best park for each night, the single best night, and
+/// "I'm free Oct 10–17": the best park in reach for each night, the single best night, and
 /// a line on why. Planned on this iPhone from cached forecasts and park updates; nothing is fetched.
 /// Plan's second mode ("My free nights"); the choices are kept for the window while the month is open.
 struct TripPlannerView: View {

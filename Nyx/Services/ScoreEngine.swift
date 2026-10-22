@@ -33,7 +33,8 @@ nonisolated struct ScoreEngine: ScoreProviding {
     ///   caps nothing; a full Moon high through the dark hours brightens the sky about as much as a
     ///   Bortle 7 town and caps near 39, as the sky-glow cap does there; a first-quarter Moon up for
     ///   the evening keeps a night out of Pristine. Rules version 2 (2026-10-20); before it a full
-    ///   Moon at a dark park could read Good.
+    ///   Moon at a dark park could read Good. Version 2 also eases each place's usual clouds from one
+    ///   month's middle to the next (`CloudClimate.typical`).
     /// - Clouds: 100 − 0.9 × cloud% (overcast 10, 80% 28, 50% 55, 30% 73, 10% 91). Additive clouds
     ///   alone could never pull a moonless desert night below Good; a cap can.
     /// - Sky glow: Bortle 1–2 100, 3 89, 4 84, 5 74, 6 59, 7 and above 39. "Pristine" needs a

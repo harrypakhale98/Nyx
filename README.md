@@ -12,7 +12,7 @@ No account, no ads, no tracking, no backend. Everything is computed on the devic
 
 - **Tonight** – the darkest places near you, with the score and what it's made of.
 - **Parks** – every park with tonight's score, a map, alerts and closures from the NPS, viewing spots and ranger night-sky programs.
-- **Plan** – a month of nights per park, with the best new-moon window marked.
+- **Plan** – the best nights in reach over the next 30, a month of nights per park with the best new-moon window marked, and a planner for your free nights.
 - **Journal** – nights you've been out, with notes and photos. Stays on the device.
 - **Field mode** – a red, full-screen view for the night itself: countdown to true darkness, moonrise and moonset, where the Milky Way core is, a dark-adaptation clock.
 - **Widgets, Live Activity, Siri and Shortcuts**, Control Center controls.

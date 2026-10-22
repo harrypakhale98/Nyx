@@ -6897,6 +6897,76 @@
         }
       }
     },
+    "Moonlight limits this night to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondlicht begrenzt den Wert dieser Nacht auf %lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonlight limits this night to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La luz de la Luna limita esa noche a %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le clair de lune limite cette nuit à %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月明かりのため、この夜は最大%lld点です。"
+          }
+        }
+      }
+    },
+    "Moonlight limits tonight to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondlicht begrenzt den Wert heute Nacht auf %lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonlight limits tonight to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La luz de la Luna limita esta noche a %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le clair de lune limite cette nuit à %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月明かりのため、今夜は最大%lld点です。"
+          }
+        }
+      }
+    },
     "Mostly low cloud, which hides what it covers.": {
       "extractionState": "manual",
       "localizations": {

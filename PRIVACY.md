@@ -30,6 +30,7 @@ Links to nps.gov, recreation.gov, Wikidata, Globe at Night and similar sites ope
 - **Motion** – field mode's compass reads device attitude while it's open. "Where to look by sound" reads headphone motion and asks for Motion & Fitness access once. Neither is stored.
 - **Notifications** – local only. Alarms use AlarmKit; the Live Activity is started and updated locally, with no push token.
 - **Ask Nyx** – Foundation Models on the device. No Private Cloud Compute, no network.
+- **Looking back** – for Tonight's answer, the place id, night, score and cloud figure Nyx showed, and the next day's look back from the same cloud forecast: up to 60 nights in the app's settings, never sent. "Forget these nights" removes them.
 - **MetricKit** – only the average pixel luminance is kept, to show how dark the screen stays. Nothing is sent.
 - **Handoff** – a park's page can be picked up on your own devices signed in to the same Apple Account. Only the park and the night's date are handed over, by Apple's system.
 - **Age range** – where the law requires it, Nyx asks iOS through Declared Age Range. The answer isn't stored or used.

@@ -2,8 +2,8 @@ import SwiftUI
 
 /// Plan's first mode, "Best nights": the best night of the next 30 among every place in reach of the
 /// one starting point and radius, then each other place at its best. Worked out on this device from
-/// cached forecasts and each place's usual clouds; nothing is fetched for it, and nothing it ranks
-/// changes Tonight's answer or what the widgets and Apple Watch follow.
+/// the forecasts at hand (a refresh that is due is asked for, as the trip planner does) and each
+/// place's usual clouds; nothing it ranks changes Tonight's answer or what the widgets and Apple Watch follow.
 struct BestNightsView: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
@@ -47,9 +47,12 @@ struct BestNightsView: View {
         }
         .measuringWidth($width)
         .foldSource()
+        .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
         .background(NightBackground(seed:"best",park:ranking?.best?.park,night:ranking?.best?.id))
         .modifier(StartingPointSheets(choosing:$choosing,explaining:$explaining))
         .task(id:key) { await rank(key) }
+        // Cached forecasts are enough to rank; a refresh that is already due arrives in the background.
+        .task { if DebugScenario.screen == nil { await model.refreshForecasts(watching:[]) } }
     }
     /// One plain line on what this mode answers; Plan's bar already names the page. Before a starting
     /// point is chosen the answer is from the example town, and says so, as Tonight does.

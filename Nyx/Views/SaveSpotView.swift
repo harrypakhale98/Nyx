@@ -113,9 +113,7 @@ struct SaveSpotView: View {
                     explainLocation=false; locator.locate()
                 }.nyxPresentation()
             }
-            .alert("Unable to save",isPresented:$saveFailed) { Button("OK",role:.cancel) {} } message:{
-                Text(model.journalUnavailable ? "Saved spots are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.")
-            }
+            .parkSaveAlert(isPresented:$saveFailed,journalUnavailable:model.journalUnavailable)
             // A light tick, as for every small keep (a copied spot, a bookmark): the success thump is the journal's.
             .sensoryFeedback(.selection,trigger:savedCount)
             .onChange(of:source) { _,_ in focus=nil }
