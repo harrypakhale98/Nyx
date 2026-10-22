@@ -15,36 +15,57 @@ struct WhatsUpPanel: View {
     var isTonight=true
     /// Aurora season, satellites, zodiacal light, the faintest stars, the core's light dome.
     var notes:[SkyNote]=[]
+    /// The rest of the night's sky, past the first three blocks.
+    @State private var showsMore=false
+    /// The night's sky in the shared order, as blocks: the leading rows, the planets under one
+    /// heading, then the rows after them.
+    enum Block: Identifiable {
+        case row(WhatsUp.Item)
+        case planets
+        var id:String { switch self { case .row(let item): item.id; case .planets: "planets" } }
+    }
+    /// How many blocks show before "More up tonight": the answer to "what is worth looking up for",
+    /// at a glance. Everything else, in the same order, is one tap away.
+    static let leading=3
+    static func blocks(_ whatsUp:WhatsUp)->(shown:[Block],more:[Block]) {
+        let layout=whatsUp.layout
+        let all=layout.first.map(Block.row)+(whatsUp.planets.isEmpty ? [] : [.planets])+layout.after.map(Block.row)
+        return (Array(all.prefix(leading)),Array(all.dropFirst(leading)))
+    }
     var body: some View {
         VStack(alignment:.leading,spacing:18) {
             Eyebrow(text:isTonight ? "What's up tonight" : "What's up this night")
-            let layout=Self.layout(whatsUp)
-            ForEach(Array(layout.first.enumerated()),id:\.element.id) { index,item in
+            let layout=Self.layout(whatsUp), blocks=Self.blocks(whatsUp)
+            ForEach(Array(blocks.shown.enumerated()),id:\.element.id) { index,block in
                 if index>0 { Divider().overlay(palette.line) }
-                row(item)
+                self.block(block)
             }
-            if !whatsUp.planets.isEmpty {
+            let hidden=blocks.more.count+layout.mentions.count+notes.count
+            if hidden>0 {
                 Divider().overlay(palette.line)
-                planets
-            }
-            ForEach(layout.after) { item in
-                Divider().overlay(palette.line)
-                row(item)
-            }
-            if !layout.mentions.isEmpty {
-                Divider().overlay(palette.line)
-                VStack(alignment:.leading,spacing:10) { ForEach(layout.mentions) { item in mention(item) } }
-            }
-            if !notes.isEmpty {
-                Divider().overlay(palette.line)
-                VStack(alignment:.leading,spacing:10) {
-                    ForEach(notes) { note in
-                        Label { Text(note.text).fixedSize(horizontal:false,vertical:true) } icon:{
-                            if !typeSize.isAccessibilitySize { Image(systemName:note.symbol).foregroundStyle(palette.accent).frame(width:glyphSize).accessibilityHidden(true) }
+                DisclosureGroup(isExpanded:$showsMore) {
+                    VStack(alignment:.leading,spacing:18) {
+                        ForEach(blocks.more) { block in self.block(block);Divider().overlay(palette.line) }
+                        if !layout.mentions.isEmpty {
+                            VStack(alignment:.leading,spacing:10) { ForEach(layout.mentions) { item in mention(item) } }
                         }
-                        .font(.subheadline).foregroundStyle(palette.muted)
-                    }
+                        if !notes.isEmpty {
+                            if !layout.mentions.isEmpty { Divider().overlay(palette.line) }
+                            VStack(alignment:.leading,spacing:10) {
+                                ForEach(notes) { note in
+                                    Label { Text(note.text).fixedSize(horizontal:false,vertical:true) } icon:{
+                                        if !typeSize.isAccessibilitySize { Image(systemName:note.symbol).foregroundStyle(palette.accent).frame(width:glyphSize).accessibilityHidden(true) }
+                                    }
+                                    .font(.subheadline).foregroundStyle(palette.muted)
+                                }
+                            }
+                        }
+                    }.padding(.top,14)
+                } label:{
+                    Text(isTonight ? "More up tonight (\(hidden))" : "More up this night (\(hidden))").font(.subheadline)
+                        .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
                 }
+                .tint(palette.accent)
             }
             VStack(alignment:.leading,spacing:0) {
                 NavigationLink { EssayView(essay:.milkyway) } label:{ Label("Finding the Milky Way",systemImage:"sparkle").font(.subheadline).frame(minHeight:44,alignment:.leading).contentShape(Rectangle()) }
@@ -57,6 +78,12 @@ struct WhatsUpPanel: View {
             }.padding(.top,2)
             Text("Worked out on this iPhone for this park. Planets are placed within about a degree; times can be a few minutes off where hills block the horizon.")
                 .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+        }
+    }
+    @ViewBuilder private func block(_ block:Block)->some View {
+        switch block {
+        case .row(let item): row(item)
+        case .planets: planets
         }
     }
     /// One glyph column, so every row's text starts on the same line.

@@ -36,8 +36,25 @@ private struct GlowLine: View {
 struct LightPollution: View {
     @Environment(\.nyx) private var palette
     let park: Park
+    /// The Park Service's readings and the satellite night lights: the evidence behind the estimate.
+    @State private var showsMeasurements=false
     private var site: SkyGlow.Site? { SkyGlow.shared.park(park.id) }
+    private var measured: Bool { park.curated && !park.isSavedSpot && !MeasuredSky.shared.sites(park.id).isEmpty }
     var body: some View {
+        VStack(alignment:.leading,spacing:12) {
+            estimate
+            // The estimate is the answer; how it is known, with its caveats, is one tap away.
+            if measured || site != nil {
+                DisclosureGroup(isExpanded:$showsMeasurements) {
+                    measurements.padding(.top,8)
+                } label:{
+                    Text("How this is measured").font(.subheadline).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
+                }
+                .tint(palette.accent)
+            }
+        }
+    }
+    private var estimate: some View {
         VStack(alignment:.leading,spacing:12) {
             VStack(alignment:.leading,spacing:6) {
                 LabeledContent("Bortle estimate",value:String(localized:"Class \(park.bortleEstimate) of 9"))
@@ -48,7 +65,11 @@ struct LightPollution: View {
                 else if !park.curated { Text("Estimated from satellite data, not measured here. Conditions vary across the area.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 else { Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted) }
             }
-            if park.curated, !park.isSavedSpot { MeasuredSkyRows(park:park).padding(.top,4) }
+        }
+    }
+    private var measurements: some View {
+        VStack(alignment:.leading,spacing:12) {
+            if measured { MeasuredSkyRows(park:park) }
             if let site {
                 let level=SkyGlow.shared.level(site.glow)
                 VStack(alignment:.leading,spacing:6) {

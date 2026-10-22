@@ -31,6 +31,10 @@ struct FromHomePanel: View {
             if !Task.isCancelled { sky=computed }
         }
     }
+    /// True when the starting point is the park the answer above already shows.
+    nonisolated static func repeats(_ origin:HomeSky.Origin,hero:Park?)->Bool {
+        origin.source == .park && hero != nil && origin.park?.id == hero?.id
+    }
     private var key:String { "\(origin.name)|\(origin.latitude)|\(origin.longitude)|\(Int(now.timeIntervalSince1970/3600))" }
     @ViewBuilder private func rows(_ sky:HomeSky)->some View {
         VStack(alignment:.leading,spacing:14) {
@@ -69,7 +73,8 @@ struct FromHomePanel: View {
                 }
             } else {
                 ForEach(sky.planets) { planet in
-                    row(title:Text([planet.title,planet.note].compactMap { $0 }.joined(separator:" · ")),value:planet.value,detail:planet.detail,spoken:planet.spoken) {
+                    // The sentence already gives the time ("Rises at 1:39 AM in the east…"): no figure beside the name.
+                    row(title:Text([planet.title,planet.note].compactMap { $0 }.joined(separator:" · ")),value:nil,detail:planet.detail,spoken:planet.spoken) {
                         SkyGlyph(.planet,color:palette.accent)
                     }
                 }
@@ -95,7 +100,8 @@ struct FromHomePanel: View {
     }
     @ViewBuilder private func notes(_ sky:HomeSky)->some View {
         VStack(alignment:.leading,spacing:6) {
-            Text("Check your local forecast for clouds. Nyx asks for none here, so your location stays on this device.")
+            // A park as the starting point has its own forecast on its page; a town or this device has none.
+            if origin.source != .park { Text("Check your local forecast for clouds. Nyx asks for none here, so your location stays on this device.") }
             if origin.source != .park, sky.light == .assumed {
                 Text("Nyx has no light map for homes. Streetlights hide faint stars; the Moon, the planets and the brightest stars still show.")
             }

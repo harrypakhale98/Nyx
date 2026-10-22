@@ -370,7 +370,13 @@ final class AccessibilityAuditTests:XCTestCase {
             // runs only (default and night vision), on iOS 27. The audit's own captures show both in full, down to "IP address.";
             // the same quirk as the Learn title. These network captions only, at standard sizes; AX5 still measures them.
             let privacyCaption=screen=="privacy" && pass != "ax5" && UIDevice.current.userInterfaceIdiom == .pad && issue.element?.elementType == .staticText && (issue.element?.label ?? "").hasSuffix("network information such as your IP address.")
-            return !visible || pastHomeIndicator || learnTitle || privacyCaption || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
+            // The `light` route's Protect this sky card (2026-10-21, once it became its own card and moved on screen): the
+            // two-line serif "An International Dark Sky Park, certified by DarkSky International." Its second line sets at about
+            // 290 of the frame's 299 pt; laid out again by the audit's own measure it takes a third line. Both lines render in
+            // full (capture 2026-10-21), and the text grows with its content, so a real third line would show.
+            // The same quirk as the Learn title. This line only, at standard sizes; AX5 still measures it.
+            let designationLine=screen=="light" && pass != "ax5" && issue.element?.elementType == .staticText && issue.element?.label=="An International Dark Sky Park, certified by DarkSky International."
+            return !visible || pastHomeIndicator || learnTitle || privacyCaption || designationLine || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
         case .elementDetection:
             // Decorative "NYX" wordmark and the time river's Canvas-drawn dates; the river element speaks the full value.
             // The sky map's Canvas-drawn inset names (Alaska, Hawaiʻi, Am. Samoa, Virgin Is.): decoration; each star is a

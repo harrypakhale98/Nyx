@@ -73,7 +73,7 @@ struct TonightView: View {
                     // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                     FoldColumns(narrow:.trailing,narrowMax:500,spacing:36) {
                         VStack(spacing:26) { hero(park,others:Array(best.dropFirst())); farther(than:park,shortlist:widerList); darkArea(all); ahead(park) }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe); more(best); fromHome; LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
+                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe); more(best); fromHome(hero:park); LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
                     weekAcross
@@ -82,7 +82,7 @@ struct TonightView: View {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
-                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil,shortlist:widerList);darkArea(all);StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe);fromHome }
+                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil,shortlist:widerList);darkArea(all);StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe);fromHome(hero:nil) }
                     else if let park=best.first {
                         hero(park,others:Array(best.dropFirst()))
                         farther(than:park,shortlist:widerList)
@@ -90,7 +90,7 @@ struct TonightView: View {
                         // The answer, then the alternatives; then where "within reach" is measured from.
                         more(best)
                         StartingPointPanel(heading:best.count>1,choose:{ chooseHome=true },nearMe:nearMe)
-                        fromHome
+                        fromHome(hero:park)
                         LookingBackPanel()
                     }
                     extras
@@ -286,18 +286,28 @@ struct TonightView: View {
     }
     private func hero(_ park:Park,others:[Park])->some View {
         let night=model.night(park)
+        let large=typeSize.isAccessibilitySize
+        // The first line is the answer's own context: the night, and from where. At accessibility sizes
+        // it follows the dial, so the park and its score fill the first screen.
+        let context=answerLine(park).font(.caption.weight(.medium)).kerning(large ? 0 : 1.6).textCase(large || !Lettering.spaced ? nil : .uppercase)
+            .foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
         return VStack(spacing:10) {
-            // The first line is the answer's own context: the night, and from where.
-            answerLine(park).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize ? 0 : 1.6).textCase(typeSize.isAccessibilitySize || !Lettering.spaced ? nil : .uppercase)
-                .foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+            if !large { context }
             // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`).
             ParkPillPicker(park:park,others:others,score:{ model.night($0).score.value },zoom:zoom)
             let basis=night.basisCaption()
             let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis)
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis,
                            revealKey:revealKey(park),range:range) { heroSettledKey=$0 }
-                .frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
+                .frame(height:large ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
+            if large { context }
+            // The night in plain words: where the Moon is, and whether the Milky Way is worth the drive.
+            if let verdict=NightVerdict.line(sky:night.sky,core:model.whatsUp(night).coreNight,park:park) {
+                Text(verdict.text).font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.center)
+                    .fixedSize(horizontal:false,vertical:true).padding(.horizontal,12)
+                    .accessibilityLabel(verdict.spoken)
+            }
             // Only the exceptions (no forecast yet, an early look); a full forecast is the norm and goes unsaid.
             // The gauge speaks this line, so VoiceOver does not hear it twice.
             if let basis { Text(basis).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true) }
@@ -331,17 +341,19 @@ struct TonightView: View {
     /// first, because the best window rests on the same clouds), then a clear, dark stretch that is
     /// only part of the night (a Moon up all evening, cloud clearing late), else the models' range
     /// in words, as the share card and the river say it (the gauge speaks the range).
+    /// The disagreement and the range are `ForecastSpread`'s, as on the park's page.
     @ViewBuilder private func skyLine(_ night:Night,range:ClosedRange<Int>?)->some View {
-        if let agreement=model.outlook(night)?.agreement, agreement.band == .disagree {
-            Text(agreement.sentence(tonight:true)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+        let agreement=model.outlook(night)?.agreement
+        if agreement?.band == .disagree, let spread=ForecastSpread.line(agreement:agreement,range:range,tonight:true) {
+            Text(spread).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
                 .fixedSize(horizontal:false,vertical:true).padding(.horizontal,12)
         } else if let window=partialWindow(night) {
             // At accessibility sizes the glyph would take a column of its own: the words alone.
             Label { Text(window.line(park:night.park)).fixedSize(horizontal:false,vertical:true) } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:"sparkles").accessibilityHidden(true) } }
                 .font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.center).padding(.horizontal,12)
                 .accessibilityElement(children:.combine)
-        } else if let range {
-            Text(ShareCard.rangeLine(range)).font(.caption).monospacedDigit().foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true)
+        } else if let spread=ForecastSpread.line(agreement:agreement,range:range,tonight:true) {
+            Text(spread).font(.caption).monospacedDigit().foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true)
         }
     }
     /// Tonight's best clear window when it is still ahead and covers at most three quarters of the
@@ -387,10 +399,13 @@ struct TonightView: View {
     }
     /// The sky over the starting point itself, for anyone not travelling tonight: the device's
     /// location only when Near me is already in use, else the chosen city or park. Not on first
-    /// run, where the starting point is only an example.
-    @ViewBuilder private var fromHome: some View {
+    /// run, where the starting point is only an example. Not when the starting point is the park the
+    /// answer already shows: its sky is that park's, one tap away, and would only be said twice.
+    @ViewBuilder private func fromHome(hero:Park?)->some View {
         let here=location.latitude.flatMap { lat in location.longitude.map { (latitude:lat,longitude:$0) } }
-        if model.startChosen, let origin=HomeSky.origin(location:here,place:model.homePlace,park:model.home) { FromHomePanel(origin:origin,now:model.today) }
+        if model.startChosen, let origin=HomeSky.origin(location:here,place:model.homePlace,park:model.home), !FromHomePanel.repeats(origin,hero:hero) {
+            FromHomePanel(origin:origin,now:model.today)
+        }
     }
     @ViewBuilder private var extras: some View {
         if DebugScenario.state=="error" || DebugScenario.state=="offline" || (model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
