@@ -135,6 +135,8 @@ struct CalendarView: View {
     @Environment(\.nyxAccess) private var access
     /// Kept for the window, so switching Plan to "My free nights" and back returns to this park.
     @SceneStorage("planPark") private var parkID=""
+    /// The key to the marks, open while the person reads it.
+    @State private var legendShown=false
     @State private var monthOffset=0
     @State private var chosen:Night?
     @State private var peeking=false
@@ -516,9 +518,18 @@ struct CalendarView: View {
                         String(localized:"Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.")])
     }
     /// The marks, with what this month's hollow nights rest on in their own words (`UsualCloudsNote`); past nights are faint dots, not hollow.
+    /// The key stays one tap away under the month rather than a paragraph across it; the night cells
+    /// and their VoiceOver labels already carry each night's own basis.
     @ViewBuilder private func legend(_ data:Month)->some View {
-        Text(Self.legend(data.nights.filter { $0.id>=data.tonight })).font(.caption).foregroundStyle(palette.muted)
-        if access.differentiate { Text(Sentences.join([NightMark.legend,String(localized:"A line through the date marks a night that has passed.")])).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+        DisclosureGroup(isExpanded:$legendShown) {
+            VStack(alignment:.leading,spacing:8) {
+                Text(Self.legend(data.nights.filter { $0.id>=data.tonight })).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                if access.differentiate { Text(Sentences.join([NightMark.legend,String(localized:"A line through the date marks a night that has passed.")])).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            }.padding(.top,6).frame(maxWidth:.infinity,alignment:.leading)
+        } label:{
+            Text("What the marks mean").font(.subheadline).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
+        }
+        .tint(palette.accent)
     }
     /// The chosen night beside the month: its breakdown, and the ways into that night (the park's
     /// page here or in a window of its own, and Calendar for nights still ahead).

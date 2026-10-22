@@ -157,17 +157,20 @@ struct SkyGlowPanel: View {
     @Environment(\.nyx) private var palette
     let park: Park
     var comparison: CityLightFigure.Sky = .here
+    /// The sky's light, then what anyone can do about it, as two cards: the estimate answers "how
+    /// dark", and protecting the sky is its own subject rather than the end of a long one.
     var body: some View {
-        Panel {
-            VStack(alignment:.leading,spacing:16) {
-                Eyebrow(text:"Sky glow")
-                // A park already under a city's glow has nothing to compare: the two skies would match.
-                // Identity per park: the selection and the drawn class are seeded from the park once.
-                if CityLightFigure.compares(park) { CityLightFigure(park:park,selection:comparison).id(park.id) }
-                LightPollution(park:park)
-                Divider().overlay(palette.line).padding(.vertical,4)
-                ProtectThisSky(park:park)
+        VStack(spacing:26) {
+            Panel {
+                VStack(alignment:.leading,spacing:16) {
+                    Eyebrow(text:"Sky glow")
+                    // A park already under a city's glow has nothing to compare: the two skies would match.
+                    // Identity per park: the selection and the drawn class are seeded from the park once.
+                    if CityLightFigure.compares(park) { CityLightFigure(park:park,selection:comparison).id(park.id) }
+                    LightPollution(park:park)
+                }
             }
+            Panel { ProtectThisSky(park:park) }
         }
     }
 }

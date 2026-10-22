@@ -19493,6 +19493,41 @@
         }
       }
     },
+    "Darker on %@: %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkler am %@: %lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darker on %@: %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más oscuro el %@: %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus sombre %@ : %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@はさらに暗い：%lld点。"
+          }
+        }
+      }
+    },
     "Darker than most national parks": {
       "extractionState": "manual",
       "localizations": {
@@ -29203,6 +29238,41 @@
         }
       }
     },
+    "How this is measured": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie das gemessen wird"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How this is measured"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo se mide"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comment c’est mesuré"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "測定方法"
+          }
+        }
+      }
+    },
     "How to book %@, on nps.gov": {
       "extractionState": "manual",
       "localizations": {
@@ -34317,6 +34387,111 @@
         }
       }
     },
+    "Milky Way core not up in true darkness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Milchstraßenzentrum steht in der echten Dunkelheit nicht am Himmel."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core not up in true darkness."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El núcleo de la Vía Láctea no está en el cielo durante la oscuridad total."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le cœur de la Voie lactée n’est pas levé pendant l’obscurité totale."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間に天の川の中心部は空にありません。"
+          }
+        }
+      }
+    },
+    "Milky Way core only briefly, under the Moon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milchstraßenzentrum nur kurz, bei Mondlicht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core only briefly, under the Moon."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Núcleo de la Vía Láctea solo un momento, con Luna."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cœur de la Voie lactée, brièvement et sous la Lune."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天の川の中心部は短時間だけで、月明かりの中です。"
+          }
+        }
+      }
+    },
+    "Milky Way core only briefly.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milchstraßenzentrum nur kurz."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core only briefly."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Núcleo de la Vía Láctea solo un momento."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cœur de la Voie lactée, brièvement seulement."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天の川の中心部は短時間だけ。"
+          }
+        }
+      }
+    },
     "Milky Way core up": {
       "extractionState": "manual",
       "localizations": {
@@ -34453,6 +34628,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "天の川の中心部はずっと空に"
+          }
+        }
+      }
+    },
+    "Milky Way core up, but under the Moon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milchstraßenzentrum am Himmel, aber bei Mondlicht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core up, but under the Moon."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Núcleo de la Vía Láctea visible, pero con Luna."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cœur de la Voie lactée levé, mais sous la Lune."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天の川の中心部は見えますが、月明かりの中です。"
+          }
+        }
+      }
+    },
+    "Milky Way core with the Moon down from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milchstraßenzentrum ohne Mond von %@ bis %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core with the Moon down from %@ to %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Núcleo de la Vía Láctea sin Luna de %@ a %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cœur de la Voie lactée sans Lune de %@ à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天の川の中心部は%@から%@まで月なしで見えます。"
+          }
+        }
+      }
+    },
+    "Milky Way core with the Moon down, %@ – %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milchstraßenzentrum ohne Mond, %@–%@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core with the Moon down, %@ – %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Núcleo de la Vía Láctea sin Luna, %@ – %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cœur de la Voie lactée sans Lune, %@ – %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月のない天の川の中心部：%@ – %@。"
           }
         }
       }
@@ -35332,6 +35612,41 @@
         }
       }
     },
+    "Moon rises at %@, %@ lit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondaufgang um %@, %@ beleuchtet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon rises at %@, %@ lit."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna sale (%@), %@ iluminada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lever de la Lune à %@, %@ éclairée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月は%@に昇ります（輝面比%@）。"
+          }
+        }
+      }
+    },
     "Moon sets %@": {
       "extractionState": "manual",
       "localizations": {
@@ -35433,6 +35748,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "時の川の月の模様"
+          }
+        }
+      }
+    },
+    "Moon up all night, %@ lit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond die ganze Nacht am Himmel, %@ beleuchtet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up all night, %@ lit."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo toda la noche, %@ iluminada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée toute la nuit, %@ éclairée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月は一晩中空にあります（輝面比%@）。"
+          }
+        }
+      }
+    },
+    "Moon up until %@, %@ lit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond bis %@ am Himmel, %@ beleuchtet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up until %@, %@ lit."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo hasta %@, %@ iluminada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée jusqu’à %@, %@ éclairée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月は%@まで空にあります（輝面比%@）。"
           }
         }
       }
@@ -36518,6 +36903,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "行ける範囲のほかの空"
+          }
+        }
+      }
+    },
+    "More up this night (%lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehr am Himmel in dieser Nacht (%lld)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More up this night (%lld)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más en el cielo esa noche (%lld)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le reste du ciel cette nuit-là (%lld)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この夜の空をもっと見る（%lld）"
+          }
+        }
+      }
+    },
+    "More up tonight (%lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehr am Himmel heute Nacht (%lld)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More up tonight (%lld)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más en el cielo esta noche (%lld)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le reste du ciel ce soir (%lld)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜の空をもっと見る（%lld）"
           }
         }
       }
@@ -39473,6 +39928,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "天の川は見えず、空全体が灰白色に光っています。"
+          }
+        }
+      }
+    },
+    "No Moon in the way.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Mond stört."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Moon in the way."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna no estorba."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de Lune pour gêner."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月の影響はありません。"
           }
         }
       }
@@ -56238,6 +56728,41 @@
         }
       }
     },
+    "Shows the park's alerts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeigt die Hinweise des Parks."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows the park's alerts."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra las alertas del parque."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affiche les alertes du parc."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園のアラートを表示します。"
+          }
+        }
+      }
+    },
     "Shows the park's other alerts.": {
       "extractionState": "manual",
       "localizations": {
@@ -63527,6 +64052,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "予報はお休み中です"
+          }
+        }
+      }
+    },
+    "The four parts add to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die vier Teile ergeben zusammen %lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The four parts add to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las cuatro partes suman %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les quatre parts totalisent %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "4つの要素の合計は%lld点です。"
           }
         }
       }
@@ -71947,6 +72507,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "予報からはわからないこと"
+          }
+        }
+      }
+    },
+    "What the marks mean": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was die Zeichen bedeuten"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What the marks mean"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qué significan las marcas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce que signifient les marques"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記号の意味"
           }
         }
       }
