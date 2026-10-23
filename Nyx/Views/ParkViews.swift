@@ -106,7 +106,7 @@ struct ParkRow: View {
             } else {
                 HStack(alignment:.center,spacing:16) { names.layoutPriority(1); Spacer(minLength:8); number }
             }
-            if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
+            if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).labelStyle(.caution).fixedSize(horizontal:false,vertical:true) }
         }.padding(.vertical,14)
             .accessibilityElement(children:.ignore)
             // Short, so a list of 63 parks is quick to swipe through: the name, the score, the band and

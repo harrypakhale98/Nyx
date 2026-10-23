@@ -3,15 +3,16 @@ import SwiftUI
 import WidgetKit
 
 /// Siri and Shortcuts on the wrist: tonight's score where Tonight shows it, the dark-adaptation
-/// clock, and red light. Each answers from what is already on the watch; none touches the network.
+/// clock, and night vision. Each answers from what is already on the watch; none touches the network.
 struct NyxWatchShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: WristTonightIntent(), phrases: ["How dark is it tonight in \(.applicationName)", "What's tonight's darkness score in \(.applicationName)"],
                     shortTitle: "Tonight's sky", systemImageName: "moon.stars")
         AppShortcut(intent: StartAdaptationIntent(), phrases: ["Start dark adaptation in \(.applicationName)", "Adapt my eyes to the dark with \(.applicationName)"],
                     shortTitle: "Dark adaptation", systemImageName: "eye")
-        AppShortcut(intent: RedLightOnIntent(), phrases: ["Red light on in \(.applicationName)", "Turn on red light in \(.applicationName)"],
-                    shortTitle: "Red light", systemImageName: "flashlight.on.circle.fill")
+        // The iPhone's phrases and name; "Red light on" stays as one more way to ask for it.
+        AppShortcut(intent: RedLightOnIntent(), phrases: ["Turn on night vision in \(.applicationName)", "Turn on \(.applicationName) night vision", "Red light on in \(.applicationName)"],
+                    shortTitle: "Night vision", systemImageName: "flashlight.on.circle.fill")
     }
 }
 
@@ -69,15 +70,16 @@ nonisolated enum WristTonightAnswer {
     }
 }
 
-/// "Red light on in Nyx": the Red light palette, as the Control Center control's On. Its own intent,
-/// in the app, because the control's (`RedLightIntent`) lives in the widget extension.
+/// "Turn on night vision in Nyx": night vision On, as the Control Center control's On. Its own
+/// intent, in the app, because the control's (`RedLightIntent`) lives in the widget extension. The
+/// type keeps its name so shortcuts people already built keep working.
 struct RedLightOnIntent: AppIntent {
-    static let title: LocalizedStringResource = "Turn on red light"
+    static let title: LocalizedStringResource = "Turn on night vision"
     static let description = IntentDescription("Keep Nyx red on the wrist, day or night, to protect dark-adapted eyes.")
     init() {}
     func perform() async throws -> some IntentResult & ProvidesDialog {
         WatchSky.setPalette(.red)
-        return .result(dialog: IntentDialog(stringLiteral: String(localized: "Red light is on. Nyx stays red, day or night, until you change Colors in Parks.")))
+        return .result(dialog: IntentDialog(stringLiteral: String(localized: "Night vision is on. Nyx stays red, day or night, until you change Night vision in Parks.")))
     }
 }
 

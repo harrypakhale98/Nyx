@@ -129,7 +129,12 @@ nonisolated struct SkyMoment: Sendable {
     var nightOffset = 0 { didSet { if settled, nightOffset != oldValue, !keepingNight { refresh(resetTime: true); refreshList() } } }
     /// Position in the night's span, sunset (0) to sunrise (1).
     var fraction = 0.5 { didSet { if fraction != oldValue { updateSkyMoment() } } }
-    var nightVision = false
+    /// Kept between launches, as the iPhone keeps its switch: someone who left in red at a dark site
+    /// comes back in red rather than to a bright window. A pinned clock (previews, DEBUG captures)
+    /// and DEBUG's forced night vision leave the stored switch alone.
+    var nightVision = false {
+        didSet { if !pinned, nightVision != oldValue, !VisionDebug.isEnabled("night-vision") { UserDefaults.standard.set(nightVision, forKey: Self.nightVisionKey) } }
+    }
     var immersiveOpen = false
     /// The body whose name card is showing in the sky.
     var selectedBody: String?
@@ -251,7 +256,7 @@ nonisolated struct SkyMoment: Sendable {
         self.detailService = detailService ?? ForecastDetailService(extras: false)
         self.parkStore = parkStore ?? ParkStore()
         self.auroraService = auroraService ?? AuroraService()
-        nightVision = VisionDebug.isEnabled("night-vision")
+        nightVision = VisionDebug.isEnabled("night-vision") || (!pinned && UserDefaults.standard.bool(forKey: Self.nightVisionKey))
         // The park chosen last time; previews and DEBUG captures (a pinned clock) always open Joshua Tree.
         selectedID = VisionDebug.park ?? (pinned ? Self.defaultPark : Self.rememberedPark(in: self.parks))
         nightOffset = VisionDebug.nightOffset ?? 0
@@ -336,6 +341,8 @@ nonisolated struct SkyMoment: Sendable {
     var park: Park? { parks.first { $0.id == selectedID } }
     /// Where the chosen park is remembered between launches (this headset's UserDefaults only).
     nonisolated static let parkKey = "visionSelectedPark"
+    /// Night vision's switch, under the iPhone's key (this headset's UserDefaults only).
+    nonisolated static let nightVisionKey = "nightVision"
     nonisolated static let defaultPark = Park.defaultID
     /// The park chosen last time if it is still one of `parks`, else Joshua Tree.
     nonisolated static func rememberedPark(in parks: [Park], defaults: UserDefaults = .standard) -> String {

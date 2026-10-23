@@ -125,7 +125,10 @@ struct PlannerWindow: View {
         return Button { Task { await toggleSky() } } label: {
             Label(open ? "Leave the sky" : "Stand under this sky", systemImage: open ? "xmark" : "sparkles")
         }
+        // Black on the amber, as the iPhone's primary buttons: white on amber is under 2:1, black well over 4.5:1.
+        // Night vision's grey button keeps its white label, which the red filter then tints.
         .buttonStyle(.borderedProminent).tint(model.nightVision ? .white.opacity(0.3) : NyxPalette.amber.opacity(0.85))
+        .foregroundStyle(model.nightVision ? Color.white : Color.black)
         .disabled(skyBusy || model.plan == nil)
         .accessibilityHint(open ? Text("Returns to the room. The window stays where it is.")
                                 : Text("Surrounds you with this park's computed sky at the time on the clock below the window"))
@@ -240,7 +243,7 @@ struct ParkRow: View {
             Spacer(minLength: 8)
             if let night {
                 VStack(alignment: .trailing, spacing: 0) {
-                    Text(night.score.value, format: .number).font(.system(.title2, design: .serif)).monospacedDigit().foregroundStyle(palette.accent)
+                    Text(night.score.value, format: .number).scoreNumeral(.title2, accent: palette.accent)
                     Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted)
                 }
             } else {

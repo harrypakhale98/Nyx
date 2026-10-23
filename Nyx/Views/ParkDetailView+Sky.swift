@@ -5,7 +5,7 @@ extension ParkDetailView {
 
     func chapterHeading(_ chapter:ParkChapter,detail:String)->some View {
         VStack(alignment:.leading,spacing:4) {
-            Eyebrow(text:"\(detail)")
+            Eyebrow(text:"\(detail)",meta:true)
             Text(chapter.title).font(.system(.title,design:.serif)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader)
         }.frame(maxWidth:.infinity,alignment:.leading).padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
     }

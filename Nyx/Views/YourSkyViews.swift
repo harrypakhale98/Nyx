@@ -401,7 +401,7 @@ struct RecapShareButton: View {
         Group {
             if let image { ShareLink(item:image,preview:SharePreview(String(localized:"My year under the stars, \(String(recap.year))"),image:image)) { Label("Share your year",systemImage:"square.and.arrow.up") } }
             else { ProgressView().accessibilityLabel("Preparing your year to share") }
-        }.buttonStyle(.bordered)
+        }.secondaryAction()
         .task(id:"\(recap.year)-\(recap.nights)-\(palette.nightVision)") {
             await WorldLandStore.shared.load()
             let card=RecapCard(recap:recap,layout:layout).environment(\.nyx,palette).environment(model)

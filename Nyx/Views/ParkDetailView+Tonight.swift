@@ -19,7 +19,7 @@ extension ParkDetailView {
         let large=typeSize.isAccessibilitySize, align:TextAlignment=large ? .leading : .center
         let range=CelestialGauge.modelRange(outlook,basis:night.basis)
         return VStack(alignment:large ? .leading : .center,spacing:12) {
-            if !large { Eyebrow(text:"\(eyebrow)").multilineTextAlignment(align) }
+            if !large { Eyebrow(text:"\(eyebrow)",meta:true).multilineTextAlignment(align) }
             Text(park.shortName).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(align).accessibilityAddTraits(.isHeader)
                 .onGeometryChange(for:Bool.self) { $0.frame(in:.scrollView).maxY<0 } action:{ titleGone=$0 }
             if large { gauge(range:range) }
@@ -27,7 +27,7 @@ extension ParkDetailView {
             alertLine(proxy,align:align)
             if large {
                 Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
-                Eyebrow(text:"\(eyebrow)").multilineTextAlignment(align)
+                Eyebrow(text:"\(eyebrow)",meta:true).multilineTextAlignment(align)
             }
             AccessNoteLabel(park:park,alignment:large ? .leading : .center).frame(maxWidth:420).padding(.horizontal,large ? 0 : 12)
             if !large { gauge(range:range) }
@@ -86,10 +86,11 @@ extension ParkDetailView {
         if let closure=model.closure(park) {
             Button(action:toAlerts) {
                 HStack(alignment:.firstTextBaseline,spacing:6) {
-                    Label(closure,systemImage:"exclamationmark.triangle").multilineTextAlignment(align).fixedSize(horizontal:false,vertical:true)
-                    Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).accessibilityHidden(true)
+                    Label(closure,systemImage:"exclamationmark.triangle").labelStyle(.caution).multilineTextAlignment(align).fixedSize(horizontal:false,vertical:true)
+                    // At accessibility sizes the words take the whole width ("temporarily" broke mid-word beside it).
+                    if !typeSize.isAccessibilitySize { Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true) }
                 }
-                .font(.subheadline).foregroundStyle(palette.accent)
+                .font(.subheadline)
                 .padding(.horizontal,12).padding(.vertical,6).frame(minHeight:44)
                 .background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12)).contentShape(Rectangle())
             }.buttonStyle(.plain)

@@ -178,7 +178,7 @@ struct BestNightSnippetView: View {
             }
             // A closure is the one line that must never be lost: beside the score, as on the park's page.
             if let closure {
-                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent)
+                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution)
                     .fixedSize(horizontal:false,vertical:true)
                     .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
             }

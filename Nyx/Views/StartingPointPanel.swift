@@ -21,15 +21,19 @@ struct StartingPointPanel: View {
     var body: some View {
         if heading { Eyebrow(text:"Starting point") }
         Panel { VStack(alignment:.leading,spacing:0) {
+            // One row: where from, how far, and Near me at the trailing edge; how it is measured under it.
             ViewThatFits(in:.horizontal) {
-                HStack(spacing:6) { origin(wraps:false); dot; radiusMenu }
+                HStack(spacing:6) { origin(wraps:false); dot; radiusMenu; Spacer(minLength:8); locationControl }
                 // A long name, or accessibility sizes: the name wraps and the radius goes underneath.
-                VStack(alignment:.leading,spacing:4) { origin(wraps:true); radiusMenu }
+                VStack(alignment:.leading,spacing:4) {
+                    origin(wraps:true)
+                    ViewThatFits(in:.horizontal) {
+                        HStack(spacing:8) { radiusMenu; Spacer(minLength:8); locationControl }
+                        VStack(alignment:.leading,spacing:8) { radiusMenu; locationControl }
+                    }
+                }
             }
-            ViewThatFits(in:.horizontal) {
-                HStack(spacing:8) { crowFlies; Spacer(minLength:8); locationControl }
-                VStack(alignment:.leading,spacing:8) { crowFlies; locationControl }
-            }
+            crowFlies
             if location.denied || DebugScenario.state=="no-location" { Text("Location is off. Choose your city or the park closest to you.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
             if let message=location.message { Text(message).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
         }
@@ -64,8 +68,8 @@ struct StartingPointPanel: View {
     /// Near me (or Settings when location is off), always in words: it is the main way into location.
     @ViewBuilder private var locationControl:some View {
         if location.locating { ProgressView().accessibilityLabel("Finding your location") }
-        else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true).accessibilityLabel("Turn on location in Settings").accessibilityInputLabels([Text("Settings"),Text("Turn on location")]) }
-        else if location.latitude==nil { Button { nearMe() } label:{ Label("Near me",systemImage:"location").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true).accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
+        else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline).frame(minHeight:30) }.secondaryAction().fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true).accessibilityLabel("Turn on location in Settings").accessibilityInputLabels([Text("Settings"),Text("Turn on location")]) }
+        else if location.latitude==nil { Button { nearMe() } label:{ Label("Near me",systemImage:"location").font(.subheadline).frame(minHeight:30) }.secondaryAction().fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true).accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
     }
     /// The radius as the distance itself in amber with the system's up-down chevrons; a menu of four
     /// distances in the locale's unit (`SearchRadius`), and the current one too when it was set in the

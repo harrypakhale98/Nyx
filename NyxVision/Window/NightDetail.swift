@@ -67,13 +67,12 @@ struct NightDetail: View {
                     .accessibilityLabel(Text(ClosureLine.spoken(closure)))
             }
             Text(plan.score.value, format: .number)
-                .font(.system(size: numeral, weight: .light, design: .serif)).kerning(3).monospacedDigit()
-                .foregroundStyle(palette.accent)
+                .scoreNumeral(size: numeral, accent: palette.accent)
                 .contentTransition(.numericText(value: Double(plan.score.value)))
                 .accessibilityLabel(Text("Darkness score"))
                 .accessibilityValue(Text("\(plan.score.value) out of 100, \(plan.night.bandWithBasis)"))
             // The band alone: the caption below always opens with the basis ("Early look: …").
-            Text(plan.score.band.label).font(.system(.title, design: .serif)).foregroundStyle(palette.ink)
+            Text(plan.score.band.label).bandWord(.title, ink: palette.ink)
             // Haze or smoke thick enough to wash out the Milky Way, in the accent beside the score, by
             // the iPhone's rule and words (`Night.smokeCaveat`), whether or not it holds the score down.
             if let smoke = plan.night.smokeCaveat {

@@ -37,8 +37,7 @@ struct WatchGauge: View {
                 let face = self.face(side: side)
                 VStack(spacing: WatchDialFace.spacing(side: side)) {
                     Text(score, format: .number)
-                        .font(.system(size: WatchDialFace.numeralSize(side: side)*face.numeral, weight: .light, design: .serif)).tracking(-side*0.012*face.numeral)
-                        .foregroundStyle(palette.accent).lineLimit(1).minimumScaleFactor(0.5)
+                        .scoreNumeral(size: WatchDialFace.numeralSize(side: side)*face.numeral, accent: palette.accent).lineLimit(1).minimumScaleFactor(0.5)
                     if let word = face.word {
                         Text(night.score.band.label).font(.system(size: WatchDialFace.wordSize(side: side)*word, design: .serif)).lineLimit(1).fixedSize()
                     }

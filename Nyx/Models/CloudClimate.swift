@@ -186,6 +186,12 @@ extension Night {
     }
     /// The short parts a list says beside a score: `basisLabel`, then `smokeLabel`.
     nonisolated var basisLabels: [String] { [basisLabel, smokeLabel].compactMap { $0 } }
+    /// `basisLabels` as one line, for the line under a band word that stands alone ("Early look, Haze
+    /// or smoke"): nil with a full forecast and clear air. Joined as `Phrase.clauses` joins, which the
+    /// widget and watch targets do not compile.
+    nonisolated var basisNote: String? {
+        basisLabels.reduce(nil) { line, part in line.map { String(localized: "\($0), \(part)") } ?? part }
+    }
     /// The band where room is short: "Excellent", "Excellent, early look", "Excellent, usual clouds".
     nonisolated var bandWithBasis: String { score.bandWithBasis }
     /// The word under a score where one word fits: the band, "Early look" or "Estimate".

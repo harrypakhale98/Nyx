@@ -50,22 +50,36 @@ enum NyxMetrics {
 /// the controls that float above content (the park pill, the river's thumb, the field controls,
 /// toolbars): on a dozen stacked cards it read as flat indigo anyway, cost compositing, and is the
 /// content-layer use of glass the design language reserves for controls.
+/// A section of a page, open to the sky: a hairline horizon above it and the content on the night,
+/// aligned with the page's own margins. Not a card: boxes are for the drawn instruments (the river,
+/// the lights-out sky, the map) and glass for what floats. A soft dark veil, with no edge to see,
+/// keeps a star from sitting behind a word.
 struct Panel<Content: View>: View {
     @Environment(\.nyx) private var palette
+    /// Off for a page's first section (the navigation bar is its edge) and after a list with its own separators.
+    var rule=true
     @ViewBuilder var content: Content
     var body: some View {
-        let shape=RoundedRectangle(cornerRadius:NyxMetrics.cardRadius)
-        // One card however many views the content holds.
-        VStack(alignment:.leading,spacing:0) { content }.padding(NyxMetrics.cardPadding).frame(maxWidth:.infinity,alignment:.leading)
-            .background(shape.fill(palette.panel))
-            .overlay(shape.stroke(palette.line,lineWidth:0.5*palette.stroke))
+        VStack(alignment:.leading,spacing:0) { content }.padding(.top,rule ? NyxMetrics.cardPadding : 4).padding(.bottom,NyxMetrics.cardPadding*0.6).frame(maxWidth:.infinity,alignment:.leading)
+            .background { Color.black.opacity(palette.nightVision ? 0.85 : 0.6).padding(-12).blur(radius:18).allowsHitTesting(false) }
+            .overlay(alignment:.top) { if rule { Rectangle().fill(palette.line).frame(height:0.5*palette.stroke).accessibilityHidden(true) } }
     }
 }
+/// A section's heading, set like a line in a star atlas: serif, sentence case, in starlight. `meta`
+/// keeps the small spaced capitals for the one line of facts above a page's title (the state and
+/// designation, the day and reach), so each screen has at most one row of capitals.
 struct Eyebrow: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
     let text: LocalizedStringKey
-    var body: some View { Text(text).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize || !Lettering.spaced ? 0 : 2.4).textCase(typeSize.isAccessibilitySize || !Lettering.spaced ? nil : .uppercase).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader) }
+    var meta=false
+    var body: some View {
+        if meta {
+            Text(text).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize || !Lettering.spaced ? 0 : 2.4).textCase(typeSize.isAccessibilitySize || !Lettering.spaced ? nil : .uppercase).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader)
+        } else {
+            Text(text).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader)
+        }
+    }
 }
 struct NightBackground: View {
     @Environment(\.skyHome) private var home
@@ -149,3 +163,18 @@ private struct PresentationStyle:ViewModifier {
 extension View {
     func nyxPresentation()->some View { modifier(PresentationStyle()) }
 }
+
+extension NyxPalette {
+    /// Through night vision it is starlight, like every colour; the glyph's shape still says caution.
+    var caution: Color { nightVision ? ink : Self.cautionColor }
+}
+/// A closure or an alert: the words in starlight, the glyph in `caution`.
+struct CautionLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View { CautionLabel(configuration:configuration) }
+}
+private struct CautionLabel: View {
+    @Environment(\.nyx) private var palette
+    let configuration: LabelStyleConfiguration
+    var body: some View { Label { configuration.title.foregroundStyle(palette.ink) } icon:{ configuration.icon.foregroundStyle(palette.caution) } }
+}
+extension LabelStyle where Self == CautionLabelStyle { static var caution: CautionLabelStyle { CautionLabelStyle() } }

@@ -11,51 +11,43 @@ struct SettingsView:View {
     @State private var permissionMessage:String?
     @State private var replay=false
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     var body:some View {
+        // Open to the night, as a page's sections are: no indigo cards, a hairline between rows, serif
+        // headings in starlight. Each note sits inside its control, so VoiceOver reads it with the switch.
         Form {
-            Section("In the dark") {
-                Toggle("Night vision",isOn:$nightVision).tint(palette.controlTint)
-                Text("A red palette reduces glare. Lower the screen brightness too. The flashlight button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back.").font(.caption).foregroundStyle(palette.muted)
-                Toggle(isOn:$brighterRed) {
-                    VStack(alignment:.leading,spacing:4) {
-                        Text("Brighter red")
-                        Text("A slightly lighter red that keeps text clear for red-blind and green-blind eyes. Increase Contrast turns it on too.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                    }
-                }.tint(palette.controlTint)
-            }.listRowBackground(palette.panel)
-            Section("Reminders") {
-                Toggle("Promising-night reminders",isOn:Binding(get:{notifications},set:{ value in if value { explainNotifications=true } else { notifications=false;Task { await NotificationScheduler().remove() } } })).tint(palette.controlTint)
-                Text("Local reminders for the parks and places you save, and the spots you add, when a night scores 90 or higher. Forecasts may change. Upcoming nights are recalculated whenever Nyx opens.").font(.caption).foregroundStyle(palette.muted)
+            Section {
+                Toggle(isOn:$nightVision) { titled("Night vision",note:"A red palette that keeps your eyes adapted to the dark. Lower the screen brightness too.") }
+                    .tint(palette.controlTint).accessibilityInputLabels([Text("Night vision")])
+                Toggle(isOn:$brighterRed) { titled("Brighter red",note:"A slightly lighter red that keeps text clear for red-blind and green-blind eyes. Increase Contrast turns it on too.") }
+                    .tint(palette.controlTint).accessibilityInputLabels([Text("Brighter red")])
+            } header:{ heading("In the dark") }.openRows(palette)
+            Section {
+                Toggle(isOn:Binding(get:{notifications},set:{ value in if value { explainNotifications=true } else { notifications=false;Task { await NotificationScheduler().remove() } } })) {
+                    titled("Promising-night reminders",note:"A local reminder when a park, place or spot you save has a night of 90 or higher. Forecasts can change.")
+                }.tint(palette.controlTint).accessibilityInputLabels([Text("Promising-night reminders")])
                 if notifications {
-                    Toggle("Meteor shower peaks",isOn:$showerReminders).tint(palette.controlTint)
-                    Text("On the peak night of a major shower, when at least 20 an hour are expected at a place you save with the Moon down. At most one a night.").font(.caption).foregroundStyle(palette.muted)
+                    Toggle(isOn:$showerReminders) { titled("Meteor shower peaks",note:"When a major shower peaks at a place you save, with the Moon down. At most one a night.") }
+                        .tint(palette.controlTint).accessibilityInputLabels([Text("Meteor shower peaks")])
                 }
-                if let permissionMessage { Text(permissionMessage).font(.caption) }
-            }.listRowBackground(palette.panel)
-            Section("Appearance") { NavigationLink("App icon") { AppIconPicker() } }.listRowBackground(palette.panel)
-            Section("Accessibility") {
-                NavigationLink("Sound and touch") { SoundAndTouchView() }
-                Text("Hear a night as sound, feel the Moon's phase, and see how Nyx adapts to VoiceOver, Voice Control and your display settings.").font(.caption).foregroundStyle(palette.muted)
-            }.listRowBackground(palette.panel)
-            Section("Privacy and data") {
+                if let permissionMessage { Text(permissionMessage).font(.footnote).fixedSize(horizontal:false,vertical:true) }
+            } header:{ heading("Reminders") }.openRows(palette)
+            Section { NavigationLink("App icon") { AppIconPicker() } } header:{ heading("Appearance") }.openRows(palette)
+            Section {
+                NavigationLink { SoundAndTouchView() } label:{ titled("Sound and touch",note:"Hear a night, feel the Moon's phase, and see how Nyx adapts to your settings.") }
+                    .accessibilityInputLabels([Text("Sound and touch")])
+            } header:{ heading("Accessibility") }.openRows(palette)
+            Section {
                 // The data switches live on the privacy page; the row says so, since they decide what Nyx can show.
-                NavigationLink { PrivacyView() } label:{
-                    VStack(alignment:.leading,spacing:4) {
-                        Text("Your privacy")
-                        Text("Choose what Nyx asks the internet for: cloud forecasts, smoke and haze, the aurora forecast, and park alerts and programs. Each has its own switch.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                    }.padding(.vertical,4)
-                }
+                NavigationLink { PrivacyView() } label:{ titled("Your privacy",note:"What Nyx asks the internet for, each with its own switch.") }
+                    .accessibilityInputLabels([Text("Your privacy")])
                 NavigationLink("About the data") { AboutDataView() }
-            }.listRowBackground(palette.panel)
-            Section("About the sky") {
-                NavigationLink { LearnView() } label:{
-                    VStack(alignment:.leading,spacing:4) {
-                        Text("Learn to look up")
-                        Text("Short essays on the darkness score, the Milky Way and its photos, meteors, forecasts, staying safe and sharing the night.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                    }.padding(.vertical,4)
-                }
-            }.listRowBackground(palette.panel)
-            Section("Support") {
+            } header:{ heading("Privacy and data") }.openRows(palette)
+            Section {
+                NavigationLink { LearnView() } label:{ titled("Learn to look up",note:"Short essays on the darkness score, the Milky Way, meteors and staying safe.") }
+                    .accessibilityInputLabels([Text("Learn to look up")])
+            } header:{ heading("About the sky") }.openRows(palette)
+            Section {
                 if let url=SupportLink.privacyPolicy { Link(destination:url) { ExternalRow(title:"Privacy policy") }.accessibilityHint("Opens the policy in Safari.") }
                 if let url=SupportLink.support { Link(destination:url) { ExternalRow(title:"Support and contact") }.accessibilityHint("Opens the support page in Safari.") }
                 if let url=SupportLink.email { Link(destination:url) { ExternalRow(title:"Email the developer") }.accessibilityHint("Opens a new email in Mail.") }
@@ -64,14 +56,27 @@ struct SettingsView:View {
                 NavigationLink("Diagnostics") { DiagnosticsView().nightForm() }
                 Button("Replay the introduction") { replay=true }
                 LabeledContent("Version",value:Self.version)
-            }.listRowBackground(palette.panel)
-        }.readableForm().nightForm().navigationTitle("Settings").navigationBarTitleDisplayMode(.inline)
+            } header:{ heading("Support") }.openRows(palette)
+        }.readableForm()
+            // With no cards under the rows the sky is veiled more than `nightForm`'s, and more again
+            // under Reduce Transparency or Increase Contrast, so no star sits behind a word.
+            .scrollContentBackground(.hidden).background(NightBackground(veil:reduceTransparency || palette.highContrast ? 0.85 : 0.65))
+            .navigationTitle("Settings").navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented:$explainNotifications) { RemindersExplainer { granted in
                 notifications=granted; permissionMessage=granted ? nil : String(localized:"Reminders are off. You can enable them in iPhone Settings.")
             }.nyxPresentation() }
             .sheet(isPresented:$replay) { OnboardingView { replay=false }.nyxPresentation() }
             .task { await syncPermission() }
             .onChange(of:scenePhase) { _,phase in if phase == .active { Task { await syncPermission() } } }
+    }
+    /// A section's heading, as `Eyebrow` sets one on a page: serif, sentence case, starlight.
+    private func heading(_ text:LocalizedStringKey)->some View { Eyebrow(text:text).textCase(nil).padding(.top,8) }
+    /// A row's name with its one quiet line beneath.
+    private func titled(_ title:LocalizedStringKey,note:LocalizedStringKey)->some View {
+        VStack(alignment:.leading,spacing:4) {
+            Text(title)
+            Text(note).font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+        }.padding(.vertical,4)
     }
     /// "1.1 (8)": the version and build, from the bundle.
     static var version:String {
@@ -86,6 +91,7 @@ struct SettingsView:View {
         permissionMessage=String(localized:"Notifications for Nyx are off in iPhone Settings. Turn them on there, then switch reminders back on.")
     }
 }
+
 /// The in-context explainer before iOS asks about notifications: from Settings, and the first time
 /// a park is saved. `decided` hears whether iOS allowed them.
 struct RemindersExplainer:View {
@@ -118,7 +124,7 @@ struct SoundAndTouchView:View {
                     }.accessibilityInputLabels([Text("Play"),Text("Listen"),Text("Stop")])
                 }
                 Text("It plays even when your iPhone is set to silent, because you asked for it, and other audio lowers while it plays. A transcript is always beside the button.").font(.caption).foregroundStyle(palette.muted)
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
             Section("Feel the Moon") {
                 if MoonHaptics.supported {
                     Toggle("Moon texture on the time river",isOn:$moonHaptics).tint(palette.controlTint)
@@ -133,15 +139,15 @@ struct SoundAndTouchView:View {
                 } else {
                     Text("This device has no Taptic Engine, so Nyx keeps its simple ticks. The Moon's phase is always written beside it.").foregroundStyle(palette.muted)
                 }
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
             Section("With VoiceOver") {
                 Text("The time river, each calendar month and the shape of the night offer an audio graph: choose Audio Graph in the rotor to hear the nights rise and fall as a tone.")
                 Text("VoiceOver rotors jump straight to what matters: Best nights and the best stretch in Plan, Closures and Pristine nights in Parks, Milestones in field mode. On the time river, actions go to the best night and feel the Moon.").foregroundStyle(palette.muted)
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
             Section("Your display settings") {
                 Text("With Differentiate Without Color, Excellent and Pristine nights are drawn as small stars, the river's best nights are marked with a triangle, moonlit hours are hatched and past nights are struck through.")
                 Text("Reduce Highlighting Effects dims the glows, halos and the Milky Way and keeps the shooting star away. Prefer Cross-Fade Transitions replaces the zoom and the month slide in Plan. When iOS asks apps to use less, the sky holds still.").foregroundStyle(palette.muted)
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
         }.readableForm().nightForm().navigationTitle("Sound and touch").navigationBarTitleDisplayMode(.inline)
             .onDisappear { listener.stop() }
     }
@@ -157,7 +163,7 @@ struct PrivacyView:View {
                 Text("Saved parks and spots, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data.")
                 // 2.0: saved spots are the one place of the person's own that a request carries.
                 Text("The one place of yours that Nyx sends anywhere is a spot you save: only its position, rounded to about \(SpotForecast.roundingDistance()), for its cloud forecast. You can turn that off below.")
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
             Section("Optional data updates") {
                 Toggle("Cloud forecasts",isOn:$model.weatherEnabled).tint(palette.controlTint)
                 Text("Requests go to api.open-meteo.com for all \(model.parks.count) U.S. national parks together, up to 50 in each request: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind, visibility, the chance of rain, the weather (such as fog or thunderstorms) and water vapour. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
@@ -174,12 +180,12 @@ struct PrivacyView:View {
                 Text("Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours. The request names no place and nothing about you. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
                 Toggle("Park alerts and programs",isOn:$model.npsEnabled).tint(palette.controlTint)
                 Text("Alerts for all \(model.parks.count) U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks are near you. Nothing is asked about any other place. Ranger programs are requested only for a park whose page you open. Campgrounds for all \(model.parks.count) parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
-            }.listRowBackground(palette.panel)
-            Section { NPSKeyField();ForecastRequestsToday() } header:{ Text("Advanced") }.listRowBackground(palette.panel)
+            }.openRows(palette)
+            Section { NPSKeyField();ForecastRequestsToday() } header:{ Eyebrow(text:"Advanced") }.openRows(palette)
             Section("Measured on this iPhone") {
                 Text("iOS reports how Nyx performs, including how bright its screen was, through MetricKit about once a day. Nyx keeps only the last screen brightness, to show here and in About the data. It is never sent anywhere.")
                 if let reading=LuminanceProof.current { Text(reading.sentence) }
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
             Section {
                 Text("Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, Plan, saved parks and the journal work offline.")
                 // Every use of location, as the purpose string iOS shows lists them.
@@ -187,7 +193,7 @@ struct PrivacyView:View {
                 Text("Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded.")
                 Text("Links open only when you tap them, in Safari, Maps, Mail or the App Store: nps.gov pages, Recreation.gov campground reservations, Globe at Night, Open-Meteo and the Creative Commons licence, a place's Wikidata page or official website, get-nyx.com, directions to a viewing spot or a saved spot, an email to the developer, and Nyx's App Store page. Nyx itself sends nothing to those sites.")
                 Text("Adding a night to Calendar opens Calendar's own editor, where you choose and save it. Nyx never reads your calendars.")
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
         }.readableForm().nightForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
     }
 }

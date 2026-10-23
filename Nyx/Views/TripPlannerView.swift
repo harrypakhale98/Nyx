@@ -188,7 +188,7 @@ struct TripPlannerView: View {
                     if let note=UsualCloudsNote.trip(TripStay.marked(plan.stops),unmarked:TripStay.unmarked(plan.stops)) { Text(note).fixedSize(horizontal:false,vertical:true) }
                     Text("Distances are straight lines, not roads. Scores are estimates; a closure in the last park update counts against a park. Check closures and the forecast before you go.").fixedSize(horizontal:false,vertical:true)
                 }.font(.caption).foregroundStyle(palette.muted)
-                ShareLink(item:TripPlanner.shareText(plan,distance:Self.miles)) { Label("Share plan",systemImage:"square.and.arrow.up") }.buttonStyle(.bordered)
+                ShareLink(item:TripPlanner.shareText(plan,distance:Self.miles)) { Label("Share plan",systemImage:"square.and.arrow.up") }.secondaryAction()
             }
         } else if planning || !prepared { ProgressView("Planning your nights").frame(maxWidth:.infinity).padding(.vertical,30) }
     }
@@ -208,7 +208,7 @@ struct TripPlannerView: View {
                     .contentTransition(.numericText(value:Double(best.night.score.value)))
                 Text(best.night.bandWithBasis).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.center)
                 Text(best.reason).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-                if let closure=best.closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
+                if let closure=best.closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).multilineTextAlignment(.center) }
                 AccessNoteLabel(park:park,alignment:.center)
             }.frame(maxWidth:.infinity)
         }.buttonStyle(.plain)
@@ -332,7 +332,7 @@ struct TripStayRow: View {
             Text(lead.reason).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             if let hop=first.hopMeters, hop>1000 { Label(String(localized:"\(distance(hop)) from the night before"),systemImage:"arrow.triangle.turn.up.right.diamond").font(.caption).foregroundStyle(palette.muted) }
             if let label=night.basisLabel { Text(label).font(.caption).foregroundStyle(palette.muted) }
-            if let closure=stay.stops.compactMap(\.closure).first { Label(String(localized:"Closure alert: \(closure)"),systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
+            if let closure=stay.stops.compactMap(\.closure).first { Label(String(localized:"Closure alert: \(closure)"),systemImage:"exclamationmark.triangle").font(.caption).labelStyle(.caution).fixedSize(horizontal:false,vertical:true) }
             if showsAccess { AccessNoteLabel(park:park) }
         }
     }

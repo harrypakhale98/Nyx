@@ -270,13 +270,13 @@ struct WatchComplicationView: View {
             // A closure takes the Moon's place, in the accent: it stands beside the score on every surface.
             if entry.closure != nil { Image(systemName: WristClosure.symbol).foregroundStyle(accent) } else { MoonSymbol(night: night).foregroundStyle(muted) }
         } currentValueLabel: {
-            Text(night.score.value, format: .number).font(.system(.title3, design: .serif)).widgetAccentable()
+            Text(night.score.value, format: .number).scoreNumeral(.title3, accent: accent).widgetAccentable()
         }
         .gaugeStyle(.accessoryCircular).tint(accent).foregroundStyle(ink).widgetAccentable()
     }
     private func corner(_ night: Night) -> some View {
         // The numeral once, in the corner; the curved gauge alone carries the fill, without end labels.
-        Text(night.score.value, format: .number).font(.system(.title2, design: .serif)).foregroundStyle(accent).widgetAccentable()
+        Text(night.score.value, format: .number).scoreNumeral(.title2, accent: accent).widgetAccentable()
             .widgetLabel {
                 // A closure takes the curved label from the gauge: the numeral stays, the warning is read first.
                 if entry.closure != nil {
@@ -335,7 +335,7 @@ struct WatchComplicationView: View {
                 Text(night.park.wristName).font(.system(.headline, design: .serif)).lineLimit(1)
             }
             HStack(alignment: .firstTextBaseline, spacing: 5) {
-                Text(night.score.value, format: .number).font(.system(.title2, design: .serif).weight(.light)).foregroundStyle(accent).widgetAccentable()
+                Text(night.score.value, format: .number).scoreNumeral(.title2, accent: accent).widgetAccentable()
                 if case .mark = closure { Image(systemName: WristClosure.symbol).font(.caption2).foregroundStyle(accent).widgetAccentable() }
                 // Whole or the one word: a basis or smoke note cut mid-word would say less than the
                 // word under the score (VoiceOver hears it all in the summary).

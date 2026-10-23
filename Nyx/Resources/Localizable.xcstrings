@@ -8752,6 +8752,41 @@
         }
       }
     },
+    "A local reminder when a park, place or spot you save has a night of 90 or higher. Forecasts can change.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine lokale Erinnerung, wenn ein gespeicherter Park, Ort oder Platz eine Nacht mit 90 oder mehr hat. Vorhersagen können sich ändern."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A local reminder when a park, place or spot you save has a night of 90 or higher. Forecasts can change."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un recordatorio local cuando un parque, lugar o sitio que guardas tiene una noche de 90 o más. Los pronósticos pueden cambiar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un rappel local quand un parc, un lieu ou un endroit enregistré a une nuit à 90 ou plus. Les prévisions peuvent changer."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存した公園や場所、スポットで夜のスコアが90以上になるときのローカルのリマインダーです。予報は変わることがあります。"
+          }
+        }
+      }
+    },
     "A low hum grows as the sky darkens and fades toward dawn; it softens while the Moon is up. A sharp tap is moonrise or moonset. A slow swell is the Milky Way's core rising.": {
       "extractionState": "manual",
       "localizations": {
@@ -9137,37 +9172,37 @@
         }
       }
     },
-    "A red palette reduces glare. Lower the screen brightness too. The flashlight button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back.": {
+    "A red palette that keeps your eyes adapted to the dark. Lower the screen brightness too.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Eine rote Farbpalette verringert die Blendung. Verringere auch die Bildschirmhelligkeit. Die Taschenlampentaste oben in jedem Tab und die Steuerung im Kontrollzentrum schalten sie ebenfalls um. Der Feldmodus, über „Ich bin heute Nacht hier“ auf der Seite eines Parks, schaltet sie ein und dunkelt den Bildschirm ab, solange er geöffnet ist, und stellt danach beides wieder her."
+            "value": "Eine rote Farbpalette, die deine Augen an die Dunkelheit gewöhnt hält. Verringere auch die Bildschirmhelligkeit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A red palette reduces glare. Lower the screen brightness too. The flashlight button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back."
+            "value": "A red palette that keeps your eyes adapted to the dark. Lower the screen brightness too."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Una paleta roja reduce el deslumbramiento. Baja también el brillo de la pantalla. El botón de la linterna arriba de cada pestaña y el control del Centro de control también la activan. El modo de campo, desde \"Estoy aquí esta noche\" de un parque, la activa y atenúa la pantalla mientras está abierto, y luego restaura ambos."
+            "value": "Una paleta roja que mantiene tus ojos adaptados a la oscuridad. Baja también el brillo de la pantalla."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Une palette rouge réduit l’éblouissement. Baissez aussi la luminosité de l’écran. Le bouton lampe en haut de chaque onglet et la commande du centre de contrôle l’activent aussi. Le mode terrain, lancé depuis « Je suis ici ce soir » sur la page d’un parc, l’active et baisse la luminosité de l’écran tant qu’il est ouvert, puis rétablit les deux."
+            "value": "Une palette rouge qui garde vos yeux adaptés à l’obscurité. Baissez aussi la luminosité de l’écran."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "赤い配色でまぶしさを抑えます。画面の明るさも下げてください。各タブ上部の懐中電灯ボタンとコントロールセンターのコントロールでも切り替えられます。公園の「今夜ここにいます」から始めるフィールドモードでは、開いている間これをオンにして画面を暗くし、閉じると両方を元に戻します。"
+            "value": "赤い配色で、目が暗さに慣れたままになります。画面の明るさも下げてください。"
           }
         }
       }
@@ -13767,37 +13802,37 @@
         }
       }
     },
-    "Automatic turns red from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark.": {
+    "Automatic turns night vision on from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "„Automatisch“ schaltet von der Abend- bis zur Morgendämmerung am Park unter „Heute Nacht“ auf Rot. Rotes Licht erhält die Dunkeladaptation deiner Augen."
+            "value": "„Automatisch“ schaltet die Nachtsicht von der Abend- bis zur Morgendämmerung am Park unter „Heute Nacht“ ein. Rotes Licht erhält die Dunkeladaptation deiner Augen."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Automatic turns red from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark."
+            "value": "Automatic turns night vision on from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Automático cambia a rojo del anochecer al alba en el parque de Esta noche. La luz roja mantiene tus ojos adaptados a la oscuridad."
+            "value": "Automático activa la visión nocturna del anochecer al alba en el parque de Esta noche. La luz roja mantiene tus ojos adaptados a la oscuridad."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "En automatique, l’écran passe au rouge du crépuscule à l’aube au parc de l’onglet Ce soir. La lumière rouge garde vos yeux adaptés à l’obscurité."
+            "value": "En automatique, la vision nocturne s’active du crépuscule à l’aube au parc de l’onglet Ce soir. La lumière rouge garde vos yeux adaptés à l’obscurité."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "「自動」にすると、「今夜」の公園で夕暮れから夜明けまで赤くなります。赤い光なら、暗さに慣れた目を保てます。"
+            "value": "「自動」にすると、「今夜」の公園で夕暮れから夜明けまでナイトビジョンがオンになります。赤い光なら、暗さに慣れた目を保てます。"
           }
         }
       }
@@ -16787,41 +16822,6 @@
         }
       }
     },
-    "Choose what Nyx asks the internet for: cloud forecasts, smoke and haze, the aurora forecast, and park alerts and programs. Each has its own switch.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wähle, was Nyx aus dem Internet abruft: Wolkenvorhersagen, Rauch und Dunst, die Polarlichtvorhersage sowie Parkmeldungen und Programme. Jedes hat einen eigenen Schalter."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose what Nyx asks the internet for: cloud forecasts, smoke and haze, the aurora forecast, and park alerts and programs. Each has its own switch."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elige qué pide Nyx a internet: previsiones de nubes, humo y bruma, la previsión de auroras, y avisos y programas de los parques. Cada uno tiene su propio interruptor."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisissez ce que Nyx demande à internet : prévisions de nuages, fumée et brume, prévision d’aurores, et alertes et programmes des parcs. Chacun a son propre interrupteur."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyxがインターネットから取得するものを選べます。雲の予報、煙ともや、オーロラ予報、公園のお知らせとプログラム。それぞれに個別のスイッチがあります。"
-          }
-        }
-      }
-    },
     "Cities and towns": {
       "extractionState": "manual",
       "localizations": {
@@ -18818,41 +18818,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "折りたたみ"
-          }
-        }
-      }
-    },
-    "Colors": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Farben"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Colors"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Colores"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couleurs"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "色"
           }
         }
       }
@@ -29477,37 +29442,37 @@
         }
       }
     },
-    "Hear a night as sound, feel the Moon's phase, and see how Nyx adapts to VoiceOver, Voice Control and your display settings.": {
+    "Hear a night, feel the Moon's phase, and see how Nyx adapts to your settings.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Höre eine Nacht als Klang, spüre die Mondphase und sieh, wie sich Nyx an VoiceOver, Sprachsteuerung und deine Anzeigeeinstellungen anpasst."
+            "value": "Höre eine Nacht, spüre die Mondphase und sieh, wie sich Nyx an deine Einstellungen anpasst."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hear a night as sound, feel the Moon's phase, and see how Nyx adapts to VoiceOver, Voice Control and your display settings."
+            "value": "Hear a night, feel the Moon's phase, and see how Nyx adapts to your settings."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Escucha una noche como sonido, siente la fase de la Luna y descubre cómo se adapta Nyx a VoiceOver, Control por voz y tu configuración de pantalla."
+            "value": "Escucha una noche, siente la fase de la Luna y descubre cómo se adapta Nyx a tu configuración."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Écoutez une nuit sous forme de sons, ressentez la phase de la Lune, et voyez comment Nyx s’adapte à VoiceOver, au Contrôle vocal et à vos réglages d’affichage."
+            "value": "Écoutez une nuit, ressentez la phase de la Lune et voyez comment Nyx s’adapte à vos réglages."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "夜を音で聞き、月の満ち欠けを触覚で感じてみてください。NyxがVoiceOver、音声コントロール、画面表示の設定にどう対応するかも確認できます。"
+            "value": "夜を音で聞き、月の満ち欠けを触覚で感じ、Nyxが設定にどう対応するかを確認できます。"
           }
         }
       }
@@ -34353,41 +34318,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "公園を読み込み中"
-          }
-        }
-      }
-    },
-    "Local reminders for the parks and places you save, and the spots you add, when a night scores 90 or higher. Forecasts may change. Upcoming nights are recalculated whenever Nyx opens.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lokale Erinnerungen für gespeicherte Parks und Orte und hinzugefügte Plätze, wenn eine Nacht 90 oder mehr erreicht. Vorhersagen können sich ändern. Die kommenden Nächte werden bei jedem Öffnen von Nyx neu berechnet."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Local reminders for the parks and places you save, and the spots you add, when a night scores 90 or higher. Forecasts may change. Upcoming nights are recalculated whenever Nyx opens."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recordatorios locales para los parques y lugares que guardas y los sitios que añades, cuando una noche llega a 90 o más. Los pronósticos pueden cambiar. Las próximas noches se recalculan cada vez que abres Nyx."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rappels locaux pour les parcs et lieux enregistrés et les lieux ajoutés, quand une nuit atteint 90 ou plus. Les prévisions peuvent changer. Les nuits à venir sont recalculées à chaque ouverture de Nyx."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存した公園や場所、追加したスポットで、夜のスコアが90以上になるときのローカルのリマインダーです。予報は変わることがあります。今後の夜はNyxを開くたびに再計算されます。"
           }
         }
       }
@@ -41081,6 +41011,41 @@
         }
       }
     },
+    "Night vision is on. Nyx stays red, day or night, until you change Night vision in Parks.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nachtsicht ist eingeschaltet. Nyx bleibt rot, bei Tag und Nacht, bis du „Nachtsicht“ unter „Parks“ änderst."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night vision is on. Nyx stays red, day or night, until you change Night vision in Parks."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La visión nocturna está activada. Nyx sigue en rojo, de día o de noche, hasta que cambies Visión nocturna en Parques."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La vision nocturne est activée. Nyx reste en rouge, de jour comme de nuit, jusqu’à ce que vous changiez Vision nocturne dans Parcs."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ナイトビジョンがオンです。「公園」の「ナイトビジョン」を変えるまで、Nyxは昼も夜も赤いままです。"
+          }
+        }
+      }
+    },
     "Night vision off": {
       "extractionState": "manual",
       "localizations": {
@@ -47305,41 +47270,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "「今夜」に表示"
-          }
-        }
-      }
-    },
-    "On the peak night of a major shower, when at least 20 an hour are expected at a place you save with the Moon down. At most one a night.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In der Höhepunktnacht eines großen Meteorstroms, wenn an einem gespeicherten Ort bei untergegangenem Mond mindestens 20 pro Stunde erwartet werden. Höchstens eine pro Nacht."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On the peak night of a major shower, when at least 20 an hour are expected at a place you save with the Moon down. At most one a night."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En la noche de máxima actividad de una gran lluvia de meteoros, cuando se esperan al menos 20 por hora en un lugar que guardas con la Luna bajo el horizonte. Como mucho uno por noche."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La nuit du maximum d’une grande pluie d’étoiles filantes, quand au moins 20 par heure sont attendues dans un lieu enregistré, Lune couchée. Au plus un par nuit."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "大きな流星群の極大夜に、保存した場所で月が沈んでいて1時間に20個以上が見込まれるときにお知らせします。1夜につき最大1件です。"
           }
         }
       }
@@ -53594,41 +53524,6 @@
         }
       }
     },
-    "Red light is on. Nyx stays red, day or night, until you change Colors in Parks.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rotlicht ist eingeschaltet. Nyx bleibt rot, bei Tag und Nacht, bis du „Farben“ unter „Parks“ änderst."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Red light is on. Nyx stays red, day or night, until you change Colors in Parks."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La luz roja está activada. Nyx sigue en rojo, de día o de noche, hasta que cambies Colores en Parques."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La lumière rouge est activée. Nyx reste en rouge, de jour comme de nuit, jusqu’à ce que vous changiez Couleurs dans Parcs."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "赤色ライトがオンです。「公園」の「色」を変えるまで、Nyxは昼も夜も赤いままです。"
-          }
-        }
-      }
-    },
     "Red light only. Nyx taps your wrist at 25 and 30 minutes, even with the screen off.": {
       "extractionState": "manual",
       "localizations": {
@@ -57444,41 +57339,6 @@
         }
       }
     },
-    "Set red light": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rotlicht einstellen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Set red light"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configurar luz roja"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Régler la lumière rouge"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "赤色ライトを設定"
-          }
-        }
-      }
-    },
     "Set to one park: no \"2 of 3\"": {
       "extractionState": "manual",
       "localizations": {
@@ -58484,37 +58344,37 @@
         }
       }
     },
-    "Short essays on the darkness score, the Milky Way and its photos, meteors, forecasts, staying safe and sharing the night.": {
+    "Short essays on the darkness score, the Milky Way, meteors and staying safe.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kurze Texte über den Dunkelheitswert, die Milchstraße und ihre Fotos, Meteore, Vorhersagen, Sicherheit und das Teilen der Nacht."
+            "value": "Kurze Texte über den Dunkelheitswert, die Milchstraße, Meteore und Sicherheit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Short essays on the darkness score, the Milky Way and its photos, meteors, forecasts, staying safe and sharing the night."
+            "value": "Short essays on the darkness score, the Milky Way, meteors and staying safe."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ensayos breves sobre el índice de oscuridad, la Vía Láctea y cómo fotografiarla, los meteoros, los pronósticos, la seguridad y compartir la noche."
+            "value": "Ensayos breves sobre el índice de oscuridad, la Vía Láctea, los meteoros y la seguridad."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "De courts essais sur l’indice d’obscurité, la Voie lactée et ses photos, les météores, les prévisions, la sécurité et le partage de la nuit."
+            "value": "De courts essais sur l’indice d’obscurité, la Voie lactée, les météores et la sécurité."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "暗さスコア、天の川とその写真、流星、予報、安全、夜を分かち合うことについての短いエッセイ。"
+            "value": "暗さスコア、天の川、流星、安全についての短いエッセイ。"
           }
         }
       }
@@ -61578,41 +61438,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "誰もが楽しめる星空"
-          }
-        }
-      }
-    },
-    "Starlight": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sternenlicht"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starlight"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estelar"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lumière des étoiles"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "星明かり"
           }
         }
       }
@@ -72495,41 +72320,6 @@
         }
       }
     },
-    "Turn on red light": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rotlicht einschalten"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn on red light"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Activar luz roja"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Activer la lumière rouge"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "赤色ライトをオンにする"
-          }
-        }
-      }
-    },
     "Turn the Crown to look ahead": {
       "extractionState": "manual",
       "localizations": {
@@ -75615,6 +75405,41 @@
         }
       }
     },
+    "What Nyx asks the internet for, each with its own switch.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was Nyx aus dem Internet abruft, jeweils mit eigenem Schalter."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What Nyx asks the internet for, each with its own switch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo que Nyx pide a internet, cada cosa con su propio interruptor."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce que Nyx demande à internet, chaque élément avec son propre interrupteur."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxがインターネットから取得するもの。それぞれに個別のスイッチがあります。"
+          }
+        }
+      }
+    },
     "What a forecast can't tell you": {
       "extractionState": "manual",
       "localizations": {
@@ -76101,6 +75926,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyxがクラッシュしたり応答しなくなったりすると、iOSは1日ほど後に技術的なレポートをNyxに渡すことがあります。Nyxはこのデバイス上に、最新の5件をここに保管します。あなたが自分でコピーまたは共有しない限り、どこにも送信されません。"
+          }
+        }
+      }
+    },
+    "When a major shower peaks at a place you save, with the Moon down. At most one a night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wenn ein großer Meteorstrom an einem gespeicherten Ort seinen Höhepunkt erreicht, bei untergegangenem Mond. Höchstens eine pro Nacht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When a major shower peaks at a place you save, with the Moon down. At most one a night."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuando una gran lluvia de meteoros alcanza su máximo en un lugar que guardas, con la Luna bajo el horizonte. Como mucho uno por noche."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand une grande pluie d’étoiles filantes atteint son maximum dans un lieu enregistré, Lune couchée. Au plus un par nuit."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存した場所で、月が沈んでいるときに大きな流星群が極大を迎えるとお知らせします。1夜につき最大1件です。"
           }
         }
       }
