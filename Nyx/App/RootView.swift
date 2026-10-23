@@ -319,6 +319,8 @@ struct RootView:View {
         // Your privacy → Advanced on its own, opened (`-nyx-advanced`).
         case "nps-key": Form { Section { NPSKeyField() } header:{ Text("Advanced") } }.readableForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
         case "data": AboutDataView()
+        // "The next six months" for the starting park (`-nyx-park` for another), for audits and captures.
+        case "long-view": if let park=model.home { NavigationStack { LongViewPage(park:park) } }
         // "With the lights out" alone, as Tonight shows it from Las Vegas (to Death Valley), for audits and captures.
         case "lights-out": if let dark=model.park("deva") {
             NavigationStack { ScrollView { Panel { LightsOutFigure(target:LightsOut.Target(place:dark,meters:dark.distanceMeters(latitude:36.17,longitude:-115.14),homeClass:8,homeKnown:true,

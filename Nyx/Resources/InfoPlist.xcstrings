@@ -36,6 +36,41 @@
         }
       }
     },
+    "NSCalendarsWriteOnlyAccessUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx fügt die dunklen Nächte, die du wählst, deinem Kalender hinzu. Es kann nur Ereignisse hinzufügen und sieht deinen Kalender nie."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx adds the dark nights you choose to your calendar. It can add events only; it never sees your calendar."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx añade a tu calendario las noches oscuras que eliges. Solo puede añadir eventos; nunca ve tu calendario."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx ajoute à votre calendrier les nuits sombres que vous choisissez. Il peut seulement ajouter des événements ; il ne voit jamais votre calendrier."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxは選んだ暗い夜をカレンダーに追加します。イベントを追加するだけで、カレンダーを見ることはありません。"
+          }
+        }
+      }
+    },
     "NSLocationWhenInUseUsageDescription": {
       "extractionState": "manual",
       "localizations": {

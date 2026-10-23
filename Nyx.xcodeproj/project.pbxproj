@@ -1180,6 +1180,7 @@
 				INFOPLIST_FILE = "Config/Nyx-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription = "Nyx adds the dark nights you choose to your calendar. It can add events only; it never sees your calendar.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, and point the sky to true north. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Nyx follows how your head turns through headphones that track motion, so the tone in field mode stays toward the part of the sky you chose. Motion never leaves this device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -1234,6 +1235,7 @@
 				INFOPLIST_FILE = "Config/Nyx-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription = "Nyx adds the dark nights you choose to your calendar. It can add events only; it never sees your calendar.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, and point the sky to true north. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Nyx follows how your head turns through headphones that track motion, so the tone in field mode stays toward the part of the sky you chose. Motion never leaves this device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

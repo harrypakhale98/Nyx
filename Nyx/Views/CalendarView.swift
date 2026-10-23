@@ -223,7 +223,7 @@ struct CalendarView: View {
                 VStack(alignment:.leading,spacing:24) {
                     heading(park); monthBar(park,shown)
                     if typeSize.isAccessibilitySize { list(park,data) } else { months(park,data,others:pages.others,scale:wide && width>=640 ? 1.3 : 1) }
-                    windowPanel(park,shown); legend(shown)
+                    windowPanel(park,shown); LongViewLink(park:park); legend(shown)
                 }.padding(24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
             } else if waiting { ConstellationLoader().frame(maxWidth:.infinity).padding(.top,80) }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park,veil:0.45))
