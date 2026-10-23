@@ -19,7 +19,9 @@ struct LongViewPage: View {
                 VStack(alignment:.leading,spacing:6) {
                     Eyebrow(text:"The next six months")
                     Text(park.shortName).font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader)
-                    Text("Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds for the month; the Moon and the hours of true darkness are exact.")
+                    Text(weekends?.first?.best.usualCloud == nil && weekends != nil
+                         ? String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, this place has no usual clouds to go on, so scores rest on the Moon and the hours of true darkness, which are exact.")
+                         : String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds for the month; the Moon and the hours of true darkness are exact."))
                         .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
                 Panel { VStack(alignment:.leading,spacing:0) {
@@ -44,7 +46,7 @@ struct LongViewPage: View {
                     .sensoryFeedback(.selection,trigger:outcome) { _,new in if case .added = new { return true }; return false }
                     if let outcome { Text(outcomeText(outcome)).font(.subheadline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
                     // For another calendar app, or to send to someone: the same nights as a file.
-                    ShareLink(item:DarkNightsCalendar(park:park,nights:nights),
+                    ShareLink(item:DarkNightsCalendar(park:park,nights:nights,closure:model.closure(park)),
                               preview:SharePreview(String(localized:"Dark weekends at \(park.shortName)"),image:Image(systemName:"calendar"))) {
                         Text("Share as a calendar file").font(.footnote).frame(minHeight:44,alignment:.leading)
                     }
@@ -56,8 +58,11 @@ struct LongViewPage: View {
                                             action:"Continue") { explaining=false; addAll(nights) }
                             .nyxPresentation()
                     }
-                    Text("Many campgrounds open reservations about six months ahead. Check the dates for yours.")
-                        .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    // U.S. park campgrounds; elsewhere booking works too differently to say.
+                    if park.nps != nil {
+                        Text("Many campgrounds open reservations about six months ahead. Check the dates for yours.")
+                            .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    }
                 }
                 Panel { VStack(alignment:.leading,spacing:10) {
                     Eyebrow(text:"Milky Way season")
@@ -88,7 +93,7 @@ struct LongViewPage: View {
     private func outcomeText(_ outcome: CalendarWriter.Outcome) -> String {
         switch outcome {
         case .added(let count): String(localized:"Added \(count) nights to your calendar.")
-        case .alreadyAdded: String(localized:"These nights are already in your calendar.")
+        case .alreadyAdded: String(localized:"Nyx has already added these nights.")
         case .denied: String(localized:"Calendar access is off for Nyx. Turn it on in Settings, or share the nights as a calendar file.")
         case .failed: String(localized:"Nyx could not add the nights. Share them as a calendar file instead.")
         }

@@ -44,12 +44,12 @@ struct ScoreReadout: View {
         case .usual: score.cloudPoints == nil ? nil : String(localized:"Usual clouds")
         }
     }
-    /// The binding cap, when the parts add up to more than the score: their sum first, so the reader
-    /// who adds the four numbers finds the total said, then what holds the score below it.
+    /// The binding cap, when the parts add up to more than the score, then their sum, so the reader who
+    /// adds the four numbers finds the total said: the breakdown's own words (`ScoreBreakdownView`).
     private var limitLine: String? { Self.limitLine(score,tonight:isTonight) }
     nonisolated static func limitLine(_ score:DarknessScore,tonight:Bool)->String? {
         guard let limit=score.limit, limit.cap<score.partsSum else { return nil }
-        return Sentences.join([String(localized:"The four parts add to \(score.partsSum)."),limit.sentence(tonight:tonight)])
+        return Sentences.join([limit.sentence(tonight:tonight),String(localized:"The four parts add up to \(score.partsSum); the score takes the lowest cap that applies.")])
     }
     var body: some View {
         Button(action:action) {

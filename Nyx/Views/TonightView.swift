@@ -70,10 +70,9 @@ struct TonightView: View {
             if wide, !loading, !empty, let park=best.first {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
-                    GoingPanel()
                     // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                     FoldColumns(narrow:.trailing,narrowMax:500,spacing:36) {
-                        VStack(spacing:26) { hero(park,others:Array(best.dropFirst())); farther(than:park,shortlist:widerList); darkArea(all); ahead(park) }.frame(maxWidth:.infinity)
+                        VStack(spacing:26) { GoingPanel(hero:park); hero(park,others:Array(best.dropFirst())); farther(than:park,shortlist:widerList); darkArea(all); ahead(park) }.frame(maxWidth:.infinity)
                         VStack(alignment:.leading,spacing:22) { StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe); more(best); fromHome(hero:park); LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
@@ -83,11 +82,13 @@ struct TonightView: View {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     // A night the person said they are going to leads: their own plan before tonight's answer.
-                    if !loading { GoingPanel() }
+                    // At accessibility sizes it follows the answer, so the score stays on the first screen.
+                    if !loading, !typeSize.isAccessibilitySize { GoingPanel(hero:best.first) }
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
                     else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil,shortlist:widerList);darkArea(all);StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe);fromHome(hero:nil) }
                     else if let park=best.first {
                         hero(park,others:Array(best.dropFirst()))
+                        if typeSize.isAccessibilitySize { GoingPanel(hero:park) }
                         farther(than:park,shortlist:widerList)
                         darkArea(all)
                         // The answer, then the alternatives; then where "within reach" is measured from.

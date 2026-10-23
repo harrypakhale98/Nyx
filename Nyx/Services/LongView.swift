@@ -87,7 +87,7 @@ nonisolated struct CoreSeason: Sendable, Equatable {
         var format=Date.FormatStyle.dateTime.month(.abbreviated).day(); format.timeZone=park.timeZone
         let from=start.formatted(format), to=end.formatted(format)
         return now ? String(localized:"Milky Way season at \(park.shortName) runs until about \(to): the core is up at least an hour in true darkness on moonless nights.")
-                   : String(localized:"Milky Way season at \(park.shortName) opens about \(from) and runs to about \(to): the core up at least an hour in true darkness on moonless nights.")
+                   : String(localized:"Milky Way season at \(park.shortName) opens about \(from) and runs to about \(to): the core is up at least an hour in true darkness on moonless nights.")
     }
 }
 
@@ -99,6 +99,7 @@ nonisolated struct CoreSeason: Sendable, Equatable {
 nonisolated struct DarkNightsCalendar: Transferable {
     let park: Park
     let nights: [Night]
+    var closure: String?=nil
     static var transferRepresentation: some TransferRepresentation {
         FileRepresentation(exportedContentType:.calendarEvent) { file in
             let url=FileManager.default.temporaryDirectory.appendingPathComponent(file.fileName)
@@ -127,17 +128,15 @@ nonisolated struct DarkNightsCalendar: Transferable {
         out.append(current)
         return out.joined(separator:"\r\n ")
     }
+    /// Each night as the single "Add to Calendar" event reads (`CalendarDraft`): its title, hours and notes.
     func text(now: Date = .now) -> String {
         var lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Nyx//Dark nights//EN","CALSCALE:GREGORIAN"]
         for night in nights {
-            let sky=night.sky
-            let start=sky.darkStart ?? sky.sunset ?? sky.cloudWindow.start
-            let end=max(start.addingTimeInterval(3600),sky.darkEnd ?? sky.sunrise ?? sky.cloudWindow.end)
-            let notes=[String(localized:"Nyx scored this night \(night.score.value), \(night.score.band.label)."),night.basisLabels.joined(separator:" · "),
-                       String(localized:"Scores this far ahead rest on the usual clouds for the month. Check the forecast and closures nearer the time.")].filter { !$0.isEmpty }
-            lines+=["BEGIN:VEVENT","UID:nyx-\(park.id)-\(park.isoDay(night.id))","DTSTAMP:\(Self.stamp(now))","DTSTART:\(Self.stamp(start))","DTEND:\(Self.stamp(end))",
-                    "SUMMARY:"+Self.escape(String(localized:"Dark sky at \(park.shortName)")),"LOCATION:"+Self.escape(park.name),
-                    "DESCRIPTION:"+Self.escape(notes.joined(separator:"\n")),"END:VEVENT"]
+            let draft=CalendarDraft(night:night,closure:closure)
+            lines+=["BEGIN:VEVENT","UID:nyx-\(park.id)-\(park.isoDay(night.id))","DTSTAMP:\(Self.stamp(now))","DTSTART:\(Self.stamp(draft.start))","DTEND:\(Self.stamp(draft.end))",
+                    "SUMMARY:"+Self.escape(draft.title),"LOCATION:"+Self.escape(draft.location),"DESCRIPTION:"+Self.escape(draft.notes)]
+            if let url=draft.url { lines.append("URL:"+url.absoluteString) }
+            lines.append("END:VEVENT")
         }
         lines.append("END:VCALENDAR")
         return lines.map(Self.fold).joined(separator:"\r\n")+"\r\n"

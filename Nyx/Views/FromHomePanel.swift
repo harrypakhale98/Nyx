@@ -23,7 +23,7 @@ struct FromHomePanel: View {
                 notes(sky)
                 if let lightsOut {
                     Divider().overlay(palette.line)
-                    LightsOutFigure(target:lightsOut,origin:origin.name)
+                    LightsOutFigure(target:lightsOut,origin:origin.name,fromDevice:origin.source == .device)
                 }
             } else {
                 ProgressView().frame(maxWidth:.infinity,minHeight:60).accessibilityLabel("Working out tonight's sky")
