@@ -351,6 +351,41 @@
         }
       }
     },
+    "%@ at %@ has changed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ in %2$@ hat sich geändert"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ at %@ has changed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ en %2$@ ha cambiado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ à %2$@ a changé"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@の%1$@が変わりました"
+          }
+        }
+      }
+    },
     "%@ at %@ tonight": {
       "extractionState": "manual",
       "localizations": {
@@ -767,6 +802,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@まで%2$@"
+          }
+        }
+      }
+    },
+    "%@ is %lld that night, %@ away.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ hat in dieser Nacht %2$lld, %3$@ entfernt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is %lld that night, %@ away."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ tiene %2$lld esa noche, a %3$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ est à %2$lld cette nuit-là, à %3$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "その夜の%1$@は%2$lld点（%3$@先）。"
+          }
+        }
+      }
+    },
+    "%@ is %lld there.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dort hat der %1$@ %2$lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is %lld there."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allí, el %1$@ tiene %2$lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Là-bas, %1$@ est à %2$lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同じ場所の%1$@は%2$lld点。"
           }
         }
       }
@@ -2539,6 +2644,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@、%2$@：100点中%3$lld点、%4$@。%5$@"
+          }
+        }
+      }
+    },
+    "%@, %@: %lld, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, %2$@: %3$lld, %4$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %lld, %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, %2$@: %3$lld, %4$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, %2$@ : %3$lld, %4$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%2$@：%3$lld点、%4$@"
           }
         }
       }
@@ -6837,6 +6977,41 @@
         }
       }
     },
+    "%lld when you chose it. Turn on reminders to hear if it changes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld, als du sie gewählt hast. Aktiviere Erinnerungen, um von Änderungen zu erfahren."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld when you chose it. Turn on reminders to hear if it changes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld cuando la elegiste. Activa los recordatorios para saber si cambia."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld quand vous l’avez choisie. Activez les rappels pour savoir si elle change."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選んだときは%lld点。変わったときに知らせを受けるには、リマインダーをオンにしてください。"
+          }
+        }
+      }
+    },
     "%lld · %@": {
       "extractionState": "manual",
       "localizations": {
@@ -10104,6 +10279,41 @@
         }
       }
     },
+    "Add your drive time to know when to leave.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gib deine Fahrzeit ein, um zu wissen, wann du losfahren solltest."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add your drive time to know when to leave."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade el tiempo de viaje para saber cuándo salir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoutez le temps de trajet pour savoir quand partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移動時間を入れると、出発の時刻がわかります。"
+          }
+        }
+      }
+    },
     "Adding a night to Calendar opens Calendar's own editor, where you choose and save it. Nyx never reads your calendars.": {
       "extractionState": "manual",
       "localizations": {
@@ -11760,6 +11970,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "空に広がる人工の光を、控えめなボートル推定値で示しています。測定値ではありません。"
+          }
+        }
+      }
+    },
+    "As of %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stand: %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As of %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A las %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mis à jour à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@時点。"
           }
         }
       }
@@ -22143,6 +22388,111 @@
         }
       }
     },
+    "Drive time": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fahrzeit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drive time"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiempo de viaje"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temps de trajet"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移動時間"
+          }
+        }
+      }
+    },
+    "Drive time, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fahrzeit: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drive time, %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiempo de viaje: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temps de trajet : %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移動時間：%@"
+          }
+        }
+      }
+    },
+    "Drive to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fahrt nach %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drive to %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viaje a %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trajet vers %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@までの移動"
+          }
+        }
+      }
+    },
     "Dust in the air: the Milky Way will look faint.": {
       "extractionState": "manual",
       "localizations": {
@@ -27988,6 +28338,41 @@
         }
       }
     },
+    "Going": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ich fahre hin"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Going"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voy"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "J’y vais"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行く予定"
+          }
+        }
+      }
+    },
     "Good": {
       "extractionState": "manual",
       "localizations": {
@@ -29343,6 +29728,111 @@
         }
       }
     },
+    "I expect to be back by sunrise, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ich rechne damit, bis Sonnenaufgang zurück zu sein, %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I expect to be back by sunrise, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuento con volver antes del amanecer (%@)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je compte être de retour au lever du soleil, à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日の出（%@）までには戻る予定です。"
+          }
+        }
+      }
+    },
+    "I'm going": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ich fahre hin"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I'm going"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voy a ir"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "J’y vais"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行く"
+          }
+        }
+      }
+    },
+    "I'm going to %@ on %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ich fahre am %2$@ nach %1$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I'm going to %@ on %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voy a %1$@ el %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je vais à %1$@ le %2$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@に%1$@へ行く"
+          }
+        }
+      }
+    },
     "I'm here tonight": {
       "extractionState": "manual",
       "localizations": {
@@ -29794,6 +30284,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "数泊の滞在では、予報が十分に届かない夜は、各公園のその月の平年の雲量をもとにしています。"
+          }
+        }
+      }
+    },
+    "In an emergency there, call 911.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Notfall dort 911 anrufen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In an emergency there, call 911."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En una emergencia allí, llama al 911."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En cas d’urgence là-bas, appelez le 911."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現地での緊急時は911に電話してください。"
+          }
+        }
+      }
+    },
+    "In an emergency there, call the local emergency number.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Notfall dort die örtliche Notrufnummer anrufen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In an emergency there, call the local emergency number."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En una emergencia allí, llama al número de emergencias local."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En cas d’urgence là-bas, appelez le numéro d’urgence local."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現地での緊急時は、その地域の緊急番号に電話してください。"
           }
         }
       }
@@ -31398,6 +31958,76 @@
         }
       }
     },
+    "Keeping watch. %lld when you chose it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird beobachtet. %lld, als du sie gewählt hast."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keeping watch. %lld when you chose it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vigilando. %lld cuando la elegiste."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sous surveillance. %lld quand vous l’avez choisie."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "見守っています。選んだときは%lld点。"
+          }
+        }
+      }
+    },
+    "Know if this night changes": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erfahren, wenn sich diese Nacht ändert"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Know if this night changes"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entérate si esta noche cambia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Savoir si cette nuit change"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この夜が変わったら知る"
+          }
+        }
+      }
+    },
     "Kp %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -31643,6 +32273,41 @@
         }
       }
     },
+    "Last score there: %lld, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzter Wert dort: %1$lld, %2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last score there: %lld, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Última puntuación allí: %1$lld, %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernier score là-bas : %1$lld, %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現地の最新スコア：%1$lld点、%2$@。"
+          }
+        }
+      }
+    },
     "Late twilight": {
       "extractionState": "manual",
       "localizations": {
@@ -31849,6 +32514,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "終了"
+          }
+        }
+      }
+    },
+    "Leave by %@ to arrive before sunset (%@).": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fahre bis %1$@ los, um vor Sonnenuntergang (%2$@) anzukommen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave by %@ to arrive before sunset (%@)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sal antes de las %1$@ para llegar antes de la puesta de sol (%2$@)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partez avant %1$@ pour arriver avant le coucher du soleil (%2$@)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日没（%2$@）前に着くには、%1$@までに出発してください。"
           }
         }
       }
@@ -33204,6 +33904,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "振り返り"
+          }
+        }
+      }
+    },
+    "Looks good so far: %lld when you chose it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sieht bisher gut aus: %lld, als du sie gewählt hast."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Looks good so far: %lld when you chose it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por ahora va bien: %lld cuando la elegiste."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bien parti pour l’instant : %lld quand vous l’avez choisie."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今のところ順調です（選んだときは%lld点）。"
           }
         }
       }
@@ -36837,6 +37572,41 @@
         }
       }
     },
+    "More for this night": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehr zu dieser Nacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More for this night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más para esta noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus pour cette nuit"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この夜のその他の操作"
+          }
+        }
+      }
+    },
     "More parks": {
       "extractionState": "manual",
       "localizations": {
@@ -37313,6 +38083,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "自由に使える夜"
+          }
+        }
+      }
+    },
+    "My plan for the night: %@, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mein Plan für die Nacht: %1$@, %2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My plan for the night: %@, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mi plan para la noche: %1$@, %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mon plan pour la nuit : %1$@, %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜の予定：%1$@、%2$@。"
           }
         }
       }
@@ -40247,6 +41052,41 @@
         }
       }
     },
+    "No cloud forecast is saved for this night yet. Open Nyx with a signal before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für diese Nacht ist noch keine Wolkenvorhersage gespeichert. Öffne Nyx vor der Fahrt mit Empfang."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No cloud forecast is saved for this night yet. Open Nyx with a signal before you go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay pronóstico de nubes guardado para esta noche. Abre Nyx con señal antes de ir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune prévision des nuages n’est encore enregistrée pour cette nuit. Ouvrez Nyx avec du réseau avant de partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この夜の雲の予報はまだ保存されていません。出発前に電波のある場所でNyxを開いてください。"
+          }
+        }
+      }
+    },
     "No cloud forecast yet": {
       "extractionState": "manual",
       "localizations": {
@@ -42186,6 +43026,76 @@
         }
       }
     },
+    "Not going": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht hinfahren"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not going"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No voy"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je n’y vais pas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行かない"
+          }
+        }
+      }
+    },
+    "Not going to %@ on %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Am %2$@ nicht nach %1$@ fahren"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not going to %@ on %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No voy a %1$@ el %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je ne vais pas à %1$@ le %2$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@に%1$@へは行かない"
+          }
+        }
+      }
+    },
     "Not heading to a park tonight? This is the sky over your starting point.": {
       "extractionState": "manual",
       "localizations": {
@@ -42592,6 +43502,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "現在"
+          }
+        }
+      }
+    },
+    "Now %lld, %@, down from %lld when you chose it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jetzt %1$lld, %2$@, nach %3$lld, als du sie gewählt hast."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now %lld, %@, down from %lld when you chose it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahora %1$lld, %2$@; cuando la elegiste era %3$lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désormais %1$lld, %2$@, contre %3$lld quand vous l’avez choisie."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在%1$lld点（%2$@）。選んだときは%3$lld点でした。"
           }
         }
       }
@@ -43093,6 +44038,101 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": "Nyxは、天の川の中心部が昇るときなど、夜のある時刻にこのiPhoneでアラームを設定できます。空の準備が整うまで休んでいられます。アラームは消音モードや集中モードでも鳴ります。このiPhoneから外には何も送られません。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Nyx can tell you if a night you are going to gets clearly worse, with a better choice nearby when there is one, and remind you when to leave. The same switch allows the evening-before reminders for Pristine nights at places you save. Everything is scheduled on this iPhone. iOS decides how often Nyx can check while it is closed, so open Nyx before you set off.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx kann dir sagen, wenn eine Nacht, für die du losfährst, deutlich schlechter wird, mit einer besseren Wahl in der Nähe, wenn es eine gibt, und dich ans Losfahren erinnern. Derselbe Schalter erlaubt auch die Erinnerungen am Vorabend für makellose Nächte an gespeicherten Orten. Alles wird auf diesem iPad geplant. iOS entscheidet, wie oft Nyx im geschlossenen Zustand prüfen kann, also öffne Nyx, bevor du losfährst."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx kann dir sagen, wenn eine Nacht, für die du losfährst, deutlich schlechter wird, mit einer besseren Wahl in der Nähe, wenn es eine gibt, und dich ans Losfahren erinnern. Derselbe Schalter erlaubt auch die Erinnerungen am Vorabend für makellose Nächte an gespeicherten Orten. Alles wird auf diesem iPhone geplant. iOS entscheidet, wie oft Nyx im geschlossenen Zustand prüfen kann, also öffne Nyx, bevor du losfährst."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx can tell you if a night you are going to gets clearly worse, with a better choice nearby when there is one, and remind you when to leave. The same switch allows the evening-before reminders for Pristine nights at places you save. Everything is scheduled on this iPad. iOS decides how often Nyx can check while it is closed, so open Nyx before you set off."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx can tell you if a night you are going to gets clearly worse, with a better choice nearby when there is one, and remind you when to leave. The same switch allows the evening-before reminders for Pristine nights at places you save. Everything is scheduled on this iPhone. iOS decides how often Nyx can check while it is closed, so open Nyx before you set off."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx puede avisarte si una noche a la que vas empeora claramente, con una opción mejor cerca cuando la haya, y recordarte cuándo salir. El mismo interruptor permite los recordatorios de la víspera para noches Prístinas en los lugares que guardas. Todo se programa en este iPad. iOS decide con qué frecuencia Nyx puede comprobar mientras está cerrada, así que abre Nyx antes de salir."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx puede avisarte si una noche a la que vas empeora claramente, con una opción mejor cerca cuando la haya, y recordarte cuándo salir. El mismo interruptor permite los recordatorios de la víspera para noches Prístinas en los lugares que guardas. Todo se programa en este iPhone. iOS decide con qué frecuencia Nyx puede comprobar mientras está cerrada, así que abre Nyx antes de salir."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx peut vous prévenir si une nuit où vous allez se dégrade nettement, avec un meilleur choix à proximité quand il y en a un, et vous rappeler quand partir. Le même réglage autorise les rappels de la veille pour les nuits Exceptionnelles dans les lieux que vous enregistrez. Tout est programmé sur cet iPad. iOS décide à quelle fréquence Nyx peut vérifier lorsqu’elle est fermée ; ouvrez donc Nyx avant de partir."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx peut vous prévenir si une nuit où vous allez se dégrade nettement, avec un meilleur choix à proximité quand il y en a un, et vous rappeler quand partir. Le même réglage autorise les rappels de la veille pour les nuits Exceptionnelles dans les lieux que vous enregistrez. Tout est programmé sur cet iPhone. iOS décide à quelle fréquence Nyx peut vérifier lorsqu’elle est fermée ; ouvrez donc Nyx avant de partir."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "出かける予定の夜がはっきり悪くなったら、近くにより良い選択肢があればそれも添えてNyxがお知らせし、出発の時刻もリマインドします。同じスイッチで、保存した場所の「最高」の夜の前日リマインダーも有効になります。すべてこのiPadでスケジュールされます。Nyxが閉じているあいだに確認できる頻度はiOSが決めるため、出発前にNyxを開いてください。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "出かける予定の夜がはっきり悪くなったら、近くにより良い選択肢があればそれも添えてNyxがお知らせし、出発の時刻もリマインドします。同じスイッチで、保存した場所の「最高」の夜の前日リマインダーも有効になります。すべてこのiPhoneでスケジュールされます。Nyxが閉じているあいだに確認できる頻度はiOSが決めるため、出発前にNyxを開いてください。"
                 }
               }
             }
@@ -43741,6 +44781,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyxは、National Park Service、NASA、DarkSky Internationalとは提携しておらず、これらの組織から推奨を受けているものでもありません。"
+          }
+        }
+      }
+    },
+    "Nyx keeps watch and tells you if this night gets clearly worse.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx behält die Nacht im Blick und sagt dir, wenn sie deutlich schlechter wird."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx keeps watch and tells you if this night gets clearly worse."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx vigila y te avisa si esta noche empeora claramente."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx veille et vous prévient si cette nuit se dégrade nettement."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxが見守り、この夜がはっきり悪くなったらお知らせします。"
           }
         }
       }
@@ -51380,6 +52455,41 @@
         }
       }
     },
+    "Refresh before you lose signal.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualisiere, bevor du den Empfang verlierst."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh before you lose signal."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualiza antes de perder la señal."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualisez avant de perdre le réseau."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電波が届かなくなる前に更新してください。"
+          }
+        }
+      }
+    },
     "Region": {
       "extractionState": "manual",
       "localizations": {
@@ -51481,6 +52591,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "リマインダー"
+          }
+        }
+      }
+    },
+    "Reminders are off, so Nyx can only show changes here. Turn them on in Settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erinnerungen sind aus, daher zeigt Nyx Änderungen nur hier. Aktiviere sie in den Einstellungen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reminders are off, so Nyx can only show changes here. Turn them on in Settings."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los recordatorios están desactivados, así que Nyx solo puede mostrar los cambios aquí. Actívalos en Ajustes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les rappels sont désactivés ; Nyx ne peut montrer les changements qu’ici. Activez-les dans Réglages."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リマインダーがオフのため、変化はここにしか表示されません。設定でオンにしてください。"
           }
         }
       }
@@ -51611,6 +52756,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "削除"
+          }
+        }
+      }
+    },
+    "Remove drive time": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fahrzeit entfernen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove drive time"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar tiempo de viaje"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer le temps de trajet"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移動時間を削除"
           }
         }
       }
@@ -53845,6 +55025,196 @@
         }
       }
     },
+    "Saved on this iPhone for offline use: the forecast from %@, park alerts from %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Für die Offline-Nutzung auf diesem iPad gespeichert: die Vorhersage vom %1$@, Parkhinweise vom %2$@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Für die Offline-Nutzung auf diesem iPhone gespeichert: die Vorhersage vom %1$@, Parkhinweise vom %2$@."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Saved on this iPad for offline use: the forecast from %@, park alerts from %@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Saved on this iPhone for offline use: the forecast from %@, park alerts from %@."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Guardado en este iPad para usar sin conexión: el pronóstico de %1$@ y las alertas del parque de %2$@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Guardado en este iPhone para usar sin conexión: el pronóstico de %1$@ y las alertas del parque de %2$@."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Enregistré sur cet iPad pour un usage hors ligne : la prévision du %1$@, les alertes du parc du %2$@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Enregistré sur cet iPhone pour un usage hors ligne : la prévision du %1$@, les alertes du parc du %2$@."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "オフラインで使えるようこのiPadに保存済み：予報（%1$@）、公園のアラート（%2$@）。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "オフラインで使えるようこのiPhoneに保存済み：予報（%1$@）、公園のアラート（%2$@）。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Saved on this iPhone for offline use: the forecast from %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Für die Offline-Nutzung auf diesem iPad gespeichert: die Vorhersage vom %@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Für die Offline-Nutzung auf diesem iPhone gespeichert: die Vorhersage vom %@."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Saved on this iPad for offline use: the forecast from %@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Saved on this iPhone for offline use: the forecast from %@."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Guardado en este iPad para usar sin conexión: el pronóstico de %@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Guardado en este iPhone para usar sin conexión: el pronóstico de %@."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Enregistré sur cet iPad pour un usage hors ligne : la prévision du %@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Enregistré sur cet iPhone pour un usage hors ligne : la prévision du %@."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "オフラインで使えるようこのiPadに保存済み：予報（%@）。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "オフラインで使えるようこのiPhoneに保存済み：予報（%@）。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Saved on this iPhone. Clouds at your saved spots is off in Your privacy, so this spot uses its usual clouds.": {
       "extractionState": "manual",
       "localizations": {
@@ -55100,6 +56470,41 @@
         }
       }
     },
+    "Sets how long the drive takes, so Nyx can say when to leave.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legt fest, wie lange die Fahrt dauert, damit Nyx sagen kann, wann du losfahren solltest."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sets how long the drive takes, so Nyx can say when to leave."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indica cuánto dura el viaje, para que Nyx diga cuándo salir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indique la durée du trajet, pour que Nyx dise quand partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移動にかかる時間を設定すると、Nyxが出発時刻を示します。"
+          }
+        }
+      }
+    },
     "Settings": {
       "extractionState": "manual",
       "localizations": {
@@ -55586,6 +56991,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "フルカラーの画像を共有します。"
+          }
+        }
+      }
+    },
+    "Shares where you will be and when you expect to be back. You choose who it goes to.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teilt, wo du sein wirst und wann du zurück sein willst. Du wählst, an wen es geht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shares where you will be and when you expect to be back. You choose who it goes to."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comparte dónde estarás y cuándo cuentas con volver. Tú eliges a quién se envía."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partage où vous serez et quand vous comptez revenir. Vous choisissez à qui l’envoyer."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "どこにいて、いつ戻る予定かを共有します。送る相手はあなたが選びます。"
           }
         }
       }
@@ -60778,6 +62218,41 @@
         }
       }
     },
+    "Sunset %@; true darkness from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonnenuntergang %1$@; echte Dunkelheit von %2$@ bis %3$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunset %@; true darkness from %@ to %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puesta de sol: %1$@; oscuridad total de %2$@ a %3$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coucher du soleil à %1$@ ; obscurité totale de %2$@ à %3$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日没%1$@。完全な暗さは%2$@から%3$@まで。"
+          }
+        }
+      }
+    },
     "Sunset in %@": {
       "extractionState": "manual",
       "localizations": {
@@ -60988,6 +62463,41 @@
         }
       }
     },
+    "Take it from Maps or from your own trips. Nyx asks no routing service, so the time stays yours.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimm sie aus Karten oder aus eigener Erfahrung. Nyx fragt keinen Routendienst, die Zeit bleibt also bei dir."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take it from Maps or from your own trips. Nyx asks no routing service, so the time stays yours."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tómalo de Mapas o de tus propios viajes. Nyx no consulta ningún servicio de rutas, así que el dato es solo tuyo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reprenez-le de Plans ou de vos propres trajets. Nyx n’interroge aucun service d’itinéraire, le temps reste le vôtre."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "マップやご自身の経験から入力してください。Nyxは経路サービスに問い合わせないため、この時間はあなただけのものです。"
+          }
+        }
+      }
+    },
     "Takes a followed night off your Lock Screen. Leave the park empty for the soonest night you follow.": {
       "extractionState": "manual",
       "localizations": {
@@ -61019,6 +62529,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "フォローしている夜をロック画面から外します。公園を空欄にすると、フォローしているいちばん近い夜を使います。"
+          }
+        }
+      }
+    },
+    "Tell someone": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jemandem Bescheid geben"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tell someone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avisar a alguien"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévenir quelqu’un"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "誰かに知らせる"
           }
         }
       }
@@ -61124,6 +62669,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "National Park Serviceのキーではないようです。キーは英数字40文字程度です。"
+          }
+        }
+      }
+    },
+    "That is %@ your time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das ist %@ deiner Zeit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That is %@ your time."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son las %@ en tu hora."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soit %@ à votre heure."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あなたの時刻では%@です。"
           }
         }
       }
@@ -67326,6 +68906,41 @@
         }
       }
     },
+    "Time to get ready for %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeit, dich für %@ fertig zu machen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time to get ready for %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hora de prepararte para %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il est temps de se préparer pour %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@へ出かける準備の時間です"
+          }
+        }
+      }
+    },
     "Timeline": {
       "extractionState": "manual",
       "localizations": {
@@ -68232,6 +69847,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "今夜、%@"
+          }
+        }
+      }
+    },
+    "Too early to call.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch zu früh für ein Urteil."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Too early to call."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún es pronto para saberlo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trop tôt pour le dire."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まだ判断できません。"
+          }
+        }
+      }
+    },
+    "Too early to call. The full cloud forecast reaches a night about three days ahead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch zu früh für ein Urteil. Die volle Wolkenvorhersage reicht etwa drei Tage voraus."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Too early to call. The full cloud forecast reaches a night about three days ahead."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún es pronto para saberlo. El pronóstico de nubes completo llega a una noche unos tres días antes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trop tôt pour le dire. La prévision complète des nuages couvre une nuit environ trois jours à l’avance."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まだ判断できません。雲の予報が完全になるのは、その夜の約3日前からです。"
           }
         }
       }
@@ -73421,6 +75106,41 @@
         }
       }
     },
+    "Where: %@ (%@).": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wo: %1$@ (%2$@)."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where: %@ (%@)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dónde: %1$@ (%2$@)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Où : %1$@ (%2$@)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "場所：%1$@（%2$@）。"
+          }
+        }
+      }
+    },
     "Which of these parks and nights looks most promising, and what is still uncertain?": {
       "extractionState": "manual",
       "localizations": {
@@ -76411,6 +78131,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "次の暗い空がここに表示されます。"
+          }
+        }
+      }
+    },
+    "Your night": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Nacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre nuit"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あなたの夜"
           }
         }
       }

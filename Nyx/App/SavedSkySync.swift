@@ -139,6 +139,7 @@ import WidgetKit
     static func anythingOutsideTheApp() async -> Bool {
         if UserDefaults.standard.bool(forKey:"notificationsEnabled") { return true }
         if !FieldActivities.Item.activities.isEmpty { return true }
+        if !GoingNights.shared.nights.isEmpty { return true }
         if WCSession.isSupported() {
             let session=WCSession.default
             if session.activationState != .activated || (session.isPaired && session.isWatchAppInstalled) { return true }
@@ -178,13 +179,15 @@ import WidgetKit
     /// The places whose forecasts and closures the widget, the watch and reminders carry, in order and
     /// once each: the saved places, the starting park, Tonight's answer on this iPhone, the places
     /// Apple Watch asked for (its kept park and its complications'), then the parks widgets and the
-    /// Tonight control are set to. Every surface that shows one of them scores it from the same data.
-    nonisolated static func followedIDs(saved:[String],home:String,tonight:String?,watch:[String],widgets:[String])->[String] {
+    /// Tonight control are set to, then the places of nights kept as going (their forecasts are
+    /// what a fall is measured on). Every surface that shows one of them scores it from the same data.
+    nonisolated static func followedIDs(saved:[String],home:String,tonight:String?,watch:[String],widgets:[String],going:[String]=[])->[String] {
         var seen=Set<String>()
-        return (WatchContext.followed(saved:saved,home:home,tonight:tonight,watch:watch)+widgets).filter { !$0.isEmpty && seen.insert($0).inserted }
+        return (WatchContext.followed(saved:saved,home:home,tonight:tonight,watch:watch)+widgets+going).filter { !$0.isEmpty && seen.insert($0).inserted }
     }
     func followedIDs(_ model:PlanModel)->[String] {
-        Self.followedIDs(saved:parkIDs ?? [],home:model.homeID,tonight:model.tonightPick,watch:WatchBridge.requestedParkIDs,widgets:widgetIDs ?? [])
+        Self.followedIDs(saved:parkIDs ?? [],home:model.homeID,tonight:model.tonightPick,watch:WatchBridge.requestedParkIDs,widgets:widgetIDs ?? [],
+                         going:GoingNights.shared.nights.map(\.parkID))
     }
     func followed(_ model:PlanModel)->[Park] { followedIDs(model).compactMap { model.park($0) } }
     func followedData(_ model:PlanModel)->FollowedData {
@@ -371,6 +374,8 @@ import WidgetKit
         // A followed night's Live Activity says what the widget now says, on every path that publishes.
         await Self.refreshFollowed(model)
         await remind(model,snapshot)
+        // The nights kept as going are checked against what was just published.
+        await GoingWatch.check(model)
     }
     /// Reminders planned from the snapshot just written: the nights, smoke, layers and closures the
     /// widget shows, so a reminder never says less than the park page.

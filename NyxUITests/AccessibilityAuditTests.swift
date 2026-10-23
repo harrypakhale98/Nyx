@@ -12,7 +12,7 @@ import AppIntents
 final class AccessibilityAuditTests:XCTestCase {
     private var screens:[String] {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
-        return ["tonight","parks","parks-map","calendar","best","journal","learn","detail","breakdown","editor","entry",
+        return ["tonight","going","parks","parks-map","calendar","best","journal","learn","detail","breakdown","editor","entry",
                 "onboarding","settings","privacy","data","article","share","river","skyarc","whatsup",
                 "field","field-compass","alarm-explainer","light","listen","accessibility","trip","constellation","recap","icons","first-light","sky","ask:answered"]
         // Not "live-activity": that DEBUG page redraws Lock Screen and Dynamic Island faces outside the
@@ -23,7 +23,8 @@ final class AccessibilityAuditTests:XCTestCase {
     private var keyScreens:[String] {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
         // Learn since 2026-10-13: its cards broke titles mid-word at AX5 on a wide iPad, which only this pass would see.
-        return ["tonight","parks","parks-map","detail","plan","best","journal","settings","field","river","editor","learn"]
+        // "going" (Tonight led by a kept night, `GoingPanel`) since 2026-10-22.
+        return ["tonight","going","parks","parks-map","detail","plan","best","journal","settings","field","river","editor","learn"]
     }
 
     func testEveryScreenPassesTheAudit() throws { try audit(state:"offline",screens:screens) }

@@ -18,9 +18,9 @@ import Testing
         let first=(floor(window.start.timeIntervalSince1970/3600)-2)*3600
         return (0..<36).map { first+Double($0)*3600 }
     }
-    func total(_ night:Night,_ cloud:Double) -> Forecast {
+    func total(_ night:Night,_ cloud:Double,updated:Date = .now) -> Forecast {
         let times=hours(night)
-        return Forecast(updated:.now,times:times,clouds:times.map { _ in cloud })
+        return Forecast(updated:updated,times:times,clouds:times.map { _ in cloud })
     }
     func layers(_ night:Night,low:Double,mid:Double,high:Double,updated:Date = .now) -> HourlySeries {
         let times=hours(night)
@@ -58,16 +58,20 @@ import Testing
     }
 
     /// Smoke and the three models arriving after a night was kept change it on every surface at once.
+    /// Pinned to the week of the November 9, 2026 new Moon: near full Moon the Moon caps the night
+    /// below where smoke would, and the smoky night could not score lower than the clear one.
     @Test func laterDetailReachesEveryKeptNight() throws {
         let deva=try named("deva")
         let model=model(RoutedHTTP())
+        let now=Date(timeIntervalSince1970:1_794_182_400+20*3600)
+        model.pinClock(now); model.presentOverride=now
         model.smokeEnabled=true
         let first=model.night(deva)
-        model.forecasts["deva"]=total(first,0)
+        model.forecasts["deva"]=total(first,0,updated:now)
         let clear=model.night(deva)
         _=model.ranked([deva]); _=model.outlook(clear)
         let times=hours(first)
-        model.details["deva"]=ForecastDetail(air:HourlySeries(updated:.now,times:times,values:["aerosol_optical_depth":times.map { _ in 0.8 }]))
+        model.details["deva"]=ForecastDetail(air:HourlySeries(updated:now,times:times,values:["aerosol_optical_depth":times.map { _ in 0.8 }]))
         let smoky=model.night(deva)
         #expect(smoky.score.value < clear.score.value && smoky.aerosol != nil)
         #expect(model.night(deva,on:model.tonight(deva)).score.value == smoky.score.value)
