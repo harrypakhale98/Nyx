@@ -128,3 +128,41 @@ extension SkyGlyph.Kind {
     HStack(spacing:12) { ForEach(SkyGlyph.Kind.allCases,id:\.self) { SkyGlyph($0,color:.white).frame(width:9) } }
         .padding().background(.black)
 }
+/// One planet as it looks in a small telescope, so Jupiter, Saturn and Mars are never one drawing:
+/// a disc sized by how bright the planet usually shines and tinted by its own colour (Venus nearly
+/// white, Jupiter cream with two belts, Mars rust, Saturn pale gold with its ring, Mercury grey).
+/// Night vision's filter turns the tints red with everything else; the shapes still differ.
+struct PlanetGlyph: View {
+    let planet: SkyAlmanac.Planet?
+    init(_ planet: SkyAlmanac.Planet?) { self.planet=planet }
+    /// The planet a What's up row stands for (its id is the planet's name).
+    init(id: String) { planet=SkyAlmanac.Planet(rawValue:id) }
+    var body: some View {
+        Canvas { context,size in
+            let s=min(size.width,size.height), c=CGPoint(x:size.width/2,y:size.height/2)
+            let (radius,tint):(Double,Color)=switch planet {
+            case .venus: (0.32,NyxPalette.venus)
+            case .jupiter: (0.3,NyxPalette.jupiter)
+            case .saturn: (0.16,NyxPalette.saturn)
+            case .mars: (0.2,NyxPalette.mars)
+            case .mercury: (0.15,NyxPalette.mercury)
+            case nil: (0.2,NyxPalette.jupiter)
+            }
+            let r=radius*s, disc=Path(ellipseIn:CGRect(x:c.x-r,y:c.y-r,width:2*r,height:2*r))
+            // Lit from the upper left, darker toward the limb, as a disc rather than a dot.
+            context.fill(disc,with:.radialGradient(Gradient(colors:[tint,tint.opacity(0.62)]),center:CGPoint(x:c.x-r*0.35,y:c.y-r*0.35),startRadius:0,endRadius:r*1.5))
+            if planet == .jupiter {
+                var belts=context; belts.clip(to:disc)
+                for y in [-0.28,0.22] { belts.fill(Path(CGRect(x:c.x-r,y:c.y+y*r,width:2*r,height:r*0.16)),with:.color(NyxPalette.jupiterBelt.opacity(0.7))) }
+            }
+            if planet == .saturn {
+                var ring=context
+                ring.translateBy(x:c.x,y:c.y); ring.rotate(by:.degrees(-18))
+                ring.stroke(Path(ellipseIn:CGRect(x:-2.3*r,y:-0.62*r,width:4.6*r,height:1.24*r)),with:.color(tint.opacity(0.9)),lineWidth:max(0.8,s/20))
+            }
+        }
+        .aspectRatio(1,contentMode:.fit)
+        .accessibilityHidden(true)
+        .accessibilityIgnoresInvertColors()
+    }
+}

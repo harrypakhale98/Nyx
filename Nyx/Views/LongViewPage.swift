@@ -41,7 +41,7 @@ struct LongViewPage: View {
                     Button { if CalendarWriter.undecided { explaining=true } else { addAll(nights) } } label:{
                         Label("Add all to Calendar",systemImage:"calendar.badge.plus").font(.subheadline).frame(minHeight:44)
                     }
-                    .buttonStyle(.bordered).tint(palette.accent).disabled(adding)
+                    .secondaryAction().disabled(adding)
                     .accessibilityHint("Adds these nights to your calendar. Nyx can add events only; it never sees your calendar.")
                     .sensoryFeedback(.selection,trigger:outcome) { _,new in if case .added = new { return true }; return false }
                     if let outcome { Text(outcomeText(outcome)).font(.subheadline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }

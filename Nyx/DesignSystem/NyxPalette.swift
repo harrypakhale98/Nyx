@@ -28,6 +28,12 @@ nonisolated struct NyxPalette: Equatable, Sendable {
     /// Deep indigo (#0B1026, the panels) and nebula violet (#2A1B4E, the watch's dark toolbar
     /// buttons, the glow behind Vision Pro's Moon).
     static let indigo=Color(red:0.043,green:0.063,blue:0.149), nebula=Color(red:0.165,green:0.106,blue:0.306)
+    /// The warning glyph's warm red (`caution`): 8:1 on the panel, apart from amber, so amber keeps
+    /// one job (the score and light) and a closure never reads as a link.
+    static let cautionColor=Color(red:1,green:0.48,blue:0.38)
+    /// Each planet's own tint for `PlanetGlyph`, as it looks in a small telescope.
+    static let venus=Color(red:0.98,green:0.95,blue:0.86), jupiter=Color(red:0.93,green:0.84,blue:0.7), saturn=Color(red:0.92,green:0.82,blue:0.58)
+    static let mars=Color(red:0.9,green:0.47,blue:0.32), mercury=Color(red:0.76,green:0.74,blue:0.71), jupiterBelt=Color(red:0.62,green:0.44,blue:0.32)
     var ink: Color { nightVision ? .white : Self.starlight }
     var accent: Color { nightVision ? ink : Self.amber }
     // Filled tracks must remain distinct from the white system thumb after the red filter.
@@ -70,6 +76,57 @@ nonisolated enum NightTint: String, Sendable, CaseIterable {
 /// as broken words, so spaced labels set solid when Nyx speaks Japanese.
 nonisolated enum Lettering {
     static let spaced = !(Bundle.main.preferredLocalizations.first ?? "en").hasPrefix("ja")
+}
+/// The Darkness Score's numeral, set one way on every surface (the dial, the river, widgets,
+/// complications, the watch and Vision Pro): New York at one weight, tracked by a share of its size
+/// so a 40-point widget and the dial read as one face, with tabular digits so a count-up or a column
+/// of scores never shifts sideways. Each surface keeps its own size.
+nonisolated enum ScoreNumeral {
+    /// Light, the iPhone dial's weight. Bold Text draws the next weight up on its own.
+    static let weight=Font.Weight.light
+    /// 2% tight, the iPhone dial's proportion.
+    static let tracking = -0.02
+    /// A text style's size at the default Dynamic Type size (iOS's; the watch's differ by a point
+    /// or two, a few hundredths of a point of tracking), which `ScaledMetric` then scales.
+    static func nominalSize(_ style:Font.TextStyle)->CGFloat {
+        switch style {
+        case .largeTitle: 34
+        case .title: 28
+        case .title2: 22
+        case .title3: 20
+        case .headline,.body: 17
+        case .callout: 16
+        case .subheadline: 15
+        case .footnote: 13
+        case .caption: 12
+        case .caption2: 11
+        default: 17
+        }
+    }
+}
+extension View {
+    /// The score's numeral at a fixed size (the dials, the widgets' heroes), in the surface's accent:
+    /// the palette's amber, or ink where night vision or a tinted face turns the accent to ink.
+    func scoreNumeral(size:CGFloat,accent:Color)->some View {
+        font(.system(size:size,weight:ScoreNumeral.weight,design:.serif)).tracking(size*ScoreNumeral.tracking).monospacedDigit().foregroundStyle(accent)
+    }
+    /// The score's numeral at a text style, so it grows with Dynamic Type and its tracking with it.
+    func scoreNumeral(_ style:Font.TextStyle,accent:Color)->some View { modifier(ScoreNumeralStyle(style:style,accent:accent)) }
+    /// The band word beside or under a score ("Excellent"): serif, in ink, a step quieter than the
+    /// numeral, as on the iPhone dial. What the score rests on ("Early look") goes on a line of its own.
+    func bandWord(_ style:Font.TextStyle,ink:Color)->some View { font(.system(style,design:.serif)).foregroundStyle(ink) }
+}
+private struct ScoreNumeralStyle: ViewModifier {
+    let style:Font.TextStyle
+    let accent:Color
+    @ScaledMetric private var size:CGFloat
+    init(style:Font.TextStyle,accent:Color) {
+        self.style=style; self.accent=accent
+        _size=ScaledMetric(wrappedValue:ScoreNumeral.nominalSize(style),relativeTo:style)
+    }
+    func body(content:Content)->some View {
+        content.font(.system(style,design:.serif).weight(ScoreNumeral.weight)).tracking(size*ScoreNumeral.tracking).monospacedDigit().foregroundStyle(accent)
+    }
 }
 /// The sRGB transfer function, one copy: gamma-encoded display values to linear light and back.
 nonisolated enum SRGB {

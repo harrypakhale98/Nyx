@@ -125,7 +125,7 @@ struct DarknessSnippetView:View {
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
                 Text(night.score.band.label).font(.system(.headline,design:.serif)).foregroundStyle(palette.accent)
                 // The one line that must never be lost: beside the score, as on the park's page.
-                if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
+                if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).labelStyle(.caution).fixedSize(horizontal:false,vertical:true) }
                 HStack(spacing:8) {
                     MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0)
                         .frame(width:22,height:22).accessibilityIgnoresInvertColors()

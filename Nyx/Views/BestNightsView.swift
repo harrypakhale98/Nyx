@@ -107,7 +107,7 @@ struct BestNightsView: View {
                 Text("\(night.score.value)").font(.system(size:min(heroSize,150),weight:.light,design:.serif)).kerning(3).foregroundStyle(palette.accent)
                     .contentTransition(.numericText(value:Double(night.score.value)))
                 Text(night.bandWithBasis).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.center)
-                if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
+                if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).multilineTextAlignment(.center) }
                 AccessNoteLabel(park:park,alignment:.center)
             }.frame(maxWidth:.infinity)
         }.buttonStyle(.plain)
@@ -121,7 +121,7 @@ struct BestNightsView: View {
         let words=VStack(alignment:.leading,spacing:4) {
             Text(park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.leading)
             Text(Phrase.clauses([park.dayLabel(night.id)]+night.basisLabels)).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.leading)
-            if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.footnote).foregroundStyle(palette.accent).multilineTextAlignment(.leading) }
+            if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.footnote).labelStyle(.caution).multilineTextAlignment(.leading) }
             AccessNoteLabel(park:park,alignment:.leading)
         }.fixedSize(horizontal:false,vertical:true)
         let score=HStack(alignment:.firstTextBaseline,spacing:6) {

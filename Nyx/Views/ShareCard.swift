@@ -228,7 +228,7 @@ struct ShareCardButton:View {
         let artwork=ShareArtwork(night:night,shape:.card,why:why,range:range,palette:nil,scale:displayScale)
         let preview=ShareArtwork(night:night,shape:.card,why:why,range:range,palette:palette,scale:displayScale)
         ShareLink(item:artwork,message:Text(card.message),preview:SharePreview(String(localized:"\(night.score.value) out of 100 at \(night.park.shortName)"),image:preview)) { Label("Share this night",systemImage:"square.and.arrow.up") }
-            .buttonStyle(.bordered).accessibilityValue(card.summary).accessibilityHint(ShareCard.hint(palette))
+            .secondaryAction().accessibilityValue(card.summary).accessibilityHint(ShareCard.hint(palette))
     }
 }
 extension ShareCard {

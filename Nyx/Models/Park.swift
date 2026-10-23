@@ -86,11 +86,14 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     /// Whether a car reaches somewhere in the park to watch the sky. Parks without a note are.
     var drivable: Bool { access?.road ?? true }
     var shortName: String { localShortName ?? Self.shortened(name) }
-    /// An English name without its designation: "Etosha National Park" is "Etosha".
+    /// An English name without its designation: "Etosha National Park" is "Etosha". A name that would
+    /// end in a number keeps it ("Constitution 1857 National Park"): alone, the year reads as a figure.
     static func shortened(_ name: String) -> String {
-        name.replacingOccurrences(of: " National Park & Preserve", with: "")
+        let short=name.replacingOccurrences(of: " National Park & Preserve", with: "")
             .replacingOccurrences(of: " National Park", with: "")
             .replacingOccurrences(of: " National and State Parks", with: "")
+        guard let last=short.split(separator: " ").last, last.allSatisfy(\.isNumber) else { return short }
+        return name
     }
     /// The names search matches: as shown, and as bundled in English when the place is shown in another language.
     var searchNames: [String] { [name, shortName]+(englishName.map { [$0, Self.shortened($0)] } ?? []) }

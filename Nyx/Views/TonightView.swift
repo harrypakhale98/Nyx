@@ -190,7 +190,7 @@ struct TonightView: View {
                 .accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")])
         }
         Button { chooseHome=true } label:{ Label("Choose a starting point",systemImage:"mappin.and.ellipse").frame(minHeight:30) }
-            .buttonStyle(.bordered).accessibilityInputLabels([Text("Choose a starting point"),Text("Choose a city"),Text("Choose a park")])
+            .secondaryAction().accessibilityInputLabels([Text("Choose a starting point"),Text("Choose a city"),Text("Choose a park")])
     }
     /// The line above the answer, all data: the night, and where "in reach" is measured from.
     /// Never "nearby" for a starting park or city; an example until a starting point is chosen.
@@ -326,7 +326,7 @@ struct TonightView: View {
             // A closure is the one line here that must never be lost in the sky: it sits on a dark scrim.
             else if let closure=model.closure(park) {
                 if let stale { forecastAsOf(park,stale) }
-                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center)
+                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).multilineTextAlignment(typeSize.isAccessibilitySize ? .leading : .center)
                 .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12))
                 .accessibilityLabel(String(localized:"Closure alert: \(closure)")) }
             // Nothing listed: the alerts and the forecast's age share one quiet caption, the safety cue kept.
@@ -494,7 +494,7 @@ struct TonightView: View {
             if !ahead.park.drivable { AccessNoteLabel(park:ahead.park,alignment:.center).padding(.horizontal,12) }
             // Darker is the sky alone: a closure there is said beside it, never weighed into it.
             if let closure=model.closure(ahead.park) {
-                Label(closure,systemImage:"exclamationmark.triangle").font(.footnote).foregroundStyle(palette.accent).multilineTextAlignment(.center)
+                Label(closure,systemImage:"exclamationmark.triangle").font(.footnote).labelStyle(.caution).multilineTextAlignment(typeSize.isAccessibilitySize ? .leading : .center)
                     .fixedSize(horizontal:false,vertical:true).padding(.horizontal,12)
                     .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
             }

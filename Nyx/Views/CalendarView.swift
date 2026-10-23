@@ -295,7 +295,7 @@ struct CalendarView: View {
     /// (data, not a slogan), and the name itself the menu that changes it.
     @ViewBuilder private func heading(_ park:Park)->some View {
         VStack(alignment:.leading,spacing:6) {
-            Eyebrow(text:"\(park.pageEyebrow)")
+            Eyebrow(text:"\(park.pageEyebrow)",meta:true)
             Menu {
                 PlacePickerOptions(title:"Park",selection:Binding(get:{park.id},set:{parkID=$0}),current:park)
             } label: {
@@ -541,8 +541,8 @@ struct CalendarView: View {
     private func aside(_ night:Night)->some View {
         NightInspector(night:night,isTonight:night.id==model.tonight(night.park),close:nil) {
             VStack(alignment:.leading,spacing:12) {
-                Button { chosen=night;peeking=true } label:{ Label("Open this night",systemImage:"arrow.up.right") }.buttonStyle(.bordered)
-                OpenParkWindowButton(park:night.park,night:night.id).buttonStyle(.bordered)
+                Button { chosen=night;peeking=true } label:{ Label("Open this night",systemImage:"arrow.up.right") }.secondaryAction()
+                OpenParkWindowButton(park:night.park,night:night.id).secondaryAction()
                 if night.id>=model.tonight(night.park) { AddNightToCalendar(night:night) }
             }
         }

@@ -227,7 +227,7 @@ struct TonightWidgetView:View {
                     if entry.closure != nil { Image(systemName:"exclamationmark.triangle.fill").widgetAccentable() } else { MoonSymbol(night:night) }
                 } currentValueLabel: {
                     // Two digits inside a fixed ring: shrink rather than spill over the arc at large sizes.
-                    Text("\(night.score.value)").font(.system(.title3,design:.serif)).minimumScaleFactor(0.6).widgetAccentable()
+                    Text("\(night.score.value)").scoreNumeral(.title3,accent:accent).minimumScaleFactor(0.6).widgetAccentable()
                 }.gaugeStyle(.accessoryCircular).dynamicTypeSize(.small ... .xxxLarge).summarized(summary(night))
             } else if family == .accessoryRectangular {
                 // Lock Screen dimensions are fixed: the score is the hero, the band beside it, and a
@@ -352,6 +352,19 @@ struct TonightWidgetView:View {
     }
     /// "Excellent" with a forecast; "Excellent, early look" or "Excellent, usual clouds" without, as on the watch.
     private func forecastLabel(_ night:Night)->String { night.bandWithBasis }
+    /// The band word as the iPhone dial sets it (serif, in ink, a step quieter than the numeral).
+    private func band(_ night:Night,_ style:Font.TextStyle)->some View {
+        Text(night.score.band.label).bandWord(style,ink:ink).fixedSize(horizontal:false,vertical:true).modifier(NightTurn(reduceMotion:reduceMotion))
+    }
+    /// What the score rests on ("Early look", "Haze or smoke"), muted, on a line of its own; nothing
+    /// on a night with a full forecast.
+    @ViewBuilder private func basisNote(_ night:Night,_ font:Font)->some View {
+        if let note=night.basisNote { Text(note).font(font).foregroundStyle(muted).fixedSize(horizontal:false,vertical:true).modifier(NightTurn(reduceMotion:reduceMotion)) }
+    }
+    /// The band beside a numeral, with the note under it.
+    private func bandBeside(_ night:Night,_ style:Font.TextStyle,note:Font)->some View {
+        VStack(alignment:.leading,spacing:0) { band(night,style); basisNote(night,note) }
+    }
     /// The month grid's key for its hollow nights, in the words the app gives the first of them
     /// (`Night.basisLabel`): "Cloud forecast unavailable" when a forecast should reach it, else
     /// "No cloud forecast yet". Nil when every night has clouds.
@@ -365,7 +378,7 @@ struct TonightWidgetView:View {
         VStack(alignment:.leading,spacing:0) {
             Text(night.park.shortName).font(.headline).lineLimit(1)
             HStack(alignment:.firstTextBaseline,spacing:6) {
-                Text("\(night.score.value)").font(.system(numeral,design:.serif).weight(.light)).monospacedDigit().widgetAccentable()
+                Text("\(night.score.value)").scoreNumeral(numeral,accent:accent).widgetAccentable()
                 if closureBesideScore { closureMark(.caption) }
                 else if shortBand { Text(night.compactBandLabel).font(.caption).lineLimit(1).minimumScaleFactor(0.8) }
                 // Unlimited here, so a band that needs a third line does not fit and the short word is chosen.
@@ -386,11 +399,14 @@ struct TonightWidgetView:View {
                     moon(night).frame(width:18,height:18).id(night.id)
                 }
             } else if mark { closureMark(.caption2) }
-            Text("\(night.score.value)").font(.system(size:48,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
-                .modifier(NightTurn(value:night.score.value,reduceMotion:reduceMotion))
+            // The band word straight under the numeral, as on the dial.
+            VStack(alignment:.leading,spacing:0) {
+                Text("\(night.score.value)").scoreNumeral(size:48,accent:accent).widgetAccentable()
+                    .modifier(NightTurn(value:night.score.value,reduceMotion:reduceMotion))
+                band(night,.subheadline)
+            }
             Text(night.park.shortName).font(.system(.caption,design:.serif)).fixedSize(horizontal:false,vertical:true)
-            Text(forecastLabel(night)).font(.caption2).foregroundStyle(muted).fixedSize(horizontal:false,vertical:true)
-                .modifier(NightTurn(reduceMotion:reduceMotion))
+            basisNote(night,.caption2)
         }.frame(maxWidth:.infinity,alignment:.leading)
         // While a night button's tap is being answered, the system marks what is about to change.
         .invalidatableContent(entry.stepScope != nil)
@@ -501,9 +517,12 @@ struct TonightWidgetView:View {
         VStack(alignment:.leading,spacing:4) {
             closureMark(.caption2)
             // In the accent group as on every other face, so a tinted Home Screen keeps the score its hero.
-            Text("\(night.score.value)").font(.system(size:40,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
+            VStack(alignment:.leading,spacing:0) {
+                Text("\(night.score.value)").scoreNumeral(size:40,accent:accent).widgetAccentable()
+                band(night,.footnote)
+            }
             Text(night.park.shortName).font(.system(.caption2,design:.serif)).fixedSize(horizontal:false,vertical:true)
-            Text(forecastLabel(night)).font(.caption2).fixedSize(horizontal:false,vertical:true)
+            basisNote(night,.caption2)
         }.frame(maxWidth:.infinity,alignment:.leading)
     }
     /// The large widget: tonight at the shown park, then its coming nights as a calendar of small
@@ -530,9 +549,9 @@ struct TonightWidgetView:View {
                     VStack(alignment:.leading,spacing:0) {
                         Text(night.park.shortName).font(.system(.headline,design:.serif)).lineLimit(1).minimumScaleFactor(0.8)
                         HStack(alignment:.firstTextBaseline,spacing:8) {
-                            Text("\(night.score.value)").font(.system(size:44,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
+                            Text("\(night.score.value)").scoreNumeral(size:44,accent:accent).widgetAccentable()
                                 .modifier(NightTurn(value:night.score.value,reduceMotion:reduceMotion))
-                            Text(forecastLabel(night)).font(.caption).foregroundStyle(muted).modifier(NightTurn(reduceMotion:reduceMotion))
+                            bandBeside(night,.subheadline,note:.caption)
                         }
                     }
                     Spacer(minLength:4)
@@ -569,8 +588,8 @@ struct TonightWidgetView:View {
             VStack(alignment:.leading,spacing:8) {
                 Text("Tonight's sky").textCase(Lettering.spaced ? .uppercase : nil).font(.caption.weight(.medium)).tracking(Lettering.spaced ? 1.4 : 0).foregroundStyle(muted)
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).lineLimit(2).minimumScaleFactor(0.8)
-                Text("\(night.score.value)").font(.system(size:72,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
-                Text(forecastLabel(night)).font(.subheadline).foregroundStyle(muted)
+                Text("\(night.score.value)").scoreNumeral(size:72,accent:accent).widgetAccentable()
+                VStack(alignment:.leading,spacing:0) { band(night,.title3); basisNote(night,.subheadline) }
                 HStack(alignment:.center,spacing:10) {
                     moon(night).frame(width:34,height:34)
                     VStack(alignment:.leading,spacing:2) {
@@ -605,8 +624,8 @@ struct TonightWidgetView:View {
                 VStack(alignment:.leading,spacing:2) {
                     Text(night.park.shortName).font(.system(.title2,design:.serif)).lineLimit(2).minimumScaleFactor(0.8)
                     HStack(alignment:.firstTextBaseline,spacing:10) {
-                        Text("\(night.score.value)").font(.system(size:80,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
-                        Text(forecastLabel(night)).font(.subheadline).foregroundStyle(muted).fixedSize(horizontal:false,vertical:true)
+                        Text("\(night.score.value)").scoreNumeral(size:80,accent:accent).widgetAccentable()
+                        bandBeside(night,.title3,note:.subheadline)
                     }
                 }
                 Spacer(minLength:8)

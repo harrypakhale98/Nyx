@@ -38,8 +38,8 @@ struct AppIconPicker: View {
         Form {
             Section { ForEach(NyxIcon.allCases) { icon in row(icon) } } footer:{
                 Text("The icon stays in the phase you choose; it does not follow the Moon.").foregroundStyle(palette.muted)
-            }.listRowBackground(palette.panel)
-            if failed { Section { Text("The icon could not be changed right now. Try again in a moment.").foregroundStyle(palette.accent) }.listRowBackground(palette.panel) }
+            }.openRows(palette)
+            if failed { Section { Text("The icon could not be changed right now. Try again in a moment.").foregroundStyle(palette.accent) }.openRows(palette) }
         }
         .nightForm().readableForm().navigationTitle("App icon").navigationBarTitleDisplayMode(.inline)
         .sensoryFeedback(.selection,trigger:changed)

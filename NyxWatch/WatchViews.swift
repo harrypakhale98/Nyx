@@ -631,7 +631,13 @@ struct WeekPage: View {
                         if tied.count > 1, tied.count == nights.count { Text("Darkest: every night").font(.footnote) }
                         else if tied.count > 1 { Text("Darkest: \(park.dayLabel(best.id)) and \(tied.count-1) more").font(.footnote) }
                         else { Text("Darkest: \(park.dayLabel(best.id))").font(.footnote) }
-                        Text(best.score.withBand).font(.system(.body, design: .serif)).foregroundStyle(palette.accent)
+                        // The score in the accent, its band word in ink as the dial sets it, and what
+                        // the score rests on in a line of its own.
+                        HStack(alignment: .firstTextBaseline, spacing: 5) {
+                            Text(best.score.value, format: .number).scoreNumeral(.body, accent: palette.accent)
+                            Text(best.score.band.label).bandWord(.subheadline, ink: palette.ink)
+                        }
+                        if let note = best.basisNote { Text(note).font(.caption2).foregroundStyle(palette.muted) }
                     }
                     .fixedSize(horizontal: false, vertical: true).accessibilityElement(children: .combine)
                 }
@@ -707,8 +713,8 @@ struct ParksList: View {
                 // The watch bundles the 63 US national parks only; saved spots and places abroad come from iPhone, above.
                 Section("US national parks") { ForEach(store.parks) { row($0, now: now, scored: false) } }
                 Section {
-                    Picker("Colors", selection: $store.palette) { ForEach(PaletteChoice.allCases) { Text($0.title).tag($0) } }
-                } footer: { Text("Automatic turns red from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark.") }
+                    Picker("Night vision", selection: $store.palette) { ForEach(PaletteChoice.allCases) { Text($0.title).tag($0) } }
+                } footer: { Text("Automatic turns night vision on from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark.") }
                 Section {
                     NavigationLink(value: WatchRoute.credits) { Label("Credits", systemImage: "text.book.closed") }
                 } footer: { Text("Nyx on Apple Watch makes no network requests. Clouds come from Nyx on your iPhone.") }
@@ -727,7 +733,7 @@ struct ParksList: View {
                 if store.pinned == park.id { Image(systemName: "pin.fill").font(.caption2).accessibilityLabel("On Tonight") }
                 if scored {
                     let night = store.tonight(park, at: now)
-                    Text(night.score.value, format: .number).font(.system(.title3, design: .serif)).foregroundStyle(palette.accent)
+                    Text(night.score.value, format: .number).scoreNumeral(.title3, accent: palette.accent)
                         .accessibilityLabel("\(night.score.value) out of 100, \(night.score.band.label)")
                 }
             }

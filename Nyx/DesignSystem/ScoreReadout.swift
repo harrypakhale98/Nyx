@@ -103,9 +103,10 @@ struct ScoreReadout: View {
         }
     }
     private var titleStyle:SubscoreTitles.Style {
-        guard gridWidth>0 else { return SubscoreTitles.Style(spaced:Lettering.spaced,scale:1,columns:4) }
+        // Sentence case, as every heading now is: four spaced-capital labels in a row read as a dashboard.
+        guard gridWidth>0 else { return SubscoreTitles.Style(spaced:false,scale:1,columns:4) }
         let bold=legibilityWeight == .bold, titles=parts.map(\.title)
-        return SubscoreTitles.style(widestSpaced:Lettering.spaced ? SubscoreTitles.widestWord(titles,typeSize:typeSize,spaced:true,bold:bold) : nil,
+        return SubscoreTitles.style(widestSpaced:nil,
                                     widestPlain:SubscoreTitles.widestWord(titles,typeSize:typeSize,spaced:false,bold:bold),width:gridWidth,spacing:Self.columnSpacing)
     }
     private func meter(_ part:Part)->some View {

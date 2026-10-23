@@ -24,7 +24,7 @@ struct CreditsView: View {
     var body: some View {
         Form {
             Section { Text("Nyx is built on public science. Each source is credited here in the words it asks for.").font(.subheadline) }
-                .listRowBackground(palette.panel)
+                .openRows(palette)
             Section("Weather and air") {
                 if let url=SupportLink.openMeteo {
                     Link(destination:url) { ExternalRow(title:"Weather data by Open-Meteo.com") }
@@ -34,7 +34,7 @@ struct CreditsView: View {
                 credit("Smoke and haze: contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo.")
                 credit("Usual clouds: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024, Hersbach et al. 2020, CC BY 4.0.")
                 credit("Usual night temperatures: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024, CC BY 4.0.")
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
             Section("Sky and light") {
                 credit("The Moon: NASA's Scientific Visualization Studio, CGI Moon Kit, with the LRO LROC (Hapke Normalized WAC Mosaic) and LOLA teams.")
                 credit("Night lights from space: NASA Black Marble (VNP46A4, Román et al. 2018), public domain.")
@@ -46,7 +46,7 @@ struct CreditsView: View {
                 credit("Aurora forecast: the planetary K-index forecast of NOAA's Space Weather Prediction Center, U.S. Government work.")
                 credit("Deep-sky positions and magnitudes: Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalogue.")
                 credit("Moon names and positions: the IAU Gazetteer of Planetary Nomenclature, USGS (public domain).")
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
             Section("Parks and places") {
                 credit("Parks, alerts and ranger programs: the National Park Service.")
                 credit("Measured night skies: the National Park Service Night Skies Program, public domain.")
@@ -57,11 +57,11 @@ struct CreditsView: View {
                 credit("World parks and dark-sky places: Wikidata, CC0.")
                 credit("World map: Natural Earth, public domain.")
                 credit("Terrain horizons: USGS 3D Elevation Program (public domain); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90.")
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
             Section {
                 credit("Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.")
                 NavigationLink("About the data") { AboutDataView() }
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
         }
         .nightForm().navigationTitle("Credits").navigationBarTitleDisplayMode(.inline)
     }
@@ -84,7 +84,9 @@ struct ExternalRow: View {
 extension View {
     /// A form over the night sky: the system's grouped background hidden, rows on Nyx's solid panel
     /// (each section sets `listRowBackground(palette.panel)`), the sky veiled so text stays calm.
-    func nightForm()->some View { scrollContentBackground(.hidden).background(NightBackground(veil:0.55)) }
+    func nightForm()->some View { scrollContentBackground(.hidden).background(NightBackground(veil:0.65)) }
+    /// Rows open to the night: clear where the indigo card was, a starlight hairline between them.
+    func openRows(_ palette:NyxPalette)->some View { listRowBackground(Color.clear).listRowSeparatorTint(palette.line) }
 }
 #Preview("Credits") { NavigationStack { CreditsView() }.environment(PlanModel()).preferredColorScheme(.dark) }
 #Preview("Credits AX5") { NavigationStack { CreditsView() }.environment(PlanModel()).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }

@@ -14,9 +14,9 @@ struct DiagnosticsView: View {
             Section {
                 Text("When Nyx crashes or stops responding, iOS may give it a technical report about a day later. Nyx keeps the last five here, on this device. Nothing is sent anywhere unless you copy or share it yourself.")
                     .font(.subheadline).foregroundStyle(palette.ink)
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
             if records.isEmpty {
-                Section { Text("No crash or hang reports on this device.").foregroundStyle(palette.muted) }.listRowBackground(palette.panel)
+                Section { Text("No crash or hang reports on this device.").foregroundStyle(palette.muted) }.openRows(palette)
             } else {
                 Section("Reports") {
                     ForEach(records) { record in
@@ -27,16 +27,16 @@ struct DiagnosticsView: View {
                         }
                         .accessibilityElement(children:.combine)
                     }
-                }.listRowBackground(palette.panel)
+                }.openRows(palette)
                 Section {
                     Button { UIPasteboard.general.string=DiagnosticsStore.report(records); copied+=1 } label:{ Label("Copy diagnostic report",systemImage:"doc.on.doc").frame(minHeight:44) }
                     ShareLink(item:DiagnosticsStore.report(records)) { Label("Share diagnostic report",systemImage:"square.and.arrow.up").frame(minHeight:44) }
                     Button(role:.destructive) { confirmClear=true } label:{ Text("Delete reports").frame(minHeight:44) }
                 } footer:{ Text("A report describes where the app stopped, with the app and iOS versions. It contains no location, journal or account information.").foregroundStyle(palette.muted) }
-                .listRowBackground(palette.panel)
+                .openRows(palette)
             }
         }
-        .readableForm().navigationTitle("Diagnostics").navigationBarTitleDisplayMode(.inline)
+        .readableForm().nightForm().navigationTitle("Diagnostics").navigationBarTitleDisplayMode(.inline)
         .sensoryFeedback(.selection,trigger:copied)
         .confirmationDialog("Delete these reports?",isPresented:$confirmClear,titleVisibility:.visible) {
             Button("Delete reports",role:.destructive) { DiagnosticsStore.removeAll(); records=[] }

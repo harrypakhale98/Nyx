@@ -91,9 +91,12 @@ struct WhatsUpPanel: View {
         }
     }
     /// One glyph column, so every row's text starts on the same line.
-    private func glyphed<Content:View>(_ kind:SkyGlyph.Kind,color:Color,@ViewBuilder content:()->Content)->some View {
+    /// No kind keeps the column empty: the planets carry their own discs, so their heading needs no glyph.
+    private func glyphed<Content:View>(_ kind:SkyGlyph.Kind?,color:Color,@ViewBuilder content:()->Content)->some View {
         HStack(alignment:.top,spacing:14) {
-            if !typeSize.isAccessibilitySize { SkyGlyph(kind,color:color).frame(width:glyphSize,height:glyphSize).padding(.top,1) }
+            if !typeSize.isAccessibilitySize {
+                if let kind { SkyGlyph(kind,color:color).frame(width:glyphSize,height:glyphSize).padding(.top,1) } else { Color.clear.frame(width:glyphSize,height:1) }
+            }
             VStack(alignment:.leading,spacing:5) { content() }
         }
     }
@@ -138,11 +141,12 @@ struct WhatsUpPanel: View {
     }
     /// The planets under one heading, brightest first: a name, a word for brightness, one sentence.
     private var planets:some View {
-        glyphed(.planet,color:palette.ink) {
-            Text("Planets").font(.system(.headline,design:.serif)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader)
+        glyphed(nil,color:palette.ink) {
+            Text("Planets").font(.system(.body,design:.serif)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader)
             ForEach(whatsUp.planets) { planet in
                 VStack(alignment:.leading,spacing:2) {
                     HStack(alignment:.firstTextBaseline,spacing:6) {
+                        if !typeSize.isAccessibilitySize { PlanetGlyph(id:planet.id).frame(width:glyphSize*0.8,height:glyphSize*0.8).alignmentGuide(.firstTextBaseline) { $0[.bottom]-2 } }
                         Text(planet.title).font(.system(.body,design:.serif)).foregroundStyle(palette.ink)
                         if let note=planet.note { Text(note).font(.caption).foregroundStyle(palette.muted) }
                     }
@@ -155,7 +159,7 @@ struct WhatsUpPanel: View {
     }
     private func heading(_ item:WhatsUp.Item,event:Bool)->some View {
         VStack(alignment:.leading,spacing:2) {
-            Text(item.title).font(.system(event ? .title3 : .headline,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+            Text(item.title).font(.system(event ? .headline : .body,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
             if let note=item.note { Text(note).font(.caption).foregroundStyle(event ? palette.accent : palette.muted) }
         }
     }

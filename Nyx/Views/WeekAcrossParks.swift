@@ -84,7 +84,7 @@ struct WeekAcrossParksPanel: View {
                         // A closed park's name carries the closure mark; its cells say the closure.
                         HStack(alignment:.firstTextBaseline,spacing:4) {
                             Text(row.park.shortName).font(.system(.subheadline,design:.serif)).foregroundStyle(palette.ink)
-                            if week.closures[row.park.id] != nil { Image(systemName:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).accessibilityHidden(true) }
+                            if week.closures[row.park.id] != nil { Image(systemName:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.caution).accessibilityHidden(true) }
                         }
                         .fixedSize(horizontal:false,vertical:true).frame(width:150,alignment:.leading)
                         .accessibilityElement(children:.combine).accessibilityAddTraits(.isHeader)

@@ -4,16 +4,18 @@ import Foundation
 /// iPhone's test suite checks it: which colours the wrist wears, the dark-adaptation clock, the
 /// next dark moment, the Moon right now, and how old the clouds are. Nothing here draws or networks.
 
-/// The wearer's colours. Automatic is the default: Nyx's standard colours by day, red from civil
-/// dusk to civil dawn at the park Tonight follows. Red light and Starlight stay explicit choices.
+/// The wearer's night vision. Automatic is the default: Nyx's standard colours by day, red from
+/// civil dusk to civil dawn at the park Tonight follows. On and Off stay explicit choices: the
+/// iPhone's "Night vision" switch, by the iPhone's name, with the wrist's own Automatic beside it.
+/// The cases keep their stored names, so a choice made before the rename survives it.
 nonisolated enum PaletteChoice: String, CaseIterable, Identifiable, Sendable {
     case automatic, red, standard, phone
     var id: String { rawValue }
     var title: String {
         switch self {
         case .automatic: String(localized: "Automatic")
-        case .red: String(localized: "Red light")
-        case .standard: String(localized: "Starlight")
+        case .red: String(localized: "On")
+        case .standard: String(localized: "Off")
         case .phone: String(localized: "Match iPhone")
         }
     }

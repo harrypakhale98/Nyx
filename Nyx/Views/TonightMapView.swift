@@ -385,7 +385,7 @@ struct ParksMapView: View {
     @ViewBuilder private func eyebrow(_ map:TonightMap,ready:Bool)->some View {
         if let home=model.home {
             let day=home.dayLabel(model.tonight(home))
-            if ready { Eyebrow(text:"\(day) · \(map.marks.count) places on this map") } else { Eyebrow(text:"\(day)") }
+            if ready { Eyebrow(text:"\(day) · \(map.marks.count) places on this map",meta:true) } else { Eyebrow(text:"\(day)",meta:true) }
         }
     }
     /// Above this many places to score, a map works their nights out off the main thread before drawing.
@@ -425,7 +425,7 @@ struct ParksMapView: View {
                 if park.rowLocality.isEmpty { Text(verbatim:model.night(park).bandWithBasis) }
                 else { Text("\(park.rowLocality) · \(model.night(park).bandWithBasis)") }
             }.font(.subheadline).foregroundStyle(palette.muted)
-            if let closure=mark.closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent) }
+            if let closure=mark.closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution) }
         }.multilineTextAlignment(.leading).frame(maxWidth:.infinity,alignment:.leading)
         return Group {
             if typeSize.isAccessibilitySize {

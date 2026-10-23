@@ -81,7 +81,7 @@ struct FromHomePanel: View {
                 ForEach(sky.planets) { planet in
                     // The sentence already gives the time ("Rises at 1:39 AM in the east…"): no figure beside the name.
                     row(title:Text([planet.title,planet.note].compactMap { $0 }.joined(separator:" · ")),value:nil,detail:planet.detail,spoken:planet.spoken) {
-                        SkyGlyph(.planet,color:palette.accent)
+                        PlanetGlyph(id:planet.id)
                     }
                 }
             }
@@ -95,8 +95,8 @@ struct FromHomePanel: View {
                 // under the title when they do not (a long name, a larger size, Spanish). A layout rather
                 // than `ViewThatFits`, so only the texts on screen are in the tree and none reads as clipped.
                 TitleValueLayout {
-                    title.font(.headline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
-                    if let value { Text(value).font(.subheadline.monospacedDigit()).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
+                    title.font(.system(.body,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                    if let value { Text(value).font(.subheadline.monospacedDigit()).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 }
                 if let detail { Text(detail).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }

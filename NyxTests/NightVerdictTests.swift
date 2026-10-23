@@ -68,6 +68,12 @@ import Testing
             if sky.moonDownPercent == 0 && sky.moon.illumination >= 0.05 { #expect(line.hasPrefix("Moon up all through")) }
         }
     }
+    /// A short name never ends in a bare number: "Constitution 1857" read as a place and a figure.
+    @Test func shortNamesKeepADesignationAfterANumber() {
+        #expect(Park.shortened("Constitution 1857 National Park") == "Constitution 1857 National Park")
+        #expect(Park.shortened("Etosha National Park") == "Etosha")
+        #expect(Park.shortened("Wrangell-St. Elias National Park & Preserve") == "Wrangell-St. Elias")
+    }
     @Test func farNorthAndNoDarknessStayQuiet() throws {
         let gaar = try park("gaar"), dena = try park("dena")
         let winter = try sky(gaar, "2027-01-15")

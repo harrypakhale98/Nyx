@@ -211,8 +211,8 @@ struct TimeRiver: View {
                 HStack(alignment:.firstTextBaseline) {
                     Text(current.park.dayLabel(current.id)).font(.subheadline)
                     Spacer(minLength:8)
-                    Text("\(current.score.value)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(current.score.value)))
-                    Text(current.score.band.label).font(.caption).foregroundStyle(palette.muted)
+                    Text("\(current.score.value)").scoreNumeral(.title3,accent:palette.accent).contentTransition(.numericText(value:Double(current.score.value)))
+                    Text(current.score.band.label).bandWord(.subheadline,ink:palette.ink)
                 }
                 HStack(alignment:.firstTextBaseline,spacing:6) {
                     if let marker=markers[current.id] { SkyGlyph(SkyGlyph.Kind(marker.glyph),color:palette.accent).frame(width:12,height:12) }
@@ -373,9 +373,9 @@ struct TimeRiver: View {
         return ordered.first(where:{ $0>(current ?? -1) }) ?? ordered.first
     }
     @ViewBuilder private func stepperScore(_ night:Night)->some View {
-        Text(night.score.value,format:.number).font(.system(.largeTitle,design:.serif).weight(.light)).foregroundStyle(palette.accent)
+        Text(night.score.value,format:.number).scoreNumeral(.largeTitle,accent:palette.accent)
             .contentTransition(.numericText(value:Double(night.score.value)))
-        Text(night.score.band.label).font(.title3).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+        Text(night.score.band.label).bandWord(.title3,ink:palette.ink).fixedSize(horizontal:false,vertical:true)
     }
 
     private var spokenValue: String {

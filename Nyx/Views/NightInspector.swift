@@ -17,9 +17,11 @@ struct NightInspector<Actions: View>: View {
                 actions
             }.padding(.horizontal,22).padding(.vertical,20)
         }
-        .id(night.id)
-        .background(palette.panel.ignoresSafeArea())
-        .overlay(alignment:.leading) { Rectangle().fill(palette.line).frame(width:0.5).ignoresSafeArea().accessibilityHidden(true) }
+        .id(night.id).foregroundStyle(palette.ink)
+        // Open to the night like the page beside it: void black, not an indigo box, parted from the
+        // month or the park by one starlight hairline that thickens with Increase Contrast and Bold Text.
+        .background(Color.black.ignoresSafeArea())
+        .overlay(alignment:.leading) { Rectangle().fill(palette.line).frame(width:0.5*palette.stroke).ignoresSafeArea().accessibilityHidden(true) }
         .toolbar {
             if let close {
                 ToolbarItem(placement:.primaryAction) {
@@ -45,7 +47,7 @@ extension NightInspector where Actions == EmptyView {
 #Preview("Inspector • AX3") {
     let model=PlanModel()
     if let park=model.home {
-        NightInspector(night:model.night(park)) {} actions:{ Button("Open this night") {}.buttonStyle(.bordered) }
+        NightInspector(night:model.night(park)) {} actions:{ Button("Open this night") {}.secondaryAction() }
             .environment(model).dynamicTypeSize(.accessibility3).preferredColorScheme(.dark)
     }
 }

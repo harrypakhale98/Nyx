@@ -455,7 +455,11 @@ struct CelestialGauge: View {
         DialBandWord(value:numeralValue,target:still ? score : shown,leaving:still ? [] : leavingBands,color:palette.ink,still:still)
             .opacity(bandVisible ? 1 : 0).blur(radius:bandVisible ? 0 : 6)
     }
-    private var units:some View { Text("Darkness / 100").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2).tracking(typeSize.isAccessibilitySize || !Lettering.spaced ? 0 : 2.5*min(1,max(0.4,(side-200)/100))).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
+    /// The scale, in sentence case (the page's one row of capitals is its facts line). Left out at
+    /// accessibility sizes, where it grew larger than the band; the gauge's spoken label says "out of 100".
+    @ViewBuilder private var units:some View {
+        if !typeSize.isAccessibilitySize { Text("Darkness / 100").font(.caption2).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
+    }
     /// The instrument's body: a ring of Liquid Glass the arc runs along, so the dial reads as an
     /// object, not a chart. Solid and dark under Reduce Transparency and in night vision, where
     /// glass would flatten toward the text colour.
@@ -544,8 +548,7 @@ private struct DialNumeral: View, Animatable {
     var animatableData: Double { get { value } set { value=newValue } }
     var body: some View {
         Text(CelestialGauge.numeral(value:value,target:target),format:.number)
-            .font(.system(size:size,weight:.light,design:.serif)).tracking(-size*0.02).monospacedDigit()
-            .foregroundStyle(color).contentTransition(rolling ? .numericText(value:value) : .identity)
+            .scoreNumeral(size:size,accent:color).contentTransition(rolling ? .numericText(value:value) : .identity)
             .lineLimit(1).fixedSize()
     }
 }
@@ -564,7 +567,7 @@ private struct DialBandWord: View, Animatable {
         // A word steps away at once as the number leaves its band, and the next fades in on the
         // settle's short spring as the number enters its own; between two kept words it changes in
         // place. A cross-fade would ghost the old word beside the new number.
-        Text((word ?? targetBand).label).font(.system(.title3,design:.serif)).foregroundStyle(color).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+        Text((word ?? targetBand).label).bandWord(.title3,ink:color).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
             .contentTransition(.identity)
             // Only the fade animates: a word changing in place must not slide as its width changes.
             .transaction { $0.animation=nil }

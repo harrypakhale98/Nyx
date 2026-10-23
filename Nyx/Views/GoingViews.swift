@@ -114,7 +114,8 @@ struct GoingPanel: View {
     private func panel(_ going: GoingNight, _ night: Night) -> some View {
         let park=night.park, outlook=model.outlook(night), closure=model.closure(park)
         let status=GoingCheck.status(chosen:going.chosenScore,night:night,agreement:outlook?.agreement)
-        return Panel { VStack(alignment:.leading,spacing:14) {
+        // First on Tonight, under the navigation bar: no horizon rule above it.
+        return Panel(rule:false) { VStack(alignment:.leading,spacing:14) {
             Eyebrow(text:"Your night")
             let repeated=hero?.id==park.id && night.id==model.tonight(park)
             if !repeated {
@@ -137,11 +138,12 @@ struct GoingPanel: View {
             .accessibilityHint("Opens that night at the park.")
             }
             Label { Text(statusLine(status,going:going,night:night,agreement:outlook?.agreement)).fixedSize(horizontal:false,vertical:true) } icon:{
-                Image(systemName:status == .worse ? "exclamationmark.circle" : status == .uncertain ? "questionmark.circle" : "checkmark.circle").accessibilityHidden(true)
+                // A fall is a caution: the glyph in its own red, the words in starlight, amber left to the score.
+                Image(systemName:status == .worse ? "exclamationmark.circle" : status == .uncertain ? "questionmark.circle" : "checkmark.circle").foregroundStyle(status == .worse ? palette.caution : palette.ink).accessibilityHidden(true)
             }
-            .font(.subheadline).foregroundStyle(status == .worse ? palette.accent : palette.ink)
+            .font(.subheadline).foregroundStyle(palette.ink)
             if let closure, !repeated {
-                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
+                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).fixedSize(horizontal:false,vertical:true)
                     .accessibilityLabel(ClosureLine.spoken(closure))
             }
             // The time to leave is also the way to the drive time: one row, no extra button.
@@ -184,7 +186,7 @@ struct GoingPanel: View {
             ShareLink(item:TellSomeone.message(night:night,spot:MapsHandOff.spot(for:night.park)?.spot,closure:closure)) {
                 Label("Tell someone",systemImage:"person.wave.2").font(.subheadline).frame(minHeight:44)
             }
-            .buttonStyle(.bordered).accessibilityHint("Shares where you will be and when you expect to be back. You choose who it goes to.")
+            .secondaryAction().accessibilityHint("Shares where you will be and when you expect to be back. You choose who it goes to.")
             Spacer(minLength:0)
             Menu {
                 Button("Drive time",systemImage:"car") { editingDrive=going }

@@ -54,57 +54,6 @@
         }
       }
     },
-    "Red light on in ${applicationName}": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringSet": {
-            "state": "translated",
-            "values": [
-              "Rotlicht an in ${applicationName}",
-              "Schalte das Rotlicht in ${applicationName} ein"
-            ]
-          }
-        },
-        "en": {
-          "stringSet": {
-            "state": "translated",
-            "values": [
-              "Red light on in ${applicationName}",
-              "Turn on red light in ${applicationName}"
-            ]
-          }
-        },
-        "es": {
-          "stringSet": {
-            "state": "translated",
-            "values": [
-              "Enciende la luz roja en ${applicationName}",
-              "Activa la luz roja en ${applicationName}"
-            ]
-          }
-        },
-        "fr": {
-          "stringSet": {
-            "state": "translated",
-            "values": [
-              "Lumière rouge dans ${applicationName}",
-              "Active la lumière rouge dans ${applicationName}"
-            ]
-          }
-        },
-        "ja": {
-          "stringSet": {
-            "state": "translated",
-            "values": [
-              "${applicationName}で赤色ライトをオン",
-              "${applicationName}で赤い光にして",
-              "${applicationName}で赤色ライトをオンにして"
-            ]
-          }
-        }
-      }
-    },
     "Start dark adaptation in ${applicationName}": {
       "extractionState": "manual",
       "localizations": {
@@ -152,6 +101,65 @@
               "${applicationName}で暗順応を始めて",
               "${applicationName}で目を暗さに慣らして",
               "${applicationName}で目を暗さに慣らす"
+            ]
+          }
+        }
+      }
+    },
+    "Turn on night vision in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Schalte die Nachtsicht in ${applicationName} ein",
+              "${applicationName} Nachtsicht einschalten",
+              "Schalte die ${applicationName}-Nachtsicht ein",
+              "Rotlicht an in ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Turn on night vision in ${applicationName}",
+              "Turn on ${applicationName} night vision",
+              "Red light on in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Activa la visión nocturna en ${applicationName}",
+              "Activa la visión nocturna de ${applicationName}",
+              "Enciende la luz roja en ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Active la vision nocturne dans ${applicationName}",
+              "Active la vision nocturne de ${applicationName}",
+              "Lumière rouge dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}でナイトビジョンをオン",
+              "${applicationName}でナイトビジョンをオンにして",
+              "${applicationName}のナイトビジョンをオン",
+              "${applicationName}のナイトビジョンをオンにして",
+              "${applicationName}で赤色ライトをオン",
+              "${applicationName}で赤い光にして"
             ]
           }
         }

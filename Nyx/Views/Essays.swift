@@ -65,8 +65,8 @@ struct LearnView:View {
     var body:some View {
         ScrollView { VStack(alignment:.leading,spacing:24) {
             LazyVGrid(columns:columns,spacing:18) { ForEach(Essay.allCases) { essay in
-                NavigationLink { EssayView(essay:essay) } label:{ Panel { HStack(alignment:.top,spacing:14) {
-                    EssayIcon(essay:essay,size:24)
+                // A contents page, not a grid of tiles: the titles carry it, with no stock icon beside them.
+                NavigationLink { EssayView(essay:essay) } label:{ Panel(rule:essay != Essay.allCases.first) { HStack(alignment:.top,spacing:14) {
                     VStack(alignment:.leading,spacing:6) {
                         // Each line takes the card's whole width, not the width its last wrap left: the system lifts a
                         // lone last word onto the line before ("Watching a / meteor shower"), and a frame hugging that
@@ -98,7 +98,7 @@ struct EssayView:View {
                 Text(paragraph).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).textSelection(.enabled)
             } else { Text(paragraph).font(.system(.body,design:.serif)).lineSpacing(7).foregroundStyle(palette.ink).textSelection(.enabled) }
             if let figure, index==figure.afterParagraph { figure.view }
-        };if let model,let link=essay.link(model:model) { Button { follow(link.url) } label:{ Label(link.label,systemImage:"arrow.up.right") }.buttonStyle(.bordered).accessibilityHint("Leaves the essay and opens it in Nyx.") };if OnDeviceGuide.available { NavigationLink("Explain this another way") { GuideView(mode:.learn(essay)) }.buttonStyle(.bordered) } }.padding(26).readableColumn(WideLayout.proseWidth) }.defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(veil:0.6)).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
+        };if let model,let link=essay.link(model:model) { Button { follow(link.url) } label:{ Label(link.label,systemImage:"arrow.up.right") }.secondaryAction().accessibilityHint("Leaves the essay and opens it in Nyx.") };if OnDeviceGuide.available { NavigationLink("Explain this another way") { GuideView(mode:.learn(essay)) }.secondaryAction() } }.padding(26).readableColumn(WideLayout.proseWidth) }.defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(veil:0.6)).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
     }
     /// Settings closes first (Learn lives in it), then the link opens where the essay points.
     private func follow(_ url:URL) {

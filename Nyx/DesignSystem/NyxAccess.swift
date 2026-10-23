@@ -185,7 +185,7 @@ extension ButtonStyle where Self == NyxActionStyle {
     static var nyxAction: NyxActionStyle { NyxActionStyle() }
 }
 /// An action that leads somewhere from an answer (a darker night ahead, a wider radius, field mode,
-/// Listen): amber words in a faintly filled hairline capsule, at least 44 pt tall. Pressed it dims;
+/// Listen): starlight words in a faintly filled hairline capsule, at least 44 pt tall (amber stays with the score). Pressed it dims;
 /// under a pointer (iPad) the capsule lifts. The capsule already outlines it, so Show Borders adds nothing.
 struct CapsuleActionStyle: ButtonStyle {
     func makeBody(configuration:Configuration)->some View { CapsuleActionLabel(configuration:configuration) }
@@ -196,17 +196,32 @@ private struct CapsuleActionLabel: View {
     @Environment(\.isEnabled) private var enabled
     var body: some View {
         configuration.label
-            .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)
-            .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1)))
-            .overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5*palette.stroke))
+            .font(.subheadline).foregroundStyle(palette.ink).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)
+            .background(Capsule().fill(palette.ink.opacity(palette.nightVision ? 0 : 0.06)))
+            .overlay(Capsule().stroke(palette.line,lineWidth:0.5*palette.stroke))
             .contentShape(.hoverEffect,Capsule()).hoverEffect(.highlight)
             .contentShape(Capsule())
             .opacity(configuration.isPressed ? 0.55 : enabled ? 1 : 0.45)
     }
 }
 extension ButtonStyle where Self == CapsuleActionStyle {
-    /// The amber capsule that leads from an answer to the next step.
+    /// The hairline capsule that leads from an answer to the next step.
     static var capsuleAction: CapsuleActionStyle { CapsuleActionStyle() }
+}
+
+/// A secondary action ("Tell someone", "Near me", "Add all to Calendar"): clear glass with a starlight
+/// label, so amber stays with the score and light and no action reads as a tinted web button. Bordered
+/// in starlight where glass would not read: night vision, Reduce Transparency, Increase Contrast.
+struct SecondaryAction: ViewModifier {
+    @Environment(\.nyx) private var palette
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @ViewBuilder func body(content:Content)->some View {
+        if palette.nightVision || reduceTransparency || palette.highContrast { content.buttonStyle(.bordered).buttonBorderShape(.capsule).tint(palette.ink) }
+        else { content.buttonStyle(.glass).buttonBorderShape(.capsule).tint(palette.ink) }
+    }
+}
+extension View {
+    func secondaryAction()->some View { modifier(SecondaryAction()) }
 }
 
 // MARK: Colour independence

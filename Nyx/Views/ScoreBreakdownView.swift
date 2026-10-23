@@ -28,7 +28,7 @@ struct ScoreBreakdownView: View {
     private var content: some View {
         VStack(alignment:.leading,spacing:26) {
             // The eyebrow, then the numeral: the navigation bar already says "Score breakdown".
-            Eyebrow(text:"\(night.park.shortName) · \(night.park.dayLabel(night.id))")
+            Eyebrow(text:"\(night.park.shortName) · \(night.park.dayLabel(night.id))",meta:true)
             // The band keeps its whole width beside the numeral (a one-word band cannot wrap, so a squeezed
             // frame clips it); when both do not fit, as at accessibility sizes, the band goes underneath.
             ViewThatFits(in:.horizontal) {
@@ -39,7 +39,7 @@ struct ScoreBreakdownView: View {
             // The weakest link, said beside the number it sets, before the parts that add up to more.
             if let limit=night.score.limit, limit.cap<partsSum {
                 if case .darkness = limit {} else {
-                    Text(Sentences.join([limit.sentence(tonight:isTonight),String(localized:"The four parts add up to \(partsSum); the score takes the lowest cap that applies.")])).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
+                    figures(Sentences.join([limit.sentence(tonight:isTonight),String(localized:"The four parts add up to \(partsSum); the score takes the lowest cap that applies.")]))
                 }
             }
             row("Moonlight",points:Double(shown.moon),of:40,fact:moonFact,detail:String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one."))
@@ -50,8 +50,8 @@ struct ScoreBreakdownView: View {
             if let caption=night.basisCaption(typical:true) { Text(Sentences.join([caption,String(localized:"The score will change as a forecast arrives.")])).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             // What the score leaves out, said once and quietly: smoke switched off, or no smoke forecast reaching the night.
             if let smoke=model.smokeNote(night) { Text(smoke).font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-            if night.sky.darkHours==0 { Text(isTonight ? String(localized:"No true darkness tonight at this latitude. The score is capped below 40.") : String(localized:"No true darkness on this night at this latitude. The score is capped below 40.")).foregroundStyle(palette.accent) }
-            else if ScoreEngine.cap(darkHours:night.sky.darkHours)<100 { Text(isTonight ? String(localized:"True darkness lasts only \(darkness) tonight, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.") : String(localized:"True darkness lasts only \(darkness) on this night, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.")).foregroundStyle(palette.accent) }
+            if night.sky.darkHours==0 { figures(isTonight ? String(localized:"No true darkness tonight at this latitude. The score is capped below 40.") : String(localized:"No true darkness on this night at this latitude. The score is capped below 40.")) }
+            else if ScoreEngine.cap(darkHours:night.sky.darkHours)<100 { figures(isTonight ? String(localized:"True darkness lasts only \(darkness) tonight, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.") : String(localized:"True darkness lasts only \(darkness) on this night, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.")) }
             if let event=model.events(night).item(park:night.park,sky:night.sky,isTonight:isTonight) {
                 // An eclipse or a shower peak is a reason to go, said beside the score, never in it.
                 HStack(alignment:.top,spacing:14) {
@@ -59,7 +59,7 @@ struct ScoreBreakdownView: View {
                     VStack(alignment:.leading,spacing:6) {
                         Text([event.title,event.note].compactMap { $0 }.joined(separator:", ")).font(.headline)
                         if let value=event.value { Text(value).font(.system(.title3,design:.serif)).foregroundStyle(palette.accent) }
-                        Text(event.detail).font(.system(.callout,design:.serif)).fixedSize(horizontal:false,vertical:true)
+                        Text(event.detail).font(.callout).fixedSize(horizontal:false,vertical:true)
                         Text("Also in the sky this night. Not part of the score.").font(.footnote).foregroundStyle(palette.muted)
                     }
                 }
@@ -69,6 +69,27 @@ struct ScoreBreakdownView: View {
             Text(Sentences.join([String(localized:"Each park uses its own local date."),String(localized:"The score is a planning guide, not a guarantee of visibility or safe access.")])).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             ShareCardButton(night:night)
         }
+    }
+    /// A sentence about what holds the score down, in starlight with only its figures in amber: the
+    /// numbers are the score's, so they take its colour, and the words around them stay calm.
+    /// Through night vision both are the one red, which loses nothing: the words say it all.
+    private func figures(_ sentence:String)->some View {
+        Text(Self.figuresLit(sentence,accent:palette.accent)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+    }
+    /// `sentence` with each run of digits coloured `accent`, as one attributed string so it wraps,
+    /// scales and reads to VoiceOver as the plain sentence does.
+    nonisolated static func figuresLit(_ sentence:String,accent:Color)->AttributedString {
+        var lit=AttributedString()
+        var rest=Substring(sentence)
+        while let first=rest.first {
+            let figure=first.isWholeNumber
+            let run=rest.prefix { $0.isWholeNumber==figure }
+            var part=AttributedString(run)
+            if figure { part.swiftUI.foregroundColor=accent }
+            lit+=part
+            rest=rest.dropFirst(run.count)
+        }
+        return lit
     }
     /// The four parts' sum before any cap, as the readout shows them.
     private var partsSum:Int { night.score.partsSum }
@@ -146,14 +167,15 @@ struct ScoreBreakdownView: View {
                     } else { Capsule().stroke(palette.line,style:StrokeStyle(lineWidth:1,dash:[2,3])) }
                 }
             }.frame(height:4).accessibilityHidden(true)
-            Text(fact).font(.system(.body,design:.serif)).fixedSize(horizontal:false,vertical:true)
+            // Sans for what a part was scored from; serif is kept for the figures and the night's name.
+            Text(fact).font(.body).fixedSize(horizontal:false,vertical:true)
             if !context.isEmpty {
                 VStack(alignment:.leading,spacing:6) {
                     ForEach(context,id:\.text) { line in
                         // One icon column, so lines with narrower or wider symbols start their words together.
                         Label { Text(line.text).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:line.symbol).foregroundStyle(palette.muted).frame(width:contextIcon).accessibilityHidden(true) }
                     }
-                }.font(.system(.callout,design:.serif)).foregroundStyle(palette.ink.opacity(palette.nightVision ? 1 : 0.88)).padding(.top,2)
+                }.font(.callout).foregroundStyle(palette.ink.opacity(palette.nightVision ? 1 : 0.88)).padding(.top,2)
             }
             Text(detail).font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }
