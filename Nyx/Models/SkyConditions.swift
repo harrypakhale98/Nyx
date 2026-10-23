@@ -36,6 +36,9 @@ nonisolated struct SkyConditions: Sendable {
     let moonrise: Date?
     let moonset: Date?
     let moonBelowFraction: Double
+    /// The Moon-free share of true darkness as a whole percent, rounded once for every device, so
+    /// "all through" (100) and "up all through" (0) mean the same on the iPhone, the watch and Vision Pro.
+    var moonDownPercent: Int { Int((moonBelowFraction*100).rounded()) }
     let darkHours: Double
     /// Moonlight over true darkness, 0 (no Moon) to 1 (a full Moon high in the sky all through it):
     /// Krisciunas–Schaefer brightness by phase and altitude, averaged in magnitudes of sky

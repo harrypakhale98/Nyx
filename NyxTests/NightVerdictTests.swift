@@ -56,6 +56,18 @@ import Testing
         #expect(scored(.usual) == "82, an estimate")
         #expect(scored(.blended(weight: 0.5, leadDays: 6)) == "82, an early look")
     }
+    /// "All through true darkness" means one thing on every device: the rounded Moon-free percent the
+    /// watch and Vision Pro show is 100 exactly when the iPhone's line says it.
+    @Test func wholeNightMoonMatchesTheWatch() throws {
+        let jotr = try park("jotr")
+        let days = (1...60).map { Calendar.current.date(byAdding: .day, value: $0, to: Date(timeIntervalSince1970: 1_793_000_000)) ?? .now }
+        for day in days {
+            let sky = engine.conditions(for: jotr, on: jotr.evening(day))
+            guard sky.darkHours > 0, let line = NightVerdict.moonSentence(sky: sky, park: jotr) else { continue }
+            #expect(line.hasPrefix("Moon-free through all") == (sky.moonDownPercent == 100))
+            if sky.moonDownPercent == 0 && sky.moon.illumination >= 0.05 { #expect(line.hasPrefix("Moon up all through")) }
+        }
+    }
     @Test func farNorthAndNoDarknessStayQuiet() throws {
         let gaar = try park("gaar"), dena = try park("dena")
         let winter = try sky(gaar, "2027-01-15")

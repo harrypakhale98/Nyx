@@ -295,7 +295,7 @@ extension SkyConditions {
     /// true darkness." rather than a bare 0%; nil on a night without true darkness.
     var moonBelowLine:String? {
         guard darkHours>0 else { return nil }
-        let percent=Int((moonBelowFraction*100).rounded())
+        let percent=moonDownPercent
         return percent==0 ? String(localized:"Up through all of true darkness.") : String(localized:"Below the horizon for \(percent)% of true darkness.")
     }
 }

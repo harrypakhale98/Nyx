@@ -30,15 +30,15 @@ nonisolated enum NightVerdict {
     static func moonSentence(sky: SkyConditions, park: Park) -> String? {
         let lit=sky.moon.illumination.formatted(.percent.precision(.fractionLength(0)))
         // In the words the watch and the share card use for the same night.
-        if sky.moonBelowFraction>=0.99 { return Sentences.end(String(localized: "Moon-free through all of true darkness")) }
+        if sky.moonDownPercent==100 { return Sentences.end(String(localized: "Moon-free through all of true darkness")) }
         if sky.moon.illumination<0.05 { return String(localized: "Moon too thin to matter, \(lit) lit.") }
-        if sky.moonBelowFraction<=0.01 { return String(localized: "Moon up all through true darkness, \(lit) lit.") }
+        if sky.moonDownPercent==0 { return String(localized: "Moon up all through true darkness, \(lit) lit.") }
         if let start=sky.darkStart, let end=sky.darkEnd {
             let dark=DateInterval(start: start, end: max(start, end))
             if let set=sky.moonset, dark.contains(set) { return String(localized: "Moon up until \(park.time(set)), \(lit) lit.") }
             if let rise=sky.moonrise, dark.contains(rise) { return String(localized: "Moon rises at \(park.time(rise)), \(lit) lit.") }
         }
-        return Sentences.end(String(localized: "Moon-free for \(Int((sky.moonBelowFraction*100).rounded()))% of true darkness"))
+        return Sentences.end(String(localized: "Moon-free for \(sky.moonDownPercent)% of true darkness"))
     }
     /// The core in true darkness: its Moon-free stretch, briefly, under the Moon, or not up at all.
     /// Nil where the core is never usefully up (far north), as What's up explains it there.

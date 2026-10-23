@@ -148,7 +148,7 @@ struct NightDetail: View {
         // Three columns side by side; stacked at accessibility sizes, where columns would clip.
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14)) : AnyLayout(HStackLayout(alignment: .top, spacing: 14))
         // Without true darkness there is nothing for the Moon to stay out of, so say that instead.
-        let moonNote = sky.darkHours > 0 ? String(localized: "Down for \(Int((sky.moonBelowFraction*100).rounded()))% of true darkness")
+        let moonNote = sky.darkHours > 0 ? String(localized: "Down for \(sky.moonDownPercent)% of true darkness")
             : String(localized: "The Moon counts only in true darkness, and this night has none.")
         // The month's usual night (ERA5), in the iPhone's words: there is no hourly forecast detail here.
         let month = park.calendar.component(.month, from: plan.sky.evening)

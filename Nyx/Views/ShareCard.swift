@@ -141,9 +141,9 @@ struct ShareCard:View {
     /// Milky Way's core and its hours, else how much of true darkness is Moon-free.
     static func why(night:Night,core:WhatsUp.Item?)->String? {
         guard night.sky.darkHours>0 else { return nil }
-        if night.sky.moonBelowFraction>=0.99 { return String(localized:"Moon-free through all of true darkness") }
+        if night.sky.moonDownPercent==100 { return String(localized:"Moon-free through all of true darkness") }
         if let core, core.timed, let value=core.value { return String(localized:"Milky Way core \(value)") }
-        let free=Int((night.sky.moonBelowFraction*100).rounded())
+        let free=night.sky.moonDownPercent
         return free>=25 ? String(localized:"Moon-free for \(free)% of true darkness") : nil
     }
 }

@@ -581,7 +581,7 @@ struct MilestonesPage: View {
         }
     }
     private var moonLine: String {
-        let below = Int((night.sky.moonBelowFraction*100).rounded())
+        let below = night.sky.moonDownPercent
         switch below {
         case 100: return String(localized: "The Moon is down all through true darkness.")
         case 0: return String(localized: "The Moon is up all through true darkness.")
