@@ -171,6 +171,10 @@ struct CalendarView: View {
     /// The pager's own width: a change (the inspector opening, an iPad window resized) rebuilds it on
     /// the current month, since a paging scroll view keeps its old offset in points.
     @State private var pagerWidth=0
+    /// One page's exact width: the pager's own, measured. Beside an inspector `containerRelativeFrame`
+    /// is at times handed the window's width instead, and the pager keeps the offset it centred on that
+    /// wider content, showing the end of this month and most of the next.
+    @State private var pageWidth=0.0
     /// The window's place; the starting park only once the place is known not to be there. A place
     /// abroad restored with the window waits for the world catalogue (`waiting`) rather than
     /// showing the starting park's month first.
@@ -371,7 +375,7 @@ struct CalendarView: View {
     /// month is in the accessibility tree and carries the peek, the rotors and the keyboard steps.
     /// Reduce Motion and Prefer Cross-Fade keep one page that fades between months.
     @ViewBuilder private func months(_ park:Park,_ data:Month,others:[Int:Month],scale:Double)->some View {
-        let weeks=MonthPager.weeks(park,tonight:model.tonight(park),around:monthOffset)
+        let weeks=MonthPager.weeks(park,tonight:model.tonight(park),around:monthOffset),page=pageWidth
         if !paging {
             grid(park,data,scale:scale,current:true,weeks:weeks)
                 .id(monthOffset)
@@ -392,7 +396,7 @@ struct CalendarView: View {
                             else { skeleton(park,scale:scale,weeks:weeks) }
                         }
                         .padding(.horizontal,24)
-                        .containerRelativeFrame(.horizontal)
+                        .containerRelativeFrame(.horizontal) { length,_ in page>0 ? page : length }
                         .accessibilityHidden(offset != monthOffset)
                     }
                 }.scrollTargetLayout()
@@ -406,7 +410,8 @@ struct CalendarView: View {
             .padding(.horizontal,-24)
             // A new width rebuilds the pager, which lands on the current month through its initial anchor.
             .id(pagerWidth)
-            .onGeometryChange(for:Int.self) { Int($0.size.width) } action:{ pagerWidth=$0 }
+            // Measured outside the negative padding, so the pager itself is 48 points wider.
+            .onGeometryChange(for:Double.self) { $0.size.width } action:{ pageWidth=$0+48; pagerWidth=Int($0) }
         }
     }
     /// The pager, unless motion should be still or cross-fade.
