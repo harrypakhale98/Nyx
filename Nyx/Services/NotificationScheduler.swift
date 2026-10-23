@@ -224,7 +224,7 @@ nonisolated struct NotificationScheduler {
     /// The Moon's part, when it is the reason; nil when it is not.
     private static func moonReason(_ night:Night)->String? {
         let sky=night.sky
-        if sky.moonBelowFraction>=0.99 { return String(localized:"Moon down all night") }
+        if sky.moonDownPercent==100 { return String(localized:"Moon down all night") }
         if sky.moon.illumination<0.05 { return String(localized:"Almost no moonlight") }
         if let set=sky.moonset, let start=sky.darkStart, let end=sky.darkEnd, set>start, set<end, sky.moonrise.map({ $0<start || $0>end }) ?? true {
             return String(localized:"Moon sets at \(night.park.time(set))")

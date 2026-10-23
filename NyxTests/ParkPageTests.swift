@@ -212,7 +212,7 @@ import SwiftUI
         let card=ShareCard(night:night,why:ShareCard.why(night:night,core:nil))
         #expect(card.message.hasSuffix("Planned with Nyx. https://apps.apple.com/app/id6818817800"))
         #expect(card.message.contains("94 out of 100"))
-        if night.sky.moonBelowFraction>=0.99 { #expect(ShareCard.why(night:night,core:nil)=="Moon-free through all of true darkness") }
+        if night.sky.moonDownPercent==100 { #expect(ShareCard.why(night:night,core:nil)=="Moon-free through all of true darkness") }
         #expect(abs(ShareCard.Format.story.size.height/ShareCard.Format.story.size.width-16.0/9)<0.001)
     }
 }
