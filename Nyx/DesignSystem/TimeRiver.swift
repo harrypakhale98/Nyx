@@ -106,8 +106,29 @@ struct TimeRiver: View {
             } else if typeSize.isAccessibilitySize {
                 stepper
             } else {
-                river
-                summary
+                // The drawn river and the words under it are one element: VoiceOver reads the chosen
+                // night once, as the river's value, and the visible summary lies inside that element
+                // rather than on screen with none (the audit's "Potentially inaccessible text").
+                VStack(alignment:.leading,spacing:14) {
+                    river
+                    summary
+                }
+                .accessibilityElement()
+                .accessibilityLabel("Thirty-night darkness timeline")
+                .accessibilityValue(spokenValue)
+                .accessibilityHint("Moves one night at a time. An audio graph is available.")
+                // An explicit activation, so a double-tap or "Tap River" says the night (or opens it) instead
+                // of landing a tap on the middle of the river and choosing whichever night lies there.
+                .accessibilityAction { activate() }
+                .accessibilityInputLabels([Text("River"),Text("Nights"),Text("Timeline")])
+                .modifier(RiverAccessibility(nights:nights,outlooks:outlooks,markers:markers,peaks:peakOrder,current:index,choose:choose))
+                .accessibilityAdjustableAction { direction in
+                    switch direction {
+                    case .increment: choose(index.map { $0+1 } ?? 0)
+                    case .decrement: choose(index.map { $0-1 } ?? 0)
+                    @unknown default: break
+                    }
+                }
                 if access.preferSteps { stepButtons }
             }
             #if DEBUG
@@ -179,25 +200,11 @@ struct TimeRiver: View {
         .frame(height:150)
         // The loupe grows and settles on the shared spring; under Reduce Motion it simply changes size.
         .animation(reduceMotion ? nil : NyxMotion.spring,value:lifted)
-        .accessibilityElement()
-        .accessibilityLabel("Thirty-night darkness timeline")
-        .accessibilityValue(spokenValue)
-        .accessibilityHint("Moves one night at a time. An audio graph is available.")
-        // An explicit activation, so a double-tap or "Tap River" says the night (or opens it) instead
-        // of landing a tap on the middle of the river and choosing whichever night lies there.
-        .accessibilityAction { activate() }
-        .accessibilityInputLabels([Text("River"),Text("Nights"),Text("Timeline")])
-        .modifier(RiverAccessibility(nights:nights,outlooks:outlooks,markers:markers,peaks:peakOrder,current:index,choose:choose))
-        .accessibilityAdjustableAction { direction in
-            switch direction {
-            case .increment: choose(index.map { $0+1 } ?? 0)
-            case .decrement: choose(index.map { $0-1 } ?? 0)
-            @unknown default: break
-            }
-        }
     }
 
-    /// The selected night in words: its date and score, then what the score rests on.
+    /// The selected night in words: its date and score, then what the score rests on. Read as the
+    /// river's value: hidden itself, but inside the river's element, so it is never text on screen
+    /// with no element.
     private var summary: some View {
         VStack(alignment:.leading,spacing:4) {
             if let current {

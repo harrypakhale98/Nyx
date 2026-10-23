@@ -337,7 +337,12 @@ final class AccessibilityAuditTests:XCTestCase {
             // bar only; the bar's own title, field and buttons are not excused here. Parks only: its list begins below the
             // field at rest, while other pages (the park's hero) may sit under a clear bar by design and stay measured.
             let underBar=screen=="parks" && !navigationBar.isNull && frame.minY<navigationBar.maxY && !barLabels.contains(issue.element?.label ?? "")
-            if !visible || underBar || issue.compactDescription.contains("nearly") || (screen=="parks" && (numeral || bandLabel)) || toolbarButton || recapSerif || learnCaption || nightScore { return true }
+            // iPad Parks (2026-10-22): the caption under the river in the split view's park page, "Cloud forecast" in muted
+            // starlight (72%) on the indigo panel, about 9:1. Measured only since the river and its summary became one element;
+            // the audit fails it there in the standard pass while passing the same caption on Tonight and the park page, and the
+            // fallback finds too few glyph pixels in 12 pt caption type to measure it. Checked in a zoomed iPad Pro 13-inch capture.
+            let riverCaption=screen=="parks" && UIDevice.current.userInterfaceIdiom == .pad && issue.element?.elementType == .staticText && issue.element?.label=="Cloud forecast"
+            if !visible || underBar || riverCaption || issue.compactDescription.contains("nearly") || (screen=="parks" && (numeral || bandLabel)) || toolbarButton || recapSerif || learnCaption || nightScore { return true }
             // iPad (2026-10-09): over the real sky the audit misjudges small text it can read in the pixels. Plan's
             // "CA · International Dark Sky Park" captures at 9.6:1 (5.7:1 in night vision) and passes over plain black or
             // with the faint layer off: the Milky Way's glow, one to five levels above black and invisible, outnumbers the
@@ -379,14 +384,17 @@ final class AccessibilityAuditTests:XCTestCase {
             let designationLine=screen=="light" && pass != "ax5" && issue.element?.elementType == .staticText && issue.element?.label=="An International Dark Sky Park, certified by DarkSky International."
             return !visible || pastHomeIndicator || learnTitle || privacyCaption || designationLine || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
         case .elementDetection:
-            // Decorative "NYX" wordmark and the time river's Canvas-drawn dates; the river element speaks the full value.
-            // The sky map's Canvas-drawn inset names (Alaska, Hawaiʻi, Am. Samoa, Virgin Is.): decoration; each star is a
-            // labelled button and the map has a spoken summary.
-            // iPad (2026-10-06): the river is on screen on Tonight (wide) and in the detail's hero column.
-            // iPad (2026-10-09): Parks' split view shows the chosen park's page beside the list, river and all; the same
-            // element-less finding appears on the detail and river routes, and the list itself passes on iPhone.
+            // Decorative "NYX" wordmark; the sky map's Canvas-drawn inset names (Alaska, Hawaiʻi, Am. Samoa, Virgin Is.):
+            // decoration; each star is a labelled button and the map has a spoken summary.
+            // Not the time river (2026-10-22): what was excused on Tonight, the park page, the river route and iPad Parks as
+            // its "Canvas-drawn dates" was the summary under the river (the chosen night's date, score and basis), on screen
+            // but hidden from accessibility. The river and its summary are now one element, and Tonight, the park page and the
+            // river route are measured.
+            // iPad Parks still reports five to fifteen element-less findings in its split view (list beside a park's page) in
+            // the standard passes, in some runs only, with the river fixed; not identified yet, so the iPad split view keeps
+            // the exemption it had since 2026-10-09. The list itself passes on iPhone.
             let padParks=screen=="parks" && UIDevice.current.userInterfaceIdiom == .pad
-            return issue.element==nil && (padParks || ["onboarding","river","constellation","journal","recap","tonight","detail"].contains(screen))
+            return issue.element==nil && (padParks || ["onboarding","constellation","journal","recap"].contains(screen))
         default:
             return false
         }
