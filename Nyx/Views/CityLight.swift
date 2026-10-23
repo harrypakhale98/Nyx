@@ -141,7 +141,7 @@ struct CityLightFigure: View {
 }
 /// The figure's canvas, with the Bortle class as its animatable value: redrawn only while the
 /// class moves, then still.
-private struct GlowComparisonSky: View, Animatable {
+struct GlowComparisonSky: View, Animatable {
     let sky: HorizonSky
     let base: PanoramaOptions
     var bortle: Double
