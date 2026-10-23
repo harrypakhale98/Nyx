@@ -12606,7 +12606,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "A las %@."
+            "value": "Datos de las %@."
           }
         },
         "fr": {
@@ -20551,7 +20551,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Plus sombre %1$@ : %2$@."
+            "value": "Plus sombre le %1$@ : %2$@."
           }
         },
         "ja": {
@@ -20586,7 +20586,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Plus sombre %@ : %lld à %@"
+            "value": "Plus sombre le %@ : %lld à %@"
           }
         },
         "ja": {
@@ -33926,7 +33926,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laissez-en d’abord une, dans Ce soir ou sur sa propre page."
+            "value": "Retirez-en d’abord une, dans Ce soir ou sur sa propre page."
           }
         },
         "ja": {
@@ -36512,7 +36512,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die Milchstraßen-Saison in %1$@ beginnt etwa am %2$@ und dauert bis etwa %3$@: Das Zentrum steht in mondlosen Nächten mindestens eine Stunde in echter Dunkelheit."
+            "value": "Die Milchstraßen-Saison in %1$@ beginnt etwa am %2$@ und dauert bis etwa zum %3$@: Das Zentrum steht in mondlosen Nächten mindestens eine Stunde in echter Dunkelheit."
           }
         },
         "en": {
@@ -36547,7 +36547,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die Milchstraßen-Saison in %1$@ dauert bis etwa %2$@: Das Zentrum steht in mondlosen Nächten mindestens eine Stunde in echter Dunkelheit."
+            "value": "Die Milchstraßen-Saison in %1$@ dauert bis etwa zum %2$@: Das Zentrum steht in mondlosen Nächten mindestens eine Stunde in echter Dunkelheit."
           }
         },
         "en": {
@@ -44651,7 +44651,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jetzt %1$lld, %2$@, nach %3$lld, als du sie gewählt hast."
+            "value": "Jetzt %1$lld, %2$@, gesunken von %3$lld, als du sie gewählt hast."
           }
         },
         "en": {
@@ -45228,13 +45228,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx kann dir sagen, wenn eine Nacht, für die du losfährst, deutlich schlechter wird, mit einer besseren Wahl in der Nähe, wenn es eine gibt, und dich ans Losfahren erinnern. Derselbe Schalter erlaubt auch die Erinnerungen am Vorabend für makellose Nächte an gespeicherten Orten. Alles wird auf diesem iPad geplant. iOS entscheidet, wie oft Nyx im geschlossenen Zustand prüfen kann, also öffne Nyx, bevor du losfährst."
+                  "value": "Nyx kann dir sagen, wenn eine Nacht, für die du losfährst, deutlich schlechter wird, mit einer besseren Wahl in der Nähe, wenn es eine gibt, und dich ans Losfahren erinnern. Derselbe Schalter erlaubt auch die Erinnerungen am Vorabend für Nächte mit „Makellos“ an gespeicherten Orten. Alles wird auf diesem iPad geplant. iOS entscheidet, wie oft Nyx im geschlossenen Zustand prüfen kann, also öffne Nyx, bevor du losfährst."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx kann dir sagen, wenn eine Nacht, für die du losfährst, deutlich schlechter wird, mit einer besseren Wahl in der Nähe, wenn es eine gibt, und dich ans Losfahren erinnern. Derselbe Schalter erlaubt auch die Erinnerungen am Vorabend für makellose Nächte an gespeicherten Orten. Alles wird auf diesem iPhone geplant. iOS entscheidet, wie oft Nyx im geschlossenen Zustand prüfen kann, also öffne Nyx, bevor du losfährst."
+                  "value": "Nyx kann dir sagen, wenn eine Nacht, für die du losfährst, deutlich schlechter wird, mit einer besseren Wahl in der Nähe, wenn es eine gibt, und dich ans Losfahren erinnern. Derselbe Schalter erlaubt auch die Erinnerungen am Vorabend für Nächte mit „Makellos“ an gespeicherten Orten. Alles wird auf diesem iPhone geplant. iOS entscheidet, wie oft Nyx im geschlossenen Zustand prüfen kann, also öffne Nyx, bevor du losfährst."
                 }
               }
             }
@@ -45282,13 +45282,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx peut vous prévenir si une nuit où vous allez se dégrade nettement, avec un meilleur choix à proximité quand il y en a un, et vous rappeler quand partir. Le même réglage autorise les rappels de la veille pour les nuits Exceptionnelles dans les lieux que vous enregistrez. Tout est programmé sur cet iPad. iOS décide à quelle fréquence Nyx peut vérifier lorsqu’elle est fermée ; ouvrez donc Nyx avant de partir."
+                  "value": "Nyx peut vous prévenir si une nuit où vous allez se dégrade nettement, avec un meilleur choix à proximité quand il y en a un, et vous rappeler quand partir. Le même réglage autorise les rappels de la veille pour les nuits Immaculées dans les lieux que vous enregistrez. Tout est programmé sur cet iPad. iOS décide à quelle fréquence Nyx peut vérifier lorsqu’il est fermé ; ouvrez donc Nyx avant de partir."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx peut vous prévenir si une nuit où vous allez se dégrade nettement, avec un meilleur choix à proximité quand il y en a un, et vous rappeler quand partir. Le même réglage autorise les rappels de la veille pour les nuits Exceptionnelles dans les lieux que vous enregistrez. Tout est programmé sur cet iPhone. iOS décide à quelle fréquence Nyx peut vérifier lorsqu’elle est fermée ; ouvrez donc Nyx avant de partir."
+                  "value": "Nyx peut vous prévenir si une nuit où vous allez se dégrade nettement, avec un meilleur choix à proximité quand il y en a un, et vous rappeler quand partir. Le même réglage autorise les rappels de la veille pour les nuits Immaculées dans les lieux que vous enregistrez. Tout est programmé sur cet iPhone. iOS décide à quelle fréquence Nyx peut vérifier lorsqu’il est fermé ; ouvrez donc Nyx avant de partir."
                 }
               }
             }
@@ -45300,13 +45300,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "出かける予定の夜がはっきり悪くなったら、近くにより良い選択肢があればそれも添えてNyxがお知らせし、出発の時刻もリマインドします。同じスイッチで、保存した場所の「最高」の夜の前日リマインダーも有効になります。すべてこのiPadでスケジュールされます。Nyxが閉じているあいだに確認できる頻度はiOSが決めるため、出発前にNyxを開いてください。"
+                  "value": "出かける予定の夜がはっきり悪くなったら、近くにより良い選択肢があればそれも添えてNyxがお知らせし、出発の時刻もリマインドします。同じスイッチで、保存した場所の「極上」の夜の前日リマインダーも有効になります。すべてこのiPadでスケジュールされます。Nyxが閉じているあいだに確認できる頻度はiOSが決めるため、出発前にNyxを開いてください。"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "出かける予定の夜がはっきり悪くなったら、近くにより良い選択肢があればそれも添えてNyxがお知らせし、出発の時刻もリマインドします。同じスイッチで、保存した場所の「最高」の夜の前日リマインダーも有効になります。すべてこのiPhoneでスケジュールされます。Nyxが閉じているあいだに確認できる頻度はiOSが決めるため、出発前にNyxを開いてください。"
+                  "value": "出かける予定の夜がはっきり悪くなったら、近くにより良い選択肢があればそれも添えてNyxがお知らせし、出発の時刻もリマインドします。同じスイッチで、保存した場所の「極上」の夜の前日リマインダーも有効になります。すべてこのiPhoneでスケジュールされます。Nyxが閉じているあいだに確認できる頻度はiOSが決めるため、出発前にNyxを開いてください。"
                 }
               }
             }
@@ -56384,13 +56384,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Guardado en este iPad para usar sin conexión: el pronóstico de %1$@ y las alertas del parque de %2$@."
+                  "value": "Guardado en este iPad para usar sin conexión: el pronóstico del %1$@ y las alertas del parque del %2$@."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Guardado en este iPhone para usar sin conexión: el pronóstico de %1$@ y las alertas del parque de %2$@."
+                  "value": "Guardado en este iPhone para usar sin conexión: el pronóstico del %1$@ y las alertas del parque del %2$@."
                 }
               }
             }
@@ -56479,13 +56479,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Guardado en este iPad para usar sin conexión: el pronóstico de %@."
+                  "value": "Guardado en este iPad para usar sin conexión: el pronóstico del %@."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Guardado en este iPhone para usar sin conexión: el pronóstico de %@."
+                  "value": "Guardado en este iPhone para usar sin conexión: el pronóstico del %@."
                 }
               }
             }
@@ -58385,7 +58385,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Teilt, wo du sein wirst und wann du zurück sein willst. Du wählst, an wen es geht."
+            "value": "Teilt, wo du sein wirst und wann du zurück sein wirst. Du wählst, an wen es geht."
           }
         },
         "en": {
@@ -63871,7 +63871,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reprenez-le de Plans ou de vos propres trajets. Nyx n’interroge aucun service d’itinéraire, le temps reste le vôtre."
+            "value": "Prenez-le dans Plans ou de vos propres trajets. Nyx n’interroge aucun service d’itinéraire, le temps reste le vôtre."
           }
         },
         "ja": {
@@ -64063,7 +64063,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Das ist %@ deiner Zeit."
+            "value": "Das ist %@ nach deiner Uhrzeit."
           }
         },
         "en": {
