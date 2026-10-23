@@ -120,6 +120,8 @@ extension ParkDetailView {
             if model.detailPausedForLowData { Label("Forecast detail paused in Low Data Mode.",systemImage:"antenna.radiowaves.left.and.right.slash").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
             Divider().overlay(palette.line).padding(.top,10)
             AddNightToCalendar(night:night)
+            // Kept as going: Nyx keeps watch on it, and Tonight leads with it (`GoingPanel`).
+            GoingButton(night:night)
             // Tonight is followed from the hero, beside "I'm here tonight".
             if !isTonight { FollowNightButton(night:night) }
             // Where the night is decided, the way there: a quiet row, or the access note for a roadless park.

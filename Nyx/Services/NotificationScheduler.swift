@@ -105,8 +105,12 @@ nonisolated struct NotificationScheduler {
     func requestAuthorization() async -> Bool { await center.request() }
     /// Cancels every pending reminder. Cancelled ones were never seen, so they may be planned again later.
     func remove() async {
-        let ours=Set(await center.pendingIDs().filter{$0.hasPrefix("nyx-night-")})
+        let pending=await center.pendingIDs()
+        let ours=Set(pending.filter{$0.hasPrefix("nyx-night-")})
         await center.remove(ours.sorted())
+        // A going night's leave reminder goes with the switch too (`GoingWatch`); it is in no ledger.
+        let going=pending.filter { $0.hasPrefix("nyx-going-") }
+        if !going.isEmpty { await center.remove(going) }
         ledger.record(ledger.ids.subtracting(ours),now:.now)
     }
     /// A score reminder is planned only for a night at most this far ahead...
