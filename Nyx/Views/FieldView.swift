@@ -229,7 +229,7 @@ struct FieldResetNotice: View {
 struct FieldNightPager: View {
     let session: FieldSession
     @Binding var focused: String?
-    /// At accessibility sizes, the eye's clock scrolls here, under "Now".
+    /// At accessibility sizes, the eye's clock scrolls here, under "Now" and with it.
     var eyeClock: Binding<Bool>?=nil
     /// At accessibility sizes, what the score's clouds rest on scrolls here, above "Now", instead of under the header.
     var note: String?=nil
@@ -249,8 +249,11 @@ struct FieldNightPager: View {
                         if showsReset, let reset=session.reset { FieldResetNotice(session:session,reset:reset).transition(.opacity) }
                         if let note { Text(note).font(.caption).fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading) }
                         nowCard(now)
+                        // Part of "Now", not a stop of its own: the page snaps from "Now" straight to the next
+                        // milestone. On its own the clock was a separate snap stop, and on iPad at AX5 the
+                        // accessibility audit could not size its text there (reported as not scaling).
+                        if let eyeClock { EyeClock(session:session,expanded:eyeClock).padding(.top,24) }
                     }.id("now")
-                    if let eyeClock { EyeClock(session:session,expanded:eyeClock) }
                     ForEach(ahead) { milestone in card(milestone,now:now).id(milestone.id) }
                     if !passed.isEmpty { earlier(passed).id("earlier") }
                 }
