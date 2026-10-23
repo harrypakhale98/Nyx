@@ -319,6 +319,12 @@ struct RootView:View {
         // Your privacy → Advanced on its own, opened (`-nyx-advanced`).
         case "nps-key": Form { Section { NPSKeyField() } header:{ Text("Advanced") } }.readableForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
         case "data": AboutDataView()
+        // "With the lights out" alone, as Tonight shows it from Las Vegas (to Death Valley), for audits and captures.
+        case "lights-out": if let dark=model.park("deva") {
+            NavigationStack { ScrollView { Panel { LightsOutFigure(target:LightsOut.Target(place:dark,meters:dark.distanceMeters(latitude:36.17,longitude:-115.14),homeClass:8,homeKnown:true,
+                                                                                          best:LightsOut.best(model.nights(dark,from:model.tonight(dark),count:LightsOut.horizon),closure:model.closure(dark))),origin:"Las Vegas") }.padding(24) }
+                .background(NightBackground(park:dark,night:model.tonight(dark))).navigationTitle(dark.shortName).navigationBarTitleDisplayMode(.inline) }
+        }
         // The Sky glow panel (what city light takes, light pollution, Protect this sky) and viewing spots for one park:
         // `-nyx-park deva | grca | sequ`; `-nyx-glow-compare city` opens the illustration on the city's sky (here and on the park page).
         case "light": if let park=model.home { NavigationStack { ScrollView { VStack(spacing:26) { SkyGlowPanel(park:park,comparison:DebugScenario.text("-nyx-glow-compare") == "city" ? .city : .here); Panel { ViewingSpots(park:park) } }.padding(24) }.defaultScrollAnchor(DebugScenario.number("-nyx-scroll").map { UnitPoint(x:0.5,y:$0) } ?? .top).background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) } }

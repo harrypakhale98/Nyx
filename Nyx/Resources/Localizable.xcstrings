@@ -246,6 +246,41 @@
         }
       }
     },
+    "%@ (Class %lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ (Klasse %2$lld)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (Class %lld)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ (clase %2$lld)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ (classe %2$lld)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@（クラス%2$lld）"
+          }
+        }
+      }
+    },
     "%@ The ring marks the week's best night.": {
       "extractionState": "manual",
       "localizations": {
@@ -1836,6 +1871,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ · ボートル%lld（あなたの観察）"
+          }
+        }
+      }
+    },
+    "%@ · Class %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · Klasse %2$lld"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Class %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · clase %2$lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · Classe %2$lld"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · クラス%2$lld"
           }
         }
       }
@@ -4359,6 +4429,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@：100点中%2$lld点、%3$@。保存済みの雲予報を含みます。出発前に、天候と公園に入れるかを確認してください。"
+          }
+        }
+      }
+    },
+    "%@: Class %lld, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: Klasse %2$lld, %3$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: Class %lld, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: clase %2$lld, %3$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ : classe %2$lld, %3$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@：クラス%2$lld、%3$@。"
           }
         }
       }
@@ -9067,6 +9172,41 @@
         }
       }
     },
+    "A suburban sky, as Nyx assumes here: Class %lld, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Vorstadthimmel, wie Nyx ihn hier annimmt: Klasse %1$lld, %2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A suburban sky, as Nyx assumes here: Class %lld, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un cielo suburbano, como Nyx supone aquí: clase %1$lld, %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un ciel de banlieue, comme Nyx le suppose ici : classe %1$lld, %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "郊外の空（Nyxがここで想定する空）：クラス%1$lld、%2$@。"
+          }
+        }
+      }
+    },
     "A summer sky in %@, redrawn at each class. Real skies vary with the season, the weather and where you stand.": {
       "extractionState": "manual",
       "localizations": {
@@ -11554,6 +11694,76 @@
         }
       }
     },
+    "An illustration: a moonless summer sky drawn as a suburban sky, Class 7 (Nyx has no light map here), and at the darker place's estimated class.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Illustration: ein mondloser Sommerhimmel, gezeichnet als Vorstadthimmel, Klasse 7 (Nyx hat hier keine Lichtkarte), und in der geschätzten Klasse des dunkleren Ortes."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An illustration: a moonless summer sky drawn as a suburban sky, Class 7 (Nyx has no light map here), and at the darker place's estimated class."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una ilustración: un cielo de verano sin Luna dibujado como un cielo suburbano, clase 7 (Nyx no tiene mapa de luz aquí), y con la clase estimada del lugar más oscuro."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une illustration : un ciel d’été sans Lune dessiné comme un ciel de banlieue, classe 7 (Nyx n’a pas de carte de lumière ici), et avec la classe estimée du lieu plus sombre."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "イラスト：月のない夏の空を、郊外の空（クラス7、ここには光害マップがありません）と、より暗い場所の推定クラスで描いたものです。"
+          }
+        }
+      }
+    },
+    "An illustration: a moonless summer sky drawn at your starting point's class, estimated from satellite data, and at the darker place's estimated class.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Illustration: ein mondloser Sommerhimmel, gezeichnet in der Klasse deines Ausgangspunkts, aus Satellitendaten geschätzt, und in der geschätzten Klasse des dunkleren Ortes."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An illustration: a moonless summer sky drawn at your starting point's class, estimated from satellite data, and at the darker place's estimated class."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una ilustración: un cielo de verano sin Luna dibujado con la clase de tu punto de partida, estimada a partir de datos satelitales, y con la clase estimada del lugar más oscuro."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une illustration : un ciel d’été sans Lune dessiné avec la classe de votre point de départ, estimée d’après des données satellitaires, et avec la classe estimée du lieu plus sombre."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "イラスト：月のない夏の空を、衛星データから推定した出発地のクラスと、より暗い場所の推定クラスで描いたものです。"
+          }
+        }
+      }
+    },
     "An illustration: the same sky drawn at this park's estimated class and at a city's.": {
       "extractionState": "manual",
       "localizations": {
@@ -13534,6 +13744,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "いちばんよい夜"
+          }
+        }
+      }
+    },
+    "Best night at %@ in the next two weeks: %@, %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beste Nacht in %1$@ in den nächsten zwei Wochen: %2$@, %3$lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best night at %@ in the next two weeks: %@, %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor noche en %1$@ en las próximas dos semanas: %2$@, %3$lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meilleure nuit à %1$@ dans les deux semaines : %2$@, %3$lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今後2週間で%1$@のいちばん良い夜：%2$@、%3$lld点。"
           }
         }
       }
@@ -29864,6 +30109,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "今夜ここにいます"
+          }
+        }
+      }
+    },
+    "Illustration: %@, then the same sky at %@'s Class %lld. With the lights out, the Milky Way and many fainter stars appear.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illustration: %1$@, dann derselbe Himmel in der Klasse %3$lld von %2$@. Ohne die Lichter erscheinen die Milchstraße und viele schwächere Sterne."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illustration: %@, then the same sky at %@'s Class %lld. With the lights out, the Milky Way and many fainter stars appear."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ilustración: %1$@, y luego el mismo cielo con la clase %3$lld de %2$@. Con las luces apagadas aparecen la Vía Láctea y muchas estrellas más débiles."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illustration : %1$@, puis le même ciel avec la classe %3$lld de %2$@. Lumières éteintes, la Voie lactée et de nombreuses étoiles plus faibles apparaissent."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "イラスト：%1$@。次に同じ空を%2$@のクラス%3$lldで描いています。明かりが消えると、天の川と多くの暗い星が現れます。"
           }
         }
       }
@@ -62883,6 +63163,41 @@
         }
       }
     },
+    "That's the sky at %@, %@ away.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "So sieht der Himmel in %1$@ aus, %2$@ entfernt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That's the sky at %@, %@ away."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Así es el cielo en %1$@, a %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voici le ciel à %1$@, à %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "これが%1$@の空です（%2$@先）。"
+          }
+        }
+      }
+    },
     "The %lld best of %lld places in reach.": {
       "extractionState": "manual",
       "localizations": {
@@ -75551,6 +75866,41 @@
         }
       }
     },
+    "With the lights out": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne die Lichter"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With the lights out"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Con las luces apagadas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lumières éteintes"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "明かりを消すと"
+          }
+        }
+      }
+    },
     "Within 10 points on %lld of the last %lld nights Nyx answered.": {
       "extractionState": "manual",
       "localizations": {
@@ -78370,6 +78720,41 @@
         }
       }
     },
+    "Your sky (Class %lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Himmel (Klasse %lld)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your sky (Class %lld)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu cielo (clase %lld)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre ciel (classe %lld)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あなたの空（クラス%lld）"
+          }
+        }
+      }
+    },
     "Your spot": {
       "extractionState": "manual",
       "localizations": {
@@ -78681,6 +79066,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "国立公園"
+          }
+        }
+      }
+    },
+    "a suburban sky, Class %lld, as Nyx assumes for %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ein Vorstadthimmel, Klasse %1$lld, wie Nyx ihn für %2$@ annimmt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "a suburban sky, Class %lld, as Nyx assumes for %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "un cielo suburbano, clase %1$lld, como Nyx supone para %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "un ciel de banlieue, classe %1$lld, comme Nyx le suppose pour %2$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@についてNyxが想定する郊外の空（クラス%1$lld）"
           }
         }
       }
@@ -85941,6 +86361,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "極大の次の夜"
+          }
+        }
+      }
+    },
+    "the sky over %@ at its estimated Class %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "der Himmel über %1$@ in seiner geschätzten Klasse %2$lld"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the sky over %@ at its estimated Class %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "el cielo sobre %1$@ con su clase estimada %2$lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "le ciel au-dessus de %1$@ avec sa classe estimée %2$lld"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "推定クラス%2$lldの%1$@の空"
           }
         }
       }

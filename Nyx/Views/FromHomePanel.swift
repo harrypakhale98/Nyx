@@ -10,6 +10,8 @@ struct FromHomePanel: View {
     @ScaledMetric(relativeTo:.headline) private var glyphSize=20.0
     let origin: HomeSky.Origin
     let now: Date
+    /// The darkest place in reach, for "With the lights out" at the foot (`LightsOutFigure`).
+    var lightsOut: LightsOut.Target?=nil
     @State private var sky: HomeSky?
     var body: some View {
         Panel { VStack(alignment:.leading,spacing:16) {
@@ -19,6 +21,10 @@ struct FromHomePanel: View {
             if let sky {
                 rows(sky)
                 notes(sky)
+                if let lightsOut {
+                    Divider().overlay(palette.line)
+                    LightsOutFigure(target:lightsOut,origin:origin.name)
+                }
             } else {
                 ProgressView().frame(maxWidth:.infinity,minHeight:60).accessibilityLabel("Working out tonight's sky")
             }

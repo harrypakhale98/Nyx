@@ -407,8 +407,17 @@ struct TonightView: View {
     @ViewBuilder private func fromHome(hero:Park?)->some View {
         let here=location.latitude.flatMap { lat in location.longitude.map { (latitude:lat,longitude:$0) } }
         if model.startChosen, let origin=HomeSky.origin(location:here,place:model.homePlace,park:model.home), !FromHomePanel.repeats(origin,hero:hero) {
-            FromHomePanel(origin:origin,now:model.today)
+            FromHomePanel(origin:origin,now:model.today,lightsOut:lightsOut(origin))
         }
+    }
+    /// The darkest place in reach of a town or of where the person is (never of a park), when it is
+    /// plainly darker, with its best night in the next two weeks.
+    private func lightsOut(_ origin:HomeSky.Origin)->LightsOut.Target? {
+        guard origin.source != .park else { return nil }
+        let home=LightsOut.homeClass(latitude:origin.latitude,longitude:origin.longitude)
+        guard let dark=LightsOut.darkest(candidates,latitude:origin.latitude,longitude:origin.longitude,homeClass:home.bortle) else { return nil }
+        let nights=model.nights(dark.place,from:model.tonight(dark.place),count:LightsOut.horizon)
+        return LightsOut.Target(place:dark.place,meters:dark.meters,homeClass:home.bortle,homeKnown:home.known,best:LightsOut.best(nights,closure:model.closure(dark.place)))
     }
     @ViewBuilder private var extras: some View {
         if DebugScenario.state=="error" || DebugScenario.state=="offline" || (model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
