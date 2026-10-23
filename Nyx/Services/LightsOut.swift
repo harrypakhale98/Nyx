@@ -46,12 +46,12 @@ nonisolated enum LightsOut {
     /// "Best night at Great Basin in the next two weeks: Sat, Oct 31, 88." Names the place, so it
     /// reads on its own before the sky has cleared.
     static func bestLine(_ night: Night) -> String {
-        String(localized:"Best night at \(night.park.shortName) in the next two weeks: \(night.park.dayLabel(night.id)), \(night.score.value).")
+        String(localized:"Best night at \(night.park.shortName) in the next two weeks: \(night.park.dayLabel(night.id)), \(NightVerdict.scored(night)).")
     }
     /// The figure for VoiceOver: what is drawn, both classes, and what the dark sky shows.
     static func spoken(_ target: Target, origin: String) -> String {
-        let home=target.homeKnown ? String(localized:"the sky over \(origin) at its estimated Class \(target.homeClass)")
-                                  : String(localized:"a suburban sky, Class \(target.homeClass), as Nyx assumes for \(origin)")
-        return String(localized:"Illustration: \(home), then the same sky at \(target.place.shortName)'s Class \(target.place.bortleEstimate). With the lights out, the Milky Way and many fainter stars appear.")
+        target.homeKnown
+            ? String(localized:"Illustration: the sky over \(origin) at its estimated Class \(target.homeClass), then the same sky at Class \(target.place.bortleEstimate), as at \(target.place.shortName). With the lights out, the Milky Way and many fainter stars appear.")
+            : String(localized:"Illustration: a suburban sky, Class \(target.homeClass), as Nyx assumes where it has no light map, then the same sky at Class \(target.place.bortleEstimate), as at \(target.place.shortName). With the lights out, the Milky Way and many fainter stars appear.")
     }
 }

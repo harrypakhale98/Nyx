@@ -876,72 +876,72 @@
         }
       }
     },
-    "%@ is %lld that night, %@ away.": {
+    "%@ is %@ that night, %@ away.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ hat in dieser Nacht %2$lld, %3$@ entfernt."
+            "value": "%1$@ hat in dieser Nacht %2$@, %3$@ entfernt."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ is %lld that night, %@ away."
+            "value": "%@ is %@ that night, %@ away."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ tiene %2$lld esa noche, a %3$@."
+            "value": "%1$@ tiene %2$@ esa noche, a %3$@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ est à %2$lld cette nuit-là, à %3$@."
+            "value": "%1$@ est à %2$@ cette nuit-là, à %3$@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "その夜の%1$@は%2$lld点（%3$@先）。"
+            "value": "その夜の%1$@は%2$@（%3$@先）。"
           }
         }
       }
     },
-    "%@ is %lld there.": {
+    "%@ is %@ there.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dort hat der %1$@ %2$lld."
+            "value": "Dort hat der %1$@ %2$@."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ is %lld there."
+            "value": "%@ is %@ there."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allí, el %1$@ tiene %2$lld."
+            "value": "Allí, el %1$@ tiene %2$@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Là-bas, %1$@ est à %2$lld."
+            "value": "Là-bas, %1$@ est à %2$@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "同じ場所の%1$@は%2$lld点。"
+            "value": "同じ場所の%1$@は%2$@。"
           }
         }
       }
@@ -7747,6 +7747,76 @@
         }
       }
     },
+    "%lld, an early look": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld, ein früher Blick"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld, an early look"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld, un primer vistazo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld, un premier aperçu"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld点（早めの見通し）"
+          }
+        }
+      }
+    },
+    "%lld, an estimate": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld, eine Schätzung"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld, an estimate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld, una estimación"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld, une estimation"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld点（推定）"
+          }
+        }
+      }
+    },
     "%lld-minute read": {
       "extractionState": "manual",
       "localizations": {
@@ -12378,6 +12448,41 @@
         }
       }
     },
+    "Around each new moon, the weekend with the darkest night. Far ahead, this place has no usual clouds to go on, so scores rest on the Moon and the hours of true darkness, which are exact.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um jeden Neumond das Wochenende mit der dunkelsten Nacht. So weit voraus gibt es für diesen Ort keine üblichen Wolken, also beruhen die Werte auf dem Mond und den Stunden echter Dunkelheit, die genau sind."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Around each new moon, the weekend with the darkest night. Far ahead, this place has no usual clouds to go on, so scores rest on the Moon and the hours of true darkness, which are exact."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca de cada luna nueva, el fin de semana con la noche más oscura. Con tanta antelación, este lugar no tiene nubes habituales en las que basarse, así que las puntuaciones se basan en la Luna y las horas de oscuridad total, que son exactas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autour de chaque nouvelle lune, le week-end à la nuit la plus sombre. Si loin à l’avance, ce lieu n’a pas de nuages habituels sur lesquels s’appuyer ; les scores reposent donc sur la Lune et les heures d’obscurité totale, qui sont exactes."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新月ごとに、いちばん暗い夜のある週末を示します。この場所にはいつもの雲のデータがないため、先のスコアは月と完全に暗い時間（どちらも正確）にもとづきます。"
+          }
+        }
+      }
+    },
     "Around the world": {
       "extractionState": "manual",
       "localizations": {
@@ -14047,37 +14152,37 @@
         }
       }
     },
-    "Best night at %@ in the next two weeks: %@, %lld.": {
+    "Best night at %@ in the next two weeks: %@, %@.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Beste Nacht in %1$@ in den nächsten zwei Wochen: %2$@, %3$lld."
+            "value": "Beste Nacht in %1$@ in den nächsten zwei Wochen: %2$@, %3$@."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Best night at %@ in the next two weeks: %@, %lld."
+            "value": "Best night at %@ in the next two weeks: %@, %@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mejor noche en %1$@ en las próximas dos semanas: %2$@, %3$lld."
+            "value": "Mejor noche en %1$@ en las próximas dos semanas: %2$@, %3$@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Meilleure nuit à %1$@ dans les deux semaines : %2$@, %3$lld."
+            "value": "Meilleure nuit à %1$@ dans les deux semaines : %2$@, %3$@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今後2週間で%1$@のいちばん良い夜：%2$@、%3$lld点。"
+            "value": "今後2週間で%1$@のいちばん良い夜：%2$@、%3$@。"
           }
         }
       }
@@ -18132,6 +18237,41 @@
         }
       }
     },
+    "Cloud forecasts are off in Your privacy, so this night rests on the Moon, the darkness and the usual clouds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersagen sind unter „Deine Privatsphäre“ aus, daher beruht diese Nacht auf dem Mond, der Dunkelheit und den üblichen Wolken."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecasts are off in Your privacy, so this night rests on the Moon, the darkness and the usual clouds."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los pronósticos de nubes están desactivados en Tu privacidad, así que esta noche se basa en la Luna, la oscuridad y las nubes habituales."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les prévisions des nuages sont désactivées dans Votre vie privée, donc cette nuit repose sur la Lune, l’obscurité et les nuages habituels."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「あなたのプライバシー」で雲の予報がオフのため、この夜は月、暗さ、いつもの雲にもとづきます。"
+          }
+        }
+      }
+    },
     "Cloud forecasts are off in Your privacy. Showing saved data.": {
       "extractionState": "manual",
       "localizations": {
@@ -20177,41 +20317,6 @@
         }
       }
     },
-    "Dark sky at %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dunkler Himmel in %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dark sky at %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cielo oscuro en %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ciel noir à %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@の暗い空"
-          }
-        }
-      }
-    },
     "Dark until %@": {
       "extractionState": "manual",
       "localizations": {
@@ -20422,6 +20527,41 @@
         }
       }
     },
+    "Darker on %@: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkler am %1$@: %2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darker on %@: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más oscuro el %1$@: %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus sombre %1$@ : %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@はさらに暗い：%2$@。"
+          }
+        }
+      }
+    },
     "Darker on %@: %lld at %@": {
       "extractionState": "manual",
       "localizations": {
@@ -20453,41 +20593,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@はさらに暗い：%3$@で%2$lld点"
-          }
-        }
-      }
-    },
-    "Darker on %@: %lld.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dunkler am %@: %lld."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Darker on %@: %lld."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Más oscuro el %@: %lld."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plus sombre %@ : %lld."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@はさらに暗い：%lld点。"
           }
         }
       }
@@ -30587,37 +30692,72 @@
         }
       }
     },
-    "Illustration: %@, then the same sky at %@'s Class %lld. With the lights out, the Milky Way and many fainter stars appear.": {
+    "Illustration: a suburban sky, Class %lld, as Nyx assumes where it has no light map, then the same sky at Class %lld, as at %@. With the lights out, the Milky Way and many fainter stars appear.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Illustration: %1$@, dann derselbe Himmel in der Klasse %3$lld von %2$@. Ohne die Lichter erscheinen die Milchstraße und viele schwächere Sterne."
+            "value": "Illustration: ein Vorstadthimmel, Klasse %1$lld, wie Nyx ihn ohne Lichtkarte annimmt, dann derselbe Himmel in Klasse %2$lld, wie in %3$@. Ohne die Lichter erscheinen die Milchstraße und viele schwächere Sterne."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Illustration: %@, then the same sky at %@'s Class %lld. With the lights out, the Milky Way and many fainter stars appear."
+            "value": "Illustration: a suburban sky, Class %lld, as Nyx assumes where it has no light map, then the same sky at Class %lld, as at %@. With the lights out, the Milky Way and many fainter stars appear."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ilustración: %1$@, y luego el mismo cielo con la clase %3$lld de %2$@. Con las luces apagadas aparecen la Vía Láctea y muchas estrellas más débiles."
+            "value": "Ilustración: un cielo suburbano, clase %1$lld, como Nyx supone donde no tiene mapa de luz, y luego el mismo cielo con clase %2$lld, como en %3$@. Con las luces apagadas aparecen la Vía Láctea y muchas estrellas más débiles."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Illustration : %1$@, puis le même ciel avec la classe %3$lld de %2$@. Lumières éteintes, la Voie lactée et de nombreuses étoiles plus faibles apparaissent."
+            "value": "Illustration : un ciel de banlieue, classe %1$lld, comme Nyx le suppose là où il n’a pas de carte de lumière, puis le même ciel en classe %2$lld, comme à %3$@. Lumières éteintes, la Voie lactée et de nombreuses étoiles plus faibles apparaissent."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "イラスト：%1$@。次に同じ空を%2$@のクラス%3$lldで描いています。明かりが消えると、天の川と多くの暗い星が現れます。"
+            "value": "イラスト：光害マップがない場所でNyxが想定する郊外の空（クラス%1$lld）。次に同じ空を、%3$@と同じクラス%2$lldで描いています。明かりが消えると、天の川と多くの暗い星が現れます。"
+          }
+        }
+      }
+    },
+    "Illustration: the sky over %@ at its estimated Class %lld, then the same sky at Class %lld, as at %@. With the lights out, the Milky Way and many fainter stars appear.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illustration: der Himmel über %1$@ in seiner geschätzten Klasse %2$lld, dann derselbe Himmel in Klasse %3$lld, wie in %4$@. Ohne die Lichter erscheinen die Milchstraße und viele schwächere Sterne."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illustration: the sky over %@ at its estimated Class %lld, then the same sky at Class %lld, as at %@. With the lights out, the Milky Way and many fainter stars appear."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ilustración: el cielo sobre %1$@ con su clase estimada %2$lld, y luego el mismo cielo con clase %3$lld, como en %4$@. Con las luces apagadas aparecen la Vía Láctea y muchas estrellas más débiles."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illustration : le ciel au-dessus de %1$@ avec sa classe estimée %2$lld, puis le même ciel en classe %3$lld, comme à %4$@. Lumières éteintes, la Voie lactée et de nombreuses étoiles plus faibles apparaissent."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "イラスト：推定クラス%2$lldの%1$@の空。次に同じ空を、%4$@と同じクラス%3$lldで描いています。明かりが消えると、天の川と多くの暗い星が現れます。"
           }
         }
       }
@@ -33762,6 +33902,41 @@
         }
       }
     },
+    "Let one of them go first, on Tonight or on its own page.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gib zuerst eine davon frei, unter Heute Nacht oder auf ihrer eigenen Seite."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let one of them go first, on Tonight or on its own page."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deja ir una de ellas primero, en Esta noche o en su propia página."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laissez-en d’abord une, dans Ce soir ou sur sa propre page."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "先に、「今夜」かその夜のページでどれか一つを外してください。"
+          }
+        }
+      }
+    },
     "Light domes rise in several directions; the Milky Way fades toward the horizon.": {
       "extractionState": "manual",
       "localizations": {
@@ -35911,6 +36086,76 @@
         }
       }
     },
+    "Milky Way core clear of moonlight from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milchstraßenzentrum ohne Mondlicht von %1$@ bis %2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core clear of moonlight from %@ to %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Núcleo de la Vía Láctea sin luz de Luna de %1$@ a %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cœur de la Voie lactée à l’abri du clair de lune de %1$@ à %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天の川の中心部は%1$@から%2$@まで月明かりなしで見えます。"
+          }
+        }
+      }
+    },
+    "Milky Way core clear of moonlight, %@ – %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milchstraßenzentrum ohne Mondlicht, %1$@–%2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core clear of moonlight, %@ – %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Núcleo de la Vía Láctea sin luz de Luna, %1$@ – %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cœur de la Voie lactée à l’abri du clair de lune, %1$@ – %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月明かりのない天の川の中心部：%1$@ – %2$@。"
+          }
+        }
+      }
+    },
     "Milky Way core not up in true darkness.": {
       "extractionState": "manual",
       "localizations": {
@@ -36191,76 +36436,6 @@
         }
       }
     },
-    "Milky Way core with the Moon down from %@ to %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Milchstraßenzentrum ohne Mond von %@ bis %@."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Milky Way core with the Moon down from %@ to %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Núcleo de la Vía Láctea sin Luna de %@ a %@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cœur de la Voie lactée sans Lune de %@ à %@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "天の川の中心部は%@から%@まで月なしで見えます。"
-          }
-        }
-      }
-    },
-    "Milky Way core with the Moon down, %@ – %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Milchstraßenzentrum ohne Mond, %@–%@."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Milky Way core with the Moon down, %@ – %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Núcleo de la Vía Láctea sin Luna, %@ – %@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cœur de la Voie lactée sans Lune, %@ – %@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月のない天の川の中心部：%@ – %@。"
-          }
-        }
-      }
-    },
     "Milky Way core: up in true darkness from %@ to %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -36331,31 +36506,31 @@
         }
       }
     },
-    "Milky Way season at %@ opens about %@ and runs to about %@: the core up at least an hour in true darkness on moonless nights.": {
+    "Milky Way season at %@ opens about %@ and runs to about %@: the core is up at least an hour in true darkness on moonless nights.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die Milchstraßen-Saison in %1$@ beginnt etwa am %2$@ und dauert bis etwa %3$@: das Zentrum mindestens eine Stunde in echter Dunkelheit, in mondlosen Nächten."
+            "value": "Die Milchstraßen-Saison in %1$@ beginnt etwa am %2$@ und dauert bis etwa %3$@: Das Zentrum steht in mondlosen Nächten mindestens eine Stunde in echter Dunkelheit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Milky Way season at %@ opens about %@ and runs to about %@: the core up at least an hour in true darkness on moonless nights."
+            "value": "Milky Way season at %@ opens about %@ and runs to about %@: the core is up at least an hour in true darkness on moonless nights."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La temporada de la Vía Láctea en %1$@ empieza hacia el %2$@ y dura hasta hacia el %3$@: el núcleo, al menos una hora en oscuridad total en noches sin Luna."
+            "value": "La temporada de la Vía Láctea en %1$@ empieza hacia el %2$@ y dura hasta hacia el %3$@: el núcleo está al menos una hora en oscuridad total en noches sin Luna."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La saison de la Voie lactée à %1$@ commence vers le %2$@ et dure jusque vers le %3$@ : le cœur au moins une heure dans l’obscurité totale, les nuits sans Lune."
+            "value": "La saison de la Voie lactée à %1$@ commence vers le %2$@ et dure jusque vers le %3$@ : le cœur est levé au moins une heure dans l’obscurité totale, les nuits sans Lune."
           }
         },
         "ja": {
@@ -37381,37 +37556,72 @@
         }
       }
     },
-    "Moon up all night, %@ lit.": {
+    "Moon too thin to matter, %@ lit.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mond die ganze Nacht am Himmel, %@ beleuchtet."
+            "value": "Mond zu schmal, um zu stören, %@ beleuchtet."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moon up all night, %@ lit."
+            "value": "Moon too thin to matter, %@ lit."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Luna en el cielo toda la noche, %@ iluminada."
+            "value": "La Luna es demasiado fina para importar, %@ iluminada."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lune levée toute la nuit, %@ éclairée."
+            "value": "Lune trop mince pour compter, %@ éclairée."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "月は一晩中空にあります（輝面比%@）。"
+            "value": "月は細く、影響はほとんどありません（輝面比%@）。"
+          }
+        }
+      }
+    },
+    "Moon up all through true darkness, %@ lit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond während der gesamten echten Dunkelheit am Himmel, %@ beleuchtet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up all through true darkness, %@ lit."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo durante toda la oscuridad total, %@ iluminada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée pendant toute l’obscurité totale, %@ éclairée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間はずっと月が空にあります（輝面比%@）。"
           }
         }
       }
@@ -41666,41 +41876,6 @@
         }
       }
     },
-    "No Moon in the way.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kein Mond stört."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No Moon in the way."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Luna no estorba."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pas de Lune pour gêner."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月の影響はありません。"
-          }
-        }
-      }
-    },
     "No alerts in the last park update. Confirm access before travel.": {
       "extractionState": "manual",
       "localizations": {
@@ -45549,6 +45724,41 @@
         }
       }
     },
+    "Nyx has already added these nights.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx hat diese Nächte schon hinzugefügt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx has already added these nights."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx ya añadió estas noches."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx a déjà ajouté ces nuits."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxはこれらの夜をすでに追加しました。"
+          }
+        }
+      }
+    },
     "Nyx has no account, no ads, no tracking. Your journal never leaves this phone.": {
       "extractionState": "manual",
       "localizations": {
@@ -45850,6 +46060,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyxが見守り、この夜がはっきり悪くなったらお知らせします。"
+          }
+        }
+      }
+    },
+    "Nyx keeps watch on four nights at a time": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx behält vier Nächte gleichzeitig im Blick"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx keeps watch on four nights at a time"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx vigila cuatro noches a la vez"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx veille sur quatre nuits à la fois"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxが見守れるのは同時に4夜までです"
           }
         }
       }
@@ -46370,41 +46615,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "Nyx scored this night %lld, %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx bewertete diese Nacht mit %1$lld, %2$@."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx scored this night %lld, %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx dio a esta noche %1$lld, %2$@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx a donné à cette nuit %1$lld, %2$@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyxのこの夜のスコアは%1$lld点、%2$@。"
           }
         }
       }
@@ -56954,41 +57164,6 @@
         }
       }
     },
-    "Scores this far ahead rest on the usual clouds for the month. Check the forecast and closures nearer the time.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "So weit voraus beruhen die Werte auf den üblichen Wolken des Monats. Prüfe Vorhersage und Sperrungen näher am Termin."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scores this far ahead rest on the usual clouds for the month. Check the forecast and closures nearer the time."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Con tanta antelación, las puntuaciones se basan en las nubes habituales del mes. Consulta el pronóstico y los cierres más cerca de la fecha."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Si loin à l’avance, les scores reposent sur les nuages habituels du mois. Vérifiez la prévision et les fermetures à l’approche de la date."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "これほど先のスコアはその月のいつもの雲にもとづきます。日が近づいたら予報と閉鎖を確認してください。"
-          }
-        }
-      }
-    },
     "Search cities, towns and parks": {
       "extractionState": "manual",
       "localizations": {
@@ -66915,41 +67090,6 @@
         }
       }
     },
-    "The four parts add to %lld.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die vier Teile ergeben zusammen %lld."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The four parts add to %lld."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Las cuatro partes suman %lld."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les quatre parts totalisent %lld."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "4つの要素の合計は%lld点です。"
-          }
-        }
-      }
-    },
     "The four parts add up to %lld; the score takes the lowest cap that applies.": {
       "extractionState": "manual",
       "localizations": {
@@ -69211,41 +69351,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "ジャーナルを開くための空き容量が足りません。空き容量を確保してから、Nyxをもう一度開いてください。ほかの機能はすべて使えます。ジャーナルには手を付けていません。"
-          }
-        }
-      }
-    },
-    "These nights are already in your calendar.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Diese Nächte sind schon in deinem Kalender."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "These nights are already in your calendar."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estas noches ya están en tu calendario."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ces nuits sont déjà dans votre calendrier."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "これらの夜はすでにカレンダーにあります。"
           }
         }
       }
@@ -79954,6 +80059,41 @@
         }
       }
     },
+    "Your sky: Class %lld, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Himmel: Klasse %1$lld, %2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your sky: Class %lld, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu cielo: clase %1$lld, %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre ciel : classe %1$lld, %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あなたの空：クラス%1$lld、%2$@。"
+          }
+        }
+      }
+    },
     "Your spot": {
       "extractionState": "manual",
       "localizations": {
@@ -80265,41 +80405,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "国立公園"
-          }
-        }
-      }
-    },
-    "a suburban sky, Class %lld, as Nyx assumes for %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ein Vorstadthimmel, Klasse %1$lld, wie Nyx ihn für %2$@ annimmt"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "a suburban sky, Class %lld, as Nyx assumes for %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "un cielo suburbano, clase %1$lld, como Nyx supone para %2$@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "un ciel de banlieue, classe %1$lld, comme Nyx le suppose pour %2$@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%2$@についてNyxが想定する郊外の空（クラス%1$lld）"
           }
         }
       }
@@ -87560,41 +87665,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "極大の次の夜"
-          }
-        }
-      }
-    },
-    "the sky over %@ at its estimated Class %lld": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "der Himmel über %1$@ in seiner geschätzten Klasse %2$lld"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "the sky over %@ at its estimated Class %lld"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "el cielo sobre %1$@ con su clase estimada %2$lld"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "le ciel au-dessus de %1$@ avec sa classe estimée %2$lld"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "推定クラス%2$lldの%1$@の空"
           }
         }
       }

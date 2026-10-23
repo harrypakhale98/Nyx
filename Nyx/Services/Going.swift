@@ -33,11 +33,14 @@ nonisolated struct GoingNight: Codable, Equatable, Sendable, Identifiable {
     }
     func isGoing(park: Park, night: Date) -> Bool { going(park:park,night:night) != nil }
     func going(park: Park, night: Date) -> GoingNight? { nights.first { $0.parkID==park.id && $0.night==park.evening(night) } }
-    /// Keeps the night, with today's score as the one changes are measured from. The soonest four stay.
-    func go(_ night: Night, now: Date = .now) {
-        guard !isGoing(park:night.park,night:night.id) else { return }
+    /// Keeps the night, with today's score as the one changes are measured from. False when four are
+    /// already kept: one is let go by the person first, never dropped behind their back.
+    @discardableResult func go(_ night: Night, now: Date = .now) -> Bool {
+        guard !isGoing(park:night.park,night:night.id) else { return true }
+        guard nights.count<Self.limit else { return false }
         nights.append(GoingNight(parkID:night.park.id,night:night.park.evening(night.id),chosenScore:night.score.value,chosenAt:now))
         save()
+        return true
     }
     func stop(_ going: GoingNight) { nights.removeAll { $0.id==going.id }; save() }
     func setDrive(_ minutes: Int?, for going: GoingNight) { update(going) { $0.driveMinutes=minutes.map { max(0,$0) } } }
@@ -112,9 +115,9 @@ nonisolated enum GoingCheck {
     static func sentence(_ alternative: Alternative) -> String {
         let night=alternative.night
         guard let meters=alternative.meters else {
-            return String(localized:"\(night.park.dayLabel(night.id)) is \(night.score.value) there.")
+            return String(localized:"\(night.park.dayLabel(night.id)) is \(NightVerdict.scored(night)) there.")
         }
-        return String(localized:"\(night.park.shortName) is \(night.score.value) that night, \(DarkerSky.distance(meters)) away.")
+        return String(localized:"\(night.park.shortName) is \(NightVerdict.scored(night)) that night, \(DarkerSky.distance(meters)) away.")
     }
     /// The card's line and the alert's body: the score now against the score when chosen, what
     /// holds it down, and the better choice when there is one.
@@ -153,7 +156,8 @@ nonisolated enum OfflineReady {
     /// Older than this, the forecast is worth refreshing while there is still a signal.
     static let stale: TimeInterval=6*3600
     /// What is kept on this iPhone for the night, and how old it is.
-    static func line(park: Park, forecast: Date?, alerts: Date?, parkServicePlace: Bool, now: Date = .now) -> String {
+    static func line(park: Park, forecast: Date?, alerts: Date?, parkServicePlace: Bool, forecastsOn: Bool = true, now: Date = .now) -> String {
+        guard forecastsOn else { return String(localized:"Cloud forecasts are off in Your privacy, so this night rests on the Moon, the darkness and the usual clouds.") }
         guard let forecast else { return String(localized:"No cloud forecast is saved for this night yet. Open Nyx with a signal before you go.") }
         let kept=parkServicePlace && alerts != nil
             ? String(localized:"Saved on this iPhone for offline use: the forecast from \(park.timestamp(forecast)), park alerts from \(park.timestamp(alerts ?? forecast)).")

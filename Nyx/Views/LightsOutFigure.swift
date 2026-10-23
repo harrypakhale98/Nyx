@@ -11,14 +11,16 @@ struct LightsOutFigure: View {
     @MotionReduced private var reduceMotion: Bool
     let target: LightsOut.Target
     let origin: String
+    /// Near me: the sky is the person's own, named as theirs rather than "your location".
+    var fromDevice=false
     enum Sky: Hashable { case home, dark }
     @State private var selection: Sky = .home
     @State private var drawnClass: Double
     @State private var onScreen=false
     /// The one clearing has played (or Reduce Motion skipped it); it never plays again here.
     @State private var played=false
-    init(target: LightsOut.Target, origin: String) {
-        self.target=target; self.origin=origin
+    init(target: LightsOut.Target, origin: String, fromDevice: Bool=false) {
+        self.target=target; self.origin=origin; self.fromDevice=fromDevice
         _drawnClass=State(initialValue:Double(target.homeClass))
     }
     var body: some View {
@@ -81,6 +83,7 @@ struct LightsOutFigure: View {
     /// What the starting point's class is called, said as the figure stands on it.
     private var homeCaption: String {
         let name=BortleScale.name(target.homeClass)
+        if target.homeKnown, fromDevice { return String(localized:"Your sky: Class \(target.homeClass), \(name).") }
         return target.homeKnown ? String(localized:"\(origin): Class \(target.homeClass), \(name).")
                                 : String(localized:"A suburban sky, as Nyx assumes here: Class \(target.homeClass), \(name).")
     }

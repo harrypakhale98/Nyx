@@ -22,6 +22,8 @@ import Testing
         let days = ["2026-10-24", "2026-10-22", "2026-10-26", "2026-10-23", "2026-10-28"]
         for (index, day) in days.enumerated() { store.go(night(jotr, try sky(jotr, day), score: 70+index)) }
         #expect(store.nights.count == GoingNights.limit)
+        // A fifth night is refused, never pushed in by dropping one.
+        #expect(!store.go(night(jotr, try sky(jotr, "2026-10-30"), score: 90)))
         #expect(store.nights.map(\.night) == store.nights.map(\.night).sorted())
         let latest = try sky(jotr, "2026-10-28").evening
         #expect(!store.nights.contains { $0.night == latest })

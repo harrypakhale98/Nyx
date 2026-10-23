@@ -45,7 +45,11 @@ struct WhatsUpPanel: View {
                 Divider().overlay(palette.line)
                 DisclosureGroup(isExpanded:$showsMore) {
                     VStack(alignment:.leading,spacing:18) {
-                        ForEach(blocks.more) { block in self.block(block);Divider().overlay(palette.line) }
+                        ForEach(Array(blocks.more.enumerated()),id:\.element.id) { index,block in
+                            if index>0 { Divider().overlay(palette.line) }
+                            self.block(block)
+                        }
+                        if !blocks.more.isEmpty, !layout.mentions.isEmpty || !notes.isEmpty { Divider().overlay(palette.line) }
                         if !layout.mentions.isEmpty {
                             VStack(alignment:.leading,spacing:10) { ForEach(layout.mentions) { item in mention(item) } }
                         }

@@ -21,7 +21,7 @@ nonisolated enum NightVerdict {
         guard sky.darkHours>0 else { return nil }
         let moon=moonSentence(sky: sky, park: park)
         let milkyWay=coreSentence(core, sky: sky, park: park)
-        let ahead=darker.map { String(localized: "Darker on \($0.park.dayLabel($0.id)): \($0.score.value).") }
+        let ahead=darker.map { String(localized: "Darker on \($0.park.dayLabel($0.id)): \(scored($0)).") }
         let text=Sentences.join([moon, milkyWay?.text, ahead].compactMap { $0 })
         let spoken=Sentences.join([moon, milkyWay?.spoken, ahead].compactMap { $0 })
         return text.isEmpty ? nil : Line(text: text, spoken: spoken)
@@ -29,13 +29,16 @@ nonisolated enum NightVerdict {
     /// Where the Moon is during true darkness, with how much of it is lit.
     static func moonSentence(sky: SkyConditions, park: Park) -> String? {
         let lit=sky.moon.illumination.formatted(.percent.precision(.fractionLength(0)))
-        if sky.moon.illumination<0.05 || sky.moonBelowFraction>=0.99 { return String(localized: "No Moon in the way.") }
-        if sky.moonBelowFraction<=0.01 { return String(localized: "Moon up all night, \(lit) lit.") }
-        guard let start=sky.darkStart, let end=sky.darkEnd else { return nil }
-        let dark=DateInterval(start: start, end: max(start, end))
-        if let set=sky.moonset, dark.contains(set) { return String(localized: "Moon up until \(park.time(set)), \(lit) lit.") }
-        if let rise=sky.moonrise, dark.contains(rise) { return String(localized: "Moon rises at \(park.time(rise)), \(lit) lit.") }
-        return nil
+        // In the words the watch and the share card use for the same night.
+        if sky.moonBelowFraction>=0.99 { return Sentences.end(String(localized: "Moon-free through all of true darkness")) }
+        if sky.moon.illumination<0.05 { return String(localized: "Moon too thin to matter, \(lit) lit.") }
+        if sky.moonBelowFraction<=0.01 { return String(localized: "Moon up all through true darkness, \(lit) lit.") }
+        if let start=sky.darkStart, let end=sky.darkEnd {
+            let dark=DateInterval(start: start, end: max(start, end))
+            if let set=sky.moonset, dark.contains(set) { return String(localized: "Moon up until \(park.time(set)), \(lit) lit.") }
+            if let rise=sky.moonrise, dark.contains(rise) { return String(localized: "Moon rises at \(park.time(rise)), \(lit) lit.") }
+        }
+        return Sentences.end(String(localized: "Moon-free for \(Int((sky.moonBelowFraction*100).rounded()))% of true darkness"))
     }
     /// The core in true darkness: its Moon-free stretch, briefly, under the Moon, or not up at all.
     /// Nil where the core is never usefully up (far north), as What's up explains it there.
@@ -46,8 +49,8 @@ nonisolated enum NightVerdict {
                 let text=String(localized: "Milky Way core only briefly.")
                 return Line(text: text, spoken: text)
             }
-            return Line(text: String(localized: "Milky Way core with the Moon down, \(park.time(free.start)) – \(park.time(free.end))."),
-                        spoken: String(localized: "Milky Way core with the Moon down from \(park.time(free.start)) to \(park.time(free.end))."))
+            return Line(text: String(localized: "Milky Way core clear of moonlight, \(park.time(free.start)) – \(park.time(free.end))."),
+                        spoken: String(localized: "Milky Way core clear of moonlight from \(park.time(free.start)) to \(park.time(free.end))."))
         }
         if let dark=core.dark {
             let text=dark.duration<3600 ? String(localized: "Milky Way core only briefly, under the Moon.") : String(localized: "Milky Way core up, but under the Moon.")
@@ -55,6 +58,16 @@ nonisolated enum NightVerdict {
         }
         let text=String(localized: "Milky Way core not up in true darkness.")
         return Line(text: text, spoken: text)
+    }
+    /// A night's score as a line may name it, with what it rests on when that is not a full forecast:
+    /// "82", "82, an early look", "82, an estimate". A later night is never set beside tonight's as
+    /// if both were forecasts.
+    static func scored(_ night: Night) -> String {
+        switch night.basis {
+        case .forecast: "\(night.score.value)"
+        case .blended: String(localized: "\(night.score.value), an early look")
+        case .usual: String(localized: "\(night.score.value), an estimate")
+        }
     }
     /// The darkest of the nights ahead when it clears the one shown by `darkerMargin` and reaches
     /// "Good"; the earliest on a tie.

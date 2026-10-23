@@ -33,9 +33,10 @@ import Testing
         let days = (1...28).map { String(format: "2027-07-%02d", $0) }
         let dark = try #require(try days.map { try sky(jotr, $0) }.first { $0.moon.illumination < 0.05 })
         let line = try #require(verdict(jotr, dark))
-        #expect(line.text.hasPrefix("No Moon in the way."))
-        #expect(line.text.contains("Milky Way core with the Moon down, "))
-        #expect(line.spoken.contains("Milky Way core with the Moon down from "))
+        // In the watch's and share card's words.
+        #expect(line.text.hasPrefix("Moon-free through all of true darkness.") || line.text.hasPrefix("Moon too thin to matter, "))
+        #expect(line.text.contains("Milky Way core clear of moonlight, "))
+        #expect(line.spoken.contains("Milky Way core clear of moonlight from "))
         #expect(!line.spoken.contains(" – "))
     }
     /// Winter in the north: the core is not up in true darkness, said plainly rather than left out.
@@ -45,6 +46,16 @@ import Testing
     }
     /// Alaska, where the core never climbs: no core sentence (What's up explains it there), and no
     /// line at all on a night with no true darkness.
+    /// A night beyond the forecast is never named beside tonight's as if both were forecasts.
+    @Test func laterNightsSayWhatTheyRestOn() throws {
+        let jotr = try park("jotr"), sky = try sky(jotr, "2026-10-28")
+        func scored(_ basis: CloudBasis) -> String {
+            NightVerdict.scored(Night(park: jotr, sky: sky, score: DarknessScore(value: 82, moonPoints: 30, cloudPoints: 20, bortlePoints: 16, lengthPoints: 10, basis: basis), cloudCover: nil, forecastUpdated: nil))
+        }
+        #expect(scored(.forecast) == "82")
+        #expect(scored(.usual) == "82, an estimate")
+        #expect(scored(.blended(weight: 0.5, leadDays: 6)) == "82, an early look")
+    }
     @Test func farNorthAndNoDarknessStayQuiet() throws {
         let gaar = try park("gaar"), dena = try park("dena")
         let winter = try sky(gaar, "2027-01-15")
@@ -81,12 +92,12 @@ import Testing
         #expect(blocks.shown.first?.id == layout.first.first?.id)
         #expect(blocks.shown.contains { $0.id == "planets" })
     }
-    /// When a cap holds the score below its parts, the readout says their sum before the cap, so the
+    /// When a cap holds the score below its parts, the readout says the cap, then their sum, in the breakdown's words, so the
     /// four numbers and the dial never seem to disagree; with no binding cap it says nothing.
     @Test func readoutSaysTheSumBeforeTheCap() {
         let capped = DarknessScore(value: 64, moonPoints: 22, cloudPoints: 21, bortlePoints: 15, lengthPoints: 15, limit: .moonlight(64))
-        #expect(ScoreReadout.limitLine(capped, tonight: true) == "The four parts add to 73. Moonlight limits tonight to 64.")
-        #expect(ScoreReadout.limitLine(capped, tonight: false) == "The four parts add to 73. Moonlight limits this night to 64.")
+        #expect(ScoreReadout.limitLine(capped, tonight: true) == "Moonlight limits tonight to 64. The four parts add up to 73; the score takes the lowest cap that applies.")
+        #expect(ScoreReadout.limitLine(capped, tonight: false) == "Moonlight limits this night to 64. The four parts add up to 73; the score takes the lowest cap that applies.")
         let loose = DarknessScore(value: 73, moonPoints: 22, cloudPoints: 21, bortlePoints: 15, lengthPoints: 15, limit: .moonlight(80))
         #expect(ScoreReadout.limitLine(loose, tonight: true) == nil)
     }

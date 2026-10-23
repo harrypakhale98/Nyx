@@ -12,6 +12,7 @@ struct GoingButton: View {
     @AppStorage("notificationsEnabled") private var notificationsEnabled=false
     let night: Night
     @State private var explaining=false
+    @State private var full=false
     private var store: GoingNights { .shared }
     var body: some View {
         if !FieldNight.isOver(night.sky,at:DebugScenario.date ?? .now) {
@@ -33,6 +34,10 @@ struct GoingButton: View {
                                              : String(localized:"Not going to \(night.park.shortName) on \(night.park.dayLabel(night.id))"))
             .accessibilityValue(caption(going))
             .accessibilityInputLabels(going == nil ? [Text("I'm going"),Text("Going")] : [Text("Not going")])
+            .accessibilityAddTraits(going == nil ? .isToggle : [.isToggle,.isSelected])
+            .alert("Nyx keeps watch on four nights at a time",isPresented:$full) { Button("OK",role:.cancel) {} } message:{
+                Text("Let one of them go first, on Tonight or on its own page.")
+            }
             .sensoryFeedback(.selection,trigger:going == nil)
             .sheet(isPresented:$explaining) { GoingExplainer { granted in notificationsEnabled=granted; Task { await GoingWatch.check(model) } }.nyxPresentation() }
         }
@@ -44,7 +49,7 @@ struct GoingButton: View {
     }
     private func toggle(_ going: GoingNight?) {
         if let going { store.stop(going); Task { await GoingWatch.check(model) }; return }
-        store.go(night)
+        guard store.go(night) else { full=true; return }
         Task {
             if !notificationsEnabled, await UNUserNotificationCenterStatus.undecided() { explaining=true }
             await GoingWatch.check(model)
@@ -76,6 +81,9 @@ struct GoingExplainer: View {
 /// against when it was chosen, any closure, when to leave, what is saved for offline use, and the
 /// plan to send to someone. The soonest night only; the rest are a tap away on their own pages.
 struct GoingPanel: View {
+    /// The park Tonight's answer shows: when the kept night is tonight there, its name, score and
+    /// closure are already on screen just below, and the card keeps only what is its own.
+    var hero: Park?=nil
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     @AppStorage("notificationsEnabled") private var notificationsEnabled=false
@@ -108,6 +116,8 @@ struct GoingPanel: View {
         let status=GoingCheck.status(chosen:going.chosenScore,night:night,agreement:outlook?.agreement)
         return Panel { VStack(alignment:.leading,spacing:14) {
             Eyebrow(text:"Your night")
+            let repeated=hero?.id==park.id && night.id==model.tonight(park)
+            if !repeated {
             NavigationLink { ParkDetailView(park:park,initialDate:night.id) } label:{
                 HStack(alignment:.firstTextBaseline,spacing:12) {
                     VStack(alignment:.leading,spacing:2) {
@@ -125,11 +135,12 @@ struct GoingPanel: View {
             .accessibilityElement(children:.ignore)
             .accessibilityLabel(String(localized:"\(park.shortName), \(park.dayLabel(night.id)): \(night.score.value), \(night.score.band.label)"))
             .accessibilityHint("Opens that night at the park.")
+            }
             Label { Text(statusLine(status,going:going,night:night,agreement:outlook?.agreement)).fixedSize(horizontal:false,vertical:true) } icon:{
                 Image(systemName:status == .worse ? "exclamationmark.circle" : status == .uncertain ? "questionmark.circle" : "checkmark.circle").accessibilityHidden(true)
             }
             .font(.subheadline).foregroundStyle(status == .worse ? palette.accent : palette.ink)
-            if let closure {
+            if let closure, !repeated {
                 Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
                     .accessibilityLabel(ClosureLine.spoken(closure))
             }
@@ -149,7 +160,7 @@ struct GoingPanel: View {
                 .accessibilityValue(going.driveMinutes.map { String(localized:"Drive time, \(LeaveBy.drive($0))") } ?? "")
                 .accessibilityHint("Sets how long the drive takes, so Nyx can say when to leave.")
             }
-            Text(OfflineReady.line(park:park,forecast:night.forecastUpdated,alerts:model.enrichments[park.id]?.updated,parkServicePlace:park.nps != nil))
+            Text(OfflineReady.line(park:park,forecast:night.forecastUpdated,alerts:model.enrichments[park.id]?.updated,parkServicePlace:park.nps != nil,forecastsOn:model.weatherEnabled))
                 .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             if !notificationsEnabled {
                 Text("Reminders are off, so Nyx can only show changes here. Turn them on in Settings.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
