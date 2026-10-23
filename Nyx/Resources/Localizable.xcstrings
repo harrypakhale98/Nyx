@@ -351,6 +351,41 @@
         }
       }
     },
+    "%@ and %@: %lld and %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ und %2$@: %3$lld und %4$lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ and %@: %lld and %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ y %2$@: %3$lld y %4$lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ et %2$@ : %3$lld et %4$lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@と%2$@：%3$lld点と%4$lld点。"
+          }
+        }
+      }
+    },
     "%@ at %@": {
       "extractionState": "manual",
       "localizations": {
@@ -7222,6 +7257,41 @@
         }
       }
     },
+    "%lld · %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld · %2$lld"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld · %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld · %2$lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld · %2$lld"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld · %2$lld"
+          }
+        }
+      }
+    },
     "%lld%%": {
       "extractionState": "manual",
       "localizations": {
@@ -10349,6 +10419,76 @@
         }
       }
     },
+    "Add all to Calendar": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle zum Kalender hinzufügen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add all to Calendar"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir todas al calendario"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout ajouter au calendrier"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてカレンダーに追加"
+          }
+        }
+      }
+    },
+    "Add these nights to your calendar": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Nächte zum Kalender hinzufügen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add these nights to your calendar"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade estas noches a tu calendario"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter ces nuits à votre calendrier"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "これらの夜をカレンダーに追加"
+          }
+        }
+      }
+    },
     "Add to Calendar": {
       "extractionState": "manual",
       "localizations": {
@@ -10454,6 +10594,95 @@
         }
       }
     },
+    "Added %lld nights to your calendar.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Nacht zu deinem Kalender hinzugefügt."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Nächte zu deinem Kalender hinzugefügt."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Added %lld night to your calendar."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Added %lld nights to your calendar."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Se añadió %lld noche a tu calendario."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Se añadieron %lld noches a tu calendario."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld nuit ajoutée à votre calendrier."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld nuits ajoutées à votre calendrier."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld夜をカレンダーに追加しました。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Adding a night to Calendar opens Calendar's own editor, where you choose and save it. Nyx never reads your calendars.": {
       "extractionState": "manual",
       "localizations": {
@@ -10555,6 +10784,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "今夜の公園で、今夜についてのメモをNyxのジャーナルに追加します。"
+          }
+        }
+      }
+    },
+    "Adds these nights to your calendar. Nyx can add events only; it never sees your calendar.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fügt diese Nächte deinem Kalender hinzu. Nyx kann nur Ereignisse hinzufügen und sieht deinen Kalender nie."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adds these nights to your calendar. Nyx can add events only; it never sees your calendar."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade estas noches a tu calendario. Nyx solo puede añadir eventos; nunca ve tu calendario."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoute ces nuits à votre calendrier. Nyx peut seulement ajouter des événements ; il ne voit jamais votre calendrier."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "これらの夜をカレンダーに追加します。Nyxはイベントを追加するだけで、カレンダーを見ることはありません。"
           }
         }
       }
@@ -12075,6 +12339,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@周辺"
+          }
+        }
+      }
+    },
+    "Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds for the month; the Moon and the hours of true darkness are exact.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um jeden Neumond das Wochenende mit der dunkelsten Nacht. So weit voraus beruhen die Werte auf den üblichen Wolken des Monats; Mond und Stunden echter Dunkelheit sind genau."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds for the month; the Moon and the hours of true darkness are exact."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca de cada luna nueva, el fin de semana con la noche más oscura. Con tanta antelación, las puntuaciones se basan en las nubes habituales del mes; la Luna y las horas de oscuridad total son exactas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autour de chaque nouvelle lune, le week-end à la nuit la plus sombre. Si loin à l’avance, les scores reposent sur les nuages habituels du mois ; la Lune et les heures d’obscurité totale sont exactes."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新月ごとに、いちばん暗い夜のある週末を示します。これほど先のスコアはその月のいつもの雲にもとづきます。月と完全に暗い時間は正確です。"
           }
         }
       }
@@ -15619,6 +15918,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "カレンダー"
+          }
+        }
+      }
+    },
+    "Calendar access is off for Nyx. Turn it on in Settings, or share the nights as a calendar file.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Kalenderzugriff ist für Nyx aus. Aktiviere ihn in den Einstellungen oder teile die Nächte als Kalenderdatei."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar access is off for Nyx. Turn it on in Settings, or share the nights as a calendar file."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El acceso al calendario está desactivado para Nyx. Actívalo en Ajustes o comparte las noches como archivo de calendario."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’accès au calendrier est désactivé pour Nyx. Activez-le dans Réglages, ou partagez les nuits sous forme de fichier de calendrier."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxのカレンダーへのアクセスはオフです。設定でオンにするか、夜をカレンダーファイルとして共有してください。"
           }
         }
       }
@@ -19843,6 +20177,41 @@
         }
       }
     },
+    "Dark sky at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkler Himmel in %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark sky at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cielo oscuro en %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciel noir à %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@の暗い空"
+          }
+        }
+      }
+    },
     "Dark until %@": {
       "extractionState": "manual",
       "localizations": {
@@ -19874,6 +20243,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@まで暗夜"
+          }
+        }
+      }
+    },
+    "Dark weekends": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkle Wochenenden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark weekends"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fines de semana oscuros"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Week-ends sombres"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暗い週末"
+          }
+        }
+      }
+    },
+    "Dark weekends at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkle Wochenenden in %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark weekends at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fines de semana oscuros en %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Week-ends sombres à %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@の暗い週末"
+          }
+        }
+      }
+    },
+    "Dark weekends, the Milky Way season, and all of it into your calendar": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkle Wochenenden, die Milchstraßen-Saison und alles in deinen Kalender"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark weekends, the Milky Way season, and all of it into your calendar"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fines de semana oscuros, la temporada de la Vía Láctea y todo ello a tu calendario"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Week-ends sombres, la saison de la Voie lactée, et tout cela dans votre calendrier"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暗い週末、天の川の季節、そしてそのすべてをカレンダーに"
           }
         }
       }
@@ -34503,6 +34977,41 @@
         }
       }
     },
+    "Many campgrounds open reservations about six months ahead. Check the dates for yours.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viele Campingplätze öffnen Reservierungen etwa sechs Monate im Voraus. Prüfe die Daten für deinen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Many campgrounds open reservations about six months ahead. Check the dates for yours."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muchos campamentos abren las reservas unos seis meses antes. Consulta las fechas del tuyo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De nombreux campings ouvrent les réservations environ six mois à l’avance. Vérifiez les dates du vôtre."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "多くのキャンプ場は約6か月前に予約を受け付け始めます。利用するキャンプ場の日程を確認してください。"
+          }
+        }
+      }
+    },
     "Map": {
       "extractionState": "manual",
       "localizations": {
@@ -35783,6 +36292,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "天の川の中心部：完全に暗い時間のうち、%@から%@まで空にあります。"
+          }
+        }
+      }
+    },
+    "Milky Way season": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milchstraßen-Saison"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way season"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temporada de la Vía Láctea"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saison de la Voie lactée"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天の川の季節"
+          }
+        }
+      }
+    },
+    "Milky Way season at %@ opens about %@ and runs to about %@: the core up at least an hour in true darkness on moonless nights.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Milchstraßen-Saison in %1$@ beginnt etwa am %2$@ und dauert bis etwa %3$@: das Zentrum mindestens eine Stunde in echter Dunkelheit, in mondlosen Nächten."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way season at %@ opens about %@ and runs to about %@: the core up at least an hour in true darkness on moonless nights."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La temporada de la Vía Láctea en %1$@ empieza hacia el %2$@ y dura hasta hacia el %3$@: el núcleo, al menos una hora en oscuridad total en noches sin Luna."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La saison de la Voie lactée à %1$@ commence vers le %2$@ et dure jusque vers le %3$@ : le cœur au moins une heure dans l’obscurité totale, les nuits sans Lune."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@の天の川の季節は%2$@ごろに始まり、%3$@ごろまで続きます。月のない夜、中心部が完全な暗さの中に1時間以上見えます。"
+          }
+        }
+      }
+    },
+    "Milky Way season at %@ runs until about %@: the core is up at least an hour in true darkness on moonless nights.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Milchstraßen-Saison in %1$@ dauert bis etwa %2$@: Das Zentrum steht in mondlosen Nächten mindestens eine Stunde in echter Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way season at %@ runs until about %@: the core is up at least an hour in true darkness on moonless nights."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La temporada de la Vía Láctea en %1$@ dura hasta hacia el %2$@: el núcleo está al menos una hora en oscuridad total en noches sin Luna."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La saison de la Voie lactée à %1$@ dure jusque vers le %2$@ : le cœur est levé au moins une heure dans l’obscurité totale, les nuits sans Lune."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@の天の川の季節は%2$@ごろまで続きます。月のない夜、中心部が完全な暗さの中に1時間以上見えます。"
           }
         }
       }
@@ -39308,6 +39922,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "新月"
+          }
+        }
+      }
+    },
+    "New moon %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neumond %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New moon %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna nueva: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouvelle lune le %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新月 %@"
           }
         }
       }
@@ -43201,6 +43850,41 @@
         }
       }
     },
+    "No weekends near a new moon in the next six months.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In den nächsten sechs Monaten kein Wochenende nahe einem Neumond."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No weekends near a new moon in the next six months."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay fines de semana cerca de una luna nueva en los próximos seis meses."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun week-end proche d’une nouvelle lune dans les six prochains mois."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今後6か月に新月に近い週末はありません。"
+          }
+        }
+      }
+    },
     "Nobody has checked it. See what is there before you go.": {
       "extractionState": "manual",
       "localizations": {
@@ -44100,6 +44784,41 @@
         }
       }
     },
+    "Nyx adds each night as an event, from true darkness to its end, with its score. iOS will ask to let Nyx add events: it can add them, and never sees your calendar.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx fügt jede Nacht als Ereignis hinzu, vom Beginn der echten Dunkelheit bis zu ihrem Ende, mit ihrem Wert. iOS fragt, ob Nyx Ereignisse hinzufügen darf: Nyx kann sie hinzufügen und sieht deinen Kalender nie."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx adds each night as an event, from true darkness to its end, with its score. iOS will ask to let Nyx add events: it can add them, and never sees your calendar."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx añade cada noche como un evento, desde el inicio de la oscuridad total hasta su final, con su puntuación. iOS te pedirá que permitas a Nyx añadir eventos: puede añadirlos y nunca ve tu calendario."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx ajoute chaque nuit comme un événement, du début de l’obscurité totale à sa fin, avec son score. iOS vous demandera d’autoriser Nyx à ajouter des événements : il peut les ajouter, et ne voit jamais votre calendrier."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxは、完全な暗さの始まりから終わりまでを、それぞれの夜のスコアとともにイベントとして追加します。iOSがNyxによるイベントの追加を許可するか尋ねます。Nyxは追加できるだけで、カレンダーを見ることはありません。"
+          }
+        }
+      }
+    },
     "Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours. The request names no place and nothing about you. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
@@ -44616,6 +45335,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyxは世界の国立公園と暗い空の場所を一夜ずつ比較します。どこへ行き、どの夜に休みを取ればよいかがわかります。"
+          }
+        }
+      }
+    },
+    "Nyx could not add the nights. Share them as a calendar file instead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx konnte die Nächte nicht hinzufügen. Teile sie stattdessen als Kalenderdatei."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx could not add the nights. Share them as a calendar file instead."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx no pudo añadir las noches. Compártelas como archivo de calendario."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx n’a pas pu ajouter les nuits. Partagez-les plutôt sous forme de fichier de calendrier."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxは夜を追加できませんでした。代わりにカレンダーファイルとして共有してください。"
           }
         }
       }
@@ -45616,6 +46370,41 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Nyx scored this night %lld, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx bewertete diese Nacht mit %1$lld, %2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx scored this night %lld, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx dio a esta noche %1$lld, %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx a donné à cette nuit %1$lld, %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxのこの夜のスコアは%1$lld点、%2$@。"
           }
         }
       }
@@ -48296,6 +49085,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "公園で、これらの夜のうちいちばんよい夜を開きます。"
+          }
+        }
+      }
+    },
+    "Opens the darker night at the park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnet die dunklere Nacht im Park."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the darker night at the park."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre la noche más oscura en el parque."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre la nuit la plus sombre au parc."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園のより暗い夜を開きます。"
           }
         }
       }
@@ -56130,6 +56954,41 @@
         }
       }
     },
+    "Scores this far ahead rest on the usual clouds for the month. Check the forecast and closures nearer the time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "So weit voraus beruhen die Werte auf den üblichen Wolken des Monats. Prüfe Vorhersage und Sperrungen näher am Termin."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scores this far ahead rest on the usual clouds for the month. Check the forecast and closures nearer the time."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Con tanta antelación, las puntuaciones se basan en las nubes habituales del mes. Consulta el pronóstico y los cierres más cerca de la fecha."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si loin à l’avance, les scores reposent sur les nuages habituels du mois. Vérifiez la prévision et les fermetures à l’approche de la date."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "これほど先のスコアはその月のいつもの雲にもとづきます。日が近づいたら予報と閉鎖を確認してください。"
+          }
+        }
+      }
+    },
     "Search cities, towns and parks": {
       "extractionState": "manual",
       "localizations": {
@@ -56925,6 +57784,41 @@
         }
       }
     },
+    "Share as a calendar file": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als Kalenderdatei teilen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share as a calendar file"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartir como archivo de calendario"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partager en fichier de calendrier"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カレンダーファイルとして共有"
+          }
+        }
+      }
+    },
     "Share as a card": {
       "extractionState": "manual",
       "localizations": {
@@ -57271,6 +58165,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "フルカラーの画像を共有します。"
+          }
+        }
+      }
+    },
+    "Shares an .ics file with these nights, for another calendar app or another person.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teilt eine .ics-Datei mit diesen Nächten, für eine andere Kalender-App oder eine andere Person."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shares an .ics file with these nights, for another calendar app or another person."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comparte un archivo .ics con estas noches, para otra app de calendario u otra persona."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partage un fichier .ics avec ces nuits, pour une autre app de calendrier ou une autre personne."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "これらの夜を含む.icsファイルを、ほかのカレンダーアプリや別の人に共有します。"
           }
         }
       }
@@ -63652,6 +64581,41 @@
         }
       }
     },
+    "The Milky Way's bright core never climbs high enough here for an hour of true darkness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das helle Zentrum der Milchstraße steigt hier nie hoch genug für eine Stunde echter Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Milky Way's bright core never climbs high enough here for an hour of true darkness."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquí el núcleo brillante de la Vía Láctea nunca sube lo bastante para una hora de oscuridad total."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ici, le cœur brillant de la Voie lactée ne monte jamais assez haut pour une heure d’obscurité totale."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ここでは、天の川の明るい中心部が完全な暗さの中で1時間見えるほど高く昇りません。"
+          }
+        }
+      }
+    },
     "The Milky Way's core, %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -66686,6 +67650,41 @@
         }
       }
     },
+    "The next six months": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die nächsten sechs Monate"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The next six months"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los próximos seis meses"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les six prochains mois"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今後6か月"
+          }
+        }
+      }
+    },
     "The night": {
       "extractionState": "manual",
       "localizations": {
@@ -68212,6 +69211,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "ジャーナルを開くための空き容量が足りません。空き容量を確保してから、Nyxをもう一度開いてください。ほかの機能はすべて使えます。ジャーナルには手を付けていません。"
+          }
+        }
+      }
+    },
+    "These nights are already in your calendar.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Nächte sind schon in deinem Kalender."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These nights are already in your calendar."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estas noches ya están en tu calendario."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ces nuits sont déjà dans votre calendrier."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "これらの夜はすでにカレンダーにあります。"
           }
         }
       }
@@ -76132,6 +77166,171 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Worked out on this iPhone from the sky's geometry; the days are approximate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Auf diesem iPad aus der Geometrie des Himmels berechnet; die Tage sind ungefähr."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Auf diesem iPhone aus der Geometrie des Himmels berechnet; die Tage sind ungefähr."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Worked out on this iPad from the sky's geometry; the days are approximate."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Worked out on this iPhone from the sky's geometry; the days are approximate."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Calculado en este iPad a partir de la geometría del cielo; los días son aproximados."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Calculado en este iPhone a partir de la geometría del cielo; los días son aproximados."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Calculé sur cet iPad à partir de la géométrie du ciel ; les jours sont approximatifs."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Calculé sur cet iPhone à partir de la géométrie du ciel ; les jours sont approximatifs."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "空の幾何学からこのiPadで計算しています。日付はおおよそです。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "空の幾何学からこのiPhoneで計算しています。日付はおおよそです。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Working out the season": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saison wird berechnet"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Working out the season"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculando la temporada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calcul de la saison"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "季節を計算中"
+          }
+        }
+      }
+    },
+    "Working out the weekends": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wochenenden werden berechnet"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Working out the weekends"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculando los fines de semana"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calcul des week-ends"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "週末を計算中"
           }
         }
       }
