@@ -706,17 +706,6 @@ struct ModelRangeBand: View {
         .allowsHitTesting(false)
     }
 }
-/// How the dial's drawing scales with its side: everything keeps its proportions below the
-/// standard 300 pt dial, and the glass rim thins with it (never under 16 pt), so a small dial
-/// (onboarding, 176 pt) is an instrument, not a thick ring crowding the numeral.
-nonisolated enum DialMetrics {
-    static let standard: CGFloat=300
-    static func scale(side:CGFloat)->CGFloat { min(1,max(0,side)/standard) }
-    /// The rim's width.
-    static func ringWidth(side:CGFloat)->CGFloat { max(16,26*scale(side:side)) }
-    /// From the frame's edge to the arc's radius.
-    static func inset(side:CGFloat)->CGFloat { 18*scale(side:side) }
-}
 /// The glass rim the arc runs along: a band centred on the arc's radius (26 pt on the standard
 /// dial, `DialMetrics`), open at the bottom like the dial itself, so the labels inside never sit on glass.
 nonisolated struct DialRing:Shape {

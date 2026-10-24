@@ -70,74 +70,107 @@ nonisolated struct NightRing: Equatable, Sendable {
 
 /// The night along the dial's track (`NightRing`), revealed from sunset as the score counts up
 /// (`reveal`, 0…1, animatable on the shared spring), then still. Drawn in the dial's own hand:
-/// hairlines, one soft glow, amber only for the best window.
+/// hairlines, one soft glow, amber only for the best window. The same night on the iPhone's dial
+/// and Apple Watch's (`Fit`), so the face is one object across devices.
 struct NightTrack: View, Animatable {
+    /// Where the track sits in its frame and how its marks scale. The iPhone's dial (`DialMetrics`)
+    /// has a glass rim and a well under the numeral. The watch's (`WatchDialFace`) leaves 10 pt for
+    /// the glow, draws no well (its face is the black screen), and sets its marks at the sizes of
+    /// the watch's own score ticks, a little heavier to read at arm's length, with tighter glows:
+    /// the iPhone's blur on a dial half the size washed the whole face and was cut at its frame.
+    nonisolated enum Fit: Sendable {
+        case phone, watch
+        func radius(side: CGFloat) -> CGFloat { self == .phone ? side/2-DialMetrics.inset(side: side) : WatchDialFace.radius(side: side) }
+        func scale(side: CGFloat) -> CGFloat { self == .phone ? DialMetrics.scale(side: side) : 0.6 }
+        var weight: CGFloat { self == .phone ? 1 : 1.35 }
+        var blur: CGFloat { self == .phone ? 1 : 0.45 }
+    }
     var reveal: Double
     let ring: NightRing
     let palette: NyxPalette
     let glow: Double
+    var fit = Fit.phone
+    /// Always-On on the watch: the night already behind "now" fades, as passed milestones do in
+    /// the words under the dial (`nonEssential`), so a lowered wrist shows what is still to come.
+    var fadesPast = false
     var animatableData: Double { get { reveal } set { reveal=newValue } }
     nonisolated static func angle(_ position: Double) -> Angle { .degrees(140+260*position) }
     var body: some View {
         Canvas { context, size in
-            let dial=min(size.width, size.height), k=DialMetrics.scale(side: dial)
-            let center=CGPoint(x: size.width/2, y: size.height/2), radius=dial/2-DialMetrics.inset(side: dial)
-            // The same well the score's dial has: the numeral sits inside the instrument.
-            let well=radius-14*k
-            context.fill(Path(ellipseIn: CGRect(x: center.x-well, y: center.y-well, width: 2*well, height: 2*well)), with: .radialGradient(Gradient(stops: [.init(color: .black.opacity(0.55), location: 0), .init(color: .black.opacity(0.35), location: 0.8), .init(color: .clear, location: 1)]), center: center, startRadius: 0, endRadius: well))
+            let dial=min(size.width, size.height), k=fit.scale(side: dial), w=fit.weight, soft=fit.blur
+            let center=CGPoint(x: size.width/2, y: size.height/2), radius=fit.radius(side: dial)
+            if fit == .phone {
+                // The same well the score's dial has: the numeral sits inside the instrument.
+                let well=radius-14*k
+                context.fill(Path(ellipseIn: CGRect(x: center.x-well, y: center.y-well, width: 2*well, height: 2*well)), with: .radialGradient(Gradient(stops: [.init(color: .black.opacity(0.55), location: 0), .init(color: .black.opacity(0.35), location: 0.8), .init(color: .clear, location: 1)]), center: center, startRadius: 0, endRadius: well))
+            }
             func arc(_ range: ClosedRange<Double>, at r: CGFloat=radius) -> Path {
                 var path=Path(); path.addArc(center: center, radius: r, startAngle: Self.angle(range.lowerBound), endAngle: Self.angle(range.upperBound), clockwise: false); return path
             }
-            // The whole night as a hairline, so its ends (sunset, sunrise) always read.
-            context.stroke(arc(0...1), with: .color(palette.line), style: StrokeStyle(lineWidth: 1.2*palette.stroke, lineCap: .round))
-            // Everything after it is drawn as far as the night has been revealed.
-            let shown=min(1, max(0, reveal))
-            guard shown>0.001 else { return }
-            var wedge=Path(); wedge.move(to: center)
-            wedge.addArc(center: center, radius: dial, startAngle: .degrees(138), endAngle: Self.angle(shown) + .degrees(shown>=1 ? 2 : 0), clockwise: false); wedge.closeSubpath()
-            context.clip(to: wedge)
-            // Twilight: the night before and after true darkness, a little brighter than the hairline.
-            context.stroke(arc(0...1), with: .color(palette.ink.opacity(0.32)), style: StrokeStyle(lineWidth: 1.6*palette.stroke, lineCap: .butt))
-            if let dark=ring.dark {
-                context.drawLayer { layer in
-                    layer.addFilter(.blur(radius: 6))
-                    layer.stroke(arc(dark), with: .color(palette.ink.opacity(0.22*glow)), style: StrokeStyle(lineWidth: 6, lineCap: .round))
+            // One layer, so Always-On's fade (below) takes back only the track, never what lies under it.
+            context.drawLayer { context in
+                // The whole night as a hairline, so its ends (sunset, sunrise) always read.
+                context.stroke(arc(0...1), with: .color(palette.line), style: StrokeStyle(lineWidth: 1.2*w*palette.stroke, lineCap: .round))
+                // Everything after it is drawn as far as the night has been revealed.
+                let shown=min(1, max(0, reveal))
+                guard shown>0.001 else { return }
+                // Clipped only while it draws in, from well below sunset's end, so the glows' soft ends
+                // are never cut along a radius (on the watch's small dial that cut showed as a hard edge).
+                if shown<1 {
+                    var wedge=Path(); wedge.move(to: center)
+                    wedge.addArc(center: center, radius: dial, startAngle: .degrees(115), endAngle: Self.angle(shown), clockwise: false); wedge.closeSubpath()
+                    context.clip(to: wedge)
                 }
-                context.stroke(arc(dark), with: .color(palette.ink.opacity(0.9)), style: StrokeStyle(lineWidth: 2.3*palette.stroke, lineCap: .round))
-            }
-            if let best=ring.best {
-                context.drawLayer { layer in
-                    layer.addFilter(.blur(radius: 7))
-                    layer.stroke(arc(best), with: .color(palette.accent.opacity(0.45*glow)), style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                // Twilight: the night before and after true darkness, a little brighter than the hairline.
+                context.stroke(arc(0...1), with: .color(palette.ink.opacity(0.32)), style: StrokeStyle(lineWidth: 1.6*w*palette.stroke, lineCap: .butt))
+                if let dark=ring.dark {
+                    context.drawLayer { layer in
+                        layer.addFilter(.blur(radius: 6*soft))
+                        layer.stroke(arc(dark), with: .color(palette.ink.opacity(0.22*glow)), style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                    }
+                    context.stroke(arc(dark), with: .color(palette.ink.opacity(0.9)), style: StrokeStyle(lineWidth: 2.3*w*palette.stroke, lineCap: .round))
                 }
-                context.stroke(arc(best), with: .color(palette.accent), style: StrokeStyle(lineWidth: 2.6*palette.stroke, lineCap: .round))
-            }
-            // The Moon's hours: pale light spilling over the rim outside the track, stronger the more it
-            // fills the sky, so the track's own colours stay readable underneath. A hairline marks its
-            // edge where glows are dimmed (Increase Contrast, night vision).
-            for span in ring.moon {
-                let rim=radius+7*k
-                context.drawLayer { layer in
-                    layer.addFilter(.blur(radius: 4+2*k))
-                    layer.stroke(arc(span, at: rim), with: .color(palette.ink.opacity((0.25+0.45*ring.moonlight)*glow)), style: StrokeStyle(lineWidth: max(6, 9*k), lineCap: .round))
+                if let best=ring.best {
+                    context.drawLayer { layer in
+                        layer.addFilter(.blur(radius: 7*soft))
+                        layer.stroke(arc(best), with: .color(palette.accent.opacity(0.45*glow)), style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                    }
+                    context.stroke(arc(best), with: .color(palette.accent), style: StrokeStyle(lineWidth: 2.6*w*palette.stroke, lineCap: .round))
                 }
-                context.stroke(arc(span, at: rim), with: .color(palette.ink.opacity(0.35+0.4*ring.moonlight)), style: StrokeStyle(lineWidth: 1.2*palette.stroke, lineCap: .round))
-                // A small Moon where it rises or sets within the night, so the halo explains itself.
-                for end in [span.lowerBound, span.upperBound] where end>0.004 && end<0.996 {
-                    let a=Self.angle(end).radians, d=max(3.2, 4.2*k)
-                    let point=CGPoint(x: center.x+cos(a)*rim, y: center.y+sin(a)*rim)
-                    context.fill(Path(ellipseIn: CGRect(x: point.x-d, y: point.y-d, width: 2*d, height: 2*d)), with: .color(palette.ink))
+                // The Moon's hours: pale light spilling over the rim outside the track, stronger the more it
+                // fills the sky, so the track's own colours stay readable underneath. A hairline marks its
+                // edge where glows are dimmed (Increase Contrast, night vision).
+                for span in ring.moon {
+                    let rim=radius+7*k
+                    context.drawLayer { layer in
+                        layer.addFilter(.blur(radius: (4+2*k)*soft))
+                        layer.stroke(arc(span, at: rim), with: .color(palette.ink.opacity((0.25+0.45*ring.moonlight)*glow)), style: StrokeStyle(lineWidth: max(6, 9*k), lineCap: .round))
+                    }
+                    context.stroke(arc(span, at: rim), with: .color(palette.ink.opacity(0.35+0.4*ring.moonlight)), style: StrokeStyle(lineWidth: 1.2*w*palette.stroke, lineCap: .round))
+                    // A small Moon where it rises or sets within the night, so the halo explains itself.
+                    for end in [span.lowerBound, span.upperBound] where end>0.004 && end<0.996 {
+                        let a=Self.angle(end).radians, d=max(3.2, 4.2*k)
+                        let point=CGPoint(x: center.x+cos(a)*rim, y: center.y+sin(a)*rim)
+                        context.fill(Path(ellipseIn: CGRect(x: point.x-d, y: point.y-d, width: 2*d, height: 2*d)), with: .color(palette.ink))
+                    }
                 }
-            }
-            // Hour ticks inside the track, midnight longer; lit while the sky is truly dark.
-            for hour in ring.hours {
-                let a=Self.angle(hour.position).radians
-                let outer=radius-8*k, inner=radius-(hour.midnight ? 17 : 12)*k
-                var line=Path()
-                line.move(to: CGPoint(x: center.x+cos(a)*outer, y: center.y+sin(a)*outer))
-                line.addLine(to: CGPoint(x: center.x+cos(a)*inner, y: center.y+sin(a)*inner))
-                let lit=ring.dark?.contains(hour.position) ?? false
-                context.stroke(line, with: .color(lit ? palette.ink.opacity(hour.midnight ? 0.8 : 0.5) : palette.line), lineWidth: (hour.midnight ? 0.9 : 0.6)*palette.stroke)
+                // Hour ticks inside the track, midnight longer; lit while the sky is truly dark.
+                for hour in ring.hours {
+                    let a=Self.angle(hour.position).radians
+                    let outer=radius-8*k, inner=radius-(hour.midnight ? 17 : 12)*k
+                    var line=Path()
+                    line.move(to: CGPoint(x: center.x+cos(a)*outer, y: center.y+sin(a)*outer))
+                    line.addLine(to: CGPoint(x: center.x+cos(a)*inner, y: center.y+sin(a)*inner))
+                    let lit=ring.dark?.contains(hour.position) ?? false
+                    context.stroke(line, with: .color(lit ? palette.ink.opacity(hour.midnight ? 0.8 : 0.5) : palette.line), lineWidth: (hour.midnight ? 0.9 : 0.6)*w*palette.stroke)
+                }
+                if fadesPast, let now=ring.now {
+                    // Take back 45% of what lies between sunset and now, the words' Always-On fade.
+                    var past=Path(); past.move(to: center)
+                    past.addArc(center: center, radius: dial, startAngle: .degrees(115), endAngle: Self.angle(now), clockwise: false); past.closeSubpath()
+                    context.blendMode = .destinationOut
+                    context.fill(past, with: .color(.black.opacity(0.45)))
+                }
             }
         }
     }
@@ -163,27 +196,14 @@ struct NightRingEnds: View {
     }
 }
 
-extension PlanModel {
-    /// A night's ring for the dial, with its best window and, while the night lasts, where it has got to.
-    func ring(_ night: Night, now: Date = .now) -> (ring: NightRing, park: Park, spoken: String)? {
-        let window=clearWindow(night)?.interval
-        guard let ring=NightRing(sky: night.sky, park: night.park, best: window, now: now) else { return nil }
-        return (ring, night.park, ring.spoken(sky: night.sky, park: night.park, best: window))
-    }
-}
-#Preview("Night ring • moonlit") {
-    let m=PlanModel()
-    if let p=m.park("jotr") { let n=m.night(p,on:Date(timeIntervalSince1970:1792800000)); CelestialGauge(score:n.score.value,night:m.ring(n)).environment(\.nyxReduceMotion,true).frame(height:300).background(.black) }
-}
-#Preview("Night ring • new moon") {
-    let m=PlanModel()
-    if let p=m.park("jotr") { let n=m.night(p,on:Date(timeIntervalSince1970:1794700000)); CelestialGauge(score:n.score.value,night:m.ring(n)).frame(height:300).background(.black) }
-}
-#Preview("Night ring • Alaska June, no true darkness") {
-    let m=PlanModel()
-    if let p=m.park("dena") { let n=m.night(p,on:Date(timeIntervalSince1970:1813564800)); CelestialGauge(score:n.score.value,night:m.ring(n)).environment(\.nyxReduceMotion,true).frame(height:300).background(.black) }
-}
-#Preview("Night ring • night vision • AX5") {
-    let m=PlanModel()
-    if let p=m.park("grba") { let n=m.night(p); CelestialGauge(score:n.score.value,night:m.ring(n)).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).dynamicTypeSize(.accessibility5).background(.black) }
+/// How the dial's drawing scales with its side: everything keeps its proportions below the
+/// standard 300 pt dial, and the glass rim thins with it (never under 16 pt), so a small dial
+/// (onboarding, 176 pt) is an instrument, not a thick ring crowding the numeral.
+nonisolated enum DialMetrics {
+    static let standard: CGFloat=300
+    static func scale(side:CGFloat)->CGFloat { min(1,max(0,side)/standard) }
+    /// The rim's width.
+    static func ringWidth(side:CGFloat)->CGFloat { max(16,26*scale(side:side)) }
+    /// From the frame's edge to the arc's radius.
+    static func inset(side:CGFloat)->CGFloat { 18*scale(side:side) }
 }

@@ -120,11 +120,19 @@ extension ParkDetailView {
             TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river),open:{ _ in showBreakdown() },hold:$heldNight)
             if model.detailPausedForLowData { Label("Forecast detail paused in Low Data Mode.",systemImage:"antenna.radiowaves.left.and.right.slash").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
             Divider().overlay(palette.line).padding(.top,10)
-            AddNightToCalendar(night:night)
-            // Kept as going: Nyx keeps watch on it, and Tonight leads with it (`GoingPanel`).
+            // One way to commit to a night: "I'm going". Nyx keeps watch on it and Tonight leads with it
+            // (`GoingPanel`); the calendar and the Lock Screen follow from it, offered once it is kept, each
+            // asking its own permission when tapped, never all at once.
             GoingButton(night:night)
-            // Tonight is followed from the hero, beside "I'm here tonight".
-            if !isTonight { FollowNightButton(night:night) }
+            if GoingNights.shared.isGoing(park:park,night:night.id) {
+                VStack(alignment:.leading,spacing:0) {
+                    AddNightToCalendar(night:night)
+                    // Tonight is followed from the hero, beside "I'm here tonight".
+                    if !isTonight { FollowNightButton(night:night) }
+                }
+                .padding(.leading,typeSize.isAccessibilitySize ? 0 : 26)
+                .transition(.opacity)
+            }
             // Where the night is decided, the way there: a quiet row, or the access note for a roadless park.
             NightDirections(park:park)
         }.id("river")
