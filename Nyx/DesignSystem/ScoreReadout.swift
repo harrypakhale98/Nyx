@@ -93,7 +93,9 @@ struct ScoreReadout: View {
                         }
                     }
                     .frame(maxWidth:.infinity,alignment:.leading)
-                    .onGeometryChange(for:Double.self) { $0.size.width } action:{ gridWidth=$0 }
+                    // Only a change of a point or more: the style chosen from this width moves the grid by half a
+                    // point on a 375 pt phone, which otherwise flipped it forever.
+                    .onGeometryChange(for:Double.self) { $0.size.width } action:{ if abs($0-gridWidth)>=1 { gridWidth=$0 } }
                 }
                 // The weakest link, when it holds the score below its parts: the number and the meters agree.
                 // In ink: a reason, not a score.

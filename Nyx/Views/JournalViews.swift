@@ -461,8 +461,13 @@ struct JournalEditorView:View {
     @Environment(\.dismiss) private var dismiss
     /// An iPhone in landscape, where the keyboard leaves about a hundred points of form.
     @Environment(\.verticalSizeClass) private var verticalSize
+    @Environment(\.dynamicTypeSize) private var typeSize
     @MotionReduced private var reduceMotion: Bool
     @FocusState private var writingNotes:Bool
+    /// The Bortle row's width and its label's widest word: where that word would not fit beside the
+    /// stepper (about 104 pt with its gap), the label goes above it rather than being hyphenated.
+    @State private var bortleRow=0.0
+    @State private var bortleWord=0.0
     @State private var editor:JournalEditorModel
     @State private var picker:[PhotosPickerItem]=[]
     /// Cancel with words or photos in the form: "Discard this night?" first.
@@ -474,6 +479,19 @@ struct JournalEditorView:View {
     private static let errorID="error"
     /// The stepper's fill: a neutral grey that keeps the white system thumb apart after night vision's red.
     private var neutral:Color { palette.nightVision ? palette.controlTint : Color(white:palette.highContrast ? 0.36 : 0.26) }
+    @ViewBuilder private var bortleStepper:some View {
+        let label=Text("Observed Bortle: \(editor.observedBortle)").foregroundStyle(palette.ink)
+        let words=String(localized:"Observed Bortle: \(editor.observedBortle)").split(separator:" ").map(String.init)
+        let stepper=Stepper(value:$editor.observedBortle,in:1...9) { label }.tint(neutral).foregroundStyle(palette.ink,palette.muted,neutral)
+        Group {
+            if typeSize.isAccessibilitySize && bortleWord>bortleRow-104 {
+                VStack(alignment:.leading,spacing:8) { label.accessibilityHidden(true);stepper.labelsHidden() }
+            } else { stepper }
+        }
+        .frame(maxWidth:.infinity,alignment:.leading)
+        .onGeometryChange(for:CGFloat.self) { $0.size.width } action:{ bortleRow=$0 }
+        .background { ZStack { ForEach(words.indices,id:\.self) { Text(words[$0]) } }.fixedSize().hidden().onGeometryChange(for:CGFloat.self) { $0.size.width } action:{ bortleWord=$0 } }
+    }
     private func showNotes(_ proxy:ScrollViewProxy) {
         guard writingNotes, verticalSize == .compact else { return }
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(Self.notesID,anchor:.top) }
@@ -500,9 +518,7 @@ struct JournalEditorView:View {
             Section("The night") {
                 DatePicker("Date",selection:$editor.date,in:...Date.now,displayedComponents:.date).environment(\.timeZone,model.park(editor.parkID)?.timeZone ?? .current)
                 ParkMenuRow(parkID:$editor.parkID)
-                Stepper(value:$editor.observedBortle,in:1...9) {
-                    Text("Observed Bortle: \(editor.observedBortle)").foregroundStyle(palette.ink)
-                }.tint(neutral).foregroundStyle(palette.ink,palette.muted,neutral)
+                bortleStepper
                 Text("Your estimate on the Bortle scale of sky brightness: 1 is the darkest sky, 9 an inner-city sky.").font(.caption).foregroundStyle(palette.muted)
             }.openRows(palette)
             // On an iPhone in landscape the keyboard leaves about a hundred points: while the notes are

@@ -26,9 +26,11 @@ struct WeekStrip: View {
             if typeSize.isAccessibilitySize { line }
             else {
                 let pitch=WeekStrip.pitch(scaledPitch)
-                HStack(spacing:10) {
-                    dots(best:best,pitch:pitch).frame(width:CGFloat(nights.count)*pitch,height:pitch*1.1)
-                    line
+                let strip=dots(best:best,pitch:pitch).frame(width:CGFloat(nights.count)*pitch,height:pitch*1.1)
+                // In a narrow row the caption moves under the dots whole rather than orphaning its score.
+                ViewThatFits(in:.horizontal) {
+                    HStack(spacing:10) { strip;line.fixedSize() }
+                    VStack(alignment:.leading,spacing:4) { strip;line }
                 }
             }
         }

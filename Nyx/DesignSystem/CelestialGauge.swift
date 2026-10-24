@@ -118,9 +118,11 @@ struct CelestialGauge: View {
     /// Where the band and units go is decided by the space the page offers the instrument, never by
     /// the dial's own measured side: that side shrinks when the labels move below it, so a choice
     /// made from it would hold itself (a 240 pt hero stuck as a 183 pt ring with its word outside).
-    /// No taller than on the widest iPhone (354 pt), as the dial itself.
-    nonisolated static func labelsInside(offered:CGSize)->Bool { min(offered.width,offered.height,354)>=labelsInsideFrom }
-    private var labelsInside: Bool { !typeSize.isAccessibilitySize && Self.labelsInside(offered:offered) }
+    /// No taller than on the widest iPhone (354 pt), as the dial itself. Where the dial is capped smaller
+    /// (220 pt at compact height, where the labels still fit inside), the threshold is the cap: from 236 a
+    /// park page in landscape put the labels below, grew past 236, put them back inside, and never settled.
+    nonisolated static func labelsInside(offered:CGSize,cap:CGFloat=354)->Bool { min(offered.width,offered.height,cap)>=min(labelsInsideFrom,cap) }
+    private var labelsInside: Bool { !typeSize.isAccessibilitySize && Self.labelsInside(offered:offered,cap:verticalSize == .compact ? 220 : 354) }
     private var still: Bool { reduceMotion || export }
     /// An unseen reveal waits while nobody can watch it: onboarding or first light over the tabs,
     /// scrolled away or in another tab, or Nyx in the background. Not while merely inactive: a
@@ -164,7 +166,7 @@ struct CelestialGauge: View {
                 // The whole space offered decides the labels' place (`labelsInside(offered:)`). A page
                 // that proposes no height (the park page) offers the instrument's own height.
                 .frame(maxWidth:.infinity,maxHeight:.infinity)
-                .onGeometryChange(for:CGSize.self) { $0.size } action:{ offered=$0 }
+                .onGeometryChange(for:CGSize.self) { CGSize(width:$0.size.width.rounded(.down),height:$0.size.height.rounded(.down)) } action:{ offered=$0 }
             }
         }
         .accessibilityElement(children:.ignore)

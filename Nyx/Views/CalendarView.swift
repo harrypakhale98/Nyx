@@ -190,6 +190,10 @@ struct CalendarView: View {
     /// is at times handed the window's width instead, and the pager keeps the offset it centred on that
     /// wider content, showing the end of this month and most of the next.
     @State private var pageWidth=0.0
+    /// The screen's whole height, bars included: on a short one (667 pt) the gaps tighten so the
+    /// month's first weeks clear the tab bar.
+    @State private var screenHeight=0.0
+    private var short:Bool { screenHeight>0 && screenHeight<720 }
     /// The window's place; the starting park only once the place is known not to be there. A place
     /// abroad restored with the window waits for the world catalogue (`waiting`) rather than
     /// showing the starting park's month first.
@@ -239,15 +243,16 @@ struct CalendarView: View {
                 let pages=pages(park), data=pages.current
                 // The month bar and the ring's panel follow the page in view as soon as it is ready.
                 let shown=visible(park).flatMap { pages.others[$0] } ?? data
-                VStack(alignment:.leading,spacing:24) {
+                VStack(alignment:.leading,spacing:short ? 12 : 24) {
                     // The answer first (the month's darkest stretch), then the month it is ringed in: the
                     // nights you can still plan are not left under half a month already past.
                     heading(park); windowPanel(park,shown); monthBar(park,shown)
                     if typeSize.isAccessibilitySize { list(park,data) } else { months(park,data,others:pages.others,scale:wide && width>=640 ? 1.3 : 1) }
                     LongViewLink(park:park); legend(shown)
-                }.padding(24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
+                }.padding(.horizontal,24).padding(.top,short ? 16 : 24).padding(.bottom,24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
             } else if waiting { ConstellationLoader().frame(maxWidth:.infinity).padding(.top,80) }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park,veil:0.45))
+            .background { Color.clear.ignoresSafeArea().onGeometryChange(for:Double.self) { $0.size.height } action:{ screenHeight=$0 } }
             // The bar (Plan's picker) as wide as the month under it, so their edges line up.
             .safeAreaBar(edge:.top,spacing:0) { if let bar { bar.readableColumn(wide ? 760 : WideLayout.readableWidth) } }
             .measuringWidth($width)

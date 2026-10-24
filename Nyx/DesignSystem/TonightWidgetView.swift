@@ -346,12 +346,15 @@ struct TonightWidgetView:View {
     /// little smaller (English, as before), then set solid on two lines where one is not enough
     /// ("PRÓXIMAS SIETE / NOCHES", "NÄCHSTE SIEBEN / NÄCHTE"). Each step is measured whole, where a
     /// shrinking single line used to end in "…". Japanese is set solid throughout (`Lettering`).
-    private func eyebrow(_ text:LocalizedStringKey)->some View { eyebrow(Text(text)) }
-    private func eyebrow(_ text:Text)->some View {
-        let caps=Lettering.spaced, regular=Font.caption2.weight(.medium), small=Font.system(size:eyebrowSmall,weight:.medium)
+    /// `shorter`, where given, is tried on one line before the two-line form ("Next 7 nights").
+    private func eyebrow(_ text:LocalizedStringKey,shorter:LocalizedStringKey?=nil)->some View { eyebrow(Text(text),shorter:shorter.map { Text($0) }) }
+    private func eyebrow(_ text:Text,shorter:Text?=nil)->some View {
+        let caps=Lettering.spaced, regular=Font.caption2.weight(.medium), small=Font.system(size:eyebrowSmall,weight:.medium), brief=shorter ?? text
         return ViewThatFits(in:.horizontal) {
             text.textCase(caps ? .uppercase : nil).tracking(caps ? 0.8 : 0).font(regular).lineLimit(1)
             text.textCase(caps ? .uppercase : nil).tracking(caps ? 0.8 : 0).font(small).lineLimit(1)
+            brief.textCase(caps ? .uppercase : nil).tracking(caps ? 0.8 : 0).font(regular).lineLimit(1)
+            brief.textCase(caps ? .uppercase : nil).tracking(caps ? 0.8 : 0).font(small).lineLimit(1)
             text.textCase(caps ? .uppercase : nil).font(small).lineLimit(2).minimumScaleFactor(0.8)
         }.foregroundStyle(muted)
     }
@@ -499,7 +502,7 @@ struct TonightWidgetView:View {
             HStack(spacing:0) {
                 // With night buttons, they lead the row and the week's columns say the rest.
                 if entry.stepScope != nil, let night=entry.shown { nightStepper(night) }
-                else { eyebrow("Next seven nights").accessibilityHidden(true) }
+                else { eyebrow("Next seven nights",shorter:"Next 7 nights").accessibilityHidden(true) }
                 // Room for the "2 of 3" button laid over the top corner.
                 Spacer(minLength:entry.savedCount>1 ? 62 : 0)
             }.frame(minHeight:entry.savedCount>1 ? 24 : nil)

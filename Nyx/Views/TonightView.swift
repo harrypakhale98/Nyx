@@ -559,14 +559,28 @@ struct TonightView: View {
         }
     }
     private func capsule<Destination:View,Icon:View>(text:String,hint:LocalizedStringKey,@ViewBuilder destination:@escaping ()->Destination,@ViewBuilder icon:()->Icon)->some View {
+        let mark=icon()
+        // A one-line capsule too wide for the column breaks at its dot, never mid-phrase, in a rounded
+        // rectangle (a capsule's rim would cut two lines); VoiceOver still reads the one line.
+        let broken=text.contains("\n") ? nil : text.range(of:" · ").map { text.replacingCharacters(in:$0,with:"\n") }
+        return Group {
+            if let broken {
+                ViewThatFits(in:.horizontal) {
+                    capsuleLink(Text(text),destination:destination,icon:mark)
+                    capsuleLink(Text(broken).accessibilityLabel(text),rounded:true,destination:destination,icon:mark)
+                }
+            } else { capsuleLink(Text(text),destination:destination,icon:mark) }
+        }.padding(.top,4)
+        .accessibilityHint(hint)
+    }
+    private func capsuleLink<Destination:View,Icon:View>(_ text:Text,rounded:Bool=false,destination:@escaping ()->Destination,icon:Icon)->some View {
         NavigationLink { destination() } label:{
             HStack(spacing:8) {
-                icon().accessibilityHidden(true)
-                Text(text).multilineTextAlignment(.leading)
+                icon.accessibilityHidden(true)
+                text.multilineTextAlignment(.leading)
                 Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
             }
-        }.buttonStyle(.capsuleAction).padding(.top,4)
-        .accessibilityHint(hint)
+        }.buttonStyle(CapsuleActionStyle(rounded:rounded))
     }
 }
 extension EnvironmentValues {
