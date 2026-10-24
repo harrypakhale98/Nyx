@@ -316,6 +316,32 @@ import WidgetKit
         bridge.push(savedParkIDs:ids,homeParkID:model.homeID,tonightParkID:tonight,tonightNight:tonight == nil ? nil : model.tonightPickNight,watchParkIDs:watchIDs,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
                     aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)),ranges:ranges,
                     places:all.compactMap { model.park($0) }.filter { $0.isSavedSpot || $0.isCatalogPlace },aurora:model.aurora,complete:complete)
+        if watch { pushWatchMoons(model) }
+    }
+    /// The places whose Moons the watch is handed (`WatchMoons.places`); none without a watch with Nyx.
+    private func watchMoonPlaces(_ model:PlanModel)->[Park] {
+        guard WatchBridge.isAvailable, WatchBridge.shared.hasWatchApp, let ids=parkIDs else { return [] }
+        let tonight=model.tonightPick.flatMap { model.park($0)?.id }
+        return WatchMoons.places(watch:WatchBridge.requestedParkIDs,saved:ids,home:model.homeID,tonight:tonight).compactMap { model.park($0) }
+    }
+    /// Hands Apple Watch the widgets' Moon pictures for the nights it shows (`WatchMoons`): only the
+    /// ones already drawn (`renderWidgetMoons`), shrunk off the main actor, and only when the set of
+    /// pictures differs from the one last sent, so most hand-overs cost a few file checks.
+    private func pushWatchMoons(_ model:PlanModel) {
+        let places=watchMoonPlaces(model).map { park in
+            (id:park.id,nights:(0..<WatchMoons.nights).map { park.evening(park.date(model.tonight(park),addingDays:$0)) })
+        }
+        let files=places.flatMap { place in place.nights.compactMap { night in SharedSettings.moonImage(park:place.id,night:night).map { (WatchMoons.key(park:place.id,night:night),$0) } } }
+        let keys=files.map(\.0).joined(separator:",")
+        guard !files.isEmpty, WatchBridge.shared.needsMoons(keys) else { return }
+        // Stamped now, before the work: if two sets cross on the way, the watch keeps the later one.
+        let pictures=Dictionary(files,uniquingKeysWith:{ first,_ in first }), made=Date.now
+        Task.detached(priority:.utility) {
+            let moons=WatchMoons.pack(places,sent:made) { id,night in
+                pictures[WatchMoons.key(park:id,night:night)].flatMap { try? Data(contentsOf:$0) }.flatMap { WatchMoons.shrink($0) }
+            }
+            if let moons { WatchBridge.shared.send(moons:moons,keys:keys) }
+        }
     }
     /// A launch with no window yet (a background refresh, a watch's request, Control Center) has had
     /// no window hand the model its saved spots (`RootView`): they are read from the store here, so a
@@ -362,7 +388,9 @@ import WidgetKit
         return ranges
     }
     private func publish(_ model:PlanModel,_ parks:[Park]) async {
-        let moonsDrawn=await renderWidgetMoons(model,parks)
+        // The watch's places too (its kept place, the starting park…), so it is handed the same Moon.
+        var drawnFor=Set<String>()
+        let moonsDrawn=await renderWidgetMoons(model,(parks+watchMoonPlaces(model)).filter { drawnFor.insert($0.id).inserted })
         // Taken as the snapshot is built (before its write suspends), so a change that lands during
         // the write still differs from `published` and is republished when this run ends.
         let data=followedData(model)

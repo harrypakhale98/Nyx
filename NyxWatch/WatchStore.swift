@@ -10,6 +10,9 @@ import WidgetKit
 @Observable final class WatchStore {
     let parks: [Park]
     private(set) var context: WatchContext?
+    /// The iPhone's Moon pictures for the nights the wrist shows (`WatchMoons`); the dial draws the
+    /// vector Moon for any night without one.
+    private(set) var moons: WatchMoons?
     var palette: PaletteChoice {
         didSet {
             guard palette != oldValue else { return }
@@ -33,6 +36,7 @@ import WidgetKit
     init() {
         parks = ((try? ParkData.load()) ?? []).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         context = WatchSky.readContext()
+        moons = WatchMoons.readStored()
         palette = WatchSky.palette
         pinned = WatchSky.pinnedPark
         adaptation = WatchSky.adaptationStart.map(AdaptationClock.init(start:))
@@ -41,6 +45,7 @@ import WidgetKit
         #endif
         // Awaited by the receiver, so a background wake knows when the context is stored and the face reloaded.
         receiver.onContext = { [weak self] context in await self?.apply(context) }
+        receiver.onMoons = { [weak self] moons in await self?.apply(moons) }
         receiver.onReachable = { [weak self] in await self?.tellIPhoneIfNeeded() }
         receiver.activate()
         // An update may change what the faces read (the bundled parks, the snapshot's shape) while
@@ -58,6 +63,14 @@ import WidgetKit
         WatchSky.save(context)
         // The faces read the context too, so they reload when what it says changed, not only when it was sent again.
         publish(force: previous?.sent(at: .distantPast) != context.sent(at: .distantPast))
+    }
+    /// A newer set of Moon pictures replaces the stored one whole, less any night already over, so
+    /// the watch keeps one small file that never grows.
+    func apply(_ moons: WatchMoons, now: Date = .now) {
+        guard WatchMoons.isNewer(moons, than: self.moons) else { return }
+        let kept = moons.pruned(before: now.addingTimeInterval(-2*86400))
+        kept.store()
+        self.moons = kept
     }
     /// Asks Nyx on iPhone, when it can be reached, to refresh and hand over the context again
     /// (`WatchRequest` on the iPhone). The answer comes at once; the context follows by the usual
@@ -192,8 +205,10 @@ import WidgetKit
 /// object holds only the callback and a count of what is still on its way to the main actor.
 nonisolated final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked Sendable {
     var onContext: (@Sendable (WatchContext) async -> Void)?
+    /// Runs with each set of Moon pictures the iPhone sends (`WatchMoons`).
+    var onMoons: (@Sendable (WatchMoons) async -> Void)?
     /// Whether activation has finished (and handed over the context it found), and how many
-    /// contexts were received but are not yet stored and published.
+    /// contexts (and Moon sets) were received but are not yet stored and published.
     private let state = Mutex((activated: false, applying: 0))
     /// True until activation has finished and every received context has been applied.
     var isSettling: Bool { state.withLock { !$0.activated || $0.applying > 0 } }
@@ -223,6 +238,16 @@ nonisolated final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked S
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) { receive(applicationContext) }
     /// Complication transfers carry the same context, sent when a Nyx complication is on the face.
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) { receive(userInfo) }
+    /// The iPhone's Moon pictures. Read here, before returning: WatchConnectivity removes the file then.
+    func session(_ session: WCSession, didReceive file: WCSessionFile) {
+        guard file.metadata?[WatchMoons.metadataKey] != nil, let data = try? Data(contentsOf: file.fileURL), let moons = WatchMoons(data: data),
+              let onMoons else { return }
+        state.withLock { $0.applying += 1 }
+        Task {
+            await onMoons(moons)
+            self.state.withLock { $0.applying -= 1 }
+        }
+    }
     /// Counted here, synchronously on WatchConnectivity's queue, so `hasContentPending` turning
     /// false never runs ahead of the context it delivered.
     private func receive(_ dictionary: [String: Any]) {

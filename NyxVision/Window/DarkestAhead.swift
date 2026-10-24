@@ -35,9 +35,8 @@ struct DarkestAhead: View {
                     Text(night.compactBandLabel).font(.callout).foregroundStyle(palette.muted)
                 }
                 HStack(spacing: 8) {
-                    // The phase as a symbol, turned for the southern sky (American Samoa).
-                    Image(systemName: WidgetMoon.symbol(illumination: night.sky.moon.illumination, waxing: night.sky.moon.waxing))
-                        .scaleEffect(x: park.latitude < 0 ? -1 : 1).foregroundStyle(palette.ink)
+                    // The phase as a symbol, swapped by name for the southern sky (American Samoa), as on every device.
+                    Image(systemName: night.sky.moon.symbolName(southern: night.park.latitude < 0)).foregroundStyle(palette.ink)
                     Text("\(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.subheadline).foregroundStyle(palette.muted)
                 }
                 if let smoke = night.smokeLabel { Text(smoke).font(.subheadline).foregroundStyle(palette.muted) }

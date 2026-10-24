@@ -20492,6 +20492,41 @@
         }
       }
     },
+    "Darker on %@ at %@: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkler am %1$@ in %2$@: %3$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darker on %@ at %@: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más oscuro el %1$@ en %2$@: %3$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus sombre le %1$@ à %2$@ : %3$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%2$@はさらに暗い：%3$@。"
+          }
+        }
+      }
+    },
     "Darker on %@: %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -20523,41 +20558,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@はさらに暗い：%2$@。"
-          }
-        }
-      }
-    },
-    "Darker on %@: %lld at %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dunkler am %@: %lld in %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Darker on %@: %lld at %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Más oscuro el %@: %lld en %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plus sombre le %@ : %lld à %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@はさらに暗い：%3$@で%2$lld点"
           }
         }
       }
@@ -66775,6 +66775,41 @@
         }
       }
     },
+    "The dial shows the night: sunset %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Zifferblatt zeigt die Nacht: Sonnenuntergang %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The dial shows the night: sunset %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El dial muestra la noche: puesta del sol %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le cadran montre la nuit : coucher du soleil %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダイヤルは夜を示します：日の入り %@"
+          }
+        }
+      }
+    },
     "The entry is still here. Try again when space is available.": {
       "extractionState": "manual",
       "localizations": {
@@ -81529,6 +81564,41 @@
         }
       }
     },
+    "best window from %@ to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bestes Zeitfenster von %1$@ bis %2$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "best window from %@ to %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mejor periodo de %1$@ a %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "meilleur créneau de %1$@ à %2$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "いちばんよい時間帯 %1$@〜%2$@"
+          }
+        }
+      }
+    },
     "bottom": {
       "extractionState": "manual",
       "localizations": {
@@ -87389,6 +87459,41 @@
         }
       }
     },
+    "sunrise %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonnenaufgang %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sunrise %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "salida del sol %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lever du soleil %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日の出 %@"
+          }
+        }
+      }
+    },
     "sunset or sunrise": {
       "extractionState": "manual",
       "localizations": {
@@ -87665,6 +87770,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "木々"
+          }
+        }
+      }
+    },
+    "true darkness from %@ to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "echte Dunkelheit von %1$@ bis %2$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "true darkness from %@ to %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oscuridad total de %1$@ a %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "obscurité totale de %1$@ à %2$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全な暗さ %1$@〜%2$@"
           }
         }
       }

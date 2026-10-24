@@ -98,6 +98,17 @@ import Testing
         #expect(line.text.hasSuffix("82."))
         #expect(line.text.contains("Darker on "))
     }
+    /// Tonight's "Darker on…" and the park page's verdict use one rule: ten points clear of the night
+    /// shown and at least Good, so the two never name darker nights by different measures.
+    @Test func oneRuleForADarkerNight() throws {
+        let jotr = try park("jotr"), skies = try ["2026-10-21", "2026-10-22"].map { try sky(jotr, $0) }
+        let shown = night(jotr, skies[0], score: 50)
+        #expect(!NightVerdict.clearlyDarker(night(jotr, skies[1], score: 59), than: shown))
+        #expect(NightVerdict.clearlyDarker(night(jotr, skies[1], score: 60), than: shown))
+        let good = night(jotr, skies[0], score: 64)
+        #expect(!NightVerdict.clearlyDarker(night(jotr, skies[1], score: 73), than: good))
+        #expect(NightVerdict.clearlyDarker(night(jotr, skies[1], score: 74), than: good))
+    }
     /// What's up shows the first three blocks of the shared order and keeps every other one, in the
     /// same order, behind "More up tonight": nothing dropped, nothing reordered.
     @MainActor @Test func whatsUpLeadsWithThreeAndKeepsTheRest() throws {

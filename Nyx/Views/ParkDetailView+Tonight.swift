@@ -71,7 +71,7 @@ extension ParkDetailView {
     private func gauge(range:ClosedRange<Int>?)->some View {
         CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:night.basisCaption(),
                        revealKey:ScoreReveals.key(parkID:park.id,night:park.isoDay(night.id),score:night.score.value),
-                       range:range)
+                       range:range,night:model.ring(night))
             .frame(maxWidth:.infinity)
             .padding(.bottom,typeSize.isAccessibilitySize ? 0 : -28)
             .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
@@ -106,7 +106,7 @@ extension ParkDetailView {
     /// The plain sentence under the dial (`NightVerdict`), with a clearly darker night at this park
     /// within the next two weeks.
     private var verdict:NightVerdict.Line? {
-        let ahead=model.nights(park,from:park.date(night.id,addingDays:1),count:13)
+        let ahead=model.nights(park,from:park.date(night.id,addingDays:1),count:NightVerdict.horizon)
         return NightVerdict.line(sky:night.sky,core:model.whatsUp(night).coreNight,park:park,darker:NightVerdict.darker(than:night,among:ahead))
     }
     /// Alerts other than the closure shown beside the score.

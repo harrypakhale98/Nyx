@@ -52,8 +52,8 @@ enum NyxMetrics {
 /// content-layer use of glass the design language reserves for controls.
 /// A section of a page, open to the sky: a hairline horizon above it and the content on the night,
 /// aligned with the page's own margins. Not a card: boxes are for the drawn instruments (the river,
-/// the lights-out sky, the map) and glass for what floats. A soft dark veil, with no edge to see,
-/// keeps a star from sitting behind a word.
+/// the lights-out sky, the map) and glass for what floats. A dark veil (`SectionVeil`) keeps a star
+/// from sitting behind a word.
 struct Panel<Content: View>: View {
     @Environment(\.nyx) private var palette
     /// Off for a page's first section (the navigation bar is its edge) and after a list with its own separators.
@@ -61,8 +61,28 @@ struct Panel<Content: View>: View {
     @ViewBuilder var content: Content
     var body: some View {
         VStack(alignment:.leading,spacing:0) { content }.padding(.top,rule ? NyxMetrics.cardPadding : 4).padding(.bottom,NyxMetrics.cardPadding*0.6).frame(maxWidth:.infinity,alignment:.leading)
-            .background { Color.black.opacity(palette.nightVision ? 0.85 : 0.6).padding(-12).blur(radius:18).allowsHitTesting(false) }
+            .background { SectionVeil(opacity:palette.nightVision ? 0.85 : 0.6,fadesTop:rule) }
             .overlay(alignment:.top) { if rule { Rectangle().fill(palette.line).frame(height:0.5*palette.stroke).accessibilityHidden(true) } }
+    }
+}
+/// The veil behind a section: dark across its whole height, so no star sits behind a word, and
+/// never past its own top or bottom, so it never dims the section above or below (a blurred veil
+/// that spilled over did, and failed the contrast audit). It fades only into the top padding and
+/// sideways into the page margins, where nothing is written, so no edge shows against the stars.
+struct SectionVeil: View {
+    let opacity: Double
+    var fadesTop=true
+    var body: some View {
+        GeometryReader { proxy in
+            let h=max(1,proxy.size.height), w=proxy.size.width+48
+            let top=fadesTop ? min(0.4,14/h) : 0
+            Color.black.opacity(opacity)
+                .frame(width:w,height:proxy.size.height)
+                .mask(LinearGradient(stops:[.init(color:.clear,location:0),.init(color:.black,location:top),.init(color:.black,location:1)],startPoint:.top,endPoint:.bottom))
+                .mask(LinearGradient(stops:[.init(color:.clear,location:0),.init(color:.black,location:24/w),.init(color:.black,location:1-24/w),.init(color:.clear,location:1)],startPoint:.leading,endPoint:.trailing))
+                .offset(x:-24)
+        }
+        .allowsHitTesting(false).accessibilityHidden(true)
     }
 }
 /// A section's heading, set like a line in a star atlas: serif, sentence case, in starlight. `meta`

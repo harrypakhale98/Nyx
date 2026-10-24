@@ -123,6 +123,52 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
             session.transferCurrentComplicationUserInfo([WatchContext.key: data])
         }
     }
+    /// The key list (`WatchMoons.key`) of the Moon pictures last handed to WatchConnectivity, kept
+    /// across launches: a picture never changes once drawn, so the same keys mean the same set.
+    static var moonsSent: String? {
+        get { UserDefaults.standard.string(forKey: moonsKey) }
+        set { UserDefaults.standard.set(newValue, forKey: moonsKey) }
+    }
+    private static let moonsKey = "watchMoonsSent"
+    /// Where the outgoing set waits until delivered: one file at a time, removed once sent or replaced.
+    private static var moonsFolder: URL? {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent("WatchMoons", isDirectory: true)
+    }
+    /// Whether the pictures named by `keys` still have to go to the watch: a watch with Nyx is there
+    /// and they are not the set last handed over. Checked before any picture is read or shrunk.
+    func needsMoons(_ keys: String) -> Bool {
+        hasWatchApp && lock.withLock { Self.moonsSent != keys }
+    }
+    /// Hands the watch its Moon pictures (`WatchMoons`) as one small file. Only the newest set is
+    /// ever on its way: one still queued is cancelled and its file removed, so nothing accumulates
+    /// on either side; the watch replaces its one stored copy.
+    func send(moons: WatchMoons, keys: String) {
+        guard WCSession.isSupported() else { return }
+        let session = WCSession.default
+        guard session.activationState == .activated, session.isPaired, session.isWatchAppInstalled, let data = moons.data, let folder = Self.moonsFolder else { return }
+        lock.withLock {
+            guard Self.moonsSent != keys else { return }
+            for transfer in session.outstandingFileTransfers where transfer.file.metadata?[WatchMoons.metadataKey] != nil { transfer.cancel() }
+            try? FileManager.default.removeItem(at: folder)
+            let url = folder.appendingPathComponent("moons-\(UUID().uuidString).plist")
+            do {
+                try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+                try data.write(to: url, options: .atomic)
+            } catch { return }
+            session.transferFile(url, metadata: [WatchMoons.metadataKey: WatchMoons.currentVersion])
+            Self.moonsSent = keys
+        }
+    }
+    /// A set delivered, or cancelled for a newer one: its file goes. One that failed with no newer one
+    /// queued is forgotten, so the next hand-over sends it again.
+    func session(_ session: WCSession, didFinish fileTransfer: WCSessionFileTransfer, error: Error?) {
+        guard fileTransfer.file.metadata?[WatchMoons.metadataKey] != nil else { return }
+        try? FileManager.default.removeItem(at: fileTransfer.file.fileURL)
+        guard error != nil else { return }
+        lock.withLock {
+            if !session.outstandingFileTransfers.contains(where: { $0.file.metadata?[WatchMoons.metadataKey] != nil }) { Self.moonsSent = nil }
+        }
+    }
     func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
         lock.withLock { activating = false }
         if state == .activated { send(session) }
@@ -145,12 +191,15 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
         if let handler { Task { @MainActor in handler() } }
     }
     func sessionDidBecomeInactive(_ session: WCSession) {}
-    /// Switching to another watch: activate again so the new one receives the context.
-    func sessionDidDeactivate(_ session: WCSession) { session.activate() }
+    /// Switching to another watch: activate again so the new one receives the context and its Moons.
+    func sessionDidDeactivate(_ session: WCSession) {
+        lock.withLock { Self.moonsSent = nil }
+        session.activate()
+    }
     func sessionWatchStateDidChange(_ session: WCSession) {
         // Nyx was just installed on the watch: send what was last prepared.
         guard session.isWatchAppInstalled else { return }
-        lock.withLock { lastSent = nil }
+        lock.withLock { lastSent = nil; Self.moonsSent = nil }
         send(session)
     }
 }
