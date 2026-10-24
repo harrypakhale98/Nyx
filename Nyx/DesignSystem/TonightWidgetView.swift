@@ -195,6 +195,9 @@ struct TonightWidgetView:View {
     private var accent:Color { tinted ? ink : look.accent }
     private var muted:Color { tinted ? ink.opacity(0.62) : look.muted }
     private var palette:NyxPalette { look.palette }
+    /// The warning glyph's warm red in full colour, as in the app (`NyxPalette.cautionColor`); ink in
+    /// night vision and on tinted faces, where the system draws the accented group in its own tint.
+    private var caution:Color { tinted || nightVision ? ink : NyxPalette.cautionColor }
     var body:some View {
         content.foregroundStyle(ink)
             // The real stars over the place on the night the face shows, and a tap opens that night.
@@ -224,7 +227,7 @@ struct TonightWidgetView:View {
                 // The Moon in the ring's opening is tonight's actual phase, or the warning glyph when
                 // the park has a closure: the ring keeps the score, the summary says the rest.
                 Gauge(value:Double(night.score.value),in:0...100) {
-                    if entry.closure != nil { Image(systemName:"exclamationmark.triangle.fill").widgetAccentable() } else { MoonSymbol(night:night) }
+                    if entry.closure != nil { Image(systemName:"exclamationmark.triangle.fill").foregroundStyle(caution).widgetAccentable() } else { MoonSymbol(night:night) }
                 } currentValueLabel: {
                     // Two digits inside a fixed ring: shrink rather than spill over the arc at large sizes.
                     Text("\(night.score.value)").scoreNumeral(.title3,accent:accent).minimumScaleFactor(0.6).widgetAccentable()
@@ -320,21 +323,22 @@ struct TonightWidgetView:View {
             .accessibilityValue("Showing \(night.park.shortName), \(entry.position) of \(entry.savedCount)")
         }
     }
-    /// The park's closure, in the accent, as the app shows it beside the score: the one line a
-    /// widget must not leave out. Two lines at most, the whole of it in the spoken summary.
+    /// The park's closure as the app shows it beside the score: the warning glyph in its warm red, the
+    /// words in starlight, so amber stays the score's. The one line a widget must not leave out. Two
+    /// lines at most, the whole of it in the spoken summary. Accented as a whole on a tinted face.
     @ViewBuilder private func closureLine(_ font:Font)->some View {
         if let closure=entry.closure {
-            Label { Text(closure).lineLimit(2).minimumScaleFactor(0.85) } icon:{ Image(systemName:"exclamationmark.triangle.fill").accessibilityHidden(true) }
-                .font(font.weight(.medium)).foregroundStyle(accent).widgetAccentable()
+            Label { Text(closure).foregroundStyle(ink).lineLimit(2).minimumScaleFactor(0.85) } icon:{ Image(systemName:"exclamationmark.triangle.fill").foregroundStyle(caution).accessibilityHidden(true) }
+                .font(font.weight(.medium)).widgetAccentable()
                 .frame(maxWidth:.infinity,alignment:.leading)
         }
     }
-    /// "⚠ Closure alert" in the accent: where the closure's own words do not fit (the small
-    /// widget and the Lock Screen), the mark that sends someone to the park's page before they drive.
+    /// "⚠ Closure alert", drawn as the closure line is: where the closure's own words do not fit (the
+    /// small widget and the Lock Screen), the mark that sends someone to the park's page before they drive.
     @ViewBuilder private func closureMark(_ font:Font)->some View {
         if entry.closure != nil {
-            Label { Text("Closure alert").lineLimit(1).minimumScaleFactor(0.75) } icon:{ Image(systemName:"exclamationmark.triangle.fill").accessibilityHidden(true) }
-                .font(font.weight(.medium)).foregroundStyle(accent).widgetAccentable()
+            Label { Text("Closure alert").foregroundStyle(ink).lineLimit(1).minimumScaleFactor(0.75) } icon:{ Image(systemName:"exclamationmark.triangle.fill").foregroundStyle(caution).accessibilityHidden(true) }
+                .font(font.weight(.medium)).widgetAccentable()
         }
     }
     /// The small and medium widgets' eyebrow, never cut: spaced capitals where they fit, then a
@@ -376,7 +380,8 @@ struct TonightWidgetView:View {
     /// `shortBand` shows the band's one word where its whole line would not fit.
     private func lockHero(_ night:Night,numeral:Font.TextStyle,closureBesideScore:Bool=false,shortBand:Bool=false)->some View {
         VStack(alignment:.leading,spacing:0) {
-            Text(night.park.shortName).font(.headline).lineLimit(1)
+            // Serif, as the park's name is on every other face.
+            Text(night.park.shortName).font(.system(.headline,design:.serif)).lineLimit(1)
             HStack(alignment:.firstTextBaseline,spacing:6) {
                 Text("\(night.score.value)").scoreNumeral(numeral,accent:accent).widgetAccentable()
                 if closureBesideScore { closureMark(.caption) }
@@ -388,15 +393,19 @@ struct TonightWidgetView:View {
         }.frame(maxWidth:.infinity,alignment:.leading)
     }
     /// `closureMark` puts "Closure alert" in the eyebrow's place (the small widget); the medium
-    /// widget shows the closure's own words below instead.
+    /// widget shows the closure's own words below instead. The Moon rides the widget's top trailing
+    /// corner on the small widget; on the medium one, whose corner belongs to the week, it sits just
+    /// after the eyebrow, never floating mid-row at the edge of a narrow column.
     private func homeContent(_ night:Night,closureMark mark:Bool=false)->some View {
-        VStack(alignment:.leading,spacing:4) {
+        let pinned=family == .systemSmall
+        return VStack(alignment:.leading,spacing:4) {
             if !typeSize.isAccessibilitySize {
-                HStack(alignment:.center) {
+                HStack(alignment:.center,spacing:6) {
                     if mark && entry.closure != nil { closureMark(.caption2) }
                     else { nightEyebrow(night) }
-                    Spacer(minLength:4)
+                    if pinned { Spacer(minLength:4) }
                     moon(night).frame(width:18,height:18).id(night.id)
+                    if !pinned { Spacer(minLength:0) }
                 }
             } else if mark { closureMark(.caption2) }
             // The band word straight under the numeral, as on the dial.
@@ -507,8 +516,8 @@ struct TonightWidgetView:View {
                 }
             }.accessibilityHidden(true)
             // A closure takes this line's room below; the ring already marks the best night.
-            if entry.closure == nil, let top=week.first(where:{ $0.id==best }) {
-                Text("Best: \(top.park.dayLabel(top.id)) · \(top.score.value)").font(.caption2).foregroundStyle(ink).lineLimit(1).minimumScaleFactor(0.8)
+            if entry.closure == nil, let top=week.first(where:{ $0.id==best }), let first=week.first {
+                Text(WeekBest.label(top,first:first)).font(.caption2).foregroundStyle(ink).lineLimit(1).minimumScaleFactor(0.8)
                     .accessibilityHidden(true)
             }
         }.dynamicTypeSize(...DynamicTypeSize.large) // Seven fixed columns: 11 pt text that always fits.
@@ -876,6 +885,17 @@ struct WidgetReviewView:View {
     }
 }
 #endif
+
+/// The week's best night in one short line, said as the week's: "Best this week: Thu · 62", or
+/// "Best this week: tonight". A Parks row and the medium widget look seven nights ahead, while the
+/// park page and Best nights name the best of thirty, so "best" alone would name two nights.
+nonisolated enum WeekBest {
+    static func label(_ best:Night,first:Night)->String {
+        if best.id==first.id { return String(localized:"Best this week: tonight") }
+        let day=best.id.formatted(Date.FormatStyle(timeZone:best.park.timeZone).weekday(.abbreviated))
+        return String(localized:"Best this week: \(day) · \(best.score.value)")
+    }
+}
 
 /// A night's dot in SwiftUI shapes, for the widgets: filled with a forecast, hollow without one,
 /// and hollow with its lower half filled for an early look (the same marks as the app's calendar).

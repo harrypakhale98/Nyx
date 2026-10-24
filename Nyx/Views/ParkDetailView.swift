@@ -5,8 +5,9 @@ import SwiftData
 /// it, the best window, the river and what to check before you go), **The sky** (the real sky,
 /// the shape of the night, what's up, the Moon at size, clouds and air) and **The place** (sky
 /// glow, spots, ranger programs, what protects this sky, the park in the Park Service's words).
-/// A pinned segmented index jumps between them and follows the scroll; at accessibility sizes it
-/// steps aside and the chapter headings carry the page (they are VoiceOver headings throughout).
+/// A pinned segmented index jumps between them and follows the scroll; at accessibility sizes,
+/// where segments cannot grow with the text, a "Jump to" menu in the bar does the same, and the
+/// chapter headings carry the page (they are VoiceOver headings throughout).
 enum ParkChapter: String, CaseIterable, Identifiable, Hashable {
     case tonight, sky, place
     var id: String { rawValue }
@@ -95,6 +96,8 @@ struct ParkDetailView: View {
     @State private var fold:Fold?
     /// The pinned index: one column, standard text sizes (segments do not grow with the text).
     private var showsIndex:Bool { !wide && !typeSize.isAccessibilitySize }
+    /// The index as a menu in the bar instead: one column at accessibility sizes.
+    private var showsJumpMenu:Bool { !wide && typeSize.isAccessibilitySize }
     var body: some View {
         ScrollViewReader { proxy in
             Group {
@@ -120,12 +123,15 @@ struct ParkDetailView: View {
                             tonightChapter(proxy).modifier(ChapterTop(chapter:.tonight,report:report))
                             skyChapter.modifier(ChapterTop(chapter:.sky,report:report))
                             placeChapter.modifier(ChapterTop(chapter:.place,report:report))
-                        }.padding(24).readableColumn()
+                        }
+                        // Under the pinned index the page's own top margin is half, so the score sits higher.
+                        .padding(.horizontal,24).padding(.bottom,24).padding(.top,showsIndex ? 12 : 24).readableColumn()
                     }
                     .scrollDisabled(scrubbing || holdingArc)
                     .safeAreaBar(edge:.top) { if showsIndex { index(proxy) } }
                 }
             }
+            .toolbar { if showsJumpMenu { ToolbarItem(placement:.topBarTrailing) { jumpMenu(proxy) } } }
             .onPreferenceChange(RiverScrubbingKey.self) { now in
                 scrubbing=now
                 // The river releases its hold when the finger lifts; a scrub cut short by the system releases it here.
@@ -253,11 +259,22 @@ struct ParkDetailView: View {
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { selected=next }
         return true
     }
-    private func index(_ proxy:ScrollViewProxy)->some View {
-        Picker("Chapter",selection:Binding(get:{ chapter },set:{ target in
+    /// The chapter in view, and a jump to another.
+    private func chapterSelection(_ proxy:ScrollViewProxy)->Binding<ParkChapter> {
+        Binding(get:{ chapter },set:{ target in
             chapter=target
             withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(target,anchor:.top) }
-        })) { ForEach(ParkChapter.allCases) { Text($0.title).tag($0) } }
+        })
+    }
+    /// At accessibility sizes: the same three chapters in a menu, the one in view checked.
+    private func jumpMenu(_ proxy:ScrollViewProxy)->some View {
+        Menu {
+            Picker("Chapter",selection:chapterSelection(proxy)) { ForEach(ParkChapter.allCases) { Text($0.title).tag($0) } }.pickerStyle(.inline)
+        } label:{ Label("Jump to a part of the page",systemImage:"list.bullet") }
+        .accessibilityValue(Text(chapter.title))
+    }
+    private func index(_ proxy:ScrollViewProxy)->some View {
+        Picker("Chapter",selection:chapterSelection(proxy)) { ForEach(ParkChapter.allCases) { Text($0.title).tag($0) } }
         .pickerStyle(.segmented)
         .padding(.horizontal,24).padding(.vertical,6)
         .frame(maxWidth:WideLayout.proseWidth)

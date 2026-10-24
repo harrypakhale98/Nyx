@@ -139,16 +139,28 @@ struct ParksView: View {
             // One request brings cloud forecasts for all 63 parks, so every score can include clouds.
             .task { await model.refresh(model.parks,parkUpdates:false) }
             .refreshable { await refreshAll() }
-            .toolbar { ToolbarItem(placement:.topBarTrailing) {
-                Button { addingSpot=true } label:{ Label("Save a spot",systemImage:"plus") }
-                    .accessibilityInputLabels([Text("Save a spot"),Text("Add a spot"),Text("New spot")]).help("Save a spot")
-            } }
-            .toolbar { ToolbarItem(placement:.topBarTrailing) { Menu {
-                // Abroad the list is by country and name; the darkest place within reach tonight is Tonight's answer.
-                if !abroad { Picker("Sort",selection:$byScore) { Label("Name",systemImage:"textformat").tag(false); Label("Darkest tonight",systemImage:"moon.stars").tag(true) } }
-                Section { Toggle("Dark Sky designated only",isOn:$darkOnly); Toggle("Step-free viewing",isOn:$stepFreeOnly); Toggle("Saved parks only",isOn:$savedOnly) }
-            } label:{ Label("Sort and filter",systemImage:"line.3.horizontal.decrease") }.accessibilityLabel("Sort and filter parks").accessibilityInputLabels([Text("Filter"),Text("Sort"),Text("Sort and filter")]) } }
+            // One menu beside the map: sorting, narrowing and saving a spot are all occasional, and three
+            // buttons beside the map's left the title as "Par…" at accessibility sizes. On iOS 27 it is the
+            // system's own overflow menu (the ellipsis is reserved for it), on iOS 26 a menu of its own.
+            .toolbar {
+                if #available(iOS 27.0,*) {
+                    ToolbarOverflowMenu { listOptions }
+                } else {
+                    ToolbarItem(placement:.topBarTrailing) { Menu { listOptions } label:{ Label("Sort and filter",systemImage:"ellipsis") }
+                        .accessibilityLabel("Sort and filter parks").accessibilityInputLabels([Text("Filter"),Text("Sort"),Text("Sort and filter"),Text("Save a spot")]) }
+                }
+            }
             .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).modifier(ParkTransition(sourceID:park.id,namespace:zoom)) }
+    }
+    /// Sorting, the narrowing switches and a new spot: the toolbar's one menu.
+    @ViewBuilder private var listOptions: some View {
+        // Abroad the list is by country and name; the darkest place within reach tonight is Tonight's answer.
+        if !abroad { Picker("Sort",selection:$byScore) { Label("Name",systemImage:"textformat").tag(false); Label("Darkest tonight",systemImage:"moon.stars").tag(true) } }
+        Section { Toggle("Dark Sky designated only",isOn:$darkOnly); Toggle("Step-free viewing",isOn:$stepFreeOnly); Toggle("Saved parks only",isOn:$savedOnly) }
+        Section {
+            Button { addingSpot=true } label:{ Label("Save a spot",systemImage:"plus") }
+                .accessibilityInputLabels([Text("Save a spot"),Text("Add a spot"),Text("New spot")])
+        }
     }
     /// The list's sections under its eyebrow: your spots, saved places, then the parks or the world.
     @ViewBuilder private func sections(shown:[Park],spots:[Park],found:[Park],savedWorld:[Park],savedListed:[Park],groups:[CountryGroup],own:CountryGroup?,others:[CountryGroup],abroad:Bool)->some View {
@@ -270,7 +282,7 @@ struct ParksView: View {
         let summary=WorldBrowse.summary(groups)
         Button { withAnimation(reduceMotion ? nil : NyxMotion.spring) { worldOpen.toggle() } } label:{
             HStack(alignment:.center,spacing:12) {
-                Image(systemName:"globe").font(.title3).foregroundStyle(palette.accent).accessibilityHidden(true)
+                Image(systemName:"globe").font(.title3).foregroundStyle(palette.ink).accessibilityHidden(true)
                 VStack(alignment:.leading,spacing:4) {
                     Text("Around the world").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
                     Text(summary).font(.caption).foregroundStyle(palette.muted)
@@ -335,7 +347,7 @@ struct ParksView: View {
     /// "Save another spot", under the spots already saved.
     private var addSpotRow: some View {
         Button { addingSpot=true } label:{
-            Label("Save another spot",systemImage:"plus.circle").font(.subheadline.weight(.medium)).foregroundStyle(palette.accent)
+            Label("Save another spot",systemImage:"plus.circle").font(.subheadline.weight(.medium)).foregroundStyle(palette.ink)
                 .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
         }.buttonStyle(.plain)
     }
@@ -353,7 +365,7 @@ struct ParksView: View {
         if let selection {
             let chosen=selection.wrappedValue==park.id
             Button { selection.wrappedValue=park.id } label:{
-                row.padding(.horizontal,12).background(RoundedRectangle(cornerRadius:16).fill(palette.accent.opacity(chosen ? (palette.nightVision ? 0.22 : 0.13) : 0))).padding(.horizontal,-12)
+                row.padding(.horizontal,12).background(RoundedRectangle(cornerRadius:16).fill(palette.ink.opacity(chosen ? (palette.nightVision ? 0.22 : 0.1) : 0))).padding(.horizontal,-12)
                     .contentShape(.hoverEffect,RoundedRectangle(cornerRadius:16).inset(by:-2))
             }.buttonStyle(.plain).hoverEffect(.highlight)
                 .accessibilityAddTraits(chosen ? .isSelected : [])

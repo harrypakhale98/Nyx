@@ -168,13 +168,15 @@ struct AssistiveParkCard: View {
         let night=night
         VStack(alignment: .leading, spacing: 18) {
             Text(park.shortName).font(.system(.largeTitle, design: .serif).weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+            // A closure is the second thing said, before the night itself, as on every other surface:
+            // the warning glyph in its red, the words in starlight.
+            if let closure=model.closure(park) {
+                Label { Text("Closure alert: \(closure)").fixedSize(horizontal: false, vertical: true) } icon:{ Image(systemName: "exclamationmark.triangle.fill") }
+                    .font(.title3.weight(.semibold)).labelStyle(.caution)
+            }
             Text(Self.word(night)).font(.title.weight(.semibold)).foregroundStyle(palette.accent).fixedSize(horizontal: false, vertical: true)
             MoonView(geometry: AstronomyEngine().moon(for: night).geometry).frame(maxWidth: 200).frame(maxWidth: .infinity)
             Text(Self.darkLine(night)).font(.title2).fixedSize(horizontal: false, vertical: true)
-            if let closure=model.closure(park) {
-                Label { Text("Closure alert: \(closure)").fixedSize(horizontal: false, vertical: true) } icon:{ Image(systemName: "exclamationmark.triangle.fill") }
-                    .font(.title3.weight(.semibold)).foregroundStyle(palette.accent)
-            }
             // Not offered when saved parks could not be opened: the park would not stay saved.
             if reminder && !model.journalUnavailable {
                 if !(isSaved && reminders) {

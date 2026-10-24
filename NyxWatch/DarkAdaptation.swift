@@ -38,7 +38,7 @@ struct DarkAdaptationView: View {
                 .sheet(isPresented: $showsInfo) { AdaptationInfo().environment(\.nyx, palette).modifier(WatchDebug.TypeSize()) }
         }
         .foregroundStyle(palette.ink)
-        .tint(palette.accent)
+        .tint(palette.ink)
         .environment(\.nyx, palette)
         .modifier(NightVisionFilter(enabled: true, red: palette.red))
         .background(Color.black)
@@ -138,7 +138,7 @@ struct AdaptationRing: View {
                 VStack(spacing: -side*0.02) {
                     Text(clock == nil ? AdaptationClock.minutes : minutes, format: .number)
                         .font(.system(size: side*0.36, weight: .light, design: .serif)).monospacedDigit()
-                        .foregroundStyle(palette.accent).lineLimit(1).minimumScaleFactor(0.5)
+                        .foregroundStyle(palette.ink).lineLimit(1).minimumScaleFactor(0.5)
                     Group {
                         if adapted { Text("adapted") } else if clock == nil { Text("minutes") } else { Text("of 30 min") }
                     }
@@ -174,7 +174,7 @@ private struct RingArc: View, Animatable {
                 var line = Path()
                 line.move(to: CGPoint(x: center.x+cos(a)*(radius-5), y: center.y+sin(a)*(radius-5)))
                 line.addLine(to: CGPoint(x: center.x+cos(a)*(radius-10), y: center.y+sin(a)*(radius-10)))
-                context.stroke(line, with: .color(Double(tick)/6 <= value ? palette.accent.opacity(0.7) : palette.line), lineWidth: palette.stroke)
+                context.stroke(line, with: .color(Double(tick)/6 <= value ? palette.ink.opacity(0.7) : palette.line), lineWidth: palette.stroke)
             }
             guard value > 0.002 else { return }
             let tip = start + sweep*min(1, value)
@@ -183,10 +183,10 @@ private struct RingArc: View, Animatable {
             if !dimmed {
                 context.drawLayer { glow in
                     glow.addFilter(.blur(radius: 4))
-                    glow.stroke(arc, with: .color(palette.accent.opacity(0.35)), style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                    glow.stroke(arc, with: .color(palette.ink.opacity(0.35)), style: StrokeStyle(lineWidth: 6, lineCap: .round))
                 }
             }
-            context.stroke(arc, with: .color(palette.accent), style: StrokeStyle(lineWidth: 3.5, lineCap: .round))
+            context.stroke(arc, with: .color(palette.ink), style: StrokeStyle(lineWidth: 3.5, lineCap: .round))
             let point = CGPoint(x: center.x+cos(tip * .pi/180)*radius, y: center.y+sin(tip * .pi/180)*radius)
             context.fill(Path(ellipseIn: CGRect(x: point.x-2.8, y: point.y-2.8, width: 5.6, height: 5.6)), with: .color(palette.ink))
         }
@@ -225,7 +225,7 @@ private struct AdaptationInfo: View {
             .containerBackground(Color.black, for: .navigation)
         }
         .foregroundStyle(palette.ink)
-        .tint(palette.accent)
+        .tint(palette.ink)
         .modifier(NightVisionFilter(enabled: true, red: palette.red))
         .background(Color.black)
     }

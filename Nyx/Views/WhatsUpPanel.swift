@@ -58,7 +58,7 @@ struct WhatsUpPanel: View {
                             VStack(alignment:.leading,spacing:10) {
                                 ForEach(notes) { note in
                                     Label { Text(note.text).fixedSize(horizontal:false,vertical:true) } icon:{
-                                        if !typeSize.isAccessibilitySize { Image(systemName:note.symbol).foregroundStyle(palette.accent).frame(width:glyphSize).accessibilityHidden(true) }
+                                        if !typeSize.isAccessibilitySize { Image(systemName:note.symbol).foregroundStyle(palette.ink).frame(width:glyphSize).accessibilityHidden(true) }
                                     }
                                     .font(.subheadline).foregroundStyle(palette.muted)
                                 }
@@ -69,13 +69,13 @@ struct WhatsUpPanel: View {
                     Text(isTonight ? "More up tonight (\(hidden))" : "More up this night (\(hidden))").font(.subheadline)
                         .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
                 }
-                .tint(palette.accent)
+                .tint(palette.ink)
             }
             VStack(alignment:.leading,spacing:0) {
                 NavigationLink { EssayView(essay:.milkyway) } label:{ Label("Finding the Milky Way",systemImage:"sparkle").font(.subheadline).frame(minHeight:44,alignment:.leading).contentShape(Rectangle()) }
                 if whatsUp.shower != nil {
                     NavigationLink { EssayView(essay:.meteors) } label:{
-                        Label { Text("Watching a meteor shower") } icon:{ SkyGlyph(.meteors,color:palette.accent).frame(width:glyphSize*0.8) }.font(.subheadline)
+                        Label { Text("Watching a meteor shower") } icon:{ SkyGlyph(.meteors,color:palette.ink).frame(width:glyphSize*0.8) }.font(.subheadline)
                             .frame(minHeight:44,alignment:.leading).contentShape(Rectangle())
                     }
                 }
@@ -100,10 +100,11 @@ struct WhatsUpPanel: View {
             VStack(alignment:.leading,spacing:5) { content() }
         }
     }
-    /// Events and a timed core get the amber figure; a state ("Out of the night sky") stays in starlight.
+    /// Events get the larger figure. Words and times are starlight; only a glyph of light in the sky (the
+    /// Moon, the core, a meteor) is amber, so the score keeps amber's one job beside it.
     private func row(_ item:WhatsUp.Item)->some View {
-        let event=[.meteors,.eclipse,.aurora,.pairing].contains(item.kind)
-        return glyphed(SkyGlyph.Kind(item.kind),color:palette.accent) {
+        let event=[.meteors,.eclipse,.aurora,.pairing].contains(item.kind), kind=SkyGlyph.Kind(item.kind)
+        return glyphed(kind,color:kind.isLight ? palette.accent : palette.ink) {
             ViewThatFits(in:.horizontal) {
                 HStack(alignment:.firstTextBaseline,spacing:8) { heading(item,event:event).layoutPriority(1); Spacer(minLength:8); figure(item,event:event) }
                 VStack(alignment:.leading,spacing:4) { heading(item,event:event); figure(item,event:event) }
@@ -160,13 +161,13 @@ struct WhatsUpPanel: View {
     private func heading(_ item:WhatsUp.Item,event:Bool)->some View {
         VStack(alignment:.leading,spacing:2) {
             Text(item.title).font(.system(event ? .headline : .body,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
-            if let note=item.note { Text(note).font(.caption).foregroundStyle(event ? palette.accent : palette.muted) }
+            if let note=item.note { Text(note).font(.caption).foregroundStyle(event ? palette.ink : palette.muted) }
         }
     }
     @ViewBuilder private func figure(_ item:WhatsUp.Item,event:Bool)->some View {
         if let value=item.value {
             Text(value).font(.system(event ? .title3 : .body,design:.serif)).monospacedDigit()
-                .foregroundStyle(item.timed ? palette.accent : palette.ink).fixedSize(horizontal:false,vertical:true)
+                .foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
         }
     }
 }

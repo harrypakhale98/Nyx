@@ -131,7 +131,7 @@ struct CityLightFigure: View {
                 Text(selection == .city ? cityLabel : hereFull).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
                 Image(systemName:"chevron.up.chevron.down").font(.footnote.weight(.semibold)).accessibilityHidden(true)
             }
-            .foregroundStyle(palette.accent)
+            .foregroundStyle(palette.ink)
             .frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
             .contentShape(Rectangle())
         }

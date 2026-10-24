@@ -51,24 +51,25 @@ struct FromHomePanel: View {
             }
             Divider().overlay(palette.line)
             row(title:Text("True darkness"),value:sky.hasDarkness ? sky.darkness : String(localized:"None tonight"),detail:sky.hasDarkness ? sky.moonlightLine : sky.darkness) {
-                Image(systemName:"moon.stars").resizable().scaledToFit().foregroundStyle(palette.accent)
+                Image(systemName:"moon.stars").resizable().scaledToFit().foregroundStyle(palette.ink)
             }
             // What the bundled world grids hold for this point (none for a park, nothing without them).
             if let title=sky.usualCloudsTitle, let line=sky.usualCloudsLine {
                 Divider().overlay(palette.line)
                 row(title:Text(title),value:nil,detail:line) {
-                    Image(systemName:"cloud.moon").resizable().scaledToFit().foregroundStyle(palette.accent)
+                    Image(systemName:"cloud.moon").resizable().scaledToFit().foregroundStyle(palette.ink)
                 }
             }
             if let skyClass=sky.skyClass, let line=sky.skyLine {
                 Divider().overlay(palette.line)
                 row(title:Text("Sky brightness"),value:skyClass,detail:line) {
-                    Image(systemName:"light.max").resizable().scaledToFit().foregroundStyle(palette.accent)
+                    Image(systemName:"light.max").resizable().scaledToFit().foregroundStyle(palette.ink)
                 }
             }
             ForEach([sky.eclipse,sky.shower].compactMap { $0 }) { item in
                 Divider().overlay(palette.line)
                 row(title:Text(item.title),value:item.value,detail:item.detail,spoken:item.spoken) {
+                    // Amber for light in the sky (an eclipsed Moon, a meteor); the facts' glyphs above are starlight.
                     SkyGlyph(SkyGlyph.Kind(item.kind),color:palette.accent)
                 }
             }

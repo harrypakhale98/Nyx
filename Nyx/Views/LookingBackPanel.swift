@@ -32,7 +32,8 @@ struct LookingBackPanel: View {
                     Text("Within 10 points on \(tally.close) of the last \(tally.of) nights Nyx answered.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
                 Text("This is the weather models' own look back at recent hours, not a measurement from the ground.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                Button("Forget these nights") { confirming=true }.font(.footnote.weight(.medium)).foregroundStyle(palette.accent).frame(minHeight:44)
+                // A quiet way out, never the accent: it lets go of data, and the dialog says so in red.
+                Button("Forget these nights",role:.destructive) { confirming=true }.font(.footnote).foregroundStyle(palette.muted).frame(minHeight:44)
                     .confirmationDialog("Forget these nights?",isPresented:$confirming,titleVisibility:.visible) {
                         Button("Forget",role:.destructive) { model.forgetHindsight() }
                     } message:{ Text("Nyx lets go of what it said about past nights and what the weather models said afterwards. Your journal is not touched.") }

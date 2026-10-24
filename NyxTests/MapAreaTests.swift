@@ -77,6 +77,10 @@ struct MapAreaTests {
         #expect(SubscoreTitles.style(widestSpaced:130,widestPlain:107,width:346,spacing:14) == .init(spaced:true,scale:1,columns:2))
         #expect(SubscoreTitles.style(widestSpaced:nil,widestPlain:40,width:346,spacing:14) == .init(spaced:false,scale:1,columns:4))
         #expect(SubscoreTitles.style(widestSpaced:500,widestPlain:400,width:346,spacing:14).scale==0.7)
+        // Whole titles on one line when all four fit at 85% or more ("True darkness" never stands taller).
+        #expect(SubscoreTitles.wholeLine(widest:76,width:346,spacing:14) == .init(spaced:false,scale:1,columns:4))
+        #expect(abs((SubscoreTitles.wholeLine(widest:84,width:346,spacing:14)?.scale ?? 0)-76/84.0)<1e-9)
+        #expect(SubscoreTitles.wholeLine(widest:95,width:346,spacing:14) == nil)
     }
 }
 

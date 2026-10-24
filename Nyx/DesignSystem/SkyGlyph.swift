@@ -5,7 +5,12 @@ import SwiftUI
 /// a solstice, the gegenschein's soft glow and aurora's curtains. SF Symbols has no meteor or eclipse, and these share one hand:
 /// hairline strokes, one filled accent, drawn at any size. Decorative; the text beside them speaks.
 struct SkyGlyph: View {
-    enum Kind: Sendable, CaseIterable { case core, planet, meteors, eclipse, aurora, pairing, moon, season, glow, binoculars }
+    enum Kind: Sendable, CaseIterable {
+        case core, planet, meteors, eclipse, aurora, pairing, moon, season, glow, binoculars
+        /// Light in the night sky, which may be drawn in amber; the season's Sun on the horizon and the
+        /// binoculars are a date and a tool, drawn in starlight.
+        var isLight: Bool { self != .season && self != .binoculars }
+    }
     let kind: Kind
     var color: Color
     var body: some View {

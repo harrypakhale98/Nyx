@@ -62,7 +62,7 @@ struct StartingPointPicker: View {
             // A place of the person's own, kept beside the parks: from here, from coordinates or a town.
             Section {
                 Button { savingSpot=SpotRequest(place:nil) } label:{ Label("Save a spot of your own",systemImage:"mappin.and.ellipse").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
-                    .foregroundStyle(palette.accent)
+                    .foregroundStyle(palette.ink)
             } footer:{ Text("A backyard, a pullout or a field you know, scored night by night like the parks. It stays on this iPhone.").foregroundStyle(palette.muted) }
             .listRowBackground(palette.panel)
         }
@@ -95,7 +95,7 @@ struct PlaceRow: View {
                     Text(detail).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
                 Spacer(minLength:8)
-                if selected { Image(systemName:"checkmark").foregroundStyle(palette.accent).accessibilityHidden(true) }
+                if selected { Image(systemName:"checkmark").foregroundStyle(palette.ink).accessibilityHidden(true) }
             }.frame(minHeight:44).contentShape(Rectangle())
         }
         .accessibilityElement(children:.combine)

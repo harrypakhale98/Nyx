@@ -41,8 +41,8 @@ struct NightListenView: View {
                 ForEach(sound.cues) { cue in
                     let heard=playing && (elapsed ?? -1)>=cue.offset
                     HStack(alignment:.firstTextBaseline,spacing:10) {
-                        // The moment's own symbol, as in field mode; amber once it has played.
-                        Image(systemName:cue.symbol).font(.caption).frame(width:20).foregroundStyle(heard ? palette.accent : palette.muted).accessibilityHidden(true)
+                        // The moment's own symbol, as in field mode; starlight once it has played.
+                        Image(systemName:cue.symbol).font(.caption).frame(width:20).foregroundStyle(heard ? palette.ink : palette.muted).accessibilityHidden(true)
                         Text(cue.line).font(.subheadline.weight(heard ? .semibold : .regular)).foregroundStyle(heard || !playing ? palette.ink : palette.muted).fixedSize(horizontal:false,vertical:true)
                     }
                     .animation(reduceMotion ? nil : NyxMotion.spring,value:heard)
@@ -70,7 +70,7 @@ struct FeelTonightView: View {
                 Label(playing ? String(localized:"Stop") : isTonight ? String(localized:"Feel tonight") : String(localized:"Feel this night"),systemImage:playing ? "stop.fill" : "hand.tap")
                     .font(.subheadline.weight(.medium)).frame(minHeight:44)
             }
-            .buttonStyle(.nyxAction).foregroundStyle(palette.accent)
+            .buttonStyle(.nyxAction).foregroundStyle(palette.ink)
             .accessibilityHint("Plays the night from sunset to sunrise as twenty-four seconds of touch.")
             .accessibilityInputLabels([Text("Feel tonight"),Text("Feel"),Text("Stop")])
             Text(NightTouch.key).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)

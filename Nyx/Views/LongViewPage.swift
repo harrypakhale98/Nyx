@@ -50,7 +50,7 @@ struct LongViewPage: View {
                               preview:SharePreview(String(localized:"Dark weekends at \(park.shortName)"),image:Image(systemName:"calendar"))) {
                         Text("Share as a calendar file").font(.footnote).frame(minHeight:44,alignment:.leading)
                     }
-                    .foregroundStyle(palette.accent)
+                    .foregroundStyle(palette.ink)
                     .accessibilityHint("Shares an .ics file with these nights, for another calendar app or another person.")
                     .sheet(isPresented:$explaining) {
                         PermissionExplainer(symbol:"calendar.badge.plus",title:"Add these nights to your calendar",
@@ -103,10 +103,10 @@ struct LongViewPage: View {
         // The usual clouds go unsaid on a row: the page says it once above. A row the forecast reaches says so.
         let words=VStack(alignment:.leading,spacing:4) {
             Text("\(park.dayLabel(weekend.friday.id)) – \(park.dayLabel(weekend.saturday.id))").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
-            Text(Phrase.clauses([DarkWeekends.newMoonLine(weekend)]+(best.basis == .usual ? [] : best.basisLabels))).font(.subheadline).foregroundStyle(palette.muted)
+            Text(verbatim:([DarkWeekends.newMoonLine(weekend)]+(best.basis == .usual ? [] : best.basisLabels)).joined(separator:" · ")).font(.subheadline).foregroundStyle(palette.muted)
         }.fixedSize(horizontal:false,vertical:true)
         let scores=HStack(alignment:.firstTextBaseline,spacing:6) {
-            Text("\(weekend.friday.score.value) · \(weekend.saturday.score.value)").font(.system(.title3,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
+            Text("\(weekend.friday.score.value) · \(weekend.saturday.score.value)").scoreNumeral(.title3,accent:palette.accent)
         }
         return NavigationLink { ParkDetailView(park:park,initialDate:best.id) } label:{
             Group {
@@ -129,9 +129,10 @@ struct LongViewLink: View {
     var body: some View {
         NavigationLink { LongViewPage(park:park) } label:{
             HStack(alignment:.firstTextBaseline,spacing:10) {
-                Image(systemName:"calendar.badge.clock").foregroundStyle(palette.accent).accessibilityHidden(true)
+                // Starlight, as every way onward is: amber stays with the score and light.
+                Image(systemName:"calendar.badge.clock").foregroundStyle(palette.ink).accessibilityHidden(true)
                 VStack(alignment:.leading,spacing:2) {
-                    Text("The next six months").font(.subheadline).foregroundStyle(palette.accent)
+                    Text("The next six months").font(.subheadline).foregroundStyle(palette.ink)
                     Text("Dark weekends, the Milky Way season, and all of it into your calendar").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
                 Spacer(minLength:8)

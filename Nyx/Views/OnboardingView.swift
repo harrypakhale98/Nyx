@@ -63,7 +63,7 @@ struct OnboardingView:View {
     }
     private var skip:some View { Button("Skip") { finish() }.frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }
     private var dots:some View {
-        HStack(spacing:12) { ForEach(0..<3,id:\.self) { i in Capsule().fill(i==page ? palette.accent : palette.line).frame(width:i==page ? 18 : 5,height:5) } }
+        HStack(spacing:12) { ForEach(0..<3,id:\.self) { i in Capsule().fill(i==page ? palette.ink : palette.line).frame(width:i==page ? 18 : 5,height:5) } }
             .animation(reduceMotion ? nil : NyxMotion.spring,value:page)
             .frame(minWidth:88,minHeight:44).contentShape(Rectangle())
             // Swipe up or down with VoiceOver to turn the page, as the dots suggest.
@@ -80,7 +80,7 @@ struct OnboardingView:View {
     }
     private var proceed:some View {
         Button(page==2 ? "Show me tonight" : "Continue") { if page==2 { finish() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring) { page+=1 } } }
-            .buttonStyle(.borderedProminent).foregroundStyle(Color.black).controlSize(.large)
+            .secondaryAction().controlSize(.large)
     }
     private let moonSize:CGFloat=170
     /// At accessibility sizes the decorative Moon is left out, so the headline and the first lines
@@ -96,7 +96,7 @@ struct OnboardingView:View {
     /// The real night-vision switch: the whole app, this page included, turns red on the shared spring.
     private var redToggle:some View {
         Toggle(isOn:$nightVision) {
-            Label { Text("Night vision") } icon:{ Image(systemName:nightVision ? "flashlight.on.circle.fill" : "flashlight.off.circle").foregroundStyle(palette.accent) }.font(.headline)
+            Label { Text("Night vision") } icon:{ Image(systemName:nightVision ? "flashlight.on.circle.fill" : "flashlight.off.circle").foregroundStyle(palette.ink) }.font(.headline)
         }
         .tint(palette.controlTint)
         .padding(.horizontal,20).padding(.vertical,12).frame(maxWidth:340,minHeight:56)

@@ -225,7 +225,7 @@ struct TonightSkyView: View {
             if large {
                 // A part to a line: the time, then the phase, never truncated side by side.
                 VStack(alignment:.leading,spacing:4) {
-                    Text(park.time(moment)).font(.system(.title2,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
+                    Text(park.time(moment)).font(.system(.title2,design:.serif)).monospacedDigit().foregroundStyle(palette.ink)
                     Text(phase(sky)).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }.accessibilityElement(children:.combine)
                 Slider(value:$minutes,in:0...max(5,window.duration/60),step:5) { Text("Time of night") }
@@ -239,7 +239,7 @@ struct TonightSkyView: View {
                 directionGrid
             } else {
                 HStack(alignment:.firstTextBaseline) {
-                    Text(park.time(moment)).font(.system(.title2,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
+                    Text(park.time(moment)).font(.system(.title2,design:.serif)).monospacedDigit().foregroundStyle(palette.ink)
                     Spacer(minLength:8)
                     Text(phase(sky)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.trailing).fixedSize(horizontal:false,vertical:true)
                 }.accessibilityElement(children:.combine)
@@ -274,11 +274,14 @@ struct TonightSkyView: View {
     private func direction(_ index:Int)->some View {
         let names=[String(localized:"North"),String(localized:"East"),String(localized:"South"),String(localized:"West")]
         let azimuth=Double(index)*90, name=names[index]
+        let facingIt=Compass.name(facing)==Compass.name(azimuth)
+        // The way you face in starlight with a starlight rim, the others muted: a control, not the score.
         return Button(name) { completeReveal(); turn(toward:azimuth) }
             .buttonStyle(.bordered).buttonBorderShape(.capsule).font(.footnote.weight(.medium))
-            .tint(Compass.name(facing)==Compass.name(azimuth) ? palette.accent : palette.muted)
+            .tint(facingIt ? palette.ink : palette.muted)
+            .overlay { if facingIt { Capsule().strokeBorder(palette.ink.opacity(palette.highContrast ? 1 : 0.7),lineWidth:palette.stroke).allowsHitTesting(false) } }
             .accessibilityLabel(String(localized:"Face \(name)"))
-            .accessibilityAddTraits(Compass.name(facing)==Compass.name(azimuth) ? .isSelected : [])
+            .accessibilityAddTraits(facingIt ? .isSelected : [])
     }
     private func phase(_ sky:HorizonSky)->String {
         if sky.sunAltitude > -6 { return String(localized:"Twilight") }
@@ -472,7 +475,7 @@ struct SkyWindowCard: View {
         }
     }
     private var expandGlyph: some View {
-        Image(systemName:"arrow.up.left.and.arrow.down.right").font(.subheadline.weight(.semibold)).foregroundStyle(palette.accent).accessibilityHidden(true)
+        Image(systemName:"arrow.up.left.and.arrow.down.right").font(.subheadline.weight(.semibold)).foregroundStyle(palette.ink).accessibilityHidden(true)
     }
 }
 

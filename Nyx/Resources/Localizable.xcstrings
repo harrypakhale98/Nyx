@@ -7747,76 +7747,6 @@
         }
       }
     },
-    "%lld, an early look": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld, ein früher Blick"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld, an early look"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld, un primer vistazo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld, un premier aperçu"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld点（早めの見通し）"
-          }
-        }
-      }
-    },
-    "%lld, an estimate": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld, eine Schätzung"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld, an estimate"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld, una estimación"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld, une estimation"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld点（推定）"
-          }
-        }
-      }
-    },
     "%lld-minute read": {
       "extractionState": "manual",
       "localizations": {
@@ -8682,6 +8612,41 @@
         }
       }
     },
+    "A lighter red for brighter surroundings or tired eyes. Increase Contrast turns it on too.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein helleres Rot für hellere Umgebungen oder müde Augen. „Kontrast erhöhen“ schaltet es ebenfalls ein."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A lighter red for brighter surroundings or tired eyes. Increase Contrast turns it on too."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un rojo más claro para entornos con más luz o para ojos cansados. Aumentar contraste también lo activa."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un rouge plus clair pour un environnement plus lumineux ou des yeux fatigués. Augmenter le contraste l’active aussi."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "周りが明るいときや目が疲れているときのための、明るめの赤です。「コントラストを上げる」がオンのときにもオンになります。"
+          }
+        }
+      }
+    },
     "A line through the date marks a night that has passed.": {
       "extractionState": "manual",
       "localizations": {
@@ -9308,41 +9273,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "守る価値のある空"
-          }
-        }
-      }
-    },
-    "A slightly lighter red that keeps text clear for red-blind and green-blind eyes. Increase Contrast turns it on too.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ein etwas helleres Rot, das Text auch für rot- und grünblinde Augen gut lesbar hält. „Kontrast erhöhen“ schaltet es ebenfalls ein."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A slightly lighter red that keeps text clear for red-blind and green-blind eyes. Increase Contrast turns it on too."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un rojo un poco más claro que mantiene el texto legible para quienes no distinguen el rojo o el verde. Aumentar contraste también lo activa."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un rouge un peu plus clair qui garde le texte lisible pour les personnes qui distinguent mal le rouge ou le vert. Augmenter le contraste l’active aussi."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "赤と緑の色覚に違いがある人にも文字がはっきり見える、少し明るい赤です。「コントラストを上げる」がオンのときにもオンになります。"
           }
         }
       }
@@ -13907,6 +13837,41 @@
         }
       }
     },
+    "Back in Accessibility, open Accessibility Shortcut and choose Color Filters.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffne danach unter „Bedienungshilfen“ den „Bedienungshilfen-Kurzbefehl“ und wähle „Farbfilter“."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back in Accessibility, open Accessibility Shortcut and choose Color Filters."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De vuelta en Accesibilidad, abre Función rápida y elige Filtros de colores."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De retour dans Accessibilité, ouvrez Raccourci Accessibilité et choisissez Filtres de couleur."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「アクセシビリティ」に戻り、「ショートカット」を開いて「カラーフィルタ」を選びます。"
+          }
+        }
+      }
+    },
     "Before you go": {
       "extractionState": "manual",
       "localizations": {
@@ -14082,41 +14047,6 @@
         }
       }
     },
-    "Best %@ · %lld": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Am besten %@ · %lld"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Best %@ · %lld"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mejor: %@ · %lld"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meilleure : %@ · %lld"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "いちばんよい日：%@ · %lld"
-          }
-        }
-      }
-    },
     "Best %@, %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -14187,37 +14117,37 @@
         }
       }
     },
-    "Best night at %@ in the next two weeks: %@, %@.": {
+    "Best night at %@ in the next %lld nights: %@, %@.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Beste Nacht in %1$@ in den nächsten zwei Wochen: %2$@, %3$@."
+            "value": "Beste Nacht in %1$@ in den nächsten %2$lld Nächten: %3$@, %4$@."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Best night at %@ in the next two weeks: %@, %@."
+            "value": "Best night at %@ in the next %lld nights: %@, %@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mejor noche en %1$@ en las próximas dos semanas: %2$@, %3$@."
+            "value": "Mejor noche en %1$@ en las próximas %2$lld noches: %3$@, %4$@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Meilleure nuit à %1$@ dans les deux semaines : %2$@, %3$@."
+            "value": "Meilleure nuit à %1$@ dans les %2$lld prochaines nuits : %3$@, %4$@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今後2週間で%1$@のいちばん良い夜：%2$@、%3$@。"
+            "value": "この先%2$lld夜で%1$@のいちばんよい夜：%3$@、%4$@。"
           }
         }
       }
@@ -15013,37 +14943,72 @@
         }
       }
     },
-    "Best tonight": {
+    "Best this week: %@ · %lld": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Heute am besten"
+            "value": "Diese Woche am besten: %@ · %lld"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Best tonight"
+            "value": "Best this week: %@ · %lld"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mejor esta noche"
+            "value": "Mejor de la semana: %@ · %lld"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Meilleure ce soir"
+            "value": "Meilleure de la semaine : %@ · %lld"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今夜がいちばん"
+            "value": "今週いちばんよい夜：%@ · %lld"
+          }
+        }
+      }
+    },
+    "Best this week: tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche am besten: heute Nacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best this week: tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor de la semana: esta noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meilleure de la semaine : ce soir"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今週いちばんよい夜：今夜"
           }
         }
       }
@@ -17137,6 +17102,41 @@
         }
       }
     },
+    "Clear %@ – %@, under the Moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klar %@–%@, bei Mondlicht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear %@ – %@, under the Moon"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Despejado %@ – %@, con Luna"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dégagé %@ – %@, sous la Lune"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "晴れ %@ – %@、月明かりの中"
+          }
+        }
+      }
+    },
     "Clear air.": {
       "extractionState": "manual",
       "localizations": {
@@ -18822,6 +18822,41 @@
         }
       }
     },
+    "Color filters": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farbfilter"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Color filters"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtros de colores"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtres de couleur"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カラーフィルタ"
+          }
+        }
+      }
+    },
     "Complications": {
       "extractionState": "manual",
       "localizations": {
@@ -20492,72 +20527,37 @@
         }
       }
     },
-    "Darker on %@ at %@: %@.": {
+    "Darker on %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dunkler am %1$@ in %2$@: %3$@."
+            "value": "Dunkler am %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Darker on %@ at %@: %@."
+            "value": "Darker on %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Más oscuro el %1$@ en %2$@: %3$@."
+            "value": "Más oscuro el %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Plus sombre le %1$@ à %2$@ : %3$@."
+            "value": "Plus sombre le %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@、%2$@はさらに暗い：%3$@。"
-          }
-        }
-      }
-    },
-    "Darker on %@: %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dunkler am %1$@: %2$@."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Darker on %@: %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Más oscuro el %1$@: %2$@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plus sombre le %1$@ : %2$@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@はさらに暗い：%2$@。"
+            "value": "%@はさらに暗い"
           }
         }
       }
@@ -24532,6 +24532,41 @@
         }
       }
     },
+    "Example night. The ring runs from sunset to sunrise.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beispielnacht. Der Ring reicht von Sonnenuntergang bis Sonnenaufgang."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Example night. The ring runs from sunset to sunrise."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noche de ejemplo. El anillo va de la puesta a la salida del sol."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit d’exemple. L’anneau va du coucher au lever du soleil."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "夜の例。リングは日の入りから日の出までを表します。"
+          }
+        }
+      }
+    },
     "Example score 94 out of 100. Share of the score: moonlight 40 percent, clouds 25, sky glow 20, and true darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good.": {
       "extractionState": "manual",
       "localizations": {
@@ -24563,6 +24598,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "スコアの例：100点中94点。スコアの配分：月明かり40パーセント、雲25、夜空の明るさ20、完全に暗い時間15。90以上は極上、75以上は上々、60以上は好条件です。"
+          }
+        }
+      }
+    },
+    "Example score 94 out of 100. The ring around it is the night, from sunset to sunrise, brightest in its best hours. Share of the score: moonlight 40 percent, clouds 25, sky glow 20, and true darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beispielwert 94 von 100. Der Ring darum ist die Nacht, von Sonnenuntergang bis Sonnenaufgang, am hellsten in ihren besten Stunden. Anteile am Wert: Mondlicht 40 Prozent, Wolken 25, Himmelsaufhellung 20 und echte Dunkelheit 15. Ab 90 ist „Makellos“, ab 75 „Sehr gut“, ab 60 „Gut“."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Example score 94 out of 100. The ring around it is the night, from sunset to sunrise, brightest in its best hours. Share of the score: moonlight 40 percent, clouds 25, sky glow 20, and true darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Índice de ejemplo 94 de 100. El anillo que lo rodea es la noche, de la puesta a la salida del sol, más brillante en sus mejores horas. Parte del índice: luz de luna 40 por ciento, nubes 25, resplandor 20 y oscuridad total 15. 90 o más es Prístina, 75 Excelente, 60 Buena."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exemple : indice de 94 sur 100. L’anneau qui l’entoure est la nuit, du coucher au lever du soleil, plus lumineux à ses meilleures heures. Part de l’indice : clair de lune 40 pour cent, nuages 25, halo lumineux 20 et obscurité totale 15. À partir de 90, Immaculée ; de 75, Excellente ; de 60, Bonne."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スコアの例：100点中94点。周りのリングは日の入りから日の出までの夜で、いちばんよい時間帯ほど明るく表示されます。スコアの配分：月明かり40パーセント、雲25、夜空の明るさ20、完全に暗い時間15。90以上は極上、75以上は上々、60以上は好条件です。"
           }
         }
       }
@@ -34042,6 +34112,76 @@
         }
       }
     },
+    "Limits this night": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begrenzt diese Nacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limits this night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limita esa noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite cette nuit"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この夜の上限"
+          }
+        }
+      }
+    },
+    "Limits tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begrenzt heute Nacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limits tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limita esta noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite cette nuit"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜の上限"
+          }
+        }
+      }
+    },
     "Links open only when you tap them, in Safari, Maps, Mail or the App Store: nps.gov pages, Recreation.gov campground reservations, Globe at Night, Open-Meteo and the Creative Commons licence, a place's Wikidata page or official website, get-nyx.com, directions to a viewing spot or a saved spot, an email to the developer, and Nyx's App Store page. Nyx itself sends nothing to those sites.": {
       "extractionState": "manual",
       "localizations": {
@@ -35697,6 +35837,41 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Menus, the keyboard and other apps stay bright. iOS can turn every screen red.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menüs, Tastatur und andere Apps bleiben hell. iOS kann jeden Bildschirm rot färben."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menus, the keyboard and other apps stay bright. iOS can turn every screen red."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los menús, el teclado y las demás apps siguen brillantes. iOS puede poner en rojo todas las pantallas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les menus, le clavier et les autres apps restent lumineux. iOS peut passer tous les écrans en rouge."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニュー、キーボード、ほかのアプリは明るいままです。iOSではすべての画面を赤くできます。"
           }
         }
       }
@@ -40486,6 +40661,41 @@
         }
       }
     },
+    "Next hour": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächste Stunde"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next hour"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hora siguiente"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heure suivante"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1時間後"
+          }
+        }
+      }
+    },
     "Next month": {
       "extractionState": "manual",
       "localizations": {
@@ -41116,6 +41326,41 @@
         }
       }
     },
+    "Night vision turns what Nyx draws red. Menus, the keyboard, alerts and other apps come from iOS and stay bright. iOS can tint the whole screen instead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nachtsicht färbt rot, was Nyx zeichnet. Menüs, Tastatur, Hinweisfenster und andere Apps kommen von iOS und bleiben hell. Stattdessen kann iOS den ganzen Bildschirm einfärben."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night vision turns what Nyx draws red. Menus, the keyboard, alerts and other apps come from iOS and stay bright. iOS can tint the whole screen instead."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La visión nocturna pone en rojo lo que dibuja Nyx. Los menús, el teclado, las alertas y las demás apps vienen de iOS y siguen brillantes. En su lugar, iOS puede teñir toda la pantalla."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La vision nocturne passe en rouge ce que Nyx dessine. Les menus, le clavier, les alertes et les autres apps viennent d’iOS et restent lumineux. iOS peut plutôt teinter tout l’écran."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ナイトビジョンは、Nyxが描くものを赤くします。メニュー、キーボード、アラート、ほかのアプリはiOSが表示するため、明るいままです。代わりに、iOSで画面全体に色を付けることもできます。"
+          }
+        }
+      }
+    },
     "Nights": {
       "extractionState": "manual",
       "localizations": {
@@ -41501,7 +41746,7 @@
         }
       }
     },
-    "Nights out, your darkest sky, and the Moons you met.": {
+    "Nights out, your darkest sky, and the moons you met.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -41513,19 +41758,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nights out, your darkest sky, and the Moons you met."
+            "value": "Nights out, your darkest sky, and the moons you met."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tus noches afuera, tu cielo más oscuro y las fases de la Luna que viste."
+            "value": "Tus noches afuera, tu cielo más oscuro y las lunas que viste."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vos nuits dehors, votre ciel le plus noir et les Lunes que vous avez vues."
+            "value": "Vos nuits dehors, votre ciel le plus noir et les lunes que vous avez vues."
           }
         },
         "ja": {
@@ -41536,7 +41781,7 @@
         }
       }
     },
-    "Nights out, your darkest sky, the Moons you met, and a few words on the season, written on this iPhone.": {
+    "Nights out, your darkest sky, the moons you met, and a few words on the season, written on this iPhone.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -41563,13 +41808,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nights out, your darkest sky, the Moons you met, and a few words on the season, written on this iPad."
+                  "value": "Nights out, your darkest sky, the moons you met, and a few words on the season, written on this iPad."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nights out, your darkest sky, the Moons you met, and a few words on the season, written on this iPhone."
+                  "value": "Nights out, your darkest sky, the moons you met, and a few words on the season, written on this iPhone."
                 }
               }
             }
@@ -41581,13 +41826,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Noches afuera, tu cielo más oscuro, las Lunas que viste y unas palabras sobre la temporada, escritas en este iPad."
+                  "value": "Noches afuera, tu cielo más oscuro, las lunas que viste y unas palabras sobre la temporada, escritas en este iPad."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Noches afuera, tu cielo más oscuro, las Lunas que viste y unas palabras sobre la temporada, escritas en este iPhone."
+                  "value": "Noches afuera, tu cielo más oscuro, las lunas que viste y unas palabras sobre la temporada, escritas en este iPhone."
                 }
               }
             }
@@ -41599,13 +41844,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Vos nuits dehors, votre ciel le plus noir, les Lunes que vous avez vues et quelques mots sur la saison, écrits sur cet iPad."
+                  "value": "Vos nuits dehors, votre ciel le plus noir, les lunes que vous avez vues et quelques mots sur la saison, écrits sur cet iPad."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Vos nuits dehors, votre ciel le plus noir, les Lunes que vous avez vues et quelques mots sur la saison, écrits sur cet iPhone."
+                  "value": "Vos nuits dehors, votre ciel le plus noir, les lunes que vous avez vues et quelques mots sur la saison, écrits sur cet iPhone."
                 }
               }
             }
@@ -44330,6 +44575,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "Note"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メモ"
+          }
+        }
+      }
+    },
+    "Notes": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notizen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notes"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notes"
           }
         },
         "ja": {
@@ -48140,6 +48420,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "設定を開く"
+          }
+        }
+      }
+    },
+    "Open Settings › Accessibility › Display & Text Size › Color Filters.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffne „Einstellungen“ › „Bedienungshilfen“ › „Anzeige & Textgröße“ › „Farbfilter“."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings › Accessibility › Display & Text Size › Color Filters."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre Configuración › Accesibilidad › Pantalla y tamaño de texto › Filtros de colores."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrez Réglages › Accessibilité › Affichage et taille du texte › Filtres de couleur."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「設定」›「アクセシビリティ」›「画面表示とテキストサイズ」›「カラーフィルタ」と開きます。"
           }
         }
       }
@@ -52334,6 +52649,41 @@
         }
       }
     },
+    "Previous hour": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorherige Stunde"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous hour"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hora anterior"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heure précédente"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1時間前"
+          }
+        }
+      }
+    },
     "Previous month": {
       "extractionState": "manual",
       "localizations": {
@@ -53520,6 +53870,101 @@
           "stringUnit": {
             "state": "translated",
             "value": "赤色ライト"
+          }
+        }
+      }
+    },
+    "Red light for the whole iPhone": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rotlicht für das ganze iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rotlicht für das ganze iPhone"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Red light for the whole iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Red light for the whole iPhone"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Luz roja para todo el iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Luz roja para todo el iPhone"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Lumière rouge pour tout l’iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Lumière rouge pour tout l’iPhone"
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "iPad全体を赤色ライトに"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "iPhone全体を赤色ライトに"
+                }
+              }
+            }
           }
         }
       }
@@ -57304,6 +57749,41 @@
         }
       }
     },
+    "Set it up once": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einmal einrichten"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set it up once"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configúralo una vez"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À configurer une fois"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最初に一度だけ設定"
+          }
+        }
+      }
+    },
     "Set night vision": {
       "extractionState": "manual",
       "localizations": {
@@ -59513,6 +59993,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "残りを表示します。"
+          }
+        }
+      }
+    },
+    "Shows the starting point and radius.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeigt den Ausgangspunkt und den Radius."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows the starting point and radius."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra el punto de partida y el radio."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affiche le point de départ et le rayon."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出発地と範囲を表示します。"
           }
         }
       }
@@ -66950,37 +67465,37 @@
         }
       }
     },
-    "The four parts add up to %lld; the score takes the lowest cap that applies.": {
+    "The four parts alone would give %lld.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die vier Teile ergeben zusammen %lld; der Wert übernimmt die niedrigste geltende Grenze."
+            "value": "Die vier Teile allein ergäben %lld."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The four parts add up to %lld; the score takes the lowest cap that applies."
+            "value": "The four parts alone would give %lld."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las cuatro partes suman %lld; el índice toma el límite más bajo que aplique."
+            "value": "Solo las cuatro partes darían %lld."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les quatre composantes totalisent %lld ; l’indice prend le plafond le plus bas qui s’applique."
+            "value": "Les quatre composantes seules donneraient %lld."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "4つの要素の合計は%lldです。スコアには、適用される上限のうち最も低いものを使います。"
+            "value": "4つの要素だけなら%lld点です。"
           }
         }
       }
@@ -68896,6 +69411,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "このスポットは、特定の野原や丘ではなく、Nyxのリストにある町の地点に置かれます。町の外の場所には、座標を使ってください。"
+          }
+        }
+      }
+    },
+    "The stretch is the best five nights in a row; one night alone scores higher.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Serie sind die besten fünf Nächte am Stück; eine einzelne Nacht erreicht einen höheren Wert."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The stretch is the best five nights in a row; one night alone scores higher."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La racha son las cinco mejores noches seguidas; una sola noche tiene un índice más alto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La série regroupe les cinq meilleures nuits d’affilée ; une nuit seule obtient un indice plus élevé."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "連夜は、連続した5夜でいちばんよい並びです。1夜だけなら、もっとスコアの高い夜があります。"
+          }
+        }
+      }
+    },
+    "The stretch keeps to forecast nights; the best night lies beyond.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Serie bleibt bei Nächten mit Vorhersage; die beste Nacht liegt dahinter."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The stretch keeps to forecast nights; the best night lies beyond."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La racha se limita a las noches con pronóstico; la mejor noche está más allá."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La série s’en tient aux nuits avec prévision ; la meilleure nuit est au-delà."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "連夜は予報のある夜の中から選んでいます。いちばんよい夜はその先にあります。"
           }
         }
       }
@@ -71550,6 +72135,101 @@
         }
       }
     },
+    "Triple-click the side button to turn the red on and off, or the Home button on an iPhone that has one. Turn the brightness down too.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Drücke dreimal die obere Taste, um das Rot ein- und auszuschalten, oder die Home-Taste bei einem iPad, das eine hat. Verringere auch die Helligkeit."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Drücke dreimal die Seitentaste, um das Rot ein- und auszuschalten, oder die Home-Taste bei einem iPhone, das eine hat. Verringere auch die Helligkeit."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Triple-click the top button to turn the red on and off, or the Home button on an iPad that has one. Turn the brightness down too."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Triple-click the side button to turn the red on and off, or the Home button on an iPhone that has one. Turn the brightness down too."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Presiona tres veces el botón superior para activar y desactivar el rojo, o el botón de inicio en un iPad que lo tenga. Baja también el brillo."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Presiona tres veces el botón lateral para activar y desactivar el rojo, o el botón de inicio en un iPhone que lo tenga. Baja también el brillo."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Appuyez trois fois sur le bouton supérieur pour activer ou désactiver le rouge, ou sur le bouton principal sur un iPad qui en a un. Baissez aussi la luminosité."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Appuyez trois fois sur le bouton latéral pour activer ou désactiver le rouge, ou sur le bouton principal sur un iPhone qui en a un. Baissez aussi la luminosité."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "トップボタンをトリプルクリックすると、赤のオン/オフを切り替えられます。ホームボタンがあるiPadではホームボタンを使います。画面の明るさも下げてください。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "サイドボタンをトリプルクリックすると、赤のオン/オフを切り替えられます。ホームボタンがあるiPhoneではホームボタンを使います。画面の明るさも下げてください。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "True darkness": {
       "extractionState": "manual",
       "localizations": {
@@ -72246,6 +72926,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "質問の例"
+          }
+        }
+      }
+    },
+    "Turn on Color Filters and choose Color Tint. Set Intensity and Hue all the way to the right.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktiviere „Farbfilter“ und wähle „Farbstich“. Stelle „Intensität“ und „Farbton“ ganz nach rechts."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on Color Filters and choose Color Tint. Set Intensity and Hue all the way to the right."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa Filtros de colores y elige Tinte de color. Lleva Intensidad y Tono hasta la derecha."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activez Filtres de couleur et choisissez Nuance de couleur. Réglez Intensité et Teinte tout à droite."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「カラーフィルタ」をオンにして「色合い」を選びます。「強さ」と「色相」を右端まで動かします。"
           }
         }
       }

@@ -43,7 +43,7 @@ import Testing
             for item in up.items {
                 #expect(item.spoken.hasPrefix(item.title), "\(id) \(day) \(item.id)")
                 #expect(!item.detail.isEmpty, "\(id) \(day) \(item.id)")
-                // A timed figure is drawn in the accent only when there is a figure to draw.
+                // A timed item is a time the thing is up, so it always has a figure to show.
                 #expect(!item.timed || item.value != nil, "\(id) \(day) \(item.id)")
             }
         }

@@ -127,7 +127,7 @@ struct SaveSpotView: View {
             switch locator.state {
             case .idle:
                 Button { useLocation() } label:{ Label("Use where I am now",systemImage:"location.fill").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
-                    .foregroundStyle(palette.accent)
+                    .foregroundStyle(palette.ink)
             case .locating:
                 HStack(spacing:10) { ProgressView(); Text("Finding where you are") }.foregroundStyle(palette.muted).frame(minHeight:44)
                     .accessibilityElement(children:.combine)
@@ -138,15 +138,15 @@ struct SaveSpotView: View {
                 }
                 .accessibilityElement(children:.combine)
                 Button { locator.locate() } label:{ Text("Find again").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
-                    .foregroundStyle(palette.accent)
+                    .foregroundStyle(palette.ink)
             case .denied:
                 Text("Location is off for Nyx. Turn it on in Settings, or type the coordinates instead.").foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
                 Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Open Settings",systemImage:"gear").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
-                    .foregroundStyle(palette.accent)
+                    .foregroundStyle(palette.ink)
             case .failed:
                 Text("Your location is unavailable right now. Try again, or type the coordinates instead.").foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
                 Button { locator.locate() } label:{ Text("Try again").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
-                    .foregroundStyle(palette.accent)
+                    .foregroundStyle(palette.ink)
             }
         } header:{ Text("Where I am now") } footer:{
             Text("Nyx reads your location once, on this iPhone, only when you ask.").foregroundStyle(palette.muted)
@@ -178,7 +178,7 @@ struct SaveSpotView: View {
                 .onChange(of:text.wrappedValue) { old,new in splitIfPair(old:old,new:new) }
                 .accessibilityLabel(title)
             if let problem=Self.problem(CoordinateText.reading(text.wrappedValue,axis:axis),axis:axis) {
-                Text(problem).font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
+                Text(problem).font(.caption).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
             }
         }
         .padding(.vertical,4)

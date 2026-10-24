@@ -17,7 +17,7 @@ struct AddNightToCalendar: View {
             Label("Add to Calendar",systemImage:"calendar.badge.plus").font(.subheadline)
                 .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
         }
-        .buttonStyle(.nyxAction).foregroundStyle(palette.accent)
+        .buttonStyle(.nyxAction).foregroundStyle(palette.ink)
         .accessibilityLabel(String(localized:"Add \(night.park.shortName) on \(night.park.dayLabel(night.id)) to Calendar"))
         .accessibilityHint("Opens a calendar event to review and save. Nyx does not read your calendars.")
         .accessibilityInputLabels([Text("Add to Calendar"),Text("Calendar")])
@@ -107,7 +107,7 @@ struct NightDirections: View {
                     .font(.footnote.weight(.medium)).multilineTextAlignment(.leading)
                     .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
             }
-            .buttonStyle(.borderless).foregroundStyle(palette.accent)
+            .buttonStyle(.borderless).foregroundStyle(palette.ink)
             .accessibilityLabel(MapsHandOff.spokenLabel(spot:spot,park:park.shortName,stepFree:stepFree))
             .accessibilityHint("Opens Apple Maps with driving directions. Nyx sends nothing.")
             .accessibilityInputLabels([Text("Directions"),Text("Maps")])

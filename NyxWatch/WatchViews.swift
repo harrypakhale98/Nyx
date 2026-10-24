@@ -44,8 +44,9 @@ struct WatchRootView: View {
         }
         .onOpenURL { open($0) }
         .environment(\.nyx, palette)
+        // Starlight for titles, links and pickers: amber is the score's and light's alone.
         .foregroundStyle(palette.ink)
-        .tint(palette.accent)
+        .tint(palette.ink)
         .modifier(WatchDebug.TypeSize())
         // Scroll bars and Tonight's page dots are system chrome the red filter cannot reach: they
         // would be the one white thing on the screen, so under red light they go.
@@ -335,7 +336,7 @@ struct TonightFace: View {
     }
     private var gauge: some View {
         // The best window by the iPhone's own rule, from the hourly clouds it handed over.
-        let window = ClearWindow.find(shown, forecast: context?.cloudForecasts[shown.park.id], layers: context?.forecastDetails[shown.park.id]?.layers)?.interval
+        let window = ClearWindow.find(shown, forecast: context?.cloudForecasts[shown.park.id], layers: context?.forecastDetails[shown.park.id]?.layers)?.brightest
         return WatchGauge(night: shown, nightLabel: offset == 0 ? nil : shown.park.dayLabel(shown.id), models: models, moon: moons?.image(park: shown.park.id, night: shown.id),
                           window: window, now: now)
             .contentShape(Circle())
@@ -365,21 +366,21 @@ struct TonightFace: View {
     }
 }
 
-/// A park's closure, in the accent with a warning mark, as the iPhone shows it beside the score:
-/// whole, wrapped, never shrunk or cut.
+/// A park's closure, the warning mark in `caution` and the words in ink, as the iPhone shows it
+/// beside the score: whole, wrapped, never shrunk or cut.
 struct ClosureLine: View {
     @Environment(\.nyx) private var palette
     let text: String
     var body: some View {
-        Label { Text(text) } icon: { Image(systemName: "exclamationmark.triangle.fill") }
-            .font(.caption2).foregroundStyle(palette.accent)
+        Label { Text(text).foregroundStyle(palette.ink) } icon: { Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(palette.caution) }
+            .font(.caption2)
             .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(String(localized: "Closure alert: \(text)"))
     }
 }
 
-/// Haze or smoke thick enough to wash out the Milky Way, in the accent with the iPhone's smoke mark.
+/// Haze or smoke thick enough to wash out the Milky Way, in ink with the iPhone's smoke mark.
 struct SmokeLine: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -388,7 +389,7 @@ struct SmokeLine: View {
     var lines: Int? = nil
     var body: some View {
         Label { Text(text) } icon: { Image(systemName: "smoke") }
-            .font(.caption2).foregroundStyle(palette.accent)
+            .font(.caption2).foregroundStyle(palette.ink)
             .lineLimit(typeSize.isAccessibilitySize ? nil : lines).minimumScaleFactor(0.8)
             .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
             .accessibilityElement(children: .ignore)
@@ -411,7 +412,7 @@ struct NightGlance: View {
             let eyebrow = Font.caption2.weight(.semibold)
             if let models, typeSize.isAccessibilitySize {
                 // In the scrolling accessibility layout a line costs the dial nothing: the range has its own.
-                day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.accent)
+                day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.ink)
                 Text("Models \(models.lowerBound)–\(models.upperBound)").font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true)
             } else if let models {
                 // The models' range rides on the day's line where it fits whole ("SAT, OCT 10 · MODELS
@@ -422,18 +423,18 @@ struct NightGlance: View {
                 // VoiceOver hears only the day here.
                 let range = Text("Models \(models.lowerBound)–\(models.upperBound)")
                 ViewThatFits(in: .horizontal) {
-                    Text("\(day.foregroundStyle(palette.accent)) · \(range.foregroundStyle(palette.muted))")
+                    Text("\(day.foregroundStyle(palette.ink)) · \(range.foregroundStyle(palette.muted))")
                         .font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0)
-                    Text("\(day.foregroundStyle(palette.accent)) · \(range.foregroundStyle(palette.muted))")
+                    Text("\(day.foregroundStyle(palette.ink)) · \(range.foregroundStyle(palette.muted))")
                         .font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil)
                     // Narrower still: the range in lower case and regular weight, the iPhone river's "models 73–89".
                     let upper = (isTonight ? String(localized: "Tonight") : night.park.dayLabel(night.id)).uppercased(with: locale)
-                    Text("\(Text(verbatim: upper).font(eyebrow).foregroundStyle(palette.accent)) · \(Text("models \(models.lowerBound)–\(models.upperBound)").font(.caption2).foregroundStyle(palette.muted))")
-                    day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.accent)
+                    Text("\(Text(verbatim: upper).font(eyebrow).foregroundStyle(palette.ink)) · \(Text("models \(models.lowerBound)–\(models.upperBound)").font(.caption2).foregroundStyle(palette.muted))")
+                    day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.ink)
                 }
                 .lineLimit(1).accessibilityLabel(day)
             } else {
-                day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.accent)
+                day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.ink)
             }
             if let start = night.sky.darkStart, let end = night.sky.darkEnd, night.sky.darkHours > 0 {
                 // Park time: the zone rides on the last time where the park's clock is not the watch's.
@@ -480,7 +481,7 @@ struct NextMoment: View {
                 VStack(spacing: 0) {
                     // At the site the first question is "is it dark yet": answer it before the countdown.
                     if let state = nowLine {
-                        Text(state).font(.caption2.weight(.semibold)).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.accent)
+                        Text(state).font(.caption2.weight(.semibold)).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.ink)
                             .lineLimit(limit).minimumScaleFactor(0.8)
                     }
                     countdownText(next, now: now).font(.system(.subheadline, design: .serif)).foregroundStyle(palette.ink)
@@ -542,7 +543,7 @@ struct MilestonesPage: View {
                     HStack(alignment: .firstTextBaseline, spacing: 7) {
                         // Passed moments are small filled dots, the next one ringed, later ones hollow.
                         ZStack {
-                            if milestone == next { Circle().stroke(palette.accent, lineWidth: 1.2*palette.stroke).frame(width: 11, height: 11) }
+                            if milestone == next { Circle().stroke(palette.ink, lineWidth: 1.2*palette.stroke).frame(width: 11, height: 11) }
                             Circle().fill(past ? palette.faint : Color.clear).frame(width: 4, height: 4)
                             if !past && milestone != next { Circle().stroke(palette.muted, lineWidth: palette.stroke).frame(width: 7, height: 7) }
                         }
@@ -551,7 +552,7 @@ struct MilestonesPage: View {
                             Text(night.park.time(milestone.date)).font(.system(.body, design: .serif)).monospacedDigit()
                             Text(milestone.title).font(.footnote)
                             if milestone == next {
-                                Text(inDuration(until: milestone.date, from: now)).font(.caption2).foregroundStyle(palette.accent)
+                                Text(inDuration(until: milestone.date, from: now)).font(.caption2).foregroundStyle(palette.ink)
                             }
                         }
                     }
@@ -774,7 +775,7 @@ struct ParkChooser: View {
                     Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
                 }
                 Spacer(minLength: 2)
-                if park.darkSkyDesignated { Image(systemName: "moon.stars").font(.caption2).foregroundStyle(palette.accent).accessibilityLabel("Dark Sky designated") }
+                if park.darkSkyDesignated { Image(systemName: "moon.stars").font(.caption2).foregroundStyle(palette.ink).accessibilityLabel("Dark Sky designated") }
             }
         }
     }
@@ -883,7 +884,7 @@ struct WatchPreviewHost<Content: View>: View {
         if let park = store.park("jotr") {
             let palette = NyxPalette(nightVision: nightVision, highContrast: false)
             content(park, store).environment(store).environment(\.nyx, palette)
-                .foregroundStyle(palette.ink).tint(palette.accent).modifier(NightVisionFilter(enabled: nightVision)).background(Color.black)
+                .foregroundStyle(palette.ink).tint(palette.ink).modifier(NightVisionFilter(enabled: nightVision)).background(Color.black)
         }
     }
 }

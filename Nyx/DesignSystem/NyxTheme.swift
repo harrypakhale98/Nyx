@@ -163,7 +163,7 @@ struct CalmState: View {
     let message: LocalizedStringKey
     var body: some View {
         VStack(spacing:20) {
-            Image(systemName:symbol).font(.system(size:36,weight:.ultraLight)).foregroundStyle(palette.accent).padding(26)
+            Image(systemName:symbol).font(.system(size:36,weight:.ultraLight)).foregroundStyle(palette.ink).padding(26)
                 .background(Circle().stroke(palette.line,lineWidth:0.5)).accessibilityHidden(true)
             Text(title).font(.system(.title2,design:.serif)).multilineTextAlignment(.center)
             Text(message).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center)
@@ -173,10 +173,12 @@ struct CalmState: View {
 #Preview("Empty") { CalmState(symbol:"sparkles",title:"A night to remember",message:"Your observations will live here.").background(.black).preferredColorScheme(.dark) }
 #Preview("Error • AX5") { CalmState(symbol:"cloud",title:"The forecast is resting",message:"Moon and darkness calculations still work offline.").dynamicTypeSize(.accessibility5).background(.black).preferredColorScheme(.dark) }
 
+/// A sheet's or a cover's look: starlight words and system controls (the close and done buttons,
+/// links, menus); the score inside keeps its amber by name. Toggles and sliders set `controlTint`.
 private struct PresentationStyle:ViewModifier {
     @Environment(\.nyx) private var palette
     func body(content:Content)->some View {
-        content.foregroundStyle(palette.ink).tint(palette.accent)
+        content.foregroundStyle(palette.ink).tint(palette.ink)
             .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)).preferredColorScheme(.dark)
     }
 }

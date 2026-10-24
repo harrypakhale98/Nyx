@@ -65,7 +65,7 @@ struct NightControls: View {
         return HStack(spacing: 14) {
             Text(park.time(span.start)).font(.caption).foregroundStyle(palette.muted).monospacedDigit().accessibilityHidden(true)
             VStack(spacing: 4) {
-                Text(park.time(now)).font(.system(.title3, design: .serif)).monospacedDigit().foregroundStyle(palette.accent)
+                Text(park.time(now)).font(.system(.title3, design: .serif)).monospacedDigit().foregroundStyle(palette.ink)
                     .contentTransition(.numericText())
                 Slider(value: Binding(get: { held ?? model.fraction }, set: { scrub(to: $0) }), in: 0...1) {
                     Text("Time of night")

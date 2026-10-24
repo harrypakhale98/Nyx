@@ -161,7 +161,7 @@ enum SpokenText {
 
 // MARK: Actions
 
-/// For actions that are only words (amber text, a small capsule): pressed, they dim like a plain
+/// For actions that are only words (starlight text, a small capsule): pressed, they dim like a plain
 /// button; with Show Borders (Button Shapes) on, a hairline capsule says "this is a button" without
 /// colour. Rows and cards that draw their own outline keep `.plain`.
 struct NyxActionStyle: ButtonStyle {

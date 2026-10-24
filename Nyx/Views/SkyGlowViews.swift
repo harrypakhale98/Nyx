@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// Five short bars, lit up to a glow level (1 darkest … 5 brightest). The words beside it carry
-/// the meaning, so the bars are hidden from VoiceOver and never the only signal.
+/// the meaning, so the bars are hidden from VoiceOver and never the only signal. Starlight, not
+/// amber: more glow is a worse sky, and amber bars would read as the score's.
 struct GlowMeter: View {
     @Environment(\.nyx) private var palette
     @ScaledMetric(relativeTo:.caption) private var bar=12.0
@@ -9,7 +10,11 @@ struct GlowMeter: View {
     var body: some View {
         HStack(spacing:3) {
             ForEach(1...5,id:\.self) { step in
-                Capsule().fill(step<=level ? palette.accent : palette.line).frame(width:min(bar,22),height:max(3,min(bar,22)/3))
+                // Lit bars filled, the rest outlined: the shape tells them apart where starlight and the
+                // hairline are close (night vision's red).
+                let size=CGSize(width:min(bar,22),height:max(3,min(bar,22)/3))
+                if step<=level { Capsule().fill(palette.ink).frame(width:size.width,height:size.height) }
+                else { Capsule().strokeBorder(palette.line,lineWidth:0.75*palette.stroke).frame(width:size.width,height:size.height) }
             }
         }.accessibilityHidden(true)
     }
@@ -50,7 +55,7 @@ struct LightPollution: View {
                 } label:{
                     Text("How this is measured").font(.subheadline).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
                 }
-                .tint(palette.accent)
+                .tint(palette.ink)
             }
         }
     }
@@ -225,29 +230,29 @@ struct ViewingSpotRow: View {
             }
             if let measured=MeasuredSky.shared.site(near:spot.latitude,spot.longitude,park:park.id), let night=measured.latest, let year=night.year {
                 Label { Text("Park Service measured \(MeasuredSky.reading(night.sqm)) here in \(MeasuredSky.span(year...year))").fixedSize(horizontal:false,vertical:true) }
-                    icon:{ Image(systemName:"camera.aperture").foregroundStyle(palette.accent).accessibilityHidden(true) }
+                    icon:{ Image(systemName:"camera.aperture").foregroundStyle(palette.ink).accessibilityHidden(true) }
                     .font(.footnote).foregroundStyle(palette.ink)
                     .accessibilityElement(children:.ignore)
                     .accessibilityLabel(String(localized:"Park Service measured the sky here in \(MeasuredSky.span(year...year)): \(MeasuredSky.reading(night.sqm)) magnitudes per square arcsecond, higher is darker."))
             }
             if let horizon=Horizon.Table.shared.spot(spot.name,park:park.id) {
                 Label { Text(SpotTerrain.line(horizon)).fixedSize(horizontal:false,vertical:true) }
-                    icon:{ Image(systemName:"mountain.2").foregroundStyle(palette.accent).accessibilityHidden(true) }
+                    icon:{ Image(systemName:"mountain.2").foregroundStyle(palette.ink).accessibilityHidden(true) }
                     .font(.footnote).foregroundStyle(palette.ink)
             }
             // The Park Service's night or seasonal rules that name this spot (the park's After dark panel has the details).
             ForEach(NightAccess.shared.rules(park.id,spot:spot.name)) { rule in
-                Label { Text(rule.title).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:rule.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
+                Label { Text(rule.title).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:rule.symbol).foregroundStyle(palette.ink).accessibilityHidden(true) }
                     .font(.footnote).foregroundStyle(palette.ink)
             }
             if let access, let summary=access.summary {
-                Label { Text(summary).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:access.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
+                Label { Text(summary).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:access.symbol).foregroundStyle(palette.ink).accessibilityHidden(true) }
                     .font(.footnote).foregroundStyle(palette.ink)
             }
             CoordinateActions(latitude:spot.latitude,longitude:spot.longitude,shown:coordinates,copyHint:String(localized:"Copies \(coordinates), approximate."),spacing:10)
             if let access, access.summary != nil {
                 DisclosureGroup { AccessSource(access:access).padding(.top,6) } label:{ Text("Access source").font(.footnote).frame(maxWidth:.infinity,minHeight:44,alignment:.leading) }
-                    .tint(palette.accent)
+                    .tint(palette.ink)
             }
         }
     }
@@ -290,11 +295,11 @@ struct CoordinateActions: View {
             PrivatePasteboard.copy("\(latitude), \(longitude)")
             copied=true; copies+=1
         } label:{ Label("Copy coordinates",systemImage:"doc.on.doc").font(.footnote.weight(.medium)).frame(minHeight:44) }
-            .buttonStyle(.borderless).foregroundStyle(palette.accent)
+            .buttonStyle(.borderless).foregroundStyle(palette.ink)
             .accessibilityHint(copyHint)
         if let url=MapsHandOff.directions(latitude:latitude,longitude:longitude) {
             Button { openURL(url) } label:{ Label("Directions in Maps",systemImage:"arrow.triangle.turn.up.right.diamond").font(.footnote.weight(.medium)).frame(minHeight:44) }
-                .buttonStyle(.borderless).foregroundStyle(palette.accent)
+                .buttonStyle(.borderless).foregroundStyle(palette.ink)
                 .accessibilityHint("Opens Apple Maps with driving directions. Nyx sends nothing.")
         }
     }
@@ -307,7 +312,7 @@ private struct AccessSource: View {
         VStack(alignment:.leading,spacing:8) {
             if let evidence=access.evidence { Text("\"\(evidence)\"").font(.system(.footnote,design:.serif)).italic().foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
             if let note=access.note { Text(note).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-            if let url=access.source { Link(destination:url) { Label("Open the park's page in Safari",systemImage:"safari").font(.footnote).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }.foregroundStyle(palette.accent) }
+            if let url=access.source { Link(destination:url) { Label("Open the park's page in Safari",systemImage:"safari").font(.footnote).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }.foregroundStyle(palette.ink) }
             Text("National Park Service, retrieved October 5, 2026. Conditions change; check with the park.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }
     }
@@ -327,7 +332,7 @@ struct ProtectThisSky: View {
         VStack(alignment:.leading,spacing:16) {
             Eyebrow(text:"Protect this sky")
             if park.darkSkyDesignated {
-                Label { Text("An International Dark Sky Park, certified by DarkSky International.").fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"checkmark.seal").foregroundStyle(palette.accent).accessibilityHidden(true) }
+                Label { Text("An International Dark Sky Park, certified by DarkSky International.").fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"checkmark.seal").foregroundStyle(palette.ink).accessibilityHidden(true) }
                     .font(.system(.body,design:.serif))
             }
             if let rank=SkyGlow.shared.trendRank(park.id) {
@@ -339,13 +344,13 @@ struct ProtectThisSky: View {
             VStack(alignment:.leading,spacing:10) {
                 Text("At home, anyone can help").font(.subheadline.weight(.medium))
                 ForEach(habits,id:\.symbol) { habit in
-                    Label { Text(habit.text).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:habit.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
+                    Label { Text(habit.text).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:habit.symbol).foregroundStyle(palette.ink).accessibilityHidden(true) }
                         .font(.subheadline).foregroundStyle(palette.ink)
                 }
             }
             NavigationLink { EssayView(essay:.darkness) } label:{
                 HStack { Text("Read \"\(Essay.darkness.title)\"").fixedSize(horizontal:false,vertical:true); Spacer(); Image(systemName:"chevron.forward").font(.footnote).accessibilityHidden(true) }.frame(minHeight:44).contentShape(Rectangle())
-            }.font(.subheadline).foregroundStyle(palette.accent)
+            }.font(.subheadline).foregroundStyle(palette.ink)
         }
     }
 }
@@ -377,8 +382,8 @@ struct OpenMeteoCredit: View {
             Link(destination:url) {
                 VStack(alignment:.leading,spacing:2) {
                     HStack(alignment:.firstTextBaseline,spacing:4) {
-                        Text("Weather data by Open-Meteo.com").foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
-                        Image(systemName:"arrow.up.right").imageScale(.small).foregroundStyle(palette.accent).accessibilityHidden(true)
+                        Text("Weather data by Open-Meteo.com").foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                        Image(systemName:"arrow.up.right").imageScale(.small).foregroundStyle(palette.ink).accessibilityHidden(true)
                     }
                     Text(issued).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
@@ -398,7 +403,7 @@ struct GlobeAtNightLink: View {
     var body: some View {
         if let url=BrowserLink.globeAtNight {
             VStack(alignment:.leading,spacing:8) {
-                Link(destination:url) { Label("Share your observation with Globe at Night",systemImage:"safari").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }.font(.body.weight(.medium)).foregroundStyle(palette.accent)
+                Link(destination:url) { Label("Share your observation with Globe at Night",systemImage:"safari").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }.font(.body.weight(.medium)).foregroundStyle(palette.ink)
                 Text("A citizen-science project. Observations like yours let scientists estimate that the night sky grew brighter by 7 to 10 percent a year from 2011 to 2022. It opens in Safari; Nyx sends nothing.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             }
         }

@@ -66,14 +66,14 @@ struct WhatsUpPage: View {
     }
     private var divider: some View { Rectangle().fill(palette.line).frame(height: 0.5).padding(.vertical, 1).accessibilityHidden(true) }
     /// A name (with a word such as "very bright" or "peak tonight"), the figure to read at a glance,
-    /// in the accent when it is a time the thing is up, then one plain sentence. VoiceOver reads the
-    /// iPhone's spoken form, which says ranges as "from … to …".
+    /// in ink, then one plain sentence. VoiceOver reads the iPhone's spoken form, which says ranges
+    /// as "from … to …".
     private func row(_ item: WhatsUp.Item) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             let title = Text(item.title).font(.system(.body, design: .serif)).foregroundStyle(palette.ink)
             if let note = item.note { Text("\(title) · \(Text(note).font(.caption2).foregroundStyle(palette.muted))") } else { title }
             if let value = item.value {
-                Text(value).font(.system(.subheadline, design: .serif)).monospacedDigit().foregroundStyle(item.timed ? palette.accent : palette.ink)
+                Text(value).font(.system(.subheadline, design: .serif)).monospacedDigit().foregroundStyle(palette.ink)
             }
             Text(item.detail).font(.caption2).foregroundStyle(palette.muted).nonEssential()
         }

@@ -8,6 +8,9 @@ struct ScoreBreakdownView: View {
     var isTonight=true
     /// Beside the month on a wide iPad: the breakdown without its own page, background or Done.
     var inline=false
+    /// What the screen that opened it offers next for the night (Plan: I'm going, its page), above
+    /// Share, so the breakdown leads somewhere rather than ending at the score.
+    var actions:AnyView?=nil
     @ScaledMetric(relativeTo:.largeTitle) private var numeralSize=72.0
     /// The context lines' symbol column, as wide as the widest symbol at the reader's text size.
     @ScaledMetric(relativeTo:.callout) private var contextIcon=24.0
@@ -15,12 +18,14 @@ struct ScoreBreakdownView: View {
         if inline { content }
         else {
             ScrollView { content.padding(24).readableColumn() }
+                // `-nyx-bottom` (DEBUG) opens at the end, for review captures of the actions.
+                .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
                 .background(NightBackground(score:night.score.value,park:night.park,night:night.id)).foregroundStyle(palette.ink).navigationTitle("Score breakdown").navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.close) { dismiss() } } }.singleControlBar()
         }
     }
     private var scoreNumeral: some View {
-        Text("\(night.score.value)").font(.system(size:numeralSize,weight:.light,design:.serif)).tracking(-3).foregroundStyle(palette.accent)
+        Text("\(night.score.value)").scoreNumeral(size:numeralSize,accent:palette.accent)
     }
     private var scoreBand: some View {
         VStack(alignment:.leading,spacing:2) { Text(night.score.band.label).font(.system(.title2,design:.serif)).fixedSize(horizontal:false,vertical:true); Text("out of 100").font(.caption).foregroundStyle(palette.muted) }
@@ -39,7 +44,7 @@ struct ScoreBreakdownView: View {
             // The weakest link, said beside the number it sets, before the parts that add up to more.
             if let limit=night.score.limit, limit.cap<partsSum {
                 if case .darkness = limit {} else {
-                    figures(Sentences.join([limit.sentence(tonight:isTonight),String(localized:"The four parts add up to \(partsSum); the score takes the lowest cap that applies.")]))
+                    figures(Sentences.join([limit.sentence(tonight:isTonight),String(localized:"The four parts alone would give \(partsSum).")]))
                 }
             }
             row("Moonlight",points:Double(shown.moon),of:40,fact:moonFact,detail:String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one."))
@@ -58,7 +63,7 @@ struct ScoreBreakdownView: View {
                     SkyGlyph(item:event.kind,color:palette.accent).frame(width:22,height:22).padding(.top,2)
                     VStack(alignment:.leading,spacing:6) {
                         Text([event.title,event.note].compactMap { $0 }.joined(separator:", ")).font(.headline)
-                        if let value=event.value { Text(value).font(.system(.title3,design:.serif)).foregroundStyle(palette.accent) }
+                        if let value=event.value { Text(value).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink) }
                         Text(event.detail).font(.callout).fixedSize(horizontal:false,vertical:true)
                         Text("Also in the sky this night. Not part of the score.").font(.footnote).foregroundStyle(palette.muted)
                     }
@@ -67,7 +72,10 @@ struct ScoreBreakdownView: View {
             }
             // Dates and the night's hours here are the park's own, wherever this phone is.
             Text(Sentences.join([String(localized:"Each park uses its own local date."),String(localized:"The score is a planning guide, not a guarantee of visibility or safe access.")])).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-            ShareCardButton(night:night)
+            VStack(alignment:.leading,spacing:12) {
+                if let actions { actions }
+                ShareCardButton(night:night)
+            }
         }
     }
     /// A sentence about what holds the score down, in starlight with only its figures in amber: the

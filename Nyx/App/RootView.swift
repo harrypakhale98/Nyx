@@ -74,12 +74,14 @@ struct RootView:View {
                 if !revealed { NightBackground().transition(.opacity) }
                 // Four tabs: where (Tonight, Parks), when (Plan: the month, or the nights you are free),
                 // and remember (Journal). Learn lives in Settings › About the sky and beside the sky it explains.
+                // Each tab's content is tinted starlight (back buttons, menus, links, the close and done
+                // buttons); only the selected tab below is amber, as the place you are.
                 TabView(selection:$commands.tab) {
-                    Tab(value:0) { NavigationStack { TonightView() }.modifier(TabChrome(tab:0,tint:palette.accent)) } label:{ Label { Text("Tonight") } icon:{ moonIcon } }
+                    Tab(value:0) { NavigationStack { TonightView() }.modifier(TabChrome(tab:0,tint:palette.ink)) } label:{ Label { Text("Tonight") } icon:{ moonIcon } }
                     // Parks becomes a list beside the park on a wide iPad; a stack in narrow windows and on iPhone.
-                    Tab("Parks",systemImage:"mountain.2",value:1) { ParksTab().modifier(TabChrome(tab:1,tint:palette.accent)) }
-                    Tab("Plan",systemImage:"calendar",value:2) { NavigationStack { PlanView() }.modifier(TabChrome(tab:2,tint:palette.accent)) }
-                    Tab("Journal",systemImage:"book.closed",value:3) { NavigationStack { JournalView() }.modifier(TabChrome(tab:3,tint:palette.accent)) }
+                    Tab("Parks",systemImage:"mountain.2",value:1) { ParksTab().modifier(TabChrome(tab:1,tint:palette.ink)) }
+                    Tab("Plan",systemImage:"calendar",value:2) { NavigationStack { PlanView() }.modifier(TabChrome(tab:2,tint:palette.ink)) }
+                    Tab("Journal",systemImage:"book.closed",value:3) { NavigationStack { JournalView() }.modifier(TabChrome(tab:3,tint:palette.ink)) }
                         // iPad and iPhone Duo's inner display: a night from Plan's month or a park held over the Journal's tab item or sidebar
                         // row opens the Journal, which takes the drop (`acceptsJournalDrop`). The tab item itself
                         // takes none: SwiftUI's tab drop destination did not fire on iPadOS 26 or 27.
@@ -105,7 +107,7 @@ struct RootView:View {
         .environment(commands).focusedSceneValue(commands)
         .background(WindowSceneReader(commands:commands).frame(width:0,height:0).accessibilityHidden(true))
         .environment(\.nyx,palette).environment(\.nyxReduceMotion,DebugScenario.isEnabled("reduce-motion")).environment(\.skyHome,model.home)
-        .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent).preferredColorScheme(.dark)
+        .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.ink).preferredColorScheme(.dark)
         // The DEBUG field routes draw field mode inside the root, so the root hides the status bar for them as
         // presented field mode does (the root's own preference would otherwise win over the field view's).
         .statusBarHidden(palette.nightVision || ["field","field-compass"].contains(DebugScenario.screen ?? ""))

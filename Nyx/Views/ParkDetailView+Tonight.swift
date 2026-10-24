@@ -12,27 +12,41 @@ extension ParkDetailView {
     /// The park's state and Dark Sky status: the eyebrow carries data, not a slogan. A saved spot:
     /// "Your spot · California". A place abroad: what it is and where, "International Dark Sky Park · Catalonia, Spain".
     var eyebrow:String { park.isCatalogPlace ? park.worldEyebrow : park.placeEyebrow }
-    /// At accessibility sizes the words run long, so the whole header reads from the leading edge; the gauge stays centred.
-    /// There the score comes straight after the park's name, the closure right under it, and the
-    /// date and designation follow, so the answer is on the first screen.
+    /// The name and its night's date are one block at every size (a night opened from the calendar
+    /// always says which night it is). The closure sits right under the score at every size, as on
+    /// Tonight, before the verdict, so a closed road is read with the number. At accessibility sizes the words
+    /// run long, so the whole header reads from the leading edge (the gauge stays centred): the score
+    /// comes straight after the date, the closure right under it and the designation last, so the
+    /// answer is on the first screen; the date before the dial costs the closure nothing.
     private func hero(_ proxy:ScrollViewProxy)->some View {
         let large=typeSize.isAccessibilitySize, align:TextAlignment=large ? .leading : .center
         let range=CelestialGauge.modelRange(outlook,basis:night.basis)
         return VStack(alignment:large ? .leading : .center,spacing:12) {
-            if !large { Eyebrow(text:"\(eyebrow)",meta:true).multilineTextAlignment(align) }
-            Text(park.shortName).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(align).accessibilityAddTraits(.isHeader)
-                .onGeometryChange(for:Bool.self) { $0.frame(in:.scrollView).maxY<0 } action:{ titleGone=$0 }
-            if large { gauge(range:range) }
-            if !large { Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted) }
-            alertLine(proxy,align:align)
             if large {
-                Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
+                VStack(alignment:.leading,spacing:4) {
+                    title(align:align)
+                    Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
+                }
+                gauge(range:range)
+            } else {
+                VStack(spacing:4) {
+                    Eyebrow(text:"\(eyebrow)",meta:true).multilineTextAlignment(align).padding(.bottom,2)
+                    title(align:align)
+                    Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
+                }
+            }
+            if large {
+                alertLine(proxy,align:align)
                 Eyebrow(text:"\(eyebrow)",meta:true).multilineTextAlignment(align)
             }
-            AccessNoteLabel(park:park,alignment:large ? .leading : .center).frame(maxWidth:420).padding(.horizontal,large ? 0 : 12)
-            if !large { gauge(range:range) }
+            // Only when there is a note, so an empty slot never adds a gap above the dial.
+            if park.accessNote != nil { AccessNoteLabel(park:park,alignment:large ? .leading : .center).frame(maxWidth:420).padding(.horizontal,large ? 0 : 12) }
+            if !large {
+                gauge(range:range)
+                alertLine(proxy,align:align)
+            }
             if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(align) }
-            if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(align) }
+            if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.body).foregroundStyle(palette.ink).multilineTextAlignment(align) }
             // The night in plain words first: where the Moon is, and whether the Milky Way is worth the drive.
             if let verdict=verdict {
                 Text(verdict.text).font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(align)
@@ -52,13 +66,17 @@ extension ParkDetailView {
                     // The gauge speaks the score range; the models' disagreement is news it does not say.
                     .accessibilityHidden(!disagree)
             }
-            if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(align).fixedSize(horizontal:false,vertical:true).padding(.horizontal,large ? 0 : 12) }
+            // A caveat in words, in ink: amber is the score's and the light's.
+            if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(align).fixedSize(horizontal:false,vertical:true).padding(.horizontal,large ? 0 : 12) }
             if let window=model.clearWindow(night) {
-                // At accessibility sizes the glyph would take a column of its own: the words alone.
-                Label { Text(window.line(park:park)).fixedSize(horizontal:false,vertical:true) } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:"sparkles").accessibilityHidden(true) } }
+                // At accessibility sizes the glyph would take a column of its own: the words alone. Under
+                // a bright Moon the clear hours are not the night's best, and their glyph says so.
+                Label { Text(window.line(park:park)).fixedSize(horizontal:false,vertical:true) } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:window.moonlit ? "moon" : "sparkles").accessibilityHidden(true) } }
                     .font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(align).padding(.horizontal,large ? 0 : 12)
                     .accessibilityElement(children:.combine)
             }
+            darkerCapsule
+            commit.padding(.top,4)
             ScoreReadout(score:night.score,agreement:outlook?.agreement,isTonight:isTonight) { showBreakdown() }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
                 .popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
             // Under the score at a place abroad: Nyx cannot see its closures, so it says so and points to the park's own site.
@@ -67,13 +85,35 @@ extension ParkDetailView {
             KeepThisNightOffer(park:park).padding(.top,4)
         }
     }
-    /// The dial. It opens at the bottom, so the lines below tuck into that space.
+    private func title(align:TextAlignment)->some View {
+        Text(park.shortName).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(align).accessibilityAddTraits(.isHeader)
+            .onGeometryChange(for:Bool.self) { $0.frame(in:.scrollView).maxY<0 } action:{ titleGone=$0 }
+    }
+    /// One way to commit to a night, right under the answer it commits to: "I'm going". Nyx keeps
+    /// watch on it and Tonight leads with it (`GoingPanel`); the calendar and the Lock Screen follow
+    /// from it, offered once it is kept, each asking its own permission when tapped, never all at once.
+    @ViewBuilder private var commit: some View {
+        let large=typeSize.isAccessibilitySize
+        VStack(alignment:large ? .leading : .center,spacing:4) {
+            GoingButton(night:night,alignment:large ? .leading : .center)
+            if GoingNights.shared.isGoing(park:park,night:night.id) {
+                VStack(alignment:.leading,spacing:0) {
+                    AddNightToCalendar(night:night)
+                    // Tonight is followed from the hero, beside "I'm here tonight".
+                    if !isTonight { FollowNightButton(night:night) }
+                }
+                .frame(maxWidth:large ? .infinity : 300)
+                .transition(.opacity)
+            }
+        }
+        .animation(reduceMotion ? nil : NyxMotion.spring,value:GoingNights.shared.isGoing(park:park,night:night.id))
+    }
+    /// The dial, square to its drawing: the lines below start just under the times at its open ends.
     private func gauge(range:ClosedRange<Int>?)->some View {
         CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:night.basisCaption(),
                        revealKey:ScoreReveals.key(parkID:park.id,night:park.isoDay(night.id),score:night.score.value),
                        range:range,night:model.ring(night))
             .frame(maxWidth:.infinity)
-            .padding(.bottom,typeSize.isAccessibilitySize ? 0 : -28)
             .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
             .modifier(DepthParallax(depth:0.1))
             .environment(\.nyxRevealHeld,heroHeld)
@@ -103,11 +143,26 @@ extension ParkDetailView {
             .accessibilityHint("Shows the park's other alerts.")
         }
     }
-    /// The plain sentence under the dial (`NightVerdict`), with a clearly darker night at this park
-    /// within the next two weeks.
+    /// The plain sentence under the dial (`NightVerdict`): the Moon and the Milky Way. A darker night
+    /// ahead is not a sentence in it but the capsule below (`darkerCapsule`), as on Tonight.
     private var verdict:NightVerdict.Line? {
-        let ahead=model.nights(park,from:park.date(night.id,addingDays:1),count:NightVerdict.horizon)
-        return NightVerdict.line(sky:night.sky,core:model.whatsUp(night).coreNight,park:park,darker:NightVerdict.darker(than:night,among:ahead))
+        NightVerdict.line(sky:night.sky,core:model.whatsUp(night).coreNight,park:park)
+    }
+    /// This park's best night when it is clearly darker and still ahead (`NightVerdict.darker`): the
+    /// night Best nights, Tonight and the river name too, in Tonight's capsule and words. A tap turns
+    /// this page to that night, as choosing it on the river would; the dial and its words follow.
+    @ViewBuilder private var darkerCapsule:some View {
+        let ahead=model.nights(park,from:model.tonight(park),count:NightVerdict.horizon)
+        if let darker=NightVerdict.darker(than:night,among:ahead) {
+            Button { withAnimation(reduceMotion ? nil : NyxMotion.spring) { selected=darker.id } } label:{
+                HStack(spacing:8) {
+                    Image(systemName:"moon.stars").imageScale(.small).accessibilityHidden(true)
+                    Text(NightVerdict.capsule(darker,here:true)).multilineTextAlignment(.leading)
+                    Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
+                }
+            }.buttonStyle(.capsuleAction)
+            .accessibilityHint("Opens that night at the park.")
+        }
     }
     /// Alerts other than the closure shown beside the score.
     private var otherAlerts:Int {
@@ -120,20 +175,8 @@ extension ParkDetailView {
             TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river),open:{ _ in showBreakdown() },hold:$heldNight)
             if model.detailPausedForLowData { Label("Forecast detail paused in Low Data Mode.",systemImage:"antenna.radiowaves.left.and.right.slash").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
             Divider().overlay(palette.line).padding(.top,10)
-            // One way to commit to a night: "I'm going". Nyx keeps watch on it and Tonight leads with it
-            // (`GoingPanel`); the calendar and the Lock Screen follow from it, offered once it is kept, each
-            // asking its own permission when tapped, never all at once.
-            GoingButton(night:night)
-            if GoingNights.shared.isGoing(park:park,night:night.id) {
-                VStack(alignment:.leading,spacing:0) {
-                    AddNightToCalendar(night:night)
-                    // Tonight is followed from the hero, beside "I'm here tonight".
-                    if !isTonight { FollowNightButton(night:night) }
-                }
-                .padding(.leading,typeSize.isAccessibilitySize ? 0 : 26)
-                .transition(.opacity)
-            }
             // Where the night is decided, the way there: a quiet row, or the access note for a roadless park.
+            // Committing to the night ("I'm going") sits up with the score it commits to (`commit`).
             NightDirections(park:park)
         }.id("river")
     }

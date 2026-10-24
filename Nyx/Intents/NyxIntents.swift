@@ -123,7 +123,7 @@ struct DarknessSnippetView:View {
             VStack(alignment:.leading,spacing:6) {
                 Text("Tonight").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(Lettering.spaced ? 1.4 : 0).foregroundStyle(palette.muted)
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
-                Text(night.score.band.label).font(.system(.headline,design:.serif)).foregroundStyle(palette.accent)
+                Text(night.score.band.label).font(.system(.headline,design:.serif)).foregroundStyle(palette.ink)
                 // The one line that must never be lost: beside the score, as on the park's page.
                 if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).labelStyle(.caution).fixedSize(horizontal:false,vertical:true) }
                 HStack(spacing:8) {

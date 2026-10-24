@@ -40,6 +40,7 @@ enum Essay: String,CaseIterable,Identifiable {
     }
 }
 /// The essay's mark: an SF Symbol, or for meteors (which SF Symbols lacks) the app's own streak glyph.
+/// In starlight: amber is the score and literal light, and an essay's mark is neither.
 private struct EssayIcon:View {
     @Environment(\.nyx) private var palette
     let essay:Essay
@@ -47,8 +48,8 @@ private struct EssayIcon:View {
     var body:some View {
         // One square box for every symbol, so the titles beneath line up across the grid.
         Group {
-            if essay == .meteors { SkyGlyph(.meteors,color:palette.accent).frame(width:size,height:size) }
-            else { Image(systemName:essay.symbol).font(.system(size:size,weight:.ultraLight)).foregroundStyle(palette.accent).accessibilityHidden(true) }
+            if essay == .meteors { SkyGlyph(.meteors,color:palette.ink).frame(width:size,height:size) }
+            else { Image(systemName:essay.symbol).font(.system(size:size,weight:.ultraLight)).foregroundStyle(palette.ink).accessibilityHidden(true) }
         }.frame(width:size*1.3,height:size*1.3,alignment:.leading)
     }
 }
@@ -62,11 +63,17 @@ struct LearnView:View {
     private var columns:[GridItem] {
         typeSize.isAccessibilitySize ? [GridItem(.flexible(),alignment:.top)] : [GridItem(.adaptive(minimum:300),spacing:18,alignment:.top)]
     }
+    @State private var gridWidth=0.0
+    /// How many cards a row holds, as the adaptive grid lays them out: the whole first row goes without
+    /// a rule (the navigation bar is its edge), so no card there sits higher than its neighbours.
+    private var perRow:Int {
+        typeSize.isAccessibilitySize ? 1 : max(1,Int((gridWidth+18)/(300+18)))
+    }
     var body:some View {
         ScrollView { VStack(alignment:.leading,spacing:24) {
-            LazyVGrid(columns:columns,spacing:18) { ForEach(Essay.allCases) { essay in
+            LazyVGrid(columns:columns,spacing:18) { ForEach(Array(Essay.allCases.enumerated()),id:\.element) { index,essay in
                 // A contents page, not a grid of tiles: the titles carry it, with no stock icon beside them.
-                NavigationLink { EssayView(essay:essay) } label:{ Panel(rule:essay != Essay.allCases.first) { HStack(alignment:.top,spacing:14) {
+                NavigationLink { EssayView(essay:essay) } label:{ Panel(rule:index >= perRow) { HStack(alignment:.top,spacing:14) {
                     VStack(alignment:.leading,spacing:6) {
                         // Each line takes the card's whole width, not the width its last wrap left: the system lifts a
                         // lone last word onto the line before ("Watching a / meteor shower"), and a frame hugging that
@@ -78,7 +85,7 @@ struct LearnView:View {
                     Spacer(minLength:0)
                     Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
                 }.frame(maxHeight:.infinity,alignment:.top) }.frame(maxHeight:.infinity) }.buttonStyle(.plain).hoverEffect(.lift)
-            } }
+            } }.measuringWidth($gridWidth)
             AboutDataLink()
         }.padding(24).readableColumn(1080) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
     }

@@ -60,10 +60,11 @@ struct NightDetail: View {
         let inputs = model.inputs, park = plan.park
         return VStack(alignment: .leading, spacing: 10) {
             VisionEyebrow(text: "\(park.region.replacingOccurrences(of: ",", with: ", ")) · \(model.nightOffset == 0 ? String(localized: "Tonight") : park.dayLabel(plan.sky.evening))")
-            // The closure is the one line that must never be lost: beside the score, in the accent, as on the iPhone.
+            // The closure is the one line that must never be lost: beside the score, the warning in its
+            // red and the words in ink, as on the iPhone (amber is the score's).
             if let closure = inputs.closure(park) {
-                Label(closure, systemImage: "exclamationmark.triangle").font(.headline).foregroundStyle(palette.accent)
-                    .fixedSize(horizontal: false, vertical: true)
+                Label { Text(closure).foregroundStyle(palette.ink) } icon: { Image(systemName: "exclamationmark.triangle").foregroundStyle(palette.nightVision ? palette.ink : NyxPalette.cautionColor) }
+                    .font(.headline).fixedSize(horizontal: false, vertical: true)
                     .accessibilityLabel(Text(ClosureLine.spoken(closure)))
             }
             Text(plan.score.value, format: .number)
@@ -73,14 +74,14 @@ struct NightDetail: View {
                 .accessibilityValue(Text("\(plan.score.value) out of 100, \(plan.night.bandWithBasis)"))
             // The band alone: the caption below always opens with the basis ("Early look: …").
             Text(plan.score.band.label).bandWord(.title, ink: palette.ink)
-            // Haze or smoke thick enough to wash out the Milky Way, in the accent beside the score, by
+            // Haze or smoke thick enough to wash out the Milky Way, in ink beside the score, by
             // the iPhone's rule and words (`Night.smokeCaveat`), whether or not it holds the score down.
             if let smoke = plan.night.smokeCaveat {
-                Label(smoke, systemImage: "smoke").font(.callout).foregroundStyle(palette.accent).fixedSize(horizontal: false, vertical: true)
+                Label(smoke, systemImage: "smoke").font(.callout).foregroundStyle(palette.ink).fixedSize(horizontal: false, vertical: true)
             }
             // The weakest link, when it holds the score below its parts ("Clouds limit tonight to 55.").
             if let limit = limitLine(plan) {
-                Text(limit).font(.callout).foregroundStyle(palette.accent).fixedSize(horizontal: false, vertical: true)
+                Text(limit).font(.callout).foregroundStyle(palette.ink).fixedSize(horizontal: false, vertical: true)
             }
             // What the clouds rest on, in the iPhone's words.
             Text(model.cloudCaption(plan.night))
@@ -180,7 +181,7 @@ struct NightDetail: View {
                         Text(item.title).font(.system(.title3, design: .serif))
                         if let note = item.note { Text(note).font(.subheadline).foregroundStyle(palette.muted) }
                         Spacer(minLength: 8)
-                        if let value = item.value { Text(value).font(.headline).monospacedDigit().foregroundStyle(item.timed ? palette.accent : palette.ink) }
+                        if let value = item.value { Text(value).font(.headline).monospacedDigit().foregroundStyle(palette.ink) }
                     }
                     Text(item.detail).font(.body).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                     if let footnote = item.footnote { Text(footnote).font(.footnote).foregroundStyle(palette.muted) }

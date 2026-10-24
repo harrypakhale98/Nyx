@@ -121,7 +121,7 @@ struct WeekAcrossParksPanel: View {
         var day=Date.FormatStyle.dateTime.day(); day.timeZone=night.park.timeZone
         return VStack(spacing:1) {
             Text(tonight ? String(localized:"Tonight") : night.id.formatted(weekday)).font(.caption.weight(tonight ? .semibold : .regular))
-                .foregroundStyle(tonight ? palette.accent : palette.muted).lineLimit(1).minimumScaleFactor(0.8)
+                .foregroundStyle(tonight ? palette.ink : palette.muted).lineLimit(1).minimumScaleFactor(0.8)
             Text(night.id.formatted(day)).font(.caption.monospacedDigit()).foregroundStyle(palette.muted)
         }
         .frame(maxWidth:.infinity).padding(.bottom,4)
@@ -145,7 +145,7 @@ struct WeekAcrossParksPanel: View {
                 else { Text("\(night.score.value)").font(.caption.monospacedDigit()).foregroundStyle(isBest ? palette.accent : palette.ink) }
             }
             .frame(maxWidth:.infinity,minHeight:58)
-            .background { if isBest { RoundedRectangle(cornerRadius:12).fill(palette.accent.opacity(palette.nightVision ? 0.18 : 0.1)) } }
+            .background { if isBest { RoundedRectangle(cornerRadius:12).fill(palette.ink.opacity(palette.nightVision ? 0.18 : 0.08)) } }
             .contentShape(.hoverEffect,RoundedRectangle(cornerRadius:12)).contentShape(Rectangle())
         }
         .buttonStyle(.plain).hoverEffect(.highlight)

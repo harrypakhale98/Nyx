@@ -153,11 +153,15 @@ private struct MarkLayer: View, Equatable {
     let ink: Color
     let strength: Double
     static func == (a:Self,b:Self)->Bool { a.sky.id==b.sky.id && a.ink==b.ink && a.strength==b.strength }
+    /// The share of the screen's height, from the top, the radiant's burst keeps out of.
+    static let radiantFloor=0.6
     var body: some View {
         Canvas { context,size in
             let warm=SkyTint.planet(ink:ink)
             let opacity=min(1,strength/0.6)
-            if let radiant=sky.radiant {
+            // Never in the upper part of the screen, where every page sets its title, score and dial:
+            // there the burst read as a mark on the words. Below it, the true place, or nothing.
+            if let radiant=sky.radiant, SkyProjection.screen(radiant.position,size:size).y>size.height*Self.radiantFloor {
                 let p=SkyProjection.screen(radiant.position,size:size)
                 var rays=Path()
                 for i in 0..<10 {

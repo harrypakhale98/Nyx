@@ -19,6 +19,8 @@ struct TonightView: View {
     private var location:LocationService { model.location }
     @State private var explainLocation=false
     @State private var chooseHome=false
+    /// The answer's "Darkest within 200 mi" was tapped: the page moves to where that reach is set.
+    @State private var toStart=0
     /// A save from a park row's menu could not be stored.
     @State private var saveFailed=false
     @Namespace private var zoom
@@ -38,6 +40,8 @@ struct TonightView: View {
     @State private var prepared:String?
     /// The same for the places a wider radius would add (`farther(than:shortlist:)`).
     @State private var widerPrepared:String?
+    /// The places' 30 nights behind "Darker on…" (`NightVerdict.horizon`), worked out off the main thread first.
+    @State private var aheadPrepared:String?
     /// The nearest dark sky when the places in reach are bright or absent (`DarkerSky`), for the
     /// key it was worked out for; worked out off the main thread from the bundled light map.
     @State private var darkerSky:(key:String,offer:DarkerSky.Offer?)?
@@ -66,6 +70,7 @@ struct TonightView: View {
         let empty=best.isEmpty || DebugScenario.state=="empty"
         let worthy=worthyNight(best.first,empty:empty)
         let heroReady=best.first.map { heroSettledKey==revealKey($0) } ?? false
+        ScrollViewReader { proxy in
         ScrollView {
             if wide, !loading, !empty, let park=best.first {
                 VStack(alignment:.leading,spacing:22) {
@@ -73,7 +78,7 @@ struct TonightView: View {
                     // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                     FoldColumns(narrow:.trailing,narrowMax:500,spacing:36) {
                         VStack(spacing:26) { GoingPanel(hero:park); hero(park,others:Array(best.dropFirst())); farther(than:park,shortlist:widerList); darkArea(all); ahead(park) }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe); more(best); fromHome(hero:park); LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
+                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID); more(best); fromHome(hero:park); LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
                     weekAcross
@@ -85,7 +90,7 @@ struct TonightView: View {
                     // At accessibility sizes it follows the answer, so the score stays on the first screen.
                     if !loading, !typeSize.isAccessibilitySize { GoingPanel(hero:best.first) }
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
-                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil,shortlist:widerList);darkArea(all);StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe);fromHome(hero:nil) }
+                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil,shortlist:widerList);darkArea(all);StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID);fromHome(hero:nil) }
                     else if let park=best.first {
                         hero(park,others:Array(best.dropFirst()))
                         if typeSize.isAccessibilitySize { GoingPanel(hero:park) }
@@ -93,7 +98,7 @@ struct TonightView: View {
                         darkArea(all)
                         // The answer, then the alternatives; then where "within reach" is measured from.
                         more(best)
-                        StartingPointPanel(heading:best.count>1,choose:{ chooseHome=true },nearMe:nearMe)
+                        StartingPointPanel(heading:best.count>1,choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID)
                         fromHome(hero:park)
                         LookingBackPanel()
                     }
@@ -105,6 +110,8 @@ struct TonightView: View {
         .foldSource()
         // `-nyx-scroll 0…1` (DEBUG) opens partway down, for review captures of the starting point.
         .defaultScrollAnchor(DebugScenario.number("-nyx-scroll").map { UnitPoint(x:0.5,y:$0) } ?? (DebugScenario.isEnabled("bottom") ? .bottom : .top))
+        .onChange(of:toStart) { withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(Self.startID,anchor:.center) } }
+        }
         .nightKeys(enabled:wide && !empty) { delta in stepRiver(delta) }
         .background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value },park:best.first,night:best.first.map { model.tonight($0) })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
             .tabRootToolbar()
@@ -127,6 +134,14 @@ struct TonightView: View {
                 let radius=model.radiusMeters, darkest=all.map(\.bortleEstimate).min()
                 let offer=await Task.detached(priority:.utility) { DarkerSky.offer(from:from,radiusMeters:radius,darkestInReach:darkest) }.value
                 if !Task.isCancelled { darkerSky=(key,offer) }
+            }
+            // "Darker on…" weighs each place's next 30 nights, as Best nights does: their astronomy is
+            // worked out off the main thread, and the capsule waits for it rather than hitch the first frame.
+            .task(id:loading ? nil : TonightReach.key(aheadPool)) {
+                let pool=aheadPool
+                guard !loading, !pool.isEmpty else { return }
+                await model.prepareNights(pool,count:NightVerdict.horizon)
+                if !Task.isCancelled { aheadPrepared=TonightReach.key(pool) }
             }
             .task(id:TonightReach.key(all)) {
                 // Hundreds of places in reach (abroad): tonight at each, worked out off the main thread, before ranking them all.
@@ -186,11 +201,28 @@ struct TonightView: View {
     @ViewBuilder private var firstRunButtons: some View {
         if !location.denied {
             Button { nearMe() } label:{ Label("Near me",systemImage:"location").frame(minHeight:30) }
-                .buttonStyle(.borderedProminent).foregroundStyle(Color.black)
+                .secondaryAction()
                 .accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")])
         }
         Button { chooseHome=true } label:{ Label("Choose a starting point",systemImage:"mappin.and.ellipse").frame(minHeight:30) }
             .secondaryAction().accessibilityInputLabels([Text("Choose a starting point"),Text("Choose a city"),Text("Choose a park")])
+    }
+    /// Where the starting point and its radius are set (`StartingPointPanel`), for the answer's line to lead to.
+    private static let startID="startingPoint"
+    /// The hero dial's side at accessibility sizes: the numeral stays over 80 pt inside it.
+    private static let accessibleDial=200.0
+    /// The answer's line, and the way to what it names: a tap moves the page to the starting point and
+    /// its radius, which sit below the answer and its alternatives.
+    private func reachLine(_ park:Park)->some View {
+        Button { toStart+=1 } label:{
+            // The small arrow says the line leads somewhere; the target reaches 44 pt without moving the line.
+            HStack(alignment:.firstTextBaseline,spacing:5) {
+                answerLine(park)
+                if !typeSize.isAccessibilitySize { Image(systemName:"arrow.down").font(.caption2.weight(.semibold)).accessibilityHidden(true) }
+            }
+            .padding(.vertical,14).contentShape(Rectangle()).padding(.vertical,-14)
+        }.buttonStyle(.plain)
+        .accessibilityHint("Shows the starting point and radius.")
     }
     /// The line above the answer, all data: the night, and where "in reach" is measured from.
     /// Never "nearby" for a starting park or city; an example until a starting point is chosen.
@@ -292,9 +324,12 @@ struct TonightView: View {
         let night=model.night(park)
         let large=typeSize.isAccessibilitySize
         // The first line is the answer's own context: the night, and from where. At accessibility sizes
-        // it follows the dial, so the park and its score fill the first screen.
-        let context=answerLine(park).font(.caption.weight(.medium)).kerning(large ? 0 : 1.6).textCase(large || !Lettering.spaced ? nil : .uppercase)
+        // it follows the dial and the closure, so the park, its score and any closure fill the first screen.
+        let context=reachLine(park).font(.caption.weight(.medium)).kerning(large ? 0 : 1.6).textCase(large || !Lettering.spaced ? nil : .uppercase)
             .foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+        // A forecast more than six hours old says when it is from.
+        let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { Date.now.timeIntervalSince($0)>6*3600 ? $0 : nil } : nil
+        let closure=park.nps == nil ? nil : model.closure(park)
         return VStack(spacing:10) {
             if !large { context }
             // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`).
@@ -303,8 +338,17 @@ struct TonightView: View {
             let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis)
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis,
                            revealKey:revealKey(park),range:range,night:model.ring(night)) { heroSettledKey=$0 }
-                .frame(height:large ? nil : wide ? 300 : 240)
+                // At accessibility sizes the dial is held small enough that a closure under it is on the first screen.
+                .environment(\.gaugeAccessibleMax,Self.accessibleDial).frame(height:large ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
+            // A closure is the one line here that must never be lost in the sky: straight under the score,
+            // as on the park's page, on a dark scrim.
+            if let closure {
+                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).multilineTextAlignment(large ? .leading : .center)
+                    .fixedSize(horizontal:false,vertical:true)
+                    .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12))
+                    .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
+            }
             if large { context }
             // The night in plain words: where the Moon is, and whether the Milky Way is worth the drive.
             if let verdict=NightVerdict.line(sky:night.sky,core:model.whatsUp(night).coreNight,park:park) {
@@ -316,26 +360,19 @@ struct TonightView: View {
             // The gauge speaks this line, so VoiceOver does not hear it twice.
             if let basis { Text(basis).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true) }
             skyLine(night,range:range)
-            // A forecast more than six hours old says when it is from.
-            let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { Date.now.timeIntervalSince($0)>6*3600 ? $0 : nil } : nil
             // A place the Park Service does not run: Nyx cannot see its closures, and says so.
             if park.nps == nil {
                 if let stale { forecastAsOf(park,stale) }
                 UnknownClosuresNote(park:park,compact:true).padding(.horizontal,12)
             }
-            // A closure is the one line here that must never be lost in the sky: it sits on a dark scrim.
-            else if let closure=model.closure(park) {
-                if let stale { forecastAsOf(park,stale) }
-                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).multilineTextAlignment(typeSize.isAccessibilitySize ? .leading : .center)
-                .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12))
-                .accessibilityLabel(String(localized:"Closure alert: \(closure)")) }
+            else if closure != nil { if let stale { forecastAsOf(park,stale) } }
             // Nothing listed: the alerts and the forecast's age share one quiet caption, the safety cue kept.
             else if let listed=model.alertFacts(park) { CaveatLine(facts:listed+(stale.map { [String(localized:"forecast from \(park.timestamp($0))")] } ?? [])).padding(.horizontal,12) }
             else {
                 if let stale { forecastAsOf(park,stale) }
                 Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12)
             }
-            if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).padding(.horizontal,12) }
+            if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.center).padding(.horizontal,12) }
             AccessNoteLabel(park:park,alignment:.center).padding(.horizontal,12)
             nudge(park:park,tonight:night)
             fieldOffer(best:park)
@@ -353,7 +390,7 @@ struct TonightView: View {
                 .fixedSize(horizontal:false,vertical:true).padding(.horizontal,12)
         } else if let window=partialWindow(night) {
             // At accessibility sizes the glyph would take a column of its own: the words alone.
-            Label { Text(window.line(park:night.park)).fixedSize(horizontal:false,vertical:true) } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:"sparkles").accessibilityHidden(true) } }
+            Label { Text(window.line(park:night.park)).fixedSize(horizontal:false,vertical:true) } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:window.moonlit ? "moon" : "sparkles").accessibilityHidden(true) } }
                 .font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.center).padding(.horizontal,12)
                 .accessibilityElement(children:.combine)
         } else if let spread=ForecastSpread.line(agreement:agreement,range:range,tonight:true) {
@@ -429,7 +466,7 @@ struct TonightView: View {
     @ViewBuilder private func nudge(park:Park,tonight:Night)->some View {
         if let event=upcomingEvent(park) {
             capsule(text:event.text,hint:"Opens that night at the park.") { ParkDetailView(park:park,initialDate:event.night.id) } icon:{
-                SkyGlyph(SkyGlyph.Kind(event.glyph),color:palette.accent).frame(width:15,height:15)
+                SkyGlyph(SkyGlyph.Kind(event.glyph),color:palette.ink).frame(width:15,height:15)
             }
         } else { darkerAhead(than:tonight) }
     }
@@ -479,22 +516,25 @@ struct TonightView: View {
         }
         return nil
     }
-    /// Tonight answers where; this answers when. The darkest of the coming nights across every park
-    /// in reach, by the park page's own rule (`NightVerdict.clearlyDarker`, the same horizon), and
-    /// said with what it rests on ("64, an estimate"). Ties are broken as everywhere
-    /// (`NightPlanner.best`), so the night named is the one its park page ranks first.
+    /// Tonight answers where; this answers when (`NightVerdict.darkerAhead`): the answer's own park's
+    /// best night when it is clearly darker (its page's "Darker on…"), else Best nights' best night in
+    /// reach, a closed park after the open ones. Said with what it rests on ("77, usual clouds").
     @ViewBuilder private func darkerAhead(than tonight:Night)->some View {
-        // Ranked as the week across parks ranks them, a closed park after the open ones.
+        if aheadPrepared == TonightReach.key(aheadPool) { darkerCapsule(than:tonight) }
+    }
+    @ViewBuilder private func darkerCapsule(than tonight:Night)->some View {
         let closures=Dictionary(aheadPool.compactMap { park in model.closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
-        let ahead=NightPlanner.ranked(aheadPool.flatMap { park in model.nights(park,from:park.date(model.tonight(park),addingDays:1),count:NightVerdict.horizon) },closures:closures).first
-        if let ahead, NightVerdict.clearlyDarker(ahead,than:tonight) {
-            capsule(text:String(localized:"Darker on \(ahead.park.dayLabel(ahead.id)) at \(ahead.park.shortName): \(NightVerdict.scored(ahead))."),hint:"Opens that night at the park.") {
+        let here=model.nights(tonight.park,from:model.tonight(tonight.park),count:NightVerdict.horizon)
+        let ahead=NightVerdict.darkerAhead(than:tonight,here:here,across:aheadPool.map { model.nights($0,from:model.tonight($0),count:NightVerdict.horizon) },closures:closures)
+        if let ahead {
+            capsule(text:NightVerdict.capsule(ahead,here:ahead.park.id==tonight.park.id),hint:"Opens that night at the park.") {
                 ParkDetailView(park:ahead.park,initialDate:ahead.id)
             } icon:{ Image(systemName:"moon.stars").imageScale(.small) }
             // A darker night somewhere the car cannot go says so before the tap, not after.
             if !ahead.park.drivable { AccessNoteLabel(park:ahead.park,alignment:.center).padding(.horizontal,12) }
-            // Darker is the sky alone: a closure there is said beside it, never weighed into it.
-            if let closure=model.closure(ahead.park) {
+            // Darker is the sky alone: a closure there is said beside it, never weighed into it. At the
+            // answer's own park it is already said under the dial, and is not said twice.
+            if ahead.park.id != tonight.park.id, let closure=model.closure(ahead.park) {
                 Label(closure,systemImage:"exclamationmark.triangle").font(.footnote).labelStyle(.caution).multilineTextAlignment(typeSize.isAccessibilitySize ? .leading : .center)
                     .fixedSize(horizontal:false,vertical:true).padding(.horizontal,12)
                     .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
@@ -511,6 +551,11 @@ struct TonightView: View {
         }.buttonStyle(.capsuleAction).padding(.top,4)
         .accessibilityHint(hint)
     }
+}
+extension EnvironmentValues {
+    /// The most a dial may measure across at accessibility sizes (`CelestialGauge`): Tonight holds
+    /// it smaller, so the pill, the score and a closure under it all fit the first screen.
+    @Entry var gaugeAccessibleMax: Double = .infinity
 }
 /// Tonight's answer and the moment "tonight" is judged from: either changing hands the pick on.
 private struct TonightPickKey: Equatable {
@@ -557,7 +602,7 @@ struct PermissionExplainer: View {
     let action:LocalizedStringKey
     let proceed:()->Void
     var body: some View {
-        NavigationStack { ScrollView { VStack(spacing:24) { CalmState(symbol:symbol,title:title,message:message);Button(action,action:proceed).buttonStyle(.borderedProminent).foregroundStyle(Color.black);Button("Continue without it") { dismiss() } }.padding(24) }.background(Color.black).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Close") { dismiss() } } } }.presentationDetents([.medium,.large])
+        NavigationStack { ScrollView { VStack(spacing:24) { CalmState(symbol:symbol,title:title,message:message);Button(action,action:proceed).secondaryAction();Button("Continue without it") { dismiss() } }.padding(24) }.background(Color.black).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Close") { dismiss() } } } }.presentationDetents([.medium,.large])
             // A form-sized card on iPad, never a page stretched across the window.
             .presentationSizing(.form)
     }

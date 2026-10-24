@@ -204,7 +204,7 @@ struct TripPlannerView: View {
                 Eyebrow(text:"The best night")
                 Text(park.shortName).font(.system(.title,design:.serif)).multilineTextAlignment(.center).foregroundStyle(palette.ink)
                 Text(park.dayLabel(best.night.id)).font(.subheadline).foregroundStyle(palette.muted)
-                Text("\(best.night.score.value)").font(.system(size:min(heroSize,150),weight:.light,design:.serif)).kerning(3).foregroundStyle(palette.accent)
+                Text("\(best.night.score.value)").scoreNumeral(size:min(heroSize,150),accent:palette.accent)
                     .contentTransition(.numericText(value:Double(best.night.score.value)))
                 Text(best.night.bandWithBasis).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.center)
                 Text(best.reason).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
@@ -298,7 +298,7 @@ struct TripStayRow: View {
                                 Spacer(minLength:8)
                                 VStack(alignment:.trailing,spacing:0) {
                                     scoreNumeral(night)
-                                    Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted)
+                                    Text(basisWord(night)).font(.caption2).foregroundStyle(palette.muted)
                                 }
                             }
                         }
@@ -311,11 +311,11 @@ struct TripStayRow: View {
                 .parkRowActions(park) { saveFailed=true }
                 .parkSaveAlert(isPresented:$saveFailed,journalUnavailable:model.journalUnavailable)
                 Button(action:addToCalendar) { Label(several ? String(localized:"Add \(stay.stops.count) nights to Calendar") : String(localized:"Add to Calendar"),systemImage:"calendar.badge.plus").font(.subheadline).frame(minHeight:44) }
-                    .buttonStyle(.nyxAction).foregroundStyle(palette.accent)
+                    .buttonStyle(.nyxAction).foregroundStyle(palette.ink)
                     .accessibilityLabel(several ? String(localized:"Add \(stay.stops.count) nights at \(park.shortName) to Calendar") : String(localized:"Add \(park.shortName) on \(park.dayLabel(night.id)) to Calendar"))
                     .accessibilityInputLabels([Text("Add to Calendar"),Text("Add \(park.shortName) to Calendar")])
             }.padding(.vertical,14)
-            .background { if stay.isBest { RoundedRectangle(cornerRadius:18).fill(palette.accent.opacity(palette.nightVision ? 0.08 : 0.07)).padding(.horizontal,-12) } }
+            .background { if stay.isBest { RoundedRectangle(cornerRadius:18).fill(palette.ink.opacity(palette.nightVision ? 0.1 : 0.06)).padding(.horizontal,-12) } }
         }
     }
     /// The dates, the park, why, and what to check.
@@ -325,7 +325,7 @@ struct TripStayRow: View {
             // At accessibility sizes the badge goes under the dates rather than squeezing them.
             dateRow {
                 (several ? Text("\(park.dayLabel(first.night.id)) – \(park.dayLabel(last.night.id))") : Text(verbatim:park.dayLabel(night.id))).font(.caption.weight(.medium)).foregroundStyle(palette.muted)
-                if stay.isBest { Text("Best night").font(.caption2.weight(.semibold)).padding(.horizontal,8).padding(.vertical,3).foregroundStyle(palette.nightVision ? palette.ink : Color.black).background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0.35 : 1))) }
+                if stay.isBest { Text("Best night").font(.caption2.weight(.semibold)).padding(.horizontal,8).padding(.vertical,3).foregroundStyle(palette.nightVision ? palette.ink : Color.black).background(Capsule().fill(palette.ink.opacity(palette.nightVision ? 0.35 : 1))) }
             }
             Text(several ? String(localized:"\(stay.stops.count) nights at \(park.shortName)") : park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
             if several { Text(nightly).font(.caption.monospacedDigit()).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
@@ -342,7 +342,16 @@ struct TripStayRow: View {
         return layout { content() }
     }
     private func scoreNumeral(_ night:Night)->some View {
-        Text("\(night.score.value)").font(.system(size:min(scoreSize,64),weight:.light,design:.serif)).foregroundStyle(palette.accent)
+        Text("\(night.score.value)").scoreNumeral(size:min(scoreSize,64),accent:palette.accent)
+    }
+    /// The word under a stay's score in the three words every surface uses: the band on a full
+    /// forecast, "Early look", or "Usual clouds" (the band alone where the place has no usual clouds).
+    private func basisWord(_ night:Night)->String {
+        switch night.basis {
+        case .forecast: night.score.band.label
+        case .blended: String(localized:"Early look")
+        case .usual: night.score.cloudPoints == nil ? night.score.band.label : String(localized:"Usual clouds")
+        }
     }
     /// "Tue 94 · Wed 97 · Thu 95", in the park's own days.
     private var nightly:String {

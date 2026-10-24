@@ -20,6 +20,8 @@ struct FieldActivityColors {
     /// Night vision keeps full red for secondary text: red is already dim, and any less fails contrast at caption sizes.
     var muted: Color { nightVision ? ink : ink.opacity(look.highContrast ? 0.9 : 0.7) }
     var track: Color { ink.opacity(0.22) }
+    /// The warning glyph's warm red, as in the app (`NyxPalette.cautionColor`); the red itself in night vision.
+    var caution: Color { nightVision ? ink : NyxPalette.cautionColor }
 }
 
 struct FieldActivityLockView: View {
@@ -75,8 +77,9 @@ struct FieldActivityLockView: View {
                     if let dark=attributes.darkStart { timeMark(String(localized:"True darkness"),dark) }
                 }.font(.caption).foregroundStyle(colors.muted).lineLimit(1).minimumScaleFactor(0.8)
                 if let closure=attributes.closure(state) {
-                    Label { Text(closure).lineLimit(2) } icon:{ Image(systemName:"exclamationmark.triangle").accessibilityHidden(true) }
-                        .font(.caption.weight(.medium)).foregroundStyle(colors.accent)
+                    // The warning in its red and the words in ink, as in the app: amber is the score's and light's.
+                    Label { Text(closure).foregroundStyle(colors.ink).lineLimit(2) } icon:{ Image(systemName:"exclamationmark.triangle").foregroundStyle(colors.caution).accessibilityHidden(true) }
+                        .font(.caption.weight(.medium))
                 }
             } else if !state.finished {
                 FieldNightLine(attributes:attributes,colors:colors).frame(height:isStale ? 10 : 16)
@@ -179,7 +182,8 @@ struct FieldActivitySmallView: View {
 }
 
 /// Dusk to dawn as a line. The fill is a system timer, so it advances without updates; marks sit
-/// at each milestone, and true darkness is the brighter stretch.
+/// at each milestone, and true darkness is the brighter stretch. All starlight: the night itself,
+/// as the dial's night track draws it, never the score's amber.
 struct FieldNightLine: View {
     let attributes: FieldActivityAttributes
     let colors: FieldActivityColors
@@ -192,7 +196,7 @@ struct FieldNightLine: View {
                     Capsule().fill(colors.track).frame(width:max(2,(b-a)*w),height:6).offset(x:a*w)
                 }
                 ProgressView(timerInterval:attributes.dusk...max(attributes.dusk,attributes.dawn),countsDown:false) { EmptyView() } currentValueLabel:{ EmptyView() }
-                    .progressViewStyle(.linear).tint(colors.accent).frame(height:3)
+                    .progressViewStyle(.linear).tint(colors.ink).frame(height:3)
                 ForEach(attributes.milestones,id:\.date) { item in
                     Capsule().fill(colors.ink.opacity(0.8)).frame(width:1.5,height:12).offset(x:attributes.fraction(item.date)*w-0.75)
                 }

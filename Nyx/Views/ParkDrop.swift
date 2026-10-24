@@ -23,10 +23,10 @@ struct ParkDropTarget<Item: Transferable>: ViewModifier {
             .overlay {
                 if targeted {
                     ZStack(alignment:.top) {
-                        RoundedRectangle(cornerRadius:28).strokeBorder(palette.accent.opacity(0.8),lineWidth:2).padding(6)
+                        RoundedRectangle(cornerRadius:28).strokeBorder(palette.ink.opacity(0.8),lineWidth:2).padding(6)
                         Label(prompt,systemImage:symbol).font(.headline).foregroundStyle(Color.black)
                             .padding(.horizontal,18).padding(.vertical,10)
-                            .background(Capsule().fill(palette.accent))
+                            .background(Capsule().fill(palette.ink))
                             .padding(.top,18)
                     }
                     .ignoresSafeArea(edges:.bottom)

@@ -132,12 +132,15 @@ extension DarknessScore {
     /// "Excellent, usual clouds", or "Good, Moon and darkness only" where no usual clouds are known,
     /// then ", haze or smoke" when smoke or haze holds the score down. One place, so the basis
     /// never drops off a surface again.
-    nonisolated var bandWithBasis: String {
+    nonisolated var bandWithBasis: String { withBasis(band.label) }
+    /// The same phrases after another lead in the band's place: "Thu, Nov 5, usual clouds" for a list's
+    /// night, "80, usual clouds" for a score. One wording for what a score rests on, already translated.
+    nonisolated func withBasis(_ lead: String) -> String {
         let base = switch basis {
-        case .forecast: band.label
-        case .blended: String(localized: "\(band.label), early look")
+        case .forecast: lead
+        case .blended: String(localized: "\(lead), early look")
         // Without usual clouds the score counts no clouds at all, and never claims it does.
-        case .usual: cloudPoints == nil ? String(localized: "\(band.label), Moon and darkness only") : String(localized: "\(band.label), usual clouds")
+        case .usual: cloudPoints == nil ? String(localized: "\(lead), Moon and darkness only") : String(localized: "\(lead), usual clouds")
         }
         return isSmokeLimited ? String(localized: "\(base), haze or smoke") : base
     }

@@ -220,16 +220,16 @@ import UniformTypeIdentifiers
         #expect(WideLayout.twoColumnSide(1376) == 68 && WideLayout.twoColumnSide(1240) == 0 && WideLayout.twoColumnSide(1000) == 0)
         #expect(WideLayout.twoColumnSide(1377) == 68)
     }
-    /// The immersive sky on Vision Pro writes in the brighter red at full strength: the standard
-    /// red is below 4.5:1 for protan eyes there, and so is the brighter one below full opacity.
-    @Test func skyWordsInNightVisionUseTheBrighterRed() {
+    /// Words in night vision stay at 4.5:1 or better on black for every colour vision in both reds,
+    /// at full strength: the standard red is the default on surfaces with no setting (Vision Pro's sky).
+    @Test func skyWordsInNightVisionPassInBothReds() {
         func seen(_ tint: NightTint, _ opacity: Double, _ vision: ColorVision) -> Double {
             func linear(_ v: Double) -> Double { v<=0.04045 ? v/12.92 : pow((v+0.055)/1.055, 2.4) }
             func encoded(_ v: Double) -> Double { v<=0.0031308 ? v*12.92 : 1.055*pow(v, 1/2.4)-0.055 }
             let rgb=SIMD3(encoded(linear(tint.rgb.x)*opacity), encoded(linear(tint.rgb.y)*opacity), encoded(linear(tint.rgb.z)*opacity))
             return vision.contrast(rgb, SIMD3(0, 0, 0))
         }
-        for vision in ColorVision.allCases { #expect(seen(.brighter, 1, vision) >= 4.5, "\(vision)") }
-        #expect(seen(.standard, 1, .protan) < 4.5 && seen(.brighter, 0.78, .protan) < 4.5)
+        for vision in ColorVision.allCases { for tint in NightTint.allCases { #expect(seen(tint, 1, vision) >= 4.5, "\(tint) \(vision)") } }
+        #expect(seen(.standard, 0.78, .protan) < 4.5)
     }
 }

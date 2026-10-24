@@ -72,6 +72,13 @@ import SwiftUI
         let kiribati=try #require(TimeZone(identifier:"Pacific/Kiritimati"))
         #expect(TimeRiver.loupeDate(night,locale:Locale(identifier:"en_US"),timeZone:kiribati)=="Sat 17")
     }
+    /// The axis carries the month with every tick, so a week across a month's end is never read as this month's.
+    @Test func theAxisTicksNameTheirMonth() throws {
+        let night=try Date("2026-11-08T21:00:00Z",strategy:.iso8601)
+        let west=try #require(TimeZone(identifier:"America/Los_Angeles"))
+        #expect(TimeRiver.tickDate(night,locale:Locale(identifier:"en_US"),timeZone:west)=="Nov 8")
+        #expect(TimeRiver.tickDate(night,locale:Locale(identifier:"es_MX"),timeZone:west).contains("8"))
+    }
     @Test func theLargeTextCaptionKeepsFiguresWithTheirWord() {
         #expect(TimeRiver.lineCaption("Cloud forecast\nmodels range 55–83")=="Cloud forecast\nmodels range\u{00A0}55–83")
         #expect(TimeRiver.lineCaption("Early look")=="Early look")
@@ -132,6 +139,20 @@ import SwiftUI
         #expect(MonthPager.commit(offset:3,position:-1) == (2,0))
         #expect(MonthPager.commit(offset:2,position:0) == (2,0))
         #expect(MonthPager.commit(offset:2,position:nil) == (2,0))
+    }
+    /// Tonight's month opens on the week holding tonight: the whole weeks before it fold under "Past
+    /// nights", none in a month tonight is not in, and none when tonight falls in the first week.
+    @Test func pastWeeksFoldAwayInTonightsMonth() throws {
+        let jotr=try park("jotr")
+        var components=DateComponents(); components.year=2026; components.month=10; components.day=23; components.hour=21
+        let tonight=jotr.evening(try #require(jotr.calendar.date(from:components)))
+        let october=MonthPager.evenings(jotr,tonight:tonight,offset:0)
+        // 1 October 2026 is a Thursday: four blank days, then 1–17 fold and the month opens on Sunday the 18th.
+        #expect(MonthPager.pastFold(lead:4,nights:october,tonight:tonight)==17)
+        #expect(MonthPager.pastFold(lead:4,nights:MonthPager.evenings(jotr,tonight:tonight,offset:1),tonight:tonight)==0)
+        #expect(MonthPager.pastFold(lead:4,nights:october,tonight:october[2])==0)
+        #expect(MonthPager.pastFold(lead:4,nights:october,tonight:october[3])==3)
+        #expect(CalendarView.span(october[0],october[16],park:jotr).contains("17"))
     }
     @Test func aStepAcrossAMonthsEdgeStartsFromTheMonthInView() throws {
         let jotr=try park("jotr")

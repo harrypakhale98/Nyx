@@ -16,8 +16,8 @@ nonisolated enum LightsOut {
     }
     /// Only where the difference is plain to see: two classes or more.
     static let difference=2
-    /// The nights looked at for the best one soon.
-    static let horizon=14
+    /// The nights looked at for the best one: the window every best night is named from.
+    static let horizon=NightVerdict.horizon
     /// The starting point's class: the sky grid's estimate where it has one, else a suburban sky.
     static func homeClass(latitude: Double, longitude: Double, grid: SkyGrid = .shared) -> (bortle: Int, known: Bool) {
         guard let magnitude=grid.skyBrightness(latitude:latitude,longitude:longitude) else { return (HomeSky.assumedBortle,false) }
@@ -34,19 +34,17 @@ nonisolated enum LightsOut {
         guard let ranked, ranked.0.bortleEstimate<=homeClass-difference else { return nil }
         return (ranked.0,ranked.1)
     }
-    /// The best of the coming nights, ranked as everywhere a best night is chosen (a closure counts against it).
-    static func best(_ nights: [Night], closure: String?) -> Night? {
-        let closures=closure.map { [nights.first?.park.id ?? "": $0] } ?? [:]
-        return nights.min { NightPlanner.better($0,$1,closures:closures) }
-    }
+    /// The best of the coming nights, as every surface names a place's best night (`NightVerdict.best`).
+    /// A closure costs every night of the one place alike, so it never moves the night; it is said beside it.
+    static func best(_ nights: [Night], closure: String?) -> Night? { NightVerdict.best(nights) }
     /// "That's the sky at Great Basin, 160 mi away."
     static func sentence(_ target: Target) -> String {
         String(localized:"That's the sky at \(target.place.shortName), \(DarkerSky.distance(target.meters)) away.")
     }
-    /// "Best night at Great Basin in the next two weeks: Sat, Oct 31, 88." Names the place, so it
+    /// "Best night at Great Basin in the next 30 nights: Sat, Oct 31, 88." Names the place, so it
     /// reads on its own before the sky has cleared.
     static func bestLine(_ night: Night) -> String {
-        String(localized:"Best night at \(night.park.shortName) in the next two weeks: \(night.park.dayLabel(night.id)), \(NightVerdict.scored(night)).")
+        String(localized:"Best night at \(night.park.shortName) in the next \(horizon) nights: \(night.park.dayLabel(night.id)), \(NightVerdict.scored(night)).")
     }
     /// The figure for VoiceOver: what is drawn, both classes, and what the dark sky shows.
     static func spoken(_ target: Target, origin: String) -> String {

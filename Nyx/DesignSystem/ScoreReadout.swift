@@ -3,8 +3,9 @@ import SwiftUI
 /// The score's four parts as an instrument readout under the gauge, so the number always arrives
 /// with its reasons. Each meter glides on the shared spring as nights are scrubbed. Without a
 /// forecast the cloud meter shows the park's usual clouds and says so. When a cap holds the score
-/// below the sum of its parts (clouds, sky glow, smoke, short darkness), one line under the meters
-/// names it, so the parts and the number never seem to disagree.
+/// below the sum of its parts (moonlight, clouds, sky glow, smoke, short darkness), the part that
+/// holds it is ringed and marked "Limits tonight", and one plain line under the meters says the
+/// cap and the sum, so the parts and the number never seem to disagree.
 /// The whole readout is one button that opens the full breakdown. Within the seven-day model
 /// horizon the cloud meter carries one quiet line saying whether three forecast models agree.
 struct ScoreReadout: View {
@@ -21,7 +22,7 @@ struct ScoreReadout: View {
     var isTonight=true
     var action: () -> Void = {}
     private struct Part: Identifiable {
-        let id: String
+        let id: PartID
         let title: String
         let spoken: String
         let points: Double?
@@ -31,12 +32,26 @@ struct ScoreReadout: View {
     private var parts: [Part] {
         let scale=score.cloudPoints == nil ? 1/0.75 : 1, shown=score.displayedParts
         return [
-            Part(id:"moon",title:String(localized:"Moonlight"),spoken:String(localized:"Moonlight"),points:Double(shown.moon),maximum:40*scale),
-            Part(id:"clouds",title:String(localized:"Clouds"),spoken:String(localized:"Clouds"),points:shown.cloud.map(Double.init),maximum:25,note:cloudNote),
-            Part(id:"glow",title:String(localized:"Sky glow"),spoken:String(localized:"Sky glow"),points:Double(shown.glow),maximum:20*scale),
-            Part(id:"hours",title:String(localized:"True darkness"),spoken:String(localized:"True darkness"),points:Double(shown.length),maximum:15*scale)
+            Part(id:.moon,title:String(localized:"Moonlight"),spoken:String(localized:"Moonlight"),points:Double(shown.moon),maximum:40*scale),
+            Part(id:.clouds,title:String(localized:"Clouds"),spoken:String(localized:"Clouds"),points:shown.cloud.map(Double.init),maximum:25,note:cloudNote),
+            Part(id:.glow,title:String(localized:"Sky glow"),spoken:String(localized:"Sky glow"),points:Double(shown.glow),maximum:20*scale),
+            Part(id:.hours,title:String(localized:"True darkness"),spoken:String(localized:"True darkness"),points:Double(shown.length),maximum:15*scale)
         ]
     }
+    nonisolated enum PartID: Hashable, Sendable { case moon, clouds, glow, hours }
+    /// The part whose cap holds the score below the sum of the parts, if one does; smoke has no part
+    /// of its own, so its cap marks none and is said in the line alone.
+    nonisolated static func limiting(_ score:DarknessScore)->PartID? {
+        guard let limit=score.limit, limit.cap<score.partsSum else { return nil }
+        switch limit {
+        case .moonlight: return .moon
+        case .clouds: return .clouds
+        case .skyGlow: return .glow
+        case .darkness: return .hours
+        case .smoke: return nil
+        }
+    }
+    private var limiting: PartID? { Self.limiting(score) }
     private var cloudNote: String? {
         switch score.basis {
         case .forecast: agreement?.word
@@ -45,11 +60,12 @@ struct ScoreReadout: View {
         }
     }
     /// The binding cap, when the parts add up to more than the score, then their sum, so the reader who
-    /// adds the four numbers finds the total said: the breakdown's own words (`ScoreBreakdownView`).
+    /// adds the four numbers finds the total said, in plain words: "Moonlight limits tonight to 50.
+    /// The four parts alone would give 65." The breakdown says the same (`ScoreBreakdownView`).
     private var limitLine: String? { Self.limitLine(score,tonight:isTonight) }
     nonisolated static func limitLine(_ score:DarknessScore,tonight:Bool)->String? {
         guard let limit=score.limit, limit.cap<score.partsSum else { return nil }
-        return Sentences.join([limit.sentence(tonight:tonight),String(localized:"The four parts add up to \(score.partsSum); the score takes the lowest cap that applies.")])
+        return Sentences.join([limit.sentence(tonight:tonight),String(localized:"The four parts alone would give \(score.partsSum).")])
     }
     var body: some View {
         Button(action:action) {
@@ -74,8 +90,9 @@ struct ScoreReadout: View {
                     .onGeometryChange(for:Double.self) { $0.size.width } action:{ gridWidth=$0 }
                 }
                 // The weakest link, when it holds the score below its parts: the number and the meters agree.
+                // In ink: a reason, not a score.
                 if let limitLine {
-                    Text(limitLine).font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading)
+                    Text(limitLine).font(.caption).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading)
                 }
             }
             .padding(.horizontal,4).contentShape(Rectangle())
@@ -106,11 +123,14 @@ struct ScoreReadout: View {
         // Sentence case, as every heading now is: four spaced-capital labels in a row read as a dashboard.
         guard gridWidth>0 else { return SubscoreTitles.Style(spaced:false,scale:1,columns:4) }
         let bold=legibilityWeight == .bold, titles=parts.map(\.title)
+        // Every title on one line when the four can share a size of at least 85%, so the four meters
+        // and numbers sit on one line with no title standing taller ("True darkness" on two lines).
+        if let whole=SubscoreTitles.wholeLine(widest:SubscoreTitles.widestWord(titles,typeSize:typeSize,spaced:false,bold:bold,whole:true),width:gridWidth,spacing:Self.columnSpacing) { return whole }
         return SubscoreTitles.style(widestSpaced:nil,
                                     widestPlain:SubscoreTitles.widestWord(titles,typeSize:typeSize,spaced:false,bold:bold),width:gridWidth,spacing:Self.columnSpacing)
     }
     private func meter(_ part:Part)->some View {
-        Meter(fraction:part.points.map { min(1,max(0,$0/part.maximum)) },reduceMotion:reduceMotion)
+        Meter(fraction:part.points.map { min(1,max(0,$0/part.maximum)) },reduceMotion:reduceMotion,limits:part.id == limiting)
     }
     private func value(_ part:Part)->some View {
         VStack(alignment:.leading,spacing:4) {
@@ -121,6 +141,11 @@ struct ScoreReadout: View {
                 }
             } else {
                 Text("Unknown").font(.system(.subheadline,design:.serif)).foregroundStyle(palette.muted).padding(.top,3)
+            }
+            // The part that holds the score down, said where the eye already is.
+            if part.id == limiting {
+                Text(isTonight ? "Limits tonight" : "Limits this night").font(.caption2.weight(.semibold)).foregroundStyle(palette.ink)
+                    .lineLimit(typeSize.isAccessibilitySize ? nil : 2).fixedSize(horizontal:false,vertical:true)
             }
             if let note=part.note {
                 Text(note).font(.caption2).foregroundStyle(palette.muted).lineLimit(typeSize.isAccessibilitySize ? nil : 2).minimumScaleFactor(0.85)
@@ -134,11 +159,13 @@ struct ScoreReadout: View {
                 ?? String(localized:"\(part.spoken), unknown"))+(part.note.map { ", "+$0 } ?? "")
         }.joined(separator:". ")+(limitLine.map { ". "+$0 } ?? "")
     }
-    /// A hairline track with an amber fill; dashed and empty when the part is unknown.
+    /// A hairline track with an amber fill; dashed and empty when the part is unknown. The part that
+    /// limits the score is ringed in starlight, a shape as well as words, so it never rests on colour.
     private struct Meter: View {
         @Environment(\.nyx) private var palette
         let fraction: Double?
         let reduceMotion: Bool
+        var limits=false
         var body: some View {
             GeometryReader { proxy in
                 ZStack(alignment:.leading) {
@@ -152,6 +179,7 @@ struct ScoreReadout: View {
                 }
                 .animation(reduceMotion ? nil : NyxMotion.spring,value:fraction)
             }.frame(height:3)
+            .overlay { if limits { Capsule().stroke(palette.ink.opacity(palette.highContrast ? 1 : 0.85),lineWidth:palette.stroke).padding(-3.5) } }
         }
     }
 }
@@ -169,9 +197,10 @@ struct ScoreReadout: View {
     if let p=m.home { ScoreReadout(score:m.night(p).score,agreement:ModelAgreement(low:4,high:48)).padding(24).background(.black).preferredColorScheme(.dark) }
 }
 #Preview("Readout • AX5") { let m=PlanModel();if let p=m.home { ScoreReadout(score:m.night(p).score).padding(24).background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) } }
-#Preview("Readout • held by clouds / early look / usual clouds") {
+#Preview("Readout • held by clouds / by the Moon / early look / usual clouds") {
     VStack(spacing:40) {
         ScoreReadout(score:DarknessScore(value:28,moonPoints:40,cloudPoints:5,bortlePoints:17.5,lengthPoints:15,basis:.forecast,cloudUsed:80,limit:.clouds(28)))
+        ScoreReadout(score:DarknessScore(value:50,moonPoints:10,cloudPoints:25,bortlePoints:15,lengthPoints:15,basis:.forecast,cloudUsed:0,limit:.moonlight(50)))
         ScoreReadout(score:DarknessScore(value:74,moonPoints:38,cloudPoints:16,bortlePoints:10,lengthPoints:14,basis:.blended(weight:0.4,leadDays:7.2),cloudUsed:36,limit:.skyGlow(74)),isTonight:false)
         ScoreReadout(score:DarknessScore(value:60,moonPoints:30,cloudPoints:14,bortlePoints:17.5,lengthPoints:15,basis:.usual,cloudUsed:44,limit:.clouds(60)))
     }.padding(24).background(.black).preferredColorScheme(.dark)
@@ -198,11 +227,18 @@ enum SubscoreTitles {
     static func pointSize(_ typeSize:DynamicTypeSize)->Double {
         Double(UIFont.preferredFont(forTextStyle:.caption2,compatibleWith:UITraitCollection(preferredContentSizeCategory:UIContentSizeCategory(typeSize))).pointSize)
     }
-    /// The widest single word among `titles`: spaced capitals, or the words as written.
-    static func widestWord(_ titles:[String],typeSize:DynamicTypeSize,spaced:Bool,bold:Bool)->Double {
+    /// Four across with every title whole on one line, all shrunk alike to no less than 85%; nil when
+    /// the widest title would need more, and the titles may wrap between words (`style`).
+    static func wholeLine(widest:Double,width:Double,spacing:Double)->Style? {
+        let column=(width-3*spacing)/4
+        guard widest>0, column/widest>=0.85 else { return nil }
+        return Style(spaced:false,scale:min(1,column/widest),columns:4)
+    }
+    /// The widest single word among `titles` (or, `whole`, the widest title): spaced capitals, or the words as written.
+    static func widestWord(_ titles:[String],typeSize:DynamicTypeSize,spaced:Bool,bold:Bool,whole:Bool=false)->Double {
         let font=UIFont.systemFont(ofSize:pointSize(typeSize),weight:bold ? .semibold : .medium)
         let attributes:[NSAttributedString.Key:Any]=spaced ? [.font:font,.kern:kerning] : [.font:font]
-        let words=titles.flatMap { $0.split(whereSeparator:\.isWhitespace).map(String.init) }
+        let words=whole ? titles : titles.flatMap { $0.split(whereSeparator:\.isWhitespace).map(String.init) }
         return words.map { word in Double(((spaced ? word.uppercased() : word) as NSString).size(withAttributes:attributes).width.rounded(.up)) }.max() ?? 0
     }
 }

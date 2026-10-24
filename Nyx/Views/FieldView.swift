@@ -122,7 +122,7 @@ struct FieldView: View {
         }
         #endif
         .environment(\.nyx,palette)
-        .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent)
+        .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.ink)
         .modifier(NightVisionFilter(enabled:true,red:palette.red))
         .preferredColorScheme(.dark)
         .statusBarHidden(true).persistentSystemOverlays(.hidden)
@@ -560,7 +560,7 @@ struct FieldAlarmRows: View {
                             Text(option.label).fixedSize(horizontal:false,vertical:true)
                             Text(on ? String(localized:"Set for \(park.time(option.fire))") : park.time(option.fire)).font(.caption).foregroundStyle(palette.muted)
                         }
-                    } icon:{ Image(systemName:on ? "alarm.fill" : "alarm").foregroundStyle(palette.accent) }
+                    } icon:{ Image(systemName:on ? "alarm.fill" : "alarm").foregroundStyle(palette.ink) }
                     .frame(maxWidth:.infinity,minHeight:rowHeight,alignment:.leading).contentShape(Rectangle())
                 }
                 .buttonStyle(.plain).disabled(working)
@@ -568,7 +568,7 @@ struct FieldAlarmRows: View {
             }
             Text("Alarms ring through Silent and Focus. They are set on this iPhone and nowhere else.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             if let message {
-                Text(message).font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
+                Text(message).font(.caption).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
                 if FieldAlarms.access == .denied, let url=URL(string:UIApplication.openSettingsURLString) { Button("Open Settings") { openURL(url) }.font(.caption).frame(minHeight:rowHeight).contentShape(Rectangle()) }
             }
         }

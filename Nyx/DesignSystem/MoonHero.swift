@@ -62,7 +62,7 @@ struct MoonHero: View {
                         Label(names ? "Hide names" : "Show names",systemImage:names ? "tag.slash" : "tag")
                             .font(.subheadline).frame(minHeight:44).contentShape(Rectangle())
                     }
-                    .foregroundStyle(palette.accent)
+                    .foregroundStyle(palette.ink)
                     .accessibilityHint("Shows or hides the names of the Moon's seas and craters in sunlight.")
                 }
             }
@@ -94,7 +94,7 @@ struct MoonHero: View {
         ForEach(Self.events(night),id:\.label) { event in
             VStack(spacing:2) {
                 Text(event.label).font(.caption.weight(.medium)).foregroundStyle(palette.muted).textCase(typeSize.isAccessibilitySize || !Lettering.spaced ? nil : .uppercase).kerning(typeSize.isAccessibilitySize ? 0 : 1.2)
-                Text(event.time).font(.system(.title3,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
+                Text(event.time).font(.system(.title3,design:.serif)).monospacedDigit().foregroundStyle(palette.ink)
             }
         }
     }

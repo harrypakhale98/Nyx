@@ -4,37 +4,40 @@ import UserNotifications
 // MARK: I'm going
 
 /// "I'm going" on a chosen night: Nyx keeps the night, with today's score as the one changes are
-/// measured from, and keeps watch (`GoingWatch`). Under the river on a park's page, beside Add to
-/// Calendar. The first time, with reminders not yet decided, it asks in context.
+/// measured from, and keeps watch (`GoingWatch`). On a park's page right under the verdict and the
+/// best window, with Add to Calendar under it once kept. A starlight capsule (`secondaryAction`):
+/// amber is the score's. A toggle, as Follow buttons are: kept, it reads "Going" with a filled mark,
+/// and the line under it says how the night stood when chosen. The first time, with reminders not
+/// yet decided, it asks in context.
 struct GoingButton: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     @AppStorage("notificationsEnabled") private var notificationsEnabled=false
     let night: Night
+    /// Centred under a centred hero; leading at accessibility sizes, where the hero reads from the edge.
+    var alignment=HorizontalAlignment.center
     @State private var explaining=false
     @State private var full=false
     private var store: GoingNights { .shared }
     var body: some View {
         if !FieldNight.isOver(night.sky,at:DebugScenario.date ?? .now) {
             let going=store.going(park:night.park,night:night.id)
-            Button { toggle(going) } label:{
-                HStack(alignment:.firstTextBaseline,spacing:8) {
-                    Image(systemName:going == nil ? "checkmark.circle" : "checkmark.circle.fill").accessibilityHidden(true)
-                    VStack(alignment:.leading,spacing:2) {
-                        Text(going == nil ? "I'm going" : "Going").font(.subheadline)
-                        Text(caption(going)).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                    }
-                    Spacer(minLength:8)
-                    if going != nil { Text("Not going").font(.subheadline).accessibilityHidden(true) }
+            VStack(alignment:alignment,spacing:6) {
+                Button { toggle(going) } label:{
+                    Label(going == nil ? "I'm going" : "Going",systemImage:going == nil ? "checkmark.circle" : "checkmark.circle.fill")
+                        .font(.headline).padding(.horizontal,10).frame(minHeight:44)
+                        .contentTransition(.symbolEffect(.replace))
                 }
-                .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
+                .secondaryAction()
+                .accessibilityLabel(going == nil ? String(localized:"I'm going to \(night.park.shortName) on \(night.park.dayLabel(night.id))")
+                                                 : String(localized:"Not going to \(night.park.shortName) on \(night.park.dayLabel(night.id))"))
+                .accessibilityValue(caption(going))
+                .accessibilityInputLabels(going == nil ? [Text("I'm going"),Text("Going")] : [Text("Not going")])
+                .accessibilityAddTraits(going == nil ? .isToggle : [.isToggle,.isSelected])
+                // The button's value says it.
+                Text(caption(going)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(alignment == .center ? .center : .leading)
+                    .fixedSize(horizontal:false,vertical:true).accessibilityHidden(true)
             }
-            .buttonStyle(.plain).foregroundStyle(palette.accent)
-            .accessibilityLabel(going == nil ? String(localized:"I'm going to \(night.park.shortName) on \(night.park.dayLabel(night.id))")
-                                             : String(localized:"Not going to \(night.park.shortName) on \(night.park.dayLabel(night.id))"))
-            .accessibilityValue(caption(going))
-            .accessibilityInputLabels(going == nil ? [Text("I'm going"),Text("Going")] : [Text("Not going")])
-            .accessibilityAddTraits(going == nil ? .isToggle : [.isToggle,.isSelected])
             .alert("Nyx keeps watch on four nights at a time",isPresented:$full) { Button("OK",role:.cancel) {} } message:{
                 Text("Let one of them go first, on Tonight or on its own page.")
             }
@@ -127,8 +130,8 @@ struct GoingPanel: View {
                     }
                     Spacer(minLength:8)
                     VStack(alignment:.trailing,spacing:0) {
-                        Text("\(night.score.value)").font(.system(.title,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
-                        Text(night.score.band.label).font(.caption).foregroundStyle(palette.muted)
+                        Text("\(night.score.value)").scoreNumeral(.title,accent:palette.accent)
+                        Text(night.score.band.label).bandWord(.footnote,ink:palette.muted)
                     }
                 }.contentShape(Rectangle())
             }
@@ -155,7 +158,7 @@ struct GoingPanel: View {
                         Spacer(minLength:4)
                         Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
                     }
-                    .font(.subheadline).foregroundStyle(going.driveMinutes == nil ? palette.accent : palette.ink)
+                    .font(.subheadline).foregroundStyle(palette.ink)
                     .frame(minHeight:44).contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -194,7 +197,8 @@ struct GoingPanel: View {
             } label:{ Image(systemName:"ellipsis").frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }
             .accessibilityLabel("More for this night")
         }
-        .tint(palette.accent)
+        // Starlight, as every action: amber is the score's and the light's.
+        .tint(palette.ink)
     }
 }
 

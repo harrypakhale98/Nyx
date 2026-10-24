@@ -39,7 +39,7 @@ import Testing
         // The highest score; between equals, whichever the shared ranking prefers (`NightPlanner.better`).
         #expect(best.score.value == 88)
         #expect(best.id == (NightPlanner.better(nights[1], nights[2], closures: [:]) ? nights[1] : nights[2]).id)
-        #expect(LightsOut.bestLine(best).hasPrefix("Best night at \(grba.shortName) in the next two weeks: "))
+        #expect(LightsOut.bestLine(best).hasPrefix("Best night at \(grba.shortName) in the next 30 nights: "))
         #expect(LightsOut.bestLine(best).hasSuffix(", 88."))
         let target = LightsOut.Target(place: grba, meters: 257_000, homeClass: 8, homeKnown: true, best: best)
         #expect(LightsOut.sentence(target).hasPrefix("That's the sky at \(grba.shortName), "))

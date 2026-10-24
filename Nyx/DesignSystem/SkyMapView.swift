@@ -70,8 +70,17 @@ struct SkyMapCanvas: View {
             let zoom=min(3,max(1,4800/(frame.plane.width*GeoPoint.earthRadiusKm)))
             // The newcomer's place: only the edges that reach it grow in, and it grows itself.
             let newcomer=arriving.flatMap { id in content.stars.first { $0.id==id } }.map(\.point)
-            // The land, barely there: coasts so the stars read as places.
-            if landLoaded { MapLand.draw(context,frame:frame,in:size,palette:palette,fill:0.025,coast:palette.nightVision ? 0.17 : 0.14) }
+            // The land, barely there: coasts so the stars read as places. It fades out toward every edge,
+            // so the map has no hard rectangle where the coasts and the land's fill are cut off.
+            if landLoaded {
+                context.drawLayer { land in
+                    let fade=0.1
+                    let stops=[Gradient.Stop(color:.clear,location:0),.init(color:.black,location:fade),.init(color:.black,location:1-fade),.init(color:.clear,location:1)]
+                    land.clipToLayer { mask in mask.fill(Path(CGRect(origin:.zero,size:size)),with:.linearGradient(Gradient(stops:stops),startPoint:.zero,endPoint:CGPoint(x:size.width,y:0))) }
+                    land.clipToLayer { mask in mask.fill(Path(CGRect(origin:.zero,size:size)),with:.linearGradient(Gradient(stops:stops),startPoint:.zero,endPoint:CGPoint(x:0,y:size.height))) }
+                    MapLand.draw(land,frame:frame,in:size,palette:palette,fill:0.025,coast:palette.nightVision ? 0.17 : 0.14)
+                }
+            }
             // The places around: the sky's faint background.
             for point in content.background {
                 let p=screen(point)

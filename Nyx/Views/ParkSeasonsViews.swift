@@ -24,7 +24,7 @@ nonisolated extension NightAccess.Rule {
 
 /// "After dark": what the Park Service says about getting to the park's dark skies at night and
 /// through the year, each rule with its page; a rule usually in effect in the month of the night
-/// shown says so in the accent. Usual patterns only: tonight's closures are the park alerts'.
+/// shown says so beside the caution glyph. Usual patterns only: tonight's closures are the park alerts'.
 struct AfterDarkPanel: View {
     @Environment(\.nyx) private var palette
     @Environment(\.openURL) private var openURL
@@ -49,20 +49,20 @@ struct AfterDarkPanel: View {
         Label {
             VStack(alignment: .leading, spacing: 4) {
                 Text(rule.title).font(.subheadline.weight(.medium)).foregroundStyle(palette.ink).fixedSize(horizontal: false, vertical: true)
-                if let line = rule.monthLine(month) { Text(line).font(.caption.weight(.medium)).foregroundStyle(palette.accent) }
+                if let line = rule.monthLine(month) { Text(line).font(.caption.weight(.medium)).foregroundStyle(palette.ink) }
                 Text(rule.note).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                 if let url = rule.source {
                     Button { openURL(url) } label: { Text("Park Service page").font(.caption).frame(minHeight: 44, alignment: .leading).contentShape(Rectangle()) }
-                        .foregroundStyle(palette.accent)
+                        .foregroundStyle(palette.ink)
                         .accessibilityHint("Opens nps.gov in Safari.")
                 }
             }
-        } icon: { Image(systemName: rule.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
+        } icon: { Image(systemName: rule.symbol).foregroundStyle(rule.monthLine(month) == nil ? palette.ink : palette.caution).accessibilityHidden(true) }
     }
 }
 
 /// "Busy and quiet months": twelve small bars of the Park Service's monthly recreation visits, the
-/// month of the night shown in the accent, and the pattern in one sentence. Decorative bars; the
+/// month of the night shown in starlight, the rest as hairlines, and the pattern in one sentence. Decorative bars; the
 /// sentence is what VoiceOver reads.
 struct BusyMonthsPanel: View {
     @Environment(\.nyx) private var palette
@@ -79,11 +79,11 @@ struct BusyMonthsPanel: View {
                     HStack(alignment: .bottom, spacing: 4) {
                         ForEach(0..<12, id: \.self) { i in
                             VStack(spacing: 4) {
-                                Capsule().fill(i == month-1 ? palette.accent : palette.line)
+                                Capsule().fill(i == month-1 ? palette.ink : palette.line)
                                     .frame(height: max(3, barHeight*Double(months.visits[i])/Double(top)))
                                 // Twelve letters do not fit at accessibility sizes; the sentence below says the pattern.
                                 if !typeSize.isAccessibilitySize {
-                                    Text(gregorian.veryShortStandaloneMonthSymbols[i]).font(.caption2).foregroundStyle(i == month-1 ? palette.accent : palette.muted)
+                                    Text(gregorian.veryShortStandaloneMonthSymbols[i]).font(.caption2.weight(i == month-1 ? .semibold : .regular)).foregroundStyle(i == month-1 ? palette.ink : palette.muted)
                                 }
                             }
                             .frame(maxWidth: .infinity)

@@ -221,11 +221,11 @@ struct JournalView: View {
     private var recapCard:some View {
         Button { recap=true } label:{
             Panel { HStack(spacing:14) {
-                Image(systemName:"sparkles").font(.title2.weight(.light)).foregroundStyle(palette.accent).accessibilityHidden(true)
+                Image(systemName:"sparkles").font(.title2.weight(.light)).foregroundStyle(palette.ink).accessibilityHidden(true)
                 VStack(alignment:.leading,spacing:4) {
                     Text("Your year under the stars").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
                     // Written on this iPhone when the system model is available; Nyx's own words otherwise.
-                    Text(OnDeviceGuide.speaksYourLanguage ? "Nights out, your darkest sky, the Moons you met, and a few words on the season, written on this iPhone." : "Nights out, your darkest sky, and the Moons you met.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    Text(OnDeviceGuide.speaksYourLanguage ? "Nights out, your darkest sky, the moons you met, and a few words on the season, written on this iPhone." : "Nights out, your darkest sky, and the moons you met.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
                 Spacer(minLength:0)
                 Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
@@ -239,7 +239,7 @@ private struct WorkingNote: View {
     @Environment(\.nyx) private var palette
     let title:LocalizedStringKey
     var body: some View {
-        ProgressView { Text(title) }.tint(palette.accent).foregroundStyle(palette.ink)
+        ProgressView { Text(title) }.tint(palette.ink).foregroundStyle(palette.ink)
             .padding(.vertical,18).padding(.horizontal,24)
             .background(palette.nightVision ? Color.black : palette.panel,in:RoundedRectangle(cornerRadius:18))
             .overlay(RoundedRectangle(cornerRadius:18).stroke(palette.line,lineWidth:0.5))
@@ -463,6 +463,9 @@ struct JournalEditorView:View {
     /// Called once the entry is saved (a kept night tells the rating request).
     var saved:(()->Void)?=nil
     private static let notesID="notes"
+    private static let errorID="error"
+    /// The stepper's fill: a neutral grey that keeps the white system thumb apart after night vision's red.
+    private var neutral:Color { palette.nightVision ? palette.controlTint : Color(white:palette.highContrast ? 0.36 : 0.26) }
     private func showNotes(_ proxy:ScrollViewProxy) {
         guard writingNotes, verticalSize == .compact else { return }
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(Self.notesID,anchor:.top) }
@@ -481,24 +484,37 @@ struct JournalEditorView:View {
         @Bindable var editor=editor
         ScrollViewReader { proxy in
         Form {
+            // A failed save is said where the form begins, as a caution: the form scrolls up to it and
+            // VoiceOver reads it, so it is never a line of body text below the photos.
+            if let error=editor.error {
+                Section { Label(error,systemImage:"exclamationmark.triangle").labelStyle(.caution).fixedSize(horizontal:false,vertical:true).id(Self.errorID) }.openRows(palette)
+            }
             Section("The night") {
                 DatePicker("Date",selection:$editor.date,in:...Date.now,displayedComponents:.date).environment(\.timeZone,model.park(editor.parkID)?.timeZone ?? .current)
                 ParkMenuRow(parkID:$editor.parkID)
                 Stepper(value:$editor.observedBortle,in:1...9) {
                     Text("Observed Bortle: \(editor.observedBortle)").foregroundStyle(palette.ink)
-                }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.controlTint)
+                }.tint(neutral).foregroundStyle(palette.ink,palette.muted,neutral)
                 Text("Your estimate on the Bortle scale of sky brightness: 1 is the darkest sky, 9 an inner-city sky.").font(.caption).foregroundStyle(palette.muted)
-            }.listRowBackground(palette.panel)
+            }.openRows(palette)
             // On an iPhone in landscape the keyboard leaves about a hundred points: while the notes are
             // being written they are short enough to sit whole above it and scroll within themselves, so
             // the line being written stays in sight (at 160 points it went behind the keyboard by the
             // third line). Read without the keyboard, they keep their full height, as the form scrolls.
-            Section("What you noticed") {
+            // A plain heading that stays once words are in, the prompt inside the field, and a hairline
+            // edge around it: an open row has no card to show where the words go.
+            Section {
                 let aboveKeyboard=verticalSize == .compact && writingNotes
                 TextEditor(text:$editor.notes).scrollContentBackground(.hidden)
                     .frame(minHeight:aboveKeyboard ? 80 : 160,maxHeight:aboveKeyboard ? 80 : nil)
+                    .overlay(alignment:.topLeading) {
+                        if editor.notes.isEmpty { Text("What you noticed").foregroundStyle(palette.muted).padding(.top,8).padding(.leading,5).allowsHitTesting(false).accessibilityHidden(true) }
+                    }
+                    .padding(.horizontal,8).padding(.vertical,4)
+                    .background(palette.panel.opacity(0.5),in:RoundedRectangle(cornerRadius:12))
+                    .overlay(RoundedRectangle(cornerRadius:12).stroke(palette.line,lineWidth:0.5))
                     .focused($writingNotes).id(Self.notesID).accessibilityLabel("Observation notes")
-            }.listRowBackground(palette.panel)
+            } header:{ Text("Notes") }.openRows(palette)
             Section {
                 ForEach(Array(editor.photos.enumerated()),id:\.offset) { index,data in
                     PhotoDescriptionRow(editor:editor,index:index,data:data)
@@ -506,21 +522,27 @@ struct JournalEditorView:View {
                 if editor.loadingPhotos { ProgressView("Adding photo") }
                 PhotosPicker(selection:$picker,maxSelectionCount:max(0,PhotoScaling.perEntry-editor.photos.count),matching:.images) { Label("Choose photos",systemImage:"photo") }.disabled(editor.photos.count>=PhotoScaling.perEntry || editor.loadingPhotos)
             } header:{ Text("Photos") } footer:{ Text("Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone. A short description lets VoiceOver say what each one shows.").foregroundStyle(palette.muted) }
-            .listRowBackground(palette.panel)
-            if let error=editor.error { Section { Text(error).foregroundStyle(palette.accent) }.listRowBackground(palette.panel) }
-        }.nightForm().readableForm().defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
+            .openRows(palette)
+        }
+        // The editor's controls in starlight and a neutral grey, never amber: amber is the score and light.
+        .tint(palette.ink).nightForm().readableForm().defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
         // The notes take Return as a new line, so a drag down the form is how the keyboard goes away.
         .scrollDismissesKeyboard(.interactively)
         // In landscape, once the keyboard is up, the form shows the notes from their top edge rather than
         // only the first line above the keyboard.
         .onReceive(NotificationCenter.default.publisher(for:UIResponder.keyboardDidShowNotification)) { _ in showNotes(proxy) }
+        .onChange(of:editor.error) { _,error in
+            guard let error else { return }
+            withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(Self.errorID,anchor:.top) }
+            AccessibilityNotification.Announcement(error).post()
+        }
         }
         .navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
         .onAppear {
             // A new entry starts on the night just seen, not the calendar day it is written on.
             if existing==nil, !editor.dateChosen, let park=model.park(editor.parkID) { editor.date=min(.now,park.lastNightBegun(at:.now)); editor.markClean() }
         }
-            .toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.cancel) { if editor.hasChanges { confirmDiscard=true } else { dismiss() } } };ToolbarItem(placement:.confirmationAction) { Button(role:.confirm) { Task { if await editor.save(context:context,existing:existing) { saved?(); dismiss() } } }.accessibilityLabel("Save").accessibilityInputLabels([Text("Save"),Text("Done")]).disabled(editor.loadingPhotos || editor.saving) } }
+            .toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.cancel) { if editor.hasChanges { confirmDiscard=true } else { dismiss() } } };ToolbarItem(placement:.confirmationAction) { Button(role:.confirm) { Task { if await editor.save(context:context,existing:existing) { saved?(); dismiss() } } }.tint(palette.controlTint).accessibilityLabel("Save").accessibilityInputLabels([Text("Save"),Text("Done")]).disabled(editor.loadingPhotos || editor.saving) } }
             // A swipe down never throws away what was written; Cancel asks first.
             .interactiveDismissDisabled(editor.hasChanges)
             .confirmationDialog(existing==nil ? "Discard this night?" : "Discard your changes?",isPresented:$confirmDiscard,titleVisibility:.visible) {
@@ -547,9 +569,16 @@ struct PhotoDescriptionRow:View {
         VStack(alignment:.leading,spacing:10) {
             let layout=typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment:.leading,spacing:10)) : AnyLayout(HStackLayout(alignment:.top,spacing:12))
             layout {
-                PhotoView(data:data,maxPixels:240,fill:true).frame(width:80,height:80).clipShape(RoundedRectangle(cornerRadius:10))
+                // A dark photo on the void would have no edge: a panel behind it and a hairline around it.
+                PhotoView(data:data,maxPixels:240,fill:true).frame(width:80,height:80)
+                    .background(palette.panel).clipShape(RoundedRectangle(cornerRadius:10))
+                    .overlay(RoundedRectangle(cornerRadius:10).stroke(palette.line,lineWidth:0.5))
                     .accessibilityLabel(JournalPhotoLabel.text(description.wrappedValue,index:index))
-                TextField("Describe this photo",text:description,axis:.vertical).lineLimit(1...4)
+                // Bounded and prompted as the notes are, so the two places to write look alike.
+                TextField("Describe this photo",text:description,prompt:Text("Describe this photo").foregroundStyle(palette.muted),axis:.vertical).lineLimit(1...4)
+                    .padding(.horizontal,10).padding(.vertical,8)
+                    .background(palette.panel.opacity(0.5),in:RoundedRectangle(cornerRadius:10))
+                    .overlay(RoundedRectangle(cornerRadius:10).stroke(palette.line,lineWidth:0.5))
                     .accessibilityLabel("Description of photo \(index+1)")
                     .accessibilityHint("VoiceOver reads this when the photo is shown.")
             }
@@ -558,7 +587,7 @@ struct PhotoDescriptionRow:View {
                     Text("Suggested on this iPhone").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
                     Text(suggestion).font(.subheadline).fixedSize(horizontal:false,vertical:true)
                     HStack(spacing:16) {
-                        Button("Use this") { editor.useSuggestion(index) }.buttonStyle(.borderless).foregroundStyle(palette.accent)
+                        Button("Use this") { editor.useSuggestion(index) }.buttonStyle(.borderless).foregroundStyle(palette.ink)
                         Button("Dismiss") { editor.suggestions[index]=nil }.buttonStyle(.borderless).foregroundStyle(palette.muted)
                     }.frame(minHeight:44)
                 }
@@ -581,11 +610,11 @@ struct PhotoDescriptionRow:View {
             else {
                 // Borderless, so only the button acts, not a tap anywhere in the row.
                 Button { Task { await editor.suggest(index) } } label:{ Label("Suggest a description",systemImage:"text.below.photo").frame(minHeight:44) }
-                    .buttonStyle(.borderless).foregroundStyle(palette.accent)
+                    .buttonStyle(.borderless).foregroundStyle(palette.ink)
                     .accessibilityHint("Drafts one line on this iPhone for you to read and edit. Nothing is saved until you use it.")
             }
         }
-        Button(role:.destructive) { editor.removePhoto(at:index) } label:{ Text("Remove photo").foregroundStyle(palette.accent).frame(minHeight:44).contentShape(Rectangle()) }
+        Button(role:.destructive) { editor.removePhoto(at:index) } label:{ Text("Remove photo").foregroundStyle(palette.muted).frame(minHeight:44).contentShape(Rectangle()) }
             .buttonStyle(.borderless).accessibilityLabel("Remove photo \(index+1)")
     }
 }
@@ -607,6 +636,21 @@ struct JournalDetailView:View {
     @State private var deleteFailed=false
     /// Set before deleting, so the closing animation never reads a deleted model.
     @State private var removed=false
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @State private var width=0.0
+    /// A finger held on the sky's arc holds the page still, as on a park's page.
+    @State private var holdingArc=false
+    /// Two columns on a wide iPad (`WideLayout`); the phone's one column everywhere else.
+    private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
+    @ViewBuilder private var heading:some View {
+        Eyebrow(text:"A night remembered")
+        Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif))
+        Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.subheadline).foregroundStyle(palette.muted).padding(.top,-14)
+    }
+    private var notes:some View { Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7) }
+    @ViewBuilder private var photos:some View {
+        ForEach(Array(entry.orderedPhotos.enumerated()),id:\.offset) { i,photo in PhotoView(data:photo.data,maxPixels:1600).clipShape(RoundedRectangle(cornerRadius:20)).accessibilityLabel(JournalPhotoLabel.text(photo.altText,index:i)) }
+    }
     /// The stars as they stood over that park on that night: under the same sky, literally.
     private var entrySky:some View {
         let park=model.park(entry.parkID)
@@ -629,7 +673,23 @@ struct JournalDetailView:View {
         } else { Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted) }
     }
     var body:some View {
-        ScrollView { if !removed { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.subheadline).foregroundStyle(palette.muted).padding(.top,-14);moonThatNight;Divider().overlay(palette.line);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.orderedPhotos.enumerated()),id:\.offset) { i,photo in PhotoView(data:photo.data,maxPixels:1600).clipShape(RoundedRectangle(cornerRadius:20)).accessibilityLabel(JournalPhotoLabel.text(photo.altText,index:i)) };Divider().overlay(palette.line);GlobeAtNightLink() }.padding(24).readableColumn(WideLayout.proseWidth) } }.background(entrySky).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
+        ScrollView { if !removed {
+            if wide {
+                // A wide iPad: the words on the left at a reading measure, and beside them what the night
+                // looked like, the Moon, the sky's arc and the photos, instead of one column with half the page empty.
+                HStack(alignment:.top,spacing:40) {
+                    VStack(alignment:.leading,spacing:24) { heading;Divider().overlay(palette.line);notes;Divider().overlay(palette.line);GlobeAtNightLink() }.frame(maxWidth:.infinity,alignment:.leading)
+                    VStack(alignment:.leading,spacing:24) {
+                        moonThatNight
+                        if let park=model.park(entry.parkID) { SkyArc(night:model.night(park,on:entry.date),isTonight:false) }
+                        photos
+                    }.frame(width:WideLayout.leadingWidth(width)).padding(.top,8)
+                }.padding(24).readableColumn(WideLayout.twoColumnMaximum)
+            } else {
+                VStack(alignment:.leading,spacing:24) { heading;moonThatNight;Divider().overlay(palette.line);notes;photos;Divider().overlay(palette.line);GlobeAtNightLink() }.padding(24).readableColumn(WideLayout.proseWidth)
+            }
+        } }.measuringWidth($width).scrollDisabled(holdingArc).onPreferenceChange(ArcHoldingKey.self) { holdingArc=$0 }
+            .background(entrySky).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement:.topBarTrailing) { Button("Edit",systemImage:"pencil") { editing=true } }
                 ToolbarItem(placement:.topBarTrailing) { Button(role:.destructive) { confirmDelete=true } label:{ Label("Delete entry",systemImage:"trash") } }
@@ -652,7 +712,7 @@ struct JournalUnavailableBanner:View {
     var needsSpace=false
     var body:some View {
         Label { Text(needsSpace ? "There is not enough free space to open your journal. Free up some space, then open Nyx again. Everything else works, and Nyx left your journal untouched." : "Your journal could not be opened. Everything else works. Nyx left your journal untouched.").fixedSize(horizontal:false,vertical:true) }
-            icon:{ Image(systemName:"externaldrive.badge.exclamationmark").foregroundStyle(palette.accent).accessibilityHidden(true) }
+            icon:{ Image(systemName:"externaldrive.badge.exclamationmark").foregroundStyle(palette.caution).accessibilityHidden(true) }
             .font(.subheadline).foregroundStyle(palette.ink)
             .padding(14).frame(maxWidth:.infinity,alignment:.leading)
             .background(palette.panel,in:RoundedRectangle(cornerRadius:16)).overlay(RoundedRectangle(cornerRadius:16).stroke(palette.line,lineWidth:0.5))
@@ -677,8 +737,8 @@ private struct ParkMenuRow:View {
                 // "Place" once there are spots to choose from too.
                 Text(model.spots.isEmpty ? "Park" : "Place").foregroundStyle(palette.ink)
                 HStack(alignment:.firstTextBaseline,spacing:6) {
-                    Text(name).foregroundStyle(palette.accent).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
-                    Image(systemName:"chevron.up.chevron.down").font(.footnote.weight(.semibold)).foregroundStyle(palette.accent)
+                    Text(name).foregroundStyle(palette.ink).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
+                    Image(systemName:"chevron.up.chevron.down").font(.footnote.weight(.semibold)).foregroundStyle(palette.muted)
                 }
             }
             .frame(maxWidth:.infinity,alignment:.leading).contentShape(Rectangle())
