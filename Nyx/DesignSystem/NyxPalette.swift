@@ -39,6 +39,9 @@ nonisolated struct NyxPalette: Equatable, Sendable {
     /// off track and stays distinct from the white thumb (about 4:1), so amber keeps to the score and
     /// light. Through night vision a dark grey, which the red filter keeps apart from the thumb.
     var controlTint:Color { nightVision ? Color(white:0.22) : Color(red:0.42,green:0.36,blue:0.66) }
+    /// The iPad sidebar's selected row: "now" is amber, as the selected tab is on iPhone, deepened so
+    /// its starlight label keeps its contrast on the fill. Through night vision a dark grey.
+    var selectionTint:Color { nightVision ? Color(white:0.22) : Color(red:0.65,green:0.35,blue:0.10) }
     var muted: Color { ink.opacity(nightVision ? 0.96 : highContrast ? 0.9 : 0.72) }
     var panel: Color { nightVision ? Color(red:0.07,green:0.008,blue:0.005) : Self.indigo }
     /// Hairlines, tracks and outlines reach 3:1 against black and the panel (WCAG 1.4.11 for

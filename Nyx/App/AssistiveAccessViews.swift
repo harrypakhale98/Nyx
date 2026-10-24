@@ -174,7 +174,7 @@ struct AssistiveParkCard: View {
                 Label { Text("Closure alert: \(closure)").fixedSize(horizontal: false, vertical: true) } icon:{ Image(systemName: "exclamationmark.triangle.fill") }
                     .font(.title3.weight(.semibold)).labelStyle(.caution)
             }
-            Text(Self.word(night)).font(.title.weight(.semibold)).foregroundStyle(palette.accent).fixedSize(horizontal: false, vertical: true)
+            Text(Self.word(night)).font(.title.weight(.semibold)).foregroundStyle(palette.ink).fixedSize(horizontal: false, vertical: true)
             MoonView(geometry: AstronomyEngine().moon(for: night).geometry).frame(maxWidth: 200).frame(maxWidth: .infinity)
             Text(Self.darkLine(night)).font(.title2).fixedSize(horizontal: false, vertical: true)
             // Not offered when saved parks could not be opened: the park would not stay saved.
