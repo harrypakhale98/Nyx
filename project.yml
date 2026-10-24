@@ -335,6 +335,12 @@ targets:
       # The dial face's geometry (numeral and band word clear of the ticks), shared with the tests.
       - path: Nyx/DesignSystem/WatchDialFace.swift
         group: Shared
+      # The iPhone's night on the dial (`NightTrack`), so the face is one object across devices.
+      - path: Nyx/DesignSystem/NightRing.swift
+        group: Shared
+      # The best window, amber on that track, by the iPhone's rule from the clouds it hands over.
+      - path: Nyx/Services/ClearWindow.swift
+        group: Shared
       - path: Nyx/Resources/stars.json
         group: Shared
       - path: Nyx/Resources/parks.json

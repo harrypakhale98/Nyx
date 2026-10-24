@@ -5,7 +5,8 @@ import SwiftData
 /// Field mode: the night itself, at the park. Black everywhere, red through the night-vision
 /// filter whatever the app's setting, large serif type, one fact at a time. The milestones scroll
 /// like a crown, snapping one by one with a light tick; "Where to look" turns the real sky to the
-/// phone. The dark-adaptation clock runs along the bottom.
+/// phone. The dark-adaptation clock runs along the bottom, over Field's own controls: glove-grade,
+/// 60 points or more, all within a thumb's reach at the foot of the screen.
 struct FieldView: View {
     enum Page: Hashable { case night, look }
     let session: FieldSession
@@ -57,8 +58,9 @@ struct FieldView: View {
         if let early=score.basis.earlyLookCaption(usualClouds:usualClouds) { return early }
         return Sentences.join([String(localized:"Cloud forecast unavailable."),score.cloudPoints == nil ? String(localized:"This score counts the Moon and darkness only.") : String(localized:"This score uses the park's usual clouds.")])
     }
+    /// Red whatever the app's setting. Built here, not read from the environment: this view sets it for everything inside.
+    private var palette: NyxPalette { NyxPalette(nightVision:true,highContrast:contrast == .increased,brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red")) }
     var body: some View {
-        let palette=NyxPalette(nightVision:true,highContrast:contrast == .increased,brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red"))
         VStack(spacing:0) {
             header
             // Without a full cloud forecast (offline with nothing cached, or a stale one) the score says
@@ -66,7 +68,7 @@ struct FieldView: View {
             // At accessibility sizes it scrolls with the page instead, so the page keeps its room.
             if let basisNote, !inline {
                 Text(basisNote).font(.caption)
-                    .fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.leading,68).padding(.trailing,20)
+                    .fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.horizontal,24)
             }
             // In the flow, not over it: the countdown under it stays readable.
             if let reset=session.reset, !resetInPage { FieldResetNotice(session:session,reset:reset).padding(.horizontal,16).padding(.top,8).transition(.opacity.combined(with:.move(edge:.top))) }
@@ -87,6 +89,8 @@ struct FieldView: View {
                     }
                 }
             }.frame(maxHeight:.infinity)
+            // The pages' own buttons (the compass's, "Keep this night") at their largest, for gloved thumbs.
+            .controlSize(.extraLarge)
             .readingFold($fold)
             .animation(reduceMotion ? nil : NyxMotion.spring,value:fold)
             footer
@@ -131,7 +135,7 @@ struct FieldView: View {
         .sensoryFeedback(.impact(weight:.medium),trigger:session.darknessBegan)
         .sheet(isPresented:alarms) {
             NavigationStack {
-                ScrollView { FieldAlarmRows(park:session.park,options:session.night.alarmOptions(at:session.now)).padding(24) }
+                ScrollView { FieldAlarmRows(park:session.park,options:session.night.alarmOptions(at:session.now),rowHeight:60).padding(24) }
                     .background(Color.black).navigationTitle("Wake me").navigationBarTitleDisplayMode(.inline)
                     .toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.close) { alarms.wrappedValue=false } } }.singleControlBar()
             }
@@ -139,58 +143,148 @@ struct FieldView: View {
             .nyxPresentation().environment(\.nyx,palette).presentationDetents([.medium,.large])
         }
     }
-    // MARK: Header: leave, the park and its score, and the night's options
+    // MARK: Header: the park and its score
 
+    /// Facts only: what Field does sits at the foot of the screen, where a thumb reaches it one-handed.
     private var header: some View {
-        HStack(alignment:.center,spacing:12) {
-            Button { NightListener.shared.stop(); close() } label:{ Image(systemName:"xmark").font(.body.weight(.semibold)).frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }
-                .accessibilityLabel("Leave field mode").accessibilityInputLabels([Text("Leave"),Text("Close"),Text("Leave field mode")])
-            VStack(alignment:.leading,spacing:2) {
-                // Wraps to its full height, never shrunk or cut: the pages below give way instead.
-                Text(session.park.shortName).font(.system(.headline,design:.serif)).fixedSize(horizontal:false,vertical:true)
-                // Wraps at accessibility sizes rather than cutting the band short.
-                Text("\(session.score.value) · \(session.score.band.label)").font(.caption).monospacedDigit().fixedSize(horizontal:false,vertical:true)
-            }
-            // One spoken line; the visible caption keeps its own short text.
-            .accessibilityElement(children:.ignore)
-            .accessibilityLabel("\(session.park.shortName). Darkness score \(session.score.value), \(session.score.band.label)")
-            Spacer(minLength:8)
-            Menu {
-                if FieldAlarms.supported && !session.night.alarmOptions(at:session.now).isEmpty { Button("Wake me…",systemImage:"alarm") { alarms.wrappedValue=true } }
-                if FieldActivities.enabled || !session.changesPhone {
-                    Toggle(isOn:Binding(get:{ session.following },set:{ session.follow($0) })) { Label("Follow on the Lock Screen",systemImage:"lock.rectangle") }
-                }
-                // Tonight as twelve seconds of sound; best with headphones, out of respect for the dark around you.
-                if NightListener.shared.isPlaying { Button("Stop listening",systemImage:"stop.fill") { NightListener.shared.stop() } }
-                else { Button("Listen to tonight",systemImage:"waveform") { NightListener.shared.play(NightSonification(park:session.park,sky:session.night.sky)) } }
-                // For the eyes reading it: a red that holds its contrast for colour-blind eyes, and the person's own brightness.
-                Section {
-                    Toggle(isOn:$brighterRed) { Label("Brighter red",systemImage:"circle.lefthalf.filled") }
-                    Toggle(isOn:Binding(get:{ session.keepsBrightness },set:{ session.keepBrightness($0) })) { Label("Keep my brightness",systemImage:"sun.max") }
-                }
-            } label:{ Image(systemName:"ellipsis").font(.body.weight(.semibold)).frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }
-                .accessibilityLabel("Field mode options").accessibilityInputLabels([Text("Options"),Text("Field mode options")])
+        VStack(alignment:.leading,spacing:2) {
+            // Wraps to its full height, never shrunk or cut: the pages below give way instead.
+            Text(session.park.shortName).font(.system(.headline,design:.serif)).fixedSize(horizontal:false,vertical:true)
+            // Wraps at accessibility sizes rather than cutting the band short.
+            Text("\(session.score.value) · \(session.score.band.label)").font(.caption).monospacedDigit().fixedSize(horizontal:false,vertical:true)
         }
-        .padding(.horizontal,12).padding(.top,8)
+        // One spoken line; the visible caption keeps its own short text.
+        .accessibilityElement(children:.ignore)
+        .accessibilityLabel("\(session.park.shortName). Darkness score \(session.score.value), \(session.score.band.label)")
+        .frame(maxWidth:.infinity,alignment:.leading)
+        .padding(.horizontal,24).padding(.top,12)
     }
-    // MARK: Footer: the eye's clock and the two pages
+    // MARK: Footer: the eye's clock, then leave, the two pages and the night's options
 
     private var footer: some View {
         VStack(spacing:14) {
             if !inline { EyeClock(session:session,expanded:$aboutEyes) }
-            if !sideBySide { pagePicker }
+            // In one row while it fits; otherwise (accessibility sizes, longer translations) the page
+            // switch takes the full width over leave and options, which keep the corners.
+            ViewThatFits(in:.horizontal) {
+                HStack(spacing:10) { closeButton; if sideBySide { Spacer(minLength:10) } else { pageSwitch }; optionsMenu }
+                VStack(spacing:10) {
+                    if !sideBySide { pageSwitch }
+                    HStack(spacing:10) { closeButton; Spacer(minLength:10); optionsMenu }
+                }
+            }
         }
-        .padding(.horizontal,20).padding(.bottom,12).padding(.top,8)
+        .padding(.horizontal,16).padding(.bottom,8).padding(.top,8)
         .readableColumn(WideLayout.proseWidth)
     }
-    /// The night or where to look, one at a time (both show side by side on a wide landscape window).
-    @ViewBuilder private var pagePicker: some View {
-        let picker=Picker("View",selection:Binding(get:{ current },set:{ page=$0 })) {
-            Text("The night").tag(Page.night)
-            Text("Where to look").tag(Page.look)
+    private var closeButton: some View {
+        Button { NightListener.shared.stop(); close() } label:{ FieldGlyph(symbol:"xmark") }
+            .buttonStyle(.plain)
+            // A keyboard's Escape leaves too, beside VoiceOver's scrub (the cover itself has no swipe to dismiss).
+            .keyboardShortcut(.cancelAction)
+            .accessibilityLabel("Leave field mode").accessibilityInputLabels([Text("Leave"),Text("Close"),Text("Leave field mode")])
+            .accessibilityShowsLargeContentViewer { Label("Leave field mode",systemImage:"xmark") }
+    }
+    private var optionsMenu: some View {
+        Menu {
+            if FieldAlarms.supported && !session.night.alarmOptions(at:session.now).isEmpty { Button("Wake me…",systemImage:"alarm") { alarms.wrappedValue=true } }
+            if FieldActivities.enabled || !session.changesPhone {
+                Toggle(isOn:Binding(get:{ session.following },set:{ session.follow($0) })) { Label("Follow on the Lock Screen",systemImage:"lock.rectangle") }
+            }
+            // Tonight as twelve seconds of sound; best with headphones, out of respect for the dark around you.
+            if NightListener.shared.isPlaying { Button("Stop listening",systemImage:"stop.fill") { NightListener.shared.stop() } }
+            else { Button("Listen to tonight",systemImage:"waveform") { NightListener.shared.play(NightSonification(park:session.park,sky:session.night.sky)) } }
+            // For the eyes reading it: a red that holds its contrast for colour-blind eyes, and the person's own brightness.
+            Section {
+                Toggle(isOn:$brighterRed) { Label("Brighter red",systemImage:"circle.lefthalf.filled") }
+                Toggle(isOn:Binding(get:{ session.keepsBrightness },set:{ session.keepBrightness($0) })) { Label("Keep my brightness",systemImage:"sun.max") }
+            }
+        } label:{ FieldGlyph(symbol:"ellipsis") }
+            .accessibilityLabel("Field mode options").accessibilityInputLabels([Text("Options"),Text("Field mode options")])
+            .accessibilityShowsLargeContentViewer { Label("Field mode options",systemImage:"ellipsis") }
+    }
+    private func pageTitle(_ page:Page)->Text {
+        switch page {
+        case .night: Text("The night")
+        case .look: Text("Where to look")
         }
-        // At accessibility sizes a menu, which never clips its labels; segments do not grow.
-        if inline { picker.pickerStyle(.menu).frame(maxWidth:.infinity,alignment:.leading) } else { picker.pickerStyle(.segmented) }
+    }
+    /// The night or where to look, one at a time (both show side by side on a wide landscape window).
+    /// Two 60-point halves of one capsule rather than a segmented control, whose segments do not grow;
+    /// at accessibility sizes a menu, which never clips its labels. Switching is a cut, never a slide.
+    @ViewBuilder private var pageSwitch: some View {
+        if inline {
+            Menu {
+                Picker("View",selection:Binding(get:{ current },set:{ page=$0 })) {
+                    pageTitle(.night).tag(Page.night)
+                    pageTitle(.look).tag(Page.look)
+                }
+            } label:{
+                HStack(spacing:10) {
+                    pageTitle(current).fixedSize(horizontal:false,vertical:true)
+                    Spacer(minLength:0)
+                    Image(systemName:"chevron.up.chevron.down").accessibilityHidden(true)
+                }
+                .font(.subheadline.weight(.semibold)).padding(.horizontal,20).padding(.vertical,8)
+                .frame(maxWidth:.infinity).modifier(FieldKey())
+            }
+            .accessibilityLabel("View").accessibilityValue(pageTitle(current))
+        } else {
+            FieldSegments { segment(.night); segment(.look) }
+                .modifier(FieldKey())
+                .accessibilityElement(children:.contain)
+        }
+    }
+    private func segment(_ target:Page)->some View {
+        let selected=current == target
+        return Button { page=target } label:{
+            pageTitle(target).font(.subheadline.weight(selected ? .semibold : .regular)).lineLimit(1)
+                .padding(.horizontal,16).frame(maxWidth:.infinity,minHeight:60)
+                // The chosen half carries a lit inner capsule as well as heavier type, so it never rests on colour alone.
+                .background { if selected { Capsule().fill(palette.ink.opacity(0.16)).overlay(Capsule().strokeBorder(palette.line,lineWidth:palette.stroke)).padding(5) } }
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+/// The page switch's halves: each its own label's width plus an equal share of what is left, so the
+/// longer label is never cut to make the halves equal. Its ideal width is the labels' own, so the
+/// footer's `ViewThatFits` moves the switch to its own row before anything is cut.
+private struct FieldSegments: Layout {
+    func sizeThatFits(proposal:ProposedViewSize,subviews:Subviews,cache:inout ())->CGSize {
+        let sizes=subviews.map { $0.sizeThatFits(.unspecified) }
+        let natural=sizes.reduce(0) { $0+$1.width }
+        return CGSize(width:max(natural,proposal.width ?? natural),height:sizes.map(\.height).max() ?? 0)
+    }
+    func placeSubviews(in bounds:CGRect,proposal:ProposedViewSize,subviews:Subviews,cache:inout ()) {
+        let sizes=subviews.map { $0.sizeThatFits(.unspecified) }
+        let share=subviews.isEmpty ? 0 : max(0,bounds.width-sizes.reduce(0) { $0+$1.width })/Double(subviews.count)
+        var x=bounds.minX
+        for (subview,size) in zip(subviews,sizes) {
+            subview.place(at:CGPoint(x:x,y:bounds.minY),proposal:ProposedViewSize(width:size.width+share,height:bounds.height))
+            x+=size.width+share
+        }
+    }
+}
+/// A glove-grade key: at least 60 points each way, the palette's panel inside its line, so it reads
+/// in the dark without lighting it. Equal sides make it a circle.
+private struct FieldKey: ViewModifier {
+    @Environment(\.nyx) private var palette
+    func body(content:Content)->some View {
+        content.frame(minWidth:60,minHeight:60)
+            .background(Capsule().fill(palette.panel))
+            .overlay(Capsule().strokeBorder(palette.line,lineWidth:palette.stroke*0.75))
+            .contentShape(Capsule())
+    }
+}
+/// A symbol on a glove-grade key. The glyph stops growing at the first accessibility size, so the
+/// row keeps both corners; a long press shows it large (`accessibilityShowsLargeContentViewer`).
+private struct FieldGlyph: View {
+    let symbol: String
+    var body: some View {
+        Image(systemName:symbol).font(.title3.weight(.semibold)).dynamicTypeSize(...DynamicTypeSize.accessibility1).modifier(FieldKey())
     }
 }
 
@@ -200,6 +294,7 @@ struct FieldView: View {
 struct FieldResetNotice: View {
     let session: FieldSession
     let reset: DarkAdaptation.Reset
+    @Environment(\.nyx) private var palette
     var body: some View {
         VStack(alignment:.leading,spacing:12) {
             Text("Your eyes started over at \(session.park.time(reset.at)).").font(.system(.headline,design:.serif))
@@ -212,13 +307,17 @@ struct FieldResetNotice: View {
             }
         }
         .padding(18).frame(maxWidth:.infinity,alignment:.leading)
-        .background(RoundedRectangle(cornerRadius:20).fill(Color(white:0.07)))
-        .overlay(RoundedRectangle(cornerRadius:20).stroke(Color.white.opacity(0.3),lineWidth:0.5))
+        .background(RoundedRectangle(cornerRadius:20).fill(palette.panel))
+        .overlay(RoundedRectangle(cornerRadius:20).strokeBorder(palette.line,lineWidth:palette.stroke*0.5))
         .accessibilityElement(children:.contain)
     }
     @ViewBuilder private var buttons: some View {
-        Button("Start over") { session.reset=nil }.buttonStyle(.bordered)
-        Button("My screen stayed dark") { session.keepAdaptation() }.buttonStyle(.bordered)
+        Button { session.reset=nil } label:{ key("Start over") }.buttonStyle(.plain)
+        Button { session.keepAdaptation() } label:{ key("My screen stayed dark") }.buttonStyle(.plain)
+    }
+    private func key(_ title:LocalizedStringKey)->some View {
+        Text(title).font(.subheadline.weight(.semibold)).fixedSize(horizontal:false,vertical:true)
+            .padding(.horizontal,20).padding(.vertical,8).modifier(FieldKey())
     }
 }
 
@@ -237,12 +336,20 @@ struct FieldNightPager: View {
     var showsReset=false
     @Environment(\.nyx) private var palette
     @MotionReduced private var reduceMotion: Bool
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @ScaledMetric(relativeTo:.largeTitle) private var numeral=68.0
+    /// The page's visible height, which the two tap zones split.
+    @State private var height=0.0
+    /// The fades at the page's edges, in points: fixed, so the bottom margin can always clear the lower one.
+    private static let topFade=16.0, bottomFade=44.0
+    private static let space="fieldPage"
     var body: some View {
         TimelineView(.periodic(from:.now,by:30)) { _ in
             let now=session.now
             // Each fact once: no card for the moment "Now" is already counting toward.
             let ahead=session.night.cards(after:now,status:session.night.status(at:now)), passed=session.night.milestones.filter { $0.date<=now }
+            // The page's stops in order, for the tap zones: "Now", each milestone ahead, then the night so far.
+            let stops=["now"]+ahead.map(\.id)+(passed.isEmpty ? [] : ["earlier"])
             ScrollView(.vertical) {
                 LazyVStack(alignment:.leading,spacing:44) {
                     VStack(alignment:.leading,spacing:20) {
@@ -258,6 +365,14 @@ struct FieldNightPager: View {
                     if !passed.isEmpty { earlier(passed).id("earlier") }
                 }
                 .scrollTargetLayout()
+                // Two big tap zones for a gloved thumb: the upper half of the visible page goes back a stop,
+                // the lower half on. On the content, measured in the page's own frame: a gesture on the
+                // ScrollView itself never sees taps its scroll view takes. Buttons inside keep their taps
+                // (a child's gesture wins), and a drag still scrolls. Off under VoiceOver, which steps
+                // through the cards (and the Milestones rotor) on its own, so a double-tap on a card never
+                // moves the page under it; the zones are never exposed as elements.
+                .contentShape(Rectangle())
+                .gesture(SpatialTapGesture(coordinateSpace:.named(Self.space)).onEnded { tap in step(tap.location.y<height/2 ? -1 : 1,through:stops) },isEnabled:!voiceOver)
                 // VoiceOver: step through what is still to come tonight, one milestone at a time.
                 .accessibilityRotor(Text("Milestones"),entries:ahead.map { MilestoneStop(id:$0.id,label:String(localized:"\($0.title), \(session.night.park.time($0.date))")) },entryID:\.id,entryLabel:\.label)
                 .padding(.horizontal,24)
@@ -267,10 +382,26 @@ struct FieldNightPager: View {
             .scrollIndicators(.hidden)
             .scrollTargetBehavior(.viewAligned)
             .scrollPosition(id:$focused,anchor:.top)
-            .contentMargins(.vertical,28,for:.scrollContent)
+            // The last stop scrolls clear of the lower fade, never resting in it above the controls.
+            .contentMargins(.top,28,for:.scrollContent).contentMargins(.bottom,28+Self.bottomFade,for:.scrollContent)
             // Text fades into the dark before it reaches the eye's clock below.
-            .mask(LinearGradient(stops:[.init(color:.clear,location:0),.init(color:.black,location:0.03),.init(color:.black,location:0.88),.init(color:.clear,location:1)],startPoint:.top,endPoint:.bottom))
+            .mask {
+                VStack(spacing:0) {
+                    LinearGradient(colors:[.clear,.black],startPoint:.top,endPoint:.bottom).frame(height:Self.topFade)
+                    Rectangle()
+                    LinearGradient(colors:[.black,.clear],startPoint:.top,endPoint:.bottom).frame(height:Self.bottomFade)
+                }
+            }
+            .onGeometryChange(for:Double.self) { $0.size.height } action:{ height=$0 }
+            .coordinateSpace(.named(Self.space))
         }
+    }
+    /// One stop back or on, with the page's light tick (`FieldView`'s selection feedback on `focused`).
+    /// A cut under Reduce Motion; the shared spring otherwise. Past either end, nothing moves.
+    private func step(_ delta:Int,through stops:[String]) {
+        let index=stops.firstIndex(of:focused ?? "now") ?? 0
+        guard stops.indices.contains(index+delta) else { return }
+        withAnimation(reduceMotion ? nil : NyxMotion.spring) { focused=stops[index+delta] }
     }
     private func dims(_ content:some View)->some View {
         content.scrollTransition(.interactive) { [still = reduceMotion] view,phase in
@@ -378,7 +509,7 @@ struct EyeClock: View {
                         }
                         Spacer(minLength:0)
                         Image(systemName:expanded ? "chevron.down" : "info.circle").font(.caption).accessibilityHidden(true)
-                    }.frame(minHeight:44).contentShape(Rectangle())
+                    }.frame(minHeight:60).contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityElement(children:.ignore)
@@ -410,6 +541,8 @@ struct FieldAlarmRows: View {
     let park: Park
     let options: [FieldNight.AlarmOption]
     var showsHeading=false
+    /// 44 on the park's page; 60 in field mode, for gloves.
+    var rowHeight: CGFloat=44
     @Environment(\.nyx) private var palette
     @Environment(\.openURL) private var openURL
     @State private var set: Set<String>=[]
@@ -428,7 +561,7 @@ struct FieldAlarmRows: View {
                             Text(on ? String(localized:"Set for \(park.time(option.fire))") : park.time(option.fire)).font(.caption).foregroundStyle(palette.muted)
                         }
                     } icon:{ Image(systemName:on ? "alarm.fill" : "alarm").foregroundStyle(palette.accent) }
-                    .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
+                    .frame(maxWidth:.infinity,minHeight:rowHeight,alignment:.leading).contentShape(Rectangle())
                 }
                 .buttonStyle(.plain).disabled(working)
                 .accessibilityAddTraits(.isToggle).accessibilityValue(on ? "Set" : "Off").accessibilityHint(on ? "Removes the alarm" : "Sets an alarm on this iPhone")
@@ -436,7 +569,7 @@ struct FieldAlarmRows: View {
             Text("Alarms ring through Silent and Focus. They are set on this iPhone and nowhere else.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             if let message {
                 Text(message).font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
-                if FieldAlarms.access == .denied, let url=URL(string:UIApplication.openSettingsURLString) { Button("Open Settings") { openURL(url) }.font(.caption).frame(minHeight:44).contentShape(Rectangle()) }
+                if FieldAlarms.access == .denied, let url=URL(string:UIApplication.openSettingsURLString) { Button("Open Settings") { openURL(url) }.font(.caption).frame(minHeight:rowHeight).contentShape(Rectangle()) }
             }
         }
         .task {

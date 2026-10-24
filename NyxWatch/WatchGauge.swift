@@ -7,6 +7,12 @@ import SwiftUI
 /// Reduce Motion and wrist-down. Turning the Crown through the week springs the arc to each night's score.
 /// Where the iPhone shows the forecast models' range, a hairline along the rim marks it, as on the
 /// iPhone's dial, and settles in as the arc lands, so uncertainty comes last and costs no line of text.
+/// Where the Sun sets and rises, the track is the night itself, as on the iPhone (`NightTrack`):
+/// twilight dim, true darkness lit, the best window in amber, the Moon's hours over the rim, hour
+/// ticks inside and the leading star at "now"; it draws in from sunset as the score's arc would
+/// have swept, and the score stays in the numeral. The models' range is then said in the words
+/// under the dial, as the iPhone does, and the times at the ends are left off: at 40 mm a time
+/// under either end would sit against the Moon and the line below, and that line gives park times.
 struct WatchGauge: View {
     @Environment(\.nyx) private var palette
     @Environment(\.isLuminanceReduced) private var dimmed
@@ -22,18 +28,33 @@ struct WatchGauge: View {
     /// The iPhone's picture of this night's Moon (`WatchMoons`): the photographic Moon, tilted for the
     /// park, as on the iPhone and its widgets. Nil draws the vector Moon.
     var moon: CGImage? = nil
+    /// The night's best window (`ClearWindow`), from the hourly clouds the iPhone handed over:
+    /// amber on the track. Nil without a full forecast.
+    var window: DateInterval? = nil
+    /// The watch's minute, for where tonight has got to.
+    var now: Date = .now
     @State private var shown = 0.0
     /// The last milestone the sweeping arc passed (70, 90), and whether it has landed: the haptics' triggers.
     @State private var milestone = 0
     @State private var landed = false
     var body: some View {
         let score = night.score.value
+        // Nil where the Sun does not set and rise (a polar day or night): the score's arc stays.
+        let ring = NightRing(sky: night.sky, park: night.park, best: window, now: now)
         // Proportions follow the dial, not the text size: the numeral is the dial's face. At
         // accessibility sizes the band word leaves the dial for the line below it.
         GeometryReader { proxy in
             let side = min(proxy.size.width, proxy.size.height)
             ZStack {
-                GaugeArc(value: shown, target: Double(score), models: models, hasForecast: night.score.hasForecast, dimmed: dimmed, palette: palette)
+                if let ring {
+                    // Revealed as the arc would sweep, so the haptics' beats still land with it. In
+                    // Always-On: no glow, and the hours already past fade, as passed milestones do.
+                    let reveal = score > 0 ? min(1, shown/Double(score)) : 1
+                    NightTrack(reveal: reveal, ring: ring, palette: palette, glow: dimmed ? 0 : 1, fit: .watch, fadesPast: dimmed)
+                    NightNow(reveal: reveal, now: ring.now, dimmed: dimmed, palette: palette)
+                } else {
+                    GaugeArc(value: shown, target: Double(score), models: models, hasForecast: night.score.hasForecast, dimmed: dimmed, palette: palette)
+                }
                 // The word sits under the numeral, clear of every tick: smaller if it must, then
                 // with a slightly smaller numeral, and only where even that cannot clear the ticks
                 // does the numeral stand alone (`WatchDialFace.choose`); VoiceOver always says the band.
@@ -59,7 +80,7 @@ struct WatchGauge: View {
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Darkness score")
-        .accessibilityValue(spoken)
+        .accessibilityValue(ring.map { spoken + " " + $0.spoken(sky: night.sky, park: night.park, best: window) } ?? spoken)
         .task(id: score) {
             if reduceMotion || dimmed || shown > 0 { withAnimation(reduceMotion ? nil : NyxMotion.spring) { shown = Double(score) }; return }
             try? await Task.sleep(for: WatchDebug.revealDelay)
@@ -113,6 +134,30 @@ struct WatchGauge: View {
         let withSmoke = night.smokeCaveat.map { spoken + " " + $0 } ?? spoken
         // The words under the dial give park times; where the park's clock is not the watch's, say whose.
         return night.park.spokenZone(at: night.sky.evening).map { withSmoke + " " + $0 } ?? withSmoke
+    }
+}
+
+/// Tonight's leading star on the night's track, where the night has got to, as on the iPhone's dial:
+/// shown once the track has drawn in that far; no glow in Always-On.
+private struct NightNow: View, Animatable {
+    var reveal: Double
+    var animatableData: Double { get { reveal } set { reveal = newValue } }
+    let now: Double?
+    let dimmed: Bool
+    let palette: NyxPalette
+    var body: some View {
+        Canvas { context, size in
+            guard let now, reveal >= now else { return }
+            let center = CGPoint(x: size.width/2, y: size.height/2), radius = WatchDialFace.radius(side: min(size.width, size.height))
+            let a = NightTrack.angle(now).radians
+            let point = CGPoint(x: center.x+cos(a)*radius, y: center.y+sin(a)*radius)
+            if !dimmed {
+                context.fill(Path(ellipseIn: CGRect(x: point.x-8, y: point.y-8, width: 16, height: 16)),
+                             with: .radialGradient(Gradient(colors: [palette.accent.opacity(0.55), palette.accent.opacity(0)]), center: point, startRadius: 0, endRadius: 8))
+            }
+            context.fill(Path(ellipseIn: CGRect(x: point.x-2.8, y: point.y-2.8, width: 5.6, height: 5.6)), with: .color(palette.ink))
+        }
+        .accessibilityHidden(true)
     }
 }
 
@@ -223,5 +268,31 @@ private struct GaugeArc: View, Animatable {
         let night = WatchSky.night(park, evening: park.currentNight(at: .now), forecast: nil, detail: nil, now: .now)
         WatchGauge(night: night, models: max(0, night.score.value-12)...min(100, night.score.value+6))
             .environment(\.nyx, NyxPalette(nightVision: true, highContrast: false)).modifier(NightVisionFilter(enabled: true))
+    }
+}
+/// The night on the dial, for the three states the brief names: a moonlit night with a best window
+/// (the window stands in for one the hourly clouds would give), a new-moon night, and Always-On.
+/// "Now" is set inside each night so the leading star shows.
+#Preview("Night • moonlit") {
+    if let park = try? ParkData.load().first(where: { $0.id == "jotr" }) {
+        let date = Date(timeIntervalSince1970: 1792800000)
+        let night = WatchSky.night(park, evening: park.currentNight(at: date), forecast: nil, detail: nil, now: date)
+        let window = night.sky.darkStart.map { DateInterval(start: $0.addingTimeInterval(3600), duration: 3*3600) }
+        WatchGauge(night: night, window: window, now: night.sky.darkStart?.addingTimeInterval(2*3600) ?? date)
+    }
+}
+#Preview("Night • new moon") {
+    if let park = try? ParkData.load().first(where: { $0.id == "jotr" }) {
+        let date = Date(timeIntervalSince1970: 1794200000) // the evening of Nov 8, 2026: the Moon new the next morning
+        let night = WatchSky.night(park, evening: park.currentNight(at: date), forecast: nil, detail: nil, now: date)
+        WatchGauge(night: night, now: night.sky.darkStart?.addingTimeInterval(4*3600) ?? date)
+    }
+}
+#Preview("Night • Always-On") {
+    if let park = try? ParkData.load().first(where: { $0.id == "jotr" }) {
+        let date = Date(timeIntervalSince1970: 1792800000)
+        let night = WatchSky.night(park, evening: park.currentNight(at: date), forecast: nil, detail: nil, now: date)
+        WatchGauge(night: night, now: night.sky.darkStart?.addingTimeInterval(2*3600) ?? date)
+            .environment(\.isLuminanceReduced, true)
     }
 }

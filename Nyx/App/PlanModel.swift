@@ -626,16 +626,7 @@ import CoreLocation
     /// The best clear, dark, moon-free stretch of a forecast night, from the hourly clouds
     /// (mid and high cloud only at a summit above the inversion). Nil without a full forecast.
     func clearWindow(_ night:Night)->ClearWindow? {
-        guard night.score.hasForecast else { return nil }
-        let window=night.sky.cloudWindow
-        var hours:[(time:Date,cloud:Double)]=[]
-        if night.upperCloudOnly, let layers=details[night.park.id]?.layers, let mid=layers.values["cloud_cover_mid"], let high=layers.values["cloud_cover_high"], mid.count==layers.times.count, high.count==layers.times.count {
-            hours=layers.times.indices.compactMap { i in
-                guard let m=mid[i], let h=high[i], layers.times[i]+1800>window.start.timeIntervalSince1970, layers.times[i]-1800<window.end.timeIntervalSince1970 else { return nil }
-                return (Date(timeIntervalSince1970:layers.times[i]),100*(1-(1-m/100)*(1-h/100)))
-            }
-        } else if let forecast=forecasts[night.park.id] { hours=forecast.hours(from:window.start,to:window.end) }
-        return ClearWindow.find(park:night.park,sky:night.sky,hours:hours)
+        ClearWindow.find(night,forecast:forecasts[night.park.id],layers:details[night.park.id]?.layers)
     }
     /// Aurora season, satellites, zodiacal light, the faintest stars and the core's light dome.
     func skyNotes(_ night:Night)->[SkyNote] {

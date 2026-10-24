@@ -334,7 +334,10 @@ struct TonightFace: View {
         }
     }
     private var gauge: some View {
-        WatchGauge(night: shown, nightLabel: offset == 0 ? nil : shown.park.dayLabel(shown.id), models: models, moon: moons?.image(park: shown.park.id, night: shown.id))
+        // The best window by the iPhone's own rule, from the hourly clouds it handed over.
+        let window = ClearWindow.find(shown, forecast: context?.cloudForecasts[shown.park.id], layers: context?.forecastDetails[shown.park.id]?.layers)?.interval
+        return WatchGauge(night: shown, nightLabel: offset == 0 ? nil : shown.park.dayLabel(shown.id), models: models, moon: moons?.image(park: shown.park.id, night: shown.id),
+                          window: window, now: now)
             .contentShape(Circle())
             .focusable(engaged)
             .focused($scrubbing)
