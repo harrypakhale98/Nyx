@@ -509,8 +509,8 @@ struct CelestialGauge: View {
                 let dial=min(size.width,size.height), k=DialMetrics.scale(side:dial)
                 let center=CGPoint(x:size.width/2,y:size.height/2), radius=dial/2-DialMetrics.inset(side:dial)
                 let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
-                // The leading star: where the score has reached, or on the night's track where the night has got to.
-                let lead:Double?=night != nil ? night?.ring.now : displayed>0.5 ? displayed/100 : nil
+                // The leading star: on the night's track, where the night has got to. Without a night to draw (polar night, midnight Sun) there is no star: it would mark the score on the ring.
+                let lead:Double?=night?.ring.now
                 let tip=Angle.degrees(140+260*(lead ?? 0))
                 // Specular glint on the glass rim. It slides with the phone's tilt, as light on a real dial would.
                 if !reduceMotion && !export && !palette.nightVision && !access.reduceHighlighting && !access.reducedResources {
@@ -523,8 +523,8 @@ struct CelestialGauge: View {
                 if lead != nil {
                     let point=CGPoint(x:center.x+cos(tip.radians)*radius,y:center.y+sin(tip.radians)*radius)
                     let pulse=still ? 1 : 0.85+0.15*sin(t*2.4)
-                    // On the night's track the star is "now", a time, not the score: starlight, as the track is.
-                    let light=night == nil ? palette.accent : palette.ink
+                    // The star is "now", a time, not the score: starlight, as the track is.
+                    let light=palette.ink
                     context.fill(Path(ellipseIn:CGRect(x:point.x-10,y:point.y-10,width:20,height:20)),with:.radialGradient(Gradient(colors:[light.opacity(0.6*pulse*access.glow),light.opacity(0)]),center:point,startRadius:0,endRadius:10))
                     // The landing: one bloom at the tip, gone in about a second. Only while the
                     // stars are moving, so a resting dial never holds it on screen.

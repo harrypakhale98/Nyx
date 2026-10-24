@@ -44,7 +44,7 @@ extension ParkDetailView {
                 .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             if let url=park.wikidataURL {
                 Link(destination:url) { Label("From Wikidata",systemImage:"safari").font(.subheadline).frame(minHeight:44).contentShape(Rectangle()) }
-                    .foregroundStyle(palette.accent)
+                    .foregroundStyle(palette.ink)
                     .accessibilityHint("Opens this place's Wikidata entry in Safari.")
             }
         }.frame(maxWidth:.infinity,alignment:.leading)

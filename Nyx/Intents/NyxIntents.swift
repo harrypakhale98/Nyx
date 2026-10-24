@@ -159,10 +159,9 @@ struct StaticScoreDial:View {
     let palette:NyxPalette
     var body:some View {
         ZStack {
+            // The dial's track without a fill, as in the app: the score is the numeral's alone.
             Circle().trim(from:0.125,to:0.875).rotation(.degrees(90))
-                .stroke(palette.ink.opacity(0.18),style:StrokeStyle(lineWidth:7,lineCap:.round))
-            Circle().trim(from:0.125,to:0.125+0.75*Double(min(100,max(0,score)))/100).rotation(.degrees(90))
-                .stroke(palette.accent,style:StrokeStyle(lineWidth:7,lineCap:.round,dash:hasForecast ? [] : [6,5]))
+                .stroke(palette.ink.opacity(0.18),style:StrokeStyle(lineWidth:7,lineCap:.round,dash:hasForecast ? [] : [6,5]))
             VStack(spacing:0) {
                 Text("\(score)").font(.system(size:44,weight:.light,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
                 Text("of 100").font(.caption2).foregroundStyle(palette.muted)

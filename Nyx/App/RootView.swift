@@ -92,7 +92,7 @@ struct RootView:View {
                 .tabBarMinimizeBehavior(tabBarMinimize)
                 // A followed night under way: a strip above the tabs that opens field mode (iOS 26.1).
                 .modifier(NightInProgressAccessory { id in withPlace(id) { FieldPresenter.present(park:$0,model:model,from:commands.topController) } })
-                .tint(commands.sidebar ? palette.controlTint : palette.accent)
+                .tint(commands.sidebar ? palette.selectionTint : palette.accent)
                 .tabViewSidebarHeader { Text(verbatim:"Nyx").font(.system(.title2,design:.serif)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader) }
                 .opacity(revealed ? 1 : 0).scaleEffect(revealed ? 1 : 0.97)
                 // Tonight's first answer waits for the person: not behind onboarding (from the first
