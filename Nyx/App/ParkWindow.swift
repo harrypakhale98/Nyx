@@ -52,7 +52,7 @@ struct ParkWindowRoot: View {
         .environment(\.nyx,palette).environment(\.skyHome,model.home)
         .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.ink).preferredColorScheme(.dark).statusBarHidden(palette.nightVision)
         .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
-        .animation(reduceMotion ? nil : NyxMotion.spring,value:palette.nightVision)
+        .animation(NyxMotion.spring(reduced:reduceMotion),value:palette.nightVision)
         // The switch asks the window for the lamp (`SceneCommands.requestNightVision`); a park's window
         // has no lamp cover of its own, so it turns at once and crossfades on the shared spring.
         .onChange(of:commands.lampRequest) { _,request in

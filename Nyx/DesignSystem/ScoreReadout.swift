@@ -15,6 +15,12 @@ struct ScoreReadout: View {
     @Environment(\.legibilityWeight) private var legibilityWeight
     /// The meters' width, for fitting the four titles (`titleStyle`).
     @State private var gridWidth=0.0
+    /// The meters fill from empty once the page can be watched, a beat into the dial's count and
+    /// 60 ms apart left to right, so the parts are seen adding up to the number above them.
+    @State private var filled=false
+    /// True only through the first fill, so the stagger never trails a scrub afterwards.
+    @State private var arriving=false
+    @Environment(\.nyxRevealHeld) private var revealHeld
     private static let columnSpacing=14.0
     let score: DarknessScore
     var agreement: ModelAgreement?=nil
@@ -103,6 +109,16 @@ struct ScoreReadout: View {
         .accessibilityLabel("Why this score")
         .accessibilityValue(spoken)
         .accessibilityHint("Opens the score breakdown.")
+        // Filled at once under Reduce Motion; otherwise a quarter second after the hold lifts, as the
+        // dial's count gathers. VoiceOver reads the parts from the first frame either way.
+        .task(id:revealHeld) {
+            guard !filled, !revealHeld else { return }
+            if !reduceMotion { try? await Task.sleep(for:.seconds(0.25)) }
+            guard !Task.isCancelled else { return }
+            arriving=true; filled=true
+            try? await Task.sleep(for:.seconds(0.6))
+            arriving=false
+        }
     }
     private func column(_ part:Part)->some View {
         VStack(alignment:.leading,spacing:7) { title(part); meter(part); value(part) }
@@ -130,7 +146,8 @@ struct ScoreReadout: View {
                                     widestPlain:SubscoreTitles.widestWord(titles,typeSize:typeSize,spaced:false,bold:bold),width:gridWidth,spacing:Self.columnSpacing)
     }
     private func meter(_ part:Part)->some View {
-        Meter(fraction:part.points.map { min(1,max(0,$0/part.maximum)) },reduceMotion:reduceMotion,limits:part.id == limiting)
+        let order=Double(parts.firstIndex { $0.id == part.id } ?? 0)
+        return Meter(fraction:part.points.map { filled ? min(1,max(0,$0/part.maximum)) : 0 },reduceMotion:reduceMotion,limits:part.id == limiting,delay:arriving ? order*0.06 : 0)
     }
     private func value(_ part:Part)->some View {
         VStack(alignment:.leading,spacing:4) {
@@ -166,6 +183,7 @@ struct ScoreReadout: View {
         let fraction: Double?
         let reduceMotion: Bool
         var limits=false
+        var delay=0.0
         var body: some View {
             GeometryReader { proxy in
                 ZStack(alignment:.leading) {
@@ -177,7 +195,7 @@ struct ScoreReadout: View {
                         Capsule().stroke(palette.line,style:StrokeStyle(lineWidth:1,dash:[2,3]))
                     }
                 }
-                .animation(reduceMotion ? nil : NyxMotion.spring,value:fraction)
+                .animation(reduceMotion ? nil : NyxMotion.spring.delay(delay),value:fraction)
             }.frame(height:3)
             .overlay { if limits { Capsule().stroke(palette.ink.opacity(palette.highContrast ? 1 : 0.85),lineWidth:palette.stroke).padding(-3.5) } }
         }

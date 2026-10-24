@@ -111,7 +111,10 @@ struct ParksView: View {
                 if DebugScenario.state=="loading" || waiting { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
                 else if nothing || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
                 else { sections(shown:shown,spots:spots,found:found,savedWorld:savedWorld,savedListed:savedListed,groups:groups,own:own,others:others,abroad:abroad) }
-            }.padding(NyxMetrics.pagePadding).readableColumn()
+            }
+            // A filter or the sort settles the rows on the shared spring (at once under Reduce Motion: rows would travel); typing in search stays instant.
+            .animation(reduceMotion ? nil : NyxMotion.spring,value:[darkOnly,stepFreeOnly,savedOnly,byScore])
+            .padding(NyxMetrics.pagePadding).readableColumn()
             .background { SearchEnder(request:commands?.sheetRequest?.id) }
             // VoiceOver rotors: jump straight to the parks with a closure alert, or a Pristine sky tonight.
             // The rows already on screen only: a rotor never scores the whole world.
@@ -314,16 +317,21 @@ struct ParksView: View {
             }
         }
     }
+    /// A country opening with more rows than this inserts them without animation.
+    private static let animatedRows=40
     private func countryRow(_ group:CountryGroup,open:Bool)->some View {
         Button {
-            withAnimation(reduceMotion ? nil : NyxMotion.spring) { if open { openCountries.remove(group.code) } else { openCountries.insert(group.code) } }
+            // A big country adds hundreds of lazy rows: they appear at once, and only the chevron turns.
+            let toggle:()->Void={ if open { openCountries.remove(group.code); return }; openCountries.insert(group.code) }
+            // The chevron animates itself (below), so the rows can go in without a transaction.
+            if group.places.count>Self.animatedRows { toggle() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring,toggle) }
         } label:{
             HStack(alignment:.firstTextBaseline,spacing:12) {
                 Text(group.name).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
                 Spacer(minLength:8)
                 Text(group.places.count,format:.number).font(.subheadline).monospacedDigit().foregroundStyle(palette.muted).fixedSize()
                 Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted)
-                    .rotationEffect(.degrees(open ? 90 : 0)).accessibilityHidden(true)
+                    .rotationEffect(.degrees(open ? 90 : 0)).animation(reduceMotion ? nil : NyxMotion.spring,value:open).accessibilityHidden(true)
             }
             .padding(.vertical,14).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
         }

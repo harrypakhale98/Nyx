@@ -9,6 +9,7 @@ struct JournalView: View {
     @Environment(\.nyx) private var palette
     @Environment(\.modelContext) private var context
     @Query(sort:\JournalEntry.date,order:.reverse) private var entries:[JournalEntry]
+    @MotionReduced private var reduceMotion: Bool
     @State private var editing=false
     @State private var deleting:JournalEntry?
     @State private var saveError=false
@@ -195,7 +196,11 @@ struct JournalView: View {
     @ViewBuilder private var entryList: some View {
         // An empty journal's button sits inside the constellation, under its promise (`YourSkyPanel`).
         if !entries.isEmpty {
-            LazyVStack(spacing:24) { ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ JournalCard(entry:entry) }.buttonStyle(.plain).hoverEffect(.lift).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } } }
+            LazyVStack(spacing:24) { ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ JournalCard(entry:entry) }.buttonStyle(.plain).hoverEffect(.lift).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } }
+                .transition(reduceMotion ? AnyTransition.opacity : .opacity.combined(with:.scale(scale:0.96))) }
+            }
+            // A night recorded or deleted settles into the list instead of jumping it (at once under Reduce Motion).
+            .animation(reduceMotion ? nil : NyxMotion.spring,value:entries.map(\.persistentModelID))
         }
     }
     /// The empty constellation's "Record a night", never into a journal that could not open.

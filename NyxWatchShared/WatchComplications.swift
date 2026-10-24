@@ -243,6 +243,7 @@ struct WatchComplicationView: View {
     var clockTimes = false
     @Environment(\.widgetRenderingMode) private var renderingMode
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var family: WidgetFamily { previewFamily ?? systemFamily }
     private var colors: WristInk { WristInk(nightVision: entry.nightVision, mode: renderingMode, contrast: contrast) }
     private var ink: Color { colors.ink }
@@ -275,12 +276,14 @@ struct WatchComplicationView: View {
             if entry.closure != nil { Image(systemName: WristClosure.symbol).foregroundStyle(caution) } else { MoonSymbol(night: night).foregroundStyle(muted) }
         } currentValueLabel: {
             Text(night.score.value, format: .number).scoreNumeral(.title3, accent: accent).widgetAccentable()
+                .contentTransition(reduceMotion ? .opacity : .numericText(value: Double(night.score.value)))
         }
         .gaugeStyle(.accessoryCircular).tint(accent).foregroundStyle(ink).widgetAccentable()
     }
     private func corner(_ night: Night) -> some View {
         // The numeral once, in the corner; the curved gauge alone carries the fill, without end labels.
         Text(night.score.value, format: .number).scoreNumeral(.title2, accent: accent).widgetAccentable()
+                .contentTransition(reduceMotion ? .opacity : .numericText(value: Double(night.score.value)))
             .widgetLabel {
                 // A closure takes the curved label from the gauge: the numeral stays, the warning is read first.
                 if entry.closure != nil {
@@ -340,6 +343,7 @@ struct WatchComplicationView: View {
             }
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text(night.score.value, format: .number).scoreNumeral(.title2, accent: accent).widgetAccentable()
+                .contentTransition(reduceMotion ? .opacity : .numericText(value: Double(night.score.value)))
                 if case .mark = closure { Image(systemName: WristClosure.symbol).font(.caption2).foregroundStyle(caution).widgetAccentable() }
                 // Whole or the one word: a basis or smoke note cut mid-word would say less than the
                 // word under the score (VoiceOver hears it all in the summary).

@@ -106,6 +106,9 @@ struct TonightView: View {
                 }.padding(24).readableColumn()
             }
         }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
+        // The loader gives way to the answer (or the calm empty state) in a dissolve, never a cut.
+        .animation(NyxMotion.spring(reduced:reduceMotion),value:loading)
+        .animation(NyxMotion.spring(reduced:reduceMotion),value:empty)
         // The fold, read on the scroll view itself so the columns keep it however far the page scrolls.
         .foldSource()
         // `-nyx-scroll 0…1` (DEBUG) opens partway down, for review captures of the starting point.

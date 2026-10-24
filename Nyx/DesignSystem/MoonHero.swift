@@ -142,8 +142,27 @@ struct MoonHero: View {
         return line
     }
 }
+/// A Moon that follows its night as the hero's does: on a change, the terminator sweeps to the new
+/// phase and the disc turns the short way round, on whatever curve the caller picks (the river's
+/// tracking spring under a finger, the shared spring otherwise, none under Reduce Motion).
+struct FollowingMoon: View {
+    let geometry: MoonGeometry
+    let animation: Animation?
+    @State private var shown: MoonGeometry?
+    var body: some View {
+        MorphingMoon(geometry:shown ?? geometry)
+            // Seated without motion on appearing, so the first step of a scrub already sweeps.
+            .onChange(of:geometry,initial:true) { _,new in
+                let from=shown ?? new
+                let to=MoonGeometry(phaseAngle:new.phaseAngle,brightLimb:MoonHero.nearest(new.brightLimb,to:from.brightLimb),
+                                    north:MoonHero.nearest(new.north,to:from.north),
+                                    librationLongitude:new.librationLongitude,librationLatitude:new.librationLatitude)
+                withAnimation(shown == nil ? nil : animation) { shown=to }
+            }
+    }
+}
 /// MoonView whose phase and tilt interpolate, so the terminator sweeps between two nights.
-private struct MorphingMoon: View, Animatable {
+struct MorphingMoon: View, Animatable {
     @Environment(\.nyx) private var palette
     var geometry: MoonGeometry
     var names=false

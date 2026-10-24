@@ -45,7 +45,7 @@ struct NightListenView: View {
                         Image(systemName:cue.symbol).font(.caption).frame(width:20).foregroundStyle(heard ? palette.ink : palette.muted).accessibilityHidden(true)
                         Text(cue.line).font(.subheadline.weight(heard ? .semibold : .regular)).foregroundStyle(heard || !playing ? palette.ink : palette.muted).fixedSize(horizontal:false,vertical:true)
                     }
-                    .animation(reduceMotion ? nil : NyxMotion.spring,value:heard)
+                    .animation(NyxMotion.spring(reduced:reduceMotion),value:heard)
                 }
             }.padding(.top,8)
         }

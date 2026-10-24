@@ -127,7 +127,7 @@ struct NightBackground: View {
             }
             else { Starfield(seed:seed,twinkle:twinkle) }
             Color.black.opacity(veil)
-        }.animation(.easeInOut(duration:0.6),value:palette.highContrast)
+        }.animation(NyxMotion.dissolve,value:palette.highContrast)
         .ignoresSafeArea().accessibilityHidden(true)
         // Nyx is dark by design and Smart Invert leaves it as it is: the system does not invert an
         // app that draws in the dark appearance (checked on iOS 27 with Smart Invert on: Tonight, a

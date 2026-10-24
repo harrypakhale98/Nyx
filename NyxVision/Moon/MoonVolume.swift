@@ -42,6 +42,8 @@ struct MoonVolume: View {
             MoonControls(view: view, nights: $nights, offersPlanner: !model.plannerOpen)
                 .environment(\.visionPalette, VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency))
                 .modifier(DebugTypeSize())
+                // Turns red with the Moon, on the iPhone's curve.
+                .animation(NyxMotion.spring(reduced: reduceMotion), value: model.nightVision)
         }
         // Keyed by the night itself, so the Moon moves on when tonight does (`VisionModel.tick`),
         // and by whether it is tonight, which a stepped-to night becomes when tonight reaches it.

@@ -21,6 +21,8 @@ struct FirstLightView: View {
     @State private var done=false
     /// Seconds for the stars to arrive; the name follows as the last of them do.
     private let reveal=7.0
+    /// Under Reduce Motion the sky dissolves in slowly; leaving, it goes over a long breath, so the dark does not snap to the screen behind.
+    private static let reducedArrival=Animation.easeInOut(duration:1), leave=Animation.easeOut(duration:0.9)
     /// The blooms' shared blur: the middle of the bright stars' diameters (2.6 to 4.7 pt), which
     /// each bloom's own blur once matched.
     private static let bloomBlur=3.6
@@ -68,7 +70,7 @@ struct FirstLightView: View {
         .accessibilityAction(.escape,dismiss)
         .task {
             started=Date.now
-            if reduceMotion { withAnimation(.easeInOut(duration:1)) { visible=true } }
+            if reduceMotion { withAnimation(Self.reducedArrival) { visible=true } }
             else {
                 try? await Task.sleep(for:.seconds(reveal*0.7))
                 withAnimation(NyxMotion.arrival) { visible=true }
@@ -82,7 +84,7 @@ struct FirstLightView: View {
     }
     private func dismiss() {
         guard !leaving else { return }
-        withAnimation(reduceMotion ? .easeOut(duration:0.3) : .easeOut(duration:0.9)) { leaving=true } completion:{ close() }
+        withAnimation(reduceMotion ? NyxMotion.fade : Self.leave) { leaving=true } completion:{ close() }
     }
     /// Each star arrives at a moment set by its brightness (bright first), with a soft ease; the
     /// Milky Way gathers last, when the eye is ready for it.

@@ -28,24 +28,30 @@ struct NightControls: View {
         }
         .saturation(model.nightVision ? 0 : 1)
         .colorMultiply(model.nightVision ? palette.red : .white)
+        // Turns red with the window (`NightVisionWindow`), on the same curve, not a frame apart.
+        .animation(NyxMotion.spring(reduced: reduceMotion), value: model.nightVision)
+    }
+    /// Another night: the title, score and Moon change together on the shared spring.
+    private func show(night offset: Int) {
+        withAnimation(NyxMotion.spring(reduced: reduceMotion)) { model.nightOffset = offset }
     }
 
     private var nightStepper: some View {
         @Bindable var model = model
         return HStack(spacing: 10) {
-            Button { model.nightOffset -= 1 } label: { Image(systemName: "chevron.backward") }
+            Button { show(night: model.nightOffset - 1) } label: { Image(systemName: "chevron.backward") }
                 .disabled(model.nightOffset == 0)
                 .accessibilityLabel(Text("Previous night"))
             VStack(spacing: 0) {
                 Text(nightTitle).font(.system(.headline, design: .serif))
                 if model.nightOffset > 0 {
                     // Regular control size: a full 44 pt target, set small by its type.
-                    Button("Back to tonight") { model.nightOffset = 0 }
+                    Button("Back to tonight") { show(night: 0) }
                         .font(.callout).buttonStyle(.bordered).buttonBorderShape(.capsule).padding(.top, 6)
                 }
             }
             .frame(minWidth: 130)
-            Button { model.nightOffset += 1 } label: { Image(systemName: "chevron.forward") }
+            Button { show(night: model.nightOffset + 1) } label: { Image(systemName: "chevron.forward") }
                 .disabled(model.nightOffset >= 365)
                 .accessibilityLabel(Text("Next night"))
         }

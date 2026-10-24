@@ -18,6 +18,7 @@ struct GoingButton: View {
     var alignment=HorizontalAlignment.center
     @State private var explaining=false
     @State private var full=false
+    @MotionReduced private var reduceMotion: Bool
     private var store: GoingNights { .shared }
     var body: some View {
         if !FieldNight.isOver(night.sky,at:DebugScenario.date ?? .now) {
@@ -42,6 +43,8 @@ struct GoingButton: View {
                 Text("Let one of them go first, on Tonight or on its own page.")
             }
             .sensoryFeedback(.selection,trigger:going == nil)
+            // The check fills and the caption changes on the spring the tap is felt with.
+            .animation(NyxMotion.spring(reduced:reduceMotion),value:going == nil)
             .sheet(isPresented:$explaining) { GoingExplainer { granted in notificationsEnabled=granted; Task { await GoingWatch.check(model) } }.nyxPresentation() }
         }
     }

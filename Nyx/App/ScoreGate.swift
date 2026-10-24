@@ -24,7 +24,7 @@ struct ScoreGate: ViewModifier {
                     .transition(.opacity)
             } else { content }
         }
-        .animation(reduceMotion ? nil : NyxMotion.spring,value:waits)
+        .animation(NyxMotion.spring(reduced:reduceMotion),value:waits)
     }
     /// Whether a surface waits: only while the launch's cache reads are still out.
     nonisolated static func waits(enabled:Bool,cachesPending:Bool)->Bool { enabled && cachesPending }

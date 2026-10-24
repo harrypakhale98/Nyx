@@ -267,17 +267,17 @@ struct RefreshKey: ViewModifier {
         let perform:@MainActor ()async->Void
         if let action { perform=action } else if let pull { perform={ await pull() } } else { return }
         commands.refreshing=true
-        withAnimation(.easeOut(duration:0.2)) { note = .working }
+        withAnimation(NyxMotion.fade) { note = .working }
         let before=model?.forecasts.mapValues(\.updated) ?? [:]
         await perform()
         commands.refreshing=false
-        guard let model else { withAnimation(.easeOut(duration:0.2)) { note=nil }; return }
+        guard let model else { withAnimation(NyxMotion.fade) { note=nil }; return }
         let line=RefreshOutcome.of(model,before:before).line(in:timeZone ?? .current)
         // Heard, politely, after anything VoiceOver is already saying; seen for a few seconds.
         if !quiet { NightListener.announce(line,priority:.low) }
-        withAnimation(.easeOut(duration:0.2)) { note = .said(line) }
+        withAnimation(NyxMotion.fade) { note = .said(line) }
         try? await Task.sleep(for:.seconds(3))
-        if note == .said(line) { withAnimation(.easeOut(duration:0.4)) { note=nil } }
+        if note == .said(line) { withAnimation(NyxMotion.fade) { note=nil } }
     }
 }
 /// What a refresh found, in Tonight's words: new forecasts (or ones minutes old), a forecast too

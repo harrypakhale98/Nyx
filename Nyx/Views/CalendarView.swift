@@ -288,11 +288,12 @@ struct CalendarView: View {
                 try? await Task.sleep(for:.milliseconds(150))
                 guard !Task.isCancelled else { return }
                 MonthLanding.seen.insert(key); landed.insert(key)
-                // The last of the ringed nights lights `ringStagger` after the one before it: a light tick then.
+                // The last of the ringed nights lights `ringStagger` after the one before it; the light tick
+                // lands as its ring closes, the shared spring's settle later, so it is felt as the click of it.
                 guard !reduceMotion else { return }
                 let lit=month(park,offset:monthOffset).inWindow.count
                 guard lit>0 else { return }
-                try? await Task.sleep(for:.seconds(Double(lit-1)*Self.ringStagger))
+                try? await Task.sleep(for:.seconds(Double(lit-1)*Self.ringStagger+NyxMotion.settleDuration))
                 if !Task.isCancelled { ringsLit+=1 }
             }
             .onChange(of:monthOffset) { old,new in if new != old { forward=new>old } }
@@ -758,7 +759,7 @@ struct CalendarView: View {
     /// and the month changes once it lands; a jump of more than a month (or the fading page) changes at once.
     private func move(_ offset:Int) {
         guard paging, !typeSize.isAccessibilitySize, abs(offset)==1 else {
-            withAnimation(reduceMotion ? nil : NyxMotion.spring) { monthOffset+=offset }
+            withAnimation(NyxMotion.spring(reduced:reduceMotion)) { monthOffset+=offset }
             return
         }
         // A slide still under way finishes first, so the next month is always in the window.

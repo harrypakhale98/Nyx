@@ -80,7 +80,7 @@ struct CityLightFigure: View {
         .sensoryFeedback(.selection,trigger:selection)
         .onChange(of:selection) { _,new in
             let target=new == .city ? Self.cityClass : Double(park.bortleEstimate)
-            withAnimation(reduceMotion ? nil : NyxMotion.spring) { drawnClass=target }
+            withAnimation(NyxMotion.spring(reduced:reduceMotion)) { drawnClass=target }
         }
     }
     /// The labels in full for the menu, and short for the segments ("Here · Class 3", "City · Class 8"),

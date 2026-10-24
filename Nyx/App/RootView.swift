@@ -116,8 +116,9 @@ struct RootView:View {
         // Field mode draws its own red; filtering it twice would darken it below legible contrast.
         .modifier(NightVisionFilter(enabled:palette.nightVision && !["field","field-compass","assistive","assistive-tonight","assistive-saved"].contains(DebugScenario.screen ?? ""),red:palette.red))
         // The lamp turns the palette under its cover, at once; every other path (Control Center, Siri, a
-        // Focus, onboarding, Reduce Motion) crossfades on the shared spring.
-        .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") || lampCover>0 ? nil : NyxMotion.spring,value:palette.nightVision)
+        // Focus, onboarding) crossfades on the shared spring, and Reduce Motion on its short dissolve:
+        // a colour change with nothing moving, never a cut of the whole screen.
+        .animation(lampCover>0 ? nil : NyxMotion.spring(reduced:systemReduceMotion || DebugScenario.isEnabled("reduce-motion")),value:palette.nightVision)
         .overlay { LampCover(cover:lampCover,origin:lampOrigin).ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true) }
         .onChange(of:commands.lampRequest) { _,request in if let request { runLamp(request.on,announce:request.announce,origin:request.origin) } }
         // One soft tap at the turn, on every path (the lamp writes the setting under its cover), however
@@ -173,7 +174,12 @@ struct RootView:View {
             #endif
             intro = !onboarded && DebugScenario.screen == nil
             if systemReduceMotion || DebugScenario.isEnabled("reduce-motion") { revealed=true; launchSettled=true }
-            else { withAnimation(NyxMotion.launch,completionCriteria:.logicallyComplete) { revealed=true } completion:{ launchSettled=true } }
+            else {
+                withAnimation(NyxMotion.launch,completionCriteria:.logicallyComplete) { revealed=true } completion:{ launchSettled=true }
+                // The dial starts its count as the tabs finish arriving (about nine tenths there), so the
+                // launch and the score read as one motion rather than two in a row.
+                Task { try? await Task.sleep(for:.seconds(NyxMotion.launchHandoff)); launchSettled=true }
+            }
             openRequestedField(); openRequestedPark()
             // Every park's week, worked out off the main thread once the first frame is up, so Parks opens ready.
             Task(priority:.utility) { await model.prepareNights(model.parks,count:7) }
