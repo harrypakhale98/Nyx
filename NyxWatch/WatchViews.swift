@@ -316,7 +316,7 @@ struct TonightFace: View {
     @ViewBuilder private func words(wraps: Bool, looking: Bool, shown: Night, isTonight: Bool = true) -> some View {
         let lines: Int? = wraps ? nil : 1
         if looking {
-            NightGlance(night: shown, isTonight: isTonight, models: context?.modelRange(for: shown)).layoutPriority(1)
+            NightGlance(night: shown, isTonight: isTonight, models: context?.modelRange(for: shown), wraps: wraps).layoutPriority(1)
         } else {
             // "No cloud forecast" or the models' range rides on the clock-time line, so neither costs the gauge anything.
             NextMoment(night: night, now: now, cloudsUnknown: night.basis == .usual, models: context?.modelRange(for: shown), wraps: wraps).layoutPriority(1)
@@ -406,7 +406,11 @@ struct NightGlance: View {
     let night: Night
     let isTonight: Bool
     var models: ClosedRange<Int>? = nil
+    /// False on the fixed face, which is one line each: the lines shrink a little rather than wrap
+    /// and take the dial's room (a 40 mm watch's "Dark 8:31 PM to 6:42 AM CDT" left it 35 pt).
+    var wraps = true
     var body: some View {
+        let lines: Int? = wraps ? nil : 1, shrink = wraps ? 1 : 0.75
         VStack(spacing: 0) {
             let day = isTonight ? Text("Tonight") : Text(night.park.dayLabel(night.id))
             let eyebrow = Font.caption2.weight(.semibold)
@@ -438,13 +442,13 @@ struct NightGlance: View {
             }
             if let start = night.sky.darkStart, let end = night.sky.darkEnd, night.sky.darkHours > 0 {
                 // Park time: the zone rides on the last time where the park's clock is not the watch's.
-                Text("Dark \(night.park.time(start)) to \(night.park.wristTime(end))").font(.system(.subheadline, design: .serif))
+                Text("Dark \(night.park.time(start)) to \(night.park.wristTime(end))").font(.system(.subheadline, design: .serif)).lineLimit(lines).minimumScaleFactor(shrink)
             } else {
-                Text(SkyConditions.noDarknessMessage(tonight: isTonight)).font(.footnote)
+                Text(SkyConditions.noDarknessMessage(tonight: isTonight)).font(.footnote).lineLimit(lines).minimumScaleFactor(shrink)
             }
-            if isTonight { Text("Turn the Crown to look ahead").font(.caption2).foregroundStyle(palette.muted).nonEssential() }
+            if isTonight { Text("Turn the Crown to look ahead").font(.caption2).foregroundStyle(palette.muted).lineLimit(lines).minimumScaleFactor(shrink).nonEssential() }
             // An early look is named as the iPhone names it, never "no forecast" (`Night.basisLabel`).
-            else if let basis = night.basisLabel { Text(basis).font(.caption2).foregroundStyle(palette.muted).nonEssential() }
+            else if let basis = night.basisLabel { Text(basis).font(.caption2).foregroundStyle(palette.muted).lineLimit(lines).minimumScaleFactor(shrink).nonEssential() }
         }
         .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .combine)
