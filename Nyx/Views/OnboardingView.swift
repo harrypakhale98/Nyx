@@ -13,6 +13,9 @@ struct OnboardingView:View {
     /// Compact height at any text size: Skip joins the dots and Continue in one row at the bottom and
     /// the margins tighten, so the page keeps most of the height.
     private var compactHeight:Bool { verticalSize == .compact }
+    /// A short portrait window (667 pt phones): Skip moves beside the dots and the art and margins
+    /// shrink, so each page's message clears the fade without scrolling.
+    private var short:Bool { size.height>0 && size.height<720 && !beside && !compactHeight }
     @Environment(\.nyx) private var palette
     @MotionReduced private var reduceMotion: Bool
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
@@ -30,27 +33,27 @@ struct OnboardingView:View {
     var body:some View {
         VStack(spacing:0) {
             // Tracking trails the X, so the wordmark is inset by one tracking step to sit on centre.
-            if !compactHeight {
+            if !compactHeight && !short {
                 HStack { Spacer();skip }.overlay { if !typeSize.isAccessibilitySize { Text("NYX").font(.caption).tracking(8).padding(.leading,8).accessibilityHidden(true) } }.padding(.horizontal,28).padding(.top,28)
             }
             TabView(selection:$page) {
                 ForEach(0..<3,id:\.self) { index in
                     ScrollView {
-                        let layout=beside ? AnyLayout(HStackLayout(spacing:36)) : AnyLayout(VStackLayout(spacing:index==1 && !typeSize.isAccessibilitySize ? 16 : 28))
+                        let layout=beside ? AnyLayout(HStackLayout(spacing:36)) : AnyLayout(VStackLayout(spacing:gap(index)))
                         layout {
                             art(index).frame(maxWidth:beside ? 320 : nil)
-                            VStack(spacing:beside ? 16 : (index==1 && !typeSize.isAccessibilitySize ? 16 : 28)) {
-                                Text(titles[index]).font(.system(beside ? .title : .largeTitle,design:.serif)).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+                            VStack(spacing:beside ? 16 : gap(index)) {
+                                Text(titles[index]).font(.system(beside || short ? .title : .largeTitle,design:.serif)).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
                                 Text(messages[index]).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).lineSpacing(4).fixedSize(horizontal:false,vertical:true)
                                 if index==2 { redToggle }
                             }
-                        }.padding(.horizontal,compactHeight ? 20 : 28).padding(.vertical,index==1 || typeSize.isAccessibilitySize || beside ? 12 : 28).frame(maxWidth:beside ? 760 : 560).frame(maxWidth:.infinity)
+                        }.padding(.horizontal,compactHeight || short ? 20 : 28).padding(.vertical,index==1 || typeSize.isAccessibilitySize || beside || short ? 12 : 28).frame(maxWidth:beside ? 760 : 560).frame(maxWidth:.infinity)
                     }.scrollBounceBehavior(.basedOnSize).defaultScrollAnchor(.center,for:.alignment)
                     // Copy taller than the page shows its scroll indicator once, so "more below" is never only a fade.
                     .scrollIndicatorsFlash(onAppear:true)
                     // Copy that runs past the controls fades out instead of being cut mid-line.
                     // At compact height the fade stays short, so a large line is not lost in it.
-                    .mask { VStack(spacing:0) { Color.black;LinearGradient(colors:[.black,.clear],startPoint:.top,endPoint:.bottom).frame(height:compactHeight ? min(fade,32) : fade) } }
+                    .mask { VStack(spacing:0) { Color.black;LinearGradient(colors:[.black,.clear],startPoint:.top,endPoint:.bottom).frame(height:compactHeight || short ? min(fade,32) : fade) } }
                     .tag(index)
                 }
             }.tabViewStyle(.page(indexDisplayMode:.never))
@@ -60,6 +63,15 @@ struct OnboardingView:View {
                     HStack(spacing:20) { dots;Spacer(minLength:8);skip;proceed }
                     VStack(spacing:8) { HStack { dots;Spacer(minLength:8);skip };proceed }
                 }.padding(.horizontal,20).padding(.top,4).padding(.bottom,8)
+            } else if short {
+                // Dots centred with Skip beside them (a hidden twin balances it); dots first when Skip's label is too wide.
+                VStack(spacing:8) {
+                    ViewThatFits(in:.horizontal) {
+                        HStack { skip.hidden();Spacer(minLength:8);dots;Spacer(minLength:8);skip }
+                        HStack { dots;Spacer(minLength:8);skip }
+                    }
+                    proceed
+                }.padding(.horizontal,20).padding(.bottom,12)
             } else {
                 VStack(spacing:20) { dots;proceed }.padding(.bottom,28)
             }
@@ -89,15 +101,17 @@ struct OnboardingView:View {
     }
     /// A large window (an iPad, either way up) draws the art at the size its other pages give the dial, not a phone's.
     private var roomy:Bool { horizontalSize == .regular && verticalSize == .regular && min(size.width,size.height)>=700 }
-    private var moonSize:CGFloat { roomy ? 260 : 170 }
+    private var moonSize:CGFloat { beside ? 130 : short ? 140 : roomy ? 260 : 170 }
+    private var moonPadding:CGFloat { beside ? 8 : short ? 12 : 24 }
+    private func gap(_ index:Int)->CGFloat { index==1 && !typeSize.isAccessibilitySize ? (short ? 12 : 16) : 28 }
     /// At accessibility sizes the decorative Moon is left out, so the headline and the first lines
     /// of the message sit above the page dots rather than behind the fade.
     @ViewBuilder private func art(_ index:Int)->some View {
         switch index {
-        case 0: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:3).frame(width:beside ? 130 : moonSize,height:beside ? 130 : moonSize).padding(.vertical,beside ? 8 : 24) }
-        case 1: ScoreAnatomy(active:page==1,roomy:roomy)
+        case 0: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:3).frame(width:moonSize,height:moonSize).padding(.vertical,moonPadding) }
+        case 1: ScoreAnatomy(active:page==1,roomy:roomy,compact:short)
         // The last page ends bright: a waxing gibbous Moon, which turns red with the switch below it.
-        default: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:11).frame(width:beside ? 130 : moonSize,height:beside ? 130 : moonSize).padding(.vertical,beside ? 8 : 24) }
+        default: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:11).frame(width:moonSize,height:moonSize).padding(.vertical,moonPadding) }
         }
     }
     /// The real night-vision switch: the whole app, this page included, turns red on the shared spring.
@@ -136,5 +150,6 @@ private struct OnboardingMoon:View {
     }
 }
 #Preview("Onboarding") { OnboardingView {}.environment(PlanModel()).preferredColorScheme(.dark) }
+#Preview("Onboarding • short",traits:.fixedLayout(width:375,height:647)) { OnboardingView {}.environment(PlanModel()).preferredColorScheme(.dark) }
 #Preview("Onboarding • landscape",traits:.landscapeLeft) { OnboardingView {}.environment(PlanModel()).preferredColorScheme(.dark) }
 #Preview("Onboarding • landscape • AX5",traits:.landscapeLeft) { OnboardingView {}.environment(PlanModel()).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }

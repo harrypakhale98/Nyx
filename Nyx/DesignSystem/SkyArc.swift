@@ -78,7 +78,9 @@ struct SkyArc: View {
                 SkyArcPicture(night:night,palette:palette,access:access,moonSize:moonSize,now:Self.nowMarker(at:timeline.date,window:window)).equatable()
             }
             .frame(height:chartHeight)
-            .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ if abs($0-chartWidth)>=1 { chartWidth=$0 } }
+            // Whole points, rounded down: rounded to nearest, a 327.5 pt column on a 375 pt phone read as 328,
+            // the chart drawn at 328 settled the column back at 327, and the page redrew forever.
+            .onGeometryChange(for:Double.self) { $0.size.width.rounded(.down) } action:{ if abs($0-chartWidth)>=1 { chartWidth=$0 } }
             // The "True darkness" label's width at the drawing's own text size, so the hairline parts
             // only where its words are.
             .background {

@@ -81,7 +81,7 @@ extension View {
     /// Reports this view's width in whole points, for pages that choose between one and two columns.
     /// Sub-point changes are ignored, so a layout can never chase its own rounding.
     func measuringWidth(_ width:Binding<Double>)->some View {
-        onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ if abs($0-width.wrappedValue)>=1 { width.wrappedValue=$0 } }
+        onGeometryChange(for:Double.self) { $0.size.width.rounded(.down) } action:{ if abs($0-width.wrappedValue)>=1 { width.wrappedValue=$0 } }
     }
 }
 private struct ReadableColumn: ViewModifier {

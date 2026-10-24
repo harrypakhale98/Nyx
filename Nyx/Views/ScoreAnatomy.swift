@@ -12,17 +12,21 @@ struct ScoreAnatomy:View {
     /// growing with the text, so larger times never meet across a dial their labels have shrunk (the page scrolls),
     /// short of the size that would move the band word inside the dial.
     @ScaledMetric(relativeTo:.caption2) private var height=188.0
+    /// A short screen's: the least that keeps the times at the dial's ends apart.
+    @ScaledMetric(relativeTo:.caption2) private var compactHeight=170.0
     let active:Bool
     /// A large window: the dial at the park page's 300 pt, its band word inside.
     var roomy=false
+    /// A short screen: a smaller dial and tighter gaps, so the page's message stays above the fade.
+    var compact=false
     @State private var filled=0
     /// The breakdown's own words (`ScoreReadout`), so the recipe and every night's score name the same four parts.
     private let parts:[(LocalizedStringKey,Int)]=[("Moonlight",40),("Clouds",25),("Sky glow",20),("True darkness",15)]
     /// Each share a step dimmer, so the four read apart without colour; gaps divide them too.
     private func shade(_ i:Int)->Double { [1,0.75,0.55,0.4][i] }
     var body:some View {
-        VStack(spacing:12) {
-            CelestialGauge(score:94,haptics:false,night:example).id(active).frame(height:typeSize.isAccessibilitySize ? nil : roomy ? 300 : min(height,CelestialGauge.labelsInsideFrom-1)) // fresh, silent count-up each time the page arrives; the real answer owns the pulses
+        VStack(spacing:compact ? 8 : 12) {
+            CelestialGauge(score:94,haptics:false,night:example).id(active).frame(height:typeSize.isAccessibilitySize ? nil : roomy ? 300 : min(compact ? compactHeight : height,CelestialGauge.labelsInsideFrom-1)) // fresh, silent count-up each time the page arrives; the real answer owns the pulses
             VStack(alignment:.leading,spacing:8) {
                 Text("Share of the score").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
                 GeometryReader { proxy in

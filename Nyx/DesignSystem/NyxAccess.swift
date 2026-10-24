@@ -188,16 +188,19 @@ extension ButtonStyle where Self == NyxActionStyle {
 /// Listen): starlight words in a faintly filled hairline capsule, at least 44 pt tall (amber stays with the score). Pressed it dims;
 /// under a pointer (iPad) the capsule lifts. The capsule already outlines it, so Show Borders adds nothing.
 struct CapsuleActionStyle: ButtonStyle {
-    func makeBody(configuration:Configuration)->some View { CapsuleActionLabel(configuration:configuration) }
+    /// The rounded rectangle at every size, for a label broken onto two lines.
+    var rounded=false
+    func makeBody(configuration:Configuration)->some View { CapsuleActionLabel(configuration:configuration,rounded:rounded) }
 }
 private struct CapsuleActionLabel: View {
     let configuration: ButtonStyleConfiguration
+    let rounded: Bool
     @Environment(\.nyx) private var palette
     @Environment(\.isEnabled) private var enabled
     @Environment(\.dynamicTypeSize) private var typeSize
     /// A rounded rectangle at accessibility sizes: a capsule around several wrapped lines has so large
     /// a radius that its rim cuts through the first and last.
-    private var shape: AnyShape { typeSize.isAccessibilitySize ? AnyShape(RoundedRectangle(cornerRadius:22,style:.continuous)) : AnyShape(Capsule()) }
+    private var shape: AnyShape { rounded || typeSize.isAccessibilitySize ? AnyShape(RoundedRectangle(cornerRadius:22,style:.continuous)) : AnyShape(Capsule()) }
     var body: some View {
         configuration.label
             .font(.subheadline).foregroundStyle(palette.ink).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)

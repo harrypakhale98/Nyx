@@ -63,7 +63,11 @@ struct PlanView: View {
         }
         Group {
             // Starlight, as every control that is not the score: amber is the score's and light's.
-            if typeSize.isAccessibilitySize || (typeSize >= .xxxLarge && sizeClass != .regular) { control.pickerStyle(.menu).tint(palette.ink).frame(maxWidth:.infinity,alignment:.leading) }
+            if typeSize.isAccessibilitySize || (typeSize >= .xxxLarge && sizeClass != .regular) {
+                let menu=control.pickerStyle(.menu).tint(palette.ink)
+                // A narrow phone at the largest sizes takes the menu a step smaller rather than breaking a mode's name.
+                ViewThatFits(in:.horizontal) { menu;menu.dynamicTypeSize(...DynamicTypeSize.accessibility3) }.frame(maxWidth:.infinity,alignment:.leading)
+            }
             else { control.pickerStyle(.segmented) }
         }
         // As wide as the page under it (the month's column, or the planner's), set by whoever places it.
