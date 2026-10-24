@@ -284,9 +284,11 @@ struct ParkDetailView: View {
         .accessibilityLabel("Jump to a part of the page")
     }
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
-        // The park's name returns to the bar once its title has scrolled away, never both at once.
+        // The park's name returns to the bar once its title has scrolled away, never both at once; never
+        // across iPhone Duo's fold, where the bar's centre is the crease and the hero already names the park.
         ToolbarItem(placement:.principal) {
-            Text(park.shortName).font(.headline).opacity(titleGone || wide ? 1 : 0).accessibilityHidden(!(titleGone || wide))
+            let shows=(titleGone || wide) && fold == nil
+            Text(park.shortName).font(.headline).opacity(shows ? 1 : 0).accessibilityHidden(!shows)
         }
         // Nothing to share until the page has its score (`ScoreGate`).
         ToolbarItem(placement:.topBarTrailing) { ShareNightMenu(night:night).disabled(model.cachesPending) }
