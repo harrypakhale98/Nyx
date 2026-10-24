@@ -215,7 +215,10 @@ struct NightRingEnds: View {
                     Text(park.time(time)).monospacedDigit().foregroundStyle(palette.ink)
                 }
                 .font(.caption2).fixedSize()
-                .position(x: center.x+cos(a)*radius, y: center.y+sin(a)*radius+DialMetrics.ringWidth(side: dial)/2+10)
+                // Hung by its top a clear gap under the rim's rounded end, at any text size: centred 10 pt
+                // under it, the caption's top sat 3 pt from the cap and read as stuck to the glass.
+                .frame(height: 0, alignment: .top)
+                .position(x: center.x+cos(a)*radius, y: center.y+sin(a)*radius+DialMetrics.ringWidth(side: dial)/2+8)
             }
         }
         .accessibilityHidden(true)
