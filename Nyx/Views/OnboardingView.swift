@@ -10,6 +10,7 @@ struct OnboardingView:View {
     /// stacked art pushed the message under the fade.
     private var beside:Bool { (verticalSize == .compact || (size.width>size.height && size.height<720)) && !typeSize.isAccessibilitySize }
     @State private var size=CGSize.zero
+    @State private var fold:Fold?
     /// Compact height at any text size: Skip joins the dots and Continue in one row at the bottom and
     /// the margins tighten, so the page keeps most of the height.
     private var compactHeight:Bool { verticalSize == .compact }
@@ -34,20 +35,25 @@ struct OnboardingView:View {
         VStack(spacing:0) {
             // Tracking trails the X, so the wordmark is inset by one tracking step to sit on centre.
             if !compactHeight && !short {
-                HStack { Spacer();skip }.overlay { if !typeSize.isAccessibilitySize { Text("NYX").font(.caption).tracking(8).padding(.leading,8).accessibilityHidden(true) } }.padding(.horizontal,28).padding(.top,28)
+                HStack { Spacer();skip }.overlay { if !typeSize.isAccessibilitySize { Text("NYX").font(.caption).tracking(8).padding(.leading,8).accessibilityHidden(true) } }.padding(.leading,wordsInset).padding(.horizontal,28).padding(.top,28)
             }
             TabView(selection:$page) {
                 ForEach(0..<3,id:\.self) { index in
                     ScrollView {
-                        let layout=beside ? AnyLayout(HStackLayout(spacing:36)) : AnyLayout(VStackLayout(spacing:gap(index)))
-                        layout {
-                            art(index).frame(maxWidth:beside ? 320 : nil)
-                            VStack(spacing:beside ? 16 : gap(index)) {
-                                Text(titles[index]).font(.system(beside || short ? .title : .largeTitle,design:.serif)).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-                                Text(messages[index]).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).lineSpacing(4).fixedSize(horizontal:false,vertical:true)
-                                if index==2 { redToggle }
-                            }
-                        }.padding(.horizontal,compactHeight || short ? 20 : 28).padding(.vertical,index==1 || typeSize.isAccessibilitySize || beside || short ? 12 : 28).frame(maxWidth:beside ? 760 : 560).frame(maxWidth:.infinity)
+                        if let halves {
+                            // iPhone Duo open: the art on the leading side of the fold, the words on the trailing side.
+                            HStack(spacing:0) {
+                                art(index).frame(maxWidth:320).padding(.horizontal,20).frame(width:halves.leading)
+                                Color.clear.frame(width:halves.gap)
+                                words(index).padding(.horizontal,24).frame(width:halves.trailing)
+                            }.padding(.vertical,12)
+                        } else {
+                            let layout=beside ? AnyLayout(HStackLayout(spacing:36)) : AnyLayout(VStackLayout(spacing:gap(index)))
+                            layout {
+                                art(index).frame(maxWidth:beside ? 320 : nil)
+                                words(index)
+                            }.padding(.horizontal,compactHeight || short ? 20 : 28).padding(.vertical,index==1 || typeSize.isAccessibilitySize || beside || short ? 12 : 28).frame(maxWidth:beside ? 760 : 560).frame(maxWidth:.infinity)
+                        }
                     }.scrollBounceBehavior(.basedOnSize).defaultScrollAnchor(.center,for:.alignment)
                     // Copy taller than the page shows its scroll indicator once, so "more below" is never only a fade.
                     .scrollIndicatorsFlash(onAppear:true)
@@ -73,11 +79,26 @@ struct OnboardingView:View {
                     proceed
                 }.padding(.horizontal,20).padding(.bottom,12)
             } else {
-                VStack(spacing:20) { dots;proceed }.padding(.bottom,28)
+                VStack(spacing:20) { dots;proceed }.frame(maxWidth:.infinity).padding(.leading,wordsInset).padding(.bottom,28)
             }
         }.background(NightBackground(score:page==1 ? 94 : nil)).foregroundStyle(palette.ink)
         .onGeometryChange(for:CGSize.self) { $0.size } action:{ size=$0 }
+        .readingFold($fold)
     }
+    private func words(_ index:Int)->some View {
+        VStack(spacing:beside ? 16 : gap(index)) {
+            Text(titles[index]).font(.system(beside || short ? .title : .largeTitle,design:.serif)).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+            Text(messages[index]).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).lineSpacing(4).fixedSize(horizontal:false,vertical:true)
+            if index==2 { redToggle }
+        }
+    }
+    /// iPhone Duo open, beside: the widths either side of the fold, each at least 260 pt; nil without a fold.
+    private var halves:(leading:Double,gap:Double,trailing:Double)? {
+        guard beside, let fold, fold.dividesWidth, fold.minX>=260, size.width-fold.maxX>=260 else { return nil }
+        return (fold.minX,fold.width,size.width-fold.maxX)
+    }
+    /// Where the words' side begins across a fold, so the wordmark, dots and Continue sit over the words, not the crease.
+    private var wordsInset:Double { halves.map { $0.leading+$0.gap } ?? 0 }
     private var skip:some View { Button("Skip") { finish() }.frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }
     private var dots:some View {
         HStack(spacing:12) { ForEach(0..<3,id:\.self) { i in Capsule().fill(i==page ? palette.ink : palette.line).frame(width:i==page ? 18 : 5,height:5) } }

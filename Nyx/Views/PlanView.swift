@@ -24,6 +24,8 @@ struct PlanView: View {
     private var shown:Mode { forced ?? mode }
     /// The page's width, so the picker over the trip planner is as wide as the planner's page.
     @State private var width=0.0
+    /// iPhone Duo's fold on its inner display (`readingFold`): the picker keeps to the leading half, off the crease.
+    @State private var fold:Fold?
     var body: some View {
         Group {
             switch shown {
@@ -35,6 +37,7 @@ struct PlanView: View {
         }
         .safeAreaBar(edge:.top,spacing:0) { if shown != .month { picker.readableColumn(WideLayout.pageWidth(width:width,largeText:typeSize.isAccessibilitySize)) } }
         .measuringWidth($width)
+        .readingFold($fold)
         .navigationTitle("Plan").navigationBarTitleDisplayMode(.inline)
         .tabRootToolbar()
         .toolbar {
@@ -68,6 +71,8 @@ struct PlanView: View {
                 // A narrow phone at the largest sizes takes the menu a step smaller rather than breaking a mode's name.
                 ViewThatFits(in:.horizontal) { menu;menu.dynamicTypeSize(...DynamicTypeSize.accessibility3) }.frame(maxWidth:.infinity,alignment:.leading)
             }
+            // Across iPhone Duo's fold, the leading half only: centred, the middle segment sat on the crease.
+            else if let fold, fold.dividesWidth, fold.minX>300 { control.pickerStyle(.segmented).frame(maxWidth:fold.minX-48).frame(maxWidth:.infinity,alignment:.leading) }
             else { control.pickerStyle(.segmented) }
         }
         // As wide as the page under it (the month's column, or the planner's), set by whoever places it.
