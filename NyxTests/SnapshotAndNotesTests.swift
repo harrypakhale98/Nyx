@@ -21,17 +21,27 @@ import Testing
 
     // MARK: Field mode's score is as old as its forecast
 
-    /// Field mode opened on a forecast issued 30 hours ago: the Live Activity carries that time, so
-    /// the Lock Screen says "as of …" as a followed night does, not a fresh-looking score.
-    @Test func fieldActivityCarriesTheForecastsAge() throws {
+    /// Field mode opened on a forecast issued 30 hours before the night's dusk: the Live Activity
+    /// carries that time, so the Lock Screen says "as of …" as a followed night does, not a
+    /// fresh-looking score. An old score is judged against dusk (`scoreAgeLimit`), so the forecast is
+    /// issued relative to the night's dusk and the clock is pinned, at every hour of the park's day:
+    /// before sunrise "tonight" is the night that began the evening before, and a forecast issued
+    /// 30 hours ago was then only 17 hours old at its dusk.
+    @Test(arguments: [0, 3, 6, 7, 9, 12, 15, 18, 20, 23])
+    func fieldActivityCarriesTheForecastsAge(hour: Int) throws {
         let model = model(), jotr = try park("jotr")
-        let now = Date.now, issued = now.addingTimeInterval(-30*3600)
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = jotr.timeZone
+        let now = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 20, hour: hour, minute: 48)))
+        model.pinClock(now); model.presentOverride = now
+        let dusk = try #require(model.night(jotr).sky.sunset)
+        let issued = dusk.addingTimeInterval(-30*3600)
         let hours = (0..<(16*24)).map { (floor(issued.timeIntervalSince1970/3600)-24+Double($0))*3600 }
         model.forecasts[jotr.id] = Forecast(updated: issued, times: hours, clouds: hours.map { _ in 5 })
         let tonight = model.night(jotr)
         try #require(tonight.forecastUpdated == issued)
         let session = FieldSession(park: jotr, model: model, changesPhone: false)
-        #expect(session.scoredAt == issued && session.scoredAt == FieldActivities.scoredAt(tonight))
+        #expect(session.scoredAt == issued && session.scoredAt == FieldActivities.scoredAt(tonight, now: now))
         let scored = FieldActivities.fieldScored(session.score, closure: session.closure, at: session.scoredAt)
         #expect(scored.at == issued && scored.score == tonight.score.value)
         let attributes = FieldActivityAttributes(night: session.night, score: scored.score, band: scored.band)
