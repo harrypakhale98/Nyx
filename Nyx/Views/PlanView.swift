@@ -10,6 +10,7 @@ struct PlanView: View {
     /// This window's commands, which carry its calendar requests.
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.nyx) private var palette
     /// Kept per window. A new key, so a window saved on the month before best nights existed opens on them.
     @SceneStorage("planView") private var mode:Mode = .best
     /// The mode a DEBUG route names (`-nyx-screen plan|calendar|best`, `-nyx-plan-trip`), chosen before the
@@ -59,7 +60,8 @@ struct PlanView: View {
             Text("My free nights").tag(Mode.free)
         }
         Group {
-            if typeSize.isAccessibilitySize { control.pickerStyle(.menu).frame(maxWidth:.infinity,alignment:.leading) }
+            // Starlight, as every control that is not the score: amber is the score's and light's.
+            if typeSize.isAccessibilitySize { control.pickerStyle(.menu).tint(palette.ink).frame(maxWidth:.infinity,alignment:.leading) }
             else { control.pickerStyle(.segmented) }
         }
         // As wide as the page under it (the month's column, or the planner's), set by whoever places it.

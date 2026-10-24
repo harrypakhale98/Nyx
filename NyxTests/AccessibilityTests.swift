@@ -19,7 +19,7 @@ import Accessibility
     // MARK: Red for every eye
 
     /// The brighter red keeps primary and secondary text above 4.5:1 on black and on the night
-    /// panel for typical, protan and deutan eyes (Machado 2009); the standard red does not for protans.
+    /// panel for typical, protan and deutan eyes (Machado 2009), as the standard red now does too.
     @Test func brighterRedPassesForColourBlindEyes() {
         let black=SIMD3<Double>(0,0,0)
         let grey=0.2126*0.07+0.7152*0.008+0.0722*0.005
@@ -29,10 +29,10 @@ import Accessibility
             #expect(vision.contrast(red*0.96,black)>=4.5, "secondary on black, \(vision)")
             #expect(vision.contrast(red,panel)>=4.5, "primary on the panel, \(vision)")
         }
-        // Why it exists: the standard red falls short for protans.
-        #expect(ColorVision.protan.contrast(NightTint.standard.rgb,black)<4.5)
-        #expect(abs(ColorVision.typical.contrast(NightTint.standard.rgb,black)-6.16)<0.02)
-        #expect(abs(ColorVision.protan.contrast(NightTint.brighter.rgb,black)-5.11)<0.02)
+        // The standard red, the default on every surface, passes for protans too; the brighter one is extra room.
+        #expect(ColorVision.protan.contrast(NightTint.standard.rgb,black)>=4.5)
+        #expect(abs(ColorVision.typical.contrast(NightTint.standard.rgb,black)-6.85)<0.02)
+        #expect(abs(ColorVision.protan.contrast(NightTint.brighter.rgb,black)-6.12)<0.02)
     }
     @Test func increaseContrastOrTheSwitchBrightensTheRed() {
         #expect(NyxPalette(nightVision:true,highContrast:false).red == .standard)

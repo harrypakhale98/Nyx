@@ -20,7 +20,7 @@ struct TranslateButton: View {
                 Label("Translate",systemImage:"translate").font(.subheadline)
                     .frame(minHeight:44).contentShape(Rectangle())
             }
-            .buttonStyle(.plain).foregroundStyle(palette.accent)
+            .buttonStyle(.plain).foregroundStyle(palette.ink)
             .accessibilityHint("Shows a translation from iOS, made on this device.")
             .translationPresentation(isPresented:$presented,text:text)
         }

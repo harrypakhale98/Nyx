@@ -31,7 +31,7 @@ struct DarkestAhead: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(name(pick)).font(.system(.headline, design: .serif)).foregroundStyle(palette.ink)
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(night.score.value, format: .number).font(.system(.largeTitle, design: .serif)).monospacedDigit().foregroundStyle(palette.accent)
+                    Text(night.score.value, format: .number).scoreNumeral(.largeTitle, accent: palette.accent)
                     Text(night.compactBandLabel).font(.callout).foregroundStyle(palette.muted)
                 }
                 HStack(spacing: 8) {
@@ -42,13 +42,14 @@ struct DarkestAhead: View {
                 if let smoke = night.smokeLabel { Text(smoke).font(.subheadline).foregroundStyle(palette.muted) }
                 // The closure's own words stand above the score; each night carries the mark.
                 if inputs.closure(park) != nil {
-                    Label("Closure alert", systemImage: "exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent)
+                    // The warning in its red and the words in ink, as on the iPhone: amber is the score's.
+                    Label { Text("Closure alert").foregroundStyle(palette.ink) } icon: { Image(systemName: "exclamationmark.triangle").foregroundStyle(palette.nightVision ? palette.ink : NyxPalette.cautionColor) }.font(.subheadline)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(18)
             .background(background, in: .rect(cornerRadius: 20))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(chosen ? palette.accent : palette.line, lineWidth: chosen ? 2 : 0.5))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(chosen ? palette.ink : palette.line, lineWidth: chosen ? 2 : 0.5))
             .contentShape(.hoverEffect, .rect(cornerRadius: 20))
         }
         .buttonStyle(.plain)

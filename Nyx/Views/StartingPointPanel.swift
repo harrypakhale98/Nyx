@@ -86,7 +86,7 @@ struct StartingPointPanel: View {
                 Text(distance)
                 Image(systemName:"chevron.up.chevron.down").font(.caption.weight(.semibold)).accessibilityHidden(true)
             }
-            .font(.subheadline).foregroundStyle(palette.accent).frame(minWidth:44,minHeight:44).contentShape(Rectangle())
+            .font(.subheadline).foregroundStyle(palette.ink).frame(minWidth:44,minHeight:44).contentShape(Rectangle())
         }
         .buttonStyle(.plain).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true)
         .accessibilityLabel("Radius").accessibilityValue(distance).accessibilityInputLabels([Text("Radius"),Text("Distance")])

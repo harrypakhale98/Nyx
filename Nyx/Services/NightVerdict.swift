@@ -11,12 +11,15 @@ nonisolated enum NightVerdict {
         /// The same, with ranges read as "from … to …".
         let spoken: String
     }
-    /// A darker night counts only this many points above the one shown, and from "Good" up, within
-    /// the nights after it up to `horizon`: one rule for the park page and for Tonight across parks,
-    /// so the two never name different "darker" nights by different measures.
+    /// A darker night counts only this many points above the one shown, and from "Good" up: one rule
+    /// for the park page and for Tonight, so the two never name "darker" nights by different measures.
     static let darkerMargin=10
     static let darkerFloor=60
-    static let horizon=13
+    /// The nights from tonight over which a place's best night is chosen, wherever one is named: the
+    /// park page's "Darker on…", Tonight's capsule, Best nights, the river's "Best night", With the
+    /// lights out. One window (Best nights' 30, a whole lunar cycle, so the next new Moon is always in
+    /// it) and one ranking (`best`), so every surface names the same night with the same number.
+    static let horizon=BestNightsInReach.nights
     /// Whether `ahead` clears `night` by the margin and reaches the floor.
     static func clearlyDarker(_ ahead: Night, than night: Night) -> Bool {
         ahead.score.value>=night.score.value+darkerMargin && ahead.score.value>=darkerFloor
@@ -28,7 +31,8 @@ nonisolated enum NightVerdict {
         guard sky.darkHours>0 else { return nil }
         let moon=moonSentence(sky: sky, park: park)
         let milkyWay=coreSentence(core, sky: sky, park: park)
-        let ahead=darker.map { String(localized: "Darker on \($0.park.dayLabel($0.id)): \(scored($0)).") }
+        // In the capsule's own words (`capsule`), so "Darker on…" is said one way wherever it is said.
+        let ahead=darker.map { Sentences.end(capsule($0, here: true)) }
         let text=Sentences.join([moon, milkyWay?.text, ahead].compactMap { $0 })
         let spoken=Sentences.join([moon, milkyWay?.spoken, ahead].compactMap { $0 })
         return text.isEmpty ? nil : Line(text: text, spoken: spoken)
@@ -66,22 +70,40 @@ nonisolated enum NightVerdict {
         let text=String(localized: "Milky Way core not up in true darkness.")
         return Line(text: text, spoken: text)
     }
-    /// A night's score as a line may name it, with what it rests on when that is not a full forecast:
-    /// "82", "82, an early look", "82, an estimate". A later night is never set beside tonight's as
-    /// if both were forecasts.
-    static func scored(_ night: Night) -> String {
-        switch night.basis {
-        case .forecast: "\(night.score.value)"
-        case .blended: String(localized: "\(night.score.value), an early look")
-        case .usual: String(localized: "\(night.score.value), an estimate")
-        }
-    }
-    /// The darkest of the nights ahead when it clears the one shown by `darkerMargin` and reaches
-    /// "Good"; the earliest on a tie.
-    static func darker(than night: Night, among ahead: [Night]) -> Night? {
-        let best=ahead.filter { $0.id>night.id }.max { a, b in a.score.value != b.score.value ? a.score.value<b.score.value : a.id>b.id }
-        guard let best, clearlyDarker(best,than:night) else { return nil }
+    /// A night's score as a line may name it, with what it rests on in the words every list uses
+    /// (`DarknessScore.withBasis`): "82" on a full forecast, "82, early look", "82, usual clouds" (or
+    /// "82, Moon and darkness only" where the place has no usual clouds), and ", haze or smoke" when
+    /// smoke holds it down. A later night is never set beside tonight's as if both were forecasts.
+    static func scored(_ night: Night) -> String { night.score.withBasis(String(night.score.value)) }
+    /// A place's best night: the first of `nights` (its nights from tonight over `horizon`) by
+    /// `NightPlanner.better`, the ranking every best night uses (score, then the darker measured sky,
+    /// the parts beneath a cap, the longer darkness, the surer forecast, the earlier night). A
+    /// closure is left out: it costs every night of one park alike, so it never moves the night.
+    static func best(_ nights: [Night]) -> Night? { nights.min(by: NightPlanner.better) }
+    /// The park page's "Darker on…": the place's best night (`best` over its nights from tonight),
+    /// when it falls after the night shown, clears it by `darkerMargin` and reaches "Good". Never a
+    /// nearer night that is merely darker than this one, so the page and every list name one night.
+    static func darker(than night: Night, among nights: [Night]) -> Night? {
+        guard let best=best(nights), best.id>night.id, clearlyDarker(best,than:night) else { return nil }
         return best
+    }
+    /// Tonight's "Darker on…" under the answer: first the answer's own park, its best night by the
+    /// park page's rule (`darker`), so the capsule and that page name the same night; otherwise the
+    /// best night across the places in reach as Best nights ranks them (`BestNightsInReach.make`, a
+    /// closure counting against its park), when it clears tonight's answer by the same margin.
+    /// `here`: the answer's park's nights from tonight; `across`: each place's nights from tonight.
+    static func darkerAhead(than tonight: Night, here: [Night], across: [[Night]], closures: [String: String]) -> Night? {
+        if let own=darker(than: tonight, among: here) { return own }
+        // The answer's park leading here is a night already turned down above (none clears tonight).
+        guard let best=BestNightsInReach.make(across, closures: closures, limit: 1).best, best.park.id != tonight.park.id, clearlyDarker(best, than: tonight) else { return nil }
+        return best
+    }
+    /// The capsule under a dial, Tonight's and a park page's, two short lines: when, then where and
+    /// how dark ("Darker on Mon, Nov 2" / "Anza-Borrego Desert State Park · 77, usual clouds"). At the
+    /// answer's own park the place goes unsaid: the name is right above ("Darker on Thu, Nov 5 · 80").
+    static func capsule(_ night: Night, here: Bool) -> String {
+        let when=String(localized: "Darker on \(night.park.dayLabel(night.id))")
+        return here ? "\(when) · \(scored(night))" : "\(when)\n\(night.park.shortName) · \(scored(night))"
     }
 }
 

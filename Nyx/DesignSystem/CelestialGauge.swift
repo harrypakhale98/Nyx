@@ -12,7 +12,8 @@ import SwiftUI
 /// The count-up runs at the display's rate, one value per frame from the time since it began, and
 /// then stops; the ambient stars and the glint redraw at `Decoration.rate` at most. Crossing 70 and
 /// 90, the orbiting stars quicken for a moment on the frame of the medium pulse; the landing's light
-/// tick comes with one amber glow at the arc's tip (a landing that is itself the step to 70 or 90 is
+/// tick comes with one glow at the arc's tip, amber on the score's arc and starlight on the night's
+/// track, where amber is the numeral's alone (a landing that is itself the step to 70 or 90 is
 /// that milestone's pulse instead, never both). Under Reduce Motion the dial shows the answer still.
 ///
 /// Only the drawing scales with the dial, the glass rim included (`DialMetrics`). The numeral is
@@ -34,6 +35,8 @@ struct CelestialGauge: View {
     @Environment(\.nyxAccess) private var access
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.nyxRevealHeld) private var revealHeld
+    /// A page's cap on the dial at accessibility sizes (`gaugeAccessibleMax`); unbounded by default.
+    @Environment(\.gaugeAccessibleMax) private var accessibleMax
     @ScaledMetric(relativeTo:.title3) private var bandMetric=20.0
     let score: Int
     var hasForecast: Bool=true
@@ -54,7 +57,7 @@ struct CelestialGauge: View {
     /// The milestone and landing ticks. Off for an example dial, so the real answer owns them.
     var haptics=true
     /// The night itself along the track (`NightRing`), with its park for the times at the ends and
-    /// what VoiceOver says of it. Nil keeps the 0–100 track (the onboarding example, a polar night).
+    /// what VoiceOver says of it. Nil keeps the 0–100 track (a polar night or day).
     var night:(ring:NightRing,park:Park,spoken:String)?=nil
     /// Called with the `revealKey` the dial has settled on: after the landing, at once without
     /// motion, after each later sweep, and when a settled dial is handed a new key for the score it
@@ -127,7 +130,7 @@ struct CelestialGauge: View {
     var body: some View {
         Group {
             if typeSize.isAccessibilitySize {
-                let dial=Self.accessibleSide(band:bandMetric,width:available)
+                let dial=min(Self.accessibleSide(band:bandMetric,width:available),accessibleMax)
                 VStack(spacing:16) {
                     ZStack { bezel; drawing; numeral(size:Self.accessibleNumeral(band:bandMetric,side:dial)) }.frame(width:dial,height:dial)
                     band
@@ -139,7 +142,9 @@ struct CelestialGauge: View {
                 VStack(spacing:6) {
                     ZStack { bezel; drawing }
                         .overlay { VStack(spacing:5) { numeral(size:side*0.36); if labelsInside { band; units.padding(.top,side<270 ? 2 : 8) } } }
-                        .frame(maxWidth:verticalSize == .compact ? 220 : 300).aspectRatio(1,contentMode:.fit)
+                        // Square first, then capped: capped first, a page that proposes no height (the park's)
+                        // got a 300 × 354 frame with 27 pt of empty sky above the dial and below it.
+                        .aspectRatio(1,contentMode:.fit).frame(maxWidth:verticalSize == .compact ? 220 : 300)
                         .onGeometryChange(for:CGFloat.self) { min($0.size.width,$0.size.height) } action:{ side=$0 }
                         // No taller than on the widest iPhone, so a wide column does not open a gap around the dial.
                         .frame(maxWidth:354)
@@ -149,7 +154,8 @@ struct CelestialGauge: View {
                             case .ended: pointer=nil
                             }
                         }
-                    if !labelsInside { band; units }
+                    // Below a small dial, clear of the sunset and sunrise times hung under its open ends.
+                    if !labelsInside { band.padding(.top,night == nil ? 0 : 10); units }
                 }
                 // The whole space offered decides the labels' place (`labelsInside(offered:)`). A page
                 // that proposes no height (the park page) offers the instrument's own height.
@@ -517,13 +523,15 @@ struct CelestialGauge: View {
                 if lead != nil {
                     let point=CGPoint(x:center.x+cos(tip.radians)*radius,y:center.y+sin(tip.radians)*radius)
                     let pulse=still ? 1 : 0.85+0.15*sin(t*2.4)
-                    context.fill(Path(ellipseIn:CGRect(x:point.x-10,y:point.y-10,width:20,height:20)),with:.radialGradient(Gradient(colors:[palette.accent.opacity(0.6*pulse*access.glow),palette.accent.opacity(0)]),center:point,startRadius:0,endRadius:10))
-                    // The landing: one amber bloom at the tip, gone in about a second. Only while the
+                    // On the night's track the star is "now", a time, not the score: starlight, as the track is.
+                    let light=night == nil ? palette.accent : palette.ink
+                    context.fill(Path(ellipseIn:CGRect(x:point.x-10,y:point.y-10,width:20,height:20)),with:.radialGradient(Gradient(colors:[light.opacity(0.6*pulse*access.glow),light.opacity(0)]),center:point,startRadius:0,endRadius:10))
+                    // The landing: one bloom at the tip, gone in about a second. Only while the
                     // stars are moving, so a resting dial never holds it on screen.
                     let age=glow.map { timeline.date.timeIntervalSince($0) } ?? -1
                     if !rests, !access.reduceHighlighting, age>=0, age<1.2 {
                         let bloom=Self.landingGlow(age), r=10+14*bloom.spread
-                        context.fill(Path(ellipseIn:CGRect(x:point.x-r,y:point.y-r,width:2*r,height:2*r)),with:.radialGradient(Gradient(colors:[palette.accent.opacity(0.55*bloom.strength*access.glow),palette.accent.opacity(0)]),center:point,startRadius:0,endRadius:r))
+                        context.fill(Path(ellipseIn:CGRect(x:point.x-r,y:point.y-r,width:2*r,height:2*r)),with:.radialGradient(Gradient(colors:[light.opacity(0.55*bloom.strength*access.glow),light.opacity(0)]),center:point,startRadius:0,endRadius:r))
                     }
                     context.fill(Path(ellipseIn:CGRect(x:point.x-3.2,y:point.y-3.2,width:6.4,height:6.4)),with:.color(palette.ink))
                 }
@@ -585,8 +593,9 @@ private struct DialBandWord: View, Animatable {
             .animation(word == nil || still ? nil : NyxMotion.settle,value:word)
     }
 }
-/// The dial's well, track, glow, arc and ticks for a value 0…100. Animatable, so a new night's
-/// score sweeps the arc on the shared spring instead of jumping.
+/// The dial's well, track and ticks where there is no night to draw (no sunset or no sunrise: a polar
+/// night, the midnight Sun): never a fill, so the ring never reads as the score, which is the numeral's
+/// alone, as on every other night. `value` stays for the models' range band, which rides beside it.
 private struct DialFace: View, Animatable {
     var value: Double
     let hasForecast: Bool
@@ -604,26 +613,13 @@ private struct DialFace: View, Animatable {
             let start=Angle.degrees(140), end=Angle.degrees(400)
             var track=Path(); track.addArc(center:center,radius:radius,startAngle:start,endAngle:end,clockwise:false)
             context.stroke(track,with:.color(palette.line),style:StrokeStyle(lineWidth:1.2*palette.stroke,lineCap:.round))
-            let displayed=min(100,max(0,value))
-            let tip=Angle.degrees(140+260*displayed/100)
-            var arc=Path(); arc.addArc(center:center,radius:radius,startAngle:start,endAngle:tip,clockwise:false)
-            let dash:[CGFloat]=hasForecast ? [] : [3,5]
-            if displayed>0.5 {
-                // A soft amber glow under the arc, stronger as the score rises.
-                context.drawLayer { layer in
-                    layer.addFilter(.blur(radius:7))
-                    layer.stroke(arc,with:.color(palette.accent.opacity((0.18+0.3*displayed/100)*glow)),style:StrokeStyle(lineWidth:6,lineCap:.round,dash:dash))
-                }
-                context.stroke(arc,with:.color(palette.accent),style:StrokeStyle(lineWidth:2.3,lineCap:.round,dash:dash))
-            }
             for tick in 0..<41 {
                 let a=(140+Double(tick)*6.5)*Double.pi/180
-                let lit=Double(tick)*2.5<=displayed
                 let outer=radius-8*k, inner=radius-(tick%10==0 ? 17 : 12)*k
                 let aPoint=CGPoint(x:center.x+cos(a)*outer,y:center.y+sin(a)*outer)
                 let bPoint=CGPoint(x:center.x+cos(a)*inner,y:center.y+sin(a)*inner)
                 var line=Path(); line.move(to:aPoint); line.addLine(to:bPoint)
-                context.stroke(line,with:.color(lit ? palette.accent.opacity(tick%10==0 ? 0.75 : 0.45) : palette.line),lineWidth:(tick%10==0 ? 0.9 : 0.6)*palette.stroke)
+                context.stroke(line,with:.color(tick%10==0 ? palette.ink.opacity(0.35) : palette.line),lineWidth:(tick%10==0 ? 0.9 : 0.6)*palette.stroke)
             }
         }
     }

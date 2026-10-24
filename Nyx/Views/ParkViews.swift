@@ -74,7 +74,7 @@ struct UnknownClosuresNote: View {
             } else {
                 Label { Text(park.unknownClosuresLine).fixedSize(horizontal:false,vertical:true) } icon:{
                     // At accessibility sizes the glyph would take a column of its own: the words alone.
-                    if !typeSize.isAccessibilitySize { Image(systemName:"exclamationmark.shield").foregroundStyle(palette.accent).accessibilityHidden(true) }
+                    if !typeSize.isAccessibilitySize { Image(systemName:"exclamationmark.shield").foregroundStyle(palette.caution).accessibilityHidden(true) }
                 }
                 .font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(alignment == .center ? .center : .leading)
             }
@@ -82,7 +82,7 @@ struct UnknownClosuresNote: View {
                 Link(destination:url) {
                     Label("Park website",systemImage:"safari").font(.subheadline.weight(.medium)).frame(minHeight:44).contentShape(Rectangle())
                 }
-                .foregroundStyle(palette.accent)
+                .foregroundStyle(palette.ink)
                 .accessibilityHint("Opens the park's own site in Safari.")
                 .accessibilityInputLabels([Text("Park website"),Text("Website")])
             }
@@ -100,11 +100,12 @@ struct ParkRow: View {
     var stepFree=false
     var body: some View {
         VStack(alignment:.leading,spacing:8) {
-            // Long names wrap beside the score; only accessibility sizes stack them.
+            // Long names wrap beside the score; only accessibility sizes stack them, and there tonight's
+            // score follows the name straight away, before the state and the week's best night.
             if typeSize.isAccessibilitySize {
-                VStack(alignment:.leading,spacing:14) { names; number }.frame(maxWidth:.infinity,alignment:.leading)
+                VStack(alignment:.leading,spacing:14) { name; number; details }.frame(maxWidth:.infinity,alignment:.leading)
             } else {
-                HStack(alignment:.center,spacing:16) { names.layoutPriority(1); Spacer(minLength:8); number }
+                HStack(alignment:.center,spacing:16) { VStack(alignment:.leading,spacing:6) { name; details }.layoutPriority(1); Spacer(minLength:8); number }
             }
             if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).labelStyle(.caution).fixedSize(horizontal:false,vertical:true) }
         }.padding(.vertical,14)
@@ -138,9 +139,11 @@ struct ParkRow: View {
         } else { items.append(.init(label:String(localized:"State"),value:night.park.region.replacingOccurrences(of:",",with:", "),high:false)) }
         return items
     }
-    private var names: some View {
+    private var name: some View {
+        Text(night.park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+    }
+    private var details: some View {
         VStack(alignment:.leading,spacing:6) {
-            Text(night.park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
             Text("\(night.park.rowLocality)\(night.park.darkSkyDesignated ? " · "+String(localized:"Dark Sky designated") : "")").font(.caption).foregroundStyle(palette.muted)
             if stepFree { Label("Step-free viewing",systemImage:"figure.roll").font(.caption).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
             if !night.park.drivable { Label("No road access",systemImage:"ferry").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
@@ -148,8 +151,9 @@ struct ParkRow: View {
         }
     }
     private var number: some View {
-        // The score never wraps, whatever the column width; the name beside it does.
-        VStack(alignment:typeSize.isAccessibilitySize ? .leading : .trailing,spacing:2) { Text("\(night.score.value)").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.accent); Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted) }.fixedSize()
+        // The score never wraps, whatever the column width; the name beside it does. A step above the
+        // name, not three: the list is sixty-three answers, and none of them should shout.
+        VStack(alignment:typeSize.isAccessibilitySize ? .leading : .trailing,spacing:2) { Text("\(night.score.value)").scoreNumeral(.title2,accent:palette.accent); Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted) }.fixedSize()
     }
 }
 /// A row's "More content" for VoiceOver (`accessibilityCustomContent`), in the items' order. One slot per
@@ -205,7 +209,7 @@ struct ClampedText: View {
                 }
             if truncates || expanded {
                 Button(expanded ? "Less" : "More") { expanded.toggle() }
-                    .font(font.weight(.medium)).foregroundStyle(palette.accent).frame(minHeight:44).contentShape(Rectangle())
+                    .font(font.weight(.medium)).foregroundStyle(palette.ink).frame(minHeight:44).contentShape(Rectangle())
                     .accessibilityHint(expanded ? "Shows less." : "Shows the rest.")
             }
         }.frame(maxWidth:.infinity,alignment:.leading)
@@ -225,14 +229,14 @@ struct SoundAndTouchRow: View {
                 NightListenView(night:night,isTonight:isTonight,expanded:expanded)
                 if MoonHaptics.enabled {
                     Button { feel() } label:{ Label("Feel the Moon",systemImage:"hand.tap").font(.subheadline.weight(.medium)).frame(minHeight:44).contentShape(Rectangle()) }
-                        .buttonStyle(.nyxAction).foregroundStyle(palette.accent)
+                        .buttonStyle(.nyxAction).foregroundStyle(palette.ink)
                         .accessibilityHint("Plays the Moon's phase as a texture: sharp, sparse taps for a new moon, a broad swell for a full moon.")
                 }
             }.padding(.top,8)
         } label:{
             Label("Sound and touch",systemImage:"waveform").font(.subheadline.weight(.medium)).frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
         }
-        .tint(palette.accent)
+        .tint(palette.ink)
         .accessibilityActions {
             Button(isTonight ? String(localized:"Listen to tonight") : String(localized:"Listen to this night")) { NightListener.shared.play(NightSonification(park:night.park,sky:night.sky)) }
             if MoonHaptics.enabled { Button("Feel the Moon") { feel() } }
@@ -284,7 +288,7 @@ struct AlertsBusyNote: View {
             if !summarySaysBusy { Text("Park alerts are busy. Check current conditions on nps.gov.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             if let url=BrowserLink.parkConditions(park) {
                 Link(destination:url) { Label("Current conditions on nps.gov",systemImage:"safari").font(.subheadline).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
-                    .foregroundStyle(palette.accent).accessibilityHint("Opens the park's page in Safari.")
+                    .foregroundStyle(palette.ink).accessibilityHint("Opens the park's page in Safari.")
             }
         }
     }

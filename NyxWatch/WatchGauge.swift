@@ -8,7 +8,7 @@ import SwiftUI
 /// Where the iPhone shows the forecast models' range, a hairline along the rim marks it, as on the
 /// iPhone's dial, and settles in as the arc lands, so uncertainty comes last and costs no line of text.
 /// Where the Sun sets and rises, the track is the night itself, as on the iPhone (`NightTrack`):
-/// twilight dim, true darkness lit, the best window in amber, the Moon's hours over the rim, hour
+/// twilight dim, true darkness lit, the best window in full starlight with a glow, the Moon's hours over the rim, hour
 /// ticks inside and the leading star at "now"; it draws in from sunset as the score's arc would
 /// have swept, and the score stays in the numeral. The models' range is then said in the words
 /// under the dial, as the iPhone does, and the times at the ends are left off: at 40 mm a time
@@ -29,7 +29,7 @@ struct WatchGauge: View {
     /// park, as on the iPhone and its widgets. Nil draws the vector Moon.
     var moon: CGImage? = nil
     /// The night's best window (`ClearWindow`), from the hourly clouds the iPhone handed over:
-    /// amber on the track. Nil without a full forecast.
+    /// brightest on the track. Nil without a full forecast.
     var window: DateInterval? = nil
     /// The watch's minute, for where tonight has got to.
     var now: Date = .now
@@ -151,9 +151,10 @@ private struct NightNow: View, Animatable {
             let center = CGPoint(x: size.width/2, y: size.height/2), radius = WatchDialFace.radius(side: min(size.width, size.height))
             let a = NightTrack.angle(now).radians
             let point = CGPoint(x: center.x+cos(a)*radius, y: center.y+sin(a)*radius)
+            // "Now" is a time, not the score: its glow is starlight, as the track is (the iPhone dial's rule).
             if !dimmed {
                 context.fill(Path(ellipseIn: CGRect(x: point.x-8, y: point.y-8, width: 16, height: 16)),
-                             with: .radialGradient(Gradient(colors: [palette.accent.opacity(0.55), palette.accent.opacity(0)]), center: point, startRadius: 0, endRadius: 8))
+                             with: .radialGradient(Gradient(colors: [palette.ink.opacity(0.55), palette.ink.opacity(0)]), center: point, startRadius: 0, endRadius: 8))
             }
             context.fill(Path(ellipseIn: CGRect(x: point.x-2.8, y: point.y-2.8, width: 5.6, height: 5.6)), with: .color(palette.ink))
         }

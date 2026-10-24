@@ -74,7 +74,7 @@ struct ExternalRow: View {
     var symbol:String?=nil
     var body: some View {
         HStack(spacing:12) {
-            if let symbol { Image(systemName:symbol).foregroundStyle(palette.accent).frame(width:24).accessibilityHidden(true) }
+            if let symbol { Image(systemName:symbol).foregroundStyle(palette.ink).frame(width:24).accessibilityHidden(true) }
             Text(title).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
             Spacer(minLength:8)
             Image(systemName:"arrow.up.right").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)

@@ -2,14 +2,17 @@ import Foundation
 
 /// The best window in words, on the iPhone (the watch draws it on its dial and says it with the ring).
 nonisolated extension ClearWindow {
-    /// "Best window: 11:40 PM – 3:10 AM · clear, Moon down; Milky Way core up throughout", park-local, to ten minutes.
+    /// "Best window: 11:40 PM – 3:10 AM · clear, Moon down; Milky Way core up throughout", park-local, to ten
+    /// minutes; "Clear 7:30 PM – 5:30 AM, under the Moon" when a bright Moon washes it (`moonlit`).
     func line(park: Park) -> String {
         func t(_ d: Date) -> String { WhatsUp.around(d, park: park) }
         let tolerance = 600.0
         let coreAll = core.map { abs($0.start.timeIntervalSince(interval.start)) <= tolerance && abs($0.end.timeIntervalSince(interval.end)) <= tolerance } ?? false
         var parts = [String(localized: "clear")]
         if moonDown { parts.append(String(localized: "Moon down")) }
-        let text = String(localized: "Best window: \(t(interval.start)) – \(t(interval.end)) · \(Phrase.clauses(parts))")
+        // Under a bright Moon the clear hours are said as what they are, never as the best window.
+        let text = moonlit ? String(localized: "Clear \(t(interval.start)) – \(t(interval.end)), under the Moon")
+            : String(localized: "Best window: \(t(interval.start)) – \(t(interval.end)) · \(Phrase.clauses(parts))")
         // The core in words of its own, as field mode names it: through the whole window, or for part of it.
         if coreAll { return Phrase.addition(text, String(localized: "Milky Way core up throughout")) }
         if let core { return Phrase.addition(text, String(localized: "Milky Way core up \(t(core.start)) – \(t(core.end))")) }

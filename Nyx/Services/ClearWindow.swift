@@ -9,6 +9,13 @@ nonisolated struct ClearWindow: Sendable, Equatable {
     let moonDown: Bool
     /// Where the core is 10° up inside the window, when for at least half an hour.
     let core: DateInterval?
+    /// True when no clear stretch is free of the Moon and a Moon over half lit is up for at least half
+    /// of this one: clear, but washed with moonlight, so never named or drawn as the night's best.
+    var moonlit = false
+    /// The stretch a dial draws brightest (the iPhone's and the watch's `NightTrack`): none under a bright Moon.
+    var brightest: DateInterval? { moonlit ? nil : interval }
+    /// Above this the Moon washes a clear window out (`moonlit`).
+    static let brightMoon = 0.5
     /// Hourly cloud under this is "clear".
     static let clearBelow = 30.0
     /// Shorter stretches are not worth naming.
@@ -32,7 +39,9 @@ nonisolated struct ClearWindow: Sendable, Equatable {
         guard let base, base.duration >= minimum else { return nil }
         let coreUp = { (date: Date) in engine.horizontal(date: date, park: park, ra: SkyAlmanac.coreRA, dec: SkyAlmanac.coreDec).altitude >= SkyAlmanac.coreMinimumAltitude }
         let core = almanac.longest(in: base, where: coreUp).flatMap { $0.duration >= minimum ? $0 : nil }
-        return ClearWindow(interval: base, moonDown: moonDown, core: core)
+        let moonUp = almanac.longest(in: base) { engine.lunarAltitude(at: $0, park: park) >= -0.833 }
+        let washed = !moonDown && sky.moon.illumination > brightMoon && (moonUp?.duration ?? 0) >= base.duration/2
+        return ClearWindow(interval: base, moonDown: moonDown, core: core, moonlit: washed)
     }
     /// A night's best window from the hourly forecast it was scored on: mid and high cloud only at a
     /// summit above the inversion, else the clouds. One rule for the iPhone and the watch, which

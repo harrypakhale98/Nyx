@@ -127,10 +127,17 @@ import Testing
     }
     /// The week strip's pitch grows with the caption beside it and stops at 1.8×.
     @Test func weekStripPitchScalesAndCaps() {
-        #expect(WeekStrip.pitch(13) == 13)
-        #expect(WeekStrip.pitch(11) == 13)
-        #expect(WeekStrip.pitch(17) == 17)
-        #expect(abs(WeekStrip.pitch(40) - 23.4) < 1e-9)
+        #expect(WeekStrip.pitch(15) == 15)
+        #expect(WeekStrip.pitch(11) == 15)
+        #expect(WeekStrip.pitch(19) == 19)
+        #expect(abs(WeekStrip.pitch(40) - 27) < 1e-9)
+    }
+    /// The week strip's dots span the week's own range, so 40 to 62 reads as a peak, not as seven specks.
+    @Test func weekStripDotsSpanTheWeek() {
+        #expect(WeekStrip.radius(score:40,low:40,high:62) == 1.6)
+        #expect(WeekStrip.radius(score:62,low:40,high:62) == 5)
+        #expect(abs(WeekStrip.radius(score:51,low:40,high:62) - 3.3) < 1e-9)
+        #expect(WeekStrip.radius(score:70,low:70,high:70) == 3.3)
     }
     @Test func theNowMarkerStepsByTheMinuteInsideTheNight() {
         let start=Date(timeIntervalSinceReferenceDate:799_999_980), end=start.addingTimeInterval(12*3600)
@@ -142,5 +149,20 @@ import Testing
         // Outside the night's window there is no marker, so the time never redraws the picture.
         #expect(SkyArc.nowMarker(at:start.addingTimeInterval(-60),window:window)==nil)
         #expect(SkyArc.nowMarker(at:end.addingTimeInterval(30),window:window)==nil)
+    }
+    /// Stepping the sky arc by hour (VoiceOver's swipe, the step buttons): whole park-local hours
+    /// inside the window, the first step at the hour nearest now when the night is under way, held at the ends.
+    @Test func theArcStepsByTheHour() throws {
+        let jotr = try park("jotr"), tonight = try night(jotr, "2026-10-23")
+        let window = ArcTouch.window(tonight), hours = SkyArc.hours(window: window, park: jotr)
+        var calendar = jotr.calendar; calendar.timeZone = jotr.timeZone
+        #expect(hours.count >= 12 && hours.allSatisfy { calendar.component(.minute, from: $0) == 0 && $0 > window.start && $0 < window.end })
+        let before = window.start.addingTimeInterval(-86400)
+        #expect(SkyArc.steppedHour(from: nil, by: 1, hours: hours, now: before) == hours.first)
+        #expect(SkyArc.steppedHour(from: nil, by: -1, hours: hours, now: before) == hours.last)
+        #expect(SkyArc.steppedHour(from: nil, by: 1, hours: hours, now: hours[3].addingTimeInterval(600)) == hours[3])
+        #expect(SkyArc.steppedHour(from: hours[3], by: 1, hours: hours, now: before) == hours[4])
+        #expect(SkyArc.steppedHour(from: hours.last, by: 1, hours: hours, now: before) == hours.last)
+        #expect(SkyArc.steppedHour(from: nil, by: 1, hours: [], now: before) == nil)
     }
 }

@@ -103,10 +103,10 @@ struct SpotPanel: View {
     }
     @ViewBuilder private var editActions: some View {
         Button { newName=spot.name; renaming=true } label:{ Label("Rename",systemImage:"pencil").font(.footnote.weight(.medium)).frame(minHeight:44) }
-            .buttonStyle(.borderless).foregroundStyle(palette.accent)
+            .buttonStyle(.borderless).foregroundStyle(palette.ink)
             .accessibilityLabel("Rename spot")
         Button(role:.destructive) { confirmingDelete=true } label:{ Label("Delete spot",systemImage:"trash").font(.footnote.weight(.medium)).frame(minHeight:44) }
-            .buttonStyle(.borderless).foregroundStyle(palette.accent)
+            .buttonStyle(.borderless).foregroundStyle(palette.muted)
     }
     /// Whose clock the page keeps, and where that came from.
     private var clockLine: String {

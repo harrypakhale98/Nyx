@@ -1,8 +1,10 @@
 import SwiftUI
 
-/// The recipe of the Darkness Score: one bar split into its four shares, lit one after another as
-/// the example score counts up, then the band words. Shares, not marks: the bar is always whole.
+/// The recipe of the Darkness Score: the dial as every park shows it (the night from sunset to
+/// sunrise around the score), one bar split into its four shares, lit one after another as the
+/// example score counts up, then the band words. Shares, not marks: the bar is always whole.
 struct ScoreAnatomy:View {
+    @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     @MotionReduced private var reduceMotion: Bool
@@ -14,7 +16,7 @@ struct ScoreAnatomy:View {
     private func shade(_ i:Int)->Double { [1,0.75,0.55,0.4][i] }
     var body:some View {
         VStack(spacing:12) {
-            CelestialGauge(score:94,haptics:false).id(active).frame(height:typeSize.isAccessibilitySize ? nil : 176) // fresh, silent count-up each time the page arrives; the real answer owns the pulses
+            CelestialGauge(score:94,haptics:false,night:example).id(active).frame(height:typeSize.isAccessibilitySize ? nil : 188) // fresh, silent count-up each time the page arrives; the real answer owns the pulses. 188, not 176: room for the band word under the times at the dial's ends
             VStack(alignment:.leading,spacing:8) {
                 Text("Share of the score").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
                 GeometryReader { proxy in
@@ -34,10 +36,11 @@ struct ScoreAnatomy:View {
                 }
             }.frame(maxWidth:320)
             Text("90 Pristine · 75 Excellent · 60 Good").font(.caption).foregroundStyle(palette.ink).multilineTextAlignment(.center)
-            Text("Example night").font(.caption).foregroundStyle(palette.muted)
+            Text(example == nil ? "Example night" : "Example night. The ring runs from sunset to sunrise.").font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
         }
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel("Example score 94 out of 100. Share of the score: moonlight 40 percent, clouds 25, sky glow 20, and true darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good.")
+        .accessibilityLabel(example == nil ? "Example score 94 out of 100. Share of the score: moonlight 40 percent, clouds 25, sky glow 20, and true darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good."
+                            : "Example score 94 out of 100. The ring around it is the night, from sunset to sunrise, brightest in its best hours. Share of the score: moonlight 40 percent, clouds 25, sky glow 20, and true darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good.")
         .task(id:active) {
             guard active else { filled=0; return }
             if reduceMotion { filled=parts.count; return }
@@ -47,6 +50,18 @@ struct ScoreAnatomy:View {
             }
         }
     }
+    /// The example's night, the real one the real dial would draw: the coming new Moon at the starting
+    /// park, taken as clear, so all of its true darkness is the best window. Nil where the Sun does not
+    /// set (a far-north summer), and the example keeps the plain score dial.
+    private var example:(ring:NightRing,park:Park,spoken:String)? {
+        guard let park=model.home else { return nil }
+        let engine=AstronomyEngine(), now=Date.now
+        let newMoon=now.addingTimeInterval((1-engine.moonPhase(at:now).fraction)*AstronomyEngine.synodicDays*86400)
+        let sky=engine.conditions(for:park,on:park.evening(newMoon))
+        let best=sky.darkStart.flatMap { start in sky.darkEnd.flatMap { end in end>start ? DateInterval(start:start,end:end) : nil } }
+        guard let ring=NightRing(sky:sky,park:park,best:best) else { return nil }
+        return (ring,park,ring.spoken(sky:sky,park:park,best:best))
+    }
     private func legend(_ i:Int)->some View {
         HStack(spacing:6) {
             Capsule().fill(palette.accent.opacity(shade(i))).frame(width:10,height:4)
@@ -55,5 +70,5 @@ struct ScoreAnatomy:View {
         }
     }
 }
-#Preview("Score anatomy") { ScoreAnatomy(active:true).padding().background(.black).preferredColorScheme(.dark) }
-#Preview("Score anatomy AX5") { ScrollView { ScoreAnatomy(active:true).padding() }.background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
+#Preview("Score anatomy") { ScoreAnatomy(active:true).padding().background(.black).environment(PlanModel()).preferredColorScheme(.dark) }
+#Preview("Score anatomy AX5") { ScrollView { ScoreAnatomy(active:true).padding() }.background(.black).environment(PlanModel()).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }

@@ -53,8 +53,9 @@ import Testing
             NightVerdict.scored(Night(park: jotr, sky: sky, score: DarknessScore(value: 82, moonPoints: 30, cloudPoints: 20, bortlePoints: 16, lengthPoints: 10, basis: basis), cloudCover: nil, forecastUpdated: nil))
         }
         #expect(scored(.forecast) == "82")
-        #expect(scored(.usual) == "82, an estimate")
-        #expect(scored(.blended(weight: 0.5, leadDays: 6)) == "82, an early look")
+        // The three words every list uses: no label, "early look", "usual clouds".
+        #expect(scored(.usual) == "82, usual clouds")
+        #expect(scored(.blended(weight: 0.5, leadDays: 6)) == "82, early look")
     }
     /// "All through true darkness" means one thing on every device: the rounded Moon-free percent the
     /// watch and Vision Pro show is 100 exactly when the iPhone's line says it.
@@ -80,23 +81,55 @@ import Testing
         #expect(verdict(gaar, winter)?.text.contains("Milky Way") != true)
         #expect(verdict(dena, try sky(dena, "2027-06-21")) == nil)
     }
-    /// A darker night is named only when it clears the shown one by the margin and reaches Good,
-    /// the earliest of equals.
+    /// A darker night is named only when it is the place's best night, clears the shown one by the
+    /// margin and reaches Good; equals are told apart as every best night is (`NightPlanner.better`).
     @Test func darkerNightNeedsAClearMargin() throws {
         let jotr = try park("jotr")
         let days = ["2026-10-21", "2026-10-22", "2026-10-23", "2026-10-24"]
         let skies = try days.map { try sky(jotr, $0) }
         let shown = night(jotr, skies[0], score: 64)
-        #expect(NightVerdict.darker(than: shown, among: [night(jotr, skies[1], score: 70)]) == nil)
-        let picked = NightVerdict.darker(than: shown, among: [night(jotr, skies[1], score: 74), night(jotr, skies[2], score: 82), night(jotr, skies[3], score: 82)])
-        #expect(picked?.id == skies[2].evening)
+        #expect(NightVerdict.darker(than: shown, among: [shown, night(jotr, skies[1], score: 70)]) == nil)
+        let ahead = [shown, night(jotr, skies[1], score: 74), night(jotr, skies[2], score: 82), night(jotr, skies[3], score: 82)]
+        let picked = NightVerdict.darker(than: shown, among: ahead)
+        #expect(picked?.id == NightPlanner.ranked(ahead).first?.id && picked?.score.value == 82)
         let low = night(jotr, skies[0], score: 40)
-        #expect(NightVerdict.darker(than: low, among: [night(jotr, skies[1], score: 55)]) == nil)
-        // Never a night before the one shown.
-        #expect(NightVerdict.darker(than: night(jotr, skies[2], score: 50), among: [night(jotr, skies[1], score: 90)]) == nil)
+        #expect(NightVerdict.darker(than: low, among: [low, night(jotr, skies[1], score: 55)]) == nil)
+        // Never a night before the one shown: the best night has passed it, and a lesser one is not named instead.
+        #expect(NightVerdict.darker(than: night(jotr, skies[2], score: 50), among: [night(jotr, skies[1], score: 90), night(jotr, skies[3], score: 75)]) == nil)
         let line = try #require(verdict(jotr, skies[0], darker: picked))
         #expect(line.text.hasSuffix("82."))
         #expect(line.text.contains("Darker on "))
+    }
+    /// One answer to "which is this park's best night": the park page's "Darker on…", Tonight's
+    /// capsule, Best nights and With the lights out name the same night with the same number, and
+    /// Tonight prefers the answer's own park when it has a clearly darker night, even where another
+    /// place ranks higher because a closure counts against this one.
+    @Test func everySurfaceNamesTheSameBestNight() throws {
+        let jotr = try park("jotr"), grba = try park("grba")
+        let days = (21...30).map { "2026-10-\($0)" }
+        let skies = try days.map { try sky(jotr, $0) }, other = try days.map { try sky(grba, $0) }
+        let scores = [49, 55, 62, 70, 82, 80, 82, 66, 58, 50]
+        let here = zip(skies, scores).map { night(jotr, $0, score: $1) }
+        let there = zip(other, [50, 52, 60, 64, 70, 77, 75, 70, 60, 55]).map { night(grba, $0, score: $1) }
+        let best = try #require(NightVerdict.best(here))
+        #expect(best.score.value == 82 && best.id == NightPlanner.ranked(here).first?.id)
+        // The park page, from tonight or from any night before the best.
+        #expect(NightVerdict.darker(than: here[0], among: here)?.id == best.id)
+        #expect(NightVerdict.darker(than: here[2], among: here)?.id == best.id)
+        // Best nights' row for the park, and With the lights out.
+        let ranking = BestNightsInReach.make([here, there])
+        #expect(ranking.rows.first { $0.id == jotr.id }?.best.id == best.id)
+        #expect(LightsOut.best(here, closure: "Road closed")?.id == best.id)
+        // Tonight: the answer's own park first, though a closure ranks another place above it.
+        let closures = [jotr.id: "Road closed"]
+        #expect(BestNightsInReach.make([here, there], closures: closures).best?.park.id == grba.id)
+        #expect(NightVerdict.darkerAhead(than: here[0], here: here, across: [here, there], closures: closures)?.id == best.id)
+        // With nothing clearly darker at the answer's park, Best nights' best in reach, by the same margin.
+        let flat = here.map { night(jotr, $0.sky, score: min($0.score.value, 55)) }
+        let elsewhere = try #require(NightVerdict.darkerAhead(than: flat[0], here: flat, across: [flat, there], closures: [:]))
+        #expect(elsewhere.park.id == grba.id && elsewhere.score.value == 77)
+        #expect(NightVerdict.capsule(elsewhere, here: false) == "Darker on \(grba.dayLabel(elsewhere.id))\n\(grba.shortName) · 77")
+        #expect(NightVerdict.capsule(best, here: true) == "Darker on \(jotr.dayLabel(best.id)) · 82")
     }
     /// Tonight's "Darker on…" and the park page's verdict use one rule: ten points clear of the night
     /// shown and at least Good, so the two never name darker nights by different measures.
@@ -121,14 +154,18 @@ import Testing
         #expect(blocks.shown.first?.id == layout.first.first?.id)
         #expect(blocks.shown.contains { $0.id == "planets" })
     }
-    /// When a cap holds the score below its parts, the readout says the cap, then their sum, in the breakdown's words, so the
+    /// When a cap holds the score below its parts, the readout says the cap, then their sum, in plain words, so the
     /// four numbers and the dial never seem to disagree; with no binding cap it says nothing.
     @Test func readoutSaysTheSumBeforeTheCap() {
         let capped = DarknessScore(value: 64, moonPoints: 22, cloudPoints: 21, bortlePoints: 15, lengthPoints: 15, limit: .moonlight(64))
-        #expect(ScoreReadout.limitLine(capped, tonight: true) == "Moonlight limits tonight to 64. The four parts add up to 73; the score takes the lowest cap that applies.")
-        #expect(ScoreReadout.limitLine(capped, tonight: false) == "Moonlight limits this night to 64. The four parts add up to 73; the score takes the lowest cap that applies.")
+        #expect(ScoreReadout.limitLine(capped, tonight: true) == "Moonlight limits tonight to 64. The four parts alone would give 73.")
+        #expect(ScoreReadout.limitLine(capped, tonight: false) == "Moonlight limits this night to 64. The four parts alone would give 73.")
         let loose = DarknessScore(value: 73, moonPoints: 22, cloudPoints: 21, bortlePoints: 15, lengthPoints: 15, limit: .moonlight(80))
         #expect(ScoreReadout.limitLine(loose, tonight: true) == nil)
+        // The part that holds the score is the one ringed; smoke has no part, and a loose cap marks none.
+        #expect(ScoreReadout.limiting(capped) == .moon && ScoreReadout.limiting(loose) == nil)
+        let smoky = DarknessScore(value: 40, moonPoints: 22, cloudPoints: 21, bortlePoints: 15, lengthPoints: 15, limit: .smoke(40))
+        #expect(ScoreReadout.limiting(smoky) == nil && ScoreReadout.limitLine(smoky, tonight: true) != nil)
     }
     /// Tonight and the park's page say a night's uncertainty the same way: the cloud spread when the
     /// models disagree, the score range otherwise, nothing when neither applies.

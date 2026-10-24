@@ -39,7 +39,7 @@ struct AppIconPicker: View {
             Section { ForEach(NyxIcon.allCases) { icon in row(icon) } } footer:{
                 Text("The icon stays in the phase you choose; it does not follow the Moon.").foregroundStyle(palette.muted)
             }.openRows(palette)
-            if failed { Section { Text("The icon could not be changed right now. Try again in a moment.").foregroundStyle(palette.accent) }.openRows(palette) }
+            if failed { Section { Text("The icon could not be changed right now. Try again in a moment.").foregroundStyle(palette.ink) }.openRows(palette) }
         }
         .nightForm().readableForm().navigationTitle("App icon").navigationBarTitleDisplayMode(.inline)
         .sensoryFeedback(.selection,trigger:changed)
@@ -66,7 +66,7 @@ struct AppIconPicker: View {
         .accessibilityAddTraits(current == icon ? [.isSelected,.isButton] : .isButton)
     }
     @ViewBuilder private func check(_ icon:NyxIcon)->some View {
-        if current == icon { Image(systemName:"checkmark").foregroundStyle(palette.accent).accessibilityHidden(true) }
+        if current == icon { Image(systemName:"checkmark").foregroundStyle(palette.ink).accessibilityHidden(true) }
     }
     private func choose(_ icon:NyxIcon) {
         guard icon != current, UIApplication.shared.supportsAlternateIcons else { return }

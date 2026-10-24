@@ -44,7 +44,7 @@ struct WhereToStayPanel: View {
             }
             if list.count>shown.count {
                 Button { showsAll=true } label:{ Text("Show all \(list.count) campgrounds").frame(minHeight:44) }
-                    .font(.subheadline.weight(.medium)).foregroundStyle(palette.accent)
+                    .font(.subheadline.weight(.medium)).foregroundStyle(palette.ink)
             }
         } else if model.campgrounds != nil {
             Text("The National Park Service lists no campgrounds in this park. Its website covers other places to stay nearby.")
@@ -61,7 +61,7 @@ struct WhereToStayPanel: View {
     @ViewBuilder private var planLink: some View {
         if let url=StayLink.planYourVisit(park) {
             Link(destination:url) { Label("Plan your visit on nps.gov",systemImage:"safari").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
-                .font(.subheadline.weight(.medium)).foregroundStyle(palette.accent).accessibilityHint(Text("Opens in Safari."))
+                .font(.subheadline.weight(.medium)).foregroundStyle(palette.ink).accessibilityHint(Text("Opens in Safari."))
         }
     }
 }
@@ -84,14 +84,14 @@ private struct CampgroundRow: View {
             }
             if let url=campground.reservationURL, let site=campground.reservationSite {
                 Link(destination:url) { Label("Reserve on \(site)",systemImage:"safari").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
-                    .font(.subheadline.weight(.medium)).foregroundStyle(palette.accent)
+                    .font(.subheadline.weight(.medium)).foregroundStyle(palette.ink)
                     .accessibilityLabel(Text("Reserve \(campground.name) on \(site)")).accessibilityHint(Text("Opens in Safari."))
             } else if (campground.firstComeSites ?? 0)>0 && (campground.reservableSites ?? 0) == 0 {
                 Text("First come, first served. No reservations.").font(.subheadline).foregroundStyle(palette.muted)
             } else if let page=campground.pageURL {
                 // Booked elsewhere (a concessioner Nyx does not link): the park's own page says how.
                 Link(destination:page) { Label("How to book, on nps.gov",systemImage:"safari").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
-                    .font(.subheadline.weight(.medium)).foregroundStyle(palette.accent)
+                    .font(.subheadline.weight(.medium)).foregroundStyle(palette.ink)
                     .accessibilityLabel(Text("How to book \(campground.name), on nps.gov")).accessibilityHint(Text("Opens in Safari."))
             }
         }

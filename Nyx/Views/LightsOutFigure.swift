@@ -53,7 +53,7 @@ struct LightsOutFigure: View {
                         Text(LightsOut.bestLine(best)).fixedSize(horizontal:false,vertical:true)
                         Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).accessibilityHidden(true)
                     }
-                    .font(.subheadline).foregroundStyle(palette.accent).frame(minHeight:44,alignment:.leading).contentShape(Rectangle())
+                    .font(.subheadline).foregroundStyle(palette.ink).frame(minHeight:44,alignment:.leading).contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityHint("Opens that night at the park.")
@@ -124,7 +124,7 @@ struct LightsOutFigure: View {
                 Text(selection == .dark ? darkLabel : homeLabel).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
                 Image(systemName:"chevron.up.chevron.down").font(.footnote.weight(.semibold)).accessibilityHidden(true)
             }
-            .foregroundStyle(palette.accent).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
+            .foregroundStyle(palette.ink).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
         }
         .accessibilityLabel(String(localized:"Sky drawn"))
         .accessibilityValue(selection == .dark ? darkLabel : homeLabel)

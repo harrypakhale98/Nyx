@@ -183,7 +183,7 @@ struct BestNightSnippetView: View {
                     .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
             }
             HStack(alignment:.firstTextBaseline,spacing:10) {
-                Text("\(night.score.value)").font(.system(size:min(numeral,76),weight:.light,design:.serif)).foregroundStyle(palette.accent)
+                Text("\(night.score.value)").scoreNumeral(size:min(numeral,76),accent:palette.accent)
                 VStack(alignment:.leading,spacing:2) {
                     Text(night.score.band.label).font(.system(.headline,design:.serif))
                     Text(night.basisLabel ?? String(localized:"Cached forecast included")).font(.caption).foregroundStyle(palette.muted)
@@ -205,7 +205,7 @@ struct BestNightSnippetView: View {
                 }
                 Button(intent:OpenParkIntent(target:ParkEntity(night.park))) { Label("Open in Nyx",systemImage:"arrow.up.forward.app") }
             }
-            .buttonStyle(.bordered).tint(palette.accent).font(.subheadline)
+            .buttonStyle(.bordered).tint(palette.ink).font(.subheadline)
             if let following {
                 // Puts the night on the Lock Screen before its sunset, with no need to open Nyx; the
                 // same place stops following. Two intents, so a repeated tap never undoes itself.
@@ -220,7 +220,7 @@ struct BestNightSnippetView: View {
                             .accessibilityHint("Puts the night's countdown on your Lock Screen before sunset.")
                     }
                 }
-                .buttonStyle(.bordered).tint(palette.accent).font(.subheadline)
+                .buttonStyle(.bordered).tint(palette.ink).font(.subheadline)
             }
         }
         .foregroundStyle(palette.ink)
@@ -241,13 +241,13 @@ struct BestNightEmptySnippetView: View {
     var body: some View {
         VStack(alignment:.leading,spacing:10) {
             HStack(alignment:.firstTextBaseline,spacing:8) {
-                Image(systemName:"moon").foregroundStyle(palette.accent).accessibilityHidden(true)
+                Image(systemName:"moon").foregroundStyle(palette.ink).accessibilityHidden(true)
                 Text("No night to show").font(.system(.headline,design:.serif))
             }
             Text("Nyx could not find those nights. They may have passed; ask again for the nights ahead.")
                 .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             Button(intent:OpenTonightParkIntent(parkID:parkID)) { Label("Open in Nyx",systemImage:"arrow.up.forward.app") }
-                .buttonStyle(.bordered).tint(palette.accent).font(.subheadline)
+                .buttonStyle(.bordered).tint(palette.ink).font(.subheadline)
         }
         .frame(maxWidth:.infinity,alignment:.leading)
         .foregroundStyle(palette.ink)

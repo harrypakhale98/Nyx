@@ -49,12 +49,18 @@ struct NightCell: View {
             .accessibilityHidden(true)
             // Space, not hidden text: a hidden placeholder stretched the date's text frame over the whole cell.
             if isPast { Color.clear.frame(height:scoreLine) }
-            // As tall as the score line, so an overcast night's date sits on its row.
-            else if let cloud=night.cloudCover,cloud>75 { Image(systemName:"cloud.fill").font(.caption2).foregroundStyle(palette.muted).frame(height:scoreLine) }
+            // As tall as the score line, so an overcast night's date sits on its row; the score stays
+            // beside the cloud, so a ringed stretch never hides the numbers it was chosen by.
+            else if let cloud=night.cloudCover,cloud>75 {
+                HStack(spacing:2) {
+                    Image(systemName:"cloud.fill").imageScale(.small)
+                    Text("\(night.score.value)").monospacedDigit().fontWeight(.medium)
+                }.font(.caption2).foregroundStyle(palette.muted).lineLimit(1).minimumScaleFactor(0.8).frame(height:scoreLine)
+            }
             // Medium weight: at 11 pt the thin diagonals of a regular "7" fade into the sky.
             else { Text("\(night.score.value)").font(.caption2.monospacedDigit().weight(.medium)).foregroundStyle(palette.muted) }
         }.frame(maxWidth:.infinity,minHeight:78*scale)
-            .background { if selected { RoundedRectangle(cornerRadius:14).fill(palette.accent.opacity(palette.nightVision ? 0.2 : 0.12)).overlay(RoundedRectangle(cornerRadius:14).stroke(palette.accent.opacity(0.5),lineWidth:0.8*palette.stroke)) } }
+            .background { if selected { RoundedRectangle(cornerRadius:14).fill(palette.ink.opacity(palette.nightVision ? 0.16 : 0.1)).overlay(RoundedRectangle(cornerRadius:14).stroke(palette.ink.opacity(0.45),lineWidth:0.8*palette.stroke)) } }
             .contentShape(.hoverEffect,RoundedRectangle(cornerRadius:14)).contentShape(Rectangle())
             .accessibilityElement(children:.ignore)
             .accessibilityLabel(spoken)
@@ -98,8 +104,9 @@ struct NightPeek: View {
                 }
                 Spacer(minLength:12)
                 VStack(alignment:.trailing,spacing:2) {
-                    Text("\(night.score.value)").font(.system(size:min(scoreSize,72),weight:.light,design:.serif)).foregroundStyle(palette.accent)
-                    Text(night.compactBandLabel).font(.caption).foregroundStyle(palette.muted)
+                    Text("\(night.score.value)").scoreNumeral(size:min(scoreSize,72),accent:palette.accent)
+                    // The band; what the score rests on is the line below, in full.
+                    Text(night.score.band.label).font(.caption).foregroundStyle(palette.muted)
                 }
             }
             if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.subheadline).foregroundStyle(palette.ink) }
@@ -139,6 +146,18 @@ struct CalendarView: View {
     @State private var calendarNight:Night?
     /// A night that has begun, opened in "Record a night" from its menu or VoiceOver action.
     @State private var recording:JournalPrefill?
+    /// "I'm going" from a night's menu: the in-context reminders explainer the first time (as
+    /// `GoingButton` asks), and the note when four nights are already kept.
+    @AppStorage("notificationsEnabled") private var notificationsEnabled=false
+    @State private var goingExplainer=false
+    @State private var goingFull=false
+    @State private var goingChanged=0
+    /// The weeks of tonight's month already past, open under "Past nights".
+    @State private var pastShown=false
+    /// Each page's natural height by month offset, and the pager's height: the page in view's, so a
+    /// month folded to the nights still ahead is not held open to a full month's height.
+    @State private var pageHeights:[Int:Double]=[:]
+    @State private var pagerHeight:Double?
     /// The pager's page in view, as a slot: -1 the month before, 0 the current month, 1 the month
     /// after. Once a slide settles the month becomes current and the pager returns to slot 0, which
     /// then draws that same month, so the window of three pages moves without a visible jump.
@@ -283,10 +302,19 @@ struct CalendarView: View {
             .onChange(of:commands?.calendarRequest,initial:true) { _,request in if let request { show(request) } }
             .sheet(item:$calendarNight) { night in CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { calendarNight=nil }.ignoresSafeArea().nyxPresentation() }
             .sheet(item:$recording) { prefill in NavigationStack { JournalEditorView(prefill:prefill) }.nyxPresentation() }
-            .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id).toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.close) { chosen=nil } } } } else { ScoreBreakdownView(night:model.night(night.park,on:night.id),isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()
+            .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id).toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.close) { chosen=nil } } } } else { ScoreBreakdownView(night:model.night(night.park,on:night.id),isTonight:night.id==model.tonight(night.park),actions:AnyView(sheetActions(model.night(night.park,on:night.id)))) } }.nyxPresentation()
                 .onAppear { ReviewPrompt.noteNightViewed(score:night.score.value) } }
+            .sheet(isPresented:$goingExplainer) { GoingExplainer { granted in notificationsEnabled=granted; Task { await GoingWatch.check(model) } }.nyxPresentation() }
+            .alert("Nyx keeps watch on four nights at a time",isPresented:$goingFull) { Button("OK",role:.cancel) {} } message:{
+                Text("Let one of them go first, on Tonight or on its own page.")
+            }
+            .sensoryFeedback(.selection,trigger:goingChanged)
             // iPad keyboard: ⌘← and ⌘→ move the chosen night, turning the month at its edges.
             .nightKeys(enabled:wide && chosen == nil) { delta in step(delta) }
+            #if DEBUG
+            // Review captures: `-nyx-night-sheet` opens the park's best night's breakdown, as a tap does.
+            .task(id:park?.id) { if DebugScenario.isEnabled("night-sheet"), let park, let best=NightVerdict.best(model.nights(park,from:model.tonight(park),count:NightVerdict.horizon)) { chosen=best } }
+            #endif
     }
     /// The park whose month this is, as the page's title: its state and Dark Sky status above it
     /// (data, not a slogan), and the name itself the menu that changes it.
@@ -298,7 +326,7 @@ struct CalendarView: View {
             } label: {
                 HStack(alignment:.firstTextBaseline,spacing:10) {
                     Text(park.shortName).font(.system(typeSize.isAccessibilitySize ? .title2 : .largeTitle,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
-                    Image(systemName:"chevron.up.chevron.down").font(.title3).foregroundStyle(palette.accent).accessibilityHidden(true)
+                    Image(systemName:"chevron.up.chevron.down").font(.title3).foregroundStyle(palette.muted).accessibilityHidden(true)
                     Spacer(minLength:0)
                 }.frame(minHeight:44).contentShape(Rectangle())
             }.accessibilityLabel("Park").accessibilityValue(park.shortName).accessibilityInputLabels([Text("Park"),Text("Choose park"),Text(park.shortName)])
@@ -358,7 +386,7 @@ struct CalendarView: View {
                 .contextMenu {
                     Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
                     Button("Why this score",systemImage:"chart.bar") { chosen=night }
-                    if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night }; FollowNightMenuItem(night:night) }
+                    if night.id>=data.tonight { goingItem(night); Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night }; FollowNightMenuItem(night:night) }
                     recordItem(night,tonight:data.tonight)
                 }
                 .modifier(RecordableNight(night:night,enabled:recordable(night,tonight:data.tonight)) { record(night,tonight:data.tonight) })
@@ -385,19 +413,10 @@ struct CalendarView: View {
         } else {
             ScrollView(.horizontal) {
                 HStack(alignment:.top,spacing:0) {
-                    ForEach(-1...1,id:\.self) { slot in
-                        let offset=monthOffset+slot
-                        Group {
-                            if offset==monthOffset { grid(park,data,scale:scale,current:true,weeks:weeks) }
-                            else if let page=others[offset] { grid(park,page,scale:scale,current:false,weeks:weeks) }
-                            else { skeleton(park,scale:scale,weeks:weeks) }
-                        }
-                        .padding(.horizontal,24)
-                        .containerRelativeFrame(.horizontal) { length,_ in page>0 ? page : length }
-                        .accessibilityHidden(offset != monthOffset)
-                    }
+                    ForEach(-1...1,id:\.self) { slot in pagerPage(park,data,others:others,offset:monthOffset+slot,scale:scale,weeks:weeks,width:page) }
                 }.scrollTargetLayout()
             }
+            .onChange(of:pageHeights[monthOffset+(position ?? 0)],initial:true) { _,height in follow(height) }
             .scrollTargetBehavior(.paging)
             .scrollPosition(id:$position)
             .defaultScrollAnchor(.center,for:.initialOffset)
@@ -411,6 +430,30 @@ struct CalendarView: View {
             .onGeometryChange(for:Double.self) { $0.size.width } action:{ pageWidth=$0+48; pagerWidth=Int($0) }
         }
     }
+    /// One of the pager's three pages: the month at `offset`, a neighbour ready to draw, or its skeleton.
+    private func pagerPage(_ park:Park,_ data:Month,others:[Int:Month],offset:Int,scale:Double,weeks:Int,width:Double)->some View {
+        Group {
+            if offset==monthOffset { grid(park,data,scale:scale,current:true,weeks:weeks) }
+            else if let page=others[offset] { grid(park,page,scale:scale,current:false,weeks:weeks) }
+            else { skeleton(park,scale:scale,weeks:weeks) }
+        }
+        // Its own height, measured with its month (a slot keeps its height when its month changes).
+        .fixedSize(horizontal:false,vertical:true)
+        .onGeometryChange(for:PageHeight.self) { PageHeight(offset:offset,height:$0.size.height) } action:{ pageHeights[$0.offset]=$0.height }
+        // As tall as the page in view: a taller neighbour shows its first weeks as it slides in.
+        .frame(height:pagerHeight.map { CGFloat($0) },alignment:.top)
+        .padding(.horizontal,24)
+        .containerRelativeFrame(.horizontal) { length,_ in width>0 ? width : length }
+        .accessibilityHidden(offset != monthOffset)
+    }
+    /// The pager takes the height of the page in view, on the shared spring once it has one, so the
+    /// folded month is not held open to the next month's height and the next grows as it arrives.
+    private func follow(_ height:Double?) {
+        guard let height, height != pagerHeight else { return }
+        if pagerHeight == nil || reduceMotion { pagerHeight=height } else { withAnimation(NyxMotion.spring) { pagerHeight=height } }
+    }
+    /// A page's measured height, with the month it was measured for.
+    private nonisolated struct PageHeight: Equatable, Sendable { let offset:Int; let height:Double }
     /// The pager, unless motion should be still or cross-fade.
     private var paging:Bool { !(reduceMotion || access.crossFade) }
     /// The page in view when it differs from the current month and is ready to draw.
@@ -425,7 +468,9 @@ struct CalendarView: View {
         ForEach(0..<7,id:\.self) { i in Text(park.calendar.veryShortWeekdaySymbols[(i+park.calendar.firstWeekday-1)%7]).font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true) }
     }
     /// One month's nights, `weeks` tall (the tallest of the three months in the pager), so a page
-    /// never jumps mid-slide and a five-week window keeps no empty sixth row.
+    /// never jumps mid-slide and a five-week window keeps no empty sixth row. In tonight's month the
+    /// weeks already past fold under one "Past nights" row (`MonthPager.pastFold`), so the month opens
+    /// on the nights still to plan; that page is as tall as it is, and the pager follows it (`months`).
     /// `scale` enlarges each night's little sky on a wide iPad. `current` is the month in the
     /// accessibility tree: only it has the long-press peek and the rotors, and only it shows the
     /// chosen night, so a neighbouring page never peeks in with a second selection.
@@ -433,15 +478,17 @@ struct CalendarView: View {
         let focusedNight=wide && current ? focused(data)?.id : nil
         let ringed=Self.lightingOrder(data.stretch.nights.map(\.id).filter { data.inWindow.contains($0) },forward:forward)
         let drawn = !paging || landed.contains(Self.pageKey(park,Self.monthOffset(park,tonight:model.tonight(park),to:data.date)))
-        let trailing=max(0,weeks*7-data.lead-data.nights.count)
-        return LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:2),count:7),spacing:6) {
-            weekdays(park)
-            // Ids apart from the weekday initials' and the sixth week's: a lazy grid drops repeated ids.
-            ForEach(50..<(50+data.lead),id:\.self) { _ in Color.clear.frame(height:78*scale) }
-            ForEach(data.nights) { night in
-                let events=model.events(night)
-                let cell=NightCell(night:night,highlighted:data.inWindow.contains(night.id),stretchName:data.stretch.kind.spoken,isTonight:night.id==data.tonight,isPast:night.id<data.tonight,marker:events.marker(park:park),scale:scale,selected:night.id==focusedNight,
-                                   ringDrawn:drawn,ringDelay:Double(ringed.firstIndex(of:night.id) ?? 0)*Self.ringStagger)
+        let fold=MonthPager.pastFold(lead:data.lead,nights:data.nights.map(\.id),tonight:data.tonight)
+        let past=Array(data.nights.prefix(fold)), ahead=Array(data.nights.dropFirst(fold))
+        // A night chosen with the keyboard among the folded weeks opens them.
+        let open=pastShown || past.contains { $0.id==focusedNight }
+        let trailing=fold>0 ? 0 : max(0,weeks*7-data.lead-data.nights.count)
+        let columns=Array(repeating:GridItem(.flexible(),spacing:2),count:7)
+        func cell(_ night:Night)->some View {
+            let events=model.events(night)
+            let cell=NightCell(night:night,highlighted:data.inWindow.contains(night.id),stretchName:data.stretch.kind.spoken,isTonight:night.id==data.tonight,isPast:night.id<data.tonight,marker:events.marker(park:park),scale:scale,selected:night.id==focusedNight,
+                               ringDrawn:drawn,ringDelay:Double(ringed.firstIndex(of:night.id) ?? 0)*Self.ringStagger)
+            return Group {
                 if current {
                     Button { choose(night) } label:{ cell }.buttonStyle(.plain)
                         .hoverEffect(.highlight)
@@ -450,7 +497,7 @@ struct CalendarView: View {
                         .contextMenu {
                             Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
                             Button("Why this score",systemImage:"chart.bar") { chosen=night }
-                            if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night }; FollowNightMenuItem(night:night) }
+                            if night.id>=data.tonight { goingItem(night); Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night }; FollowNightMenuItem(night:night) }
                             recordItem(night,tonight:data.tonight)
                         } preview: { NightPeek(night:night,isTonight:night.id==data.tonight,event:events.item(park:park,sky:night.sky,isTonight:night.id==data.tonight)).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) }
                         // iPad: drag a night that has begun onto the Journal; everywhere, "Record this night".
@@ -459,16 +506,83 @@ struct CalendarView: View {
                     cell
                 }
             }
-            // The last weeks held open with invisible cells, as tall as real ones at any text size.
-            if let sample=data.nights.first { ForEach(100..<(100+trailing),id:\.self) { _ in NightCell(night:sample,scale:scale).hidden().accessibilityHidden(true) } }
+        }
+        // The weekday initials sit right over the nights they name: over the folded weeks when open, and
+        // over the nights ahead under the fold row, never above the fold, detached from the grid.
+        return VStack(spacing:6) {
+            if fold>0 {
+                DisclosureGroup(isExpanded:Binding(get:{ open },set:{ shown in
+                    withAnimation(reduceMotion ? nil : NyxMotion.spring) { pastShown=shown; if !shown, past.contains(where:{ $0.id==focusedNight }) { focusedID=nil } }
+                })) {
+                    LazyVGrid(columns:columns,spacing:6) {
+                        weekdays(park)
+                        ForEach(50..<(50+data.lead),id:\.self) { _ in Color.clear.frame(height:78*scale) }
+                        ForEach(past) { night in cell(night) }
+                    }.padding(.top,6)
+                } label:{
+                    // The weeks it holds, as dates: "Oct 1 – 17", in the reader's own form.
+                    HStack(alignment:.firstTextBaseline,spacing:8) {
+                        Text("Past nights")
+                        Spacer(minLength:8)
+                        if let first=past.first?.id, let last=past.last?.id { Text(Self.span(first,last,park:park)).monospacedDigit() }
+                    }
+                    .font(.subheadline).foregroundStyle(palette.muted).frame(minHeight:44).contentShape(Rectangle())
+                    .accessibilityElement(children:.combine)
+                }
+                .tint(palette.muted)
+            }
+            // Once the past weeks are open, theirs are the initials over one continuous month.
+            if !(fold>0 && open) { LazyVGrid(columns:columns,spacing:6) { weekdays(park) } }
+            LazyVGrid(columns:columns,spacing:6) {
+                // Ids apart from the folded weeks' and the sixth week's: a lazy grid drops repeated ids.
+                if fold==0 { ForEach(50..<(50+data.lead),id:\.self) { _ in Color.clear.frame(height:78*scale) } }
+                ForEach(ahead) { night in cell(night) }
+                // The last weeks held open with invisible cells, as tall as real ones at any text size.
+                if let sample=data.nights.first { ForEach(100..<(100+trailing),id:\.self) { _ in NightCell(night:sample,scale:scale).hidden().accessibilityHidden(true) } }
+            }
         }
         .modifier(MonthRotors(enabled:current,best:Self.bestNights(data.nights,after:data.tonight),stretchTitle:data.stretch.kind.title,stretch:Self.rotor(data.stretch.nights.filter { data.inWindow.contains($0.id) })))
+    }
+    /// "Oct 1 – 17": the first and last nights folded away, in the park's calendar and the reader's language.
+    nonisolated static func span(_ first:Date,_ last:Date,park:Park)->String {
+        var format=Date.IntervalFormatStyle().month(.abbreviated).day()
+        format.timeZone=park.timeZone
+        return (first..<max(first,last)).formatted(format)
     }
     /// A night the journal can keep: tonight or one before it, while the journal is open.
     private func recordable(_ night:Night,tonight:Date)->Bool { night.id<=tonight && !model.journalUnavailable }
     private func record(_ night:Night,tonight:Date) { recording=JournalPrefill.recording(night,tonight:tonight) }
     @ViewBuilder private func recordItem(_ night:Night,tonight:Date)->some View {
         if recordable(night,tonight:tonight) { Button("Record this night",systemImage:"book.closed") { record(night,tonight:tonight) } }
+    }
+    /// The breakdown a tap opens is a step toward the night, not an end: committing to it, and its
+    /// own page, pushed in the sheet so the breakdown is one swipe back. Share follows in the breakdown.
+    private func sheetActions(_ night:Night)->some View {
+        VStack(alignment:.leading,spacing:12) {
+            GoingButton(night:night,alignment:.leading)
+            NavigationLink { ParkDetailView(park:night.park,initialDate:night.id) } label:{ Label("Open this night",systemImage:"arrow.up.right").frame(minHeight:30) }
+                .secondaryAction()
+                .accessibilityHint("Opens that night at the park.")
+        }
+    }
+    /// "I'm going" in a night's menu, as `GoingButton` offers it on the night's page: kept, it reads "Not going".
+    @ViewBuilder private func goingItem(_ night:Night)->some View {
+        if !FieldNight.isOver(night.sky,at:DebugScenario.date ?? .now) {
+            let going=GoingNights.shared.going(park:night.park,night:night.id)
+            Button(going == nil ? "I'm going" : "Not going",systemImage:going == nil ? "checkmark.circle" : "checkmark.circle.fill") { toggleGoing(night,going) }
+        }
+    }
+    /// `GoingButton`'s own steps: keep the night (or let it go), ask about reminders in context the
+    /// first time, and keep watch.
+    private func toggleGoing(_ night:Night,_ going:GoingNight?) {
+        let store=GoingNights.shared
+        goingChanged+=1
+        if let going { store.stop(going); Task { await GoingWatch.check(model) }; return }
+        guard store.go(night) else { goingFull=true; return }
+        Task {
+            if !notificationsEnabled, await UNUserNotificationCenterStatus.undecided() { goingExplainer=true }
+            await GoingWatch.check(model)
+        }
     }
     /// A month not yet worked out: quiet weeks of faint dots, the same size as the real page.
     private func skeleton(_ park:Park,scale:Double,weeks:Int)->some View {
@@ -491,20 +605,44 @@ struct CalendarView: View {
         withTransaction(still) { monthOffset=settled.offset; position=settled.position }
         return settled.offset
     }
-    /// What the ring marks, said once: the best stretch while forecasts reach it, else the darkest Moon.
+    /// What the ring marks, said once: the best stretch while forecasts reach it, else the darkest Moon,
+    /// then the park's best night (`NightVerdict.best`, the night its page, Tonight and Best nights
+    /// name) on tonight's month and on the month or stretch that holds it. How the ring is chosen is in
+    /// the key under the month.
     private func windowPanel(_ park:Park,_ data:Month)->some View {
         let stretch=data.stretch
-        return Panel { VStack(alignment:.leading,spacing:10) {
-            Label(stretch.kind == .moon && !stretch.inMonth && !stretch.nights.isEmpty ? String(localized:"The next darkest moon stretch") : stretch.kind.title,systemImage:"circle.circle").font(.subheadline)
+        let thisMonth=data.nights.contains { $0.id==data.tonight }
+        let best=NightVerdict.best(model.nights(park,from:model.tonight(park),count:NightVerdict.horizon))
+            .flatMap { best in thisMonth || (data.nights+stretch.nights).contains { $0.id==best.id } ? best : nil }
+        return Panel { VStack(alignment:.leading,spacing:8) {
+            Label(stretch.kind == .moon && !stretch.inMonth && !stretch.nights.isEmpty ? String(localized:"The next darkest moon stretch") : stretch.kind.title,systemImage:"circle.circle").font(.subheadline).foregroundStyle(palette.muted)
             if let first=stretch.nights.first,let last=stretch.nights.last {
-                Text("\(park.dayLabel(first.id)) – \(park.dayLabel(last.id))").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
-                Text(stretch.kind == .best ? String(localized:"The ring marks the five nights in a row with the highest scores while forecasts reach them. A closure can still change the best choice.")
-                     : stretch.inMonth ? String(localized:"Past the forecasts, the ring marks the five nights with the least moonlight. Their clouds are not known yet.")
-                     : String(localized:"The darkest stretch this month has passed or falls just beyond it. Look ahead to plan it.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                Text("\(park.dayLabel(first.id)) – \(park.dayLabel(last.id))").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                if let best {
+                    Text(verbatim:[String(localized:"Best night"),park.dayLabel(best.id),NightVerdict.scored(best)].joined(separator:" · ")).font(.subheadline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                    // Why the best night can lie outside the ringed stretch, in one line where the two meet.
+                    if let why=Self.apart(best:best,from:stretch) { Text(why).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                }
+                if !stretch.inMonth { Text("The darkest stretch this month has passed or falls just beyond it. Look ahead to plan it.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             } else {
                 Text("These nights have passed. Look ahead to the next new moon.").font(.caption).foregroundStyle(palette.muted)
             }
-        } }
+        }.frame(maxWidth:.infinity,alignment:.leading) }
+    }
+    /// Why the park's best night is not in the ringed stretch, when it is not: the stretch keeps to
+    /// nights a forecast reaches, or it is five nights in a row, which one fine night alone can outscore.
+    nonisolated static func apart(best:Night,from stretch:Stretch)->String? {
+        guard case .best=stretch.kind, !stretch.nights.contains(where:{ $0.id==best.id }) else { return nil }
+        return best.basis == .usual ? String(localized:"The stretch keeps to forecast nights; the best night lies beyond.")
+            : String(localized:"The stretch is the best five nights in a row; one night alone scores higher.")
+    }
+    /// How the ring was chosen, for the key: five nights in a row by score while forecasts reach them,
+    /// else the least moonlight. Nil when the panel already says the stretch lies beyond the month.
+    nonisolated static func stretchNote(_ stretch:Stretch)->String? {
+        switch stretch.kind {
+        case .best: String(localized:"The ring marks the five nights in a row with the highest scores while forecasts reach them. A closure can still change the best choice.")
+        case .moon: stretch.inMonth ? String(localized:"Past the forecasts, the ring marks the five nights with the least moonlight. Their clouds are not known yet.") : nil
+        }
     }
     /// The key says how this month's early looks treat their forecast (`EarlyLookNote`), from the
     /// half-filled nights shown, else from any night ahead: eased toward the usual clouds, or counted
@@ -525,19 +663,21 @@ struct CalendarView: View {
     @ViewBuilder private func legend(_ data:Month)->some View {
         DisclosureGroup(isExpanded:$legendShown) {
             VStack(alignment:.leading,spacing:8) {
+                if let note=Self.stretchNote(data.stretch) { Text(note).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 Text(Self.legend(data.nights.filter { $0.id>=data.tonight })).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 if access.differentiate { Text(Sentences.join([NightMark.legend,String(localized:"A line through the date marks a night that has passed.")])).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }.padding(.top,6).frame(maxWidth:.infinity,alignment:.leading)
         } label:{
-            Text("What the marks mean").font(.subheadline).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
+            Text("What the marks mean").font(.subheadline).foregroundStyle(palette.ink).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
         }
-        .tint(palette.accent)
+        .tint(palette.muted)
     }
     /// The chosen night beside the month: its breakdown, and the ways into that night (the park's
     /// page here or in a window of its own, and Calendar for nights still ahead).
     private func aside(_ night:Night)->some View {
         NightInspector(night:night,isTonight:night.id==model.tonight(night.park),close:nil) {
             VStack(alignment:.leading,spacing:12) {
+                GoingButton(night:night,alignment:.leading)
                 Button { chosen=night;peeking=true } label:{ Label("Open this night",systemImage:"arrow.up.right") }.secondaryAction()
                 OpenParkWindowButton(park:night.park,night:night.id).secondaryAction()
                 if night.id>=model.tonight(night.park) { AddNightToCalendar(night:night) }
@@ -712,6 +852,13 @@ nonisolated enum MonthPager {
         let month=park.calendar.date(byAdding:.month,value:offset,to:base) ?? base
         let count=park.calendar.range(of:.day,in:.month,for:month)?.count ?? 30
         return (0..<count).map { park.evening(park.date(month,addingDays:$0)) }
+    }
+    /// How many of a month's first nights fold away under "Past nights": the whole weeks before
+    /// tonight's week (`lead` blank days start the first). None when tonight is not in the month or
+    /// falls in its first week, so a month never opens on a lone fold row.
+    static func pastFold(lead:Int,nights:[Date],tonight:Date)->Int {
+        guard let index=nights.firstIndex(of:tonight) else { return 0 }
+        return max(0,(lead+index)/7*7-lead)
     }
     /// Weeks a month spans in the park's calendar (4 to 6).
     static func weeks(_ park:Park,tonight:Date,offset:Int)->Int {

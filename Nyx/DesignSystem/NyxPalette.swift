@@ -18,8 +18,7 @@ nonisolated struct NyxPalette: Equatable, Sendable {
     /// 1.6× under Increase Contrast or Bold Text, as text grows heavier; 1 otherwise, so the default
     /// drawing is unchanged.
     var stroke: Double { highContrast || boldText ? 1.6 : 1.0 }
-    /// Night vision's red is lifted under Increase Contrast or by choice, so it stays above 4.5:1
-    /// for protan and deutan eyes too (`NightTint`).
+    /// Night vision's red is lifted further under Increase Contrast or by choice (`NightTint`).
     var red: NightTint { highContrast || brighterRed ? .brighter : .standard }
     /// Starlight and moon-amber, gamma-encoded sRGB: the one copy the app's palette and `NightLook`
     /// (widgets, the Live Activity, Siri's cards) both draw from.
@@ -36,8 +35,10 @@ nonisolated struct NyxPalette: Equatable, Sendable {
     static let mars=Color(red:0.9,green:0.47,blue:0.32), mercury=Color(red:0.76,green:0.74,blue:0.71), jupiterBelt=Color(red:0.62,green:0.44,blue:0.32)
     var ink: Color { nightVision ? .white : Self.starlight }
     var accent: Color { nightVision ? ink : Self.amber }
-    // Filled tracks must remain distinct from the white system thumb after the red filter.
-    var controlTint:Color { nightVision ? Color(white:0.22) : Color(red:0.65,green:0.35,blue:0.10) }
+    /// A switch that is on, a confirm button: nebula violet lifted until it reads as "on" against the
+    /// off track and stays distinct from the white thumb (about 4:1), so amber keeps to the score and
+    /// light. Through night vision a dark grey, which the red filter keeps apart from the thumb.
+    var controlTint:Color { nightVision ? Color(white:0.22) : Color(red:0.42,green:0.36,blue:0.66) }
     var muted: Color { ink.opacity(nightVision ? 0.96 : highContrast ? 0.9 : 0.72) }
     var panel: Color { nightVision ? Color(red:0.07,green:0.008,blue:0.005) : Self.indigo }
     /// Hairlines, tracks and outlines reach 3:1 against black and the panel (WCAG 1.4.11 for
@@ -53,14 +54,16 @@ nonisolated struct NyxPalette: Equatable, Sendable {
     /// than a graphic may be.
     func markOpacity(score:Int)->Double { max(nightVision ? 0.7 : 0.5,Self.markRamp(score:score)) }
 }
-/// Night vision's red: everything drawn in grey, then multiplied by one red. The standard red is
-/// the deepest that keeps text at 6.2:1 on black for typical colour vision; the brighter one lets a
-/// little more green and blue through, so protan eyes (which barely see long-wavelength red) still
-/// get 5.1:1 and deutan eyes 8.1:1, while it still reads red. Chosen under Increase Contrast or by hand.
+/// Night vision's red: everything drawn in grey, then multiplied by one red. Protan eyes barely see
+/// long-wavelength red, so the red carries enough green for them to read it, and blue in step so it
+/// stays red rather than orange (hue about 8°): the standard red keeps every word at 4.5:1 or better
+/// for typical, protan and deutan eyes (6.9, 5.1 and 8.0:1 on black). The brighter one (6.1:1 for
+/// protan eyes) is chosen under Increase Contrast or by hand.
 nonisolated enum NightTint: String, Sendable, CaseIterable {
     case standard, brighter
-    /// The multiplier, gamma-encoded sRGB.
-    var rgb: SIMD3<Double> { self == .standard ? SIMD3(1,0.27,0.23) : SIMD3(1,0.36,0.31) }
+    /// The multiplier, gamma-encoded sRGB (`Scripts/contrast.py` measures both). The default must pass
+    /// for everyone: Vision Pro has no setting of its own.
+    var rgb: SIMD3<Double> { self == .standard ? SIMD3(1,0.36,0.25) : SIMD3(1,0.45,0.32) }
     var color: Color { Color(red:rgb.x,green:rgb.y,blue:rgb.z) }
     /// What `NightVisionFilter` does to a colour (`saturation(0)` then `colorMultiply(color)`): its
     /// Rec. 709 luminance times the multiplier. For the places no view filter reaches, such as

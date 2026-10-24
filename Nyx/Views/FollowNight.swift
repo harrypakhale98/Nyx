@@ -29,7 +29,7 @@ struct FollowNightButton: View {
                 }
                 .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
             }
-            .buttonStyle(.plain).foregroundStyle(palette.accent)
+            .buttonStyle(.plain).foregroundStyle(palette.ink)
             .accessibilityLabel(following ? String(localized:"Stop following \(night.park.shortName) on \(night.park.dayLabel(night.id))")
                                           : String(localized:"Follow \(night.park.shortName) on \(night.park.dayLabel(night.id))"))
             .accessibilityValue(FollowNight.caption(night,following:following))
@@ -211,7 +211,7 @@ struct NightInProgressStrip: View {
             let status=NightStatus(followed.attributes,at:context.date)
             Button(action:open) {
                 HStack(spacing:8) {
-                    Image(systemName:status.symbol).foregroundStyle(palette.accent).accessibilityHidden(true)
+                    Image(systemName:status.symbol).foregroundStyle(palette.ink).accessibilityHidden(true)
                     if placement == .inline {
                         Text(status.short).font(.subheadline.weight(.medium)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
                     } else {

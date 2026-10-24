@@ -138,11 +138,20 @@ struct ShareCard:View {
         ([night.basisLine ?? String(localized:"Forecast included · conditions may change")]+[night.smokeLabel].compactMap { $0 }).joined(separator:" · ")
     }
     /// The night's one reason, in a few words: the Moon gone through true darkness, else the
-    /// Milky Way's core and its hours, else how much of true darkness is Moon-free.
-    static func why(night:Night,core:WhatsUp.Item?)->String? {
+    /// Milky Way's core and its hours, else how much of true darkness is Moon-free. A core up only
+    /// under the Moon, or clear of it only briefly, is said in Tonight's own words ("Milky Way core
+    /// only briefly, under the Moon", `NightVerdict.coreSentence`), never as bare hours that read as a promise.
+    static func why(night:Night,core:WhatsUp.Item?,coreNight:SkyAlmanac.CoreNight?=nil)->String? {
         guard night.sky.darkHours>0 else { return nil }
         if night.sky.moonDownPercent==100 { return String(localized:"Moon-free through all of true darkness") }
-        if let core, core.timed, let value=core.value { return String(localized:"Milky Way core \(value)") }
+        if let core, core.timed, let value=core.value {
+            if let coreNight, coreNight.moonFree.map({ $0.duration<NightVerdict.briefCore }) ?? true,
+               let line=NightVerdict.coreSentence(coreNight,sky:night.sky,park:night.park)?.text {
+                // A line on the card, as the card's other reasons are: without the sentence's full stop.
+                return line.hasSuffix(".") ? String(line.dropLast()) : line
+            }
+            return String(localized:"Milky Way core \(value)")
+        }
         let free=night.sky.moonDownPercent
         return free>=25 ? String(localized:"Moon-free for \(free)% of true darkness") : nil
     }
@@ -197,7 +206,7 @@ struct ShareNightMenu:View {
     @Environment(PlanModel.self) private var model
     @Environment(\.displayScale) private var displayScale
     let night:Night
-    private var why:String? { ShareCard.why(night:night,core:model.whatsUp(night).core) }
+    private var why:String? { let up=model.whatsUp(night); return ShareCard.why(night:night,core:up.core,coreNight:up.coreNight) }
     var body:some View {
         let why=why, range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis), card=ShareCard(night:night,why:why,range:range)
         Menu {
@@ -222,7 +231,7 @@ struct ShareCardButton:View {
     @Environment(PlanModel.self) private var model
     let night:Night
     @Environment(\.displayScale) private var displayScale
-    private var why:String? { ShareCard.why(night:night,core:model.whatsUp(night).core) }
+    private var why:String? { let up=model.whatsUp(night); return ShareCard.why(night:night,core:up.core,coreNight:up.coreNight) }
     var body:some View {
         let why=why, range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis), card=ShareCard(night:night,why:why,range:range)
         let artwork=ShareArtwork(night:night,shape:.card,why:why,range:range,palette:nil,scale:displayScale)
@@ -268,7 +277,7 @@ struct ShareCardReview:View {
     @State private var image:UIImage?
     var body:some View {
         let night=model.night(park,on:park.date(model.tonight(park),addingDays:daysAhead))
-        let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis), why=ShareCard.why(night:night,core:model.whatsUp(night).core)
+        let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis), up=model.whatsUp(night), why=ShareCard.why(night:night,core:up.core,coreNight:up.coreNight)
         let artwork=ShareArtwork(night:night,shape:.card,why:why,range:range,palette:nil,scale:displayScale)
         Group {
             if let image {

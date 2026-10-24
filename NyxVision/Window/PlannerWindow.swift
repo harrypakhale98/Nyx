@@ -125,9 +125,9 @@ struct PlannerWindow: View {
         return Button { Task { await toggleSky() } } label: {
             Label(open ? "Leave the sky" : "Stand under this sky", systemImage: open ? "xmark" : "sparkles")
         }
-        // Black on the amber, as the iPhone's primary buttons: white on amber is under 2:1, black well over 4.5:1.
+        // Black on starlight, as the iPhone's primary buttons (amber is the score's and light's alone).
         // Night vision's grey button keeps its white label, which the red filter then tints.
-        .buttonStyle(.borderedProminent).tint(model.nightVision ? .white.opacity(0.3) : NyxPalette.amber.opacity(0.85))
+        .buttonStyle(.borderedProminent).tint(model.nightVision ? .white.opacity(0.3) : NyxPalette.starlight.opacity(0.85))
         .foregroundStyle(model.nightVision ? Color.white : Color.black)
         .disabled(skyBusy || model.plan == nil)
         .accessibilityHint(open ? Text("Returns to the room. The window stays where it is.")
@@ -236,8 +236,9 @@ struct ParkRow: View {
                 Text(park.shortName).font(.system(.body, design: .serif))
                 Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption).foregroundStyle(palette.muted)
                 if let closure {
-                    Label(closure, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent)
-                        .fixedSize(horizontal: false, vertical: true).padding(.top, 2)
+                    // The warning in its red and the words in ink, as on the iPhone: amber is the score's.
+                    Label { Text(closure).foregroundStyle(palette.ink) } icon: { Image(systemName: "exclamationmark.triangle").foregroundStyle(palette.nightVision ? palette.ink : NyxPalette.cautionColor) }
+                        .font(.caption).fixedSize(horizontal: false, vertical: true).padding(.top, 2)
                 }
             }
             Spacer(minLength: 8)

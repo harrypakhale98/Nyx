@@ -19,8 +19,10 @@ struct SettingsView:View {
             Section {
                 Toggle(isOn:$nightVision) { titled("Night vision",note:"A red palette that keeps your eyes adapted to the dark. Lower the screen brightness too.") }
                     .tint(palette.controlTint).accessibilityInputLabels([Text("Night vision")])
-                Toggle(isOn:$brighterRed) { titled("Brighter red",note:"A slightly lighter red that keeps text clear for red-blind and green-blind eyes. Increase Contrast turns it on too.") }
+                Toggle(isOn:$brighterRed) { titled("Brighter red",note:"A lighter red for brighter surroundings or tired eyes. Increase Contrast turns it on too.") }
                     .tint(palette.controlTint).accessibilityInputLabels([Text("Brighter red")])
+                NavigationLink { WholePhoneRedView() } label:{ titled("Red light for the whole iPhone",note:"Menus, the keyboard and other apps stay bright. iOS can turn every screen red.") }
+                    .accessibilityInputLabels([Text("Red light for the whole iPhone"),Text("Color filters")])
             } header:{ heading("In the dark") }.openRows(palette)
             Section {
                 Toggle(isOn:Binding(get:{notifications},set:{ value in if value { explainNotifications=true } else { notifications=false;Task { await NotificationScheduler().remove() } } })) {
@@ -105,6 +107,37 @@ struct RemindersExplainer:View {
     }
 }
 /// Settings › Accessibility › Sound and touch: what the non-visual features do, each with a way to try it.
+/// Night vision reddens what Nyx draws; menus, the keyboard, alerts and other apps are drawn by iOS
+/// and stay bright. iOS's own Color Filters can tint every screen, and the Accessibility Shortcut
+/// switches it with a triple-click, which Nyx can neither set nor read: so the steps, said once. The
+/// button is the side button, the top button on an iPad, or the Home button where there is one
+/// (`device_strings.py` gives the iPad its own words).
+struct WholePhoneRedView:View {
+    @Environment(\.nyx) private var palette
+    var body:some View {
+        Form {
+            Section {
+                Text("Night vision turns what Nyx draws red. Menus, the keyboard, alerts and other apps come from iOS and stay bright. iOS can tint the whole screen instead.")
+            }.openRows(palette)
+            Section {
+                ForEach(Array(steps.enumerated()),id:\.offset) { index,step in
+                    HStack(alignment:.firstTextBaseline,spacing:12) {
+                        Text(index+1,format:.number).font(.system(.body,design:.serif)).foregroundStyle(palette.muted).monospacedDigit().accessibilityHidden(true)
+                        Text(step).fixedSize(horizontal:false,vertical:true)
+                    }.accessibilityElement(children:.combine)
+                }
+            } header:{ Text("Set it up once") }.openRows(palette)
+            Section {
+                Text("Triple-click the side button to turn the red on and off, or the Home button on an iPhone that has one. Turn the brightness down too.").foregroundStyle(palette.muted)
+            }.openRows(palette)
+        }.nightForm().navigationTitle("Red light").navigationBarTitleDisplayMode(.inline)
+    }
+    private var steps:[String] {[
+        String(localized:"Open Settings › Accessibility › Display & Text Size › Color Filters."),
+        String(localized:"Turn on Color Filters and choose Color Tint. Set Intensity and Hue all the way to the right."),
+        String(localized:"Back in Accessibility, open Accessibility Shortcut and choose Color Filters.")
+    ]}
+}
 struct SoundAndTouchView:View {
     @Environment(\.nyx) private var palette
     @Environment(PlanModel.self) private var model
@@ -120,7 +153,7 @@ struct SoundAndTouchView:View {
                         HStack(alignment:.firstTextBaseline,spacing:12) {
                             Image(systemName:listener.isPlaying ? "stop.fill" : "waveform").accessibilityHidden(true)
                             Text(listener.isPlaying ? String(localized:"Stop listening") : String(localized:"Play tonight at \(park.shortName)")).fixedSize(horizontal:false,vertical:true)
-                        }.foregroundStyle(palette.accent).frame(maxWidth:.infinity,alignment:.leading).contentShape(Rectangle())
+                        }.foregroundStyle(palette.ink).frame(maxWidth:.infinity,alignment:.leading).contentShape(Rectangle())
                     }.accessibilityInputLabels([Text("Play"),Text("Listen"),Text("Stop")])
                 }
                 Text("It plays even when your iPhone is set to silent, because you asked for it, and other audio lowers while it plays. A transcript is always beside the button.").font(.caption).foregroundStyle(palette.muted)
@@ -131,7 +164,7 @@ struct SoundAndTouchView:View {
                     Text("A new moon is a few sharp, sparse taps. As it fills, the taps soften over a broad hum, until a full moon is one wide swell. A waxing Moon swells across the pattern; a waning one fades. Each night's tick on the river is firmer and crisper as its score rises.").foregroundStyle(palette.muted)
                     if moonHaptics {
                         ForEach([(String(localized:"Feel a new moon"),0.0),(String(localized:"Feel a half moon"),0.5),(String(localized:"Feel a full moon"),1.0)],id:\.0) { title,lit in
-                            Button(title) { MoonHaptics.shared.play(.moon(illumination:lit,waxing:true)) }.foregroundStyle(palette.accent)
+                            Button(title) { MoonHaptics.shared.play(.moon(illumination:lit,waxing:true)) }.foregroundStyle(palette.ink)
                         }
                         // The whole night in the hand, at the starting park.
                         if let park=model.home { FeelTonightView(night:model.night(park)) }
@@ -254,7 +287,7 @@ struct AboutDataView:View {
     @ViewBuilder private var licenseLink:some View { if let url=BrowserLink.creativeCommonsBY { sourceLink("Creative Commons Attribution 4.0 (CC BY 4.0)",url) } }
     private func sourceLink(_ title:LocalizedStringKey,_ url:URL)->some View {
         Link(destination:url) { Label(title,systemImage:"safari").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
-            .font(.body.weight(.medium)).foregroundStyle(palette.accent).accessibilityHint(Text("Opens in Safari."))
+            .font(.body.weight(.medium)).foregroundStyle(palette.ink).accessibilityHint(Text("Opens in Safari."))
     }
 }
 /// "About the data" as a row with a mark and a chevron, the same at the foot of Learn and of a park.
@@ -285,7 +318,7 @@ struct ForecastRequestsToday: View {
                     .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             }.padding(.top,6)
         } label:{ Text("Forecast requests on this iPhone").frame(minHeight:44,alignment:.leading) }
-        .tint(palette.accent)
+        .tint(palette.ink)
     }
 }
 /// Your privacy → Advanced: an NPS key of the person's own, used instead of the key every install
@@ -311,10 +344,10 @@ struct NPSKeyField: View {
                         .submitLabel(.done).onSubmit(save)
                     Button("Use this key",action:save).disabled(draft.isEmpty).frame(minHeight:44)
                 }
-                if let message { Text(message).font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
+                if let message { Label(message,systemImage:"exclamationmark.triangle").labelStyle(.caution).font(.caption).fixedSize(horizontal:false,vertical:true) }
             }.padding(.top,6)
         } label:{ Text("Use your own park service key").frame(minHeight:44,alignment:.leading) }
-        .tint(palette.accent)
+        .tint(palette.ink)
     }
     private func save() {
         guard NPSKeyStore.plausible(draft) else { message=String(localized:"That does not look like a National Park Service key. Keys are about 40 letters and numbers."); return }

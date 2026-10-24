@@ -22,7 +22,7 @@ struct RiverScrubbingKey:PreferenceKey {
 /// Without a long drag: VoiceOver and Voice Control adjust it a night at a time (activating it
 /// says the night, never jumps to the middle one); with "prefers action slider alternative" or
 /// Switch Control, previous and next night buttons sit under it; at accessibility sizes it becomes
-/// a stepper with the best nights a button away.
+/// the night in words with full-width previous and next night buttons, the best nights a button away.
 struct TimeRiver: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
@@ -100,7 +100,7 @@ struct TimeRiver: View {
             Eyebrow(text:startsTonight ? "The next 30 nights" : "30 nights from \(nights.first.map { $0.park.dayLabel($0.id) } ?? "")")
             // The tip stays readable through the first scrub (the loupe keeps below it, `tipHeadroom`), so
             // nothing under the finger moves; it closes once the scrub ends.
-            if tipShown { TipView(tip,arrowEdge:.bottom).tipBackground(palette.panel).tint(palette.accent) }
+            if tipShown { TipView(tip,arrowEdge:.bottom).tipBackground(palette.panel).tint(palette.ink) }
             if nights.isEmpty {
                 Text("No nights available").font(.subheadline).foregroundStyle(palette.muted)
             } else if typeSize.isAccessibilitySize {
@@ -245,9 +245,9 @@ struct TimeRiver: View {
                     // The finger covers the date row; the loupe carries the night's date above it.
                     Text(Self.loupeDate(night.id,locale:locale,timeZone:night.park.timeZone)).font(.system(size:10*loupeScale,weight:.semibold)).monospacedDigit()
                         .foregroundStyle(palette.muted).lineLimit(1).minimumScaleFactor(0.8)
-                    // Light, or regular under Bold Text, as the strokes follow it.
-                    Text(night.score.value,format:.number).font(.system(size:22*loupeScale,weight:palette.stroke>1 ? .regular : .light,design:.serif)).monospacedDigit()
-                        .foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(night.score.value)))
+                    // The score's own numeral; Bold Text draws its next weight up, as the strokes follow it.
+                    Text(night.score.value,format:.number).scoreNumeral(size:22*loupeScale,accent:palette.accent)
+                        .contentTransition(.numericText(value:Double(night.score.value)))
                 }.transition(.opacity)
             }
         }
@@ -259,6 +259,10 @@ struct TimeRiver: View {
     /// ("Fri 16", "vie 16"). Always the date, never "Tonight", so it reads the same on every night.
     nonisolated static func loupeDate(_ date:Date,locale:Locale,timeZone:TimeZone)->String {
         date.formatted(Date.FormatStyle(locale:locale,timeZone:timeZone).weekday(.abbreviated).day())
+    }
+    /// An axis tick: the month and day in the reader's language and the park's time zone ("Nov 8", "8 nov").
+    nonisolated static func tickDate(_ date:Date,locale:Locale,timeZone:TimeZone)->String {
+        date.formatted(Date.FormatStyle(locale:locale,timeZone:timeZone).month(.abbreviated).day())
     }
     /// Where the loupe sits: lifted above the night's point, kept inside the river's width and at
     /// most `headroom` (`loupeHeadroom` by default) above it (a Pristine night near the top lifts
@@ -282,29 +286,43 @@ struct TimeRiver: View {
         let gap=loupeSize/2+6+moonSize/2
         return CGPoint(x:point.x<width/2 ? loupe.x+gap : loupe.x-gap,y:row)
     }
-    /// Previous and next night, for anyone who prefers buttons to a long drag.
+    /// Previous and next night, for anyone who prefers buttons to a long drag: side by side, or one
+    /// above the other at accessibility sizes, each the full width and at least 44 pt tall. Starlight
+    /// glass (`secondaryAction`): amber is the score's. Each step is a detent, as a scrub's is.
     private var stepButtons: some View {
-        HStack(spacing:12) {
-            Button { choose((index ?? 1)-1) } label:{ Label("Previous night",systemImage:"chevron.backward").frame(maxWidth:.infinity,minHeight:44) }
-                .disabled((index ?? 0)<=0)
-            Button { choose((index ?? -1)+1) } label:{ Label("Next night",systemImage:"chevron.forward").frame(maxWidth:.infinity,minHeight:44) }
-                .disabled((index ?? nights.count)>=nights.count-1)
+        let layout=typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing:10)) : AnyLayout(HStackLayout(spacing:12))
+        return layout {
+            let first=(index ?? 0)<=0, last=(index ?? nights.count)>=nights.count-1
+            Button { choose((index ?? 1)-1) } label:{ stepLabel("Previous night",systemImage:"chevron.backward",disabled:first) }
+                .disabled(first)
+            Button { choose((index ?? -1)+1) } label:{ stepLabel("Next night",systemImage:"chevron.forward",disabled:last) }
+                .disabled(last)
         }
-        .buttonStyle(.bordered).tint(palette.accent).font(.subheadline.weight(.medium))
+        .secondaryAction().font(.subheadline.weight(.medium))
         .accessibilityElement(children:.contain)
+    }
+    /// At accessibility sizes the words alone, wrapping: a glyph would take a column of its own. A
+    /// step that cannot be taken (before tonight, past the last night) is dimmed, so it reads as such
+    /// on glass too.
+    @ViewBuilder private func stepLabel(_ title:LocalizedStringKey,systemImage:String,disabled:Bool)->some View {
+        Group {
+            if typeSize.isAccessibilitySize { Text(title).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
+            else { Label(title,systemImage:systemImage) }
+        }.frame(maxWidth:.infinity,minHeight:44).opacity(disabled ? 0.45 : 1)
     }
     /// The river's default action: the chosen night opens, or is spoken.
     private func activate() {
         if let current, let open { open(current); return }
         AccessibilityNotification.Announcement(spokenValue).post()
     }
-    /// At accessibility text sizes the drawn river gives way to a plain, large stepper: the date,
-    /// the score as a large numeral with its band, the stepper on a row of its own, buttons to the
-    /// best night and the next of the best (the glow they replace is not drawn here), then what the
-    /// score rests on, a part to a line. VoiceOver hears the stepper as before (the best nights are
-    /// also its actions); the words above it are what a sighted reader sees.
+    /// At accessibility text sizes the drawn river gives way to the night in words: the date, the
+    /// score as a large numeral with its band, then what the score rests on, a part to a line; under it
+    /// full-width previous and next night buttons (`stepButtons`, which scale with the text, as a
+    /// stock stepper's fixed − and + do not) and buttons to the best night and the next of the best
+    /// (the glow they replace is not drawn here). VoiceOver hears the words as one adjustable element,
+    /// "Selected night", swiped up or down a night at a time, with the best nights as its actions.
     private var stepper: some View {
-        VStack(alignment:.leading,spacing:10) {
+        VStack(alignment:.leading,spacing:12) {
             if let current {
                 VStack(alignment:.leading,spacing:6) {
                     Text(current.park.dayLabel(current.id)).font(.headline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
@@ -312,15 +330,22 @@ struct TimeRiver: View {
                         HStack(alignment:.firstTextBaseline,spacing:10) { stepperScore(current) }
                         VStack(alignment:.leading,spacing:2) { stepperScore(current) }
                     }
-                }.accessibilityHidden(true)
-            }
-            Stepper("Selected night",value:Binding(get:{index ?? 0},set:choose),in:0...max(0,nights.count-1))
-                .labelsHidden().frame(maxWidth:.infinity,alignment:.leading)
-                // The third style fills the stepper's capsule under clear − and + glyphs (`stepperFill`).
-                .tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,stepperFill)
+                    lineCaptionView(caption(current,separator:"\n"))
+                }
+                .frame(maxWidth:.infinity,alignment:.leading)
+                .accessibilityElement(children:.ignore)
                 .accessibilityLabel("Selected night").accessibilityValue(spokenValue).accessibilityHint("Moves one night at a time.")
                 .accessibilityInputLabels([Text("Night"),Text("Selected night")])
+                .accessibilityAdjustableAction { direction in
+                    switch direction {
+                    case .increment: choose(index.map { $0+1 } ?? 0)
+                    case .decrement: choose(index.map { $0-1 } ?? 0)
+                    @unknown default: break
+                    }
+                }
                 .modifier(RiverAccessibility(nights:nights,outlooks:outlooks,markers:markers,peaks:peakOrder,current:index,choose:choose))
+            }
+            stepButtons
             // The best nights are a button away for sighted readers too (VoiceOver has them as actions).
             if let best=peakOrder.first {
                 VStack(alignment:.leading,spacing:10) {
@@ -330,22 +355,14 @@ struct TimeRiver: View {
                         Button { if let next=Self.nextPeak(peaks:peakOrder,current:index) { choose(next) } } label:{ bestLabel("Next of the best nights") }
                     }
                 }
-                .buttonStyle(.bordered).tint(palette.accent).font(.subheadline.weight(.medium))
+                .secondaryAction().font(.subheadline.weight(.medium))
             }
-            if let current { lineCaptionView(caption(current,separator:"\n")) }
         }
     }
-    /// The AX stepper's capsule: amber-brown on the panel (in night vision a dark red, the red ink at
-    /// 0.26), as the journal's
-    /// Bortle stepper, but translucent. The stepper draws a glyph it has disabled (− on tonight, +
-    /// on the last night) in this same style over the capsule, so an opaque fill would make that
-    /// glyph vanish; at half strength it stays a dim, legible mark, and the enabled glyph in
-    /// starlight keeps at least 4.5:1 on the capsule.
-    private var stepperFill: Color { palette.nightVision ? palette.ink.opacity(0.26) : palette.accent.opacity(0.5) }
     /// Words alone: at these sizes a glyph would take a column of its own.
     private func bestLabel(_ title:LocalizedStringKey)->some View {
-        Text(title).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
-            .frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
+        Text(title).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+            .frame(maxWidth:.infinity,minHeight:44)
     }
     /// The large-text caption, a part to a line: each part on one line whenever it fits, so a phrase
     /// such as "models 55–83" is never split; a part too long for the width wraps within itself,
@@ -449,7 +466,7 @@ struct TimeRiver: View {
             let p=point(hovered)
             var hairline=Path(); hairline.move(to:CGPoint(x:p.x,y:moonSize+8)); hairline.addLine(to:CGPoint(x:p.x,y:bottom+4))
             context.stroke(hairline,with:.color(palette.line),style:StrokeStyle(lineWidth:0.6*palette.stroke,dash:[2,3]))
-            context.stroke(Path(ellipseIn:CGRect(x:p.x-6,y:p.y-6,width:12,height:12)),with:.color(palette.accent.opacity(0.7)),lineWidth:0.9*palette.stroke)
+            context.stroke(Path(ellipseIn:CGRect(x:p.x-6,y:p.y-6,width:12,height:12)),with:.color(palette.ink.opacity(0.7)),lineWidth:0.9*palette.stroke)
         }
         // A smooth river through every night; the forecast-free stretch is dashed.
         func river(_ range:ClosedRange<Int>)->Path {
@@ -520,11 +537,12 @@ struct TimeRiver: View {
         }
 
         // Sparse date labels: the selected night first, then the first night, then the first night
-        // of each week. A label that would touch one already placed is left out.
+        // of each week, each with its month ("Nov 8"), so a tick across a month's end is never read
+        // as this month's. A label that would touch one already placed is left out.
         var placed:[CGRect]=[]
         let weekStarts=calendar.map { calendar in nights.indices.filter { calendar.component(.weekday,from:nights[$0].id)==calendar.firstWeekday } } ?? []
         for i in [index].compactMap({ $0 })+[0]+weekStarts {
-            let label=i==0 && startsTonight ? String(localized:"Tonight") : i==0 ? nights[i].park.dayLabel(nights[i].id) : "\((calendar ?? nights[i].park.calendar).component(.day,from:nights[i].id))"
+            let label=i==0 && startsTonight ? String(localized:"Tonight") : i==0 ? nights[i].park.dayLabel(nights[i].id) : Self.tickDate(nights[i].id,locale:locale,timeZone:nights[i].park.timeZone)
             let text=context.resolve(Text(label).font(.caption2.weight(i==index ? .semibold : .regular)).foregroundStyle(i==index ? palette.ink : palette.muted))
             let measured=text.measure(in:size)
             let cx=min(max(x(i,width:size.width),measured.width/2),size.width-measured.width/2)
@@ -584,7 +602,8 @@ struct DebugRiverHost: View {
 #endif
 /// The loupe's surface: panel-tinted, interactive Liquid Glass (the small lens is clear glass that
 /// bends the river), or under night vision, Reduce Transparency and Increase Contrast a solid
-/// panel fill that grows the same way, opaque while lifted so the numeral keeps 4.5:1.
+/// panel fill that grows the same way, opaque while lifted so the numeral keeps 4.5:1. Its rim is
+/// starlight: the lens is the control, the amber numeral inside it the score.
 private struct LoupeSurface: ViewModifier {
     @Environment(\.nyx) private var palette
     let solid:Bool
@@ -592,10 +611,10 @@ private struct LoupeSurface: ViewModifier {
     @ViewBuilder func body(content:Content)->some View {
         if solid {
             content.background(Circle().fill(lifted ? palette.panel : palette.panel.opacity(0.35)))
-                .overlay(Circle().strokeBorder(palette.accent,lineWidth:1.2*palette.stroke))
+                .overlay(Circle().strokeBorder(palette.ink,lineWidth:1.2*palette.stroke))
         } else {
             content.glassEffect(lifted ? Glass.regular.tint(palette.panel.opacity(0.7)).interactive() : Glass.regular.interactive(),in:.circle)
-                .overlay(Circle().strokeBorder(palette.accent.opacity(0.55),lineWidth:0.8*palette.stroke))
+                .overlay(Circle().strokeBorder(palette.ink.opacity(0.55),lineWidth:0.8*palette.stroke))
         }
     }
 }
@@ -639,7 +658,7 @@ private struct LoupePreview: View {
         let scale=min(1.5,max(1,loupeType/22))
         VStack(spacing:1) {
             Text(TimeRiver.loupeDate(night.id,locale:.current,timeZone:night.park.timeZone)).font(.system(size:10*scale,weight:.semibold)).monospacedDigit().foregroundStyle(palette.muted)
-            Text(night.score.value,format:.number).font(.system(size:22*scale,weight:.light,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
+            Text(night.score.value,format:.number).scoreNumeral(size:22*scale,accent:palette.accent)
         }.frame(width:56*scale,height:56*scale).modifier(LoupeSurface(solid:solid,lifted:true))
     }
 }

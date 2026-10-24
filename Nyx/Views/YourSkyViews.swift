@@ -87,6 +87,7 @@ struct YourSkyPanel: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     @Environment(SceneCommands.self) private var commands: SceneCommands?
+    @Environment(\.horizontalSizeClass) private var sizeClass
     let nights: [LoggedNight]
     /// Records a first night, offered inside the empty constellation beside its promise.
     var record: (()->Void)? = nil
@@ -110,7 +111,8 @@ struct YourSkyPanel: View {
         let hold: Double?=nil
         let arriving=arrival ?? ConstellationArrivals.waiting(in:ids)
         #endif
-        Panel { VStack(alignment:.leading,spacing:16) {
+        // The page's first section: the navigation bar is its edge, so no rule of its own.
+        Panel(rule:false) { VStack(alignment:.leading,spacing:16) {
             HStack(alignment:.center) {
                 Eyebrow(text:"Your constellation")
                 Spacer(minLength:8)
@@ -120,13 +122,16 @@ struct YourSkyPanel: View {
                        arriving:arriving,arrivalHold:hold,arrivalPaused:!onScreen || fieldOpen,drawInMemory:"journal",
                        onSelect:{ id in if let night=nights.first(where:{ $0.id.uuidString==id }) { open(night.id) } },
                        onArrived:{ id in arrived(id) })
+                // On a phone, once there are nights, the map is a header, not the page: held low enough
+                // that the first entries show on the first screen. Empty, it is the promise and keeps its size.
+                .frame(maxHeight:sizeClass == .compact && !nights.isEmpty ? 172 : nil).frame(maxWidth:.infinity)
             if unavailable {
                 Text("Your stars are drawn from your journal, which could not be opened.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             } else if nights.isEmpty {
                 Text("Your first night will be your first star").font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
                 Text("Each night you record shines at its park on this map of the sky. Nights in the same season join into a figure of their own. Every entry stays on this iPhone.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 // The promise and the way to keep it, together.
-                if let record { Button("Record a night",action:record).buttonStyle(.borderedProminent).foregroundStyle(Color.black).padding(.top,4) }
+                if let record { Button("Record a night",action:record).secondaryAction().padding(.top,4) }
             } else {
                 Text("Brighter stars mark darker skies. Each season's nights join into a figure. Tap a star to open its night.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 Divider().overlay(palette.line)
@@ -172,7 +177,7 @@ struct SkiesSeenSection: View {
                 Text("Bortle as you observed it: the darkest of your nights there.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             }.padding(.top,10)
         } label:{
-            Label { Text(seen.line).font(.system(.body,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"sparkles").foregroundStyle(palette.accent).accessibilityHidden(true) }
+            Label { Text(seen.line).font(.system(.body,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"sparkles").foregroundStyle(palette.ink).accessibilityHidden(true) }
                 .frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
         }.tint(palette.muted)
     }
@@ -260,7 +265,7 @@ struct YearRecapView: View {
         ScrollView { VStack(alignment:.leading,spacing:24) {
             Eyebrow(text:"Year under the stars")
             HStack(alignment:.firstTextBaseline) {
-                Text(JournalYear.label(year)).font(.system(size:min(yearSize,120),weight:.light,design:.serif)).foregroundStyle(palette.accent).kerning(2)
+                Text(JournalYear.label(year)).font(.system(size:min(yearSize,120),weight:.light,design:.serif)).foregroundStyle(palette.ink).kerning(2)
                     .lineLimit(1).minimumScaleFactor(0.5)
                 Spacer(minLength:8)
                 if years.count>1 {
@@ -351,8 +356,8 @@ struct MoonPhaseRow: View {
                         Circle().stroke(palette.line,lineWidth:0.6)
                         MoonDisc(illumination:moon.illumination,waxing:moon.waxing).opacity(met.contains(index) ? 1 : 0.18)
                     }.frame(maxWidth:30,maxHeight:30)
-                    // A new moon met is as dark as one missed; the amber mark says which you saw.
-                    Circle().fill(palette.accent).frame(width:4,height:4).opacity(met.contains(index) ? 1 : 0)
+                    // A new moon met is as dark as one missed; the starlight mark says which you saw.
+                    Circle().fill(palette.ink).frame(width:4,height:4).opacity(met.contains(index) ? 1 : 0)
                 }.frame(maxWidth:.infinity)
             }
         }
@@ -372,7 +377,7 @@ struct RecapCard: View {
             Starfield(seed:"recap-\(recap.year)",twinkle:0)
             VStack(alignment:.leading,spacing:16) {
                 Text("Nyx · Year under the stars").textCase(Lettering.spaced ? .uppercase : nil).font(.caption).tracking(4).foregroundStyle(palette.muted)
-                Text(String(recap.year)).font(.system(size:80,weight:.light,design:.serif)).foregroundStyle(palette.accent)
+                Text(String(recap.year)).font(.system(size:80,weight:.light,design:.serif)).foregroundStyle(palette.ink)
                 HStack(spacing:28) {
                     figure(recap.nights,String(localized:"nights out"))
                     // "parks" only while every night was at a national park, as the recap's own tiles say.

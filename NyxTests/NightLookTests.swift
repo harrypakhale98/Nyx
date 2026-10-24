@@ -94,7 +94,7 @@ import Testing
         for value in stride(from: 0.0, through: 1.0, by: 0.05) { #expect(abs(SRGB.encoded(SRGB.linear(value))-value) < 1e-9) }
         #expect(abs(SRGB.linear(0.5)-0.214) < 0.001)
         #expect(SRGB.encoded(-1) == 0 && abs(SRGB.encoded(2)-1) < 1e-12)
-        #expect(abs(NightRed.contrastOnBlack(opacity: 1)-6.16) < 0.01)
-        #expect(abs(NightRed.contrastOnBlack(opacity: 0.96)-5.71) < 0.01)
+        #expect(abs(NightRed.contrastOnBlack(opacity: 1)-6.85) < 0.01)
+        #expect(abs(NightRed.contrastOnBlack(opacity: 0.96)-6.34) < 0.01)
     }
 }

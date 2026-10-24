@@ -50,7 +50,7 @@ struct ParkWindowRoot: View {
         .environment(commands).focusedSceneValue(commands)
         .background(WindowSceneReader(commands:commands).frame(width:0,height:0).accessibilityHidden(true))
         .environment(\.nyx,palette).environment(\.skyHome,model.home)
-        .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent).preferredColorScheme(.dark).statusBarHidden(palette.nightVision)
+        .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.ink).preferredColorScheme(.dark).statusBarHidden(palette.nightVision)
         .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
         .animation(reduceMotion ? nil : NyxMotion.spring,value:palette.nightVision)
         // The switch asks the window for the lamp (`SceneCommands.requestNightVision`); a park's window

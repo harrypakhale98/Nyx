@@ -127,13 +127,16 @@ final class NyxUITests:XCTestCase {
         let header=app.staticTexts.matching(NSPredicate(format:"label MATCHES %@","^[A-Z][a-z]+ [0-9]{4}$")).firstMatch
         XCTAssertTrue(header.waitForExistence(timeout:5))
         func month()->String { header.label }
+        let tonightsMonth=month()
+        /// A night that stands for the page: the 15th, or the 28th in tonight's month, whose past weeks fold away.
+        func day(_ title:String)->String { title == tonightsMonth ? " 28" : " 15" }
         /// The visible page's nights: a night of the month named by the header is on screen.
         func pageMatches(_ title:String,file:StaticString=#filePath,line:UInt=#line) {
             let short=String(title.prefix(3))
-            let night=app.buttons.matching(NSPredicate(format:"label CONTAINS %@",short+" 15")).firstMatch
+            let night=app.buttons.matching(NSPredicate(format:"label CONTAINS %@",short+day(title))).firstMatch
             XCTAssertTrue(night.waitForExistence(timeout:5),"No night of \(title) in the tree",file:file,line:line)
             XCTAssertTrue(night.isHittable,"\(title)'s nights are not on screen",file:file,line:line)
-            XCTAssertEqual(app.buttons.matching(NSPredicate(format:"label CONTAINS %@"," 15.")).count,1,"More than one month in the tree",file:file,line:line)
+            XCTAssertEqual(app.buttons.matching(NSPredicate(format:"label CONTAINS %@",day(title)+".")).count,1,"More than one month in the tree",file:file,line:line)
         }
         func waitChange(from old:String,file:StaticString=#filePath,line:UInt=#line)->String {
             let changed=NSPredicate { _,_ in header.label != old }
@@ -145,7 +148,7 @@ final class NyxUITests:XCTestCase {
         /// arrows mark the month's column: on a wide iPad the column is centred and the night's breakdown
         /// stands beside it in an inspector, so a drag across the window's width would start in the inspector.
         func drag(left:Bool) {
-            let row=app.buttons.matching(NSPredicate(format:"label CONTAINS %@"," 15")).firstMatch
+            let row=app.buttons.matching(NSPredicate(format:"label CONTAINS %@",day(month()))).firstMatch
             let column=app.buttons["Previous month"].firstMatch.frame.union(next.frame)
             let y=row.frame.midY/app.frame.height
             func x(_ share:Double)->Double { (column.minX+column.width*share)/app.frame.width }
@@ -168,7 +171,7 @@ final class NyxUITests:XCTestCase {
         XCTAssertEqual(waitChange(from:second),first,"The arrow did not return to the first month")
         pageMatches(first)
         // The peek on the visible page.
-        let night=app.buttons.matching(NSPredicate(format:"label CONTAINS %@",String(first.prefix(3))+" 20")).firstMatch
+        let night=app.buttons.matching(NSPredicate(format:"label CONTAINS %@",String(first.prefix(3))+" 28")).firstMatch
         XCTAssertTrue(night.waitForExistence(timeout:5))
         night.press(forDuration:1.2)
         XCTAssertTrue(app.buttons["Why this score"].waitForExistence(timeout:5),"No peek on the visible month")

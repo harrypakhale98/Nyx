@@ -2,8 +2,9 @@ import SwiftUI
 
 extension PlanModel {
     /// A night's ring for the dial, with its best window and, while the night lasts, where it has got to.
+    /// A clear stretch under a bright Moon is not lit as the best (`ClearWindow.brightest`).
     func ring(_ night: Night, now: Date = .now) -> (ring: NightRing, park: Park, spoken: String)? {
-        let window=clearWindow(night)?.interval
+        let window=clearWindow(night)?.brightest
         guard let ring=NightRing(sky: night.sky, park: night.park, best: window, now: now) else { return nil }
         return (ring, night.park, ring.spoken(sky: night.sky, park: night.park, best: window))
     }

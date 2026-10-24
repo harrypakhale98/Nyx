@@ -32,15 +32,17 @@ struct BestNightsView: View {
     var body: some View {
         ScrollView {
             if wide {
-                // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
+                // The two columns meet at iPhone Duo's fold on its inner display, half open or flat. The
+                // answer leads the first column, above where it is measured from; the places follow beside it.
                 FoldColumns(narrow:.leading,narrowMax:420,spacing:32) {
-                    VStack(alignment:.leading,spacing:22) { intro; startingPoint }.frame(maxWidth:.infinity,alignment:.leading)
-                    VStack(alignment:.leading,spacing:24) { answer }.frame(maxWidth:.infinity)
+                    VStack(alignment:.leading,spacing:24) { intro; answer; startingPoint }.frame(maxWidth:.infinity,alignment:.leading)
+                    VStack(alignment:.leading,spacing:24) { others }.frame(maxWidth:.infinity)
                 }.padding(NyxMetrics.pagePadding).readableColumn(WideLayout.twoColumnMaximum)
             } else {
                 VStack(alignment:.leading,spacing:24) {
-                    intro
-                    answer
+                    // At accessibility sizes the answer comes first, so its score is on the first screen.
+                    if typeSize.isAccessibilitySize { answer; intro } else { intro; answer }
+                    others
                     startingPoint
                 }.padding(24).readableColumn()
             }
@@ -59,16 +61,26 @@ struct BestNightsView: View {
     private var intro:some View {
         VStack(alignment:.leading,spacing:6) {
             Text("The darkest nights in reach over the next 30, one for each place.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-            if !model.startChosen { Text("Example: from \(model.originName)").font(.caption.weight(.medium)).foregroundStyle(palette.accent) }
+            if !model.startChosen { Text("Example: from \(model.originName)").font(.caption.weight(.medium)).foregroundStyle(palette.ink) }
         }
     }
     private var startingPoint:some View {
         StartingPointPanel(heading:true,choose:{ choosing=true },nearMe:{ StartingPointSheets.nearMe(model) { explaining=true } })
     }
+    /// The best night in reach, or why there is none yet.
     @ViewBuilder private var answer:some View {
         if !loading, let ranking, let best=ranking.best {
             hero(best,closure:ranking.closures[best.park.id])
-            // The hero is the first place; the list goes on from the second.
+        } else if !loading, ranking != nil {
+            CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No parks or dark-sky places fall inside this radius. Widen it or choose a different starting point.")
+        } else {
+            // Gone at once when the answer lands: faded out beside the arriving rows it could be left behind.
+            ProgressView().frame(maxWidth:.infinity,minHeight:120).accessibilityLabel("Ranking the nights in reach").transition(.identity)
+        }
+    }
+    /// The hero is the first place; the list goes on from the second.
+    @ViewBuilder private var others:some View {
+        if !loading, let ranking, ranking.best != nil {
             let others=Array(ranking.rows.dropFirst())
             VStack(alignment:.leading,spacing:12) {
                 if !others.isEmpty {
@@ -82,10 +94,6 @@ struct BestNightsView: View {
                 }
                 notes(ranking)
             }
-        } else if !loading, ranking != nil {
-            CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No parks or dark-sky places fall inside this radius. Widen it or choose a different starting point.")
-        } else {
-            ProgressView().frame(maxWidth:.infinity,minHeight:120).accessibilityLabel("Ranking the nights in reach")
         }
     }
     @ViewBuilder private func notes(_ ranking:BestNightsInReach)->some View {
@@ -101,12 +109,14 @@ struct BestNightsView: View {
         let park=night.park
         return NavigationLink { ParkDetailView(park:park,initialDate:night.id).onAppear { ReviewPrompt.noteNightViewed(score:night.score.value) } } label:{
             VStack(spacing:10) {
-                Eyebrow(text:"The best night")
+                // One row of small capitals over the place, as above a park's page; the band and what it
+                // rests on stay a quiet line under the numeral, never a second heading.
+                Eyebrow(text:"The best night",meta:true)
                 Text(park.shortName).font(.system(.title,design:.serif)).multilineTextAlignment(.center).foregroundStyle(palette.ink)
                 Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
-                Text("\(night.score.value)").font(.system(size:min(heroSize,150),weight:.light,design:.serif)).kerning(3).foregroundStyle(palette.accent)
+                Text("\(night.score.value)").scoreNumeral(size:min(heroSize,150),accent:palette.accent)
                     .contentTransition(.numericText(value:Double(night.score.value)))
-                Text(night.bandWithBasis).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.center)
+                Text(night.bandWithBasis).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center)
                 if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).multilineTextAlignment(.center) }
                 AccessNoteLabel(park:park,alignment:.center)
             }.frame(maxWidth:.infinity)
@@ -120,12 +130,14 @@ struct BestNightsView: View {
         let park=night.park
         let words=VStack(alignment:.leading,spacing:4) {
             Text(park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.leading)
-            Text(Phrase.clauses([park.dayLabel(night.id)]+night.basisLabels)).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.leading)
+            // The night, then what it rests on in the hero's words ("Thu, Nov 5, usual clouds"; the
+            // hero says "Excellent, usual clouds"), so one screen says it one way. The note below explains them.
+            Text(night.score.withBasis(park.dayLabel(night.id))).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.leading)
             if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.footnote).labelStyle(.caution).multilineTextAlignment(.leading) }
             AccessNoteLabel(park:park,alignment:.leading)
         }.fixedSize(horizontal:false,vertical:true)
         let score=HStack(alignment:.firstTextBaseline,spacing:6) {
-            Text("\(night.score.value)").font(.system(.title,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
+            Text("\(night.score.value)").scoreNumeral(.title,accent:palette.accent)
             Text(night.score.band.label).font(.caption).foregroundStyle(palette.muted)
         }
         return NavigationLink { ParkDetailView(park:park,initialDate:night.id).onAppear { ReviewPrompt.noteNightViewed(score:night.score.value) } } label:{
@@ -157,7 +169,8 @@ struct BestNightsView: View {
         let closed=Dictionary(pool.compactMap { park in model.closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
         let result=BestNightsInReach.make(months,closures:closed,inReach:all.count)
         model.bestNightsKept=(key,result)
-        withAnimation(reduceMotion ? nil : NyxMotion.spring) { ranking=result }
+        // The first answer simply appears; a later one (a new radius or day) moves on the shared spring.
+        withAnimation(reduceMotion || ranking == nil ? nil : NyxMotion.spring) { ranking=result }
     }
 }
 #Preview("Best nights") { NavigationStack { BestNightsView() }.environment(PlanModel()).preferredColorScheme(.dark) }

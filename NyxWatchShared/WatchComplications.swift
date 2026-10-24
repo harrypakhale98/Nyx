@@ -56,6 +56,9 @@ struct WristInk {
     var layered: Bool { mode == .fullColor }
     var ink: Color { look.ink }
     var accent: Color { nightVision || !layered ? ink : look.accent }
+    /// A closure's warning glyph: the app's warm red in full colour (`NyxPalette.cautionColor`), so
+    /// amber stays the score's; ink in night vision and wherever the face is tinted.
+    var caution: Color { nightVision || !layered ? ink : NyxPalette.cautionColor }
     var mutedOpacity: Double { nightVision ? (highContrast ? NightRed.levels[0] : NightRed.levels[1]) : (highContrast ? 0.9 : 0.72) }
     var muted: Color { layered ? ink.opacity(mutedOpacity) : ink }
 }
@@ -244,6 +247,7 @@ struct WatchComplicationView: View {
     private var colors: WristInk { WristInk(nightVision: entry.nightVision, mode: renderingMode, contrast: contrast) }
     private var ink: Color { colors.ink }
     private var accent: Color { colors.accent }
+    private var caution: Color { colors.caution }
     private var muted: Color { colors.muted }
     var body: some View {
         Group {
@@ -267,8 +271,8 @@ struct WatchComplicationView: View {
         // The system's open ring echoes the app's celestial gauge; the Moon sits in its opening.
         Gauge(value: Double(night.score.value), in: 0...100) {
             // Coloured explicitly: the label otherwise renders white, the one bright thing on a red face.
-            // A closure takes the Moon's place, in the accent: it stands beside the score on every surface.
-            if entry.closure != nil { Image(systemName: WristClosure.symbol).foregroundStyle(accent) } else { MoonSymbol(night: night).foregroundStyle(muted) }
+            // A closure takes the Moon's place, in the warning's red: it stands beside the score on every surface.
+            if entry.closure != nil { Image(systemName: WristClosure.symbol).foregroundStyle(caution) } else { MoonSymbol(night: night).foregroundStyle(muted) }
         } currentValueLabel: {
             Text(night.score.value, format: .number).scoreNumeral(.title3, accent: accent).widgetAccentable()
         }
@@ -280,7 +284,7 @@ struct WatchComplicationView: View {
             .widgetLabel {
                 // A closure takes the curved label from the gauge: the numeral stays, the warning is read first.
                 if entry.closure != nil {
-                    Text("\(Image(systemName: WristClosure.symbol)) \(Text("Closure alert"))").foregroundStyle(accent).widgetAccentable()
+                    Text("\(Text(Image(systemName: WristClosure.symbol)).foregroundStyle(caution)) \(Text("Closure alert"))").foregroundStyle(ink).widgetAccentable()
                 } else {
                     Gauge(value: Double(night.score.value), in: 0...100) { Text(night.score.band.label) }.tint(accent).widgetAccentable()
                 }
@@ -336,7 +340,7 @@ struct WatchComplicationView: View {
             }
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text(night.score.value, format: .number).scoreNumeral(.title2, accent: accent).widgetAccentable()
-                if case .mark = closure { Image(systemName: WristClosure.symbol).font(.caption2).foregroundStyle(accent).widgetAccentable() }
+                if case .mark = closure { Image(systemName: WristClosure.symbol).font(.caption2).foregroundStyle(caution).widgetAccentable() }
                 // Whole or the one word: a basis or smoke note cut mid-word would say less than the
                 // word under the score (VoiceOver hears it all in the summary).
                 ViewThatFits(in: .horizontal) {
@@ -364,8 +368,8 @@ struct WatchComplicationView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     private func closureLine(_ text: Text) -> some View {
-        Label { text } icon: { Image(systemName: WristClosure.symbol) }
-            .font(.caption2.weight(.medium)).foregroundStyle(accent).widgetAccentable()
+        Label { text.foregroundStyle(ink) } icon: { Image(systemName: WristClosure.symbol).foregroundStyle(caution) }
+            .font(.caption2.weight(.medium)).widgetAccentable()
             .fixedSize(horizontal: false, vertical: true)
     }
     private var empty: some View {

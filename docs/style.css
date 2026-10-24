@@ -37,9 +37,11 @@ body {
   -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
 }
 img { max-width: 100%; height: auto; display: block; }
-a { color: var(--amber); text-underline-offset: 3px; text-decoration-thickness: 1px; }
-a:hover { text-decoration-thickness: 2px; }
-:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 6px; }
+/* Links in starlight with a quiet underline, as in the app: amber is kept for the score and light. */
+a { color: var(--ink); text-decoration-line: underline; text-decoration-color: var(--soft); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+@supports (text-decoration-color: color-mix(in srgb, red 50%, transparent)) { a { text-decoration-color: color-mix(in srgb, currentColor 45%, transparent); } }
+a:hover { text-decoration-color: currentColor; text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
 h1, h2, h3 { font-family: var(--serif); font-weight: 400; line-height: 1.12; letter-spacing: -.01em; margin: 0; text-wrap: balance; }
 p { margin: 0 0 1em; text-wrap: pretty; }
 strong { color: var(--ink); font-weight: 600; }
@@ -81,7 +83,7 @@ html:has(#nv:checked) .sky::after { background-image: url("images/stars-bright-r
 .nv-switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); }
 #nv:checked ~ * .nv-switch .track { background: #FF453A; }
 #nv:checked ~ * .nv-switch .track::after { transform: translateX(16px); background: #000; }
-#nv:focus-visible ~ * .nv-switch .track { outline: 2px solid var(--amber); outline-offset: 3px; }
+#nv:focus-visible ~ * .nv-switch .track { outline: 2px solid var(--ink); outline-offset: 3px; }
 .nv-switch .label-short { display: none; }
 
 /* Layout */
@@ -89,7 +91,6 @@ html:has(#nv:checked) .sky::after { background-image: url("images/stars-bright-r
 .prose { max-width: 700px; margin: 0 auto; padding: 0 20px; }
 section { position: relative; }
 .eyebrow { font: 600 12px/1.4 var(--sans); letter-spacing: .26em; text-transform: uppercase; color: var(--soft); margin: 0 0 14px; }
-.eyebrow.amber { color: var(--amber); }
 .lead { font-size: clamp(18px, 2.1vw, 21px); line-height: 1.55; color: var(--muted); }
 .muted { color: var(--muted); }
 .note { font-size: 14px; color: var(--soft); }
@@ -140,24 +141,33 @@ section { position: relative; }
 .score-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
 .dial { position: relative; max-width: 420px; width: 100%; margin: 0 auto; }
 .dial svg { width: 100%; height: auto; overflow: visible; }
-.dial .track { stroke: rgba(245, 241, 230, .1); }
-.dial .value { stroke: var(--amber); filter: drop-shadow(0 0 10px var(--glow)); }
-.dial .tick { stroke: var(--line-strong); }
-.dial .knob { fill: var(--ink); filter: drop-shadow(0 0 6px var(--amber)); }
+/* The dial's track is the night, sunset to sunrise, in starlight only, as in the app: twilight dim,
+   true darkness lit, the best window brightest with one soft glow. Amber is the numeral's alone. */
+.dial .glass { stroke: rgba(245, 241, 230, .07); }
+.dial .night { stroke: var(--line-strong); }
+.dial .twilight { stroke: var(--ink); stroke-opacity: .15; }
+.dial .dark { stroke: var(--ink); stroke-opacity: .3; }
+.dial .best { stroke: var(--ink); filter: drop-shadow(0 0 4px rgba(245, 241, 230, .45)); }
+.dial .tick { stroke: var(--line-strong); stroke-width: .7; }
+.dial .tick.lit { stroke: var(--ink); stroke-opacity: .5; }
+.dial .tick.mid { stroke-opacity: .8; stroke-width: 1; }
+.dial .end text { font: 9.5px var(--sans); fill: var(--ink); font-variant-numeric: tabular-nums; }
+.dial .end .sun { fill: none; stroke: var(--muted); stroke-width: 1; stroke-linecap: round; }
 .dial .readout { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding-top: 4%; }
 .dial .number { font-family: var(--serif); font-size: clamp(96px, 14vw, 150px); line-height: .9; color: var(--amber); letter-spacing: -.02em; }
 .dial .band-name { font-family: var(--serif); font-size: clamp(24px, 3vw, 32px); margin-top: 8px; }
-.dial .unit { font-size: 12px; letter-spacing: .3em; color: var(--soft); margin-top: 10px; }
+.dial .unit { font-size: 14px; color: var(--soft); margin-top: 10px; }
+html:has(#nv:checked) .dial .best { filter: none; }
+@media (prefers-contrast: more) { .dial .dark { stroke-opacity: .5; } .dial .twilight { stroke-opacity: .25; } }
 @media (prefers-reduced-motion: no-preference) {
-  .dial .value { animation: draw 2.2s cubic-bezier(.2, .9, .25, 1) .3s both; }
-  .dial .knob { animation: knob .6s ease .2s both; }
-  /* Where the browser can, the dial fills as it scrolls into view, like scrubbing the time river. */
+  /* The night draws in from sunset, as the app reveals it while the score counts up. */
+  .dial .reveal-arc { animation: draw 2.2s cubic-bezier(.2, .9, .25, 1) .3s both; }
+  /* Where the browser can, the night draws as the dial scrolls into view, like scrubbing the time river. */
   @supports (animation-timeline: view()) {
-    .dial .value { animation-duration: auto; animation-delay: 0s; animation-timing-function: cubic-bezier(.3, .7, .4, 1); animation-timeline: --dial; animation-range: entry 20% cover 45%; }
+    .dial .reveal-arc { animation-duration: auto; animation-delay: 0s; animation-timing-function: cubic-bezier(.3, .7, .4, 1); animation-timeline: --dial; animation-range: entry 20% cover 45%; }
     .dial { view-timeline-name: --dial; }
   }
-  @keyframes draw { from { stroke-dasharray: 0 100; } }
-  @keyframes knob { from { opacity: 0; } }
+  @keyframes draw { from { stroke-dasharray: 0 100; } to { stroke-dasharray: 100 100; } }
 }
 .parts { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
 .part { display: grid; grid-template-columns: 1fr auto; gap: 4px 18px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
@@ -169,7 +179,8 @@ section { position: relative; }
 .part .meter .w100 { width: 100%; }
 .part .meter .w85 { width: 85%; }
 .part p { grid-column: 1 / -1; margin: 6px 0 0; font-size: 15px; color: var(--muted); }
-.cap { margin-top: 18px; padding: 16px 20px; border-left: 2px solid var(--amber); color: var(--ink); background: var(--amber-soft); border-radius: 0 14px 14px 0; font-size: 16px; }
+/* The limit sentence, as the app sets it under the number: quiet starlight, no amber. */
+.cap { margin-top: 18px; padding: 16px 20px; border-left: 1px solid var(--line-strong); color: var(--muted); border-radius: 0; font-size: 16px; }
 .scale { margin-top: clamp(40px, 6vw, 64px); }
 .scale ol { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 40fr 20fr 15fr 15fr 10fr; gap: 4px; }
 .scale li { padding: 14px 12px 0; border-top: 4px solid var(--amber); font-size: 14px; color: var(--muted); }
@@ -374,8 +385,9 @@ blockquote { margin: 18px 0; padding: 4px 0 4px 18px; border-left: 2px solid var
   html, body { background: #fff; color: #000; }
   body { font-size: 11pt; line-height: 1.5; min-height: 0; }
   .sky, .site-header, .nv-switch, .skip, .defs, #nv { display: none !important; }
-  .reveal, .dial .value, .dial .knob { animation: none !important; opacity: 1 !important; transform: none !important; }
-  .dial .track, .part .meter { background: rgba(0, 0, 0, .12); stroke: rgba(0, 0, 0, .15); }
+  .reveal, .dial .reveal-arc { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .dial .glass, .part .meter { background: rgba(0, 0, 0, .12); stroke: rgba(0, 0, 0, .15); }
+  .dial .best { filter: none; }
   .field { background: #fff; border-color: var(--line); }
   .field, .field .copy, .field h2, .field .eyebrow, .field .lead, .field .ticks li, .field .shot figcaption { color: #000; }
   .tile.vision .over { background: #fff; }

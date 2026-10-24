@@ -185,7 +185,7 @@ struct GuideView:View {
                 .lineLimit(1...4).focused($typing).submitLabel(.send)
                 .onSubmit { ask(question) }
                 .padding(.vertical,8)
-            Button { ask(question) } label:{ Image(systemName:"arrow.up.circle.fill").font(.title).foregroundStyle(palette.accent) }
+            Button { ask(question) } label:{ Image(systemName:"arrow.up.circle.fill").font(.title).foregroundStyle(palette.ink) }
                 .buttonStyle(.plain).frame(minWidth:44,minHeight:44)
                 .disabled(question.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty || guide.loading || !hasRecords)
                 .accessibilityLabel("Ask").accessibilityInputLabels([Text("Ask"),Text("Send")])
@@ -243,7 +243,7 @@ struct GuideRecords: View {
                     DisclosureGroup(isExpanded:$othersOpen) {
                         VStack(alignment:.leading,spacing:0) { Divider().overlay(palette.line); recordRows(others,nights:nights,shared:shared) }
                     } label:{
-                        Text("\(others.count) other records").font(.subheadline.weight(.medium)).foregroundStyle(palette.accent)
+                        Text("\(others.count) other records").font(.subheadline.weight(.medium)).foregroundStyle(palette.ink)
                             .fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
                     }
                     .disclosureGroupStyle(RecordsDisclosureStyle()).padding(.horizontal,8)
@@ -276,8 +276,8 @@ struct GuideRecords: View {
         return model.night(park,on:night)
     }
 }
-/// The folded records' disclosure: the words and a chevron in the accent (the system's chevron stays
-/// white beside amber words outside a List, and pure white on black is off the palette). One button
+/// The folded records' disclosure: the words and a chevron in starlight (the system's chevron is
+/// pure white outside a List, and pure white on black is off the palette). One button
 /// that says whether it is expanded or collapsed, as the system's own disclosure does; the rows appear
 /// without a custom animation.
 private struct RecordsDisclosureStyle: DisclosureGroupStyle {
@@ -293,7 +293,7 @@ private struct RecordsDisclosure: View {
                 HStack(spacing:8) {
                     configuration.label
                     // Forward in the reading direction, turned down when open (the other way round in a right-to-left language).
-                    Image(systemName:"chevron.forward").font(.subheadline.weight(.semibold)).foregroundStyle(palette.accent)
+                    Image(systemName:"chevron.forward").font(.subheadline.weight(.semibold)).foregroundStyle(palette.ink)
                         .rotationEffect(.degrees(configuration.isExpanded ? (layoutDirection == .rightToLeft ? -90 : 90) : 0))
                         .accessibilityHidden(true)
                 }
@@ -353,7 +353,7 @@ private struct GuideAnswerBlock: View {
     /// where muted and starlight are the same red, this line is how the answer shows its work.
     private var status:some View {
         HStack(alignment:.center,spacing:6) {
-            if guide.checked { Image(systemName:"checkmark.seal").foregroundStyle(palette.accent) }
+            if guide.checked { Image(systemName:"checkmark.seal").foregroundStyle(palette.ink) }
             else { ProgressView().controlSize(.mini).tint(palette.muted) }
             // "Numbers": the check confirms each cited record exists and every figure appears in the
             // records, not which night a figure belongs to, so the line claims no more than that.
@@ -382,14 +382,15 @@ private struct GuideAnswerBlock: View {
         }
     }
 }
-/// A suggestion or citation chip: accent words in a hairline capsule, at least 44 pt tall.
+/// A suggestion or citation chip: starlight words in a hairline capsule, at least 44 pt tall (an action,
+/// so not amber, which stays with the score and light).
 private struct GuideChip: View {
     @Environment(\.nyx) private var palette
     let text:Text
     var body: some View {
-        text.font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.leading)
+        text.font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.leading)
             .padding(.vertical,8).padding(.horizontal,14).frame(minHeight:44)
-            .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
+            .background(Capsule().fill(palette.ink.opacity(palette.nightVision ? 0 : 0.06))).overlay(Capsule().stroke(palette.line,lineWidth:0.5*palette.stroke))
             .contentShape(Capsule())
     }
 }
@@ -521,7 +522,7 @@ struct GuideRecordRow: View {
             }
         }
         .padding(.vertical,12).padding(.horizontal,8)
-        .background { if lit { RoundedRectangle(cornerRadius:14).fill(palette.accent.opacity(palette.nightVision ? 0.2 : 0.12)) } }
+        .background { if lit { RoundedRectangle(cornerRadius:14).fill(palette.ink.opacity(palette.nightVision ? 0.2 : 0.1)) } }
         .contentShape(Rectangle())
     }
     private var badge:some View {
@@ -541,7 +542,7 @@ struct GuideRecordRow: View {
         }
     }
     private func scoreNumeral(_ score:Int)->some View {
-        Text("\(score)").font(.system(.title2,design:.serif,weight:.light)).foregroundStyle(palette.accent)
+        Text("\(score)").scoreNumeral(.title2,accent:palette.accent)
     }
     @ViewBuilder private var bandLabel:some View {
         if let band=record.band { Text(band).font(.caption2).foregroundStyle(palette.muted) }
@@ -557,8 +558,9 @@ struct GuideRecordRow: View {
             .accessibilityElement(children:.ignore)
             .accessibilityLabel(showsBasis ? "\(String(localized:"\(night.sky.moon.name), \(lit)% lit")). \(Self.basis(night))" : String(localized:"\(night.sky.moon.name), \(lit)% lit"))
         if let closure {
-            Label { Text(closure).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"exclamationmark.triangle").accessibilityHidden(true) }
-                .font(.subheadline.weight(.medium)).foregroundStyle(palette.accent).labelStyle(GuideLineLabelStyle())
+            // The caution glyph and starlight words, as every closure (`CautionLabelStyle`), in this row's column.
+            Label { Text(closure).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"exclamationmark.triangle").foregroundStyle(palette.caution).accessibilityHidden(true) }
+                .font(.subheadline.weight(.medium)).labelStyle(GuideLineLabelStyle())
         }
         if let park=record.park { AccessNoteLabel(park:park) }
     }
