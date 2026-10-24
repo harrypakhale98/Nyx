@@ -194,13 +194,17 @@ private struct CapsuleActionLabel: View {
     let configuration: ButtonStyleConfiguration
     @Environment(\.nyx) private var palette
     @Environment(\.isEnabled) private var enabled
+    @Environment(\.dynamicTypeSize) private var typeSize
+    /// A rounded rectangle at accessibility sizes: a capsule around several wrapped lines has so large
+    /// a radius that its rim cuts through the first and last.
+    private var shape: AnyShape { typeSize.isAccessibilitySize ? AnyShape(RoundedRectangle(cornerRadius:22,style:.continuous)) : AnyShape(Capsule()) }
     var body: some View {
         configuration.label
             .font(.subheadline).foregroundStyle(palette.ink).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)
-            .background(Capsule().fill(palette.ink.opacity(palette.nightVision ? 0 : 0.06)))
-            .overlay(Capsule().stroke(palette.line,lineWidth:0.5*palette.stroke))
-            .contentShape(.hoverEffect,Capsule()).hoverEffect(.highlight)
-            .contentShape(Capsule())
+            .background(shape.fill(palette.ink.opacity(palette.nightVision ? 0 : 0.06)))
+            .overlay(shape.stroke(palette.line,lineWidth:0.5*palette.stroke))
+            .contentShape(.hoverEffect,shape).hoverEffect(.highlight)
+            .contentShape(shape)
             .opacity(configuration.isPressed ? 0.55 : enabled ? 1 : 0.45)
     }
 }
@@ -215,9 +219,12 @@ extension ButtonStyle where Self == CapsuleActionStyle {
 struct SecondaryAction: ViewModifier {
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.dynamicTypeSize) private var typeSize
+    /// A rounded rectangle at accessibility sizes, where a wrapped label would meet a capsule's rim.
+    private var shape: ButtonBorderShape { typeSize.isAccessibilitySize ? .roundedRectangle(radius:22) : .capsule }
     @ViewBuilder func body(content:Content)->some View {
-        if palette.nightVision || reduceTransparency || palette.highContrast { content.buttonStyle(.bordered).buttonBorderShape(.capsule).tint(palette.ink) }
-        else { content.buttonStyle(.glass).buttonBorderShape(.capsule).tint(palette.ink) }
+        if palette.nightVision || reduceTransparency || palette.highContrast { content.buttonStyle(.bordered).buttonBorderShape(shape).tint(palette.ink) }
+        else { content.buttonStyle(.glass).buttonBorderShape(shape).tint(palette.ink) }
     }
 }
 extension View {

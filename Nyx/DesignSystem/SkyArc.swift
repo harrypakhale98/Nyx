@@ -524,12 +524,15 @@ private struct SkyArcPicture: View, Equatable {
 
         // True darkness, bracketed on the ground in starlight, as the dial lights its dark hours.
         if let darkStart=night.sky.darkStart,let darkEnd=night.sky.darkEnd,darkEnd>darkStart {
-            let a=max(0,x(darkStart)), b=min(size.width,x(darkEnd)), barY=horizon+9
-            var bar=Path(); bar.move(to:CGPoint(x:a,y:barY)); bar.addLine(to:CGPoint(x:b,y:barY))
-            context.stroke(bar,with:.color(palette.ink.opacity(SkyArcInk.darkness(contrast:palette.highContrast))),style:StrokeStyle(lineWidth:2*palette.stroke,lineCap:.round))
-            if b-a>70 {
-                let label=context.resolve(Text("True darkness").font(.caption2).foregroundStyle(palette.muted))
-                context.draw(label,at:CGPoint(x:(a+b)/2,y:barY+11))
+            // Held inside the rounded corners when darkness runs past the window (a polar night), never into the rim.
+            let a=max(SkyArcInk.corner,x(darkStart)), b=min(size.width-SkyArcInk.corner,x(darkEnd)), barY=horizon+9
+            if b>a {
+                var bar=Path(); bar.move(to:CGPoint(x:a,y:barY)); bar.addLine(to:CGPoint(x:b,y:barY))
+                context.stroke(bar,with:.color(palette.ink.opacity(SkyArcInk.darkness(contrast:palette.highContrast))),style:StrokeStyle(lineWidth:2*palette.stroke,lineCap:.round))
+                if b-a>70 {
+                    let label=context.resolve(Text("True darkness").font(.caption2).foregroundStyle(palette.muted))
+                    context.draw(label,at:CGPoint(x:(a+b)/2,y:barY+11))
+                }
             }
         }
 
@@ -543,10 +546,13 @@ private struct SkyArcPicture: View, Equatable {
                 let hour=calendar.component(.hour,from:tick)
                 if hour%step==0 {
                     let tx=x(tick)
-                    if tx>18 && tx<size.width-18 {
+                    let label=context.resolve(Text(tick.formatted(format)).font(.caption2).foregroundStyle(palette.muted))
+                    let s=label.measure(in:size)
+                    // The whole label inside the chart's edge, at every text size it draws.
+                    if tx-s.width/2>6 && tx+s.width/2<size.width-6 {
                         var mark=Path(); mark.move(to:CGPoint(x:tx,y:size.height-labelBand)); mark.addLine(to:CGPoint(x:tx,y:size.height-labelBand+4))
                         context.stroke(mark,with:.color(palette.line),lineWidth:0.6*palette.stroke)
-                        context.draw(context.resolve(Text(tick.formatted(format)).font(.caption2).foregroundStyle(palette.muted)),at:CGPoint(x:tx,y:size.height-labelBand/2+2))
+                        context.draw(label,at:CGPoint(x:tx,y:size.height-labelBand/2+2))
                     }
                 }
                 tick=tick.addingTimeInterval(3600)
@@ -560,11 +566,13 @@ private struct SkyArcPicture: View, Equatable {
         // Where the night stands now.
         if let now {
             let nx=x(now)
-            var marker=Path(); marker.move(to:CGPoint(x:nx,y:14)); marker.addLine(to:CGPoint(x:nx,y:horizon))
+            let label=context.resolve(Text("Now").font(.caption2.weight(.semibold)).foregroundStyle(palette.ink))
+            let s=label.measure(in:size)
+            // The marker starts under the label at any text size, and the label keeps clear of the rounded corners.
+            var marker=Path(); marker.move(to:CGPoint(x:nx,y:3+s.height+2)); marker.addLine(to:CGPoint(x:nx,y:horizon))
             context.stroke(marker,with:.color(palette.ink.opacity(0.7)),style:StrokeStyle(lineWidth:0.8*palette.stroke,dash:[2,2]))
             context.fill(Path(ellipseIn:CGRect(x:nx-3.5,y:horizon-3.5,width:7,height:7)),with:.color(palette.ink))
-            let label=context.resolve(Text("Now").font(.caption2.weight(.semibold)).foregroundStyle(palette.ink))
-            context.draw(label,at:CGPoint(x:min(max(nx,16),size.width-16),y:8))
+            context.draw(label,at:CGPoint(x:min(max(nx,s.width/2+SkyArcInk.corner),size.width-s.width/2-SkyArcInk.corner),y:3),anchor:.top)
         }
     }
 

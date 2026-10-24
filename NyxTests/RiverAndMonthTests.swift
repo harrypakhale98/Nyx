@@ -41,7 +41,7 @@ import SwiftUI
         #expect(high.x-28 >= 0)
         let right=river.loupeCenter(CGPoint(x:316,y:60),width:width)
         #expect(right.x+28 <= width)
-        // The Moon keeps its row above the river's marks (which start at y 42), never under the
+        // The Moon keeps its row above the river's marks (which start at y 49), never under the
         // loupe, and inside the river's width, with or without the tip's headroom.
         for headroom in [nil,0.0] {
             for point in [CGPoint(x:14,y:42),CGPoint(x:165,y:80),CGPoint(x:316,y:128),CGPoint(x:60,y:110)] {

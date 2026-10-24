@@ -108,7 +108,7 @@ struct ParksView: View {
                 // Only worth saying when a row actually reads "Estimate", in the rows' own words.
                 if !waiting, let note=estimateNote(shown:shown,own:own) { Text(note.estimate).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if stepFreeOnly { Text("Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-                if DebugScenario.state=="loading" || waiting { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
+                if DebugScenario.state=="loading" || waiting { VStack(spacing:0) { ForEach(0..<5,id:\.self) { _ in SkeletonRow(); Divider().overlay(palette.line) } } } // the real rows' rhythm, so nothing jumps when they arrive
                 else if nothing || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
                 else { sections(shown:shown,spots:spots,found:found,savedWorld:savedWorld,savedListed:savedListed,groups:groups,own:own,others:others,abroad:abroad) }
             }
@@ -168,14 +168,17 @@ struct ParksView: View {
     /// The list's sections under its eyebrow: your spots, saved places, then the parks or the world.
     @ViewBuilder private func sections(shown:[Park],spots:[Park],found:[Park],savedWorld:[Park],savedListed:[Park],groups:[CountryGroup],own:CountryGroup?,others:[CountryGroup],abroad:Bool)->some View {
         // Your spots: the places the person saved, scored like the parks, then a way to add another.
+        // Rows and hairlines in their own stacks, as in the park list below, so all three keep one rhythm.
         if !spots.isEmpty {
             Eyebrow(text:"Your spots")
-            ForEach(spots) { spot in link(spot) }
-            if search.isEmpty { addSpotRow }
+            VStack(spacing:0) {
+                ForEach(spots) { spot in link(spot); Divider().overlay(palette.line) }
+                if search.isEmpty { addSpotRow }
+            }
         }
         if showsSavedSection {
             Eyebrow(text:"Saved for later")
-            ForEach(savedListed) { p in savedRow(p) }
+            VStack(spacing:0) { ForEach(savedListed) { p in savedRow(p); Divider().overlay(palette.line) } }
         }
         if abroad { abroadSections(own:own,others:others) }
         else { homeSections(shown:shown,spots:spots,found:found,savedWorld:savedWorld,groups:groups) }

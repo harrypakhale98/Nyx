@@ -30,7 +30,8 @@ struct NightCell: View {
                 .foregroundStyle(isTonight ? palette.accent : isPast ? palette.muted : palette.ink)
                 // Past nights are dimmer; without colour, a line through the date says so.
                 .strikethrough(access.differentiate && isPast,color:palette.muted)
-                .overlay(alignment:.bottom) { if isTonight { Capsule().fill(palette.accent).frame(width:12,height:2).offset(y:4) } }
+                // In the line's descent, under the digits: lower, it would almost meet a best stretch's ring below.
+                .overlay(alignment:.bottom) { if isTonight { Capsule().fill(palette.accent).frame(width:12,height:2).offset(y:2) } }
                 // The night's event beside its date: a reason to go that is not part of the score.
                 .overlay(alignment:.topTrailing) { if let marker { SkyGlyph(SkyGlyph.Kind(marker.glyph),color:palette.ink.opacity(isPast ? 0.5 : 1)).frame(width:12,height:12).offset(x:15,y:-3) } }
             Canvas { context,size in
@@ -50,12 +51,12 @@ struct NightCell: View {
             // Space, not hidden text: a hidden placeholder stretched the date's text frame over the whole cell.
             if isPast { Color.clear.frame(height:scoreLine) }
             // As tall as the score line, so an overcast night's date sits on its row; the score stays
-            // beside the cloud, so a ringed stretch never hides the numbers it was chosen by.
+            // beside the cloud, so a ringed stretch never hides the numbers it was chosen by. The number
+            // alone is centred, under its date and dot, and the cloud hangs off its leading side.
             else if let cloud=night.cloudCover,cloud>75 {
-                HStack(spacing:2) {
-                    Image(systemName:"cloud.fill").imageScale(.small)
-                    Text("\(night.score.value)").monospacedDigit().fontWeight(.medium)
-                }.font(.caption2).foregroundStyle(palette.muted).lineLimit(1).minimumScaleFactor(0.8).frame(height:scoreLine)
+                Text("\(night.score.value)").monospacedDigit().fontWeight(.medium)
+                    .overlay(alignment:.leading) { Image(systemName:"cloud.fill").imageScale(.small).alignmentGuide(.leading) { $0[.trailing]+2 } }
+                    .font(.caption2).foregroundStyle(palette.muted).lineLimit(1).minimumScaleFactor(0.8).frame(height:scoreLine)
             }
             // Medium weight: at 11 pt the thin diagonals of a regular "7" fade into the sky.
             else { Text("\(night.score.value)").font(.caption2.monospacedDigit().weight(.medium)).foregroundStyle(palette.muted) }

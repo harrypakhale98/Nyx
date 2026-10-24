@@ -95,12 +95,14 @@ struct OnboardingView:View {
     }
     /// The real night-vision switch: the whole app, this page included, turns red on the shared spring.
     private var redToggle:some View {
-        Toggle(isOn:$nightVision) {
+        // A rounded rectangle at accessibility sizes, where the label wraps and a capsule's rim would meet the icon.
+        let shape=typeSize.isAccessibilitySize ? AnyShape(RoundedRectangle(cornerRadius:22,style:.continuous)) : AnyShape(Capsule())
+        return Toggle(isOn:$nightVision) {
             Label { Text("Night vision") } icon:{ Image(systemName:nightVision ? "flashlight.on.circle.fill" : "flashlight.off.circle").foregroundStyle(palette.ink) }.font(.headline)
         }
         .tint(palette.controlTint)
         .padding(.horizontal,20).padding(.vertical,12).frame(maxWidth:340,minHeight:56)
-        .background(Capsule().fill(palette.panel)).overlay(Capsule().stroke(palette.line,lineWidth:0.5))
+        .background(shape.fill(palette.panel)).overlay(shape.stroke(palette.line,lineWidth:0.5))
         // The soft tap of the turn comes once, from RootView, whichever switch changed it.
         .accessibilityHint("Turns the screen red. You can change it any time.")
     }

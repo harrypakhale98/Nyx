@@ -14,8 +14,21 @@ struct ConstellationLoader: View {
 struct SkeletonRow: View {
     @Environment(\.nyx) private var palette
     @MotionReduced private var reduceMotion: Bool
+    /// A park row's layout (`ParkRow`) at the default size, each bar in its text's line height: name,
+    /// state and the week on the left, the score and its band on the right, so nothing moves as rows land.
     private var shapes: some View {
-        HStack { RoundedRectangle(cornerRadius:8).frame(width:48,height:48); VStack(alignment:.leading) { RoundedRectangle(cornerRadius:4).frame(height:14); RoundedRectangle(cornerRadius:4).frame(width:120,height:10) }; Spacer() }
+        HStack(alignment:.center,spacing:16) {
+            VStack(alignment:.leading,spacing:6) {
+                RoundedRectangle(cornerRadius:4).frame(width:150,height:14).frame(height:25)
+                RoundedRectangle(cornerRadius:3).frame(width:56,height:9).frame(height:16)
+                RoundedRectangle(cornerRadius:3).frame(width:220,height:9).frame(height:19).padding(.top,4)
+            }
+            Spacer(minLength:8)
+            VStack(alignment:.trailing,spacing:2) {
+                RoundedRectangle(cornerRadius:4).frame(width:30,height:20).frame(height:28)
+                RoundedRectangle(cornerRadius:3).frame(width:26,height:8).frame(height:13)
+            }
+        }
     }
     var body: some View {
         let still=reduceMotion
@@ -33,7 +46,7 @@ struct SkeletonRow: View {
                     .mask(shapes)
                 }
             }
-            .padding(.vertical,12)
+            .padding(.vertical,14)
             .accessibilityElement(children:.ignore)
             .accessibilityLabel("Loading park")
     }

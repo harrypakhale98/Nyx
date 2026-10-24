@@ -45,6 +45,8 @@ enum NyxMetrics {
     static let cardRadius=24.0
     static let cardPadding=20.0
     static let pagePadding=24.0
+    /// Between a wide page's two columns, the same on every tab.
+    static let columnGap=36.0
 }
 /// A content card: solid deep indigo with a hairline, over the real sky. Liquid Glass is kept for
 /// the controls that float above content (the park pill, the river's thumb, the field controls,
@@ -67,18 +69,19 @@ struct Panel<Content: View>: View {
 }
 /// The veil behind a section: dark across its whole height, so no star sits behind a word, and
 /// never past its own top or bottom, so it never dims the section above or below (a blurred veil
-/// that spilled over did, and failed the contrast audit). It fades only into the top padding and
-/// sideways into the page margins, where nothing is written, so no edge shows against the stars.
+/// that spilled over did, and failed the contrast audit). It fades only into the top and bottom padding
+/// and sideways into the page margins, where nothing is written, so no edge shows against the stars
+/// (on a twilight sky a hard bottom edge read as a stack of black boxes).
 struct SectionVeil: View {
     let opacity: Double
     var fadesTop=true
     var body: some View {
         GeometryReader { proxy in
             let h=max(1,proxy.size.height), w=proxy.size.width+48
-            let top=fadesTop ? min(0.4,14/h) : 0
+            let top=fadesTop ? min(0.4,14/h) : 0, bottom=1-min(0.3,NyxMetrics.cardPadding*0.6/h)
             Color.black.opacity(opacity)
                 .frame(width:w,height:proxy.size.height)
-                .mask(LinearGradient(stops:[.init(color:.clear,location:0),.init(color:.black,location:top),.init(color:.black,location:1)],startPoint:.top,endPoint:.bottom))
+                .mask(LinearGradient(stops:[.init(color:.clear,location:0),.init(color:.black,location:top),.init(color:.black,location:bottom),.init(color:.clear,location:1)],startPoint:.top,endPoint:.bottom))
                 .mask(LinearGradient(stops:[.init(color:.clear,location:0),.init(color:.black,location:24/w),.init(color:.black,location:1-24/w),.init(color:.clear,location:1)],startPoint:.leading,endPoint:.trailing))
                 .offset(x:-24)
         }

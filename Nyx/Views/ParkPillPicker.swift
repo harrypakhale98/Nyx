@@ -62,24 +62,26 @@ struct ParkPillPicker: View {
     }
 }
 extension ParkPillPicker {
-    private var pillShape: AnyShape { large ? AnyShape(RoundedRectangle(cornerRadius:22,style:.continuous)) : AnyShape(Capsule()) }
     private var pill: some View {
         NavigationLink(value:ZoomRoute.pill(park)) {
-            Group {
-                if large {
-                    // The arrow rides at the end of the words, so the name has the whole width and long words stay whole.
-                    Text("\(Text(park.shortName).font(.system(.title2,design:.serif))) \(Text(Image(systemName:"arrow.up.right")).font(.subheadline))")
-                        .accessibilityLabel(park.shortName)
-                        .multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-                        .frame(maxWidth:.infinity).padding(.vertical,14).padding(.horizontal,16)
-                } else {
-                    HStack { Text(park.shortName).font(.system(.title2,design:.serif)); Image(systemName:"arrow.up.right").font(.subheadline).accessibilityHidden(true) }
-                        .padding(.vertical,14).padding(.horizontal,22)
-                }
-            }
-            .modifier(PillGlass(solid:solid,shape:pillShape,id:"pill",namespace:glass))
+            // A capsule while the name fits on one line; a long name ("Black Canyon of the Gunnison")
+            // wraps on the rounded rectangle instead, even at default sizes, so the capsule never becomes an egg.
+            if large { wrappedPill } else { ViewThatFits(in:.horizontal) { capsulePill; wrappedPill } }
         }
         .buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.pill(park).source,in:zoom).hoverEffect(.lift)
+    }
+    private var capsulePill: some View {
+        HStack { Text(park.shortName).font(.system(.title2,design:.serif)).lineLimit(1); Image(systemName:"arrow.up.right").font(.subheadline).accessibilityHidden(true) }
+            .padding(.vertical,14).padding(.horizontal,22)
+            .modifier(PillGlass(solid:solid,shape:Capsule(),id:"pill",namespace:glass))
+    }
+    private var wrappedPill: some View {
+        // The arrow rides at the end of the words, so the name has the whole width and long words stay whole.
+        Text("\(Text(park.shortName).font(.system(.title2,design:.serif))) \(Text(Image(systemName:"arrow.up.right")).font(.subheadline))")
+            .accessibilityLabel(park.shortName)
+            .multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+            .frame(maxWidth:.infinity).padding(.vertical,14).padding(.horizontal,16)
+            .modifier(PillGlass(solid:solid,shape:RoundedRectangle(cornerRadius:22,style:.continuous),id:"pill",namespace:glass))
     }
     @ViewBuilder private var toggle: some View {
         if !others.isEmpty {

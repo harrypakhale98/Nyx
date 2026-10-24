@@ -59,7 +59,9 @@ struct FirstLightView: View {
             .scrollBounceBehavior(.basedOnSize)
             // When the words outgrow the screen, it opens on Continue, the only way on.
             .defaultScrollAnchor(.bottom)
-            .ignoresSafeArea(edges:.vertical)
+            // The bottom margin is measured from the screen's edge; the top keeps the safe area, so words
+            // that outgrow the screen never scroll to rest behind the Dynamic Island.
+            .ignoresSafeArea(edges:.bottom)
             .onGeometryChange(for:CGFloat.self) { $0.size.height.rounded() } action:{ viewport=$0 }
             .opacity(visible ? 1 : 0).offset(y:visible || reduceMotion ? 0 : 12)
         }

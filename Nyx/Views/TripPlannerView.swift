@@ -64,7 +64,7 @@ struct TripPlannerView: View {
         ScrollViewReader { proxy in ScrollView {
             if wide {
                 // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
-                FoldColumns(narrow:.leading,narrowMax:420,spacing:32) {
+                FoldColumns(narrow:.leading,narrowMax:420,spacing:NyxMetrics.columnGap) {
                     VStack(alignment:.leading,spacing:22) { intro; startingPoint; Panel { controls } }.frame(maxWidth:.infinity,alignment:.leading)
                     VStack(alignment:.leading,spacing:24) {
                         if let best=plan?.best { hero(best) }

@@ -8,6 +8,10 @@ struct ScoreAnatomy:View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     @MotionReduced private var reduceMotion: Bool
+    /// The whole instrument's height: 188, not 176, for the band word under the times at the dial's ends, and
+    /// growing with the text, so larger times never meet across a dial their labels have shrunk (the page scrolls),
+    /// short of the size that would move the band word inside the dial.
+    @ScaledMetric(relativeTo:.caption2) private var height=188.0
     let active:Bool
     @State private var filled=0
     /// The breakdown's own words (`ScoreReadout`), so the recipe and every night's score name the same four parts.
@@ -16,7 +20,7 @@ struct ScoreAnatomy:View {
     private func shade(_ i:Int)->Double { [1,0.75,0.55,0.4][i] }
     var body:some View {
         VStack(spacing:12) {
-            CelestialGauge(score:94,haptics:false,night:example).id(active).frame(height:typeSize.isAccessibilitySize ? nil : 188) // fresh, silent count-up each time the page arrives; the real answer owns the pulses. 188, not 176: room for the band word under the times at the dial's ends
+            CelestialGauge(score:94,haptics:false,night:example).id(active).frame(height:typeSize.isAccessibilitySize ? nil : min(height,CelestialGauge.labelsInsideFrom-1)) // fresh, silent count-up each time the page arrives; the real answer owns the pulses
             VStack(alignment:.leading,spacing:8) {
                 Text("Share of the score").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
                 GeometryReader { proxy in

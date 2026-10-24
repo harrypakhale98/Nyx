@@ -10,6 +10,7 @@ struct PlanView: View {
     /// This window's commands, which carry its calendar requests.
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.nyx) private var palette
     /// Kept per window. A new key, so a window saved on the month before best nights existed opens on them.
     @SceneStorage("planView") private var mode:Mode = .best
@@ -52,7 +53,8 @@ struct PlanView: View {
         // A `nyx://calendar` link always lands on the month it names.
         .onChange(of:commands?.calendarRequest,initial:true) { _,request in if request != nil { forced=nil; mode = .month } }
     }
-    /// Segmented where it fits; at accessibility sizes a menu, which grows with the text instead of truncating.
+    /// Segmented where it fits; from the largest standard size up a menu, which grows with the text
+    /// instead of truncating ("My free nights" no longer fits a third of a 375 pt phone there).
     @ViewBuilder private var picker: some View {
         let control=Picker("Plan",selection:Binding(get:{ shown },set:{ forced=nil; mode=$0 })) {
             Text("Best nights").tag(Mode.best)
@@ -61,7 +63,7 @@ struct PlanView: View {
         }
         Group {
             // Starlight, as every control that is not the score: amber is the score's and light's.
-            if typeSize.isAccessibilitySize { control.pickerStyle(.menu).tint(palette.ink).frame(maxWidth:.infinity,alignment:.leading) }
+            if typeSize.isAccessibilitySize || (typeSize >= .xxxLarge && sizeClass != .regular) { control.pickerStyle(.menu).tint(palette.ink).frame(maxWidth:.infinity,alignment:.leading) }
             else { control.pickerStyle(.segmented) }
         }
         // As wide as the page under it (the month's column, or the planner's), set by whoever places it.

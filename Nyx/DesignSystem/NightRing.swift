@@ -116,7 +116,7 @@ struct NightTrack: View, Animatable {
     }
     var body: some View {
         Canvas { context, size in
-            let dial=min(size.width, size.height), k=fit.scale(side: dial), w=fit.weight, soft=fit.blur
+            let dial=min(size.width, size.height)-2*Self.bleed, k=fit.scale(side: dial), w=fit.weight, soft=fit.blur
             let center=CGPoint(x: size.width/2, y: size.height/2), radius=fit.radius(side: dial)
             if fit == .phone {
                 // The same well the score's dial has: the numeral sits inside the instrument.
@@ -193,7 +193,11 @@ struct NightTrack: View, Animatable {
                 }
             }
         }
+        // Drawn past the dial's square, so the Moon's halo and the best window's glow fade out on their
+        // own instead of ending on the frame's straight edges (a box round the dial at accessibility sizes).
+        .padding(-Self.bleed).allowsHitTesting(false)
     }
+    nonisolated static let bleed: CGFloat=16
 }
 
 /// Sunset and sunrise at the dial's two open ends, in the park's time, each with its small Sun on
@@ -215,13 +219,18 @@ struct NightRingEnds: View {
                     Text(park.time(time)).monospacedDigit().foregroundStyle(palette.ink)
                 }
                 .font(.caption2).fixedSize()
-                // Hung by its top a clear gap under the rim's rounded end, at any text size: centred 10 pt
-                // under it, the caption's top sat 3 pt from the cap and read as stuck to the glass.
+                // Hung by its top, at any text size, under the glass rather than the track: the rim runs
+                // on past the track's end, and its rounded cap is the lowest thing there.
                 .frame(height: 0, alignment: .top)
-                .position(x: center.x+cos(a)*radius, y: center.y+sin(a)*radius+DialMetrics.ringWidth(side: dial)/2+8)
+                .position(x: center.x+cos(a)*radius, y: center.y+Self.top(side: dial))
             }
         }
         .accessibilityHidden(true)
+    }
+    /// How far below the dial's centre the times' tops hang: a clear 8 pt under the rim's rounded ends.
+    nonisolated static func top(side: CGFloat) -> CGFloat {
+        let radius=side/2-DialMetrics.inset(side: side)
+        return CGFloat(sin(DialMetrics.rimStart.radians))*radius+DialMetrics.ringWidth(side: side)/2+8
     }
 }
 
@@ -230,6 +239,8 @@ struct NightRingEnds: View {
 /// (onboarding, 176 pt) is an instrument, not a thick ring crowding the numeral.
 nonisolated enum DialMetrics {
     static let standard: CGFloat=300
+    /// Where the glass rim begins, a little before the track (140°), so the track's ends sit on glass.
+    static let rimStart=Angle.degrees(136)
     static func scale(side:CGFloat)->CGFloat { min(1,max(0,side)/standard) }
     /// The rim's width.
     static func ringWidth(side:CGFloat)->CGFloat { max(16,26*scale(side:side)) }

@@ -80,7 +80,7 @@ struct ShareCard:View {
             // Night itself right behind the words: the stars stop short of every letter.
             .background { RoundedRectangle(cornerRadius:48).fill(.black).blur(radius:20) }
             Spacer(minLength:0)
-            Text("NYX").font(.caption2.weight(.medium)).tracking(6).foregroundStyle(palette.muted).padding(.top,12)
+            Text("NYX").font(.caption2.weight(.medium)).tracking(6).foregroundStyle(palette.muted).padding(.leading,6).padding(.top,12)
         }
     }
     /// The numeral, light and tightly set as on the gauge, with "/100" hung off its right side so

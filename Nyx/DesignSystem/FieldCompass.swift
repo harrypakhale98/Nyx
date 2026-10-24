@@ -243,9 +243,11 @@ struct FieldCompassView: View {
         // Labels never cover each other: brightest first, each takes the first free spot around
         // its mark (above, below, right, left); one with no room keeps its mark and loses its name.
         var taken: [CGRect]=[]
-        func label(_ text:Text,near c:CGPoint,gap:Double) {
+        // `clear`: from the mark's centre to the name's near edge, so a larger name grows away from its mark.
+        func label(_ text:Text,near c:CGPoint,clear:Double) {
             let resolved=context.resolve(text), s=resolved.measure(in:size)
-            let spots=[CGPoint(x:c.x,y:c.y-gap),CGPoint(x:c.x,y:c.y+gap),CGPoint(x:c.x+gap/2+s.width/2+6,y:c.y),CGPoint(x:c.x-gap/2-s.width/2-6,y:c.y)]
+            let up=clear+s.height/2, side=clear+5+s.width/2
+            let spots=[CGPoint(x:c.x,y:c.y-up),CGPoint(x:c.x,y:c.y+up),CGPoint(x:c.x+side,y:c.y),CGPoint(x:c.x-side,y:c.y)]
             for spot in spots {
                 let rect=CGRect(x:spot.x-s.width/2,y:spot.y-s.height/2,width:s.width,height:s.height).insetBy(dx:-3,dy:-1)
                 guard rect.minX>=0,rect.maxX<=w,rect.minY>=0,rect.maxY<=h,!taken.contains(where:{ $0.intersects(rect) }) else { continue }
@@ -276,7 +278,9 @@ struct FieldCompassView: View {
                 context.stroke(rays,with:.color(ink.opacity(0.8)),lineWidth:1)
             case .star: break
             }
-            label(Text(target.name).font(.system(.subheadline,design:.serif)).foregroundStyle(ink),near:c,gap:target.kind == .core ? 30 : 22)
+            // Past what each mark draws: the Moon's ringed disc (11.5), a radiant's longest rays (18), the core's bright knot.
+            let clear:Double=switch target.kind { case .moon: 15; case .radiant: 21; case .core: 20; default: 12 }
+            label(Text(target.name).font(.system(.subheadline,design:.serif)).foregroundStyle(ink),near:c,clear:clear)
         }
         for arrow in arrows { edgeArrow(&context,size:size,angle:arrow.angle,name:arrow.name,ink:ink,taken:&taken) }
         // The middle of the window, where the back of the phone points: a crosshair with an open
