@@ -194,8 +194,11 @@ struct CelestialGauge: View {
     }
     // MARK: The count-up
 
-    /// The odometer's progress `t` seconds in: an exponential settle, fastest at the start.
-    nonisolated static func progress(_ t:Double,settle:Double=0.28)->Double { t<=0 ? 0 : 1-exp(-t/settle) }
+    /// The odometer's progress `t` seconds in: a critically damped settle, so the count gathers
+    /// itself for its first tenths (fastest about `settle` in) instead of leaving rest at full speed,
+    /// then lands as softly as before. The shape of a spring released from rest, as the rings fill.
+    nonisolated static func progress(_ t:Double,settle:Double=countSettle)->Double { t<=0 ? 0 : 1-(1+t/settle)*exp(-t/settle) }
+    nonisolated static let countSettle=0.2
     /// The arc leads the numeral by this much.
     nonisolated static let numeralLag=0.08
     /// The numeral `t` seconds into the count-up.
@@ -217,7 +220,15 @@ struct CelestialGauge: View {
     nonisolated enum LandingPulse: Equatable, Sendable { case light, milestone }
     nonisolated static func landingPulse(from shown:Int,score:Int)->LandingPulse { milestones(from:shown,to:score).isEmpty ? .light : .milestone }
     /// How long the count-up runs for a score: until the numeral rounds to it.
-    nonisolated static func duration(score:Int)->Double { score<=0 ? 0 : 0.28*log(2.2*Double(score))+numeralLag }
+    nonisolated static func duration(score:Int)->Double {
+        guard score>0 else { return 0 }
+        // Where (1+x)e^-x falls to 1/(2.2 score), a little past the numeral's last half step: the
+        // fixed point of x = ln(2.2 score (1+x)), which settles to the frame within a few turns.
+        let k=2.2*Double(score)
+        var x=log(k)
+        for _ in 0..<8 { x=log(k*(1+x)) }
+        return countSettle*x+numeralLag
+    }
     /// How far (radians) a milestone's quickening has carried the orbiting stars `t` seconds after it:
     /// a brief extra turn of about 20° that is fastest at once and settled within about a second.
     /// It is the integral of a decaying speed, so the stars speed up and slow down without jumping.

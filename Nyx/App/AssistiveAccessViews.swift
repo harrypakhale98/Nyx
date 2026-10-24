@@ -23,7 +23,7 @@ struct AssistiveAccessRoot: View {
             .preferredColorScheme(.dark)
             .background(AssistiveSavedSync())
             .modifier(NightVisionFilter(enabled:nightVision,red:palette.red))
-            .animation(reduceMotion ? nil : NyxMotion.spring,value:nightVision)
+            .animation(NyxMotion.spring(reduced:reduceMotion),value:nightVision)
             .task { model.savedSync.palette=palette }
             .onChange(of:nightVision) { _,on in
                 // The same follow-through as the full app (`RootView`): widgets, the Control Center

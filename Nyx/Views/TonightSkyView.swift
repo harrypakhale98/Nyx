@@ -120,6 +120,8 @@ struct TonightSkyView: View {
             .task { await debugFling() }
             #endif
     }
+    /// The landing caption's slow fade once the sky has settled by itself; a touch fades it at `NyxMotion.fade`.
+    private static let captionRelease=Animation.easeOut(duration:0.8)
     /// Starts the reveal on first appearance for this park and night, and lands it after `duration`.
     private func reveal() async {
         SkyAdaptation.seen.insert(SkyAdaptation.key(parkID:park.id,night:night.id))
@@ -134,7 +136,7 @@ struct TonightSkyView: View {
         withAnimation(NyxMotion.spring) { landedNaturally=true }
         try? await Task.sleep(for:.seconds(SkyAdaptation.landingHold))
         guard !Task.isCancelled, captionShown else { return }
-        withAnimation(.easeOut(duration:0.8)) { captionShown=false }
+        withAnimation(Self.captionRelease) { captionShown=false }
     }
     #if DEBUG
     /// DEBUG: `-nyx-sky-fling 90` coasts 90° (as a fling to the left would) two seconds after the
@@ -155,7 +157,7 @@ struct TonightSkyView: View {
     private func completeReveal() {
         guard revealing || captionShown else { return }
         revealing=false
-        withAnimation(.easeOut(duration:0.3)) { captionShown=false }
+        withAnimation(NyxMotion.fade) { captionShown=false }
     }
     private var title: String {
         isTonight ? String(localized:"Tonight's sky over \(park.shortName)") : String(localized:"The sky over \(park.shortName), \(park.dayLabel(night.id))")

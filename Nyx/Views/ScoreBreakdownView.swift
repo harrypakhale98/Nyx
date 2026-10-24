@@ -4,6 +4,7 @@ struct ScoreBreakdownView: View {
     @Environment(\.nyx) private var palette
     @Environment(PlanModel.self) private var model
     @Environment(\.dismiss) private var dismiss
+    @MotionReduced private var reduceMotion: Bool
     let night:Night
     var isTonight=true
     /// Beside the month on a wide iPad: the breakdown without its own page, background or Done.
@@ -25,7 +26,7 @@ struct ScoreBreakdownView: View {
         }
     }
     private var scoreNumeral: some View {
-        Text("\(night.score.value)").scoreNumeral(size:numeralSize,accent:palette.accent)
+        Text("\(night.score.value)").scoreNumeral(size:numeralSize,accent:palette.accent).contentTransition(reduceMotion ? .opacity : .numericText(value:Double(night.score.value)))
     }
     private var scoreBand: some View {
         VStack(alignment:.leading,spacing:2) { Text(night.score.band.label).font(.system(.title2,design:.serif)).fixedSize(horizontal:false,vertical:true); Text("out of 100").font(.caption).foregroundStyle(palette.muted) }

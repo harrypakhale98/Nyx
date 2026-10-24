@@ -273,6 +273,7 @@ struct TripStayRow: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(PlanModel.self) private var model
     @ScaledMetric(relativeTo:.title) private var scoreSize=40.0
+    @MotionReduced private var reduceMotion: Bool
     /// A save from the stop's menu could not be stored.
     @State private var saveFailed=false
     let stay: TripStay
@@ -342,7 +343,7 @@ struct TripStayRow: View {
         return layout { content() }
     }
     private func scoreNumeral(_ night:Night)->some View {
-        Text("\(night.score.value)").scoreNumeral(size:min(scoreSize,64),accent:palette.accent)
+        Text("\(night.score.value)").scoreNumeral(size:min(scoreSize,64),accent:palette.accent).contentTransition(reduceMotion ? .opacity : .numericText(value:Double(night.score.value)))
     }
     /// The word under a stay's score in the three words every surface uses: the band on a full
     /// forecast, "Early look", or "Usual clouds" (the band alone where the place has no usual clouds).

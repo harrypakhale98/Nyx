@@ -8,6 +8,7 @@ import SwiftUI
 /// night smoke holds down says so, as the iPhone's rows do.
 struct DarkestAhead: View {
     @Environment(VisionModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.visionPalette) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     let park: Park
@@ -27,7 +28,7 @@ struct DarkestAhead: View {
 
     private func row(_ pick: NightsAhead.Pick) -> some View {
         let night = pick.night, chosen = pick.offset == model.nightOffset, inputs = model.inputs
-        return Button { model.nightOffset = pick.offset } label: {
+        return Button { withAnimation(NyxMotion.spring(reduced: reduceMotion)) { model.nightOffset = pick.offset } } label: {
             VStack(alignment: .leading, spacing: 8) {
                 Text(name(pick)).font(.system(.headline, design: .serif)).foregroundStyle(palette.ink)
                 HStack(alignment: .firstTextBaseline, spacing: 8) {

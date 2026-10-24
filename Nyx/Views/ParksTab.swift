@@ -8,6 +8,7 @@ import SwiftUI
 struct ParksTab: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.dynamicTypeSize) private var typeSize
+    @MotionReduced private var reduceMotion: Bool
     /// The tab's own width, measured: it chooses the split (`split`).
     @State private var width=0.0
     @Environment(SceneCommands.self) private var commands: SceneCommands?
@@ -94,7 +95,7 @@ struct ParksTab: View {
                     .padding(.leading,ParksTab.parkInset(fold:fold,listAtFold:listAtFold,listShown:columnVisibility != .detailOnly))
                     .modifier(ParkColumnWidth(range:ParksTab.parkColumn(atFold:listAtFold,width:width)))
                 }
-                .navigationSplitViewStyle(.balanced)
+                .navigationSplitViewStyle(.balanced).transition(.opacity)
             } else {
                 NavigationStack(path:$path) {
                     Group {
@@ -102,9 +103,10 @@ struct ParksTab: View {
                             ParksMapView { park in path.append(park) }
                                 .modifier(RefreshKey { await model.refresh(model.parks,force:true) })
                                 .navigationDestination(for:Park.self) { park in ParkDetailView(park:park) }
-                        } else { ParksView().modifier(listRefresh) }
+                                .transition(.opacity)
+                        } else { ParksView().modifier(listRefresh).transition(.opacity) }
                     }.toolbar { mapToggle }.tabRootToolbar()
-                }
+                }.transition(.opacity)
             }
         }
         .measuringWidth($width)
@@ -145,7 +147,7 @@ struct ParksTab: View {
     /// List or map: one button that says what it shows next, with a light tick.
     private var mapToggle: some ToolbarContent {
         ToolbarItem(placement:.topBarTrailing) {
-            Button { showsMap.toggle() } label:{ Label(showsMap ? "Show list" : "Show map",systemImage:showsMap ? "list.bullet" : "map") }
+            Button { withAnimation(NyxMotion.spring(reduced:reduceMotion)) { showsMap.toggle() } } label:{ Label(showsMap ? "Show list" : "Show map",systemImage:showsMap ? "list.bullet" : "map") }
                 .accessibilityInputLabels(showsMap ? [Text("List"),Text("Show list")] : [Text("Map"),Text("Show map")])
                 .help(showsMap ? "Show list" : "Show map")
                 .sensoryFeedback(.selection,trigger:showsMap)

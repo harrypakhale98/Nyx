@@ -93,8 +93,8 @@ struct NightDetail: View {
             }
         }
         .frame(maxWidth: 380, alignment: .leading)
-        // A new score rolls in on the shared spring; under Reduce Motion it simply changes.
-        .animation(reduceMotion ? nil : VisionMotion.spring, value: plan.score.value)
+        // A new score rolls in on the shared spring; under Reduce Motion it cross-fades.
+        .animation(NyxMotion.spring(reduced: reduceMotion), value: plan.score.value)
     }
     /// The binding cap, when the four parts add up to more than the score.
     private func limitLine(_ plan: NightPlan) -> String? {
@@ -124,7 +124,7 @@ struct NightDetail: View {
             Text(plan.sky.moon.name).font(.system(.headline, design: .serif))
             Text("\(lit)% lit").font(.subheadline).foregroundStyle(palette.muted)
             if !MoonFeatures.shared.features.isEmpty {
-                Button { names.toggle() } label: { Label(names ? "Hide names" : "Show names", systemImage: names ? "tag.slash" : "tag") }
+                Button { withAnimation(NyxMotion.spring(reduced: reduceMotion)) { names.toggle() } } label: { Label(names ? "Hide names" : "Show names", systemImage: names ? "tag.slash" : "tag") }
                     .accessibilityHint(Text("Shows or hides the names of the Moon's seas and craters in sunlight."))
             }
         }

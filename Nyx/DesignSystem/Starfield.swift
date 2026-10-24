@@ -34,7 +34,7 @@ struct Starfield: View {
                 // (rather than pop), leaving a calmer field behind text, and then leave the tree.
                 if !palette.highContrast { layer(faint,t:t).transition(.opacity) }
                 layer(bright,t:t)
-            }.animation(.easeInOut(duration:0.6),value:palette.highContrast)
+            }.animation(NyxMotion.dissolve,value:palette.highContrast)
         }.allowsHitTesting(false).accessibilityHidden(true).accessibilityIgnoresInvertColors()
     }
     /// Stars smaller than this (about half of them) stand for those fainter than about magnitude 3.

@@ -62,11 +62,15 @@ struct WatchGauge: View {
                 VStack(spacing: WatchDialFace.spacing(side: side)) {
                     Text(score, format: .number)
                         .scoreNumeral(size: WatchDialFace.numeralSize(side: side)*face.numeral, accent: palette.accent).lineLimit(1).minimumScaleFactor(0.5)
+                        // A Crown step rolls the numeral with the arc, as the iPhone's dial does; Reduce Motion cross-fades it.
+                        .contentTransition(reduceMotion ? .opacity : .numericText(value: Double(score)))
                     if let word = face.word {
                         Text(night.score.band.label).font(.system(size: WatchDialFace.wordSize(side: side)*word, design: .serif)).lineLimit(1).fixedSize()
                     }
                 }
                 .padding(.horizontal, side*0.16).offset(y: -WatchDialFace.lift(side: side))
+                // Always-On changes without motion; Reduce Motion keeps a short cross-fade.
+                .animation(dimmed ? nil : reduceMotion ? NyxMotion.fade : NyxMotion.spring, value: score)
                 // Drawn in starlight on the iPhone: the root's night-vision filter turns it red, as it does the vector Moon.
                 Group {
                     if let moon { Image(decorative: moon, scale: 2).resizable().interpolation(.high).scaledToFit().accessibilityIgnoresInvertColors() }
@@ -82,7 +86,7 @@ struct WatchGauge: View {
         .accessibilityLabel("Darkness score")
         .accessibilityValue(ring.map { spoken + " " + $0.spoken(sky: night.sky, park: night.park, best: window) } ?? spoken)
         .task(id: score) {
-            if reduceMotion || dimmed || shown > 0 { withAnimation(reduceMotion ? nil : NyxMotion.spring) { shown = Double(score) }; return }
+            if reduceMotion || dimmed || shown > 0 { withAnimation(reduceMotion || dimmed ? nil : NyxMotion.spring) { shown = Double(score) }; return }
             try? await Task.sleep(for: WatchDebug.revealDelay)
             withAnimation(NyxMotion.spring) { shown = Double(score) }
             // The haptics follow the spring itself: each fires when the arc reaches its mark.

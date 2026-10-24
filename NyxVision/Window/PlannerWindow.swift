@@ -167,7 +167,7 @@ private struct NightVisionWindow: ViewModifier {
             .saturation(enabled ? 0 : 1)
             .colorMultiply(enabled ? palette.red : .white)
             .background { if enabled { palette.nightPanel } }
-            .animation(reduceMotion ? nil : VisionMotion.spring, value: enabled)
+            .animation(NyxMotion.spring(reduced: reduceMotion), value: enabled)
     }
 }
 struct DebugTypeSize: ViewModifier {

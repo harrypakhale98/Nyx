@@ -34,7 +34,7 @@ struct ParkDropTarget<Item: Transferable>: ViewModifier {
                     .transition(.opacity)
                 }
             }
-            .animation(reduceMotion ? nil : NyxMotion.spring,value:targeted)
+            .animation(NyxMotion.spring(reduced:reduceMotion),value:targeted)
             .sensoryFeedback(.selection,trigger:targeted) { _,now in now }
     }
 }

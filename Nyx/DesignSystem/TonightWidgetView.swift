@@ -230,7 +230,7 @@ struct TonightWidgetView:View {
                     if entry.closure != nil { Image(systemName:"exclamationmark.triangle.fill").foregroundStyle(caution).widgetAccentable() } else { MoonSymbol(night:night) }
                 } currentValueLabel: {
                     // Two digits inside a fixed ring: shrink rather than spill over the arc at large sizes.
-                    Text("\(night.score.value)").scoreNumeral(.title3,accent:accent).minimumScaleFactor(0.6).widgetAccentable()
+                    Text("\(night.score.value)").scoreNumeral(.title3,accent:accent).minimumScaleFactor(0.6).widgetAccentable().modifier(NightTurn(value:night.score.value,reduceMotion:reduceMotion))
                 }.gaugeStyle(.accessoryCircular).dynamicTypeSize(.small ... .xxxLarge).summarized(summary(night))
             } else if family == .accessoryRectangular {
                 // Lock Screen dimensions are fixed: the score is the hero, the band beside it, and a
@@ -383,7 +383,7 @@ struct TonightWidgetView:View {
             // Serif, as the park's name is on every other face.
             Text(night.park.shortName).font(.system(.headline,design:.serif)).lineLimit(1)
             HStack(alignment:.firstTextBaseline,spacing:6) {
-                Text("\(night.score.value)").scoreNumeral(numeral,accent:accent).widgetAccentable()
+                Text("\(night.score.value)").scoreNumeral(numeral,accent:accent).widgetAccentable().modifier(NightTurn(value:night.score.value,reduceMotion:reduceMotion))
                 if closureBesideScore { closureMark(.caption) }
                 else if shortBand { Text(night.compactBandLabel).font(.caption).lineLimit(1).minimumScaleFactor(0.8) }
                 // Unlimited here, so a band that needs a third line does not fit and the short word is chosen.
@@ -527,7 +527,7 @@ struct TonightWidgetView:View {
             closureMark(.caption2)
             // In the accent group as on every other face, so a tinted Home Screen keeps the score its hero.
             VStack(alignment:.leading,spacing:0) {
-                Text("\(night.score.value)").scoreNumeral(size:40,accent:accent).widgetAccentable()
+                Text("\(night.score.value)").scoreNumeral(size:40,accent:accent).widgetAccentable().modifier(NightTurn(value:night.score.value,reduceMotion:reduceMotion))
                 band(night,.footnote)
             }
             Text(night.park.shortName).font(.system(.caption2,design:.serif)).fixedSize(horizontal:false,vertical:true)
@@ -597,7 +597,7 @@ struct TonightWidgetView:View {
             VStack(alignment:.leading,spacing:8) {
                 Text("Tonight's sky").textCase(Lettering.spaced ? .uppercase : nil).font(.caption.weight(.medium)).tracking(Lettering.spaced ? 1.4 : 0).foregroundStyle(muted)
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).lineLimit(2).minimumScaleFactor(0.8)
-                Text("\(night.score.value)").scoreNumeral(size:72,accent:accent).widgetAccentable()
+                Text("\(night.score.value)").scoreNumeral(size:72,accent:accent).widgetAccentable().modifier(NightTurn(value:night.score.value,reduceMotion:reduceMotion))
                 VStack(alignment:.leading,spacing:0) { band(night,.title3); basisNote(night,.subheadline) }
                 HStack(alignment:.center,spacing:10) {
                     moon(night).frame(width:34,height:34)
@@ -633,7 +633,7 @@ struct TonightWidgetView:View {
                 VStack(alignment:.leading,spacing:2) {
                     Text(night.park.shortName).font(.system(.title2,design:.serif)).lineLimit(2).minimumScaleFactor(0.8)
                     HStack(alignment:.firstTextBaseline,spacing:10) {
-                        Text("\(night.score.value)").scoreNumeral(size:80,accent:accent).widgetAccentable()
+                        Text("\(night.score.value)").scoreNumeral(size:80,accent:accent).widgetAccentable().modifier(NightTurn(value:night.score.value,reduceMotion:reduceMotion))
                         bandBeside(night,.title3,note:.subheadline)
                     }
                 }

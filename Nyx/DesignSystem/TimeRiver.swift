@@ -175,7 +175,8 @@ struct TimeRiver: View {
                     let loupe=lifted ? loupeCenter(point,width:width,headroom:tipHeadroom) : point
                     let moon=lifted ? moonBeside(loupe,point:point,width:width) : CGPoint(x:point.x,y:moonSize/2)
                     let size=lifted ? loupeSize : lensSize
-                    MoonView(geometry:MoonMoments.moon(for:current).geometry)
+                    // The terminator sweeps night to night under the finger, as on the park's Moon.
+                    FollowingMoon(geometry:MoonMoments.moon(for:current).geometry,animation:reduceMotion ? nil : lifted ? NyxMotion.tracking : NyxMotion.spring)
                         .frame(width:moonSize,height:moonSize)
                         .offset(x:moon.x-moonSize/2,y:moon.y-moonSize/2)
                         .accessibilityHidden(true)

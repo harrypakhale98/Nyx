@@ -301,8 +301,10 @@ struct ParkDetailView: View {
         }
     }
     private var saveButton:some View {
-        Button { guard !model.journalUnavailable else { persistenceError=true; return }; if let item=saved.first(where:{$0.parkID==park.id}) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }; do { try context.save() } catch { context.rollback();persistenceError=true } } label:{ Label(SaveWords.title(saved:isSaved,spot:park.isSavedSpot,place:park.isCatalogPlace),systemImage:isSaved ? "bookmark.fill" : "bookmark") }
+        Button { guard !model.journalUnavailable else { persistenceError=true; return }; if let item=saved.first(where:{$0.parkID==park.id}) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }; do { try context.save() } catch { context.rollback();persistenceError=true } } label:{ Label(SaveWords.title(saved:isSaved,spot:park.isSavedSpot,place:park.isCatalogPlace),systemImage:isSaved ? "bookmark.fill" : "bookmark").contentTransition(.symbolEffect(.replace)) }
             .modifier(SaveButtonWords(saved:isSaved,spot:park.isSavedSpot,place:park.isCatalogPlace))
+            // The bookmark fills in place (the store's change carries no animation of its own).
+            .animation(NyxMotion.spring(reduced:reduceMotion),value:isSaved)
     }
 }
 /// What the river's skies are built ahead for: the place and the river's first night.

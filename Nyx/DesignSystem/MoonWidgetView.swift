@@ -52,6 +52,7 @@ struct MoonWidgetView: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
     @Environment(\.displayScale) private var displayScale
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var previewFamily: WidgetFamily?=nil
     private var family: WidgetFamily { previewFamily ?? systemFamily }
     let entry: MoonEntry
@@ -82,7 +83,7 @@ struct MoonWidgetView: View {
                 AccessoryWidgetBackground()
                 VStack(spacing: 1) {
                     symbol.font(.title3).widgetAccentable()
-                    Text(verbatim: percent).font(.caption2.weight(.medium)).monospacedDigit()
+                    Text(verbatim: percent).font(.caption2.weight(.medium)).monospacedDigit().contentTransition(reduceMotion ? .opacity : .numericText())
                 }
             }.dynamicTypeSize(.small ... .xxxLarge)
         case .accessoryRectangular:
@@ -110,7 +111,7 @@ struct MoonWidgetView: View {
                 }
                 disc.frame(width: 58, height: 58).frame(maxWidth: .infinity, alignment: .center).padding(.vertical, 2)
                 Text(entry.moon.phase.name).font(.system(.subheadline, design: .serif)).lineLimit(1).minimumScaleFactor(0.75)
-                Text(litLine).font(.caption2).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
+                Text(litLine).font(.caption2).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8).contentTransition(reduceMotion ? .opacity : .numericText())
                 if let event=eventLine { Text(event).font(.caption2).lineLimit(1).minimumScaleFactor(0.75) }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

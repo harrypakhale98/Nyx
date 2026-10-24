@@ -91,7 +91,7 @@ struct RealSky: View {
                     }
                 }.offset(x:tilt.x*7,y:tilt.y*7)
             }
-            .animation(.easeInOut(duration:0.6),value:seen)
+            .animation(NyxMotion.dissolve,value:seen)
         }
         // No tilt while a full-screen sky covers it, as it draws nothing new then.
         .motionTilt(!still && !resting)

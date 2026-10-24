@@ -78,6 +78,8 @@ extension ParkDetailView {
             darkerCapsule
             commit.padding(.top,4)
             ScoreReadout(score:night.score,agreement:outlook?.agreement,isTonight:isTonight) { showBreakdown() }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
+                // Held with the dial (the zoom in, a forecast still loading), so its parts fill as it counts.
+                .environment(\.nyxRevealHeld,heroHeld)
                 .popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
             // Under the score at a place abroad: Nyx cannot see its closures, so it says so and points to the park's own site.
             if park.isCatalogPlace { UnknownClosuresNote(park:park,alignment:large ? .leading : .center).frame(maxWidth:420).padding(.horizontal,large ? 0 : 12).id("alerts") }
