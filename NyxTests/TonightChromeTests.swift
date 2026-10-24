@@ -25,6 +25,14 @@ import Testing
         #expect(ShootingStar.speed(progress:-1)==ShootingStar.speed(progress:0))
         #expect(!ShootingStar.speed(progress:2).isNaN)
     }
+    @Test func aPullGathersTheStarInTwelveSteps() {
+        // Nothing at rest or scrolled down; full at the refresh distance and beyond; at most twelve values.
+        #expect(ShootingStar.gather(overscroll:0)==0 && ShootingStar.gather(overscroll:-300)==0)
+        #expect(ShootingStar.gather(overscroll:ShootingStar.gatherDistance)==1 && ShootingStar.gather(overscroll:500)==1)
+        let steps=Set(stride(from:0.0,through:200,by:0.5).map { ShootingStar.gather(overscroll:$0) })
+        #expect(steps.count==13)
+        #expect(ShootingStar.gather(overscroll:30)<ShootingStar.gather(overscroll:60))
+    }
 
     @Test func lampReversesFromWhereTheCoverIs() {
         // A cover already half down needs half the dimming time; a full cover needs none.

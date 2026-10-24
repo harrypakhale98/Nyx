@@ -7,6 +7,8 @@ struct TonightView: View {
     @MotionReduced private var reduceMotion: Bool
     @Environment(\.nyxAccess) private var access
     @State private var shooting=0.0
+    /// The pull's gathered star; only the meteor's overlay reads it.
+    @State private var pull=PullGather()
     @State private var refreshed=0
     /// The subtle double tap: Tonight's answer is a night a reminder would announce.
     @State private var found=0
@@ -109,6 +111,14 @@ struct TonightView: View {
         // The loader gives way to the answer (or the calm empty state) in a dissolve, never a cut.
         .animation(NyxMotion.spring(reduced:reduceMotion),value:loading)
         .animation(NyxMotion.spring(reduced:reduceMotion),value:empty)
+        // Pulled past the top by a finger, the meteor's star gathers; at rest again, the next pull may launch one.
+        .onScrollGeometryChange(for:Double.self) { ShootingStar.gather(overscroll:-($0.contentOffset.y+$0.contentInsets.top)) } action:{ _,new in
+            withAnimation(NyxMotion.tracking) { pull.pull=new }
+        }
+        .onScrollPhaseChange { _,phase in
+            withAnimation(NyxMotion.tracking) { pull.interacting = phase == .interacting }
+            if phase == .idle { pull.spent=false }
+        }
         // The fold, read on the scroll view itself so the columns keep it however far the page scrolls.
         .foldSource()
         // `-nyx-scroll 0…1` (DEBUG) opens partway down, for review captures of the starting point.
@@ -167,7 +177,7 @@ struct TonightView: View {
                 location.refreshIfAuthorized()
                 if model.lastRefresh.map({ Date.now.timeIntervalSince($0)>3600 }) ?? true { Task { await model.refresh(candidates) } }
             }
-            .overlay(alignment:.top) { ShootingStar(progress:shooting).frame(height:170) }
+            .overlay(alignment:.top) { PullMeteor(progress:shooting,pull:pull,off:reduceMotion || access.reduceHighlighting).frame(height:170) }
             .sensoryFeedback(.selection,trigger:refreshed)
             .sensoryFeedback(.impact(weight:.light,intensity:0.8),trigger:found)
             // The double tap is the reveal's last beat, after the landing and any 70/90 pulses.
@@ -176,7 +186,8 @@ struct TonightView: View {
             .refreshable {
                 // The shooting star is a highlight: it stays home under Reduce Highlighting Effects.
                 if !reduceMotion && !access.reduceHighlighting && shooting==0 {
-                    withAnimation(ShootingStar.launch) { shooting=1 } completion:{ shooting=0 }
+                    // The gathered star becomes the meteor's head as it leaves (⌘R, with nothing gathered, just launches).
+                    withAnimation(ShootingStar.launch) { shooting=1; pull.spent = pull.pull>0 } completion:{ shooting=0 }
                 }
                 let before=model.forecasts.mapValues(\.updated)
                 await model.refresh(candidates,force:true)
