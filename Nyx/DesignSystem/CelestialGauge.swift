@@ -38,6 +38,8 @@ struct CelestialGauge: View {
     /// A page's cap on the dial at accessibility sizes (`gaugeAccessibleMax`); unbounded by default.
     @Environment(\.gaugeAccessibleMax) private var accessibleMax
     @ScaledMetric(relativeTo:.title3) private var bandMetric=20.0
+    /// The line height of the sunset and sunrise times under a small dial's ends, for the gap below them.
+    @ScaledMetric(relativeTo:.caption2) private var timesLine=14.0
     let score: Int
     var hasForecast: Bool=true
     /// What the night's clouds rest on, spoken after the band as the caption under the dial says it
@@ -133,7 +135,8 @@ struct CelestialGauge: View {
                 let dial=min(Self.accessibleSide(band:bandMetric,width:available),accessibleMax)
                 VStack(spacing:16) {
                     ZStack { bezel; drawing; numeral(size:Self.accessibleNumeral(band:bandMetric,side:dial)) }.frame(width:dial,height:dial)
-                    band
+                    // The ring is open at the bottom: the word sits 16 pt under its rounded ends, not under the square's empty corner.
+                    band.padding(.top,NightRingEnds.top(side:dial)-8-dial/2)
                     units
                 }
                 .frame(maxWidth:.infinity)
@@ -154,8 +157,9 @@ struct CelestialGauge: View {
                             case .ended: pointer=nil
                             }
                         }
-                    // Below a small dial, clear of the sunset and sunrise times hung under its open ends.
-                    if !labelsInside { band.padding(.top,night == nil ? 0 : 10); units }
+                    // Below a small dial, a clear 8 pt under the sunset and sunrise times hung from its open ends
+                    // (in whole points, so the few passes as the dial shrinks to make room settle).
+                    if !labelsInside { band.padding(.top,night == nil ? 0 : max(10,(NightRingEnds.top(side:side)+timesLine-side/2+8).rounded(.up))); units }
                 }
                 // The whole space offered decides the labels' place (`labelsInside(offered:)`). A page
                 // that proposes no height (the park page) offers the instrument's own height.
@@ -234,6 +238,12 @@ struct CelestialGauge: View {
     /// It is the integral of a decaying speed, so the stars speed up and slow down without jumping.
     nonisolated static let surgeAngle=0.35, surgeSettle=0.3
     nonisolated static func surgeTurn(_ t:Double)->Double { t<=0 ? 0 : surgeAngle*(1-exp(-t/surgeSettle)) }
+    /// How fully an orbiting star at angle `a` (radians) shows beside the dial's opening (40°…140°, under
+    /// its ends): 0 inside it, 1 from 12° outside it, so a star fades rather than blinks out.
+    nonisolated static func openingClearance(_ a:Double)->Double {
+        let turn=(a*180/Double.pi).truncatingRemainder(dividingBy:360), degrees=turn<0 ? turn+360 : turn
+        return min(1,max(0,(abs(degrees-90)-50)/12))
+    }
     /// The landing's amber glow `t` seconds in: how strong and how far it has spread, both 0 to 1.
     nonisolated static func landingGlow(_ t:Double)->(strength:Double,spread:Double) {
         guard t>=0, t<1.2 else { return (0,t<0 ? 0 : 1) }
@@ -559,7 +569,10 @@ struct CelestialGauge: View {
                     let twinkle=still ? 0.8 : 0.55+0.45*sin(t*(1.2+2.6*energy)+seed)
                     let big=i%4==0
                     let d=big ? 2.6 : 1.4+unit
-                    context.fill(Path(ellipseIn:CGRect(x:center.x+cos(a)*orbit-d/2,y:center.y+sin(a)*orbit-d/2,width:d,height:d)),with:.color(palette.ink.opacity((big ? 0.75 : 0.4)*twinkle)))
+                    // Under a night the opening holds the sunset and sunrise times: stars fade out on the way in, never crossing the digits.
+                    let clear=night == nil || typeSize.isAccessibilitySize ? 1 : Self.openingClearance(a)
+                    if clear<=0 { continue }
+                    context.fill(Path(ellipseIn:CGRect(x:center.x+cos(a)*orbit-d/2,y:center.y+sin(a)*orbit-d/2,width:d,height:d)),with:.color(palette.ink.opacity((big ? 0.75 : 0.4)*twinkle*clear)))
                 }
             }
         }
@@ -720,7 +733,7 @@ nonisolated struct DialRing:Shape {
         let side=min(rect.width,rect.height)
         let center=CGPoint(x:rect.midX,y:rect.midY), radius=side/2-DialMetrics.inset(side:side)
         var arc=Path()
-        arc.addArc(center:center,radius:radius,startAngle:.degrees(136),endAngle:.degrees(404),clockwise:false)
+        arc.addArc(center:center,radius:radius,startAngle:DialMetrics.rimStart,endAngle:.degrees(540-DialMetrics.rimStart.degrees),clockwise:false)
         return arc.strokedPath(StrokeStyle(lineWidth:DialMetrics.ringWidth(side:side),lineCap:.round))
     }
 }

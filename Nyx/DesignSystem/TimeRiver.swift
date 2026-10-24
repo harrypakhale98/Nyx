@@ -415,7 +415,7 @@ struct TimeRiver: View {
 
     /// A score's height on the river, as `draw` places it.
     private func y(_ score:Int,height:Double)->Double {
-        let top=moonSize+12, bottom=height-22
+        let top=moonSize+lensSize/2+4, bottom=height-22
         return bottom-(bottom-top)*Double(score)/100
     }
     private func x(_ i:Int,width:Double)->Double {
@@ -456,7 +456,8 @@ struct TimeRiver: View {
         // Read once per drawing, not once per night: each is a search of the thirty nights.
         let index=self.index, peaks=self.peaks
         let calendar=nights.first?.park.calendar
-        let top=moonSize+12, bottom=size.height-22, span=bottom-top
+        // The highest mark's lens stays clear of the Moon's row above it.
+        let top=moonSize+lensSize/2+4, bottom=size.height-22, span=bottom-top
         func point(_ i:Int)->CGPoint { CGPoint(x:x(i,width:size.width),y:bottom-span*Double(nights[i].score.value)/100) }
         let lastForecast=nights.lastIndex { $0.score.hasForecast }
 
@@ -508,7 +509,8 @@ struct TimeRiver: View {
             context.stroke(tick,with:.color(palette.ink.opacity(palette.highContrast ? 0.6 : 0.3)),style:StrokeStyle(lineWidth:0.7*palette.stroke,dash:[1,3]))
             let label=context.resolve(Text("forecast ends").font(.caption2).foregroundStyle(palette.muted))
             let measured=label.measure(in:size)
-            let lx=min(max(fx+4+measured.width/2,measured.width/2),size.width-measured.width/2)
+            // Beside the tick, not touching it: the dashes are a hairline, the gap is what reads.
+            let lx=min(max(fx+7+measured.width/2,measured.width/2),size.width-measured.width/2)
             context.draw(label,at:CGPoint(x:lx,y:bottom-measured.height/2-2))
         }
 

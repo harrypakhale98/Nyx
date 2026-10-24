@@ -45,22 +45,24 @@ struct JournalView: View {
                 // A journal lives on the device it was written on; say so where a second device is likely.
                 if JournalView.mentionsOtherDevices(width:width,regular:sizeClass == .regular,compactHeight:verticalSizeClass == .compact) {
                     Text("Journals stay on each device. Export to move yours.").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                        // Over the centred constellation when there are no nights yet, in line with its edge.
+                        .frame(maxWidth:wide && entries.isEmpty ? 760 : .infinity,alignment:.leading).frame(maxWidth:.infinity)
                 }
                 // One way into the year: at the top in recap season (December, early January), else under the constellation.
                 let season=recapSeason(nights)
-                if season { recapCard }
+                if season { recapCard() }
                 if wide && !entries.isEmpty {
                     // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
-                    FoldColumns(narrow:.trailing,narrowMax:min(440,(width*0.4).rounded()),spacing:28) {
+                    FoldColumns(narrow:.trailing,narrowMax:min(440,(width*0.4).rounded()),spacing:NyxMetrics.columnGap) {
                         YourSkyPanel(nights:nights) { id in opened=entries.first { $0.id==id } }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:24) { if !season && !nights.isEmpty { recapCard }; entryList }.frame(maxWidth:.infinity,alignment:.leading)
+                        VStack(alignment:.leading,spacing:24) { if !season && !nights.isEmpty { recapCard(rule:false) }; entryList }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                 } else if wide {
                     // No nights yet: the constellation alone, centred, with its promise and the button inside.
                     YourSkyPanel(nights:nights,record:recordAction) { _ in }.frame(maxWidth:760).frame(maxWidth:.infinity)
                 } else {
                     YourSkyPanel(nights:nights,record:recordAction) { id in opened=entries.first { $0.id==id } }
-                    if !season && !nights.isEmpty { recapCard }
+                    if !season && !nights.isEmpty { recapCard() }
                     entryList
                 }
             }.padding(NyxMetrics.pagePadding).readableColumn(wide ? WideLayout.twoColumnMaximum : WideLayout.readableWidth)
@@ -223,9 +225,10 @@ struct JournalView: View {
         let recapYear=month==12 ? year : month==1 && calendar.component(.day,from:now)<=7 ? year-1 : nil
         return recapYear.map { y in nights.contains { $0.year==y } } ?? false
     }
-    private var recapCard:some View {
+    /// `rule` off where it opens a column, level with the other column's first section.
+    private func recapCard(rule:Bool=true)->some View {
         Button { recap=true } label:{
-            Panel { HStack(spacing:14) {
+            Panel(rule:rule) { HStack(spacing:14) {
                 Image(systemName:"sparkles").font(.title2.weight(.light)).foregroundStyle(palette.ink).accessibilityHidden(true)
                 VStack(alignment:.leading,spacing:4) {
                     Text("Your year under the stars").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
@@ -647,10 +650,13 @@ struct JournalDetailView:View {
     @State private var holdingArc=false
     /// Two columns on a wide iPad (`WideLayout`); the phone's one column everywhere else.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
-    @ViewBuilder private var heading:some View {
-        Eyebrow(text:"A night remembered")
-        Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif))
-        Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.subheadline).foregroundStyle(palette.muted).padding(.top,-14)
+    /// One group, so the page's spacing falls between sections and not between a title and its own lines.
+    private var heading:some View {
+        VStack(alignment:.leading,spacing:4) {
+            Eyebrow(text:"A night remembered")
+            Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif))
+            Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.subheadline).foregroundStyle(palette.muted)
+        }
     }
     private var notes:some View { Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7) }
     @ViewBuilder private var photos:some View {
@@ -667,7 +673,9 @@ struct JournalDetailView:View {
             let night=model.night(park,on:entry.date)
             let moon=AstronomyEngine().moon(for:night)
             // VoiceOver reads the Moon once, from the line under "The Moon that night"; the disc is quiet.
-            HStack(spacing:18) {
+            // Stacked at accessibility sizes, so the words keep the width instead of wrapping beside the disc.
+            let layout=typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment:.leading,spacing:12)) : AnyLayout(HStackLayout(spacing:18))
+            layout {
                 MoonView(geometry:moon.geometry).frame(width:64,height:64).accessibilityHidden(true)
                 VStack(alignment:.leading,spacing:4) {
                     Text("The Moon that night").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
@@ -682,7 +690,7 @@ struct JournalDetailView:View {
             if wide {
                 // A wide iPad: the words on the left at a reading measure, and beside them what the night
                 // looked like, the Moon, the sky's arc and the photos, instead of one column with half the page empty.
-                HStack(alignment:.top,spacing:40) {
+                HStack(alignment:.top,spacing:NyxMetrics.columnGap) {
                     VStack(alignment:.leading,spacing:24) { heading;Divider().overlay(palette.line);notes;Divider().overlay(palette.line);GlobeAtNightLink() }.frame(maxWidth:.infinity,alignment:.leading)
                     VStack(alignment:.leading,spacing:24) {
                         moonThatNight

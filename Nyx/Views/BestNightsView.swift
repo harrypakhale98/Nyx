@@ -34,7 +34,7 @@ struct BestNightsView: View {
             if wide {
                 // The two columns meet at iPhone Duo's fold on its inner display, half open or flat. The
                 // answer leads the first column, above where it is measured from; the places follow beside it.
-                FoldColumns(narrow:.leading,narrowMax:420,spacing:32) {
+                FoldColumns(narrow:.leading,narrowMax:420,spacing:NyxMetrics.columnGap) {
                     VStack(alignment:.leading,spacing:24) { intro; answer; startingPoint }.frame(maxWidth:.infinity,alignment:.leading)
                     VStack(alignment:.leading,spacing:24) { others }.frame(maxWidth:.infinity)
                 }.padding(NyxMetrics.pagePadding).readableColumn(WideLayout.twoColumnMaximum)
@@ -117,7 +117,12 @@ struct BestNightsView: View {
                 Text("\(night.score.value)").scoreNumeral(size:min(heroSize,150),accent:palette.accent)
                     .contentTransition(.numericText(value:Double(night.score.value)))
                 Text(night.bandWithBasis).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center)
-                if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).multilineTextAlignment(.center) }
+                // On a dark scrim, as on Tonight: the one line here that must never be lost in the sky.
+                if let closure {
+                    Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).multilineTextAlignment(.center)
+                        .fixedSize(horizontal:false,vertical:true)
+                        .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12))
+                }
                 AccessNoteLabel(park:park,alignment:.center)
             }.frame(maxWidth:.infinity)
         }.buttonStyle(.plain)

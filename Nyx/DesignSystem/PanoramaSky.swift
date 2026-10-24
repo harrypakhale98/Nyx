@@ -299,6 +299,8 @@ struct PanoramaCanvas: View {
         let ink=palette.ink, highContrast=palette.highContrast, stroke=palette.stroke
         let tints=HorizonSkies.shared.tints(sky,ink:ink)
         Canvas { context,size in PanoramaCanvas.draw(sky:sky,options:options,ink:ink,highContrast:highContrast,stroke:stroke,tints:tints,in:&context,size:size) }
+            // Names and compass points stop growing here, where they would bury their stars; VoiceOver reads the sky in full.
+            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             .background(Color.black)
             .accessibilityIgnoresInvertColors()
     }
@@ -454,14 +456,18 @@ struct PanoramaCanvas: View {
         for (azimuth,name) in points {
             guard let p=frame.point(0,azimuth), p.x>16, p.x<size.width-16 else { continue }
             let text=context.resolve(Text(name).font(.system(azimuth.truncatingRemainder(dividingBy:90)==0 ? .callout : .caption,design:.serif).weight(.semibold)).foregroundStyle(ink.opacity(azimuth.truncatingRemainder(dividingBy:90)==0 ? 0.9 : 0.6)))
-            context.draw(text,at:CGPoint(x:p.x,y:min(size.height-14,p.y+16)))
+            let s=text.measure(in:size)
+            // A fixed step under the horizon, so larger letters grow downward, never over the line.
+            context.draw(text,at:CGPoint(x:p.x,y:min(size.height-s.height/2-4,p.y+6+s.height/2)))
         }
         // Names, brightest first, never over one another.
         var taken:[CGRect]=[]
         func label(_ name:String,at p:CGPoint,gap:Double,opacity:Double=0.92) {
             let text=context.resolve(Text(name).font(.system(.footnote,design:.serif)).foregroundStyle(ink.opacity(opacity)))
             let s=text.measure(in:size)
-            for spot in [CGPoint(x:p.x,y:p.y-gap),CGPoint(x:p.x,y:p.y+gap),CGPoint(x:p.x+gap/2+s.width/2+4,y:p.y)] {
+            // `gap` places the name's centre at the default size; larger names keep the same edge clear of the mark.
+            let lift=gap-8+s.height/2
+            for spot in [CGPoint(x:p.x,y:p.y-lift),CGPoint(x:p.x,y:p.y+lift),CGPoint(x:p.x+gap/2+s.width/2+4,y:p.y)] {
                 let rect=CGRect(x:spot.x-s.width/2,y:spot.y-s.height/2,width:s.width,height:s.height).insetBy(dx:-3,dy:-1)
                 guard rect.minX>=4, rect.maxX<=size.width-4, rect.minY>=max(4,options.labelTop), rect.maxY<=horizonY, !taken.contains(where:{ $0.intersects(rect) }) else { continue }
                 taken.append(rect)

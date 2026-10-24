@@ -127,10 +127,10 @@ import Testing
     }
     /// The week strip's pitch grows with the caption beside it and stops at 1.8×.
     @Test func weekStripPitchScalesAndCaps() {
-        #expect(WeekStrip.pitch(15) == 15)
-        #expect(WeekStrip.pitch(11) == 15)
+        #expect(WeekStrip.pitch(16) == 16)
+        #expect(WeekStrip.pitch(11) == 16)
         #expect(WeekStrip.pitch(19) == 19)
-        #expect(abs(WeekStrip.pitch(40) - 27) < 1e-9)
+        #expect(abs(WeekStrip.pitch(40) - 28.8) < 1e-9)
     }
     /// The week strip's dots span the week's own range, so 40 to 62 reads as a peak, not as seven specks.
     @Test func weekStripDotsSpanTheWeek() {

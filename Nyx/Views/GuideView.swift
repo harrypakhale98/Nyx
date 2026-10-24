@@ -11,6 +11,7 @@ struct GuideView:View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     let mode:GuideMode
     @State private var guide=OnDeviceGuide()
@@ -181,16 +182,17 @@ struct GuideView:View {
         let shape=RoundedRectangle(cornerRadius:24,style:.continuous)
         let solid=reduceTransparency || palette.nightVision || palette.highContrast
         return HStack(alignment:.bottom,spacing:10) {
-            TextField(mode.isPlanning ? "Ask about parks and nights" : "Ask about this essay",text:$question,axis:.vertical)
+            // A placeholder never wraps: at accessibility sizes the long one was cut off mid-word.
+            TextField(typeSize.isAccessibilitySize ? "Ask Nyx" : mode.isPlanning ? "Ask about parks and nights" : "Ask about this essay",text:$question,axis:.vertical)
                 .lineLimit(1...4).focused($typing).submitLabel(.send)
                 .onSubmit { ask(question) }
                 .padding(.vertical,8)
             Button { ask(question) } label:{ Image(systemName:"arrow.up.circle.fill").font(.title).foregroundStyle(palette.ink) }
-                .buttonStyle(.plain).frame(minWidth:44,minHeight:44)
+                .buttonStyle(.plain).frame(minWidth:44,minHeight:44).padding(.vertical,typeSize.isAccessibilitySize ? 4 : 0)
                 .disabled(question.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty || guide.loading || !hasRecords)
                 .accessibilityLabel("Ask").accessibilityInputLabels([Text("Ask"),Text("Send")])
         }
-        .padding(.leading,18).padding(.trailing,6)
+        .padding(.leading,18).padding(.trailing,8)
         .background { if solid { shape.fill(palette.nightVision ? Color.black : palette.panel) } }
         .glassEffect(solid ? .identity : .regular.tint(palette.panel.opacity(0.5)).interactive(),in:shape)
         .overlay(shape.stroke(palette.line,lineWidth:0.5))
@@ -382,16 +384,18 @@ private struct GuideAnswerBlock: View {
         }
     }
 }
-/// A suggestion or citation chip: starlight words in a hairline capsule, at least 44 pt tall (an action,
-/// so not amber, which stays with the score and light).
+/// A suggestion or citation chip: starlight words in a hairline lozenge, at least 44 pt tall (an action,
+/// so not amber, which stays with the score and light). A capsule on one line; its corners stay 22 pt when
+/// the words wrap, so a two- or three-line chip keeps straight sides instead of rounding into its text.
 private struct GuideChip: View {
     @Environment(\.nyx) private var palette
     let text:Text
+    private let shape=RoundedRectangle(cornerRadius:22,style:.continuous)
     var body: some View {
         text.font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.leading)
             .padding(.vertical,8).padding(.horizontal,14).frame(minHeight:44)
-            .background(Capsule().fill(palette.ink.opacity(palette.nightVision ? 0 : 0.06))).overlay(Capsule().stroke(palette.line,lineWidth:0.5*palette.stroke))
-            .contentShape(Capsule())
+            .background(shape.fill(palette.ink.opacity(palette.nightVision ? 0 : 0.06))).overlay(shape.stroke(palette.line,lineWidth:0.5*palette.stroke))
+            .contentShape(shape)
     }
 }
 /// A record as Nyx's own row shows it: the park, the night, the score, and one line for the rest.

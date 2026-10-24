@@ -13,14 +13,18 @@ struct StartingPointPanel: View {
     @Environment(\.openURL) private var openURL
     @ScaledMetric(relativeTo:.subheadline) private var dotSize=3.0
     var heading=false
+    /// Off where the panel opens a column (Tonight's right column on a wide iPad).
+    var rule=true
     /// Opens the starting-point picker.
     let choose:()->Void
     /// Near me: the explainer first, or the location itself (`StartingPointSheets.nearMe`).
     let nearMe:()->Void
     private var location:LocationService { model.location }
     var body: some View {
-        if heading { Eyebrow(text:"Starting point") }
-        Panel { VStack(alignment:.leading,spacing:0) {
+        Panel(rule:rule) { VStack(alignment:.leading,spacing:0) {
+            // Inside the panel, under its hairline, so it heads this row and not the section above;
+            // with the row's own 44 pt height that leaves the 16 pt other panels keep under a heading.
+            if heading { Eyebrow(text:"Starting point").padding(.bottom,4) }
             // One row: where from, how far, and Near me at the trailing edge; how it is measured under it.
             ViewThatFits(in:.horizontal) {
                 HStack(spacing:6) { origin(wraps:false); dot; radiusMenu; Spacer(minLength:8); locationControl }

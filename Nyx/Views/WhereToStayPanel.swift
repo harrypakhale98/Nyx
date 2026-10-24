@@ -41,10 +41,12 @@ struct WhereToStayPanel: View {
                     if index>0 { Divider().overlay(palette.line) }
                     CampgroundRow(campground:campground).padding(.vertical,12)
                 }
-            }
-            if list.count>shown.count {
-                Button { showsAll=true } label:{ Text("Show all \(list.count) campgrounds").frame(minHeight:44) }
-                    .font(.subheadline.weight(.medium)).foregroundStyle(palette.ink)
+                // The list's last row, under the same rule as the rest, so it reads as the end of the list.
+                if list.count>shown.count {
+                    Divider().overlay(palette.line)
+                    Button { showsAll=true } label:{ Text("Show all \(list.count) campgrounds").frame(minHeight:44) }
+                        .font(.subheadline.weight(.medium)).foregroundStyle(palette.ink)
+                }
             }
         } else if model.campgrounds != nil {
             Text("The National Park Service lists no campgrounds in this park. Its website covers other places to stay nearby.")

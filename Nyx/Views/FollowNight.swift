@@ -215,7 +215,12 @@ struct NightInProgressStrip: View {
                     if placement == .inline {
                         Text(status.short).font(.subheadline.weight(.medium)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
                     } else {
-                        Text("\(Text(followed.attributes.parkName).fontWeight(.semibold)) · \(status.line)").font(.subheadline).lineLimit(1).minimumScaleFactor(0.8)
+                        // A long park name gives way to the countdown, which is the reason the strip is there.
+                        // The separator reads the same in every language, so the line needs no key of its own.
+                        HStack(alignment:.firstTextBaseline,spacing:0) {
+                            Text(followed.attributes.parkName).fontWeight(.semibold).lineLimit(1)
+                            Text(verbatim:" · "+status.line).lineLimit(1).minimumScaleFactor(0.8).layoutPriority(1)
+                        }.font(.subheadline)
                         Spacer(minLength:4)
                         Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
                     }

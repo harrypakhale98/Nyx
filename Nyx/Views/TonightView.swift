@@ -78,9 +78,9 @@ struct TonightView: View {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
-                    FoldColumns(narrow:.trailing,narrowMax:500,spacing:36) {
+                    FoldColumns(narrow:.trailing,narrowMax:500,spacing:NyxMetrics.columnGap) {
                         VStack(spacing:26) { GoingPanel(hero:park); hero(park,others:Array(best.dropFirst())); farther(than:park,shortlist:widerList); darkArea(all); ahead(park) }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID); more(best); fromHome(hero:park); LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
+                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(rule:false,choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID); more(best); fromHome(hero:park); LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
                     weekAcross
@@ -447,7 +447,10 @@ struct TonightView: View {
     @ViewBuilder private func more(_ best:[Park])->some View {
         if best.count>1 {
             Eyebrow(text:"More skies within reach")
-            ForEach(Array(best.dropFirst())) { park in NavigationLink(value:ZoomRoute.row(park)) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.row(park).source,in:zoom).parkRowActions(park) { saveFailed=true };Divider().overlay(palette.line) }
+            // Rows and hairlines in their own stack, as on Parks: the page's spacing would double each gap.
+            VStack(spacing:0) {
+                ForEach(Array(best.dropFirst())) { park in NavigationLink(value:ZoomRoute.row(park)) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.row(park).source,in:zoom).parkRowActions(park) { saveFailed=true };Divider().overlay(palette.line) }
+            }
             // Only worth saying when a row actually reads "Estimate", in the rows' own words, as on Parks.
             if let note=UsualCloudsNote(best.dropFirst().map { model.night($0) }) { Text(note.estimate).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         }

@@ -226,7 +226,7 @@ struct ConstellationShareButton: View {
     }
     var body: some View {
         Group {
-            if let image { ShareLink(item:image,preview:SharePreview(title,image:image)) { Label("Share",systemImage:"square.and.arrow.up").labelStyle(.iconOnly).frame(minWidth:44,minHeight:44) }.accessibilityLabel("Share your constellation") }
+            if let image { ShareLink(item:image,preview:SharePreview(title,image:image)) { Label("Share",systemImage:"square.and.arrow.up").labelStyle(.iconOnly).frame(minWidth:44,minHeight:44,alignment:.trailing) }.accessibilityLabel("Share your constellation") }
             else { ProgressView().frame(minWidth:44,minHeight:44).accessibilityLabel("Preparing your constellation to share") }
         }
         .task(id:"\(layout.stars.count)-\(palette.nightVision)") {

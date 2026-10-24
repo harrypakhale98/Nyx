@@ -9,7 +9,7 @@ struct WeekStrip: View {
     @Environment(\.nyx) private var palette
     @Environment(\.nyxAccess) private var access
     @Environment(\.dynamicTypeSize) private var typeSize
-    /// The column pitch grows with the caption beside it (15 pt at the default size), so the dots
+    /// The column pitch grows with the caption beside it (16 pt at the default size), so the dots
     /// keep company with the text; capped at 1.8× (`WeekStrip.pitch`), where accessibility sizes
     /// take over with the sentence alone.
     @ScaledMetric(relativeTo:.caption2) private var scaledPitch=WeekStrip.basePitch
@@ -33,9 +33,13 @@ struct WeekStrip: View {
             }
         }
     }
-    /// The default column pitch: room for a 5 pt dot and the best night's ring with air between them.
-    static let basePitch=15.0
-    /// The column pitch for a scaled 15 pt: never below 15, never above 1.8× it.
+    /// The default column pitch: the best night's ring (`ringRadius`) and a neighbour's largest dot
+    /// (5 pt radius) with 4 pt of sky between them; wider and the strip crowds its caption on a 375 pt phone.
+    static let basePitch=16.0
+    /// The best night's ring at the default size: just outside the largest dot, not the whole column,
+    /// so it reads as that night's and never touches the next.
+    static let ringRadius=5+1.7
+    /// The column pitch for a scaled 16 pt: never below 16, never above 1.8× it.
     static func pitch(_ scaled:Double)->Double { min(max(scaled,basePitch),basePitch*1.8) }
     /// A night's dot radius at the default size: the week's lowest score at 1.6 pt, its highest at
     /// 5, the rest between by score; a week of one score draws every dot at the middle size.
@@ -53,7 +57,7 @@ struct WeekStrip: View {
                 let mark=NightMark.mark(night,differentiate:access.differentiate)
                 mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent,fillOpacity:palette.markOpacity(score:night.score.value),lineWidth:0.8*scale,stroke:palette.stroke)
                 if night.id==best.id {
-                    let ring=pitch/2
+                    let ring=WeekStrip.ringRadius*scale
                     context.stroke(Path(ellipseIn:CGRect(x:center.x-ring,y:center.y-ring,width:2*ring,height:2*ring)),with:.color(palette.accent.opacity(0.75)),lineWidth:0.7*scale*palette.stroke)
                 }
             }

@@ -27,7 +27,8 @@ extension ParkDetailView {
         // A spot's own words are on its panel; the Park Service's are only for its parks.
         if !park.description.isEmpty, !park.isSavedSpot {
             VStack(alignment:.leading,spacing:8) {
-                Eyebrow(text:"From the National Park Service")
+                // The programs' gap under its heading, so the two sections read alike.
+                Eyebrow(text:"From the National Park Service").padding(.bottom,6)
                 ClampedText(text:park.description,lines:4)
                 // The Park Service writes in English: translated by iOS on this device, as alerts and programs are.
                 TranslateButton(text:park.description)
@@ -54,10 +55,10 @@ extension ParkDetailView {
             Eyebrow(text:"Ranger night-sky programs")
             if let data=model.rangerPrograms(park) {
                 let programs=data.programs.filter{$0.date>=park.isoDay(model.today)}
-                if programs.isEmpty && data.updated == nil { Text("Programs could not be checked in the last update. Ask at the visitor center for current night-sky programs.").foregroundStyle(palette.muted) }
-                else if programs.isEmpty { Text("No upcoming programs in the last update. Ask at the visitor center.").foregroundStyle(palette.muted) }
+                if programs.isEmpty && data.updated == nil { Text("Programs could not be checked in the last update. Ask at the visitor center for current night-sky programs.").font(.subheadline).foregroundStyle(palette.muted) }
+                else if programs.isEmpty { Text("No upcoming programs in the last update. Ask at the visitor center.").font(.subheadline).foregroundStyle(palette.muted) }
                 ForEach(programs) { program in ProgramCard(park:park,program:program) }
-            } else { Text("Programs are not checked yet. Ask at the visitor center for current night-sky programs.").foregroundStyle(palette.muted) }
+            } else { Text("Programs are not checked yet. Ask at the visitor center for current night-sky programs.").font(.subheadline).foregroundStyle(palette.muted) }
         } }.id("programs")
     }
 }

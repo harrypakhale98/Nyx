@@ -696,7 +696,8 @@ struct TonightWidgetView:View {
                 NightDot(fill:night.basis.fill,color:accent.opacity(night.basis.fill == .full ? 1 : 0.85),fillOpacity:0.45+Double(night.score.value)/200,lineWidth:0.9).frame(width:d,height:d).widgetAccentable()
                 // Beside the dot, never on it: the dot's size is the score and must stay readable.
                 if let event { SkyGlyph(event == .eclipse ? .eclipse : .meteors,color:ink).frame(width:12*scale,height:12*scale).offset(x:13*scale,y:-3*scale) }
-            }.frame(height:15*scale)
+                // The best night's ring fits here; the cell stays 28 pt and spills into the row gap, so the month keeps its height.
+            }.frame(height:17*scale)
         }.frame(maxWidth:.infinity).frame(height:28*scale)
             .background { if shown { RoundedRectangle(cornerRadius:6).fill(ink.opacity(tinted ? 0.2 : 0.12)).padding(.horizontal,2) } }
     }
