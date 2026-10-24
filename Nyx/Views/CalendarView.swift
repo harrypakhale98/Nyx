@@ -36,14 +36,9 @@ struct NightCell: View {
             Canvas { context,size in
                 // Size follows the score on a curve, so a 95 night reads clearly larger than a 70.
                 let center=CGPoint(x:size.width/2,y:size.height/2),radius=(1.5+8*pow(Double(night.score.value)/100,1.5))*scale
-                // A past night is one quiet mark, whatever its forecast was: it can no longer be chosen.
-                if isPast {
-                    let dot=1.6*scale
-                    // In the date's own grey, not fainter: the cell is one accessibility element whose text spans
-                    // it, so a fainter dot was measured as the date's colour (the audit failed every past date).
-                    context.fill(Path(ellipseIn:CGRect(x:center.x-dot,y:center.y-dot,width:2*dot,height:2*dot)),with:.color(palette.muted))
-                    return
-                }
+                // A past night is its date alone: it can no longer be chosen, and a row of grey dots read
+                // as half a month of nights still to plan.
+                if isPast { return }
                 let mark=NightMark.mark(night,differentiate:access.differentiate)
                 // Past nights fade their dot only; their text keeps full legibility.
                 let fade=isPast ? 0.35 : 1.0
@@ -225,9 +220,11 @@ struct CalendarView: View {
                 // The month bar and the ring's panel follow the page in view as soon as it is ready.
                 let shown=visible(park).flatMap { pages.others[$0] } ?? data
                 VStack(alignment:.leading,spacing:24) {
-                    heading(park); monthBar(park,shown)
+                    // The answer first (the month's darkest stretch), then the month it is ringed in: the
+                    // nights you can still plan are not left under half a month already past.
+                    heading(park); windowPanel(park,shown); monthBar(park,shown)
                     if typeSize.isAccessibilitySize { list(park,data) } else { months(park,data,others:pages.others,scale:wide && width>=640 ? 1.3 : 1) }
-                    windowPanel(park,shown); LongViewLink(park:park); legend(shown)
+                    LongViewLink(park:park); legend(shown)
                 }.padding(24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
             } else if waiting { ConstellationLoader().frame(maxWidth:.infinity).padding(.top,80) }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park,veil:0.45))

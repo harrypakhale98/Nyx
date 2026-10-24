@@ -302,7 +302,7 @@ struct TonightView: View {
             let basis=night.basisCaption()
             let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis)
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis,
-                           revealKey:revealKey(park),range:range) { heroSettledKey=$0 }
+                           revealKey:revealKey(park),range:range,night:model.ring(night)) { heroSettledKey=$0 }
                 .frame(height:large ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
             if large { context }
@@ -479,15 +479,16 @@ struct TonightView: View {
         }
         return nil
     }
-    /// Tonight answers where; this answers when. The darkest of the next six nights across every
-    /// park in reach, shown only when it is clearly better than tonight's best. Ties are broken as
-    /// everywhere (`NightPlanner.best`), so the night named is the one its park page ranks first.
+    /// Tonight answers where; this answers when. The darkest of the coming nights across every park
+    /// in reach, by the park page's own rule (`NightVerdict.clearlyDarker`, the same horizon), and
+    /// said with what it rests on ("64, an estimate"). Ties are broken as everywhere
+    /// (`NightPlanner.best`), so the night named is the one its park page ranks first.
     @ViewBuilder private func darkerAhead(than tonight:Night)->some View {
         // Ranked as the week across parks ranks them, a closed park after the open ones.
         let closures=Dictionary(aheadPool.compactMap { park in model.closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
-        let ahead=NightPlanner.ranked(aheadPool.flatMap { park in model.nights(park,from:park.date(model.tonight(park),addingDays:1),count:6) },closures:closures).first
-        if let ahead, ahead.score.value>=tonight.score.value+5 {
-            capsule(text:String(localized:"Darker on \(ahead.park.dayLabel(ahead.id)): \(ahead.score.value) at \(ahead.park.shortName)"),hint:"Opens that night at the park.") {
+        let ahead=NightPlanner.ranked(aheadPool.flatMap { park in model.nights(park,from:park.date(model.tonight(park),addingDays:1),count:NightVerdict.horizon) },closures:closures).first
+        if let ahead, NightVerdict.clearlyDarker(ahead,than:tonight) {
+            capsule(text:String(localized:"Darker on \(ahead.park.dayLabel(ahead.id)) at \(ahead.park.shortName): \(NightVerdict.scored(ahead))."),hint:"Opens that night at the park.") {
                 ParkDetailView(park:ahead.park,initialDate:ahead.id)
             } icon:{ Image(systemName:"moon.stars").imageScale(.small) }
             // A darker night somewhere the car cannot go says so before the tap, not after.

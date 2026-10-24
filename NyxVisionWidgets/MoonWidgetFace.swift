@@ -13,6 +13,8 @@ nonisolated struct MoonFacts: Sendable, Equatable {
     let illumination: Double
     let waxing: Bool
     let phaseAngle: Double
+    /// Where in the cycle the Moon is (0 new, 0.5 full).
+    let fraction: Double
     let nextNewMoon: Date
 
     init(at date: Date, calendar: Calendar = .current) {
@@ -24,10 +26,13 @@ nonisolated struct MoonFacts: Sendable, Equatable {
         phaseName = glance.phaseName
         waxing = glance.waxing
         phaseAngle = glance.phaseAngle
+        fraction = glance.fraction
         illumination = glance.illumination
         nextNewMoon = MoonWeek.newMoon(after: date)
     }
     var percent: Int { Int((illumination*100).rounded()) }
+    /// The phase as every device names it and picks its symbol (`MoonPhase.symbolName`).
+    var phase: MoonPhase { MoonPhase(fraction: fraction) }
     /// "Moon, waxing crescent, 23 percent lit. Next new moon Tuesday, October 21."
     var spoken: String {
         String(localized: "Moon, \(phaseName), \(percent) percent lit. Next new moon \(nextNewMoon.formatted(.dateTime.weekday(.wide).month(.wide).day())).")
@@ -144,21 +149,22 @@ struct MoonWidgetFace: View {
 
 /// The Moon from NASA's map, lit at tonight's phase, drawn once by the Moon shader into an image
 /// (a widget cannot run a shader as it draws). Textbook orientation: north up, lit on the right
-/// while waxing, as seen from the northern states. A phase symbol stands in if the render fails.
+/// while waxing, as seen from the northern states: the widget follows no place, so it has no park's
+/// tilt to turn by. A phase symbol stands in if the render fails, the one every device uses.
 struct WidgetMoon: View {
     let phaseAngle: Double
     let waxing: Bool
-    let illumination: Double
+    let phase: MoonPhase
     /// The rendered image's side in points (drawn at 2×): 240 for the face's Moon, less for the week's small ones.
     var side = 240.0
-    init(facts: MoonFacts) { phaseAngle = facts.phaseAngle; waxing = facts.waxing; illumination = facts.illumination }
-    init(glance: MoonWeek.Glance, side: Double) { phaseAngle = glance.phaseAngle; waxing = glance.waxing; illumination = glance.illumination; self.side = side }
+    init(facts: MoonFacts) { phaseAngle = facts.phaseAngle; waxing = facts.waxing; phase = facts.phase }
+    init(glance: MoonWeek.Glance, side: Double) { phaseAngle = glance.phaseAngle; waxing = glance.waxing; phase = glance.phase; self.side = side }
     var body: some View {
         Group {
             if let image = Self.render(phaseAngle: phaseAngle, waxing: waxing, side: side) {
                 Image(uiImage: image).resizable().scaledToFit()
             } else {
-                Image(systemName: Self.symbol(illumination: illumination, waxing: waxing)).resizable().scaledToFit().foregroundStyle(.white)
+                Image(systemName: phase.symbolName(southern: false)).resizable().scaledToFit().foregroundStyle(.white)
             }
         }
         .accessibilityIgnoresInvertColors()
@@ -172,12 +178,6 @@ struct WidgetMoon: View {
         let renderer = ImageRenderer(content: Rectangle().fill(.black).frame(width: side, height: side).colorEffect(shader))
         renderer.scale = 2
         return renderer.uiImage
-    }
-    static func symbol(illumination lit: Double, waxing: Bool) -> String {
-        if lit < 0.03 { return "moonphase.new.moon" }
-        if lit > 0.97 { return "moonphase.full.moon" }
-        if abs(lit-0.5) < 0.06 { return waxing ? "moonphase.first.quarter" : "moonphase.last.quarter" }
-        return lit < 0.5 ? (waxing ? "moonphase.waxing.crescent" : "moonphase.waning.crescent") : (waxing ? "moonphase.waxing.gibbous" : "moonphase.waning.gibbous")
     }
 }
 

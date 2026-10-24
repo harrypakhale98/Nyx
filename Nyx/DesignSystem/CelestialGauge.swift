@@ -53,6 +53,9 @@ struct CelestialGauge: View {
     var range: ClosedRange<Int>?=nil
     /// The milestone and landing ticks. Off for an example dial, so the real answer owns them.
     var haptics=true
+    /// The night itself along the track (`NightRing`), with its park for the times at the ends and
+    /// what VoiceOver says of it. Nil keeps the 0–100 track (the onboarding example, a polar night).
+    var night:(ring:NightRing,park:Park,spoken:String)?=nil
     /// Called with the `revealKey` the dial has settled on: after the landing, at once without
     /// motion, after each later sweep, and when a settled dial is handed a new key for the score it
     /// already shows. Tonight's subtle double tap waits for its own park and night to arrive here.
@@ -181,7 +184,7 @@ struct CelestialGauge: View {
             let label=String(localized:"Darkness score \(inputs.score) out of 100. \(ScoreBand.band(inputs.score).label). \(basis)")
             guard let range=inputs.range else { return label }
             return label+" "+String(localized:"Forecast models: \(range.lowerBound) to \(range.upperBound).")
-        }
+        }+(night.map { " "+$0.spoken } ?? "")
     }
     // MARK: The count-up
 
@@ -473,12 +476,18 @@ struct CelestialGauge: View {
     private var drawing:some View {
         let displayed=reduceMotion || export ? Double(score) : arc
         return ZStack {
-            // The models' range sits under the arc; a hairline outside it where glows are dimmed or red.
-            if let range {
-                ModelRangeBand(range:range,score:displayed,palette:palette,glow:access.glow,hairline:palette.highContrast || palette.nightVision || access.reduceHighlighting)
-                    .opacity(rangeVisible ? 1 : 0)
+            if let night {
+                // The track is the night, drawn from sunset as the score counts up; the score is the numeral's.
+                NightTrack(reveal:score>0 ? min(1,displayed/Double(score)) : 1,ring:night.ring,palette:palette,glow:access.glow)
+                if !typeSize.isAccessibilitySize { NightRingEnds(ring:night.ring,park:night.park).opacity(numeralVisible ? 1 : 0) }
+            } else {
+                // The models' range sits under the arc; a hairline outside it where glows are dimmed or red.
+                if let range {
+                    ModelRangeBand(range:range,score:displayed,palette:palette,glow:access.glow,hairline:palette.highContrast || palette.nightVision || access.reduceHighlighting)
+                        .opacity(rangeVisible ? 1 : 0)
+                }
+                DialFace(value:displayed,hasForecast:hasForecast,palette:palette,glow:access.glow)
             }
-            DialFace(value:displayed,hasForecast:hasForecast,palette:palette,glow:access.glow)
             ambient(displayed)
         }.accessibilityHidden(true)
     }
@@ -494,7 +503,9 @@ struct CelestialGauge: View {
                 let dial=min(size.width,size.height), k=DialMetrics.scale(side:dial)
                 let center=CGPoint(x:size.width/2,y:size.height/2), radius=dial/2-DialMetrics.inset(side:dial)
                 let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
-                let tip=Angle.degrees(140+260*displayed/100)
+                // The leading star: where the score has reached, or on the night's track where the night has got to.
+                let lead:Double?=night != nil ? night?.ring.now : displayed>0.5 ? displayed/100 : nil
+                let tip=Angle.degrees(140+260*(lead ?? 0))
                 // Specular glint on the glass rim. It slides with the phone's tilt, as light on a real dial would.
                 if !reduceMotion && !export && !palette.nightVision && !access.reduceHighlighting && !access.reducedResources {
                     let tilt=MotionTilt.shared
@@ -503,8 +514,7 @@ struct CelestialGauge: View {
                     let from=CGPoint(x:center.x+cos(mid-half)*radius,y:center.y+sin(mid-half)*radius), to=CGPoint(x:center.x+cos(mid+half)*radius,y:center.y+sin(mid+half)*radius)
                     context.stroke(glint,with:.linearGradient(Gradient(colors:[.white.opacity(0),.white.opacity(0.35),.white.opacity(0)]),startPoint:from,endPoint:to),style:StrokeStyle(lineWidth:2.5,lineCap:.round))
                 }
-                // The leading star: where tonight's score has reached.
-                if displayed>0.5 {
+                if lead != nil {
                     let point=CGPoint(x:center.x+cos(tip.radians)*radius,y:center.y+sin(tip.radians)*radius)
                     let pulse=still ? 1 : 0.85+0.15*sin(t*2.4)
                     context.fill(Path(ellipseIn:CGRect(x:point.x-10,y:point.y-10,width:20,height:20)),with:.radialGradient(Gradient(colors:[palette.accent.opacity(0.6*pulse*access.glow),palette.accent.opacity(0)]),center:point,startRadius:0,endRadius:10))

@@ -19,6 +19,9 @@ struct WatchGauge: View {
     /// The forecast models' range the iPhone shows for this night (`WatchContext.modelRange`),
     /// drawn along the rim and spoken with the score; the words under the dial are hidden from VoiceOver.
     var models: ClosedRange<Int>? = nil
+    /// The iPhone's picture of this night's Moon (`WatchMoons`): the photographic Moon, tilted for the
+    /// park, as on the iPhone and its widgets. Nil draws the vector Moon.
+    var moon: CGImage? = nil
     @State private var shown = 0.0
     /// The last milestone the sweeping arc passed (70, 90), and whether it has landed: the haptics' triggers.
     @State private var milestone = 0
@@ -43,7 +46,11 @@ struct WatchGauge: View {
                     }
                 }
                 .padding(.horizontal, side*0.16).offset(y: -WatchDialFace.lift(side: side))
-                MoonDisc(illumination: night.sky.moon.illumination, waxing: night.sky.moon.waxing, southern: night.park.latitude < 0)
+                // Drawn in starlight on the iPhone: the root's night-vision filter turns it red, as it does the vector Moon.
+                Group {
+                    if let moon { Image(decorative: moon, scale: 2).resizable().interpolation(.high).scaledToFit().accessibilityIgnoresInvertColors() }
+                    else { MoonDisc(illumination: night.sky.moon.illumination, waxing: night.sky.moon.waxing, southern: night.park.latitude < 0) }
+                }
                     .frame(width: side*0.15, height: side*0.15)
                     .position(x: proxy.size.width/2, y: proxy.size.height/2 + side*0.39)
                     .opacity(dimmed ? 0.7 : 1)
@@ -179,6 +186,16 @@ private struct GaugeArc: View, Animatable {
 #Preview("Pristine • red") {
     if let park = try? ParkData.load().first(where: { $0.id == "jotr" }) {
         WatchGauge(night: WatchSky.night(park, evening: park.currentNight(at: .now), forecast: nil, detail: nil, now: .now))
+            .environment(\.nyx, NyxPalette(nightVision: true, highContrast: false)).modifier(NightVisionFilter(enabled: true))
+    }
+}
+#Preview("Pictured Moon • red") {
+    // The iPhone's picture stands in for the vector Moon; here the vector Moon rendered to an image
+    // plays it, since the watch cannot draw the shader. The root's filter turns it red.
+    if let park = try? ParkData.load().first(where: { $0.id == "jotr" }) {
+        let night = WatchSky.night(park, evening: park.currentNight(at: .now), forecast: nil, detail: nil, now: .now)
+        let picture = ImageRenderer(content: MoonDisc(illumination: night.sky.moon.illumination, waxing: night.sky.moon.waxing).frame(width: 48, height: 48)).cgImage
+        WatchGauge(night: night, moon: picture)
             .environment(\.nyx, NyxPalette(nightVision: true, highContrast: false)).modifier(NightVisionFilter(enabled: true))
     }
 }

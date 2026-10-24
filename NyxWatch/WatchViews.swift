@@ -159,7 +159,7 @@ struct ParkNightView: View {
             let night = week.first ?? store.tonight(park, at: now)
             TabView(selection: $page) {
                 // (The DEBUG Always-On override is repeated per page: pages take the scene's value.)
-                TonightFace(night: night, week: week, now: now, context: store.context, startNight: startNight).modifier(WatchDebug.AlwaysOn()).tag(0)
+                TonightFace(night: night, week: week, now: now, context: store.context, moons: store.moons, startNight: startNight).modifier(WatchDebug.AlwaysOn()).tag(0)
                 MilestonesPage(night: night, now: now, context: store.context).modifier(WatchDebug.AlwaysOn()).tag(1)
                 // Tonight's pages together: the moments of the night, then what is up in it.
                 WhatsUpPage(night: night).modifier(WatchDebug.AlwaysOn()).tag(2)
@@ -215,6 +215,8 @@ struct TonightFace: View {
     let week: [Night]
     let now: Date
     let context: WatchContext?
+    /// The iPhone's Moon pictures, so the dial's Moon is the one the iPhone shows for each night.
+    let moons: WatchMoons?
     @State private var offset: Int
     /// The dial takes the Crown only after a tap; otherwise the Crown pages, as everywhere on the watch.
     /// Opened on a later night, it holds the Crown already, so the night shown stays until let go.
@@ -225,11 +227,12 @@ struct TonightFace: View {
     @State private var room = 0.0
     @State private var wordsHeight = 0.0
     @State private var held: WatchTonightLayout?
-    init(night: Night, week: [Night], now: Date, context: WatchContext?, startNight: Int = WatchDebug.initialNight) {
+    init(night: Night, week: [Night], now: Date, context: WatchContext?, moons: WatchMoons? = nil, startNight: Int = WatchDebug.initialNight) {
         self.night = night
         self.week = week
         self.now = now
         self.context = context
+        self.moons = moons
         _offset = State(initialValue: startNight)
         _engaged = State(initialValue: startNight > 0)
     }
@@ -331,7 +334,7 @@ struct TonightFace: View {
         }
     }
     private var gauge: some View {
-        WatchGauge(night: shown, nightLabel: offset == 0 ? nil : shown.park.dayLabel(shown.id), models: models)
+        WatchGauge(night: shown, nightLabel: offset == 0 ? nil : shown.park.dayLabel(shown.id), models: models, moon: moons?.image(park: shown.park.id, night: shown.id))
             .contentShape(Circle())
             .focusable(engaged)
             .focused($scrubbing)

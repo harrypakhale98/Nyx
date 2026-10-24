@@ -284,6 +284,9 @@ targets:
         group: Shared
       - path: Nyx/Services/WatchContext.swift
         group: Shared
+      # The iPhone's Moon pictures for the dial (`WatchMoons`): the watch cannot run the Moon shader.
+      - path: Nyx/Services/WatchMoons.swift
+        group: Shared
       # DEBUG only (the whole file): the iPhone's forecast fixture, for the watch's models' range debug screen.
       - path: Nyx/App/DebugForecasts.swift
         group: Shared
@@ -479,6 +482,9 @@ targets:
         group: Shared
       - path: Nyx/Models/SkyConditions.swift
         group: Shared
+      # `MoonPhase.symbolName`: the phase symbol every device uses.
+      - path: Nyx/DesignSystem/MoonSymbol.swift
+        group: Shared
       - path: Nyx/Services/AstronomyEngine.swift
         group: Shared
       - path: Nyx/Services/ScoreEngine.swift
@@ -616,6 +622,9 @@ targets:
       - path: Nyx/Services/Sentences.swift
         group: Shared
       - path: Nyx/Models/SkyConditions.swift
+        group: Shared
+      # `MoonPhase.symbolName`: the phase symbol every device uses.
+      - path: Nyx/DesignSystem/MoonSymbol.swift
         group: Shared
       - path: Nyx/Services/AstronomyEngine.swift
         group: Shared

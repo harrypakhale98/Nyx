@@ -11,9 +11,16 @@ nonisolated enum NightVerdict {
         /// The same, with ranges read as "from … to …".
         let spoken: String
     }
-    /// A darker night counts only this many points above the one shown, and from "Good" up.
+    /// A darker night counts only this many points above the one shown, and from "Good" up, within
+    /// the nights after it up to `horizon`: one rule for the park page and for Tonight across parks,
+    /// so the two never name different "darker" nights by different measures.
     static let darkerMargin=10
     static let darkerFloor=60
+    static let horizon=13
+    /// Whether `ahead` clears `night` by the margin and reaches the floor.
+    static func clearlyDarker(_ ahead: Night, than night: Night) -> Bool {
+        ahead.score.value>=night.score.value+darkerMargin && ahead.score.value>=darkerFloor
+    }
     /// A Moon-free stretch of the core shorter than this is said as brief.
     static let briefCore: TimeInterval=1800
 
@@ -73,7 +80,7 @@ nonisolated enum NightVerdict {
     /// "Good"; the earliest on a tie.
     static func darker(than night: Night, among ahead: [Night]) -> Night? {
         let best=ahead.filter { $0.id>night.id }.max { a, b in a.score.value != b.score.value ? a.score.value<b.score.value : a.id>b.id }
-        guard let best, best.score.value>=night.score.value+darkerMargin, best.score.value>=darkerFloor else { return nil }
+        guard let best, clearlyDarker(best,than:night) else { return nil }
         return best
     }
 }
