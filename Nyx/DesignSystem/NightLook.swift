@@ -1,8 +1,9 @@
 import SwiftUI
 
-// Night vision as it reaches surfaces outside the app's own windows, and the contrast arithmetic
-// that keeps it legible. Apart from NyxTheme.swift (the app's views and its sky), so the widgets
-// and complications compile this alone.
+// Night vision as it reaches surfaces outside the app's own windows, the contrast arithmetic
+// that keeps it legible, and a night's mark (`NightMark`), so a week reads alike on every device.
+// Apart from NyxTheme.swift (the app's views and its sky), so the widgets and complications
+// compile this alone.
 
 struct NightVisionFilter: ViewModifier {
     let enabled:Bool
@@ -67,4 +68,122 @@ nonisolated enum ColorVision: String, Sendable, CaseIterable {
         let x=luminance(a), y=luminance(b)
         return (max(x,y)+0.05)/(min(x,y)+0.05)
     }
+}
+
+// MARK: Colour independence
+
+/// The shape vocabulary that carries meaning colour also carries, so nothing depends on amber alone.
+/// Used everywhere a night is a mark: the calendar, the river, the week strip, the widgets and the watch.
+nonisolated enum NightMark: Equatable, Sendable {
+    /// Excellent or Pristine nights become four-pointed stars when Differentiate Without Color
+    /// is on; every other night stays a dot. Hollow means no cloud forecast yet and half-filled an
+    /// early look (a forecast eased toward the usual clouds), in both shapes.
+    case dot(filled:Bool)
+    case star(filled:Bool)
+    static func mark(score:Int,hasForecast:Bool,differentiate:Bool)->NightMark {
+        differentiate && score>=75 ? .star(filled:hasForecast) : .dot(filled:hasForecast)
+    }
+    /// A night's mark; an early look is drawn hollow with its lower half filled (`draw`).
+    static func mark(_ night:Night,differentiate:Bool)->NightMark { mark(score:night.score.value,hasForecast:night.basis.fill == .full,differentiate:differentiate) }
+    /// Draws a mark: filled, hollow, or hollow with its lower half filled for an early look.
+    /// `stroke` is the palette's outline weight (`NyxPalette.stroke`: 1.6 under Increase Contrast or
+    /// Bold Text). A mark that is not filled is never smaller than 2.6 pt in radius, grown by the
+    /// half of the heavier outline that falls inward, so its hole stays the size it is at default
+    /// settings and a half fill always reads as half, without a low score looking like a high one.
+    /// `minimumRadius` replaces that floor where marks stand close together (the time river).
+    func draw(in context:inout GraphicsContext,center:CGPoint,radius:Double,fill:NightFill,color:Color,fillOpacity:Double,lineWidth:Double=1.1,stroke:Double=1,minimumRadius:Double?=nil,hollowBackground:Color?=nil) {
+        let radius=NightMark.drawnRadius(radius,fill:fill,lineWidth:lineWidth,stroke:stroke,minimum:minimumRadius)
+        let lineWidth=lineWidth*stroke
+        let shape=path(center:center,radius:radius)
+        switch fill {
+        case .full: context.fill(shape,with:.color(color.opacity(fillOpacity)))
+        case .half, .hollow:
+            if let hollowBackground { context.fill(shape,with:.color(hollowBackground)) }
+            if fill == .half {
+                var lower=context
+                let reach=radius*1.5+2
+                lower.clip(to:Path(CGRect(x:center.x-reach,y:center.y,width:2*reach,height:reach)))
+                lower.fill(shape,with:.color(color.opacity(fillOpacity)))
+            }
+            context.stroke(shape,with:.color(color),lineWidth:lineWidth)
+        }
+    }
+    /// The radius a mark is drawn at: as asked when filled, at least `floor` (or `minimum`) otherwise.
+    static func drawnRadius(_ radius:Double,fill:NightFill,lineWidth:Double=1.1,stroke:Double,minimum:Double?=nil)->Double {
+        fill == .full ? radius : max(radius,minimum ?? unfilledFloor(lineWidth:lineWidth,stroke:stroke))
+    }
+    /// The smallest radius for a mark that is not filled: 2.6 pt, plus the inward half of the extra
+    /// outline `stroke` adds, so the hole inside the ring is the same at 1 and at 1.6. A score-40
+    /// early look stays smaller than a score-85 dot under Bold Text, as it is by default.
+    static func unfilledFloor(lineWidth:Double=1.1,stroke:Double)->Double { 2.6+lineWidth*max(0,stroke-1)/2 }
+    var filled: Bool { switch self { case .dot(let filled),.star(let filled): filled } }
+    /// The mark's outline, `radius` being the dot's own radius; a star reaches a little farther so
+    /// it reads as the same size.
+    func path(center:CGPoint,radius:Double)->Path {
+        switch self {
+        case .dot: return Path(ellipseIn:CGRect(x:center.x-radius,y:center.y-radius,width:2*radius,height:2*radius))
+        case .star:
+            let outer=max(3,radius*1.35), inner=outer*0.42
+            var path=Path()
+            for i in 0..<8 {
+                let angle=Double(i)*Double.pi/4-Double.pi/2, r=i%2==0 ? outer : inner
+                let point=CGPoint(x:center.x+r*cos(angle),y:center.y+r*sin(angle))
+                if i==0 { path.move(to:point) } else { path.addLine(to:point) }
+            }
+            path.closeSubpath()
+            return path
+        }
+    }
+    /// One sentence for a legend, said only when the stars are drawn.
+    static var legend: String { String(localized:"Star-shaped marks are Excellent or Pristine nights.") }
+    /// A week's dot radius, `largest` being the surface's biggest: the week's lowest score at 0.32 of
+    /// it, its highest at all of it, the rest between by score; a week of one score draws every dot
+    /// at 0.66. Across the week's own range, so a week of 40s to 60s still shows its peak where sizes
+    /// on the whole 0…100 scale were near identical. The app's 1.6 to 5 pt, scaled to each surface.
+    static func radius(score:Int,low:Int,high:Int,largest:Double=5)->Double {
+        let unit=high>low ? 1.6+3.4*Double(min(high,max(low,score))-low)/Double(high-low) : 3.3
+        return unit*(largest/5)
+    }
+}
+/// A mark's outline as a shape filling its frame (the dot's radius is half the frame), or only the
+/// part below its centre: an early look's fill, reaching past a star's points as `draw` clips it.
+nonisolated struct NightMarkShape: Shape {
+    let mark: NightMark
+    var lowerHalf = false
+    func path(in rect: CGRect) -> Path {
+        let center=CGPoint(x:rect.midX,y:rect.midY), radius=min(rect.width,rect.height)/2
+        let shape=mark.path(center:center,radius:radius)
+        guard lowerHalf else { return shape }
+        let reach=radius*1.5+2
+        return shape.intersection(Path(CGRect(x:center.x-reach,y:center.y,width:2*reach,height:reach)))
+    }
+}
+/// A night's mark in SwiftUI shapes, for the widgets and the watch: filled with a forecast, hollow
+/// without one, and hollow with its lower half filled for an early look, as `NightMark.draw` draws it
+/// in the app; a star where `mark` is one (Differentiate Without Color).
+struct NightDot: View {
+    let fill: NightFill
+    let color: Color
+    var fillOpacity = 0.6
+    var lineWidth = 1.0
+    var mark: NightMark = .dot(filled: true)
+    var body: some View {
+        let shape=NightMarkShape(mark:mark)
+        switch fill {
+        case .full: shape.fill(color.opacity(fillOpacity))
+        case .hollow: shape.stroke(color, lineWidth: lineWidth)
+        case .half:
+            ZStack {
+                NightMarkShape(mark:mark,lowerHalf:true).fill(color.opacity(fillOpacity))
+                shape.stroke(color, lineWidth: lineWidth)
+            }
+        }
+    }
+}
+#Preview("Night dots") {
+    VStack(spacing: 16) {
+        ForEach([false, true], id: \.self) { star in
+            HStack(spacing: 16) { ForEach([NightFill.full, .half, .hollow], id: \.self) { NightDot(fill: $0, color: .orange, mark: star ? .star(filled: true) : .dot(filled: true)).frame(width: 14, height: 14) } }
+        }
+    }.padding().background(.black)
 }

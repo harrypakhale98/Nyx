@@ -37,6 +37,8 @@ struct VisionPalette: Equatable {
         highContrast || nightVision ? AnyShapeStyle(ink.opacity(highContrast ? 0.95 : 0.9)) : AnyShapeStyle(.secondary)
     }
     var line: Color { ink.opacity(highContrast ? 0.6 : 0.2) }
+    /// A switch that is on: the iPhone's lifted violet, so amber keeps to the score and light.
+    var controlTint: Color { base.controlTint }
     /// Behind the window's content in night vision, where grey glass would read as a bright panel:
     /// the iPhone's night panel.
     var nightPanel: Color { NyxPalette(nightVision: true, highContrast: highContrast).panel }
@@ -77,6 +79,20 @@ struct VisionEyebrow: View {
         Text(text).font(.footnote.weight(.semibold)).kerning(spaced ? 1.6 : 0)
             .textCase(spaced ? .uppercase : nil).foregroundStyle(palette.muted)
             .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// A closure: the warning glyph in its red, pinned to the first line with a tight gap, and the words
+/// in ink, as on the iPhone (amber is the score's). A plain `Label` in a list row gets a centred icon column.
+struct VisionCaution: View {
+    @Environment(\.visionPalette) private var palette
+    let text: Text
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Image(systemName: "exclamationmark.triangle").foregroundStyle(palette.nightVision ? palette.ink : NyxPalette.cautionColor).accessibilityHidden(true)
+            text.foregroundStyle(palette.ink).fixedSize(horizontal: false, vertical: true)
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 

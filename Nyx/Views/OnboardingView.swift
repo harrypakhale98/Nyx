@@ -5,7 +5,11 @@ struct OnboardingView:View {
     /// Landscape on iPhone (and iPhone Duo's outer display turned): the art beside the words, so the
     /// words are never pushed under the page's controls.
     @Environment(\.verticalSizeClass) private var verticalSize
-    private var beside:Bool { verticalSize == .compact && !typeSize.isAccessibilitySize }
+    @Environment(\.horizontalSizeClass) private var horizontalSize
+    /// Also in a wide, short window of regular height (iPhone Duo's inner display, 878 × 669), where
+    /// stacked art pushed the message under the fade.
+    private var beside:Bool { (verticalSize == .compact || (size.width>size.height && size.height<720)) && !typeSize.isAccessibilitySize }
+    @State private var size=CGSize.zero
     /// Compact height at any text size: Skip joins the dots and Continue in one row at the bottom and
     /// the margins tighten, so the page keeps most of the height.
     private var compactHeight:Bool { verticalSize == .compact }
@@ -60,6 +64,7 @@ struct OnboardingView:View {
                 VStack(spacing:20) { dots;proceed }.padding(.bottom,28)
             }
         }.background(NightBackground(score:page==1 ? 94 : nil)).foregroundStyle(palette.ink)
+        .onGeometryChange(for:CGSize.self) { $0.size } action:{ size=$0 }
     }
     private var skip:some View { Button("Skip") { finish() }.frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }
     private var dots:some View {
@@ -82,13 +87,15 @@ struct OnboardingView:View {
         Button(page==2 ? "Show me tonight" : "Continue") { if page==2 { finish() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring) { page+=1 } } }
             .secondaryAction().controlSize(.large)
     }
-    private let moonSize:CGFloat=170
+    /// A large window (an iPad, either way up) draws the art at the size its other pages give the dial, not a phone's.
+    private var roomy:Bool { horizontalSize == .regular && verticalSize == .regular && min(size.width,size.height)>=700 }
+    private var moonSize:CGFloat { roomy ? 260 : 170 }
     /// At accessibility sizes the decorative Moon is left out, so the headline and the first lines
     /// of the message sit above the page dots rather than behind the fade.
     @ViewBuilder private func art(_ index:Int)->some View {
         switch index {
         case 0: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:3).frame(width:beside ? 130 : moonSize,height:beside ? 130 : moonSize).padding(.vertical,beside ? 8 : 24) }
-        case 1: ScoreAnatomy(active:page==1)
+        case 1: ScoreAnatomy(active:page==1,roomy:roomy)
         // The last page ends bright: a waxing gibbous Moon, which turns red with the switch below it.
         default: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:11).frame(width:beside ? 130 : moonSize,height:beside ? 130 : moonSize).padding(.vertical,beside ? 8 : 24) }
         }

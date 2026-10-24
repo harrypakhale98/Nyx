@@ -186,7 +186,8 @@ struct GuideView:View {
             TextField(typeSize.isAccessibilitySize ? "Ask Nyx" : mode.isPlanning ? "Ask about parks and nights" : "Ask about this essay",text:$question,axis:.vertical)
                 .lineLimit(1...4).focused($typing).submitLabel(.send)
                 .onSubmit { ask(question) }
-                .padding(.vertical,8)
+                // A 44 pt row on both releases (iOS 26's padded field stood 7 pt taller), with a small inset once it wraps.
+                .padding(.vertical,4).frame(minHeight:44)
             Button { ask(question) } label:{ Image(systemName:"arrow.up.circle.fill").font(.title).foregroundStyle(palette.ink) }
                 .buttonStyle(.plain).frame(minWidth:44,minHeight:44).padding(.vertical,typeSize.isAccessibilitySize ? 4 : 0)
                 .disabled(question.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty || guide.loading || !hasRecords)

@@ -304,12 +304,12 @@ struct TimeRiver: View {
     }
     /// At accessibility sizes the words alone, wrapping: a glyph would take a column of its own. A
     /// step that cannot be taken (before tonight, past the last night) is dimmed, so it reads as such
-    /// on glass too.
+    /// on glass too: to 0.6, which with the system's own dimming keeps 3:1 on the glass itself.
     @ViewBuilder private func stepLabel(_ title:LocalizedStringKey,systemImage:String,disabled:Bool)->some View {
         Group {
             if typeSize.isAccessibilitySize { Text(title).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
             else { Label(title,systemImage:systemImage) }
-        }.frame(maxWidth:.infinity,minHeight:44).opacity(disabled ? 0.45 : 1)
+        }.frame(maxWidth:.infinity,minHeight:44).opacity(disabled ? 0.6 : 1)
     }
     /// The river's default action: the chosen night opens, or is spoken.
     private func activate() {

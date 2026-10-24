@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Your privacy on Vision Pro: what leaves the headset, the iPhone's four optional services (cloud
-/// forecasts with Haleakalā's summit cloud layers, smoke and haze, park alerts, the aurora forecast), each with its
-/// switch, and that nothing else does. Each switch is the preference the transport checks before
+/// Your privacy on Vision Pro: what leaves the headset, the iPhone's four optional services in its
+/// order (cloud forecasts with Haleakalā's summit cloud layers, smoke and haze, the aurora forecast,
+/// park alerts), each with its switch, and that nothing else does. Each switch is the preference the transport checks before
 /// any connection (`SafeHTTP`), so off means no request at all.
 struct YourPrivacyView: View {
     @Environment(VisionModel.self) private var model
@@ -28,7 +28,7 @@ struct YourPrivacyView: View {
                     }
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityElement(children: .combine)
-                    Toggle("Cloud forecasts (Open-Meteo)", isOn: $model.forecastsOn)
+                    Toggle("Cloud forecasts", isOn: $model.forecastsOn)
                         .accessibilityHint(Text("Shows each night's forecast clouds in the score and the sky"))
                     Text("Clouds only, from api.open-meteo.com: the forecast for all the parks at most every six hours while Nyx is open, and the cloud layers above Haleakalā's summit at most every twelve hours. The service receives network information such as your IP address.")
                         .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
@@ -38,15 +38,15 @@ struct YourPrivacyView: View {
                     Text("Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all \(model.parks.count) parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.")
                         .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                     Text(smokeStatus).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                    Toggle("Aurora forecast", isOn: $model.auroraOn)
+                        .accessibilityHint(Text("Shows when aurora may reach a park, in What's up"))
+                    Text("Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours. The request names no place and nothing about you. The service receives network information such as your IP address.")
+                        .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                     Toggle("Park alerts", isOn: $model.alertsOn)
                         .accessibilityHint(Text("Shows park closures beside every score"))
                     Text("Alerts for all \(model.parks.count) U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks interest you. Your coordinates are never sent. The service receives network information such as your IP address.")
                         .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                     Text(alertsStatus).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
-                    Toggle("Aurora forecast", isOn: $model.auroraOn)
-                        .accessibilityHint(Text("Shows when aurora may reach a park, in What's up"))
-                    Text("Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours. The request names no place and nothing about you. The service receives network information such as your IP address.")
-                        .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                 } header: {
                     Text("Optional data updates")
                 }
@@ -55,6 +55,8 @@ struct YourPrivacyView: View {
                         .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                 }
             }
+            // Switches that are on in the iPhone's violet, not the system's green.
+            .tint(palette.controlTint)
             .navigationTitle(Text("Your privacy"))
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }

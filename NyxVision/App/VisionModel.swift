@@ -176,7 +176,7 @@ nonisolated struct SkyMoment: Sendable {
     var aurora: AuroraOutlook? { didSet { if settled, aurora != oldValue { refresh(resetTime: false) } } }
     /// The Park Service refused the last request, or is being left alone after one.
     var alertsBusy = false
-    /// "Cloud forecasts (Open-Meteo)" in Your privacy: on unless turned off. The transport reads
+    /// "Cloud forecasts" in Your privacy: on unless turned off. The transport reads
     /// the same preference before any request (`SafeHTTP`), so off means no request at all.
     var forecastsOn = CloudForecastSwitch.isOn() {
         didSet {

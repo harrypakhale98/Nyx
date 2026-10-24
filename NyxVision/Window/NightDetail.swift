@@ -59,12 +59,15 @@ struct NightDetail: View {
     private func scoreBlock(_ plan: NightPlan) -> some View {
         let inputs = model.inputs, park = plan.park
         return VStack(alignment: .leading, spacing: 10) {
-            VisionEyebrow(text: "\(park.region.replacingOccurrences(of: ",", with: ", ")) · \(model.nightOffset == 0 ? String(localized: "Tonight") : park.dayLabel(plan.sky.evening))")
-            // The closure is the one line that must never be lost: beside the score, the warning in its
-            // red and the words in ink, as on the iPhone (amber is the score's).
+            // The iPhone's eyebrow (states and Dark Sky status: data, not a slogan), and the night's date under it.
+            VStack(alignment: .leading, spacing: 4) {
+                let states = park.region.replacingOccurrences(of: ",", with: " · ")
+                VisionEyebrow(text: park.darkSkyDesignated ? "\(states) · \(String(localized: "International Dark Sky Park"))" : "\(states)")
+                Text(park.dayLabel(plan.sky.evening)).font(.subheadline).foregroundStyle(palette.muted)
+            }
+            // The closure is the one line that must never be lost: beside the score.
             if let closure = inputs.closure(park) {
-                Label { Text(closure).foregroundStyle(palette.ink) } icon: { Image(systemName: "exclamationmark.triangle").foregroundStyle(palette.nightVision ? palette.ink : NyxPalette.cautionColor) }
-                    .font(.headline).fixedSize(horizontal: false, vertical: true)
+                VisionCaution(text: Text(closure)).font(.headline)
                     .accessibilityLabel(Text(ClosureLine.spoken(closure)))
             }
             Text(plan.score.value, format: .number)
@@ -74,6 +77,11 @@ struct NightDetail: View {
                 .accessibilityValue(Text("\(plan.score.value) out of 100, \(plan.night.bandWithBasis)"))
             // The band alone: the caption below always opens with the basis ("Early look: …").
             Text(plan.score.band.label).bandWord(.title, ink: palette.ink)
+            // The scale, as under the iPhone's dial; left out at accessibility sizes, where it grew
+            // larger than the band (the score's spoken value says "out of 100").
+            if !typeSize.isAccessibilitySize {
+                Text("Darkness / 100").font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true)
+            }
             // Haze or smoke thick enough to wash out the Milky Way, in ink beside the score, by
             // the iPhone's rule and words (`Night.smokeCaveat`), whether or not it holds the score down.
             if let smoke = plan.night.smokeCaveat {
@@ -164,10 +172,10 @@ struct NightDetail: View {
     @ViewBuilder private func factCells(_ darkness: String, _ hours: String?, _ moonLine: String, _ moonNote: String, _ park: Park) -> some View {
         Fact(title: "True darkness", value: darkness, note: hours.map { "\($0) · \(park.timeZoneName)" } ?? park.timeZoneName)
         Fact(title: "Moon", value: moonLine, note: moonNote)
-        // The iPhone's words (`ScoreBreakdownView`): the class on its scale, called an estimate, and what it means.
-        let glow = String(localized: "Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement.")
-        Fact(title: "Sky glow", value: String(localized: "Bortle class \(park.bortleEstimate) of 9, estimated."),
-             note: park.darkSkyDesignated ? Sentences.join([glow, String(localized: "An International Dark Sky Park.")]) : glow)
+        // The iPhone's words: the class on its scale (its sky glow page), and the note that calls it an
+        // estimate (`ScoreBreakdownView`). The designation is the eyebrow's.
+        Fact(title: "Sky glow", value: String(localized: "Class \(park.bortleEstimate) of 9"),
+             note: String(localized: "Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))
     }
 
     private func whatsUp(_ plan: NightPlan) -> some View {

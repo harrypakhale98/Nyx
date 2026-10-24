@@ -179,6 +179,7 @@ struct TonightWidgetView:View {
     @Environment(\.displayScale) private var displayScale
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiate
     /// The eyebrow's smaller step: about four fifths of caption 2, following Dynamic Type.
     @ScaledMetric(relativeTo:.caption2) private var eyebrowSmall=8.8
     var previewFamily:WidgetFamily?=nil
@@ -488,10 +489,12 @@ struct TonightWidgetView:View {
         renderer.scale=displayScale
         return renderer.uiImage
     }
-    /// Seven nights as small skies: the dot grows with the score, the best night gets a ring,
-    /// nights without a cloud forecast are hollow.
+    /// Seven nights as small skies, as the app's week strip draws them: the dot grows with the score
+    /// across the week's own range, the best night gets a ring, early looks are half-filled and
+    /// nights without a cloud forecast hollow.
     private func weekStrip(_ week:[Night])->some View {
         let best=NightPlanner.best(week)?.id
+        let scores=week.map(\.score.value), low=scores.min() ?? 0, high=scores.max() ?? 0
         return VStack(alignment:.leading,spacing:6) {
             HStack(spacing:0) {
                 // With night buttons, they lead the row and the week's columns say the rest.
@@ -506,8 +509,9 @@ struct TonightWidgetView:View {
                         Text(night.park.weekdayInitial(night.id)).font(.caption2.weight(night.id==best ? .bold : .regular)).foregroundStyle(night.id==best ? ink : muted)
                         ZStack {
                             if night.id==best { Circle().stroke(accent.opacity(0.8),lineWidth:0.8).frame(width:22,height:22) }
-                            let d=4+12*Double(night.score.value)/100
-                            NightDot(fill:night.basis.fill,color:accent,fillOpacity:0.45+Double(night.score.value)/200,lineWidth:1).frame(width:d,height:d).widgetAccentable()
+                            // 8 pt at most, so the 11 pt ring stays just outside the largest dot, as in the app.
+                            let d=2*NightMark.drawnRadius(NightMark.radius(score:night.score.value,low:low,high:high,largest:8),fill:night.basis.fill,lineWidth:1,stroke:1)
+                            NightDot(fill:night.basis.fill,color:accent,fillOpacity:0.45+Double(night.score.value)/200,lineWidth:1,mark:NightMark.mark(night,differentiate:differentiate)).frame(width:d,height:d).widgetAccentable()
                         }.frame(height:24)
                         Text("\(night.score.value)").font(.caption2.monospacedDigit()).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
                     }.frame(maxWidth:.infinity)
@@ -693,7 +697,7 @@ struct TonightWidgetView:View {
                 .foregroundStyle(tonight ? ink : muted)
             ZStack {
                 if best { Circle().stroke(accent.opacity(0.85),lineWidth:0.9).frame(width:17*scale,height:17*scale) }
-                NightDot(fill:night.basis.fill,color:accent.opacity(night.basis.fill == .full ? 1 : 0.85),fillOpacity:0.45+Double(night.score.value)/200,lineWidth:0.9).frame(width:d,height:d).widgetAccentable()
+                NightDot(fill:night.basis.fill,color:accent.opacity(night.basis.fill == .full ? 1 : 0.85),fillOpacity:0.45+Double(night.score.value)/200,lineWidth:0.9,mark:NightMark.mark(night,differentiate:differentiate)).frame(width:d,height:d).widgetAccentable()
                 // Beside the dot, never on it: the dot's size is the score and must stay readable.
                 if let event { SkyGlyph(event == .eclipse ? .eclipse : .meteors,color:ink).frame(width:12*scale,height:12*scale).offset(x:13*scale,y:-3*scale) }
                 // The best night's ring fits here; the cell stays 28 pt and spills into the row gap, so the month keeps its height.
@@ -896,27 +900,4 @@ nonisolated enum WeekBest {
         let day=best.id.formatted(Date.FormatStyle(timeZone:best.park.timeZone).weekday(.abbreviated))
         return String(localized:"Best this week: \(day) · \(best.score.value)")
     }
-}
-
-/// A night's dot in SwiftUI shapes, for the widgets: filled with a forecast, hollow without one,
-/// and hollow with its lower half filled for an early look (the same marks as the app's calendar).
-struct NightDot: View {
-    let fill: NightFill
-    let color: Color
-    var fillOpacity = 0.6
-    var lineWidth = 1.0
-    var body: some View {
-        switch fill {
-        case .full: Circle().fill(color.opacity(fillOpacity))
-        case .hollow: Circle().stroke(color, lineWidth: lineWidth)
-        case .half:
-            ZStack {
-                Circle().fill(color.opacity(fillOpacity)).mask { VStack(spacing: 0) { Color.clear; Rectangle() } }
-                Circle().stroke(color, lineWidth: lineWidth)
-            }
-        }
-    }
-}
-#Preview("Night dots") {
-    HStack(spacing: 16) { ForEach([NightFill.full, .half, .hollow], id: \.self) { NightDot(fill: $0, color: .orange).frame(width: 14, height: 14) } }.padding().background(.black)
 }

@@ -13,6 +13,8 @@ struct ScoreAnatomy:View {
     /// short of the size that would move the band word inside the dial.
     @ScaledMetric(relativeTo:.caption2) private var height=188.0
     let active:Bool
+    /// A large window: the dial at the park page's 300 pt, its band word inside.
+    var roomy=false
     @State private var filled=0
     /// The breakdown's own words (`ScoreReadout`), so the recipe and every night's score name the same four parts.
     private let parts:[(LocalizedStringKey,Int)]=[("Moonlight",40),("Clouds",25),("Sky glow",20),("True darkness",15)]
@@ -20,7 +22,7 @@ struct ScoreAnatomy:View {
     private func shade(_ i:Int)->Double { [1,0.75,0.55,0.4][i] }
     var body:some View {
         VStack(spacing:12) {
-            CelestialGauge(score:94,haptics:false,night:example).id(active).frame(height:typeSize.isAccessibilitySize ? nil : min(height,CelestialGauge.labelsInsideFrom-1)) // fresh, silent count-up each time the page arrives; the real answer owns the pulses
+            CelestialGauge(score:94,haptics:false,night:example).id(active).frame(height:typeSize.isAccessibilitySize ? nil : roomy ? 300 : min(height,CelestialGauge.labelsInsideFrom-1)) // fresh, silent count-up each time the page arrives; the real answer owns the pulses
             VStack(alignment:.leading,spacing:8) {
                 Text("Share of the score").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
                 GeometryReader { proxy in

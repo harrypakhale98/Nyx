@@ -321,7 +321,7 @@ import UIKit
         if coreShown {
             coreTarget.position = Self.point(moment.core.altitude, moment.core.azimuth, facing, Self.bodyRadius)
             let face = label(coreLabel, SkyLabel(title: coreTitle, detail: nil, style: .whisper, palette: palette, typeSize: typeSize),
-                             key: "core\(palette.nightVision)\(coreWashed)", altitude: moment.core.altitude-2.4, azimuth: moment.core.azimuth, facing: facing)
+                             key: "core\(palette.nightVision)\(coreWashed)", altitude: moment.core.altitude-1.55, azimuth: moment.core.azimuth, facing: facing, hangs: true)
             if let face {
                 // The visible words are what the eye lands on: they light up under a look and answer a tap.
                 if face.name != "body:core" {
@@ -534,8 +534,9 @@ import UIKit
             guard let place = horizontal(row: star.row, moment: moment, facing: facing), namedStars[star.id]?.isEnabled == true else { card.isEnabled = false; return }
             card.isEnabled = true
             let detail = "\(String(localized: "\(Int(place.altitude.rounded()))° up in the \(Compass.name(place.azimuth))")) · \(star.constellation) · \(SkyLore.brightness(star.magnitude))"
+            // Hung by its top edge, so a card set in larger text grows away from its star.
             label(card, SkyLabel(title: star.name, detail: detail, style: .card, palette: palette, typeSize: typeSize), key: "card\(star.id)\(detail)\(palette.nightVision)",
-                  altitude: place.altitude-(typeSize.isAccessibilitySize ? 3.4 : 2.4), azimuth: place.azimuth, facing: facing, throttle: moving)
+                  altitude: place.altitude-0.65, azimuth: place.azimuth, facing: facing, throttle: moving, hangs: true)
             card.components.set(Self.access(star.name, detail, activatable: false))
             return
         }
@@ -547,7 +548,7 @@ import UIKit
         if body.kind == .moon { detail += " · " + String(localized: "\(Int((moment.moonIllumination*100).rounded()))% lit") }
         if body.kind == .core { detail += " · " + (coreWashed ? String(localized: "washed out by moonlight") : String(localized: "the bright center of our galaxy")) }
         label(card, SkyLabel(title: body.name, detail: detail, style: .card, palette: palette, typeSize: typeSize), key: "card\(body.id)\(detail)\(palette.nightVision)",
-              altitude: body.altitude-(body.kind == .moon ? 3.4 : 2.8), azimuth: body.azimuth, facing: facing, throttle: moving)
+              altitude: body.altitude-(body.kind == .moon ? 1.65 : 1.05), azimuth: body.azimuth, facing: facing, throttle: moving, hangs: true)
         card.components.set(Self.access(body.name, detail, activatable: false))
     }
 
@@ -606,18 +607,19 @@ import UIKit
         return simd_quatf(simd_float3x3(columns: (x, up, z)))
     }
     /// A SwiftUI label in the sky, scaled with distance so it reads at the size it would at one metre.
+    /// `hangs` puts its top edge, not its centre, at `altitude`.
     @discardableResult
     private func label(_ entity: Entity, _ view: SkyLabel, key: String, altitude: Double, azimuth: Double, facing: Double, radius: Float = SkyScene.labelRadius,
-                       throttle: Bool = false) -> ModelEntity? {
+                       throttle: Bool = false, hangs: Bool = false) -> ModelEntity? {
         let position = Self.point(altitude, azimuth, facing, radius)
-        return label(entity, view, key: key, position: position, scale: radius, throttle: throttle)
+        return label(entity, view, key: key, position: position, scale: radius, throttle: throttle, hangs: hangs)
     }
     /// Labels are SwiftUI views rendered once into a texture on a quad (re-rendered only when their
     /// words or the person's text size change): view attachments far out in an immersive sky
     /// appeared late or not at all. Returns the quad that shows the words. `throttle` keeps a label
     /// whose words change with the clock (a name card's "32° up") to a few renders a second.
     @discardableResult
-    private func label(_ entity: Entity, _ view: SkyLabel, key: String, position: SIMD3<Float>, scale: Float, throttle: Bool = false) -> ModelEntity? {
+    private func label(_ entity: Entity, _ view: SkyLabel, key: String, position: SIMD3<Float>, scale: Float, throttle: Bool = false, hangs: Bool = false) -> ModelEntity? {
         entity.position = position
         entity.orientation = Self.facingViewer(position)
         entity.scale = [scale, scale, scale]
@@ -643,6 +645,8 @@ import UIKit
         // About 0.9 mm per point at one metre, the size system text has at that distance.
         let metresPerPoint: Float = 0.00088
         face.scale = [Float(image.width)/3*metresPerPoint, Float(image.height)/3*metresPerPoint, 1]
+        // Set with the texture it matches, so a throttled card never sits off its own words.
+        face.position.y = hangs ? -face.scale.y/2 : 0
         return face
     }
 

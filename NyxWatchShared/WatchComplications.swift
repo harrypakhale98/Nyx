@@ -275,7 +275,8 @@ struct WatchComplicationView: View {
             // A closure takes the Moon's place, in the warning's red: it stands beside the score on every surface.
             if entry.closure != nil { Image(systemName: WristClosure.symbol).foregroundStyle(caution) } else { MoonSymbol(night: night).foregroundStyle(muted) }
         } currentValueLabel: {
-            Text(night.score.value, format: .number).scoreNumeral(.title3, accent: accent).widgetAccentable()
+            // Two digits inside a fixed ring: shrink rather than spill over the arc, as on the iPhone's Lock Screen.
+            Text(night.score.value, format: .number).scoreNumeral(.title3, accent: accent).minimumScaleFactor(0.6).widgetAccentable()
                 .contentTransition(reduceMotion ? .opacity : .numericText(value: Double(night.score.value)))
         }
         .gaugeStyle(.accessoryCircular).tint(accent).foregroundStyle(ink).widgetAccentable()

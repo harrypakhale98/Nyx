@@ -29,7 +29,7 @@ struct SkyLabel: View {
             }
             .multilineTextAlignment(.center)
             .foregroundStyle(palette.skyInk).padding(.horizontal, 18).padding(.vertical, 10)
-            .background(palette.nightVision ? AnyShapeStyle(palette.nightPanel) : AnyShapeStyle(.black.opacity(palette.solid || palette.highContrast ? 0.88 : 0.55)), in: .capsule)
+            .background(palette.nightVision ? AnyShapeStyle(palette.nightPanel) : AnyShapeStyle(.black.opacity(palette.solid || palette.highContrast ? 0.88 : 0.55)), in: cardShape)
         case .plaque:
             VStack(spacing: 8) {
                 Text(title).font(font(28, .title1, weight: .medium)).foregroundStyle(palette.skyInk)
@@ -41,6 +41,9 @@ struct SkyLabel: View {
             .padding(20)
         }
     }
+    /// A rounded rectangle at accessibility sizes: a capsule's radius grows with the card's height
+    /// past its side padding, until the rim meets the ends of the detail line.
+    private var cardShape: AnyShape { typeSize.isAccessibilitySize ? AnyShape(RoundedRectangle(cornerRadius: 22, style: .continuous)) : AnyShape(Capsule()) }
     private func font(_ size: CGFloat, _ style: UIFont.TextStyle, weight: Font.Weight, serif: Bool = true) -> Font {
         // A step heavier for Increase Contrast, and another for Bold Text, which this off-screen render never sees.
         let contrasted = palette.highContrast ? weight.bolder : weight

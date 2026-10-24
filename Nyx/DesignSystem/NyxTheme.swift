@@ -183,6 +183,8 @@ private struct PresentationStyle:ViewModifier {
     func body(content:Content)->some View {
         content.foregroundStyle(palette.ink).tint(palette.ink)
             .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)).preferredColorScheme(.dark)
+            // Sheets fade under their bars as the tabs do (`RootView`), on iOS 26 and 27 alike.
+            .scrollEdgeEffectStyle(.soft,for:.all)
     }
 }
 extension View {
