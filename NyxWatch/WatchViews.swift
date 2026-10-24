@@ -288,8 +288,9 @@ struct TonightFace: View {
     private var scrolling: some View {
         ScrollView {
             VStack(spacing: 6) {
-                // Smaller at the large sizes, so the words under it start on the first screen.
-                let side = typeSize.isAccessibilitySize ? 112 : WatchTonightLayout.scrollingDial
+                // Smaller at the large sizes, so the words under it start on the first screen; never wider
+                // than 60% of the screen, so a 40 mm watch keeps its countdown in view as an Ultra does.
+                let side = typeSize.isAccessibilitySize ? min(112, WKInterfaceDevice.current().screenBounds.width*0.6) : WatchTonightLayout.scrollingDial
                 gauge.frame(width: side, height: side)
                 // At accessibility sizes the band word leaves the dial for this line.
                 if typeSize.isAccessibilitySize { Text(shown.score.band.label).font(.system(.headline, design: .serif)) }
@@ -416,7 +417,8 @@ struct NightGlance: View {
             let eyebrow = Font.caption2.weight(.semibold)
             if let models, typeSize.isAccessibilitySize {
                 // In the scrolling accessibility layout a line costs the dial nothing: the range has its own.
-                day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.ink)
+                // Set solid there, as every eyebrow is at accessibility sizes.
+                day.font(eyebrow).foregroundStyle(palette.ink)
                 Text("Models \(models.lowerBound)–\(models.upperBound)").font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true)
             } else if let models {
                 // The models' range rides on the day's line where it fits whole ("SAT, OCT 10 · MODELS
@@ -438,7 +440,8 @@ struct NightGlance: View {
                 }
                 .lineLimit(1).accessibilityLabel(day)
             } else {
-                day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.ink)
+                let spaced = Lettering.spaced && !typeSize.isAccessibilitySize
+                day.font(eyebrow).textCase(spaced ? .uppercase : nil).tracking(spaced ? 1 : 0).foregroundStyle(palette.ink)
             }
             if let start = night.sky.darkStart, let end = night.sky.darkEnd, night.sky.darkHours > 0 {
                 // Park time: the zone rides on the last time where the park's clock is not the watch's.
@@ -485,7 +488,8 @@ struct NextMoment: View {
                 VStack(spacing: 0) {
                     // At the site the first question is "is it dark yet": answer it before the countdown.
                     if let state = nowLine {
-                        Text(state).font(.caption2.weight(.semibold)).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.ink)
+                        let spaced = Lettering.spaced && !typeSize.isAccessibilitySize
+                        Text(state).font(.caption2.weight(.semibold)).textCase(spaced ? .uppercase : nil).tracking(spaced ? 1 : 0).foregroundStyle(palette.ink)
                             .lineLimit(limit).minimumScaleFactor(0.8)
                     }
                     countdownText(next, now: now).font(.system(.subheadline, design: .serif)).foregroundStyle(palette.ink)
@@ -611,14 +615,16 @@ struct WeekPage: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.isLuminanceReduced) private var dimmed
+    @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiate
     let park: Park
     let nights: [Night]
     let now: Date
     let isHome: Bool
     var body: some View {
         let best = NightPlanner.best(nights)
-        // Nights that tie the best are all ringed; the best by the iPhone's tie-breaks is named, the rest counted.
+        // The best by the iPhone's tie-breaks is ringed and named, as on every surface; nights tying it are counted.
         let tied = nights.filter { $0.score.value == best?.score.value }
+        let scores = nights.map(\.score.value), low = scores.min() ?? 0, high = scores.max() ?? 0
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
                 WatchEyebrow(text: "Next 7 nights")
@@ -627,14 +633,15 @@ struct WeekPage: View {
                     // is written under the night it belongs to, so the legend below is not needed.
                     ForEach(nights) { night in
                         VStack(alignment: .leading, spacing: 0) {
-                            HStack { Text(park.dayLabel(night.id)); Spacer(); Text(night.score.value, format: .number).foregroundStyle(palette.accent) }
+                            // Clear of the scroll indicator at the trailing edge.
+                            HStack { Text(park.dayLabel(night.id)); Spacer(); Text(night.score.value, format: .number).foregroundStyle(palette.accent) }.padding(.trailing, 8)
                             if let basis = night.basisLabel { Text(basis).font(.caption2).foregroundStyle(palette.muted) }
                         }
                         .font(.footnote).fixedSize(horizontal: false, vertical: true)
                         .accessibilityElement(children: .ignore).accessibilityLabel(label(night))
                     }
                 } else {
-                    HStack(spacing: 0) { ForEach(nights) { night in column(night, best: tied.contains { $0.id == night.id }) } }
+                    HStack(spacing: 0) { ForEach(nights) { night in column(night, best: night.id == best?.id, low: low, high: high) } }
                 }
                 if let best {
                     VStack(alignment: .leading, spacing: 0) {
@@ -655,9 +662,7 @@ struct WeekPage: View {
                 Group {
                     // Why Tonight shows this place, where nothing on screen says so: nothing is saved on iPhone.
                     if isHome, let line = WatchSky.caption(store.rule(at: now)) { Text(line) }
-                    if !typeSize.isAccessibilitySize, nights.contains(where: { !$0.score.hasForecast }) {
-                        Text("Hollow nights have no full cloud forecast yet.")
-                    }
+                    if !typeSize.isAccessibilitySize, let legend { Text(legend) }
                     if let line = WatchSky.cloudSource(park, context: store.context, now: now).line(for: park) { Text(line) }
                     if let line = store.context?.dataNote { Text(line) }
                 }
@@ -674,15 +679,23 @@ struct WeekPage: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
-    private func column(_ night: Night, best: Bool) -> some View {
+    /// What the marks mean, in the iPhone's week legend: the fills where a night has no full forecast,
+    /// the stars under Differentiate Without Color.
+    private var legend: String? {
+        let marks = String(localized: "Solid: forecast. Half-filled: an early look. Hollow: usual clouds. The ring marks the week's best night.")
+        if nights.contains(where: { $0.basis.fill != .full }) { return differentiate ? Sentences.join([NightMark.legend, marks]) : marks }
+        return differentiate ? String(localized: "\(NightMark.legend) The ring marks the week's best night.") : nil
+    }
+    private func column(_ night: Night, best: Bool, low: Int, high: Int) -> some View {
         VStack(spacing: 3) {
             Text(park.weekdayInitial(night.id)).font(.caption2.weight(best ? .bold : .regular)).foregroundStyle(best ? palette.ink : palette.muted)
             ZStack {
                 if best { Circle().stroke(palette.accent.opacity(0.8), lineWidth: palette.stroke).frame(width: 20, height: 20) }
-                let d = 4 + 11*Double(night.score.value)/100
+                // The iPhone's sizes across the week's own range, 7.5 pt at most so the 10 pt ring stays clear of it.
+                let d = 2*NightMark.drawnRadius(NightMark.radius(score: night.score.value, low: low, high: high, largest: 7.5), fill: night.basis.fill, lineWidth: 1, stroke: palette.stroke)
                 // Wrist down the fills drop to one quiet level; only the sizes still rank the nights.
-                if night.score.hasForecast { Circle().fill(palette.accent.opacity(dimmed ? 0.5 : 0.5+Double(night.score.value)/200)).frame(width: d, height: d) }
-                else { Circle().stroke(palette.accent, lineWidth: palette.stroke).frame(width: d, height: d) }
+                NightDot(fill: night.basis.fill, color: palette.accent, fillOpacity: dimmed ? 0.5 : 0.5+Double(night.score.value)/200, lineWidth: palette.stroke,
+                         mark: NightMark.mark(night, differentiate: differentiate)).frame(width: d, height: d)
             }.frame(height: 22)
             Text(night.score.value, format: .number).font(.caption2.monospacedDigit()).foregroundStyle(palette.muted).lineLimit(1).minimumScaleFactor(0.7)
         }
@@ -698,9 +711,14 @@ struct WeekPage: View {
 
 struct WatchEyebrow: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
     let text: LocalizedStringKey
     var body: some View {
-        Text(text).font(.caption2.weight(.medium)).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1.2 : 0).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader)
+        // Set solid at accessibility sizes, as on iPhone and Vision Pro.
+        let spaced = Lettering.spaced && !typeSize.isAccessibilitySize
+        // Clear of the page dots the system sets at the trailing edge of a vertical page; a long heading wraps.
+        Text(text).font(.caption2.weight(.medium)).textCase(spaced ? .uppercase : nil).tracking(spaced ? 1.2 : 0).foregroundStyle(palette.muted)
+            .fixedSize(horizontal: false, vertical: true).padding(.trailing, 10).accessibilityAddTraits(.isHeader)
     }
 }
 

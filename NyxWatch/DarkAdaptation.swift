@@ -11,7 +11,12 @@ struct DarkAdaptationView: View {
     @Environment(\.legibilityWeight) private var legibility
     let park: Park
     @State private var showsInfo = WatchDebug.showsInfo
+    /// The first Start's line before the system asks to tap the wrist.
+    @State private var explaining = false
     @State private var permission: UNAuthorizationStatus?
+    /// The page's room between its bars, and the words' height above the ring: the ring takes what is left.
+    @State private var room: CGFloat = 200
+    @State private var words: CGFloat = 0
     /// Always red; under Increase Contrast or by the iPhone's choice the brighter red, as everywhere in Nyx (`NyxPalette.red`).
     private var palette: NyxPalette {
         NyxPalette(nightVision: true, highContrast: contrast == .increased, brighterRed: store.context?.brighterRed ?? false, boldText: legibility == .bold)
@@ -35,6 +40,10 @@ struct DarkAdaptationView: View {
                         Spacer()
                     }
                 }
+                .alert("Nyx will ask to tap your wrist at 25 and 30 minutes.", isPresented: $explaining) {
+                    Button("Continue") { start() }
+                    Button("Cancel", role: .cancel) {}
+                }
                 .sheet(isPresented: $showsInfo) { AdaptationInfo().environment(\.nyx, palette).modifier(WatchDebug.TypeSize()) }
         }
         .foregroundStyle(palette.ink)
@@ -47,6 +56,9 @@ struct DarkAdaptationView: View {
         .onChange(of: store.reminderStatus) { _, status in if let status { permission = status } }
         .onAppear { store.reloadSettings() }
     }
+    /// The ring's side: 112 pt where it fits, else what the room under the words leaves, counting the
+    /// open bottom of the ring (about a fifth of its side, below "minutes") as free to sit over the bar.
+    nonisolated static func ring(room: CGFloat, words: CGFloat) -> CGFloat { min(112, max(80, (room-words-4)/0.82)) }
     private var content: some View {
         // Minutes counted from the moment the clock started, not from the wall clock's minute.
         TimelineView(.periodic(from: store.adaptation?.start ?? .now, by: 60)) { timeline in
@@ -55,18 +67,18 @@ struct DarkAdaptationView: View {
             let night = store.tonight(park, at: now)
             let next = NightMilestone.next(after: now, in: night.sky)
             ScrollView {
-                // Words above the ring: the bottom bar's button then rests in the ring's opening.
+                // Words above the ring, and the ring as large as the room left above the bottom bar's button
+                // (112 pt where it fits): on a 40 mm watch two lines of words pushed a 112 pt ring's "minutes" under it.
                 VStack(spacing: 4) {
-                    if clock == nil, permission == .notDetermined {
-                        // Asked in context, once: the system prompt follows this line the first time.
-                        Text("Nyx will ask to tap your wrist at 25 and 30 minutes.").font(.caption2).foregroundStyle(palette.muted)
-                            .fixedSize(horizontal: false, vertical: true).nonEssential()
-                    } else if let next {
-                        NextInDark(night: night, next: next, now: now)
-                    } else {
-                        Text("Nothing more tonight").font(.footnote).foregroundStyle(palette.muted).nonEssential()
+                    Group {
+                        if let next {
+                            NextInDark(night: night, next: next, now: now)
+                        } else {
+                            Text("Nothing more tonight").font(.footnote).foregroundStyle(palette.muted).nonEssential()
+                        }
                     }
-                    AdaptationRing(clock: clock, now: now).frame(maxWidth: 112)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { words = $0 }
+                    AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: words))
                 }
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
@@ -75,6 +87,8 @@ struct DarkAdaptationView: View {
             }
             // The scroll indicator is system chrome outside the red filter: a white bar at night.
             .scrollIndicators(.never)
+            // The height between the top bar and the bottom bar: the scroll view's frame sits inside both.
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { room = $0 }
             // Without permission for reminders, the taps come from the screen while it is up.
             .sensoryFeedback(.success, trigger: clock?.isAdapted(at: now) ?? false) { old, new in !old && new && !AdaptationReminders.allowed(permission) }
             .modifier(MilestoneTap(park: park, next: next, active: true))
@@ -86,7 +100,9 @@ struct DarkAdaptationView: View {
                 .tint(palette.toolbarTint)
                 .accessibilityHint("Resets the clock and cancels the reminders.")
         } else {
-            Button { start() } label: { Label("Start", systemImage: "play.fill") }
+            // The first time, a line first says why the system will ask (in the page it pushed the ring
+            // under this button on a 40 mm watch); after that Start starts at once.
+            Button { if permission == .notDetermined { explaining = true } else { start() } } label: { Label("Start", systemImage: "play.fill") }
                 .tint(palette.toolbarTint)
                 .handGestureShortcut(.primaryAction)
                 .accessibilityHint("Starts a 30-minute dark-adaptation clock.")
@@ -164,7 +180,9 @@ private struct RingArc: View, Animatable {
     let palette: NyxPalette
     var body: some View {
         Canvas { context, size in
-            let center = CGPoint(x: size.width/2, y: size.height/2), radius = min(size.width, size.height)/2 - 10
+            // Inset and ticks in proportion to the 112 pt ring, so a smaller ring keeps them off the numeral.
+            let k = min(size.width, size.height)/112
+            let center = CGPoint(x: size.width/2, y: size.height/2), radius = min(size.width, size.height)/2 - 10*k
             let start = 140.0, sweep = 260.0
             var track = Path()
             track.addArc(center: center, radius: radius, startAngle: .degrees(start), endAngle: .degrees(start+sweep), clockwise: false)
@@ -172,8 +190,8 @@ private struct RingArc: View, Animatable {
             for tick in 0...6 {
                 let a = (start + Double(tick)*sweep/6) * .pi/180
                 var line = Path()
-                line.move(to: CGPoint(x: center.x+cos(a)*(radius-5), y: center.y+sin(a)*(radius-5)))
-                line.addLine(to: CGPoint(x: center.x+cos(a)*(radius-10), y: center.y+sin(a)*(radius-10)))
+                line.move(to: CGPoint(x: center.x+cos(a)*(radius-5*k), y: center.y+sin(a)*(radius-5*k)))
+                line.addLine(to: CGPoint(x: center.x+cos(a)*(radius-10*k), y: center.y+sin(a)*(radius-10*k)))
                 context.stroke(line, with: .color(Double(tick)/6 <= value ? palette.ink.opacity(0.7) : palette.line), lineWidth: palette.stroke)
             }
             guard value > 0.002 else { return }

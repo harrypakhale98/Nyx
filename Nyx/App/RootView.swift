@@ -90,6 +90,9 @@ struct RootView:View {
                 // A tab bar on iPhone; on iPad a tab bar that opens into a sidebar.
                 .tabViewStyle(.sidebarAdaptable)
                 .tabBarMinimizeBehavior(tabBarMinimize)
+                // Content fades under the bars on every release: iOS 27's automatic edge is hard (a grey band
+                // under the park page's picker, rows at full brightness under the tab bar), iOS 26's soft.
+                .scrollEdgeEffectStyle(.soft,for:.all)
                 // A followed night under way: a strip above the tabs that opens field mode (iOS 26.1).
                 .modifier(NightInProgressAccessory { id in withPlace(id) { FieldPresenter.present(park:$0,model:model,from:commands.topController) } })
                 .tint(commands.sidebar ? palette.selectionTint : palette.accent)

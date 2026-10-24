@@ -108,12 +108,15 @@ struct ParkDetailView: View {
                     // iPhone Duo's inner display: tonight on one side of the fold, the sky and the
                     // place on the other, each column's own padding keeping its words off the crease.
                     let folded=fold.flatMap { f in f.leadingWidth(in:width).map { (leading:$0,gap:f.width) } }
+                    // Half the shared column gap at each inner edge, so the columns stand as far apart as every
+                    // other wide page's; across a fold each keeps its full padding off the crease.
+                    let inner=folded == nil ? NyxMetrics.columnGap/2 : 24
                     HStack(alignment:.top,spacing:folded?.gap ?? 0) {
-                        ScrollView { VStack(spacing:26) { tonightChapter(proxy) }.padding(24) }
+                        ScrollView { VStack(spacing:26) { tonightChapter(proxy) }.padding([.vertical,.leading],24).padding(.trailing,inner) }
                             .contentMargins(.leading,side,for:.scrollContent)
                             .scrollDisabled(scrubbing || holdingArc).frame(width:folded?.leading ?? WideLayout.leadingWidth(width)+side)
                         // The sky arc lives here, so its held finger holds this column still too.
-                        ScrollView { VStack(spacing:26) { skyChapter; placeChapter }.padding(24) }
+                        ScrollView { VStack(spacing:26) { skyChapter; placeChapter }.padding([.vertical,.trailing],24).padding(.leading,inner) }
                             .contentMargins(.trailing,side,for:.scrollContent)
                             .scrollDisabled(scrubbing || holdingArc)
                     }
@@ -285,9 +288,6 @@ struct ParkDetailView: View {
         ToolbarItem(placement:.principal) {
             Text(park.shortName).font(.headline).opacity(titleGone || wide ? 1 : 0).accessibilityHidden(!(titleGone || wide))
         }
-        if #available(iOS 27.0,*) {
-            ToolbarItem(placement:.topBarPinnedTrailing) { saveButton }
-        } else { ToolbarItem(placement:.topBarTrailing) { saveButton } }
         // Nothing to share until the page has its score (`ScoreGate`).
         ToolbarItem(placement:.topBarTrailing) { ShareNightMenu(night:night).disabled(model.cachesPending) }
         // iPad: this park in a window of its own, beside another (not in a park's own window).
@@ -299,6 +299,10 @@ struct ParkDetailView: View {
                 ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:selected).labelStyle(.iconOnly).help("Open in New Window") }
             }
         }
+        // Save ends the row on every release: iOS 27 pins it at the trailing edge, so iOS 26 declares it last.
+        if #available(iOS 27.0,*) {
+            ToolbarItem(placement:.topBarPinnedTrailing) { saveButton }
+        } else { ToolbarItem(placement:.topBarTrailing) { saveButton } }
     }
     private var saveButton:some View {
         Button { guard !model.journalUnavailable else { persistenceError=true; return }; if let item=saved.first(where:{$0.parkID==park.id}) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }; do { try context.save() } catch { context.rollback();persistenceError=true } } label:{ Label(SaveWords.title(saved:isSaved,spot:park.isSavedSpot,place:park.isCatalogPlace),systemImage:isSaved ? "bookmark.fill" : "bookmark").contentTransition(.symbolEffect(.replace)) }

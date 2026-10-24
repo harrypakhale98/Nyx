@@ -69,13 +69,6 @@ struct JournalView: View {
         }.measuringWidth($width).foldSource().background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
             .tabRootToolbar()
             .toolbar {
-                // Export and import are rare: on iOS 27 they live in the system's own overflow menu (the
-                // ellipsis is reserved for it), on iOS 26 in a menu of their own.
-                if #available(iOS 27.0,*) {
-                    ToolbarOverflowMenu { journalFileActions }
-                } else {
-                    ToolbarItem(placement:.topBarTrailing) { Menu { journalFileActions } label:{ Label { Text("Journal options") } icon:{ Image(systemName:"ellipsis").opacity(model.journalUnavailable ? 0.35 : 1) } }.accessibilityLabel("Journal options").disabled(model.journalUnavailable) }
-                }
                 // Nothing is recorded into a journal that could not be opened: it would be lost. Dimmed by hand, since
                 // the app's ink foreground style (`RootView`) holds bar symbols at full strength when disabled.
                 // Recording a night is the Journal's everyday action, so on iPhone Duo's side bar it overflows last.
@@ -83,6 +76,13 @@ struct JournalView: View {
                     ToolbarItem(placement:.topBarTrailing) { recordButton }.visibilityPriority(.high)
                 } else {
                     ToolbarItem(placement:.topBarTrailing) { recordButton }
+                }
+                // Export and import are rare: on iOS 27 they live in the system's own overflow menu (the
+                // ellipsis is reserved for it, always last), on iOS 26 in a menu of their own, also last.
+                if #available(iOS 27.0,*) {
+                    ToolbarOverflowMenu { journalFileActions }
+                } else {
+                    ToolbarItem(placement:.topBarTrailing) { Menu { journalFileActions } label:{ Label { Text("Journal options") } icon:{ Image(systemName:"ellipsis").opacity(model.journalUnavailable ? 0.35 : 1) } }.accessibilityLabel("Journal options").disabled(model.journalUnavailable) }
                 }
             }
             .navigationDestination(item:$opened) { entry in JournalDetailView(entry:entry) }

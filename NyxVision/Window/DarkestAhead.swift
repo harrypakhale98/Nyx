@@ -43,11 +43,11 @@ struct DarkestAhead: View {
                 if let smoke = night.smokeLabel { Text(smoke).font(.subheadline).foregroundStyle(palette.muted) }
                 // The closure's own words stand above the score; each night carries the mark.
                 if inputs.closure(park) != nil {
-                    // The warning in its red and the words in ink, as on the iPhone: amber is the score's.
-                    Label { Text("Closure alert").foregroundStyle(palette.ink) } icon: { Image(systemName: "exclamationmark.triangle").foregroundStyle(palette.nightVision ? palette.ink : NyxPalette.cautionColor) }.font(.subheadline)
+                    VisionCaution(text: Text("Closure alert")).font(.subheadline)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            // One height for the row, as the night's fact cells.
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(18)
             .background(background, in: .rect(cornerRadius: 20))
             .overlay(RoundedRectangle(cornerRadius: 20).stroke(chosen ? palette.ink : palette.line, lineWidth: chosen ? 2 : 0.5))

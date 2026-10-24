@@ -42,11 +42,8 @@ struct WeekStrip: View {
     /// The column pitch for a scaled 16 pt: never below 16, never above 1.8× it.
     static func pitch(_ scaled:Double)->Double { min(max(scaled,basePitch),basePitch*1.8) }
     /// A night's dot radius at the default size: the week's lowest score at 1.6 pt, its highest at
-    /// 5, the rest between by score; a week of one score draws every dot at the middle size.
-    static func radius(score:Int,low:Int,high:Int)->Double {
-        guard high>low else { return 3.3 }
-        return 1.6+3.4*Double(min(high,max(low,score))-low)/Double(high-low)
-    }
+    /// 5, the rest between by score (`NightMark.radius`, the widgets' and the watch's rule too).
+    static func radius(score:Int,low:Int,high:Int)->Double { NightMark.radius(score:score,low:low,high:high) }
     private func dots(best:Night,pitch:Double)->some View {
         let scores=nights.map(\.score.value), low=scores.min() ?? 0, high=scores.max() ?? 0
         return Canvas { context,size in

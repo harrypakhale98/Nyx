@@ -37,7 +37,8 @@ struct CreditsView: View {
                         .font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 6)
                 }
-                .padding(.horizontal, 40).padding(.vertical, 24)
+                // The title's inset, as the privacy sheet's Form keeps.
+                .padding(.horizontal, 24).padding(.vertical, 24)
                 .frame(maxWidth: 640, alignment: .leading)
                 .frame(maxWidth: .infinity)
             }

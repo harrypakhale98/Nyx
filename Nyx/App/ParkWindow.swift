@@ -45,6 +45,8 @@ struct ParkWindowRoot: View {
             }
         }
         .environment(\.nyxTab,0)
+        // Soft under the bars, as in the main window (`RootView`): iOS 27's automatic edge is hard.
+        .scrollEdgeEffectStyle(.soft,for:.all)
         // A spot's page in its own window resolves the spot through the model, which this scene keeps fed.
         .background(SavedSpotsFeed(fed:$spotsFed))
         .environment(commands).focusedSceneValue(commands)

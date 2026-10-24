@@ -65,7 +65,8 @@ struct PlannerWindow: View {
         .sheet(isPresented: $showCredits) { CreditsView().environment(\.visionPalette, palette).modifier(DebugTypeSize()) }
         .sheet(isPresented: $showPrivacy) { YourPrivacyView().environment(model).environment(\.visionPalette, palette).modifier(DebugTypeSize()) }
         .ornament(visibility: model.parks.isEmpty ? .hidden : .visible, attachmentAnchor: .scene(.bottom), contentAlignment: .top) {
-            NightControls().environment(\.visionPalette, palette)
+            // An ornament takes nothing from the window's environment: the debug type size too.
+            NightControls().environment(\.visionPalette, palette).modifier(DebugTypeSize())
         }
         .environment(\.visionPalette, palette)
         .modifier(NightVisionWindow(enabled: model.nightVision, palette: palette))
@@ -236,9 +237,7 @@ struct ParkRow: View {
                 Text(park.shortName).font(.system(.body, design: .serif))
                 Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption).foregroundStyle(palette.muted)
                 if let closure {
-                    // The warning in its red and the words in ink, as on the iPhone: amber is the score's.
-                    Label { Text(closure).foregroundStyle(palette.ink) } icon: { Image(systemName: "exclamationmark.triangle").foregroundStyle(palette.nightVision ? palette.ink : NyxPalette.cautionColor) }
-                        .font(.caption).fixedSize(horizontal: false, vertical: true).padding(.top, 2)
+                    VisionCaution(text: Text(closure)).font(.caption).padding(.top, 2)
                 }
             }
             Spacer(minLength: 8)
