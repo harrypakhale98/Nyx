@@ -32,12 +32,12 @@ struct GoingButton: View {
                 .secondaryAction()
                 .accessibilityLabel(going == nil ? String(localized:"I'm going to \(night.park.shortName) on \(night.park.dayLabel(night.id))")
                                                  : String(localized:"Not going to \(night.park.shortName) on \(night.park.dayLabel(night.id))"))
-                .accessibilityValue(caption(going))
                 .accessibilityInputLabels(going == nil ? [Text("I'm going"),Text("Going")] : [Text("Not going")])
                 .accessibilityAddTraits(going == nil ? .isToggle : [.isToggle,.isSelected])
-                // The button's value says it.
+                // Read in its own right, straight after the button: hidden as the button's value, it was text on
+                // screen that no element covered (the iPad park page's audit, 2026-10-24), outside the capsule's frame.
                 Text(caption(going)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(alignment == .center ? .center : .leading)
-                    .fixedSize(horizontal:false,vertical:true).accessibilityHidden(true)
+                    .fixedSize(horizontal:false,vertical:true)
             }
             .alert("Nyx keeps watch on four nights at a time",isPresented:$full) { Button("OK",role:.cancel) {} } message:{
                 Text("Let one of them go first, on Tonight or on its own page.")
