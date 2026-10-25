@@ -40,7 +40,7 @@ import Testing
 
     // MARK: Park row "More content"
 
-    /// The fullest row (closure, clouds, a week, step-free, no road, state) fits the modifier's slots,
+    /// The fullest row (closure, clouds, the Little Dipper, a week, step-free, no road, state) fits the modifier's slots,
     /// so nothing a row says is dropped.
     @Test func fullestRowFitsTheCustomContentSlots() throws {
         let isro=try park("isro")
@@ -48,13 +48,13 @@ import Testing
         let days=["2026-10-05","2026-10-06","2026-10-07","2026-10-08","2026-10-09","2026-10-10","2026-10-11"]
         let week=try days.map { try night(isro,$0) }
         let more=ParkRow.moreContent(night:week[0],closure:"Ferry not running",week:week,stepFree:true)
-        #expect(more.map(\.label)==["Closure alert","Clouds","This week","Step-free viewing","Getting there","State"])
+        #expect(more.map(\.label)==["Closure alert","Clouds","Little Dipper","This week","Step-free viewing","Getting there","State"])
         #expect(more.count==ParkRowContent.slots)
-        #expect(more.map(\.high)==[true,false,false,false,false,false])
-        // The quietest row: clouds and state only.
+        #expect(more.map(\.high)==[true,false,false,false,false,false,false])
+        // The quietest row: clouds, the Little Dipper and state only.
         let zion=try park("zion")
         let plain=ParkRow.moreContent(night:try night(zion,"2026-10-05"),closure:nil,week:[],stepFree:false)
-        #expect(plain.map(\.label)==["Clouds","State"])
+        #expect(plain.map(\.label)==["Clouds","Little Dipper","State"])
         #expect(plain.count<=ParkRowContent.slots)
     }
 }

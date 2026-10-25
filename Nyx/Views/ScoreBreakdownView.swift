@@ -4,6 +4,7 @@ struct ScoreBreakdownView: View {
     @Environment(\.nyx) private var palette
     @Environment(PlanModel.self) private var model
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var typeSize
     @MotionReduced private var reduceMotion: Bool
     let night:Night
     var isTonight=true
@@ -15,6 +16,8 @@ struct ScoreBreakdownView: View {
     @ScaledMetric(relativeTo:.largeTitle) private var numeralSize=72.0
     /// The context lines' symbol column, as wide as the widest symbol at the reader's text size.
     @ScaledMetric(relativeTo:.callout) private var contextIcon=24.0
+    /// The Little Dipper beside its sentence in Sky glow.
+    @ScaledMetric(relativeTo:.callout) private var dipperWidth=56.0
     var body: some View {
         if inline { content }
         else {
@@ -51,7 +54,7 @@ struct ScoreBreakdownView: View {
             row("Moonlight",points:Double(shown.moon),of:40,fact:moonFact,detail:String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one."))
             row("Clouds",points:shown.cloud.map(Double.init),of:25,fact:Self.cloudFact(night),
                 context:cloudContext,detail:Self.cloudDetail(usualClouds:night.usualCloud != nil,context:!cloudContext.isEmpty))
-            row("Sky glow",points:Double(shown.glow),of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9, estimated."),context:lightContext,detail:String(localized:"Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))
+            row("Sky glow",points:Double(shown.glow),of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9, estimated."),context:lightContext,dipper:LittleDipper.reading(night),detail:String(localized:"Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))
             row("True darkness",points:Double(shown.length),of:15,fact:night.sky.darkHours>0 ? String(localized:"\(darkness) of true darkness.") : String(localized:"No true darkness."),detail:String(localized:"True darkness: the Sun more than 18° below the horizon. Ten hours earn full credit."))
             if let caption=night.basisCaption(typical:true) { Text(Sentences.join([caption,String(localized:"The score will change as a forecast arrives.")])).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             // What the score leaves out, said once and quietly: smoke switched off, or no smoke forecast reaching the night.
@@ -161,7 +164,8 @@ struct ScoreBreakdownView: View {
     private var darkness:String { Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed:[.hours,.minutes],width:.wide)) }
     /// `weight` is the component's share of 100; with no cloud figure at all the others are scaled up to fill it.
     /// Each part states the fact it was scored from, then how it is scored.
-    private func row(_ title:LocalizedStringKey,points:Double?,of weight:Double,fact:String,context:[(symbol:String,text:String)]=[],detail:String)->some View {
+    /// `dipper`: the Sky glow part's illustration, what that glow and the night's Moon leave of the Little Dipper.
+    private func row(_ title:LocalizedStringKey,points:Double?,of weight:Double,fact:String,context:[(symbol:String,text:String)]=[],dipper:LittleDipper.Reading?=nil,detail:String)->some View {
         let maximum=night.score.cloudPoints != nil || points==nil ? weight : weight/0.75
         return VStack(alignment:.leading,spacing:9) {
             ViewThatFits(in:.horizontal) {
@@ -185,6 +189,15 @@ struct ScoreBreakdownView: View {
                         Label { Text(line.text).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:line.symbol).foregroundStyle(palette.muted).frame(width:contextIcon).accessibilityHidden(true) }
                     }
                 }.font(.callout).foregroundStyle(palette.ink.opacity(palette.nightVision ? 1 : 0.88)).padding(.top,2)
+            }
+            if let dipper {
+                // The drawing beside its sentence; at accessibility sizes it sits above, so the words keep the width.
+                let glyph=LittleDipperGlyph(reading:dipper).frame(width:min(dipperWidth,112))
+                let sentence=Text(dipper.sentence).font(.callout).foregroundStyle(palette.ink.opacity(palette.nightVision ? 1 : 0.88)).fixedSize(horizontal:false,vertical:true)
+                Group {
+                    if typeSize.isAccessibilitySize { VStack(alignment:.leading,spacing:6) { glyph; sentence } }
+                    else { HStack(alignment:.center,spacing:12) { glyph; sentence } }
+                }.padding(.top,2)
             }
             Text(detail).font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }

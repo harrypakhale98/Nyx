@@ -101,7 +101,7 @@ import WidgetKit
     }
     /// A bundled park, or a place the iPhone sent (a saved spot or a followed world catalogue place).
     func park(_ id: String?) -> Park? { id.flatMap { WatchSky.place($0, in: parks, context: context) } }
-    /// Red or not at `now`: Automatic follows the Sun at the park on Tonight.
+    /// Red or not at `now`: At dusk follows the Sun at the park on Tonight.
     func nightVision(at now: Date) -> Bool { WatchSky.nightVision(palette, context: context, park: featured(at: now), at: now) }
     /// The Control Center control writes the palette from another process: read it again on return.
     func reloadSettings() {

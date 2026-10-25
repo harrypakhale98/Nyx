@@ -92,6 +92,8 @@ struct UnknownClosuresNote: View {
 struct ParkRow: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
+    /// The Little Dipper grows with the caption beside it, to 1.8× at most.
+    @ScaledMetric(relativeTo:.caption2) private var dipperWidth=ParkRow.dipperWidth
     let night: Night
     var closure: String?=nil
     /// Tonight and the six nights after it, for the week strip.
@@ -126,6 +128,7 @@ struct ParkRow: View {
         var items:[ParkRowContent.Item]=[]
         if let closure { items.append(.init(label:String(localized:"Closure alert"),value:closure,high:true)) }
         items.append(.init(label:String(localized:"Clouds"),value:night.basisLabel ?? String(localized:"Cloud forecast included"),high:false))
+        if let dipper=LittleDipper.reading(night) { items.append(.init(label:String(localized:"Little Dipper"),value:dipper.label,high:false)) }
         if let summary=WeekStrip.summary(week) { items.append(.init(label:String(localized:"This week"),value:summary,high:false)) }
         if stepFree { items.append(.init(label:String(localized:"Step-free viewing"),value:String(localized:"Yes"),high:false)) }
         if !night.park.drivable { items.append(.init(label:String(localized:"Getting there"),value:String(localized:"No road access"),high:false)) }
@@ -153,8 +156,20 @@ struct ParkRow: View {
     private var number: some View {
         // The score never wraps, whatever the column width; the name beside it does. A step above the
         // name, not three: the list is sixty-three answers, and none of them should shout.
-        VStack(alignment:typeSize.isAccessibilitySize ? .leading : .trailing,spacing:2) { Text("\(night.score.value)").scoreNumeral(.title2,accent:palette.accent); Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted) }.fixedSize()
+        // Under it, the Little Dipper count in place of the band word, which VoiceOver still says first:
+        // a second reading of the night rather than a restatement of the number. Without a reading
+        // (no true darkness, or too far south) the band word stays; an early look or an estimate on
+        // the usual clouds keeps its word under the stars, since the count does not say it.
+        VStack(alignment:typeSize.isAccessibilitySize ? .leading : .trailing,spacing:2) {
+            Text("\(night.score.value)").scoreNumeral(.title2,accent:palette.accent)
+            if let dipper=LittleDipper.reading(night) {
+                LittleDipperGlyph(reading:dipper).frame(width:min(dipperWidth,ParkRow.dipperWidth*1.8)).padding(.top,1)
+                if night.basis != .forecast { Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted) }
+            } else { Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted) }
+        }.fixedSize()
     }
+    /// The Little Dipper's width at the default text size: a little wider than a two-figure score, about 25 pt high.
+    static let dipperWidth=50.0
 }
 /// A row's "More content" for VoiceOver (`accessibilityCustomContent`), in the items' order. One slot per
 /// possible item, so the row keeps one view type whatever it holds: a slot past the end has no value,
@@ -162,8 +177,9 @@ struct ParkRow: View {
 struct ParkRowContent: ViewModifier {
     struct Item: Equatable { let label: String; let value: String; let high: Bool }
     let items: [Item]
-    /// The most a row says (`ParkRow.moreContent`): closure, clouds, this week, step-free, getting there, state.
-    static let slots=6
+    /// The most a row says (`ParkRow.moreContent`): closure, clouds, the Little Dipper, this week,
+    /// step-free, getting there, state (a place abroad: region and designation, without a week).
+    static let slots=7
     func body(content:Content)->some View {
         content
             .accessibilityCustomContent(key(0),value(0),importance:high(0) ? .high : .default)
@@ -172,6 +188,7 @@ struct ParkRowContent: ViewModifier {
             .accessibilityCustomContent(key(3),value(3),importance:high(3) ? .high : .default)
             .accessibilityCustomContent(key(4),value(4),importance:high(4) ? .high : .default)
             .accessibilityCustomContent(key(5),value(5),importance:high(5) ? .high : .default)
+            .accessibilityCustomContent(key(6),value(6),importance:high(6) ? .high : .default)
     }
     private func key(_ slot:Int)->AccessibilityCustomContentKey {
         AccessibilityCustomContentKey(slot<items.count ? Text(items[slot].label) : Text(verbatim:""),id:"parkRow.\(slot)")

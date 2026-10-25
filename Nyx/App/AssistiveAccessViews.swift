@@ -70,7 +70,7 @@ struct AssistiveHome: View {
             NavigationLink { AssistiveSaved() } label:{ Label("Saved parks",systemImage:"star") }
             // Night vision, shared with the full app, widgets, the Live Activity and the watch. Reads
             // the palette, so what the switch says is what the screen shows.
-            Toggle(isOn:Binding(get:{ palette.nightVision },set:{ nightVision=$0 })) { Label("Red light",systemImage:"flashlight.on.circle") }
+            Toggle(isOn:Binding(get:{ palette.nightVision },set:{ NightVisionMode.turnedByHand(); nightVision=$0 })) { Label("Red light",systemImage:"flashlight.on.circle") }
                 // A track that stays distinct from the white thumb once the screen is red.
                 .tint(palette.controlTint)
         }

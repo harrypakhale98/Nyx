@@ -2,7 +2,7 @@ import SwiftUI
 import WatchKit
 
 /// Red at night: at a dark site the wrist is the screen, and red light keeps the eyes adapted.
-/// Automatic (the default) wears Nyx's standard colours by day and turns red at civil dusk.
+/// At dusk (the default) wears Nyx's standard colours by day and turns red at civil dusk.
 struct WatchRootView: View {
     @Environment(WatchStore.self) private var store
     @Environment(\.colorSchemeContrast) private var contrast
@@ -14,7 +14,7 @@ struct WatchRootView: View {
     /// Tonight or replace what is open.
     @State private var path: [WatchRoute] = []
     var body: some View {
-        // The app's one clock, read once a minute: Automatic turns red at civil dusk with the app
+        // The app's one clock, read once a minute: At dusk turns red at civil dusk with the app
         // open, and every page below reads the same minute (`\.watchNow`).
         TimelineView(.everyMinute) { timeline in
             let now = max(timeline.date, woke).addingTimeInterval(WatchDebug.clockShift)
@@ -743,7 +743,7 @@ struct ParksList: View {
                 Section("US national parks") { ForEach(store.parks) { row($0, now: now, scored: false) } }
                 Section {
                     Picker("Night vision", selection: $store.palette) { ForEach(PaletteChoice.allCases) { Text($0.title).tag($0) } }
-                } footer: { Text("Automatic turns night vision on from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark.") }
+                } footer: { Text("At dusk is red from dusk to dawn at the park on Tonight. Night vision keeps your eyes adapted to the dark.") }
                 Section {
                     NavigationLink(value: WatchRoute.credits) { Label("Credits", systemImage: "text.book.closed") }
                 } footer: { Text("Nyx on Apple Watch makes no network requests. Clouds come from Nyx on your iPhone.") }
@@ -823,7 +823,7 @@ private struct NyxTitle: ViewModifier {
     }
 }
 
-#Preview("Tonight • Automatic by day") {
+#Preview("Tonight • At dusk by day") {
     WatchPreviewHost(nightVision: false) { park, store in TonightFace(night: store.tonight(park, at: .now), week: store.week(park, at: .now), now: .now, context: nil) }
 }
 #Preview("Tonight • red • AX5") {
