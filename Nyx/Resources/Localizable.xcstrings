@@ -2928,6 +2928,41 @@
         }
       }
     },
+    "%@, %lld on %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld am %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld on %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld el %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld le %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%3$@は%2$lld点"
+          }
+        }
+      }
+    },
     "%@, %lld out of 100, %@": {
       "extractionState": "manual",
       "localizations": {
@@ -4359,6 +4394,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@：%3$@年、1平方秒角あたり%2$@等級。観測者の判定はボートル%4$lld。"
+          }
+        }
+      }
+    },
+    "%@: %@, %@, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@, %@, %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@, %@, %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@, %@, %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@, %@, %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@：%2$@、%3$@、%4$@"
           }
         }
       }
@@ -6144,6 +6214,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%2$lldか所中%1$lldか所の公園"
+          }
+        }
+      }
+    },
+    "%lld of 7 Little Dipper stars, an estimate": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld von 7 Sternen des Kleinen Wagens, eine Schätzung"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of 7 Little Dipper stars, an estimate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld de las 7 estrellas de la Osa Menor, una estimación"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld des 7 étoiles du Petit Chariot, une estimation"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小びしゃくの7つの星のうち%lld個（推定）"
           }
         }
       }
@@ -13207,6 +13312,76 @@
         }
       }
     },
+    "At dusk": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ab Dämmerung"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At dusk"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al anochecer"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au crépuscule"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "夕暮れから"
+          }
+        }
+      }
+    },
+    "At dusk is red from dusk to dawn at the park on Tonight. Night vision keeps your eyes adapted to the dark.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„Ab Dämmerung“ ist rot von der Abend- bis zur Morgendämmerung am Park unter „Heute Nacht“. Nachtsicht erhält die Dunkeladaptation deiner Augen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At dusk is red from dusk to dawn at the park on Tonight. Night vision keeps your eyes adapted to the dark."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al anochecer pone la pantalla roja del anochecer al alba en el parque de Esta noche. La visión nocturna mantiene tus ojos adaptados a la oscuridad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au crépuscule, l’écran est rouge du crépuscule à l’aube au parc de l’onglet Ce soir. La vision nocturne garde vos yeux adaptés à l’obscurité."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「夕暮れから」では、「今夜」の公園で夕暮れから夜明けまで赤くなります。ナイトビジョンなら、暗さに慣れた目を保てます。"
+          }
+        }
+      }
+    },
     "At home, anyone can help": {
       "extractionState": "manual",
       "localizations": {
@@ -13732,41 +13907,6 @@
         }
       }
     },
-    "Automatic turns night vision on from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "„Automatisch“ schaltet die Nachtsicht von der Abend- bis zur Morgendämmerung am Park unter „Heute Nacht“ ein. Rotes Licht erhält die Dunkeladaptation deiner Augen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Automatic turns night vision on from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Automático activa la visión nocturna del anochecer al alba en el parque de Esta noche. La luz roja mantiene tus ojos adaptados a la oscuridad."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En automatique, la vision nocturne s’active du crépuscule à l’aube au parc de l’onglet Ce soir. La lumière rouge garde vos yeux adaptés à l’obscurité."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "「自動」にすると、「今夜」の公園で夕暮れから夜明けまでナイトビジョンがオンになります。赤い光なら、暗さに慣れた目を保てます。"
-          }
-        }
-      }
-    },
     "Autumn %@": {
       "extractionState": "manual",
       "localizations": {
@@ -13868,6 +14008,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "「アクセシビリティ」に戻り、「ショートカット」を開いて「カラーフィルタ」を選びます。"
+          }
+        }
+      }
+    },
+    "Back to tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zurück zu heute Nacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back to tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volver a esta noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revenir à ce soir"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜に戻る"
           }
         }
       }
@@ -18682,6 +18857,76 @@
         }
       }
     },
+    "Clouds likely hide the Little Dipper, an estimate": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolken verdecken wahrscheinlich den Kleinen Wagen, eine Schätzung"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clouds likely hide the Little Dipper, an estimate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las nubes probablemente ocultan la Osa Menor, una estimación"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nuages cachent sans doute le Petit Chariot, une estimation"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲で小びしゃくは見えない可能性が高い（推定）"
+          }
+        }
+      }
+    },
+    "Clouds likely hide the Little Dipper. An estimate, not part of the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolken verdecken wahrscheinlich den Kleinen Wagen. Eine Schätzung, nicht Teil des Werts."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clouds likely hide the Little Dipper. An estimate, not part of the score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las nubes probablemente ocultan la Osa Menor. Es una estimación, no forma parte del índice."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nuages cachent sans doute le Petit Chariot. Une estimation, qui ne compte pas dans l’indice."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲で小びしゃくは見えない可能性が高いです。推定値で、スコアには含まれません。"
+          }
+        }
+      }
+    },
     "Clouds limit this night to %lld.": {
       "extractionState": "manual",
       "localizations": {
@@ -23103,6 +23348,41 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Drag across the dial": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Über das Zifferblatt ziehen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag across the dial"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desliza sobre el dial"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faites glisser sur le cadran"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダイヤルを横にドラッグ"
           }
         }
       }
@@ -30202,41 +30482,6 @@
         }
       }
     },
-    "Hollow nights have no full cloud forecast yet.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leere Nächte haben noch keine vollständige Wolkenvorhersage."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hollow nights have no full cloud forecast yet."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Las noches sin relleno aún no tienen pronóstico de nubes completo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les nuits vides n’ont pas encore de prévision de nuages complète."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "白抜きの夜には、まだ雲予報がそろっていません。"
-          }
-        }
-      }
-    },
     "Hollow: %@, so the Moon and darkness only.": {
       "extractionState": "manual",
       "localizations": {
@@ -34388,6 +34633,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "今夜を聞く"
+          }
+        }
+      }
+    },
+    "Little Dipper": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleiner Wagen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Little Dipper"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Osa Menor"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Petit Chariot"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小びしゃく"
           }
         }
       }
@@ -38886,6 +39166,41 @@
         }
       }
     },
+    "More skies within reach on %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weitere Himmel in Reichweite am %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More skies within reach on %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más cielos a tu alcance el %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "D’autres ciels à portée le %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@に行ける範囲のほかの空"
+          }
+        }
+      }
+    },
     "More up this night (%lld)": {
       "extractionState": "manual",
       "localizations": {
@@ -42607,6 +42922,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "なし"
+          }
+        }
+      }
+    },
+    "No dusk or dawn at %@ today, so night vision stays as you set it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute gibt es in %@ keine Dämmerung, also bleibt die Nachtsicht, wie du sie eingestellt hast."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No dusk or dawn at %@ today, so night vision stays as you set it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoy no hay anochecer ni alba en %@, así que la visión nocturna se queda como la dejaste."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de crépuscule ni d’aube à %@ aujourd’hui : la vision nocturne reste comme vous l’avez réglée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今日は%@に夕暮れも夜明けもないため、ナイトビジョンは設定したままです。"
+          }
+        }
+      }
+    },
+    "No dusk or dawn where you are today, so night vision stays as you set it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute gibt es dort, wo du bist, keine Dämmerung, also bleibt die Nachtsicht, wie du sie eingestellt hast."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No dusk or dawn where you are today, so night vision stays as you set it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoy no hay anochecer ni alba donde estás, así que la visión nocturna se queda como la dejaste."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de crépuscule ni d’aube là où vous êtes aujourd’hui : la vision nocturne reste comme vous l’avez réglée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今日は現在地に夕暮れも夜明けもないため、ナイトビジョンは設定したままです。"
           }
         }
       }
@@ -53839,6 +54224,76 @@
         }
       }
     },
+    "Red from dusk to dawn at %@. Turned by hand, it holds until the next dusk or dawn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rot von der Abend- bis zur Morgendämmerung in %@. Von Hand umgeschaltet, bleibt es bis zur nächsten Dämmerung so."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Red from dusk to dawn at %@. Turned by hand, it holds until the next dusk or dawn."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roja del anochecer al alba en %@. Si la cambias a mano, se mantiene hasta el próximo anochecer o alba."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rouge du crépuscule à l’aube à %@. Changée à la main, elle reste ainsi jusqu’au prochain crépuscule ou à la prochaine aube."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@で夕暮れから夜明けまで赤くなります。手動で切り替えると、次の夕暮れか夜明けまでそのままです。"
+          }
+        }
+      }
+    },
+    "Red from dusk to dawn where you are. Turned by hand, it holds until the next dusk or dawn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rot von der Abend- bis zur Morgendämmerung, wo du bist. Von Hand umgeschaltet, bleibt es bis zur nächsten Dämmerung so."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Red from dusk to dawn where you are. Turned by hand, it holds until the next dusk or dawn."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roja del anochecer al alba donde estás. Si la cambias a mano, se mantiene hasta el próximo anochecer o alba."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rouge du crépuscule à l’aube là où vous êtes. Changée à la main, elle reste ainsi jusqu’au prochain crépuscule ou à la prochaine aube."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在地で夕暮れから夜明けまで赤くなります。手動で切り替えると、次の夕暮れか夜明けまでそのままです。"
+          }
+        }
+      }
+    },
     "Red light": {
       "extractionState": "manual",
       "localizations": {
@@ -59857,6 +60312,41 @@
         }
       }
     },
+    "Shows the other parks in reach and their scores that night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeigt die anderen Parks in Reichweite und ihre Werte für diese Nacht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows the other parks in reach and their scores that night."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra los otros parques a tu alcance y su índice de esa noche."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affiche les autres parcs à portée et leur indice cette nuit-là."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行ける範囲のほかの公園と、その夜のスコアを表示します。"
+          }
+        }
+      }
+    },
     "Shows the other parks in reach and their scores tonight.": {
       "extractionState": "manual",
       "localizations": {
@@ -62622,6 +63112,41 @@
         }
       }
     },
+    "Step through the next two weeks. Each night shows the darkest place in reach.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geh die nächsten zwei Wochen durch. Jede Nacht zeigt den dunkelsten Ort in Reichweite."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Step through the next two weeks. Each night shows the darkest place in reach."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recorre las próximas dos semanas. Cada noche muestra el lugar más oscuro a tu alcance."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parcourez les deux prochaines semaines. Chaque nuit montre le lieu le plus sombre à portée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この先2週間を1夜ずつ見られます。夜ごとに、行ける範囲でいちばん暗い場所を表示します。"
+          }
+        }
+      }
+    },
     "Step-free": {
       "extractionState": "manual",
       "localizations": {
@@ -62793,6 +63318,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "段差または山道"
+          }
+        }
+      }
+    },
+    "Steps through the next two weeks of nights, each with the darkest place in reach.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geht die Nächte der nächsten zwei Wochen durch, jede mit dem dunkelsten Ort in Reichweite."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steps through the next two weeks of nights, each with the darkest place in reach."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recorre las noches de las próximas dos semanas, cada una con el lugar más oscuro a tu alcance."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parcourt les nuits des deux prochaines semaines, chacune avec le lieu le plus sombre à portée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この先2週間の夜を1夜ずつ移動し、夜ごとに行ける範囲でいちばん暗い場所を示します。"
           }
         }
       }
@@ -71116,6 +71676,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "ちらっと見る合間もNyxを画面に表示しておくには、「設定」›「一般」›「時計に戻る」›「Nyx」と開き、「1時間後」を選んでください。"
+          }
+        }
+      }
+    },
+    "To the eye, about %lld of the Little Dipper's 7 stars. An estimate, not part of the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit bloßem Auge etwa %lld der 7 Sterne des Kleinen Wagens. Eine Schätzung, nicht Teil des Werts."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To the eye, about %lld of the Little Dipper's 7 stars. An estimate, not part of the score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A simple vista, unas %lld de las 7 estrellas de la Osa Menor. Es una estimación, no forma parte del índice."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À l’œil nu, environ %lld des 7 étoiles du Petit Chariot. Une estimation, qui ne compte pas dans l’indice."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "肉眼で小びしゃくの7つの星のうち約%lld個。推定値で、スコアには含まれません。"
           }
         }
       }

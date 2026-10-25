@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 
 struct TonightView: View {
     @Environment(PlanModel.self) private var model
@@ -53,6 +54,31 @@ struct TonightView: View {
     /// its own tonight rather than carrying the old park's date.
     @State private var riverNight:RiverChoice?
     @State private var scrubbing=false
+    /// The night the dial shows, in nights after tonight (`TonightScrub`, 0…13): stepped by a horizontal
+    /// drag across the dial, VoiceOver's adjustable action, ⌘← ⌘→ where no river is beside it, or the
+    /// step buttons. Each night re-ranks the places in reach, so the dial answers "where" for any night.
+    @State private var dialNight=TonightView.debugNight
+    /// The night the page's sky follows: the dial's once the finger lifts, so the sky and its Moon change
+    /// once on release rather than on every detent, as the river holds the park page's sky.
+    @State private var skyNight=TonightView.debugNight
+    /// The dial's night as the current drag began; nil between drags.
+    @State private var dragFrom:Int?
+    /// Whether the current drag on the dial is a scrub: decided on its first movement as the river decides
+    /// (`TimeRiver`, mostly horizontal), so the page still scrolls; reset by the system even when cancelled.
+    @GestureState private var dialDrag:Bool?=nil
+    /// Bumped once per night the dial steps to: the light tick of a scrub detent.
+    @State private var dialDetents=0
+    @State private var dialTipDone=false
+    @Environment(\.layoutDirection) private var layoutDirection
+    private let dialTip=DialNightsTip()
+    /// `-nyx-tonight-night 6` (DEBUG captures): the dial opens on that night.
+    private static var debugNight:Int {
+        #if DEBUG
+        return TonightScrub.clamp(Int(DebugScenario.number("-nyx-tonight-night") ?? 0))
+        #else
+        return 0
+        #endif
+    }
     /// A wide iPad: the answer on the left, the ways to change the question on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
     /// The world catalogue abroad, or the offline caches still being read after the first frame
@@ -71,16 +97,23 @@ struct TonightView: View {
         let widerList=widerShortlist(than:best.first,inReach:all)
         let empty=best.isEmpty || DebugScenario.state=="empty"
         let worthy=worthyNight(best.first,empty:empty)
-        let heroReady=best.first.map { heroSettledKey==revealKey($0) } ?? false
+        let heroReady=best.first.map { heroSettledKey==revealKey(model.night($0)) } ?? false
+        // Another night on the dial waits for the places' coming nights, worked out off the main thread for
+        // "Darker on…" (`aheadPrepared`): a step then only reads nights the model already keeps.
+        let aheadParks=aheadPool
+        let ready = !best.isEmpty && !loading && aheadPrepared==TonightReach.key(aheadParks)
+        let offset=ready ? dialNight : 0, skyOffset=ready ? skyNight : 0
+        let shown=answer(offset:offset,best:best,ahead:aheadParks)
+        let sky=skyOffset==offset ? shown.first : answer(offset:skyOffset,best:best,ahead:aheadParks).first
         ScrollViewReader { proxy in
         ScrollView {
-            if wide, !loading, !empty, let park=best.first {
+            if wide, !loading, !empty, let park=best.first, let night=shown.first {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                     FoldColumns(narrow:.trailing,narrowMax:500,spacing:NyxMetrics.columnGap) {
-                        VStack(spacing:26) { GoingPanel(hero:park); hero(park,others:Array(best.dropFirst())); farther(than:park,shortlist:widerList); darkArea(all); ahead(park) }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(rule:false,choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID); more(best); fromHome(hero:park); LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
+                        VStack(spacing:26) { GoingPanel(hero:park); hero(night,others:Array(shown.dropFirst()),offset:offset,ready:ready); farther(than:park,shortlist:widerList); darkArea(all); ahead(park) }.frame(maxWidth:.infinity)
+                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(rule:false,choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID); more(shown,offset:offset); fromHome(hero:park); LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
                     weekAcross
@@ -93,13 +126,13 @@ struct TonightView: View {
                     if !loading, !typeSize.isAccessibilitySize { GoingPanel(hero:best.first) }
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
                     else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil,shortlist:widerList);darkArea(all);StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID);fromHome(hero:nil) }
-                    else if let park=best.first {
-                        hero(park,others:Array(best.dropFirst()))
+                    else if let park=best.first, let night=shown.first {
+                        hero(night,others:Array(shown.dropFirst()),offset:offset,ready:ready)
                         if typeSize.isAccessibilitySize { GoingPanel(hero:park) }
                         farther(than:park,shortlist:widerList)
                         darkArea(all)
                         // The answer, then the alternatives; then where "within reach" is measured from.
-                        more(best)
+                        more(shown,offset:offset)
                         StartingPointPanel(heading:best.count>1,choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID)
                         fromHome(hero:park)
                         LookingBackPanel()
@@ -125,12 +158,32 @@ struct TonightView: View {
         .defaultScrollAnchor(DebugScenario.number("-nyx-scroll").map { UnitPoint(x:0.5,y:$0) } ?? (DebugScenario.isEnabled("bottom") ? .bottom : .top))
         .onChange(of:toStart) { withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(Self.startID,anchor:.center) } }
         }
-        .nightKeys(enabled:wide && !empty) { delta in stepRiver(delta) }
-        .background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value },park:best.first,night:best.first.map { model.tonight($0) })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
+        // ⌘← ⌘→ move the river beside the answer on a wide iPad, else the dial's night.
+        .nightKeys(enabled:!empty && (wide || ready)) { delta in if wide { stepRiver(delta) } else { stepDial(delta) } }
+        // The sky is the dial's night once a finger lets go of it (`skyNight`).
+        .background(NightBackground(seed:model.homeID,score:sky?.score.value,park:sky?.park,night:sky.map { TonightScrub.evening($0.park,tonight:model.tonight($0.park),offset:skyOffset) })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
+        .sensoryFeedback(.selection,trigger:dialDetents)
+        // The finger lifts: the sky follows to the night it left, on the shared spring (a dissolve without motion).
+        .onChange(of:dialDrag==true) { _,now in
+            guard !now else { return }
+            dragFrom=nil
+            if skyNight != dialNight { withAnimation(NyxMotion.spring(reduced:reduceMotion)) { skyNight=dialNight } }
+        }
+        // A new night (sunrise turned it over): "three nights on" means another night now, so the dial starts at tonight.
+        .onChange(of:model.today) { dialNight=0; skyNight=0 }
+        // The nights the dial steps to: what's up each night (the verdict under the dial) worked out off the main thread.
+        .task(id:ready ? TonightReach.key(aheadParks) : nil) {
+            guard ready else { return }
+            await model.prepareWhatsUp((1..<TonightScrub.nights).compactMap { answer(offset:$0,best:best,ahead:aheadParks).first })
+        }
             .tabRootToolbar()
             // ⌘R's note says a forecast's time as the pull does, in the answer's own time.
             .environment(\.refreshTimeZone,best.first?.timeZone)
-            .navigationDestination(for:ZoomRoute.self) { route in ParkDetailView(park:route.park).modifier(ParkTransition(sourceID:route.source,namespace:zoom)).onAppear { ReviewPrompt.noteNightViewed(score:model.night(route.park).score.value) } }
+            // The pill and the rows open the night the dial shows: tonight, or the night it was stepped to.
+            .navigationDestination(for:ZoomRoute.self) { route in
+                let night=offset==0 ? nil : TonightScrub.evening(route.park,tonight:model.tonight(route.park),offset:offset)
+                ParkDetailView(park:route.park,initialDate:night).modifier(ParkTransition(sourceID:route.source,namespace:zoom)).onAppear { ReviewPrompt.noteNightViewed(score:model.night(route.park,on:night).score.value) }
+            }
             .modifier(StartingPointSheets(choosing:$chooseHome,explaining:$explainLocation))
             .parkSaveAlert(isPresented:$saveFailed,journalUnavailable:model.journalUnavailable)
             // Keyed on the places in reach, not the raw fix: a location that moves a few metres, or a
@@ -227,11 +280,11 @@ struct TonightView: View {
     private static let accessibleDial=200.0
     /// The answer's line, and the way to what it names: a tap moves the page to the starting point and
     /// its radius, which sit below the answer and its alternatives.
-    private func reachLine(_ park:Park)->some View {
+    private func reachLine(_ park:Park,day:String)->some View {
         Button { toStart+=1 } label:{
             // The small arrow says the line leads somewhere; the target reaches 44 pt without moving the line.
             HStack(alignment:.firstTextBaseline,spacing:5) {
-                answerLine(park)
+                answerLine(day:day)
                 if !typeSize.isAccessibilitySize { Image(systemName:"arrow.down").font(.caption2.weight(.semibold)).accessibilityHidden(true) }
             }
             .padding(.vertical,14).contentShape(Rectangle()).padding(.vertical,-14)
@@ -241,8 +294,8 @@ struct TonightView: View {
     /// The line above the answer, all data: the night, and where "in reach" is measured from.
     /// Never "nearby" for a starting park or city; an example until a starting point is chosen.
     /// At accessibility sizes the two facts stack as two lines, with no "·" left dangling at a wrap.
-    @ViewBuilder private func answerLine(_ park:Park)->some View {
-        let day=park.dayLabel(model.night(park).id), radius=SearchRadius.label(model.radiusMeters)
+    @ViewBuilder private func answerLine(day:String)->some View {
+        let radius=SearchRadius.label(model.radiusMeters)
         if typeSize.isAccessibilitySize {
             VStack(spacing:4) {
                 Text(day)
@@ -334,27 +387,33 @@ struct TonightView: View {
         guard next>=tonight, next<park.date(tonight,addingDays:30) else { return }
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { riverNight=RiverChoice(parkID:park.id,night:next) }
     }
-    private func hero(_ park:Park,others:[Park])->some View {
-        let night=model.night(park)
-        let large=typeSize.isAccessibilitySize
+    /// The answer for the night `offset` nights after tonight: the places in reach ranked for that night,
+    /// at most five, each place's night in its own time zone. Tonight ranks the page's pool (`best`);
+    /// a later night the places whose coming nights are already worked out (`aheadPool`). Every night
+    /// is one the model keeps (`PlanModel.night`), so a step is a sort of memoised nights, not astronomy.
+    private func answer(offset:Int,best:[Park],ahead:[Park])->[Night] {
+        guard offset>0 else { return best.map { model.night($0) } }
+        return Array(TonightScrub.ranked(ahead.map { model.night($0,on:TonightScrub.evening($0,tonight:model.tonight($0),offset:offset)) }).prefix(5))
+    }
+    private func hero(_ night:Night,others:[Night],offset:Int,ready:Bool)->some View {
+        let park=night.park
+        let large=typeSize.isAccessibilitySize, later=offset>0
         // The first line is the answer's own context: the night, and from where. At accessibility sizes
         // it follows the dial and the closure, so the park, its score and any closure fill the first screen.
-        let context=reachLine(park).font(.caption.weight(.medium)).kerning(large ? 0 : 1.6).textCase(large || !Lettering.spaced ? nil : .uppercase)
-            .foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+        // Another night than tonight is said in starlight, so the held night reads as chosen, not as the default.
+        let context=reachLine(park,day:park.dayLabel(night.id)).font(.caption.weight(.medium)).kerning(large ? 0 : 1.6).textCase(large || !Lettering.spaced ? nil : .uppercase)
+            .foregroundStyle(later ? palette.ink : palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
         // A forecast more than six hours old says when it is from.
         let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { Date.now.timeIntervalSince($0)>6*3600 ? $0 : nil } : nil
         let closure=park.nps == nil ? nil : model.closure(park)
+        let scores=Dictionary(others.map { ($0.park.id,$0.score.value) },uniquingKeysWith:{ first,_ in first })
         return VStack(spacing:10) {
             if !large { context }
-            // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`).
-            ParkPillPicker(park:park,others:others,score:{ model.night($0).score.value },zoom:zoom)
+            // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`), scored for the dial's night.
+            ParkPillPicker(park:park,others:others.map(\.park),score:{ scores[$0.id] ?? model.night($0).score.value },zoom:zoom,night:later ? park.dayLabel(night.id) : nil)
             let basis=night.basisCaption()
             let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis)
-            CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis,
-                           revealKey:revealKey(park),range:range,night:model.ring(night)) { heroSettledKey=$0 }
-                // At accessibility sizes the dial is held small enough that a closure under it is on the first screen.
-                .environment(\.gaugeAccessibleMax,Self.accessibleDial).frame(height:large ? nil : wide ? 300 : 240)
-                .modifier(DepthParallax(depth:0.08))
+            dial(night,basis:basis,range:range,offset:offset,ready:ready)
             // A closure is the one line here that must never be lost in the sky: straight under the score,
             // as on the park's page, on a dark scrim.
             if let closure {
@@ -363,6 +422,10 @@ struct TonightView: View {
                     .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12))
                     .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
             }
+            // Switch Control and "prefers action slider alternative": the nights a button at a time.
+            if ready && access.preferSteps { dialSteps(offset) }
+            // A later night is held after the finger lifts, with the way back right under it.
+            if later { backToTonight }
             if large { context }
             // The night in plain words: where the Moon is, and whether the Milky Way is worth the drive.
             if let verdict=NightVerdict.line(sky:night.sky,core:model.whatsUp(night).coreNight,park:park) {
@@ -388,9 +451,92 @@ struct TonightView: View {
             }
             if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.center).padding(.horizontal,12) }
             AccessNoteLabel(park:park,alignment:.center).padding(.horizontal,12)
-            nudge(park:park,tonight:night)
-            fieldOffer(best:park)
+            // "Darker on…", an eclipse or shower ahead, and field mode are tonight's: weighed against tonight
+            // and said from it, they would contradict a later night on the dial, so they wait for its return.
+            if !later {
+                nudge(park:park,tonight:night)
+                fieldOffer(best:park)
+            }
         }.frame(maxWidth:.infinity)
+    }
+    /// The dial, which steps through the coming nights under a sideways drag (`dialScrub`), VoiceOver's
+    /// swipe up or down, or the step buttons. Nothing steps until the places' nights are ready (`ready`).
+    private func dial(_ night:Night,basis:String?,range:ClosedRange<Int>?,offset:Int,ready:Bool)->some View {
+        let large=typeSize.isAccessibilitySize
+        return CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis,
+                              revealKey:revealKey(night),range:range,night:model.ring(night)) { heroSettledKey=$0 }
+            // At accessibility sizes the dial is held small enough that a closure under it is on the first screen.
+            .environment(\.gaugeAccessibleMax,Self.accessibleDial).frame(height:large ? nil : wide ? 300 : 240)
+            .modifier(DepthParallax(depth:0.08))
+            .contentShape(Rectangle())
+            .simultaneousGesture(dialScrub,including:ready ? .all : .subviews)
+            // VoiceOver steps the nights without the drag: the value is the night, the place and its score.
+            .accessibilityValue(TonightScrub.spokenValue(night,tonight:offset==0))
+            .accessibilityHint(ready ? Text("Steps through the next two weeks of nights, each with the darkest place in reach.") : Text(verbatim:""))
+            .accessibilityAdjustableAction { direction in
+                switch direction {
+                case .increment: stepDial(1)
+                case .decrement: stepDial(-1)
+                @unknown default: break
+                }
+            }
+            // Found once, then out of the way: the first step closes it. Not in night vision, where it would be
+            // the brightest thing on the screen, nor before a starting point, while the first-run question leads.
+            .popoverTip(ready && model.startChosen && !palette.nightVision && (DebugScenario.screen == nil || DebugScenario.isEnabled("dial-tip")) ? dialTip : nil)
+            // While a finger scrubs the dial the page holds still, as for the river.
+            .preference(key:RiverScrubbingKey.self,value:dialDrag==true)
+    }
+    /// A mostly sideways drag across the dial steps a night every `TonightScrub.pitch` points: toward the
+    /// leading edge for later nights, which come in from the trailing edge as pages do. Measured on the
+    /// screen, so the dial shifting under the finger (a longer name in the pill) never steps a night.
+    private var dialScrub: some Gesture {
+        DragGesture(minimumDistance:6,coordinateSpace:.global).updating($dialDrag) { drag,state,_ in
+            if state==nil { state=TonightScrub.isHorizontal(drag.translation) }
+        }.onChanged { drag in
+            guard dialDrag ?? TonightScrub.isHorizontal(drag.translation) else { return }
+            let from=dragFrom ?? dialNight
+            if dragFrom==nil { dragFrom=from }
+            chooseNight(TonightScrub.offset(from:from,translation:drag.translation.width,rightToLeft:layoutDirection == .rightToLeft))
+        }
+    }
+    /// One step, from VoiceOver, a key or a button; nothing until the places' nights are ready.
+    private func stepDial(_ delta:Int) {
+        guard aheadPrepared==TonightReach.key(aheadPool) else { return }
+        chooseNight(dialNight+delta)
+    }
+    /// The dial moves to a night: the numeral sweeps there on the shared spring (`CelestialGauge`), or
+    /// dissolves under Reduce Motion, with one light tick per night. A finger keeps the sky until it lifts.
+    private func chooseNight(_ offset:Int) {
+        let next=TonightScrub.clamp(offset)
+        guard next != dialNight else { return }
+        withAnimation(NyxMotion.spring(reduced:reduceMotion)) {
+            dialNight=next
+            if dialDrag != true { skyNight=next }
+        }
+        dialDetents+=1
+        if !dialTipDone { dialTipDone=true; dialTip.invalidate(reason:.actionPerformed) }
+    }
+    /// The way back from a held night: starlight glass under the dial, as the page's other actions.
+    private var backToTonight: some View {
+        Button { chooseNight(0) } label:{
+            HStack(spacing:8) {
+                Image(systemName:"arrow.uturn.backward").imageScale(.small).accessibilityHidden(true)
+                Text("Back to tonight").multilineTextAlignment(.leading)
+            }
+        }.buttonStyle(.capsuleAction).padding(.top,4)
+        .accessibilityInputLabels([Text("Back to tonight"),Text("Tonight")])
+    }
+    /// Previous and next night as buttons, side by side or stacked at accessibility sizes. A step that
+    /// cannot be taken is set in the muted ink, which keeps its contrast in night vision.
+    private func dialSteps(_ offset:Int)->some View {
+        let layout=typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing:10)) : AnyLayout(HStackLayout(spacing:12))
+        let first=offset<=0, last=offset>=TonightScrub.last
+        return layout {
+            Button { stepDial(-1) } label:{ Label("Previous night",systemImage:"chevron.backward").frame(maxWidth:.infinity,minHeight:30).foregroundStyle(first ? palette.muted : palette.ink) }.disabled(first)
+            Button { stepDial(1) } label:{ Label("Next night",systemImage:"chevron.forward").frame(maxWidth:.infinity,minHeight:30).foregroundStyle(last ? palette.muted : palette.ink) }.disabled(last)
+        }
+        .secondaryAction().font(.subheadline.weight(.medium))
+        .accessibilityElement(children:.contain)
     }
     /// One sky line under the dial, the first that applies: the forecast models disagreeing (said
     /// first, because the best window rests on the same clouds), then a clear, dark stretch that is
@@ -421,10 +567,9 @@ struct TonightView: View {
     private func forecastAsOf(_ park:Park,_ updated:Date)->some View {
         Text("Forecast as of \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
     }
-    /// The hero dial's reveal key for a park tonight.
-    private func revealKey(_ park:Park)->String {
-        let night=model.night(park)
-        return ScoreReveals.key(parkID:park.id,night:park.isoDay(night.id),score:night.score.value)
+    /// The hero dial's reveal key for a park's night.
+    private func revealKey(_ night:Night)->String {
+        ScoreReveals.key(parkID:night.park.id,night:night.park.isoDay(night.id),score:night.score.value)
     }
     /// Tonight's answer when a reminder would announce it (`NotificationScheduler.worthAReminder`),
     /// as "park-day"; nil otherwise, and until a starting point is chosen.
@@ -444,15 +589,19 @@ struct TonightView: View {
         try? await Task.sleep(for:.milliseconds(120))
         found+=1
     }
-    @ViewBuilder private func more(_ best:[Park])->some View {
-        if best.count>1 {
-            Eyebrow(text:"More skies within reach")
+    /// The other places in reach for the dial's night, each row's week starting from it.
+    @ViewBuilder private func more(_ shown:[Night],offset:Int)->some View {
+        if shown.count>1, let first=shown.first {
+            if offset>0 { Eyebrow(text:"More skies within reach on \(first.park.dayLabel(first.id))") } else { Eyebrow(text:"More skies within reach") }
             // Rows and hairlines in their own stack, as on Parks: the page's spacing would double each gap.
             VStack(spacing:0) {
-                ForEach(Array(best.dropFirst())) { park in NavigationLink(value:ZoomRoute.row(park)) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.row(park).source,in:zoom).parkRowActions(park) { saveFailed=true };Divider().overlay(palette.line) }
+                ForEach(Array(shown.dropFirst()),id:\.park.id) { night in
+                    let park=night.park
+                    NavigationLink(value:ZoomRoute.row(park)) { ParkRow(night:night,closure:model.closure(park),week:model.nights(park,from:TonightScrub.evening(park,tonight:model.tonight(park),offset:offset),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.row(park).source,in:zoom).parkRowActions(park) { saveFailed=true };Divider().overlay(palette.line)
+                }
             }
             // Only worth saying when a row actually reads "Estimate", in the rows' own words, as on Parks.
-            if let note=UsualCloudsNote(best.dropFirst().map { model.night($0) }) { Text(note.estimate).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            if let note=UsualCloudsNote(Array(shown.dropFirst())) { Text(note.estimate).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         }
     }
     /// The sky over the starting point itself, for anyone not travelling tonight: the device's
@@ -702,4 +851,41 @@ struct RiverChoice: Equatable {
     let night: Date
     /// The night, when it was chosen at this park; nil at any other.
     func night(at park: Park) -> Date? { parkID==park.id ? night : nil }
+}
+/// Tonight's dial stepped through the coming nights, apart from the view so it can be tested. Each
+/// step is a night after tonight, counted in each place's own time zone, so "Friday" is Friday night
+/// wherever the place is; the dial shows the darkest place in reach that night.
+nonisolated enum TonightScrub {
+    /// Tonight and the next 13 nights: two weeks, the reach of the cloud forecast and its early look,
+    /// and the nights "where is darkest" can still be planned around. Every later night is Plan's.
+    static let nights=14
+    static var last:Int { nights-1 }
+    /// Points of sideways drag per night: two weeks in about one sweep of a thumb across the dial.
+    static let pitch=24.0
+    static func clamp(_ offset:Int)->Int { min(last,max(0,offset)) }
+    /// The river's rule, so both read a drag alike: mostly sideways scrubs, anything else scrolls the page.
+    static func isHorizontal(_ translation:CGSize)->Bool { abs(translation.width)>abs(translation.height) }
+    /// The night a drag reaches from the night it began on: a night per `pitch` points (from half a pitch,
+    /// so the first step comes early), later toward the leading edge (left, or right in a right-to-left
+    /// language), held to tonight and the last night.
+    static func offset(from start:Int,translation:Double,rightToLeft:Bool=false,pitch:Double=pitch)->Int {
+        let steps=Int((translation/pitch).rounded())
+        return clamp(start+(rightToLeft ? steps : -steps))
+    }
+    /// The date `offset` nights after a place's tonight, as `PlanModel.nights(_:from:count:)` steps it.
+    static func evening(_ park:Park,tonight:Date,offset:Int)->Date { offset==0 ? tonight : park.date(tonight,addingDays:offset) }
+    /// The places' nights best first, by the rule every best night uses (`NightPlanner.better`), as Tonight ranks tonight.
+    static func ranked(_ nights:[Night])->[Night] { NightPlanner.ranked(nights) }
+    /// The dial's value for VoiceOver: "Fri, Oct 30: Joshua Tree, 82, Excellent", the score with what it
+    /// rests on beyond the forecast ("82, usual clouds", `NightVerdict.scored`); "Tonight: …" tonight.
+    static func spokenValue(_ night:Night,tonight:Bool)->String {
+        let day=tonight ? String(localized:"Tonight") : night.park.dayLabel(night.id)
+        return String(localized:"\(day): \(night.park.shortName), \(NightVerdict.scored(night)), \(night.score.band.label)")
+    }
+}
+/// Tonight's dial steps through the nights, which nothing on it shows: said once, and closed by the first step.
+struct DialNightsTip: Tip {
+    var title: Text { Text("Drag across the dial") }
+    var message: Text? { Text("Step through the next two weeks. Each night shows the darkest place in reach.") }
+    var image: Image? { Image(systemName:"hand.draw") }
 }

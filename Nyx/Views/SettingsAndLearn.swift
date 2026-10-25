@@ -5,6 +5,7 @@ struct SettingsView:View {
     @Environment(PlanModel.self) private var model
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
+    @AppStorage(NightVisionMode.atDuskKey,store:SharedSettings.defaults) private var atDusk=false
     @AppStorage("notificationsEnabled") private var notifications=false
     @AppStorage("showerReminders") private var showerReminders=true
     @State private var explainNotifications=false
@@ -17,8 +18,11 @@ struct SettingsView:View {
         // headings in starlight. Each note sits inside its control, so VoiceOver reads it with the switch.
         Form {
             Section {
-                Toggle(isOn:$nightVision) { titled("Night vision",note:"A red palette that keeps your eyes adapted to the dark. Lower the screen brightness too.") }
-                    .tint(palette.controlTint).accessibilityInputLabels([Text("Night vision")])
+                // Off, On or At dusk; the toolbar's switch and Control Center still turn it either way.
+                Picker(selection:Binding(get:{ mode },set:{ NightVisionDusk.choose($0,model:model) })) {
+                    ForEach(NightVisionMode.allCases) { Text($0.title).tag($0) }
+                } label:{ titled("Night vision",note:nightVisionNote) }
+                    .accessibilityInputLabels([Text("Night vision")])
                 Toggle(isOn:$brighterRed) { titled("Brighter red",note:"A lighter red for brighter surroundings or tired eyes. Increase Contrast turns it on too.") }
                     .tint(palette.controlTint).accessibilityInputLabels([Text("Brighter red")])
                 NavigationLink { WholePhoneRedView() } label:{ titled("Red light for the whole iPhone",note:"Menus, the keyboard and other apps stay bright. iOS can turn every screen red.") }
@@ -71,13 +75,29 @@ struct SettingsView:View {
             .task { await syncPermission() }
             .onChange(of:scenePhase) { _,phase in if phase == .active { Task { await syncPermission() } } }
     }
+    /// Read from both stored keys, so a turn in the toolbar or Control Center shows here at once.
+    private var mode:NightVisionMode { atDusk ? .dusk : nightVision ? .on : .off }
+    /// What night vision does under the choice. At dusk names the place it follows, says what a turn
+    /// by hand does, and says so plainly where no dusk comes today (the midnight Sun, polar night).
+    private var nightVisionNote:Text {
+        guard mode == .dusk, let place=NightVisionDusk.place(model) else {
+            return Text("A red palette that keeps your eyes adapted to the dark. Lower the screen brightness too.")
+        }
+        if NightVisionDusk.plan(model)?.polar == true {
+            if let name=place.name { return Text("No dusk or dawn at \(name) today, so night vision stays as you set it.") }
+            return Text("No dusk or dawn where you are today, so night vision stays as you set it.")
+        }
+        if let name=place.name { return Text("Red from dusk to dawn at \(name). Turned by hand, it holds until the next dusk or dawn.") }
+        return Text("Red from dusk to dawn where you are. Turned by hand, it holds until the next dusk or dawn.")
+    }
     /// A section's heading, as `Eyebrow` sets one on a page: serif, sentence case, starlight.
     private func heading(_ text:LocalizedStringKey)->some View { Eyebrow(text:text).textCase(nil).padding(.top,8) }
     /// A row's name with its one quiet line beneath.
-    private func titled(_ title:LocalizedStringKey,note:LocalizedStringKey)->some View {
+    private func titled(_ title:LocalizedStringKey,note:LocalizedStringKey)->some View { titled(title,note:Text(note)) }
+    private func titled(_ title:LocalizedStringKey,note:Text)->some View {
         VStack(alignment:.leading,spacing:4) {
             Text(title)
-            Text(note).font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            note.font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }.padding(.vertical,4)
     }
     /// "1.1 (8)": the version and build, from the bundle.

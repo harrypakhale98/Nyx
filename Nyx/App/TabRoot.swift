@@ -93,6 +93,8 @@ struct NightVisionToggle: View {
     private func turn(_ on:Bool) {
         // Read at the tap, before the lamp's cover could move VoiceOver anywhere.
         let announce = !NightVisionLamp.voiceOverOnSwitch()
+        // Under At dusk a turn by hand holds until the next dusk or dawn (`NightVisionMode`).
+        NightVisionMode.turnedByHand()
         if let commands, !(reduceMotion || access.crossFade) { commands.requestNightVision(on,announce:announce,origin:center); return }
         nightVision=on
         if announce { NightVisionLamp.announce(on) }

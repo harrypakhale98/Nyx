@@ -246,14 +246,14 @@ struct DuskWidget: Widget {
     }
 }
 
-/// Control Center (and the Action button): night vision on the wrist, or back to Automatic.
+/// Control Center (and the Action button): night vision on the wrist, or back to At dusk.
 struct RedLightControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: WatchSky.redLightKind, provider: RedLightProvider()) { isOn in
-            // The state reads in word and symbol: "On" with a filled flashlight, "Automatic" with an
+            // The state reads in word and symbol: "On" with a filled flashlight, "At dusk" with an
             // outline: the iPhone's night-vision glyph (the eye stays dark adaptation's).
             ControlWidgetToggle(isOn: isOn, action: RedLightIntent()) { Text("Night vision") } valueLabel: { isOn in
-                if isOn { Label("On", systemImage: "flashlight.on.circle.fill") } else { Label("Automatic", systemImage: "flashlight.off.circle") }
+                if isOn { Label("On", systemImage: "flashlight.on.circle.fill") } else { Label("At dusk", systemImage: "flashlight.off.circle") }
             }
         }
         .displayName("Night vision")
@@ -264,7 +264,7 @@ struct RedLightProvider: ControlValueProvider {
     var previewValue: Bool { true }
     func currentValue() async throws -> Bool { WatchSky.palette == .red }
 }
-/// On: night vision On. Off: back to Automatic (red from dusk to dawn at the park on Tonight).
+/// On: night vision On. Off: back to At dusk (red from dusk to dawn at the park on Tonight).
 struct RedLightIntent: SetValueIntent {
     static let title: LocalizedStringResource = "Set night vision"
     static let isDiscoverable = false

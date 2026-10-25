@@ -139,7 +139,7 @@ struct OnboardingView:View {
     private var redToggle:some View {
         // A rounded rectangle at accessibility sizes, where the label wraps and a capsule's rim would meet the icon.
         let shape=typeSize.isAccessibilitySize ? AnyShape(RoundedRectangle(cornerRadius:22,style:.continuous)) : AnyShape(Capsule())
-        return Toggle(isOn:$nightVision) {
+        return Toggle(isOn:Binding(get:{ nightVision },set:{ NightVisionMode.turnedByHand(); nightVision=$0 })) {
             Label { Text("Night vision") } icon:{ Image(systemName:nightVision ? "flashlight.on.circle.fill" : "flashlight.off.circle").foregroundStyle(palette.ink) }.font(.headline)
         }
         .tint(palette.controlTint)

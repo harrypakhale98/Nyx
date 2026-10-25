@@ -15,6 +15,8 @@ struct ParkPillPicker: View {
     let others: [Park]
     let score: (Park) -> Int
     let zoom: Namespace.ID
+    /// The night the scores are for when it is not tonight ("Fri, Oct 30": Tonight's dial stepped on).
+    var night: String?=nil
     /// `-nyx-pill-open` (DEBUG captures) opens it.
     @State private var open=DebugScenario.isEnabled("pill-open")
     @Namespace private var glass
@@ -50,7 +52,7 @@ struct ParkPillPicker: View {
                             .padding(.horizontal,18).frame(minHeight:44).contentShape(Rectangle())
                         }
                         .buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.pillList(other).source,in:zoom)
-                        .accessibilityLabel(String(localized:"\(other.shortName), \(score(other)) tonight"))
+                        .accessibilityLabel(night.map { String(localized:"\(other.shortName), \(score(other)) on \($0)") } ?? String(localized:"\(other.shortName), \(score(other)) tonight"))
                     }
                 }
                 .padding(.vertical,4)
@@ -95,7 +97,7 @@ extension ParkPillPicker {
             .buttonStyle(.plain)
             .accessibilityLabel("Other parks within reach")
             .accessibilityValue(open ? "Shown" : "Hidden")
-            .accessibilityHint(open ? "Hides the list." : "Shows the other parks in reach and their scores tonight.")
+            .accessibilityHint(open ? "Hides the list." : night == nil ? "Shows the other parks in reach and their scores tonight." : "Shows the other parks in reach and their scores that night.")
             .accessibilityInputLabels([Text("Other parks"),Text("More parks")])
         }
     }

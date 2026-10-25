@@ -24,11 +24,45 @@ enum NightVisionFollowers {
     /// Sets night vision, reloads the widgets and controls, and tells the followers. False when
     /// there were none to tell (the app's hook is not set).
     @discardableResult static func set(_ value:Bool) async -> Bool {
+        // A turn by hand: under At dusk it holds until the next dusk or dawn.
+        NightVisionMode.turnedByHand()
         SharedSettings.defaults.set(value,forKey:"nightVision")
         WidgetCenter.shared.reloadAllTimelines()
         ControlCenter.shared.reloadAllControls()
         guard let changed else { return false }
         await changed(value)
         return true
+    }
+}
+
+/// Night vision's choice on iPhone and iPad: Off, On, or At dusk (red from civil dusk to civil dawn
+/// at the starting point, `NightVisionDusk`). "nightVision" stays the state every surface reads
+/// (widgets, Control Center, the Live Activity, the watch's Match iPhone); At dusk is one key beside
+/// it, so Off and On are simply that switch and nothing downstream changes. Here, not in the app,
+/// because Control Center's intent is compiled into the widget extension too.
+nonisolated enum NightVisionMode: String, CaseIterable, Identifiable, Sendable {
+    case off, on, dusk
+    static let atDuskKey="nightVisionAtDusk"
+    /// When the switch was last turned by hand under At dusk (seconds since 1970): the turn holds
+    /// until the first dusk or dawn after it, then At dusk takes over again.
+    static let heldKey="nightVisionHeldAt"
+    var id:String { rawValue }
+    var title:LocalizedStringResource {
+        switch self {
+        case .off: "Off"
+        case .on: "On"
+        case .dusk: "At dusk"
+        }
+    }
+    static func current(_ defaults:UserDefaults=SharedSettings.defaults)->NightVisionMode {
+        defaults.bool(forKey:atDuskKey) ? .dusk : defaults.bool(forKey:"nightVision") ? .on : .off
+    }
+    static func heldAt(_ defaults:UserDefaults=SharedSettings.defaults)->Date? {
+        (defaults.object(forKey:heldKey) as? Double).map(Date.init(timeIntervalSince1970:))
+    }
+    /// The toolbar switch, Control Center, Siri, Assistive Access: under At dusk the turn is noted, so
+    /// the next look at the Sun keeps it rather than undoing it. Off and On need nothing.
+    static func turnedByHand(_ defaults:UserDefaults=SharedSettings.defaults,now:Date = .now) {
+        if defaults.bool(forKey:atDuskKey) { defaults.set(now.timeIntervalSince1970,forKey:heldKey) }
     }
 }

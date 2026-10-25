@@ -21,7 +21,9 @@ struct WristSkyTests {
             // Before the first sync, red: at a dark site that is the safe default.
             #expect(PaletteChoice.phone.nightVision(phone: nil, park: nil, at: date))
         }
-        #expect(PaletteChoice.allCases.first == .automatic)
+        // The iPhone's order and words (Off, On, At dusk), then the wrist's own Match iPhone.
+        #expect(PaletteChoice.allCases == [.standard, .red, .automatic, .phone])
+        #expect(PaletteChoice.automatic.title == String(localized: "At dusk"))
     }
 
     @Test func automaticIsRedFromCivilDuskToCivilDawnAtThePark() throws {

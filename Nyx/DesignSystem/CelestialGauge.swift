@@ -7,7 +7,8 @@ import SwiftUI
 /// together, and a moment later the forecast models' range fades in along the track. The word is
 /// never shown beside a number still counting, so the dial never pairs "81" with "Pristine".
 /// The same park and night seen again settles in 0.35 s with one light tick; later changes
-/// (scrubbing nights) sweep on the shared spring. While the reveal is unseen and nobody can see it
+/// (scrubbing nights, Tonight's dial stepped on) sweep on the shared spring, the night's track
+/// cross-fading beneath, and dissolve under Reduce Motion. While the reveal is unseen and nobody can see it
 /// (onboarding over the tabs, first light, another tab, the background), the dial waits empty.
 /// The count-up runs at the display's rate, one value per frame from the time since it began, and
 /// then stops; the ambient stars and the glint redraw at `Decoration.rate` at most. Crossing 70 and
@@ -471,6 +472,9 @@ struct CelestialGauge: View {
     private func numeral(size:CGFloat)->some View {
         DialNumeral(value:numeralValue,target:still ? score : shown,rolling:counting && !still,size:max(24,size),color:palette.accent)
             .opacity(numeralVisible ? 1 : 0)
+            // Drawn still, a new score (Tonight's dial stepped to another night) dissolves in rather than
+            // sweeping or cutting: one numeral per score, faded by the page's own transaction (`NyxMotion.fade`).
+            .id(still ? score : -1).transition(.opacity)
     }
     /// At accessibility sizes the numeral is at least 2.2 times the band label's size (and never
     /// under the standard 108 pt), the dial drawn around it, never wider than the column.
@@ -486,6 +490,8 @@ struct CelestialGauge: View {
     private var band:some View {
         DialBandWord(value:numeralValue,target:still ? score : shown,leaving:still ? [] : leavingBands,color:palette.ink,still:still)
             .opacity(bandVisible ? 1 : 0).blur(radius:bandVisible ? 0 : 6)
+            // Drawn still, the word dissolves with its numeral (`numeral(size:)`).
+            .id(still ? score : -1).transition(.opacity)
     }
     /// The scale, in sentence case (the page's one row of capitals is its facts line). Left out at
     /// accessibility sizes, where it grew larger than the band; the gauge's spoken label says "out of 100".
@@ -507,8 +513,13 @@ struct CelestialGauge: View {
         return ZStack {
             if let night {
                 // The track is the night, drawn from sunset as the score counts up; the score is the numeral's.
-                NightTrack(reveal:score>0 ? min(1,displayed/Double(score)) : 1,ring:night.ring,palette:palette,glow:access.glow)
-                if !typeSize.isAccessibilitySize { NightRingEnds(ring:night.ring,park:night.park).opacity(numeralVisible ? 1 : 0) }
+                // Another night (Tonight's dial stepped on) cross-fades in a quarter second, whatever moves the
+                // page: a scrub outruns the shared spring, and longer fades would stack blurred tracks.
+                ZStack {
+                    NightTrack(reveal:score>0 ? min(1,displayed/Double(score)) : 1,ring:night.ring,palette:palette,glow:access.glow)
+                    if !typeSize.isAccessibilitySize { NightRingEnds(ring:night.ring,park:night.park).opacity(numeralVisible ? 1 : 0) }
+                }
+                .id(NightFace(park:night.park.id,sunset:night.ring.sunset)).transition(.opacity.animation(NyxMotion.fade))
             } else {
                 // The models' range sits under the arc; a hairline outside it where glows are dimmed or red.
                 if let range {
@@ -762,6 +773,8 @@ nonisolated struct DialRing:Shape {
         return cached
     }
 }
+/// Which night the track draws, by park and sunset: the same night keeps its drawing as "now" moves along it.
+private struct NightFace: Hashable { let park: String; let sunset: Date }
 /// What restarts a reveal: a new score, or the hold lifting or falling.
 nonisolated struct RevealTrigger: Equatable, Sendable { let score: Int; let held: Bool }
 private struct RevealHeldKey: EnvironmentKey { static let defaultValue=false }

@@ -4,23 +4,23 @@ import Foundation
 /// iPhone's test suite checks it: which colours the wrist wears, the dark-adaptation clock, the
 /// next dark moment, the Moon right now, and how old the clouds are. Nothing here draws or networks.
 
-/// The wearer's night vision. Automatic is the default: Nyx's standard colours by day, red from
-/// civil dusk to civil dawn at the park Tonight follows. On and Off stay explicit choices: the
-/// iPhone's "Night vision" switch, by the iPhone's name, with the wrist's own Automatic beside it.
-/// The cases keep their stored names, so a choice made before the rename survives it.
+/// The wearer's night vision, in the iPhone's words and order: Off, On, At dusk, and the wrist's own
+/// Match iPhone. At dusk is the default: Nyx's standard colours by day, red from civil dusk to civil
+/// dawn at the park Tonight follows (the iPhone's At dusk follows its starting point by the same rule,
+/// `NightVisionSchedule`). The cases keep their stored names, so a choice made before a rename survives it.
 nonisolated enum PaletteChoice: String, CaseIterable, Identifiable, Sendable {
-    case automatic, red, standard, phone
+    case standard, red, automatic, phone
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .automatic: String(localized: "Automatic")
+        case .automatic: String(localized: "At dusk")
         case .red: String(localized: "On")
         case .standard: String(localized: "Off")
         case .phone: String(localized: "Match iPhone")
         }
     }
     /// Whether the wrist wears red. `phone` is the iPhone's night-vision switch, nil before the
-    /// first sync (red then: at a dark site that is the safe default). Automatic needs a park for
+    /// first sync (red then: at a dark site that is the safe default). At dusk needs a park for
     /// the Sun; with none chosen yet it reads the watch's clock, red from 6 PM to 7 AM.
     func nightVision(phone: Bool?, park: Park?, at now: Date, calendar: Calendar = .current) -> Bool {
         switch self {
