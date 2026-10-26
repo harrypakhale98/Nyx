@@ -877,6 +877,41 @@
         }
       }
     },
+    "%lld of 7 Little Dipper stars, an estimate": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld von 7 Sternen des Kleinen Wagens, eine Schätzung"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of 7 Little Dipper stars, an estimate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld de las 7 estrellas de la Osa Menor, una estimación"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld des 7 étoiles du Petit Chariot, une estimation"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小びしゃくの7つの星のうち%lld個（推定）"
+          }
+        }
+      }
+    },
     "%lld out of 100, %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1717,41 +1752,6 @@
         }
       }
     },
-    "An International Dark Sky Park.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ein International Dark Sky Park."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "An International Dark Sky Park."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un International Dark Sky Park."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un International Dark Sky Park."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "International Dark Sky Parkです。"
-          }
-        }
-      }
-    },
     "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide.": {
       "extractionState": "manual",
       "localizations": {
@@ -2168,41 +2168,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "見ごろは%1$@、%2$@。"
-          }
-        }
-      }
-    },
-    "Bortle class %lld of 9, estimated.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bortle-Klasse %lld von 9, geschätzt."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bortle class %lld of 9, estimated."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clase Bortle %lld de 9, estimada."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Classe de Bortle %lld sur 9, estimée."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ボートルクラス%lld（9段階中、推定）。"
           }
         }
       }
@@ -2732,41 +2697,6 @@
         }
       }
     },
-    "Cloud forecasts (Open-Meteo)": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wolkenvorhersagen (Open-Meteo)"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cloud forecasts (Open-Meteo)"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pronósticos de nubes (Open-Meteo)"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prévisions de nuages (Open-Meteo)"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "雲予報（Open-Meteo）"
-          }
-        }
-      }
-    },
     "Cloud forecasts are off in Your privacy.": {
       "extractionState": "manual",
       "localizations": {
@@ -2798,6 +2728,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "「あなたのプライバシー」で雲予報がオフになっています。"
+          }
+        }
+      }
+    },
+    "Clouds likely hide the Little Dipper, an estimate": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolken verdecken wahrscheinlich den Kleinen Wagen, eine Schätzung"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clouds likely hide the Little Dipper, an estimate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las nubes probablemente ocultan la Osa Menor, una estimación"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nuages cachent sans doute le Petit Chariot, une estimation"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲で小びしゃくは見えない可能性が高い（推定）"
+          }
+        }
+      }
+    },
+    "Clouds likely hide the Little Dipper. An estimate, not part of the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolken verdecken wahrscheinlich den Kleinen Wagen. Eine Schätzung, nicht Teil des Werts."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clouds likely hide the Little Dipper. An estimate, not part of the score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las nubes probablemente ocultan la Osa Menor. Es una estimación, no forma parte del índice."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nuages cachent sans doute le Petit Chariot. Une estimation, qui ne compte pas dans l’indice."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲で小びしゃくは見えない可能性が高いです。推定値で、スコアには含まれません。"
           }
         }
       }
@@ -3502,37 +3502,37 @@
         }
       }
     },
-    "Darkest of the next 14 nights": {
+    "Darkest of the next 30 nights": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die dunkelsten der nächsten 14 Nächte"
+            "value": "Die dunkelsten der nächsten 30 Nächte"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Darkest of the next 14 nights"
+            "value": "Darkest of the next 30 nights"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las noches más oscuras de las próximas 14"
+            "value": "Las noches más oscuras de las próximas 30"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les plus noires des 14 prochaines nuits"
+            "value": "Les plus noires des 30 prochaines nuits"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この先14夜でいちばん暗い夜"
+            "value": "この先30夜でいちばん暗い夜"
           }
         }
       }
@@ -3743,41 +3743,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "一晩中地平線の下"
-          }
-        }
-      }
-    },
-    "Down for %lld%% of true darkness": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Während %lld %% der echten Dunkelheit unten"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Down for %lld%% of true darkness"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Oculta durante el %lld%% de la oscuridad total"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couchée pendant %lld %% de l’obscurité totale"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "完全に暗い時間の%lld%%は地平線の下"
           }
         }
       }
@@ -4307,19 +4272,19 @@
         }
       }
     },
-    "Find the on-device darkness estimate for a national park. Returns the score, 0 to 100.": {
+    "Find the on-device darkness score for a national park. Returns the score, 0 to 100.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ermittelt die auf dem Gerät berechnete Dunkelheitsschätzung für einen Nationalpark. Gibt den Wert von 0 bis 100 zurück."
+            "value": "Ermittelt den auf dem Gerät berechneten Dunkelheitswert für einen Nationalpark. Gibt den Wert von 0 bis 100 zurück."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Find the on-device darkness estimate for a national park. Returns the score, 0 to 100."
+            "value": "Find the on-device darkness score for a national park. Returns the score, 0 to 100."
           }
         },
         "es": {
@@ -4337,7 +4302,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "国立公園の暗さを、デバイス上で推定した値で調べます。0〜100のスコアを返します。"
+            "value": "国立公園の暗さスコアを、デバイス上で計算して調べます。0〜100のスコアを返します。"
           }
         }
       }
@@ -6757,6 +6722,41 @@
         }
       }
     },
+    "Moon up all through true darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond während der gesamten echten Dunkelheit am Himmel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up all through true darkness"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo durante toda la oscuridad total"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée pendant toute l’obscurité totale"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間はずっと月あり"
+          }
+        }
+      }
+    },
     "Moon up, %lld%% lit": {
       "extractionState": "manual",
       "localizations": {
@@ -6862,6 +6862,41 @@
         }
       }
     },
+    "Moon-free for %lld%% of true darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondfrei während %lld %% der echten Dunkelheit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon-free for %lld%% of true darkness"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin Luna durante el %lld%% de la oscuridad total"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans Lune pendant %lld %% de l’obscurité totale"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間の%lld%%は月なし"
+          }
+        }
+      }
+    },
     "Moon-free from %@ to %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -6928,6 +6963,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@から月なし。"
+          }
+        }
+      }
+    },
+    "Moon-free through all of true darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondfrei während der gesamten echten Dunkelheit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon-free through all of true darkness"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin Luna durante toda la oscuridad total"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans Lune pendant toute l’obscurité totale"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間はずっと月なし"
           }
         }
       }
@@ -7656,7 +7726,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nouvelle lune %@"
+            "value": "Nouvelle lune le %@"
           }
         },
         "ja": {
@@ -8332,37 +8402,37 @@
         }
       }
     },
-    "No true darkness in the next 14 nights at this latitude.": {
+    "No true darkness in the next 30 nights at this latitude.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "In den nächsten 14 Nächten keine echte Dunkelheit auf dieser Breite."
+            "value": "In den nächsten 30 Nächten keine echte Dunkelheit auf dieser Breite."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No true darkness in the next 14 nights at this latitude."
+            "value": "No true darkness in the next 30 nights at this latitude."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "En las próximas 14 noches no hay oscuridad total a esta latitud."
+            "value": "En las próximas 30 noches no hay oscuridad total a esta latitud."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pas d’obscurité totale dans les 14 prochaines nuits à cette latitude."
+            "value": "Pas d’obscurité totale dans les 30 prochaines nuits à cette latitude."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この緯度では、この先14夜は完全に暗くなりません。"
+            "value": "この緯度では、この先30夜は完全に暗くなりません。"
           }
         }
       }
@@ -11587,37 +11657,37 @@
         }
       }
     },
-    "That park could not be found in the bundled library.": {
+    "That place could not be found in Nyx.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dieser Park wurde in der mitgelieferten Bibliothek nicht gefunden."
+            "value": "Dieser Ort wurde in Nyx nicht gefunden."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "That park could not be found in the bundled library."
+            "value": "That place could not be found in Nyx."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ese parque no se encontró en la biblioteca incluida."
+            "value": "Ese lugar no se encontró en Nyx."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ce parc est introuvable dans la bibliothèque intégrée."
+            "value": "Ce lieu est introuvable dans Nyx."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "その公園は、内蔵のライブラリに見つかりませんでした。"
+            "value": "その場所はNyxに見つかりませんでした。"
           }
         }
       }
@@ -13263,6 +13333,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "時刻は公園の現地時間です。月の出と月の入りの誤差は数分以内、惑星の位置の誤差は約1度です。空の中の月は、満ち欠けがわかるように実際より大きく描いていますが、位置は正確です。"
+          }
+        }
+      }
+    },
+    "To the eye, about %lld of the Little Dipper's 7 stars. An estimate, not part of the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit bloßem Auge etwa %lld der 7 Sterne des Kleinen Wagens. Eine Schätzung, nicht Teil des Werts."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To the eye, about %lld of the Little Dipper's 7 stars. An estimate, not part of the score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A simple vista, unas %lld de las 7 estrellas de la Osa Menor. Es una estimación, no forma parte del índice."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À l’œil nu, environ %lld des 7 étoiles du Petit Chariot. Une estimation, qui ne compte pas dans l’indice."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "肉眼で小びしゃくの7つの星のうち約%lld個。推定値で、スコアには含まれません。"
           }
         }
       }

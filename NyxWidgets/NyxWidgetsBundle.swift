@@ -100,7 +100,7 @@ struct TonightWidget:Widget {
     var body:some WidgetConfiguration {
         // The same kind as before the park setting, so widgets already placed keep working (as "darkest saved park").
         AppIntentConfiguration(kind:WidgetSelection.kind,intent:TonightWidgetIntent.self,provider:TonightProvider()) { entry in TonightWidgetView(entry:entry) }
-            .configurationDisplayName("Tonight's sky").description("The darkest sky among your saved parks, or one park you choose, with forecast limits and closures shown.")
+            .configurationDisplayName("Tonight's sky").description("The darkest sky among your saved places, or one place you choose, with forecast limits and closures shown.")
             // Extra large appears only on iPad: tonight and the month side by side (portrait: tonight above the month).
             .supportedFamilies(families)
     }
@@ -139,7 +139,7 @@ struct MoonProvider:AppIntentTimelineProvider {
 struct MoonWidget:Widget {
     var body:some WidgetConfiguration {
         AppIntentConfiguration(kind:"MoonWidget",intent:MoonWidgetIntent.self,provider:MoonProvider()) { entry in MoonWidgetView(entry:entry) }
-            .configurationDisplayName("The Moon").description("Tonight's Moon: its phase, how much is lit, and when it rises or sets at your park.")
+            .configurationDisplayName("The Moon").description("Tonight's Moon: its phase, how much is lit, and when it rises or sets at your place.")
             .supportedFamilies([.systemSmall,.accessoryCircular,.accessoryRectangular,.accessoryInline])
     }
 }
@@ -180,7 +180,7 @@ struct TonightControl:ControlWidget {
                     Text(value.name ?? String(localized:"Save a place in Nyx"))
                 } icon:{ Image(systemName:value.symbol) }
             }
-        }.displayName("Tonight's score").description("Tonight's darkness score at your darkest saved park, or a park you choose.")
+        }.displayName("Tonight's score").description("Tonight's darkness score at your darkest saved place, or a place you choose.")
     }
 }
 struct TonightControlProvider:AppIntentControlValueProvider {

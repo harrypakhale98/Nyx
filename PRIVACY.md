@@ -26,7 +26,7 @@ Links to nps.gov, recreation.gov, Wikidata, Globe at Night and similar sites ope
 ## On the device
 
 - **Journal, saved parks and saved spots** – SwiftData. Photos come from `PhotosPicker` only, so Nyx sees just the ones you pick. A journal export (`.nyxjournal`) leaves the device only if you share it.
-- **Location** – When In Use, asked in context with an explainer first. Used on the device for distances, and only kept if you save where you stand as a spot. The app is fully usable with location off.
+- **Location** – When In Use, asked in context with an explainer first. Used on the device for distances and for night vision at dusk, and only kept if you save where you stand as a spot. The app is fully usable with location off.
 - **Motion** – field mode's compass reads device attitude while it's open. "Where to look by sound" reads headphone motion and asks for Motion & Fitness access once. Neither is stored.
 - **Notifications** – local only. Alarms use AlarmKit; the Live Activity is started and updated locally, with no push token.
 - **Ask Nyx** – Foundation Models on the device. No Private Cloud Compute, no network.
@@ -37,7 +37,7 @@ Links to nps.gov, recreation.gov, Wikidata, Globe at Night and similar sites ope
 
 ## Apple Watch and Vision Pro
 
-The watch makes no network requests; the network code isn't compiled into the watch targets. The iPhone sends it saved places, night vision, cached forecasts and the aurora forecast over WatchConnectivity.
+The watch makes no network requests; the network code isn't compiled into the watch targets. The iPhone sends it saved places, its starting point (a park or the town you chose, never your location), night vision, cached forecasts and the aurora forecast over WatchConnectivity.
 
 The Vision Pro app reaches the same four hosts as the iPhone, with the same requests and pacing, each behind its own switch in its Your privacy screen: `api.open-meteo.com` (clouds), `air-quality-api.open-meteo.com` (smoke and haze), `developer.nps.gov` (park alerts, all 63 park codes in one request) and `services.swpc.noaa.gov` (the aurora forecast, one global file). They carry only the parks' public coordinates and codes, or nothing at all. It requests no permissions.
 

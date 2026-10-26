@@ -3,7 +3,9 @@ import Foundation
 /// At dusk, worked out on this device: night vision from civil dusk to civil dawn (the Sun 6° down)
 /// at the place the person plans from. Civil dusk rather than sunset: at sunset the sky is still
 /// bright enough for a white screen to feel right, and eyes begin to adapt only as twilight deepens.
-/// It is also the watch's rule (`WristSky`), so wrist and phone turn red at the same minute.
+/// It is also the watch's rule (`WristSky`), and the iPhone hands the watch its chosen town or starting
+/// park (`WatchContext.dusk`), so wrist and phone turn red at the same minute (while Near me has found
+/// you, the phone follows where you are, which never leaves it).
 nonisolated enum NightVisionSchedule {
     struct Plan: Equatable, Sendable {
         /// What night vision should be now.
@@ -24,11 +26,7 @@ nonisolated enum NightVisionSchedule {
 
     /// The Sun alone decides, so any place stands in for the starting point: a park, a town, or where
     /// you are. The time zone plays no part in the Sun's altitude.
-    static func place(latitude: Double, longitude: Double) -> Park {
-        Park(id: "dusk", nps: nil, name: "", countryCode: "", region: "", kind: .custom, curated: false,
-             latitude: latitude, longitude: longitude, timeZoneID: "UTC", darkSkyDesignated: false,
-             bortleEstimate: HomeSky.assumedBortle, description: "", sourceURL: "", sourceNote: "", viewingSpots: [])
-    }
+    static func place(latitude: Double, longitude: Double) -> Park { WristSky.place(latitude: latitude, longitude: longitude) }
 
     /// What At dusk wants at `now`, given the switch as it stands (`current`) and when it was last
     /// turned by hand (`heldAt`). A turn by hand holds until the first dusk or dawn after it; where no

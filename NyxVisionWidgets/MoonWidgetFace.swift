@@ -72,7 +72,7 @@ struct MoonWidgetFace: View {
                     WidgetMoon(facts: facts).frame(width: 64, height: 64)
                     Spacer(minLength: 4)
                     Text(facts.phaseName).font(.system(.headline, design: .serif)).foregroundStyle(Self.ink).lineLimit(2).minimumScaleFactor(0.85)
-                    Text("\(facts.percent)% lit").font(.subheadline).monospacedDigit().foregroundStyle(Self.amber)
+                    Text("\(facts.percent)% lit").font(.subheadline).monospacedDigit().foregroundStyle(quiet)
                     Text("New moon \(facts.nextNewMoon.formatted(.dateTime.month(.abbreviated).day()))").font(.caption).foregroundStyle(quiet)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
@@ -82,7 +82,7 @@ struct MoonWidgetFace: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Tonight's Moon").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.semibold)).kerning(Lettering.spaced ? 1.4 : 0).foregroundStyle(eyebrowInk)
                         Text(facts.phaseName).font(.system(.title2, design: .serif)).foregroundStyle(Self.ink)
-                        Text("\(facts.percent)% lit").font(.headline).monospacedDigit().foregroundStyle(Self.amber)
+                        Text("\(facts.percent)% lit").font(.headline).monospacedDigit().foregroundStyle(quiet)
                         Spacer(minLength: 6)
                         Text("Next new moon").font(.caption).foregroundStyle(quiet)
                         Text(facts.nextNewMoon.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())).font(.system(.headline, design: .serif)).foregroundStyle(Self.ink)
@@ -93,6 +93,9 @@ struct MoonWidgetFace: View {
                 }
             }
         }
+        // How much is lit in the quiet ink, as on the iPhone's Moon widget and the watch's Moon face; the
+        // across-the-room figure stays the face's one amber number. Text sizes capped as the iPhone's widgets.
+        .dynamicTypeSize(.small ... .xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(week.map { facts.spoken+" "+Self.spokenWeek($0) } ?? facts.spoken))
     }
@@ -104,7 +107,7 @@ struct MoonWidgetFace: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Tonight's Moon").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.semibold)).kerning(Lettering.spaced ? 1.4 : 0).foregroundStyle(eyebrowInk)
                     Text(facts.phaseName).font(.system(.title2, design: .serif)).foregroundStyle(Self.ink).lineLimit(2).minimumScaleFactor(0.85)
-                    Text("\(facts.percent)% lit").font(.headline).monospacedDigit().foregroundStyle(Self.amber)
+                    Text("\(facts.percent)% lit").font(.headline).monospacedDigit().foregroundStyle(quiet)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }

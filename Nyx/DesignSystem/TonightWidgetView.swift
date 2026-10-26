@@ -514,7 +514,7 @@ struct TonightWidgetView:View {
                             if night.id==best { Circle().stroke(accent.opacity(0.8),lineWidth:0.8).frame(width:22,height:22) }
                             // 8 pt at most, so the 11 pt ring stays just outside the largest dot, as in the app.
                             let d=2*NightMark.drawnRadius(NightMark.radius(score:night.score.value,low:low,high:high,largest:8),fill:night.basis.fill,lineWidth:1,stroke:1)
-                            NightDot(fill:night.basis.fill,color:accent,fillOpacity:0.45+Double(night.score.value)/200,lineWidth:1,mark:NightMark.mark(night,differentiate:differentiate)).frame(width:d,height:d).widgetAccentable()
+                            NightDot(fill:night.basis.fill,color:accent,fillOpacity:palette.markOpacity(score:night.score.value),lineWidth:palette.stroke,mark:NightMark.mark(night,differentiate:differentiate)).frame(width:d,height:d).widgetAccentable()
                         }.frame(height:24)
                         Text("\(night.score.value)").font(.caption2.monospacedDigit()).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
                     }.frame(maxWidth:.infinity)
@@ -700,7 +700,7 @@ struct TonightWidgetView:View {
                 .foregroundStyle(tonight ? ink : muted)
             ZStack {
                 if best { Circle().stroke(accent.opacity(0.85),lineWidth:0.9).frame(width:17*scale,height:17*scale) }
-                NightDot(fill:night.basis.fill,color:accent.opacity(night.basis.fill == .full ? 1 : 0.85),fillOpacity:0.45+Double(night.score.value)/200,lineWidth:0.9,mark:NightMark.mark(night,differentiate:differentiate)).frame(width:d,height:d).widgetAccentable()
+                NightDot(fill:night.basis.fill,color:accent.opacity(night.basis.fill == .full ? 1 : 0.85),fillOpacity:palette.markOpacity(score:night.score.value),lineWidth:0.9*palette.stroke,mark:NightMark.mark(night,differentiate:differentiate)).frame(width:d,height:d).widgetAccentable()
                 // Beside the dot, never on it: the dot's size is the score and must stay readable.
                 if let event { SkyGlyph(event == .eclipse ? .eclipse : .meteors,color:ink).frame(width:12*scale,height:12*scale).offset(x:13*scale,y:-3*scale) }
                 // The best night's ring fits here; the cell stays 28 pt and spills into the row gap, so the month keeps its height.

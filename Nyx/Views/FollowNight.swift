@@ -227,7 +227,7 @@ struct NightInProgressStrip: View {
                 }
                 .foregroundStyle(palette.ink)
                 .padding(.horizontal,placement == .inline ? 10 : 16).frame(maxWidth:.infinity,maxHeight:.infinity)
-                .background { if palette.nightVision || reduceTransparency { Capsule().fill(Color.black).overlay(Capsule().stroke(palette.line,lineWidth:0.8)) } }
+                .background { if palette.nightVision || reduceTransparency || palette.highContrast { Capsule().fill(Color.black).overlay(Capsule().stroke(palette.line,lineWidth:0.8)) } }
                 .contentShape(Capsule())
             }
             .buttonStyle(.plain)

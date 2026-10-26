@@ -80,6 +80,12 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// (`AuroraForecast.item`). Nil with "Aurora forecast" off or none fetched, and from an iPhone
     /// before 2.4; an older watch ignores it.
     let aurora: AuroraOutlook?
+    /// Where the iPhone's night vision At dusk looks for the Sun when Near me has not found you
+    /// (`NightVisionDusk.place`): the chosen town or starting park, never the device's location, which
+    /// stays on the iPhone. As [latitude, longitude] to a tenth of a degree (about 11 km; dusk moves
+    /// about 24 seconds over that), so the wrist's At dusk turns at the phone's minute. Nil from an
+    /// iPhone before it was sent; the wrist then follows the park on Tonight. An older watch ignores it.
+    let dusk: [Double]?
     /// The forecasts in the shape the score engine and the widgets already read, expanded once when
     /// the context is made or received, never per score. Not sent: rebuilt from `forecasts`.
     let cloudForecasts: [String: Forecast]
@@ -90,7 +96,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// Only what travels; the expanded forecasts above are rebuilt on arrival.
     enum CodingKeys: String, CodingKey {
         case version, sent, sequence, savedParkIDs, homeParkID, nightVision, brighterRed, forecasts, details, closures, ranges, places, usualClouds, tonightParkID, watchParkIDs, droppedParkIDs, dataVersion, aurora
-        case tonightNight, spotForecastsOff
+        case tonightNight, spotForecastsOff, dusk
     }
     /// What was sent; the expanded forecasts follow from it.
     static func == (a: WatchContext, b: WatchContext) -> Bool {
@@ -98,14 +104,16 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             && a.nightVision == b.nightVision && a.brighterRed == b.brighterRed && a.forecasts == b.forecasts && a.details == b.details && a.closures == b.closures
             && a.ranges == b.ranges && a.places == b.places && a.usualClouds == b.usualClouds
             && a.tonightParkID == b.tonightParkID && a.watchParkIDs == b.watchParkIDs && a.droppedParkIDs == b.droppedParkIDs && a.dataVersion == b.dataVersion
-            && a.aurora == b.aurora && a.tonightNight == b.tonightNight && a.spotForecastsOff == b.spotForecastsOff
+            && a.aurora == b.aurora && a.tonightNight == b.tonightNight && a.spotForecastsOff == b.spotForecastsOff && a.dusk == b.dusk
     }
 
     init(sent: Date, savedParkIDs: [String], homeParkID: String, nightVision: Bool, brighterRed: Bool = false, forecasts: [String: CompactForecast],
          details: [String: CompactDetail] = [:], closures: [String: String] = [:], ranges: [String: [String: [Int]]] = [:], places: [Place] = [],
          usualClouds: [String: CloudClimate.Months] = [:], tonightParkID: String? = nil, watchParkIDs: [String] = [], droppedParkIDs: [String] = [],
-         dataVersion: String? = WatchContext.bundledData, sequence: Int64? = nil, aurora: AuroraOutlook? = nil, tonightNight: String? = nil, spotForecastsOff: Bool = false) {
+         dataVersion: String? = WatchContext.bundledData, sequence: Int64? = nil, aurora: AuroraOutlook? = nil, tonightNight: String? = nil, spotForecastsOff: Bool = false,
+         dusk: [Double]? = nil) {
         self.version = Self.currentVersion
+        self.dusk = dusk.flatMap(Self.duskPoint)
         self.tonightNight = tonightParkID == nil ? nil : tonightNight; self.spotForecastsOff = spotForecastsOff
         self.aurora = aurora
         self.sequence = sequence
@@ -137,7 +145,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
                      details: [String: ForecastDetail] = [:], closures: [String: String] = [:], aboveInversion: Set<String> = [],
                      ranges: [String: [String: ClosedRange<Int>]] = [:], places: [Place] = [], climate: CloudClimate = .shared,
                      tonightParkID: String? = nil, tonightNight: String? = nil, watchParkIDs: [String] = [], aurora: AuroraOutlook? = nil,
-                     spotForecastsOff: Bool = false, now: Date = .now) -> WatchContext {
+                     spotForecastsOff: Bool = false, dusk: [Double]? = nil, now: Date = .now) -> WatchContext {
         var compact: [String: CompactForecast] = [:], compactDetails: [String: CompactDetail] = [:], sentClosures: [String: String] = [:]
         var sentRanges: [String: [String: [Int]]] = [:]
         let ids = followed(saved: savedParkIDs, home: homeParkID, tonight: tonightParkID, watch: watchParkIDs)
@@ -204,7 +212,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         return WatchContext(sent: now, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: compact,
                             details: compactDetails, closures: sentClosures, ranges: sentRanges, places: sentPlaces, usualClouds: sentUsual,
                             tonightParkID: tonightParkID, watchParkIDs: watchParkIDs, droppedParkIDs: ids.filter(dropped.contains), aurora: sentAurora,
-                            tonightNight: tonightNight, spotForecastsOff: spotForecastsOff)
+                            tonightNight: tonightNight, spotForecastsOff: spotForecastsOff, dusk: dusk)
     }
     /// The places the watch is handed, in the order their clouds are packed, once each: the saved
     /// places, the starting park, the iPhone's Tonight answer, then the places the watch asked for.
@@ -264,7 +272,8 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     private func stamped(sent date: Date, sequence: Int64?) -> WatchContext {
         WatchContext(sent: date, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: forecasts, details: details,
                      closures: closures, ranges: ranges, places: places, usualClouds: usualClouds, tonightParkID: tonightParkID, watchParkIDs: watchParkIDs,
-                     droppedParkIDs: droppedParkIDs, dataVersion: dataVersion, sequence: sequence, aurora: aurora, tonightNight: tonightNight, spotForecastsOff: spotForecastsOff)
+                     droppedParkIDs: droppedParkIDs, dataVersion: dataVersion, sequence: sequence, aurora: aurora, tonightNight: tonightNight, spotForecastsOff: spotForecastsOff,
+                     dusk: dusk)
     }
     /// The number for the next hand-over: one past the last, or the clock in milliseconds when that
     /// is higher. A clock set back never lowers it, and a reinstall that forgot the last number still
@@ -314,6 +323,13 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// watch's, the same night could score differently on each: said plainly, on the watch, without
     /// guessing which of the two is older.
     var dataNote: String? { dataDiffers ? Self.versionsNote : nil }
+    /// `dusk` as a place for the Sun, or nil.
+    var duskPlace: Park? { dusk.map { WristSky.place(latitude: $0[0], longitude: $0[1]) } }
+    /// A latitude and longitude to a tenth of a degree, or nil unless it is a real place.
+    static func duskPoint(_ point: [Double]) -> [Double]? {
+        guard point.count == 2, point.allSatisfy(\.isFinite), abs(point[0]) <= 90, abs(point[1]) <= 180 else { return nil }
+        return point.map { ($0*10).rounded()/10 }
+    }
     /// The same words on the faces (`FaceNote.versionsDiffer`), spoken.
     static var versionsNote: String { String(localized: "iPhone and Apple Watch have different versions of Nyx. Update both for matching scores.") }
     /// A night's key in `ranges`: its park-local calendar day, as `WatchLink` writes a date.
@@ -367,6 +383,8 @@ nonisolated extension WatchContext {
         droppedParkIDs = (try? container.decodeIfPresent([String].self, forKey: .droppedParkIDs)) ?? []
         // Absent before 2.3: nothing to compare, so nothing is said.
         dataVersion = (try? container.decodeIfPresent(String.self, forKey: .dataVersion)) ?? nil
+        // Absent from an older iPhone, or with no starting point: the wrist follows the park on Tonight.
+        dusk = ((try? container.decodeIfPresent([Double].self, forKey: .dusk)) ?? nil).flatMap(Self.duskPoint)
         cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
         climate = CloudClimate.shared.carrying(usualClouds)
     }

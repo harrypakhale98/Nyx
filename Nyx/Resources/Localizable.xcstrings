@@ -2330,37 +2330,37 @@
         }
       }
     },
-    "%@, %@ lit. Confirm park access before you go.": {
+    "%@, %@ lit. Confirm conditions and park access before traveling.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@ beleuchtet. Prüfe vor der Fahrt, ob der Park zugänglich ist."
+            "value": "%@, %@ beleuchtet. Prüfe vor der Fahrt die Bedingungen und ob der Park zugänglich ist."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@ lit. Confirm park access before you go."
+            "value": "%@, %@ lit. Confirm conditions and park access before traveling."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@ iluminada. Confirma el acceso al parque antes de ir."
+            "value": "%@, %@ iluminada. Confirma las condiciones y el acceso al parque antes de viajar."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@ éclairée. Vérifiez l’accès au parc avant de partir."
+            "value": "%@, %@ éclairée. Vérifiez les conditions et l’accès au parc avant de partir."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@、輝面比%2$@。出かける前に、公園に入れるか確認してください。"
+            "value": "%1$@、輝面比%2$@。出発前に、天候と公園に入れるかを確認してください。"
           }
         }
       }
@@ -12513,7 +12513,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "新月ごとに、いちばん暗い夜のある週末を示します。これほど先のスコアはその月のいつもの雲にもとづきます。月と完全に暗い時間は正確です。"
+            "value": "新月ごとに、いちばん暗い夜のある週末を示します。これほど先のスコアはその月の平年の雲量にもとづきます。月と完全に暗い時間は正確です。"
           }
         }
       }
@@ -12548,7 +12548,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "新月ごとに、いちばん暗い夜のある週末を示します。この場所にはいつもの雲のデータがないため、先のスコアは月と完全に暗い時間（どちらも正確）にもとづきます。"
+            "value": "新月ごとに、いちばん暗い夜のある週末を示します。この場所には平年の雲量のデータがないため、先のスコアは月と完全に暗い時間（どちらも正確）にもとづきます。"
           }
         }
       }
@@ -13347,37 +13347,37 @@
         }
       }
     },
-    "At dusk is red from dusk to dawn at the park on Tonight. Night vision keeps your eyes adapted to the dark.": {
+    "At dusk is red from dusk to dawn at your iPhone's starting point. Night vision keeps your eyes adapted to the dark.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "„Ab Dämmerung“ ist rot von der Abend- bis zur Morgendämmerung am Park unter „Heute Nacht“. Nachtsicht erhält die Dunkeladaptation deiner Augen."
+            "value": "„Ab Dämmerung“ ist rot von der Abend- bis zur Morgendämmerung am Ausgangspunkt deines iPhone. Nachtsicht erhält die Dunkeladaptation deiner Augen."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "At dusk is red from dusk to dawn at the park on Tonight. Night vision keeps your eyes adapted to the dark."
+            "value": "At dusk is red from dusk to dawn at your iPhone's starting point. Night vision keeps your eyes adapted to the dark."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Al anochecer pone la pantalla roja del anochecer al alba en el parque de Esta noche. La visión nocturna mantiene tus ojos adaptados a la oscuridad."
+            "value": "Al anochecer pone la pantalla roja del anochecer al alba en el punto de partida de tu iPhone. La visión nocturna mantiene tus ojos adaptados a la oscuridad."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Au crépuscule, l’écran est rouge du crépuscule à l’aube au parc de l’onglet Ce soir. La vision nocturne garde vos yeux adaptés à l’obscurité."
+            "value": "Au crépuscule, l’écran est rouge du crépuscule à l’aube au point de départ de votre iPhone. La vision nocturne garde vos yeux adaptés à l’obscurité."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "「夕暮れから」では、「今夜」の公園で夕暮れから夜明けまで赤くなります。ナイトビジョンなら、暗さに慣れた目を保てます。"
+            "value": "「夕暮れから」では、iPhoneの出発地で夕暮れから夜明けまで赤くなります。ナイトビジョンなら、暗さに慣れた目を保てます。"
           }
         }
       }
@@ -15118,6 +15118,111 @@
         }
       }
     },
+    "Best this week": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche am besten"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best this week"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor de la semana"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meilleure de la semaine"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今週いちばんよい夜"
+          }
+        }
+      }
+    },
+    "Best this week: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche am besten: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best this week: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor de la semana: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meilleure de la semaine : %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今週いちばんよい夜：%@"
+          }
+        }
+      }
+    },
+    "Best this week: %@ and %lld more": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche am besten: %@ und %lld weitere"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best this week: %@ and %lld more"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor de la semana: %@ y %lld más"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meilleure de la semaine : %@ et %lld autres"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今週いちばんよい夜：%1$@ほか%2$lld夜"
+          }
+        }
+      }
+    },
     "Best this week: %@ · %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -15149,6 +15254,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "今週いちばんよい夜：%@ · %lld"
+          }
+        }
+      }
+    },
+    "Best this week: every night": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche am besten: jede Nacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best this week: every night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor de la semana: todas las noches"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meilleure de la semaine : toutes les nuits"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今週いちばんよい夜：どの夜も"
           }
         }
       }
@@ -18442,7 +18582,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "「あなたのプライバシー」で雲の予報がオフのため、この夜は月、暗さ、いつもの雲にもとづきます。"
+            "value": "「あなたのプライバシー」で雲の予報がオフのため、この夜は月、暗さ、平年の雲量にもとづきます。"
           }
         }
       }
@@ -20422,41 +20562,6 @@
         }
       }
     },
-    "Dark hours": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dunkle Stunden"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dark hours"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Horas oscuras"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heures d’obscurité"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "暗い時間"
-          }
-        }
-      }
-    },
     "Dark night": {
       "extractionState": "manual",
       "localizations": {
@@ -21052,41 +21157,6 @@
         }
       }
     },
-    "Darkest of the week": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die dunkelste der Woche"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Darkest of the week"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La más oscura de la semana"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La plus sombre de la semaine"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今週いちばん暗い"
-          }
-        }
-      }
-    },
     "Darkest park within %@ of Denver this weekend": {
       "extractionState": "manual",
       "localizations": {
@@ -21293,111 +21363,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@以内でいちばん暗い"
-          }
-        }
-      }
-    },
-    "Darkest: %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Am dunkelsten: %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Darkest: %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Más oscura: %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La plus noire : %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "いちばん暗い：%@"
-          }
-        }
-      }
-    },
-    "Darkest: %@ and %lld more": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Am dunkelsten: %@ und %lld weitere"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Darkest: %@ and %lld more"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Más oscuras: %@ y %lld más"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La plus noire : %@ et %lld autres"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "いちばん暗い：%1$@ほか%2$lld夜"
-          }
-        }
-      }
-    },
-    "Darkest: every night": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Am dunkelsten: jede Nacht"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Darkest: every night"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Más oscuras: todas las noches"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les plus noires : toutes les nuits"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "いちばん暗い：どの夜も"
           }
         }
       }
@@ -24497,41 +24462,6 @@
         }
       }
     },
-    "Enabled": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktiviert"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enabled"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Activado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Activé"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "有効"
-          }
-        }
-      }
-    },
     "Estimate": {
       "extractionState": "manual",
       "localizations": {
@@ -26282,19 +26212,19 @@
         }
       }
     },
-    "Find the on-device darkness estimate for a park or dark-sky place. Returns the score, 0 to 100.": {
+    "Find the on-device darkness score for a park or dark-sky place. Returns the score, 0 to 100.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ermittelt die auf dem Gerät berechnete Dunkelheitsschätzung für einen Park oder Dunkelort. Gibt den Wert von 0 bis 100 zurück."
+            "value": "Ermittelt den auf dem Gerät berechneten Dunkelheitswert für einen Park oder Dunkelort. Gibt den Wert von 0 bis 100 zurück."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Find the on-device darkness estimate for a park or dark-sky place. Returns the score, 0 to 100."
+            "value": "Find the on-device darkness score for a park or dark-sky place. Returns the score, 0 to 100."
           }
         },
         "es": {
@@ -26312,7 +26242,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "公園や暗い空の場所の暗さを、デバイス上で推定した値で調べます。0〜100のスコアを返します。"
+            "value": "公園や暗い空の場所の暗さスコアを、デバイス上で計算して調べます。0〜100のスコアを返します。"
           }
         }
       }
@@ -34882,7 +34812,7 @@
         }
       }
     },
-    "Location is used only while you use Nyx: to measure distances, for From home tonight and a trip's starting point, to notice in the evening that you are at a U.S. national park, to point the sky to true north, and, only when you ask, to save where you stand as a spot. Where you are stays on this iPhone; a spot you save is sent only as its position, rounded to about %@.": {
+    "Location is used only while you use Nyx: to measure distances, for the sky at your starting point and a trip's starting point, to notice in the evening that you are at a U.S. national park, to point the sky to true north, to turn night vision on at dusk where you are, and, only when you ask, to save where you stand as a spot. Where you are stays on this iPhone; a spot you save is sent only as its position, rounded to about %@.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -34891,13 +34821,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Der Standort wird nur verwendet, während du Nyx benutzt: um Entfernungen zu messen, für „Von zu Hause heute Nacht“ und den Ausgangspunkt einer Reise, um abends zu erkennen, dass du in einem US-Nationalpark bist, um den Himmel nach geografisch Nord auszurichten und, nur wenn du darum bittest, um deinen Standort als Platz zu speichern. Wo du bist, bleibt auf diesem iPad; ein gespeicherter Platz wird nur als seine Position gesendet, auf etwa %@ gerundet."
+                  "value": "Der Standort wird nur verwendet, während du Nyx benutzt: um Entfernungen zu messen, für den Himmel an deinem Ausgangspunkt und den Ausgangspunkt einer Reise, um abends zu erkennen, dass du in einem US-Nationalpark bist, um den Himmel nach geografisch Nord auszurichten, um die Nachtsicht ab der Dämmerung dort einzuschalten, wo du bist, und, nur wenn du darum bittest, um deinen Standort als Platz zu speichern. Wo du bist, bleibt auf diesem iPad; ein gespeicherter Platz wird nur als seine Position gesendet, auf etwa %@ gerundet."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Der Standort wird nur verwendet, während du Nyx benutzt: um Entfernungen zu messen, für „Von zu Hause heute Nacht“ und den Ausgangspunkt einer Reise, um abends zu erkennen, dass du in einem US-Nationalpark bist, um den Himmel nach geografisch Nord auszurichten und, nur wenn du darum bittest, um deinen Standort als Platz zu speichern. Wo du bist, bleibt auf diesem iPhone; ein gespeicherter Platz wird nur als seine Position gesendet, auf etwa %@ gerundet."
+                  "value": "Der Standort wird nur verwendet, während du Nyx benutzt: um Entfernungen zu messen, für den Himmel an deinem Ausgangspunkt und den Ausgangspunkt einer Reise, um abends zu erkennen, dass du in einem US-Nationalpark bist, um den Himmel nach geografisch Nord auszurichten, um die Nachtsicht ab der Dämmerung dort einzuschalten, wo du bist, und, nur wenn du darum bittest, um deinen Standort als Platz zu speichern. Wo du bist, bleibt auf diesem iPhone; ein gespeicherter Platz wird nur als seine Position gesendet, auf etwa %@ gerundet."
                 }
               }
             }
@@ -34909,13 +34839,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Location is used only while you use Nyx: to measure distances, for From home tonight and a trip's starting point, to notice in the evening that you are at a U.S. national park, to point the sky to true north, and, only when you ask, to save where you stand as a spot. Where you are stays on this iPad; a spot you save is sent only as its position, rounded to about %@."
+                  "value": "Location is used only while you use Nyx: to measure distances, for the sky at your starting point and a trip's starting point, to notice in the evening that you are at a U.S. national park, to point the sky to true north, to turn night vision on at dusk where you are, and, only when you ask, to save where you stand as a spot. Where you are stays on this iPad; a spot you save is sent only as its position, rounded to about %@."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Location is used only while you use Nyx: to measure distances, for From home tonight and a trip's starting point, to notice in the evening that you are at a U.S. national park, to point the sky to true north, and, only when you ask, to save where you stand as a spot. Where you are stays on this iPhone; a spot you save is sent only as its position, rounded to about %@."
+                  "value": "Location is used only while you use Nyx: to measure distances, for the sky at your starting point and a trip's starting point, to notice in the evening that you are at a U.S. national park, to point the sky to true north, to turn night vision on at dusk where you are, and, only when you ask, to save where you stand as a spot. Where you are stays on this iPhone; a spot you save is sent only as its position, rounded to about %@."
                 }
               }
             }
@@ -34927,13 +34857,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "La ubicación solo se usa mientras usas Nyx: para medir distancias, para Desde casa esta noche y el punto de partida de un viaje, para notar por la noche que estás en un parque nacional de EE. UU., para orientar el cielo hacia el norte verdadero y, solo cuando lo pides, para guardar como sitio el lugar donde estás. Tu ubicación se queda en este iPad; un sitio que guardas solo se envía como su posición, redondeada a unos %@."
+                  "value": "La ubicación solo se usa mientras usas Nyx: para medir distancias, para el cielo en tu punto de partida y el punto de partida de un viaje, para notar por la noche que estás en un parque nacional de EE. UU., para orientar el cielo hacia el norte verdadero, para activar la visión nocturna al anochecer donde estás y, solo cuando lo pides, para guardar como sitio el lugar donde estás. Tu ubicación se queda en este iPad; un sitio que guardas solo se envía como su posición, redondeada a unos %@."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "La ubicación solo se usa mientras usas Nyx: para medir distancias, para Desde casa esta noche y el punto de partida de un viaje, para notar por la noche que estás en un parque nacional de EE. UU., para orientar el cielo hacia el norte verdadero y, solo cuando lo pides, para guardar como sitio el lugar donde estás. Tu ubicación se queda en este iPhone; un sitio que guardas solo se envía como su posición, redondeada a unos %@."
+                  "value": "La ubicación solo se usa mientras usas Nyx: para medir distancias, para el cielo en tu punto de partida y el punto de partida de un viaje, para notar por la noche que estás en un parque nacional de EE. UU., para orientar el cielo hacia el norte verdadero, para activar la visión nocturna al anochecer donde estás y, solo cuando lo pides, para guardar como sitio el lugar donde estás. Tu ubicación se queda en este iPhone; un sitio que guardas solo se envía como su posición, redondeada a unos %@."
                 }
               }
             }
@@ -34945,13 +34875,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "La position n’est utilisée que pendant que vous utilisez Nyx : pour mesurer les distances, pour Depuis chez vous ce soir et le point de départ d’un voyage, pour remarquer le soir que vous êtes dans un parc national des États-Unis, pour orienter le ciel vers le nord géographique et, seulement quand vous le demandez, pour enregistrer l’endroit où vous êtes comme lieu. Votre position reste sur cet iPad ; un lieu enregistré n’est envoyé que sous la forme de sa position, arrondie à environ %@."
+                  "value": "La position n’est utilisée que pendant que vous utilisez Nyx : pour mesurer les distances, pour le ciel à votre point de départ et le point de départ d’un voyage, pour remarquer le soir que vous êtes dans un parc national des États-Unis, pour orienter le ciel vers le nord géographique, pour activer la vision nocturne au crépuscule là où vous êtes et, seulement quand vous le demandez, pour enregistrer l’endroit où vous êtes comme lieu. Votre position reste sur cet iPad ; un lieu enregistré n’est envoyé que sous la forme de sa position, arrondie à environ %@."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "La position n’est utilisée que pendant que vous utilisez Nyx : pour mesurer les distances, pour Depuis chez vous ce soir et le point de départ d’un voyage, pour remarquer le soir que vous êtes dans un parc national des États-Unis, pour orienter le ciel vers le nord géographique et, seulement quand vous le demandez, pour enregistrer l’endroit où vous êtes comme lieu. Votre position reste sur cet iPhone ; un lieu enregistré n’est envoyé que sous la forme de sa position, arrondie à environ %@."
+                  "value": "La position n’est utilisée que pendant que vous utilisez Nyx : pour mesurer les distances, pour le ciel à votre point de départ et le point de départ d’un voyage, pour remarquer le soir que vous êtes dans un parc national des États-Unis, pour orienter le ciel vers le nord géographique, pour activer la vision nocturne au crépuscule là où vous êtes et, seulement quand vous le demandez, pour enregistrer l’endroit où vous êtes comme lieu. Votre position reste sur cet iPhone ; un lieu enregistré n’est envoyé que sous la forme de sa position, arrondie à environ %@."
                 }
               }
             }
@@ -34963,13 +34893,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "位置情報は、Nyxを使っている間だけ、次のために使います。距離を測ること、「今夜、自宅から」と旅の出発地、夜に米国の国立公園にいると気づくこと、空を真北に合わせること、そして求められたときだけ、今いる場所をスポットとして保存すること。現在地はこのiPadから出ません。保存したスポットは、約%@に丸めた位置としてだけ送信されます。"
+                  "value": "位置情報は、Nyxを使っている間だけ、次のために使います。距離を測ること、出発地の空と旅の出発地、夜に米国の国立公園にいると気づくこと、空を真北に合わせること、今いる場所の夕暮れにナイトビジョンをオンにすること、そして求められたときだけ、今いる場所をスポットとして保存すること。現在地はこのiPadから出ません。保存したスポットは、約%@に丸めた位置としてだけ送信されます。"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "位置情報は、Nyxを使っている間だけ、次のために使います。距離を測ること、「今夜、自宅から」と旅の出発地、夜に米国の国立公園にいると気づくこと、空を真北に合わせること、そして求められたときだけ、今いる場所をスポットとして保存すること。現在地はこのiPhoneから出ません。保存したスポットは、約%@に丸めた位置としてだけ送信されます。"
+                  "value": "位置情報は、Nyxを使っている間だけ、次のために使います。距離を測ること、出発地の空と旅の出発地、夜に米国の国立公園にいると気づくこと、空を真北に合わせること、今いる場所の夕暮れにナイトビジョンをオンにすること、そして求められたときだけ、今いる場所をスポットとして保存すること。現在地はこのiPhoneから出ません。保存したスポットは、約%@に丸めた位置としてだけ送信されます。"
                 }
               }
             }
@@ -37486,41 +37416,6 @@
         }
       }
     },
-    "Moon down all night": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mond die ganze Nacht unter dem Horizont"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon down all night"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna oculta toda la noche"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lune couchée toute la nuit"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一晩中月は沈んでいる"
-          }
-        }
-      }
-    },
     "Moon down at %@": {
       "extractionState": "manual",
       "localizations": {
@@ -37552,41 +37447,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@に月が沈む"
-          }
-        }
-      }
-    },
-    "Moon down through true darkness": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mond während der echten Dunkelheit untergegangen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon down through true darkness"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna oculta durante la oscuridad total"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lune couchée pendant l’obscurité totale"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "完全に暗い時間はずっと月が沈んでいる"
           }
         }
       }
@@ -37972,6 +37832,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "月は細く、影響はほとんどありません（輝面比%@）。"
+          }
+        }
+      }
+    },
+    "Moon up all through true darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond während der gesamten echten Dunkelheit am Himmel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up all through true darkness"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo durante toda la oscuridad total"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée pendant toute l’obscurité totale"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間はずっと月あり"
           }
         }
       }
@@ -39541,37 +39436,37 @@
         }
       }
     },
-    "Moves the Tonight's sky widget to your next saved park, in order of tonight's score. Tomorrow it returns to your darkest park.": {
+    "Moves the Tonight's sky widget to your next saved place, in order of tonight's score. Tomorrow it returns to your darkest place.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stellt das Widget „Himmel heute Nacht“ auf deinen nächsten gespeicherten Park um, geordnet nach dem Wert für heute Nacht. Morgen kehrt es zu deinem dunkelsten Park zurück."
+            "value": "Stellt das Widget „Himmel heute Nacht“ auf deinen nächsten gespeicherten Ort um, geordnet nach dem Wert für heute Nacht. Morgen kehrt es zu deinem dunkelsten Ort zurück."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moves the Tonight's sky widget to your next saved park, in order of tonight's score. Tomorrow it returns to your darkest park."
+            "value": "Moves the Tonight's sky widget to your next saved place, in order of tonight's score. Tomorrow it returns to your darkest place."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pasa el widget Cielo de esta noche a tu siguiente parque guardado, según el índice de esta noche. Mañana vuelve a tu parque más oscuro."
+            "value": "Pasa el widget Cielo de esta noche a tu siguiente lugar guardado, según el índice de esta noche. Mañana vuelve a tu lugar más oscuro."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Passe le widget Ciel de ce soir à votre parc enregistré suivant, dans l’ordre de l’indice de ce soir. Demain, il revient à votre parc le plus sombre."
+            "value": "Passe le widget Ciel de ce soir à votre lieu enregistré suivant, dans l’ordre de l’indice de ce soir. Demain, il revient à votre lieu le plus sombre."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "「今夜の空」ウィジェットを、今夜のスコア順で次の保存した公園に切り替えます。明日はいちばん暗い公園に戻ります。"
+            "value": "「今夜の空」ウィジェットを、今夜のスコア順で次の保存した場所に切り替えます。明日はいちばん暗い場所に戻ります。"
           }
         }
       }
@@ -42221,7 +42116,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "予報の範囲を超える夜は、各場所のふだんの雲と月をもとに順位を付けています。近づいたらもう一度確認してください。"
+            "value": "予報の範囲を超える夜は、各場所の平年の雲量と月をもとに順位を付けています。近づいたらもう一度確認してください。"
           }
         }
       }
@@ -52789,37 +52684,37 @@
         }
       }
     },
-    "Precise Location is off for Nyx, so this is only good to a few kilometers. You can turn it on in Settings.": {
+    "Precise Location is off for Nyx, so this is only good to about %@. You can turn it on in Settings.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "„Genauer Standort“ ist für Nyx ausgeschaltet, daher ist dies nur auf einige Kilometer genau. Du kannst ihn in den Einstellungen einschalten."
+            "value": "„Genauer Standort“ ist für Nyx ausgeschaltet, daher ist dies nur auf etwa %@ genau. Du kannst ihn in den Einstellungen einschalten."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Precise Location is off for Nyx, so this is only good to a few kilometers. You can turn it on in Settings."
+            "value": "Precise Location is off for Nyx, so this is only good to about %@. You can turn it on in Settings."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La ubicación exacta está desactivada para Nyx, así que esto solo es fiable a unos pocos kilómetros. Puedes activarla en Ajustes."
+            "value": "La ubicación exacta está desactivada para Nyx, así que esto solo es fiable a unos %@. Puedes activarla en Ajustes."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La position exacte est désactivée pour Nyx : celle-ci n’est donc précise qu’à quelques kilomètres près. Vous pouvez l’activer dans Réglages."
+            "value": "La position exacte est désactivée pour Nyx : celle-ci n’est donc précise qu’à environ %@ près. Vous pouvez l’activer dans Réglages."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyxの「正確な位置情報」がオフになっているため、精度は数キロメートル程度です。設定でオンにできます。"
+            "value": "Nyxの「正確な位置情報」がオフになっているため、精度は約%@です。設定でオンにできます。"
           }
         }
       }
@@ -59858,37 +59753,37 @@
         }
       }
     },
-    "Show the next saved park": {
+    "Show the next saved place": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nächsten gespeicherten Park anzeigen"
+            "value": "Nächsten gespeicherten Ort anzeigen"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Show the next saved park"
+            "value": "Show the next saved place"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mostrar el siguiente parque guardado"
+            "value": "Mostrar el siguiente lugar guardado"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Afficher le parc enregistré suivant"
+            "value": "Afficher le lieu enregistré suivant"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "次の保存した公園を表示"
+            "value": "次の保存した場所を表示"
           }
         }
       }
@@ -65831,76 +65726,6 @@
         }
       }
     },
-    "The Moon is down all through true darkness.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Mond ist während der gesamten echten Dunkelheit untergegangen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The Moon is down all through true darkness."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Luna está oculta durante toda la oscuridad total."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Lune est couchée pendant toute l’obscurité totale."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "完全に暗い時間は、ずっと月が沈んでいます。"
-          }
-        }
-      }
-    },
-    "The Moon is down for %lld%% of true darkness.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Mond ist während %lld %% der echten Dunkelheit untergegangen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The Moon is down for %lld%% of true darkness."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Luna está oculta durante el %lld%% de la oscuridad total."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Lune est couchée pendant %lld %% de l’obscurité totale."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "完全に暗い時間の%lld%%は、月が沈んでいます。"
-          }
-        }
-      }
-    },
     "The Moon is down through all of it.": {
       "extractionState": "manual",
       "localizations": {
@@ -66881,13 +66706,13 @@
         }
       }
     },
-    "The best of the next %lld nights: %@ at %@, %lld out of 100, %@. %@ Confirm park access before you go.": {
+    "The best of the next %lld nights: %@ at %@, %lld out of 100, %@. %@ Confirm conditions and park access before traveling.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@nights@: %2$@ in %3$@, %4$lld von 100, %5$@. %6$@ Prüfe vor der Fahrt, ob der Park zugänglich ist."
+            "value": "%#@nights@: %2$@ in %3$@, %4$lld von 100, %5$@. %6$@ Prüfe vor der Fahrt die Bedingungen und ob der Park zugänglich ist."
           },
           "substitutions": {
             "nights": {
@@ -66915,7 +66740,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The best of the next %#@nights@: %2$@ at %3$@, %4$lld out of 100, %5$@. %6$@ Confirm park access before you go."
+            "value": "The best of the next %#@nights@: %2$@ at %3$@, %4$lld out of 100, %5$@. %6$@ Confirm conditions and park access before traveling."
           },
           "substitutions": {
             "nights": {
@@ -66943,7 +66768,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La mejor de %#@nights@: %2$@ en %3$@, %4$lld de 100, %5$@. %6$@ Confirma el acceso al parque antes de ir."
+            "value": "La mejor de %#@nights@: %2$@ en %3$@, %4$lld de 100, %5$@. %6$@ Confirma las condiciones y el acceso al parque antes de viajar."
           },
           "substitutions": {
             "nights": {
@@ -66971,7 +66796,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La meilleure des %#@nights@ : %2$@ à %3$@, %4$lld sur 100, %5$@. %6$@ Vérifiez l’accès au parc avant de partir."
+            "value": "La meilleure des %#@nights@ : %2$@ à %3$@, %4$lld sur 100, %5$@. %6$@ Vérifiez les conditions et l’accès au parc avant de partir."
           },
           "substitutions": {
             "nights": {
@@ -66999,7 +66824,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この先%#@nights@夜でいちばんよいのは、%2$@の%3$@で、100点中%4$lld点、%5$@。%6$@出かける前に、公園に入れるか確認してください。"
+            "value": "この先%#@nights@夜でいちばんよいのは、%2$@の%3$@で、100点中%4$lld点、%5$@。%6$@出発前に、天候と公園に入れるかを確認してください。"
           },
           "substitutions": {
             "nights": {
@@ -67675,37 +67500,37 @@
         }
       }
     },
-    "The darkest sky among your saved parks, or one park you choose, with forecast limits and closures shown.": {
+    "The darkest sky among your saved places, or one place you choose, with forecast limits and closures shown.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Der dunkelste Himmel unter deinen gespeicherten Parks oder einem Park deiner Wahl, mit den Grenzen der Vorhersage und Sperrungen."
+            "value": "Der dunkelste Himmel unter deinen gespeicherten Orten oder einem Ort deiner Wahl, mit den Grenzen der Vorhersage und Sperrungen."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The darkest sky among your saved parks, or one park you choose, with forecast limits and closures shown."
+            "value": "The darkest sky among your saved places, or one place you choose, with forecast limits and closures shown."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El cielo más oscuro entre tus parques guardados, o un parque que elijas, con los límites del pronóstico y los cierres a la vista."
+            "value": "El cielo más oscuro entre tus lugares guardados, o un lugar que elijas, con los límites del pronóstico y los cierres a la vista."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le ciel le plus noir parmi vos parcs enregistrés, ou un parc de votre choix, avec les limites de la prévision et les fermetures affichées."
+            "value": "Le ciel le plus noir parmi vos lieux enregistrés, ou un lieu de votre choix, avec les limites de la prévision et les fermetures affichées."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "保存した公園のうちいちばん暗い空、または選んだ一つの公園の空。予報の限界と閉鎖情報も表示します。"
+            "value": "保存した場所のうちいちばん暗い空、または選んだ一つの場所の空。予報の限界と閉鎖情報も表示します。"
           }
         }
       }
@@ -72030,37 +71855,37 @@
         }
       }
     },
-    "Tonight's Moon: its phase, how much is lit, and when it rises or sets at your park.": {
+    "Tonight's Moon: its phase, how much is lit, and when it rises or sets at your place.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Der Mond heute Nacht: seine Phase, wie viel beleuchtet ist und wann er an deinem Park auf- oder untergeht."
+            "value": "Der Mond heute Nacht: seine Phase, wie viel beleuchtet ist und wann er an deinem Ort auf- oder untergeht."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tonight's Moon: its phase, how much is lit, and when it rises or sets at your park."
+            "value": "Tonight's Moon: its phase, how much is lit, and when it rises or sets at your place."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La Luna de esta noche: su fase, cuánto está iluminada y cuándo sale o se pone en tu parque."
+            "value": "La Luna de esta noche: su fase, cuánto está iluminada y cuándo sale o se pone en tu lugar."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La Lune de ce soir : sa phase, sa part éclairée, et son lever ou son coucher à votre parc."
+            "value": "La Lune de ce soir : sa phase, sa part éclairée, et son lever ou son coucher à votre lieu."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今夜の月：月の形、輝面比、そしてあなたの公園で月が昇る、または沈む時刻。"
+            "value": "今夜の月：月の形、輝面比、そしてあなたの場所で月が昇る、または沈む時刻。"
           }
         }
       }
@@ -72135,37 +71960,37 @@
         }
       }
     },
-    "Tonight's darkness score at your darkest saved park, or a park you choose.": {
+    "Tonight's darkness score at your darkest saved place, or a place you choose.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Der Dunkelheitswert heute Nacht in deinem dunkelsten gespeicherten Park oder einem Park deiner Wahl."
+            "value": "Der Dunkelheitswert heute Nacht an deinem dunkelsten gespeicherten Ort oder einem Ort deiner Wahl."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tonight's darkness score at your darkest saved park, or a park you choose."
+            "value": "Tonight's darkness score at your darkest saved place, or a place you choose."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El índice de oscuridad de esta noche en tu parque guardado más oscuro, o en un parque que elijas."
+            "value": "El índice de oscuridad de esta noche en tu lugar guardado más oscuro, o en un lugar que elijas."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "L’indice d’obscurité de ce soir à votre parc enregistré le plus sombre, ou à un parc de votre choix."
+            "value": "L’indice d’obscurité de ce soir à votre lieu enregistré le plus sombre, ou à un lieu de votre choix."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "保存した公園のうちいちばん暗い公園、または選んだ公園の、今夜の暗さスコア。"
+            "value": "保存した場所のうちいちばん暗い場所、または選んだ場所の、今夜の暗さスコア。"
           }
         }
       }
@@ -75450,7 +75275,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この時期のこの場所のふだんの雲量：%lld%%。"
+            "value": "この時期のこの場所の平年の雲量：%lld%%。"
           }
         }
       }

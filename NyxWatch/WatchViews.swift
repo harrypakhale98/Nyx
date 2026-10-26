@@ -595,12 +595,13 @@ struct MilestonesPage: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
+    /// In the iPhone's words (`NightVerdict.moonSentence`); how much is lit is the line above.
     private var moonLine: String {
         let below = night.sky.moonDownPercent
         switch below {
-        case 100: return String(localized: "The Moon is down all through true darkness.")
-        case 0: return String(localized: "The Moon is up all through true darkness.")
-        default: return String(localized: "The Moon is down for \(below)% of true darkness.")
+        case 100: return Sentences.end(String(localized: "Moon-free through all of true darkness"))
+        case 0: return Sentences.end(String(localized: "Moon up all through true darkness"))
+        default: return Sentences.end(String(localized: "Moon-free for \(below)% of true darkness"))
         }
     }
 }
@@ -646,9 +647,9 @@ struct WeekPage: View {
                 if let best {
                     VStack(alignment: .leading, spacing: 0) {
                         // Every night alike (usual clouds all week): no night to single out.
-                        if tied.count > 1, tied.count == nights.count { Text("Darkest: every night").font(.footnote) }
-                        else if tied.count > 1 { Text("Darkest: \(park.dayLabel(best.id)) and \(tied.count-1) more").font(.footnote) }
-                        else { Text("Darkest: \(park.dayLabel(best.id))").font(.footnote) }
+                        if tied.count > 1, tied.count == nights.count { Text("Best this week: every night").font(.footnote) }
+                        else if tied.count > 1 { Text("Best this week: \(park.dayLabel(best.id)) and \(tied.count-1) more").font(.footnote) }
+                        else { Text("Best this week: \(park.dayLabel(best.id))").font(.footnote) }
                         // The score in the accent, its band word in ink as the dial sets it, and what
                         // the score rests on in a line of its own.
                         HStack(alignment: .firstTextBaseline, spacing: 5) {
@@ -694,14 +695,14 @@ struct WeekPage: View {
                 // The iPhone's sizes across the week's own range, 7.5 pt at most so the 10 pt ring stays clear of it.
                 let d = 2*NightMark.drawnRadius(NightMark.radius(score: night.score.value, low: low, high: high, largest: 7.5), fill: night.basis.fill, lineWidth: 1, stroke: palette.stroke)
                 // Wrist down the fills drop to one quiet level; only the sizes still rank the nights.
-                NightDot(fill: night.basis.fill, color: palette.accent, fillOpacity: dimmed ? 0.5 : 0.5+Double(night.score.value)/200, lineWidth: palette.stroke,
+                NightDot(fill: night.basis.fill, color: palette.accent, fillOpacity: palette.markOpacity(score: dimmed ? 0 : night.score.value), lineWidth: palette.stroke,
                          mark: NightMark.mark(night, differentiate: differentiate)).frame(width: d, height: d)
             }.frame(height: 22)
             Text(night.score.value, format: .number).font(.caption2.monospacedDigit()).foregroundStyle(palette.muted).lineLimit(1).minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(label(night) + (best ? ". " + String(localized: "Darkest of the week") : ""))
+        .accessibilityLabel(label(night) + (best ? ". " + String(localized: "Best this week") : ""))
     }
     private func label(_ night: Night) -> String {
         let base = String(localized: "\(park.dayLabel(night.id)), \(night.score.value), \(night.score.band.label)")
@@ -743,7 +744,7 @@ struct ParksList: View {
                 Section("US national parks") { ForEach(store.parks) { row($0, now: now, scored: false) } }
                 Section {
                     Picker("Night vision", selection: $store.palette) { ForEach(PaletteChoice.allCases) { Text($0.title).tag($0) } }
-                } footer: { Text("At dusk is red from dusk to dawn at the park on Tonight. Night vision keeps your eyes adapted to the dark.") }
+                } footer: { Text("At dusk is red from dusk to dawn at your iPhone's starting point. Night vision keeps your eyes adapted to the dark.") }
                 Section {
                     NavigationLink(value: WatchRoute.credits) { Label("Credits", systemImage: "text.book.closed") }
                 } footer: { Text("Nyx on Apple Watch makes no network requests. Clouds come from Nyx on your iPhone.") }

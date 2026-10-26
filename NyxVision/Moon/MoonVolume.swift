@@ -15,6 +15,7 @@ struct MoonVolume: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.legibilityWeight) private var legibilityWeight
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openWindow) private var openWindow
     @State private var globe = MoonGlobe()
@@ -40,7 +41,7 @@ struct MoonVolume: View {
             .onEnded { _ in globe.settle(reduceMotion: reduceMotion) })
         .ornament(attachmentAnchor: .scene(.bottom), contentAlignment: .top) {
             MoonControls(view: view, nights: $nights, offersPlanner: !model.plannerOpen)
-                .environment(\.visionPalette, VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency))
+                .environment(\.visionPalette, VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency || contrast == .increased, boldText: legibilityWeight == .bold))
                 .modifier(DebugTypeSize())
                 // Turns red with the Moon, on the iPhone's curve.
                 .animation(NyxMotion.spring(reduced: reduceMotion), value: model.nightVision)
@@ -321,6 +322,8 @@ struct MoonControls: View {
                 Text("Night")
             }
             .frame(minWidth: 320)
+            // Starlight, as the iPhone's controls: amber is the score's and light's.
+            .tint(palette.ink)
             .accessibilityValue(Text(title))
             if let view {
                 Text(Self.caption(view)).font(.footnote).foregroundStyle(palette.muted).multilineTextAlignment(.center)

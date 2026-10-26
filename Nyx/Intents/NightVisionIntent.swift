@@ -7,7 +7,7 @@ import WidgetKit
 /// so a followed night's Live Activity and the watch turn with the switch (`NightVisionFollowers`).
 struct NightVisionIntent:SetValueIntent,LiveActivityIntent {
     static let title:LocalizedStringResource="Set night vision"
-    @Parameter(title:"Enabled") var value:Bool
+    @Parameter(title:"Night vision") var value:Bool
     init() {}
     init(value:Bool) { self.value=value }
     func perform() async throws -> some IntentResult {

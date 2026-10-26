@@ -9,7 +9,9 @@ struct FindBestNightIntent: AppIntent {
     static let title: LocalizedStringResource="Find the best night"
     static let description=IntentDescription("Finds the best night ahead at a park or dark-sky place, or across your saved parks, using Nyx's on-device darkness score. A closure in the last park update counts against a park. Clouds count only where a cached forecast reaches.")
     @Parameter(title:"Park",description:"Leave empty to compare your saved parks.") var park: ParkEntity?
-    @Parameter(title:"Nights",description:"How many nights ahead to look, up to 30.",default:14,inclusiveRange:(1,30)) var nights: Int
+    // 30 by default, the app's best-night reach (`NightVerdict.horizon`; App Intents wants a literal), so
+    // "Find the best night at Joshua Tree" names the night the park's page and Tonight name.
+    @Parameter(title:"Nights",description:"How many nights ahead to look, up to 30.",default:30,inclusiveRange:(1,30)) var nights: Int
     @Parameter(title:"Starting",description:"The first night to consider. Tonight if empty.") var start: Date?
     static var parameterSummary: some ParameterSummary {
         Summary("Find the best night at \(\.$park) in the next \(\.$nights) nights") { \.$start }
@@ -52,7 +54,7 @@ nonisolated enum BestNightSearch {
     /// `closures`: each park's closure, which counts against its nights as in the trip planner
     /// (`NightPlanner.better(_:_:closures:)`), so Siri and the planner pick the same best night.
     static func answer(parks: [Park], planner: NightPlanner, from start: Date, nights: Int, now: Date, closures: [String: String] = [:]) -> Answer? {
-        let count=min(30,max(1,nights))
+        let count=min(NightVerdict.horizon,max(1,nights))
         let all=planner.bestNights(parks,from:start,count:count,now:now,limit:.max,closures:closures)
         return all.isEmpty ? nil : Answer(nights:all,count:count)
     }
@@ -61,7 +63,7 @@ nonisolated enum BestNightSearch {
     /// or from tonight when no day was picked.
     static func answer(parks: [Park], planner: NightPlanner, day: TripDay?, nights: Int, now: Date, closures: [String: String] = [:]) -> Answer? {
         guard let day else { return answer(parks:parks,planner:planner,from:now,nights:nights,now:now,closures:closures) }
-        let count=min(30,max(1,nights))
+        let count=min(NightVerdict.horizon,max(1,nights))
         let all=planner.bestNights(parks,day:DateComponents(year:day.year,month:day.month,day:day.day),count:count,now:now,limit:.max,closures:closures)
         return all.isEmpty ? nil : Answer(nights:all,count:count)
     }
@@ -185,7 +187,7 @@ struct BestNightSnippetView: View {
             HStack(alignment:.firstTextBaseline,spacing:10) {
                 Text("\(night.score.value)").scoreNumeral(size:min(numeral,76),accent:palette.accent)
                 VStack(alignment:.leading,spacing:2) {
-                    Text(night.score.band.label).font(.system(.headline,design:.serif))
+                    Text(night.score.band.label).bandWord(.headline,ink:palette.ink)
                     Text(night.basisLabel ?? String(localized:"Cached forecast included")).font(.caption).foregroundStyle(palette.muted)
                 }
             }
@@ -196,7 +198,7 @@ struct BestNightSnippetView: View {
                 Text("\(night.sky.moon.name), \(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption).foregroundStyle(palette.muted)
                 Text(unknown).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             } else {
-                Text("\(night.sky.moon.name), \(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit. Confirm park access before you go.").font(.caption).foregroundStyle(palette.muted)
+                Text("\(night.sky.moon.name), \(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit. Confirm conditions and park access before traveling.").font(.caption).foregroundStyle(palette.muted)
             }
             HStack(spacing:10) {
                 if total>1 {

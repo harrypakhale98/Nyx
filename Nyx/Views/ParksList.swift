@@ -120,7 +120,7 @@ struct ParksView: View {
             // The rows already on screen only: a rotor never scores the whole world.
             .accessibilityRotor(Text("Closures"),entries:rotor(spots,shown) { park in model.closure(park).map { String(localized:"\(park.shortName): \($0)") } },entryID:\.id,entryLabel:\.label)
             .accessibilityRotor(Text("Pristine nights"),entries:rotor(spots,shown) { park in
-                let night=model.night(park); return night.score.value>=90 ? String(localized:"\(park.shortName), \(night.score.value)") : nil
+                let night=model.night(park); return night.score.value>=ScoreBand.pristine.minimum ? String(localized:"\(park.shortName), \(night.score.value)") : nil
             },entryID:\.id,entryLabel:\.label)
         }
         // On an iPhone in landscape the keyboard hides all but the first result: a drag down puts it away.

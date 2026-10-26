@@ -43,7 +43,7 @@ Nyx only talks to four hosts, each with its own switch in Settings › Your priv
 - `air-quality-api.open-meteo.com` – smoke and haze
 - `services.swpc.noaa.gov` – NOAA's aurora (Kp) forecast, one global file
 
-Your location isn't sent anywhere. A saved spot's coordinates are rounded to 0.1° (about 11 km) before its forecast is requested. Notifications are local. The App Store privacy label is "Data Not Collected". Full details in [PRIVACY.md](PRIVACY.md).
+Your location isn't sent anywhere, except a spot you choose to save: its coordinates are rounded to 0.1° (about 11 km) before its forecast is requested. Notifications are local. The App Store privacy label is "Data Not Collected". Full details in [PRIVACY.md](PRIVACY.md).
 
 ## Building
 

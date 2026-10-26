@@ -69,8 +69,13 @@ nonisolated enum ScoreBand: String, Codable, CaseIterable, Sendable {
         case .poor: String(localized: "Poor")
         }
     }
+    /// The lowest score in the band: the one set of cutoffs every surface reads ("Excellent or better"
+    /// is `score >= ScoreBand.excellent.minimum`), never a number written again elsewhere.
+    var minimum: Int {
+        switch self { case .pristine: 90; case .excellent: 75; case .good: 60; case .fair: 40; case .poor: 0 }
+    }
     static func band(_ score: Int) -> Self {
-        switch score { case 90...: .pristine; case 75...: .excellent; case 60...: .good; case 40...: .fair; default: .poor }
+        allCases.first { score >= $0.minimum } ?? .poor
     }
 }
 /// What a night's cloud figure rests on. One rule everywhere (`CloudBasis.forecastWeight`): a

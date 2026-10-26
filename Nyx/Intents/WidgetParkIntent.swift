@@ -2,11 +2,11 @@ import AppIntents
 import Foundation
 import WidgetKit
 
-/// The Tonight widget's "next park" button. Shared by the app and the widget extension, where it
-/// runs: it moves the widget to the next saved park in order of tonight's score.
+/// The Tonight widget's "next place" button. Shared by the app and the widget extension, where it
+/// runs: it moves the widget to the next saved place in order of tonight's score.
 struct CycleWidgetParkIntent: AppIntent {
-    static let title: LocalizedStringResource="Show the next saved park"
-    static let description=IntentDescription("Moves the Tonight's sky widget to your next saved park, in order of tonight's score. Tomorrow it returns to your darkest park.")
+    static let title: LocalizedStringResource="Show the next saved place"
+    static let description=IntentDescription("Moves the Tonight's sky widget to your next saved place, in order of tonight's score. Tomorrow it returns to your darkest place.")
     static let isDiscoverable=false
     init() {}
     func perform() async throws -> some IntentResult {

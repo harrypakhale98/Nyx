@@ -173,7 +173,7 @@ extension ParkDetailView {
     }
     private var river: some View {
         Panel {
-            let river=model.nights(park,from:riverStart,count:30)
+            let river=model.nights(park,from:riverStart,count:NightVerdict.horizon)
             TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river),open:{ _ in showBreakdown() },hold:$heldNight)
             if model.detailPausedForLowData { Label("Forecast detail paused in Low Data Mode.",systemImage:"antenna.radiowaves.left.and.right.slash").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
             Divider().overlay(palette.line).padding(.top,10)

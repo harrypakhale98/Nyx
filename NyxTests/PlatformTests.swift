@@ -207,7 +207,7 @@ import Testing
         let full = BestNightSearch.dialog(answer, voiceOnly: false), voice = BestNightSearch.dialog(answer, voiceOnly: true)
         #expect(full.contains("Joshua Tree") && full.contains("\(answer.best.score.value) out of 100"))
         let basis = try #require(answer.best.noForecastSentence)
-        #expect(full.contains(basis) && full.contains("Confirm park access"))
+        #expect(full.contains(basis) && full.contains("Confirm conditions and park access"))
         #expect(voice.count < full.count && voice.contains(basis))
         // Gates of the Arctic in June: no true darkness, said plainly.
         let gaar = try park("gaar")

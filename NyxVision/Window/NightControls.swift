@@ -72,7 +72,7 @@ struct NightControls: View {
             Text(park.time(span.start)).font(.caption).foregroundStyle(palette.muted).monospacedDigit().accessibilityHidden(true)
             VStack(spacing: 4) {
                 Text(park.time(now)).font(.system(.title3, design: .serif)).monospacedDigit().foregroundStyle(palette.ink)
-                    .contentTransition(.numericText())
+                    .contentTransition(reduceMotion ? .opacity : .numericText())
                 Slider(value: Binding(get: { held ?? model.fraction }, set: { scrub(to: $0) }), in: 0...1) {
                     Text("Time of night")
                 } onEditingChanged: { began in
@@ -82,6 +82,8 @@ struct NightControls: View {
                     // Reduce Motion in the sky: one move, without a sweep, once the hand lets go.
                     if reduceMotion, model.immersiveOpen { model.move(to: target, reduceMotion: true) }
                 }
+                // Starlight, as the iPhone's controls (`RootView`): amber is the score's and light's.
+                .tint(palette.ink)
                 .frame(minWidth: 280)
                 .accessibilityValue(model.skyMoment.map { Text("\(park.time(now)), \($0.twilight)") } ?? Text(park.time(now)))
             }

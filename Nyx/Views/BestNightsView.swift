@@ -115,7 +115,7 @@ struct BestNightsView: View {
                 Text(park.shortName).font(.system(.title,design:.serif)).multilineTextAlignment(.center).foregroundStyle(palette.ink)
                 Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
                 Text("\(night.score.value)").scoreNumeral(size:min(heroSize,150),accent:palette.accent)
-                    .contentTransition(.numericText(value:Double(night.score.value)))
+                    .contentTransition(reduceMotion ? .opacity : .numericText(value:Double(night.score.value)))
                 Text(night.bandWithBasis).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center)
                 // On a dark scrim, as on Tonight: the one line here that must never be lost in the sky.
                 if let closure {

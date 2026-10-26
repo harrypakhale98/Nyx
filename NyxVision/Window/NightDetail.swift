@@ -62,7 +62,7 @@ struct NightDetail: View {
             // The iPhone's eyebrow (states and Dark Sky status: data, not a slogan), and the night's date under it.
             VStack(alignment: .leading, spacing: 4) {
                 let states = park.region.replacingOccurrences(of: ",", with: " · ")
-                VisionEyebrow(text: park.darkSkyDesignated ? "\(states) · \(String(localized: "International Dark Sky Park"))" : "\(states)")
+                VisionEyebrow(text: park.darkSkyDesignated ? "\(states) · \(String(localized: "International Dark Sky Park"))" : "\(states)", meta: true)
                 Text(park.dayLabel(plan.sky.evening)).font(.subheadline).foregroundStyle(palette.muted)
             }
             // The closure is the one line that must never be lost: beside the score.
@@ -72,7 +72,7 @@ struct NightDetail: View {
             }
             Text(plan.score.value, format: .number)
                 .scoreNumeral(size: numeral, accent: palette.accent)
-                .contentTransition(.numericText(value: Double(plan.score.value)))
+                .contentTransition(reduceMotion ? .opacity : .numericText(value: Double(plan.score.value)))
                 .accessibilityLabel(Text("Darkness score"))
                 .accessibilityValue(Text("\(plan.score.value) out of 100, \(plan.night.bandWithBasis)"))
             // The band alone: the caption below always opens with the basis ("Early look: …").
@@ -156,26 +156,31 @@ struct NightDetail: View {
         // Three columns side by side; stacked at accessibility sizes, where columns would clip.
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14)) : AnyLayout(HStackLayout(alignment: .top, spacing: 14))
         // Without true darkness there is nothing for the Moon to stay out of, so say that instead.
-        let moonNote = sky.darkHours > 0 ? String(localized: "Down for \(sky.moonDownPercent)% of true darkness")
-            : String(localized: "The Moon counts only in true darkness, and this night has none.")
+        // In the iPhone's and the watch's words (`NightVerdict.moonSentence`); how much is lit is the value above.
+        let moonNote = sky.darkHours <= 0 ? String(localized: "The Moon counts only in true darkness, and this night has none.")
+            : sky.moonDownPercent == 100 ? Sentences.end(String(localized: "Moon-free through all of true darkness"))
+            : sky.moonDownPercent == 0 ? Sentences.end(String(localized: "Moon up all through true darkness"))
+            : Sentences.end(String(localized: "Moon-free for \(sky.moonDownPercent)% of true darkness"))
         // The month's usual night (ERA5), in the iPhone's words: there is no hourly forecast detail here.
         let month = park.calendar.component(.month, from: plan.sky.evening)
         let usual = NightClimate.shared.lines(park, month: month)
         return VStack(alignment: .leading, spacing: 12) {
-            layout { factCells(darkness, hours, moonLine, moonNote, park) }
+            layout { factCells(darkness, hours, moonLine, moonNote, park, dipper: LittleDipper.reading(plan.night)) }
             if let usual {
                 Text(Sentences.join([usual.temperatures, usual.dew ?? ""])).font(.callout).foregroundStyle(palette.muted)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
-    @ViewBuilder private func factCells(_ darkness: String, _ hours: String?, _ moonLine: String, _ moonNote: String, _ park: Park) -> some View {
+    @ViewBuilder private func factCells(_ darkness: String, _ hours: String?, _ moonLine: String, _ moonNote: String, _ park: Park, dipper: LittleDipper.Reading?) -> some View {
         Fact(title: "True darkness", value: darkness, note: hours.map { "\($0) · \(park.timeZoneName)" } ?? park.timeZoneName)
         Fact(title: "Moon", value: moonLine, note: moonNote)
         // The iPhone's words: the class on its scale (its sky glow page), and the note that calls it an
         // estimate (`ScoreBreakdownView`). The designation is the eyebrow's.
+        // The Little Dipper count, as the iPhone's breakdown says it under Sky glow: the same reading of the
+        // same Moon, clouds and air the score counted.
         Fact(title: "Sky glow", value: String(localized: "Class \(park.bortleEstimate) of 9"),
-             note: String(localized: "Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))
+             note: Sentences.join([String(localized: "Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."), dipper?.sentence ?? ""]))
     }
 
     private func whatsUp(_ plan: NightPlan) -> some View {
@@ -274,7 +279,8 @@ private struct Fact: View {
     let note: String
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            VisionEyebrow(text: title)
+            // A fact's name over its value, quieter than a section's heading (the iPhone's breakdown rows).
+            Text(title).font(.subheadline.weight(.medium)).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader)
             Text(value).font(.system(.title3, design: .serif)).monospacedDigit().fixedSize(horizontal: false, vertical: true)
             Text(note).font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
         }

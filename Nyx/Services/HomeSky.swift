@@ -177,10 +177,9 @@ nonisolated struct HomeSky: Sendable {
     var moonlightLine: String? {
         guard hasDarkness else { return nil }
         if sky.moon.illumination<0.05 { return String(localized: "No moonlight to speak of: a good night for faint stars.") }
-        guard let free=moonFree else { return String(localized: "The Moon is up through all of it.") }
-        if let start=sky.darkStart, let end=sky.darkEnd, abs(free.start.timeIntervalSince(start))<120, abs(free.end.timeIntervalSince(end))<120 {
-            return String(localized: "The Moon is down through all of it.")
-        }
+        // "All" and "none" by the one Moon rule every surface uses (`SkyConditions.moonDownPercent`), in its words.
+        if sky.moonDownPercent==100 { return Sentences.end(String(localized: "Moon-free through all of true darkness")) }
+        guard let free=moonFree, sky.moonDownPercent>0 else { return Sentences.end(String(localized: "Moon up all through true darkness")) }
         return String(localized: "Moon-free from \(place.time(free.start)) to \(place.time(free.end)).")
     }
     /// The whole panel as one VoiceOver summary.

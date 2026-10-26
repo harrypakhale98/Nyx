@@ -6,8 +6,9 @@ import Foundation
 
 /// The wearer's night vision, in the iPhone's words and order: Off, On, At dusk, and the wrist's own
 /// Match iPhone. At dusk is the default: Nyx's standard colours by day, red from civil dusk to civil
-/// dawn at the park Tonight follows (the iPhone's At dusk follows its starting point by the same rule,
-/// `NightVisionSchedule`). The cases keep their stored names, so a choice made before a rename survives it.
+/// dawn at the place the iPhone's At dusk follows (its starting point, `WatchContext.duskPlace`), so
+/// wrist and phone turn at the same minute; before an iPhone has sent one, at the park Tonight follows.
+/// The cases keep their stored names, so a choice made before a rename survives it.
 nonisolated enum PaletteChoice: String, CaseIterable, Identifiable, Sendable {
     case standard, red, automatic, phone
     var id: String { rawValue }
@@ -36,6 +37,13 @@ nonisolated enum PaletteChoice: String, CaseIterable, Identifiable, Sendable {
 }
 
 nonisolated enum WristSky {
+    /// A place that stands only for the Sun's position (night vision at dusk): the Sun alone decides,
+    /// so the time zone and sky glow play no part.
+    static func place(latitude: Double, longitude: Double) -> Park {
+        Park(id: "dusk", nps: nil, name: "", countryCode: "", region: "", kind: .custom, curated: false,
+             latitude: latitude, longitude: longitude, timeZoneID: "UTC", darkSkyDesignated: false,
+             bortleEstimate: 4, description: "", sourceURL: "", sourceNote: "", viewingSpots: [])
+    }
     /// Civil night: the Sun more than 6° below the horizon. Under the midnight sun it never comes;
     /// in polar night it lasts all day.
     static func isCivilNight(at park: Park, _ date: Date) -> Bool {

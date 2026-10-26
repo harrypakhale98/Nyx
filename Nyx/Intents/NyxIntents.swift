@@ -34,7 +34,7 @@ enum NyxIntentError:Error,CustomLocalizedStringResourceConvertible {
 /// on a still dial, the Moon, what the clouds rest on), and returns the score so Shortcuts can use it.
 struct DarknessIntent:AppIntent {
     static let title:LocalizedStringResource="Tonight's darkness score"
-    static let description=IntentDescription("Find the on-device darkness estimate for a park or dark-sky place. Returns the score, 0 to 100.")
+    static let description=IntentDescription("Find the on-device darkness score for a park or dark-sky place. Returns the score, 0 to 100.")
     @Parameter(title:"Park") var park:ParkEntity
     static var parameterSummary:some ParameterSummary { Summary("Darkness at \(\.$park) tonight") }
     func perform() async throws -> some IntentResult & ReturnsValue<Int> & ProvidesDialog & ShowsSnippetView {
@@ -123,7 +123,7 @@ struct DarknessSnippetView:View {
             VStack(alignment:.leading,spacing:6) {
                 Text("Tonight").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(Lettering.spaced ? 1.4 : 0).foregroundStyle(palette.muted)
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
-                Text(night.score.band.label).font(.system(.headline,design:.serif)).foregroundStyle(palette.ink)
+                Text(night.score.band.label).bandWord(.headline,ink:palette.ink)
                 // The one line that must never be lost: beside the score, as on the park's page.
                 if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).labelStyle(.caution).fixedSize(horizontal:false,vertical:true) }
                 HStack(spacing:8) {
@@ -163,7 +163,7 @@ struct StaticScoreDial:View {
             Circle().trim(from:0.125,to:0.875).rotation(.degrees(90))
                 .stroke(palette.ink.opacity(0.18),style:StrokeStyle(lineWidth:7,lineCap:.round,dash:hasForecast ? [] : [6,5]))
             VStack(spacing:0) {
-                Text("\(score)").font(.system(size:44,weight:.light,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
+                Text("\(score)").scoreNumeral(size:44,accent:palette.accent)
                 Text("of 100").font(.caption2).foregroundStyle(palette.muted)
             }
         }
@@ -181,7 +181,7 @@ struct NyxShortcuts:AppShortcutsProvider {
     static var appShortcuts:[AppShortcut] {
         AppShortcut(intent:DarknessIntent(),phrases:["What is the darkness score at \(\.$park) in \(.applicationName)","Check tonight's sky at \(\.$park) with \(.applicationName)"],shortTitle:"Tonight's sky",systemImageName:"moon.stars")
         AppShortcut(intent:FindBestNightIntent(),phrases:["Find the best night at \(\.$park) with \(.applicationName)","When is the darkest night at \(\.$park) in \(.applicationName)","Find the best night for stars with \(.applicationName)"],shortTitle:"Best night",systemImageName:"calendar")
-        AppShortcut(intent:DarkTonightIntent(),phrases:["When is it dark tonight in \(.applicationName)","When is it dark at \(\.$park) in \(.applicationName)","When does true darkness start at \(\.$park) in \(.applicationName)"],shortTitle:"Dark hours",systemImageName:"moon.haze")
+        AppShortcut(intent:DarkTonightIntent(),phrases:["When is it dark tonight in \(.applicationName)","When is it dark at \(\.$park) in \(.applicationName)","When does true darkness start at \(\.$park) in \(.applicationName)"],shortTitle:"True darkness",systemImageName:"moon.haze")
         AppShortcut(intent:WhatsUpTonightIntent(),phrases:["What's up tonight in \(.applicationName)","What's up tonight at \(\.$park) in \(.applicationName)","What can I see tonight at \(\.$park) with \(.applicationName)"],shortTitle:"What's up",systemImageName:"sparkles")
         // A park is optional: without one, field mode opens at the last park used in the field, else the starting park.
         AppShortcut(intent:StartFieldModeIntent(),phrases:["Start field mode at \(\.$park) in \(.applicationName)","I'm stargazing at \(\.$park) with \(.applicationName)","Start field mode in \(.applicationName)","I'm stargazing with \(.applicationName)"],shortTitle:"Field mode",systemImageName:"scope")

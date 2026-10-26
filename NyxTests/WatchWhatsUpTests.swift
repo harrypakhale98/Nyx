@@ -48,25 +48,27 @@ import Testing
             }
         }
     }
-    /// The Geminids' peak at Joshua Tree: a row below the planets (ten or more an hour), timed,
-    /// with "peak tonight" beside the name, the wrist's own words for that night.
-    @Test func aShowerPeakIsARowBelowThePlanets() throws {
+    /// The Geminids' peak at Joshua Tree: a row right after the core, above the planets (ten or more
+    /// an hour, a rare thing before the ones up most nights), timed, with "peak tonight" beside the
+    /// name, the wrist's own words for that night. Siri says it in the same place (`items`).
+    @Test func aShowerPeakIsARowAboveThePlanets() throws {
         let jotr = try park("jotr")
         let up = WhatsUp(park: jotr, sky: try sky(jotr, "2026-12-13"), isTonight: true)
         let layout = WhatsUpPanel.layout(up)
-        #expect(layout.after.first?.kind == .meteors && layout.mentions.isEmpty)
+        #expect(layout.first.last?.kind == .meteors && layout.mentions.isEmpty)
+        #expect(up.items.map(\.id) == (layout.first + up.planets + layout.after + layout.mentions).map(\.id))
         #expect(up.shower?.note == "peak tonight" && up.shower?.timed == true)
         // The wrist copies the iPhone card's threshold (`WristWhatsUp.showerRow` in NyxWatch).
         #expect(WhatsUpPanel.showerRow == 10)
     }
-    /// The partial eclipse of August 2026 is seen from Joshua Tree: a timed row after the planets.
+    /// The partial eclipse of August 2026 is seen from Joshua Tree: a timed row above the planets.
     @Test func aVisiblePartialEclipseIsATimedRow() throws {
         let jotr = try park("jotr")
         let up = WhatsUp(park: jotr, sky: try sky(jotr, "2026-08-27"), isTonight: true)
         let eclipse = try #require(up.eclipse)
         #expect(up.events.eclipse?.visible != nil && up.events.eclipse?.eclipse.type == "partial")
         #expect(eclipse.timed && eclipse.value != nil)
-        #expect(WhatsUpPanel.layout(up).after.contains { $0.kind == .eclipse })
+        #expect(WhatsUpPanel.layout(up).first.contains { $0.kind == .eclipse })
     }
     /// Denali at midsummer is the wrist's quiet sky: the core cannot be timed and says why in the
     /// seasonal guidance's words; there is no shower or eclipse to lead with.
