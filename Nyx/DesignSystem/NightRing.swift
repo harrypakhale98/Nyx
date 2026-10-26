@@ -247,3 +247,30 @@ nonisolated enum DialMetrics {
     /// From the frame's edge to the arc's radius.
     static func inset(side:CGFloat)->CGFloat { 18*scale(side:side) }
 }
+
+/// A night from the engine alone (this file is shared with the watch, which has no `PlanModel`).
+private func previewRing(_ id: String, days: Int = 0) -> (ring: NightRing, park: Park)? {
+    guard let park = try? ParkData.load().first(where: { $0.id == id }) else { return nil }
+    let sky = AstronomyEngine().conditions(for: park, on: park.date(park.currentNight(at: .now), addingDays: days))
+    return NightRing(sky: sky, park: park).map { ($0, park) }
+}
+#Preview("Night track and its ends • standard, contrast, night vision") {
+    if let night = previewRing("jotr") {
+        let palettes = [NyxPalette(nightVision: false, highContrast: false), NyxPalette(nightVision: false, highContrast: true), NyxPalette(nightVision: true, highContrast: false)]
+        VStack(spacing: 24) {
+            ForEach(Array(palettes.enumerated()), id: \.offset) { _, palette in
+                ZStack { NightTrack(reveal: 1, ring: night.ring, palette: palette, glow: 1); NightRingEnds(ring: night.ring, park: night.park) }
+                    .frame(width: 220, height: 180).environment(\.nyx, palette)
+            }
+        }.padding().background(.black)
+    }
+}
+#Preview("Night track • drawing in, and on the watch") {
+    if let night = previewRing("grba", days: 7) {
+        let palette = NyxPalette(nightVision: false, highContrast: false)
+        HStack {
+            ForEach([0.25, 0.6, 1.0], id: \.self) { reveal in NightTrack(reveal: reveal, ring: night.ring, palette: palette, glow: 1).frame(width: 110, height: 110) }
+            NightTrack(reveal: 1, ring: night.ring, palette: palette, glow: 1, fit: .watch).frame(width: 110, height: 110)
+        }.padding().background(.black)
+    }
+}
