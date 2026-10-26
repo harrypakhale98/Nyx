@@ -37,3 +37,17 @@ extension MoonPhase {
         }
     }
 }
+
+// Not on visionOS: the Vision Pro widget compiles this file without the night planner.
+#if !os(visionOS)
+#Preview("The Moon symbol • four weeks of nights") {
+    // From the engine alone: this file is shared with the widgets, the watch and Vision Pro.
+    if let park = try? ParkData.load().first(where: { $0.id == "jotr" }) {
+        let tonight = park.currentNight(at: .now)
+        let nights = (0..<28).map { NightPlanner.night(park: park, sky: AstronomyEngine().conditions(for: park, on: park.date(tonight, addingDays: $0)), forecast: nil, detail: nil, now: .now) }
+        LazyVGrid(columns: Array(repeating: GridItem(.fixed(36)), count: 7)) {
+            ForEach(nights) { night in MoonSymbol(night: night).font(.title2) }
+        }.padding().background(.black).foregroundStyle(NyxPalette.starlight)
+    }
+}
+#endif

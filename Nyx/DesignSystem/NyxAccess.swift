@@ -233,3 +233,18 @@ struct SecondaryAction: ViewModifier {
 extension View {
     func secondaryAction()->some View { modifier(SecondaryAction()) }
 }
+
+/// The three action looks side by side: a text action, a capsule, and a secondary action on glass.
+private struct ActionStylesPreview: View {
+    var body: some View {
+        VStack(spacing:18) {
+            Button("Open this night") {}.buttonStyle(.nyxAction)
+            Button { } label:{ Label { Text(verbatim:"Darker on Fri, Oct 30 · Joshua Tree, 82") } icon:{ Image(systemName:"moon.stars") } }.buttonStyle(.capsuleAction)
+            Button { } label:{ Label("Add to Calendar",systemImage:"calendar.badge.plus") }.secondaryAction()
+        }.padding().background(.black)
+    }
+}
+#Preview("Action styles") { ActionStylesPreview() }
+#Preview("Action styles • AX5, wrapped") { ActionStylesPreview().dynamicTypeSize(.accessibility5) }
+#Preview("Action styles • Increase Contrast") { ActionStylesPreview().environment(\.nyx,NyxPalette(nightVision:false,highContrast:true)) }
+#Preview("Action styles • night vision") { ActionStylesPreview().environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)) }

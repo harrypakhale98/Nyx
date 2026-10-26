@@ -10548,7 +10548,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ajouter un lieu"
+            "value": "Ajouter un endroit"
           }
         },
         "ja": {
@@ -12227,7 +12227,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Une illustration : le même ciel dessiné avec la classe estimée de ce lieu et avec celle d’une ville."
+            "value": "Une illustration : le même ciel dessiné avec la classe estimée de cet endroit et avec celle d’une ville."
           }
         },
         "ja": {
@@ -18821,7 +18821,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nuages à vos lieux enregistrés"
+            "value": "Nuages à vos endroits enregistrés"
           }
         },
         "ja": {
@@ -18895,13 +18895,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nuages à vos lieux enregistrés est désactivé dans Nyx sur l’iPad."
+                  "value": "Nuages à vos endroits enregistrés est désactivé dans Nyx sur l’iPad."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nuages à vos lieux enregistrés est désactivé dans Nyx sur l’iPhone."
+                  "value": "Nuages à vos endroits enregistrés est désactivé dans Nyx sur l’iPhone."
                 }
               }
             }
@@ -18951,7 +18951,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nuages à vos lieux enregistrés est désactivé dans Votre vie privée, donc rien n’est envoyé : le lieu utilise sa nébulosité habituelle."
+            "value": "Nuages à vos endroits enregistrés est désactivé dans Votre vie privée, donc rien n’est envoyé : l’endroit utilise sa nébulosité habituelle."
           }
         },
         "ja": {
@@ -22231,7 +22231,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Supprimer le lieu"
+            "value": "Supprimer l’endroit"
           }
         },
         "ja": {
@@ -27406,7 +27406,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour un lieu qui n’est pas l’un des parcs nationaux des États-Unis, comme votre ville de départ, un lieu que vous enregistrez ou un parc ou site de ciel étoilé d’un autre pays, Nyx lit deux grilles fournies avec l’app. La luminosité du ciel vient des mêmes lumières nocturnes 2025 de la NASA, additionnées dans un rayon de 300 km autour de chaque point et comparées à 77 mesures publiées, de sites sombres à des centres-villes : en général à moins d’une demi-magnitude près, plus proche encore dans les lieux sombres. Elle est affichée comme une estimation, avec sa classe de Bortle. La nébulosité habituelle vient des mêmes dix ans d’ERA5, moyennée sur la nuit de chaque mois sur une grille d’un quart de degré ; la fréquence des nuits plutôt dégagées est estimée à partir de cette moyenne, d’où le mot « environ ». Les parcs nationaux des États-Unis gardent leurs propres valeurs vérifiées. Contient des informations modifiées du Copernicus Climate Change Service (2026), issues d’ERA5, 2015 à 2024."
+            "value": "Pour un lieu qui n’est pas l’un des parcs nationaux des États-Unis, comme votre ville de départ, un endroit que vous enregistrez ou un parc ou site de ciel étoilé d’un autre pays, Nyx lit deux grilles fournies avec l’app. La luminosité du ciel vient des mêmes lumières nocturnes 2025 de la NASA, additionnées dans un rayon de 300 km autour de chaque point et comparées à 77 mesures publiées, de sites sombres à des centres-villes : en général à moins d’une demi-magnitude près, plus proche encore dans les lieux sombres. Elle est affichée comme une estimation, avec sa classe de Bortle. La nébulosité habituelle vient des mêmes dix ans d’ERA5, moyennée sur la nuit de chaque mois sur une grille d’un quart de degré ; la fréquence des nuits plutôt dégagées est estimée à partir de cette moyenne, d’où le mot « environ ». Les parcs nationaux des États-Unis gardent leurs propres valeurs vérifiées. Contient des informations modifiées du Copernicus Climate Change Service (2026), issues d’ERA5, 2015 à 2024."
           }
         },
         "ja": {
@@ -27441,7 +27441,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour chaque lieu que vous enregistrez, Nyx demande ses nuages à api.open-meteo.com avec les coordonnées du lieu arrondies à 0,1°, soit environ %@. Le service sait à peu près où sont vos lieux, jamais le point exact ni leurs noms. Les lieux font l’objet d’une requête à part, jamais mêlée aux parcs. Votre position actuelle n’est envoyée que si vous l’enregistrez comme lieu. Si cette option est désactivée, rien n’est envoyé pour les lieux : ils gardent leur dernière prévision, puis utilisent leur nébulosité habituelle. Le service reçoit des informations réseau, comme votre adresse IP."
+            "value": "Pour chaque endroit que vous enregistrez, Nyx demande ses nuages à api.open-meteo.com avec les coordonnées de l’endroit arrondies à 0,1°, soit environ %@. Le service sait à peu près où sont vos lieux, jamais le point exact ni leurs noms. Les lieux font l’objet d’une requête à part, jamais mêlée aux parcs. Votre position actuelle n’est envoyée que si vous l’enregistrez comme lieu. Si cette option est désactivée, rien n’est envoyé pour les lieux : ils gardent leur dernière prévision, puis utilisent leur nébulosité habituelle. Le service reçoit des informations réseau, comme votre adresse IP."
           }
         },
         "ja": {
@@ -31031,7 +31031,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Illustration : le ciel de ce lieu à sa classe estimée, %lld, et le même ciel depuis une ville, classe 8. Depuis une ville, la Voie lactée et la plupart des étoiles faibles disparaissent ; seules les plus brillantes restent."
+            "value": "Illustration : le ciel de cet endroit à sa classe estimée, %lld, et le même ciel depuis une ville, classe 8. Depuis une ville, la Voie lactée et la plupart des étoiles faibles disparaissent ; seules les plus brillantes restent."
           }
         },
         "ja": {
@@ -34875,13 +34875,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "La position n’est utilisée que pendant que vous utilisez Nyx : pour mesurer les distances, pour le ciel à votre point de départ et le point de départ d’un voyage, pour remarquer le soir que vous êtes dans un parc national des États-Unis, pour orienter le ciel vers le nord géographique, pour activer la vision nocturne au crépuscule là où vous êtes et, seulement quand vous le demandez, pour enregistrer l’endroit où vous êtes comme lieu. Votre position reste sur cet iPad ; un lieu enregistré n’est envoyé que sous la forme de sa position, arrondie à environ %@."
+                  "value": "La position n’est utilisée que pendant que vous utilisez Nyx : pour mesurer les distances, pour le ciel à votre point de départ et le point de départ d’un voyage, pour remarquer le soir que vous êtes dans un parc national des États-Unis, pour orienter le ciel vers le nord géographique, pour activer la vision nocturne au crépuscule là où vous êtes et, seulement quand vous le demandez, pour enregistrer l’endroit où vous êtes comme endroit. Votre position reste sur cet iPad ; un endroit enregistré n’est envoyé que sous la forme de sa position, arrondie à environ %@."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "La position n’est utilisée que pendant que vous utilisez Nyx : pour mesurer les distances, pour le ciel à votre point de départ et le point de départ d’un voyage, pour remarquer le soir que vous êtes dans un parc national des États-Unis, pour orienter le ciel vers le nord géographique, pour activer la vision nocturne au crépuscule là où vous êtes et, seulement quand vous le demandez, pour enregistrer l’endroit où vous êtes comme lieu. Votre position reste sur cet iPhone ; un lieu enregistré n’est envoyé que sous la forme de sa position, arrondie à environ %@."
+                  "value": "La position n’est utilisée que pendant que vous utilisez Nyx : pour mesurer les distances, pour le ciel à votre point de départ et le point de départ d’un voyage, pour remarquer le soir que vous êtes dans un parc national des États-Unis, pour orienter le ciel vers le nord géographique, pour activer la vision nocturne au crépuscule là où vous êtes et, seulement quand vous le demandez, pour enregistrer l’endroit où vous êtes comme endroit. Votre position reste sur cet iPhone ; un endroit enregistré n’est envoyé que sous la forme de sa position, arrondie à environ %@."
                 }
               }
             }
@@ -40580,7 +40580,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nouveau lieu"
+            "value": "Nouvel endroit"
           }
         },
         "ja": {
@@ -42250,7 +42250,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nuits : %lld. Photos : %lld. Lieux : %lld."
+            "value": "Nuits : %lld. Photos : %lld. Endroits : %lld."
           }
         },
         "ja": {
@@ -45617,13 +45617,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit Immaculée, de 90 ou plus, dans un parc ou un lieu enregistré, ou un lieu ajouté : seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance et au plus une fois par semaine pour chaque lieu. Nyx peut aussi signaler le maximum d’une grande pluie d’étoiles filantes. Les rappels sont programmés sur cet iPad. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
+                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit Immaculée, de 90 ou plus, dans un parc ou un lieu enregistré, ou un endroit ajouté : seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance et au plus une fois par semaine pour chaque lieu. Nyx peut aussi signaler le maximum d’une grande pluie d’étoiles filantes. Les rappels sont programmés sur cet iPad. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit Immaculée, de 90 ou plus, dans un parc ou un lieu enregistré, ou un lieu ajouté : seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance et au plus une fois par semaine pour chaque lieu. Nyx peut aussi signaler le maximum d’une grande pluie d’étoiles filantes. Les rappels sont programmés sur cet iPhone. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
+                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit Immaculée, de 90 ou plus, dans un parc ou un lieu enregistré, ou un endroit ajouté : seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance et au plus une fois par semaine pour chaque lieu. Nyx peut aussi signaler le maximum d’une grande pluie d’étoiles filantes. Les rappels sont programmés sur cet iPhone. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
                 }
               }
             }
@@ -46943,7 +46943,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx lit votre position une fois, pour enregistrer ce lieu. Rien n’est envoyé sauf si vous l’enregistrez."
+            "value": "Nyx lit votre position une fois, pour enregistrer cet endroit. Rien n’est envoyé sauf si vous l’enregistrez."
           }
         },
         "ja": {
@@ -47112,13 +47112,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx enregistre ce lieu sur cet iPad. Ses nuages sont demandés avec sa position arrondie à environ %@."
+                  "value": "Nyx enregistre cet endroit sur cet iPad. Ses nuages sont demandés avec sa position arrondie à environ %@."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx enregistre ce lieu sur cet iPhone. Ses nuages sont demandés avec sa position arrondie à environ %@."
+                  "value": "Nyx enregistre cet endroit sur cet iPhone. Ses nuages sont demandés avec sa position arrondie à environ %@."
                 }
               }
             }
@@ -55138,7 +55138,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Renommer le lieu"
+            "value": "Renommer l’endroit"
           }
         },
         "ja": {
@@ -55278,7 +55278,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les requêtes vont à air-quality-api.open-meteo.com, le service de qualité de l’air du même fournisseur, pour les %lld parcs nationaux des États-Unis ensemble, jusqu’à 50 par requête, avec uniquement les mêmes coordonnées de points d’observation. Les autres parcs et sites de ciel étoilé sont demandés par les mêmes carrés entiers que leurs nuages, dès que vous avez ouvert la page de l’un d’eux. Le service renvoie la prévision d’aérosols et de poussière CAMS, qui avertit quand la fumée, la poussière ou la brume masqueront les étoiles faibles. Rien n’est demandé sur la fumée pour les lieux enregistrés. Le service reçoit des informations réseau, comme votre adresse IP."
+            "value": "Les requêtes vont à air-quality-api.open-meteo.com, le service de qualité de l’air du même fournisseur, pour les %lld parcs nationaux des États-Unis ensemble, jusqu’à 50 par requête, avec uniquement les mêmes coordonnées de points d’observation. Les autres parcs et sites de ciel étoilé sont demandés par les mêmes carrés entiers que leurs nuages, dès que vous avez ouvert la page de l’un d’eux. Le service renvoie la prévision d’aérosols et de poussière CAMS, qui avertit quand la fumée, la poussière ou la brume masqueront les étoiles faibles. Rien n’est demandé sur la fumée pour les endroits enregistrés. Le service reçoit des informations réseau, comme votre adresse IP."
           }
         },
         "ja": {
@@ -56573,7 +56573,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enregistrer un lieu"
+            "value": "Enregistrer un endroit"
           }
         },
         "ja": {
@@ -56608,7 +56608,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enregistrer votre propre lieu"
+            "value": "Enregistrer votre propre endroit"
           }
         },
         "ja": {
@@ -56643,7 +56643,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enregistrer un autre lieu"
+            "value": "Enregistrer un autre endroit"
           }
         },
         "ja": {
@@ -56678,7 +56678,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enregistrer comme lieu"
+            "value": "Enregistrer comme endroit"
           }
         },
         "ja": {
@@ -57282,13 +57282,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Enregistré sur cet iPad. Nuages à vos lieux enregistrés est désactivé dans Votre vie privée, donc ce lieu utilise sa nébulosité habituelle."
+                  "value": "Enregistré sur cet iPad. Nuages à vos endroits enregistrés est désactivé dans Votre vie privée, donc cet endroit utilise sa nébulosité habituelle."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Enregistré sur cet iPhone. Nuages à vos lieux enregistrés est désactivé dans Votre vie privée, donc ce lieu utilise sa nébulosité habituelle."
+                  "value": "Enregistré sur cet iPhone. Nuages à vos endroits enregistrés est désactivé dans Votre vie privée, donc cet endroit utilise sa nébulosité habituelle."
                 }
               }
             }
@@ -57507,13 +57507,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Les parcs et lieux enregistrés, les entrées du journal et les photos choisies sont stockés sur cet iPad. La synchronisation iCloud n’est pas utilisée. Les réglages de sauvegarde de votre appareil peuvent inclure les données des apps."
+                  "value": "Les parcs et endroits enregistrés, les entrées du journal et les photos choisies sont stockés sur cet iPad. La synchronisation iCloud n’est pas utilisée. Les réglages de sauvegarde de votre appareil peuvent inclure les données des apps."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Les parcs et lieux enregistrés, les entrées du journal et les photos choisies sont stockés sur cet iPhone. La synchronisation iCloud n’est pas utilisée. Les réglages de sauvegarde de votre appareil peuvent inclure les données des apps."
+                  "value": "Les parcs et endroits enregistrés, les entrées du journal et les photos choisies sont stockés sur cet iPhone. La synchronisation iCloud n’est pas utilisée. Les réglages de sauvegarde de votre appareil peuvent inclure les données des apps."
                 }
               }
             }
@@ -62016,7 +62016,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les lieux arrivent dans Vos lieux sans rappels. Ouvrez-en un et ajoutez-le aux widgets et aux rappels."
+            "value": "Les endroits arrivent dans Vos endroits sans rappels. Ouvrez-en un et ajoutez-le aux widgets et aux rappels."
           }
         },
         "ja": {
@@ -62051,7 +62051,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les lieux ajoutés apparaissent dans les widgets, les rappels et sur l’Apple Watch."
+            "value": "Les endroits ajoutés apparaissent dans les widgets, les rappels et sur l’Apple Watch."
           }
         },
         "ja": {
@@ -65726,41 +65726,6 @@
         }
       }
     },
-    "The Moon is down through all of it.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Mond ist die ganze Zeit untergegangen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The Moon is down through all of it."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Luna está oculta todo ese tiempo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Lune est couchée tout du long."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "その間ずっと月は沈んでいます。"
-          }
-        }
-      }
-    },
     "The Moon is down.": {
       "extractionState": "manual",
       "localizations": {
@@ -65827,76 +65792,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "その間ずっと月が出ています。輝面比%lld%%。"
-          }
-        }
-      }
-    },
-    "The Moon is up all through true darkness.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Mond steht während der gesamten echten Dunkelheit am Himmel."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The Moon is up all through true darkness."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Luna está en el cielo durante toda la oscuridad total."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Lune est levée pendant toute l’obscurité totale."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "完全に暗い時間は、ずっと月が出ています。"
-          }
-        }
-      }
-    },
-    "The Moon is up through all of it.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Mond steht die ganze Zeit am Himmel."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The Moon is up through all of it."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Luna está en el cielo todo ese tiempo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Lune est levée tout du long."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "その間ずっと月が出ています。"
           }
         }
       }
@@ -68189,7 +68084,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les terres sous votre constellation et sur la carte de Parcs sont simplifiées à partir des terres et lacs au 1:50m de Natural Earth, du domaine public. C’est un décor, dessiné à une échelle où les petites îles disparaissent. Savoir si un point se trouve aux États-Unis, ce qui détermine la localité la plus proche d’un lieu enregistré et les lieux pris en compte par Ce soir, se lit dans le fichier des limites cartographiques du pays de l’U.S. Census Bureau (cb_2023_us_nation_20m), lui aussi du domaine public."
+            "value": "Les terres sous votre constellation et sur la carte de Parcs sont simplifiées à partir des terres et lacs au 1:50m de Natural Earth, du domaine public. C’est un décor, dessiné à une échelle où les petites îles disparaissent. Savoir si un point se trouve aux États-Unis, ce qui détermine la localité la plus proche d’un endroit enregistré et les lieux pris en compte par Ce soir, se lit dans le fichier des limites cartographiques du pays de l’U.S. Census Bureau (cb_2023_us_nation_20m), lui aussi du domaine public."
           }
         },
         "ja": {
@@ -68879,7 +68774,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le seul endroit à vous que Nyx envoie où que ce soit est un lieu que vous enregistrez : seulement sa position, arrondie à environ %@, pour sa prévision de nuages. Vous pouvez désactiver cet envoi ci-dessous."
+            "value": "Le seul lieu à vous que Nyx envoie où que ce soit est un endroit que vous enregistrez : seulement sa position, arrondie à environ %@, pour sa prévision de nuages. Vous pouvez désactiver cet envoi ci-dessous."
           }
         },
         "ja": {
@@ -69789,7 +69684,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le lieu est placé au point de la localité dans la liste de Nyx, pas sur un champ ou une colline en particulier. Pour un endroit hors de la localité, utilisez des coordonnées."
+            "value": "L’endroit est placé au point de la localité dans la liste de Nyx, pas sur un champ ou une colline en particulier. Pour un point hors de la localité, utilisez des coordonnées."
           }
         },
         "ja": {
@@ -70104,7 +69999,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les villes et villages d’où vous pouvez partir proviennent, aux États-Unis, des Gazetteer Files 2025 (Places) de l’U.S. Census Bureau et de ses estimations de population Vintage 2025, du domaine public, et partout ailleurs de GeoNames (geonames.org) : tous les lieux de 15 000 habitants ou plus, sous licence Creative Commons Attribution 4.0 (CC BY 4.0). Chaque lieu est un point unique, pas un territoire, et seules des distances à vol d’oiseau sont mesurées à partir de lui. Un lieu que vous enregistrez prend le fuseau horaire et la région du plus proche de ces lieux ; près d’une frontière, ce peut être ceux du voisin."
+            "value": "Les villes et villages d’où vous pouvez partir proviennent, aux États-Unis, des Gazetteer Files 2025 (Places) de l’U.S. Census Bureau et de ses estimations de population Vintage 2025, du domaine public, et partout ailleurs de GeoNames (geonames.org) : tous les lieux de 15 000 habitants ou plus, sous licence Creative Commons Attribution 4.0 (CC BY 4.0). Chaque lieu est un point unique, pas un territoire, et seules des distances à vol d’oiseau sont mesurées à partir de lui. Un endroit que vous enregistrez prend le fuseau horaire et la région du plus proche de ces lieux ; près d’une frontière, ce peut être ceux du voisin."
           }
         },
         "ja": {
@@ -70549,7 +70444,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vous êtes ici. Si vous enregistrez ce lieu, sa position arrondie est demandée comme pour n’importe quel lieu. Sinon, rien n’est envoyé."
+            "value": "Vous êtes ici. Si vous enregistrez cet endroit, sa position arrondie est demandée comme pour n’importe quel endroit. Sinon, rien n’est envoyé."
           }
         },
         "ja": {
@@ -77229,7 +77124,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quand rien n’est à portée, ou que le lieu le plus sombre à portée a un ciel de banlieue ou plus lumineux (Bortle 5 ou plus), Ce soir indique la terre la plus proche que la même grille de luminosité du ciel place en Bortle 4 ou plus sombre, et d’au moins deux classes plus sombre que ce qui est à portée, dans votre rayon ou à 800 km (500 milles), selon la plus grande distance. Il montre la zone la plus sombre un peu au-delà de la première trouvée, à environ 5 km à l’intérieur des terres selon le trait de côte de Natural Earth. Elle n’a ni nom ni indice, et personne n’en a vérifié les routes, l’accès ou la sécurité. Enregistrée comme lieu, elle a des nuits comme tout autre lieu."
+            "value": "Quand rien n’est à portée, ou que le lieu le plus sombre à portée a un ciel de banlieue ou plus lumineux (Bortle 5 ou plus), Ce soir indique la terre la plus proche que la même grille de luminosité du ciel place en Bortle 4 ou plus sombre, et d’au moins deux classes plus sombre que ce qui est à portée, dans votre rayon ou à 800 km (500 milles), selon la plus grande distance. Il montre la zone la plus sombre un peu au-delà de la première trouvée, à environ 5 km à l’intérieur des terres selon le trait de côte de Natural Earth. Elle n’a ni nom ni indice, et personne n’en a vérifié les routes, l’accès ou la sécurité. Enregistrée comme endroit, elle a des nuits comme tout autre lieu."
           }
         },
         "ja": {
@@ -81148,7 +81043,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Votre lieu"
+            "value": "Votre endroit"
           }
         },
         "ja": {
@@ -81183,7 +81078,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Votre lieu · %@"
+            "value": "Votre endroit · %@"
           }
         },
         "ja": {
@@ -81218,7 +81113,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vos lieux"
+            "value": "Vos endroits"
           }
         },
         "ja": {
@@ -82454,6 +82349,41 @@
         }
       }
     },
+    "at %@ · cloud forecast unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "um %@ · Wolkenvorhersage nicht verfügbar"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "at %@ · cloud forecast unavailable"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · pronóstico de nubes no disponible"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "à %@ · prévision de nuages indisponible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · 雲予報を取得できません"
+          }
+        }
+      }
+    },
     "at %@ · models %lld–%lld": {
       "extractionState": "manual",
       "localizations": {
@@ -82489,37 +82419,37 @@
         }
       }
     },
-    "at %@ · no cloud forecast": {
+    "at %@ · no cloud forecast yet": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "um %@ · keine Wolkenvorhersage"
+            "value": "um %@ · noch keine Wolkenvorhersage"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "at %@ · no cloud forecast"
+            "value": "at %@ · no cloud forecast yet"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · sin pronóstico de nubes"
+            "value": "%@ · aún sin pronóstico de nubes"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "à %@ · pas de prévision de nuages"
+            "value": "à %@ · pas encore de prévision de nuages"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · 雲予報なし"
+            "value": "%@ · 雲予報はまだありません"
           }
         }
       }

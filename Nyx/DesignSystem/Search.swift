@@ -65,3 +65,12 @@ struct InlineSearchField: View {
         .overlay(RoundedRectangle(cornerRadius:22,style:.continuous).stroke(palette.line,lineWidth:0.5))
     }
 }
+
+private struct InlineSearchPreview: View {
+    @State private var text=""
+    @FocusState private var focused: Bool
+    var body: some View { InlineSearchField(text:$text,prompt:"Search parks",focus:$focused).padding().background(.black) }
+}
+#Preview("Inline search") { InlineSearchPreview() }
+#Preview("Inline search • AX5") { InlineSearchPreview().dynamicTypeSize(.accessibility5) }
+#Preview("Inline search • night vision") { InlineSearchPreview().environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)) }

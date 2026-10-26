@@ -737,3 +737,5 @@ struct FieldCountdownSchedule: TimelineSchedule {
 #Preview("Eyes started over • notice") {
     if let session=resetPreviewSession(), let reset=session.reset { FieldResetNotice(session:session,reset:reset).padding().foregroundStyle(.red).background(.black) }
 }
+#Preview("Where to look • the compass alone") { if let session=resetPreviewSession() { FieldCompassView(session:session).background(.black) } }
+#Preview("Where to look • the compass alone • AX5") { if let session=resetPreviewSession() { FieldCompassView(session:session).dynamicTypeSize(.accessibility5).background(.black) } }

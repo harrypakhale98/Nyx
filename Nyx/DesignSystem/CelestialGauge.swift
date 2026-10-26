@@ -795,6 +795,9 @@ extension EnvironmentValues {
 #Preview("Tonight's framing • models' range") { CelestialGauge(score:85,range:73...96).frame(height:240).padding(.horizontal,24).background(.black) }
 #Preview("Silent example • 176 pt") { CelestialGauge(score:94,haptics:false).frame(height:176).background(.black) }
 #Preview("Night vision") { CelestialGauge(score:91).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).background(.black) }
+#Preview("The night • tonight at the starting park") { let m=PlanModel();if let p=m.home { let n=m.night(p);CelestialGauge(score:n.score.value,hasForecast:n.score.hasForecast,night:m.ring(n)).frame(height:240).environment(\.nyxReduceMotion,true).background(.black) } }
+#Preview("The night • a week on • night vision") { let m=PlanModel();if let p=m.home { let n=m.night(p,on:p.date(m.tonight(p),addingDays:7));CelestialGauge(score:n.score.value,hasForecast:n.score.hasForecast,night:m.ring(n)).frame(height:240).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).environment(\.nyxReduceMotion,true).background(.black) } }
+#Preview("The night • Increase Contrast • AX5") { let m=PlanModel();if let p=m.home { let n=m.night(p);CelestialGauge(score:n.score.value,hasForecast:n.score.hasForecast,night:m.ring(n)).environment(\.nyx,NyxPalette(nightVision:false,highContrast:true)).dynamicTypeSize(.accessibility5).environment(\.nyxReduceMotion,true).background(.black) } }
 #Preview("Bold Text strokes") { CelestialGauge(score:72).environment(\.nyx,NyxPalette(nightVision:false,highContrast:false,boldText:true)).environment(\.nyxReduceMotion,true).background(.black) }
 #if DEBUG
 /// `-nyx-screen gauge`: Tonight's 240 pt dial for frame-by-frame checks of a sweep.

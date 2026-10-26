@@ -293,7 +293,7 @@ struct TonightFace: View {
                 let side = typeSize.isAccessibilitySize ? min(112, WKInterfaceDevice.current().screenBounds.width*0.6) : WatchTonightLayout.scrollingDial
                 gauge.frame(width: side, height: side)
                 // At accessibility sizes the band word leaves the dial for this line.
-                if typeSize.isAccessibilitySize { Text(shown.score.band.label).font(.system(.headline, design: .serif)) }
+                if typeSize.isAccessibilitySize { Text(shown.score.band.label).bandWord(.headline, ink: palette.ink) }
                 if looking { NightGlance(night: shown, isTonight: offset == 0, models: models) } else { NextMoment(night: night, now: now, models: models, wraps: true) }
                 if let closure { ClosureLine(text: closure) }
                 if let smoke = shown.smokeCaveat { SmokeLine(text: smoke, spoken: smoke) }
@@ -502,7 +502,8 @@ struct NextMoment: View {
                             // Whole or not at all, as the models' range below (it was cut to "no cloud
                             // forec…" on 40 mm): where it does not fit, the time stands alone and the
                             // dial's dashed rim says the clouds are not forecast. VoiceOver hears it all.
-                            let full = Text("at \(time) · no cloud forecast")
+                            // The iPhone's two words for it (`Night.basisLabel`): not yet beyond the forecast's reach, unavailable within it.
+                            let full = night.beyondForecast ? Text("at \(time) · no cloud forecast yet") : Text("at \(time) · cloud forecast unavailable")
                             if typeSize.isAccessibilitySize || wraps { full }
                             else { ViewThatFits(in: .horizontal) { full; at.minimumScaleFactor(0.8) }.accessibilityLabel(full) }
                         }
