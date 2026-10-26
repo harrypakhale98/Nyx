@@ -33,7 +33,7 @@ enum VisionIntentError: Error, CustomLocalizedStringResourceConvertible {
     case parkNotFound
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case .parkNotFound: "That park could not be found in the bundled library."
+        case .parkNotFound: "That place could not be found in Nyx."
         }
     }
 }
@@ -43,7 +43,7 @@ enum VisionIntentError: Error, CustomLocalizedStringResourceConvertible {
 /// and never asks for new ones, so it answers the same with a switch off, and says so.
 struct DarknessIntent: AppIntent {
     static let title: LocalizedStringResource = "Tonight's darkness score"
-    static let description = IntentDescription("Find the on-device darkness estimate for a national park. Returns the score, 0 to 100.")
+    static let description = IntentDescription("Find the on-device darkness score for a national park. Returns the score, 0 to 100.")
     @Parameter(title: "Park") var park: ParkEntity
     static var parameterSummary: some ParameterSummary { Summary("Darkness at \(\.$park) tonight") }
     func perform() async throws -> some IntentResult & ReturnsValue<Int> & ProvidesDialog {

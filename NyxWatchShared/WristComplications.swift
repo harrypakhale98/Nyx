@@ -251,7 +251,7 @@ struct NextDarkComplicationView: View {
         case .darkNow(let until, false): return String(localized: "Until dawn twilight at \(park.wristTime(until))")
         case .begins(let date, true): return String(localized: "Moonset at \(park.wristTime(date))")
         case .begins(let date, false): return String(localized: "At \(park.wristTime(date))")
-        case .moonlit: return String(localized: "The Moon is up all through true darkness.")
+        case .moonlit: return Sentences.end(String(localized: "Moon up all through true darkness"))
         case .none: return String(localized: "The Sun stays too high at this latitude.")
         }
     }

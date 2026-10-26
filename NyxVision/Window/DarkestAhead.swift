@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The darkest of the chosen park's next 14 nights, best first (`NightsAhead`), scored as the
+/// The darkest of the chosen park's next 30 nights, best first (`NightsAhead`), scored as the
 /// night above is. A tap opens that night in the planner, as the ornament's arrows would, and the
 /// night on show is marked. Nights without a full cloud forecast say so in the iPhone's words:
 /// "Early look" or "Estimate" under the score, and the first of them explained beneath. A park
@@ -14,7 +14,7 @@ struct DarkestAhead: View {
     let park: Park
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            VisionEyebrow(text: "Darkest of the next 14 nights")
+            VisionEyebrow(text: "Darkest of the next 30 nights")
             if let ahead = model.ahead, ahead.park.id == park.id {
                 // Side by side; stacked at accessibility sizes, where three columns would clip.
                 let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12)) : AnyLayout(HStackLayout(alignment: .top, spacing: 14))
@@ -68,7 +68,7 @@ struct DarkestAhead: View {
     /// forecast rests on, in the words under the score above.
     @ViewBuilder private func footnote(_ ahead: NightsAhead) -> some View {
         if ahead.noDarkness {
-            Text("No true darkness in the next 14 nights at this latitude.")
+            Text("No true darkness in the next 30 nights at this latitude.")
                 .font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
         } else if let estimate = ahead.firstEstimate {
             VStack(alignment: .leading, spacing: 2) {

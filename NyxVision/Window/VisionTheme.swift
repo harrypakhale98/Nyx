@@ -7,7 +7,7 @@ import SwiftUI
 struct VisionPalette: Equatable {
     var nightVision = false
     var highContrast = false
-    /// Reduce Transparency: panels behind words become nearly opaque.
+    /// Reduce Transparency or Increase Contrast, as on the iPhone: panels behind words become nearly opaque.
     var solid = false
     /// Bold Text (`legibilityWeight == .bold`): the sky's words, rendered off screen where the
     /// system's own weight never reaches, are set a step heavier.
@@ -69,16 +69,24 @@ enum VisionMotion {
     static let spring = NyxMotion.spring
 }
 
-/// Small spaced capitals over a section, as on the iPhone; set solid in Japanese (`Lettering`).
+/// A section's heading, as the iPhone's `Eyebrow`: serif sentence case in ink, so it outranks its rows.
+/// `meta` keeps small spaced capitals for the one line of facts above a title (set solid in Japanese,
+/// `Lettering`, and at accessibility sizes).
 struct VisionEyebrow: View {
     @Environment(\.visionPalette) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     let text: LocalizedStringKey
+    var meta = false
     var body: some View {
-        let spaced = Lettering.spaced && !typeSize.isAccessibilitySize
-        Text(text).font(.footnote.weight(.semibold)).kerning(spaced ? 1.6 : 0)
-            .textCase(spaced ? .uppercase : nil).foregroundStyle(palette.muted)
-            .accessibilityAddTraits(.isHeader)
+        if meta {
+            let spaced = Lettering.spaced && !typeSize.isAccessibilitySize
+            Text(text).font(.footnote.weight(.semibold)).kerning(spaced ? 1.6 : 0)
+                .textCase(spaced ? .uppercase : nil).foregroundStyle(palette.muted)
+                .accessibilityAddTraits(.isHeader)
+        } else {
+            Text(text).font(.system(.title3, design: .serif)).fixedSize(horizontal: false, vertical: true).foregroundStyle(palette.ink)
+                .accessibilityAddTraits(.isHeader)
+        }
     }
 }
 

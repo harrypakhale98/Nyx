@@ -22,7 +22,7 @@ import UserNotifications
     static var version:String { Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "" }
     /// A night was opened; Excellent (75) or better counts toward this version's third.
     static func noteNightViewed(score:Int,defaults:UserDefaults = .standard,version:String=ReviewPrompt.version,ask:@MainActor (UserDefaults)->Void={ request(defaults:$0) }) {
-        guard score>=75 else { return }
+        guard score>=ScoreBand.excellent.minimum else { return }
         let key=greatNightsKey(version:version)
         let count=defaults.integer(forKey:key)+1
         defaults.set(count,forKey:key)

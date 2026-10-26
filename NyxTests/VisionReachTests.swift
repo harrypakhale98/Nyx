@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// Vision Pro's reach in 1.4: the planner's darkest of the next 14 nights (`NightsAhead`) and
+/// Vision Pro's reach in 1.4: the planner's darkest of the next 30 nights (`NightsAhead`; 14 at first) and
 /// the widget's large face, the Moon over the coming week (`MoonWeek`). Both are shared code the
 /// visionOS targets compile, tested here against the iPhone's engine.
 struct VisionReachTests {
@@ -15,15 +15,20 @@ struct VisionReachTests {
         return Forecast(updated: issued, times: times, clouds: times.map { _ in cover })
     }
 
-    // MARK: Darkest of the next 14 nights
+    // MARK: Darkest of the next 30 nights
 
-    /// The picks are `NightPlanner.bestNights` over tonight and the next thirteen nights, in its
+    /// Vision Pro looks as far ahead as the iPhone's best night (`NightVerdict.horizon`), so a park's
+    /// darkest night is the same night on both.
+    @Test func reachIsTheIPhonesBestNightHorizon() {
+        #expect(NightsAhead.reach == NightVerdict.horizon)
+    }
+    /// The picks are `NightPlanner.bestNights` over tonight and the next 29 nights, in its
     /// order, and each offset steps the planner to exactly that night.
     @Test func picksAreThePlannersBestNightsWithTheirOffsets() throws {
         let park = try Self.park("jotr"), now = try Self.date("2026-10-10T21:00:00Z")
         let planner = NightPlanner(forecasts: [park.id: Self.forecast(cover: 30, issued: now)])
         let ahead = NightsAhead(park: park, planner: planner, now: now)
-        let expected = planner.bestNights([park], from: now, count: 14, now: now, limit: 3)
+        let expected = planner.bestNights([park], from: now, count: NightsAhead.reach, now: now, limit: 3)
         #expect(ahead.picks.count == 3)
         #expect(ahead.picks.map(\.id) == expected.map(\.id))
         #expect(ahead.picks.map(\.night.score.value) == expected.map(\.score.value))

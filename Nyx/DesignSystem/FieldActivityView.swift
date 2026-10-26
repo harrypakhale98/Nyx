@@ -78,7 +78,7 @@ struct FieldActivityLockView: View {
                 }.font(.caption).foregroundStyle(colors.muted).lineLimit(1).minimumScaleFactor(0.8)
                 if let closure=attributes.closure(state) {
                     // The warning in its red and the words in ink, as in the app: amber is the score's and light's.
-                    Label { Text(closure).foregroundStyle(colors.ink).lineLimit(2) } icon:{ Image(systemName:"exclamationmark.triangle").foregroundStyle(colors.caution).accessibilityHidden(true) }
+                    Label { Text(closure).foregroundStyle(colors.ink).lineLimit(2) } icon:{ Image(systemName:"exclamationmark.triangle.fill").foregroundStyle(colors.caution).accessibilityHidden(true) }
                         .font(.caption.weight(.medium))
                 }
             } else if !state.finished {

@@ -53,7 +53,7 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
     /// place-local night Tonight's answer was picked for (`PlanModel.tonightPickNight`).
     func push(savedParkIDs: [String], homeParkID: String, tonightParkID: String? = nil, tonightNight: String? = nil, watchParkIDs: [String] = [], forecasts: [String: Forecast],
               details: [String: ForecastDetail], closures: [String: String], aboveInversion: Set<String>, ranges: [String: [String: ClosedRange<Int>]]?, places: [Place] = [],
-              aurora: AuroraOutlook? = nil, complete: (@MainActor @Sendable () -> Void)? = nil) {
+              aurora: AuroraOutlook? = nil, dusk: [Double]? = nil, complete: (@MainActor @Sendable () -> Void)? = nil) {
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
         // No watch with Nyx paired: nothing is worked out for one, and `complete` hands over once there
@@ -68,7 +68,7 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
         let context = WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: forecasts,
                                         details: details, closures: closures, aboveInversion: aboveInversion, ranges: ranges ?? [:], places: places,
                                         tonightParkID: tonightParkID, tonightNight: tonightNight, watchParkIDs: watchParkIDs, aurora: aurora,
-                                        spotForecastsOff: !SpotForecast.isOn())
+                                        spotForecastsOff: !SpotForecast.isOn(), dusk: dusk)
         lock.withLock { latest = context; self.complete = ranges == nil ? complete : nil }
         if session.activationState == .activated { send(session) } else { activate() }
     }

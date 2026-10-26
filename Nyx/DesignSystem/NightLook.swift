@@ -81,7 +81,7 @@ nonisolated enum NightMark: Equatable, Sendable {
     case dot(filled:Bool)
     case star(filled:Bool)
     static func mark(score:Int,hasForecast:Bool,differentiate:Bool)->NightMark {
-        differentiate && score>=75 ? .star(filled:hasForecast) : .dot(filled:hasForecast)
+        differentiate && score>=ScoreBand.excellent.minimum ? .star(filled:hasForecast) : .dot(filled:hasForecast)
     }
     /// A night's mark; an early look is drawn hollow with its lower half filled (`draw`).
     static func mark(_ night:Night,differentiate:Bool)->NightMark { mark(score:night.score.value,hasForecast:night.basis.fill == .full,differentiate:differentiate) }

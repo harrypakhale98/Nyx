@@ -113,7 +113,7 @@ struct WeekAcrossParksPanel: View {
     private var rotorCells:[WeekAcrossParks.Cell] {
         let all=week.rows.enumerated().flatMap { r,row in row.nights.indices.map { WeekAcrossParks.Cell(row:r,night:$0) } }
         let sorted=all.sorted { NightPlanner.better(week.rows[$0.row].nights[$0.night],week.rows[$1.row].nights[$1.night],closures:week.closures) }
-        let excellent=sorted.filter { week.rows[$0.row].nights[$0.night].score.value>=75 }
+        let excellent=sorted.filter { week.rows[$0.row].nights[$0.night].score.value>=ScoreBand.excellent.minimum }
         return excellent.count>=3 ? excellent : Array(sorted.prefix(3))
     }
     private func header(_ night:Night,tonight:Bool)->some View {

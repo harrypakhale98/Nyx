@@ -11,6 +11,7 @@
 		00F5B8FD438E9BDB79E20183 /* DebugForecasts.swift in Sources */ = {isa = PBXBuildFile; fileRef = F709E97C95C2822EF09782FE /* DebugForecasts.swift */; };
 		05E4A3B5BE6A68488CD18F09 /* ForecastDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9998D8250D17F15D09BC11C4 /* ForecastDetail.swift */; };
 		07DD9A62FE26C172021CF1CE /* DeepSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6086F924A9AA8D7806502F74 /* DeepSky.swift */; };
+		084A31A08F5C932A5C5850EC /* LittleDipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9179AD844F05D3EA2A0E90 /* LittleDipper.swift */; };
 		0870407728908FE84B757328 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0237C0E0F5172A701CB7CE97 /* SkyConditions.swift */; };
 		08EA694F6AB6FF7EB2BE0157 /* FieldActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB37AE2807D0FD113C27DC0D /* FieldActivityView.swift */; };
 		092DD8031C747916C4A36133 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
@@ -341,6 +342,7 @@
 		B30FAB15A78C4224F9A91117 /* Forecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Forecast.swift; path = Nyx/Models/Forecast.swift; sourceTree = "<group>"; };
 		B8D52A0A38DA73A94BD94A63 /* MoonWeek.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MoonWeek.swift; path = Nyx/Services/MoonWeek.swift; sourceTree = "<group>"; };
 		BEA896A970D4E216C36A98A0 /* stars.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = stars.json; path = Nyx/Resources/stars.json; sourceTree = "<group>"; };
+		BF9179AD844F05D3EA2A0E90 /* LittleDipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LittleDipper.swift; path = Nyx/Services/LittleDipper.swift; sourceTree = "<group>"; };
 		C2B255D63E873FD4422C672B /* Nyx.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Nyx.xcconfig; sourceTree = "<group>"; };
 		C424C7442F787D7C3A520B5B /* SkyLore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkyLore.swift; path = Nyx/Services/SkyLore.swift; sourceTree = "<group>"; };
 		C6A1336554FE05CE9EA9906B /* NyxUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NyxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -546,6 +548,7 @@
 				5A05D06651099344A67C4602 /* Geomagnetic.swift */,
 				19CAB52FA48ACAFD32124D20 /* Horizon.swift */,
 				15951D79824C65A2FFA73BF5 /* horizons.json */,
+				BF9179AD844F05D3EA2A0E90 /* LittleDipper.swift */,
 				04228A0B7EC87B023F8C2239 /* Localizable.xcstrings */,
 				99D9C0E7BA1AE3FB95C49685 /* moon-features.json */,
 				4FA83F19CA3A305D8FD7A607 /* Moon.metal */,
@@ -968,6 +971,7 @@
 				3C46A1DA1B1D353EA7719F6A /* ForecastDetail.swift in Sources */,
 				43E0812C8587586D11653F2B /* Geomagnetic.swift in Sources */,
 				54C9A1185CE854C477EBC6B0 /* Horizon.swift in Sources */,
+				084A31A08F5C932A5C5850EC /* LittleDipper.swift in Sources */,
 				465EA9F6564ECF7E6F127A99 /* Moon.metal in Sources */,
 				6936FA95881C3250462837C0 /* MoonFeatures.swift in Sources */,
 				7FC8F631FA91104DFF34CE90 /* MoonShading.swift in Sources */,
@@ -1197,7 +1201,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription = "Nyx adds the dark nights you choose to your calendar. It can add events only; it never sees your calendar.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, and point the sky to true north. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, point the sky to true north, and turn night vision on at dusk where you are. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Nyx follows how your head turns through headphones that track motion, so the tone in field mode stays toward the part of the sky you chose. Motion never leaves this device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1252,7 +1256,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription = "Nyx adds the dark nights you choose to your calendar. It can add events only; it never sees your calendar.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, and point the sky to true north. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, point the sky to true north, and turn night vision on at dusk where you are. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Nyx follows how your head turns through headphones that track motion, so the tone in field mode stays toward the part of the sky you chose. Motion never leaves this device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

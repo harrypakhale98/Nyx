@@ -244,7 +244,8 @@ nonisolated enum TripPlanner {
         var parts:[String]=[]
         if night.sky.darkHours==0 { parts.append(String(localized:"No true darkness at this latitude")) }
         else if lit<=1 { parts.append(String(localized:"New moon")) }
-        else if night.sky.moonBelowFraction>=0.95 { parts.append(String(localized:"Moon down through true darkness")) }
+        // "All" only when it is all, as the park's page says it (`SkyConditions.moonDownPercent`).
+        else if night.sky.moonDownPercent==100 { parts.append(String(localized:"Moon-free through all of true darkness")) }
         else { parts.append(String(localized:"Moon \(lit)% lit")) }
         if let cloud=night.cloudCover { parts.append(night.score.hasForecast ? String(localized:"\(Int(cloud.rounded()))% cloud forecast") : String(localized:"\(Int(cloud.rounded()))% cloud forecast, an early look")) }
         // "Not yet" beyond the forecast's reach, "unavailable" within it, as every surface says it.

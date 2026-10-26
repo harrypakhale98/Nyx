@@ -315,7 +315,10 @@ import WidgetKit
         let complete:@MainActor @Sendable ()->Void={ [weak self, weak model] in if let self, let model { self.pushWatch(model,watchSeen:true) } }
         bridge.push(savedParkIDs:ids,homeParkID:model.homeID,tonightParkID:tonight,tonightNight:tonight == nil ? nil : model.tonightPickNight,watchParkIDs:watchIDs,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
                     aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)),ranges:ranges,
-                    places:all.compactMap { model.park($0) }.filter { $0.isSavedSpot || $0.isCatalogPlace },aurora:model.aurora,complete:complete)
+                    places:all.compactMap { model.park($0) }.filter { $0.isSavedSpot || $0.isCatalogPlace },aurora:model.aurora,
+                    // At dusk's place for the wrist: the chosen town or starting park, never where you are
+                    // (location stays on this iPhone), so the two turn together except while Near me has found you.
+                    dusk:model.origin.map { [$0.latitude,$0.longitude] },complete:complete)
         if watch { pushWatchMoons(model) }
     }
     /// The places whose Moons the watch is handed (`WatchMoons.places`); none without a watch with Nyx.

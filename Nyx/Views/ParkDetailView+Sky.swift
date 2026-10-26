@@ -63,7 +63,7 @@ extension ParkDetailView {
                 VStack(alignment:.leading,spacing:10) {
                     Eyebrow(text:"The night itself")
                     ForEach(nightItself,id:\.text) { line in
-                        Label { Text(line.text).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:line.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
+                        Label { Text(line.text).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:line.symbol).foregroundStyle(palette.ink).accessibilityHidden(true) }
                             .font(.subheadline).foregroundStyle(palette.ink)
                     }
                 }

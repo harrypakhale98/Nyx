@@ -295,7 +295,11 @@ struct SaveSpotView: View {
     }
     /// "Within about 20 m." In the reader's units; with Precise Location off, that said plainly.
     static func accuracyLine(_ fix: Fix) -> String {
-        if fix.reduced { return String(localized:"Precise Location is off for Nyx, so this is only good to a few kilometers. You can turn it on in Settings.") }
+        // Approximate location is good to a few kilometres; said in the reader's units, as every distance is.
+        if fix.reduced {
+            let few=Measurement(value:3,unit:UnitLength.kilometers).formatted(.measurement(width:.wide,usage:.road))
+            return String(localized:"Precise Location is off for Nyx, so this is only good to about \(few). You can turn it on in Settings.")
+        }
         guard fix.accuracy > 0 else { return String(localized:"Accuracy unknown.") }
         let distance=Measurement(value:fix.accuracy,unit:UnitLength.meters).formatted(.measurement(width:.abbreviated,usage:.road))
         return String(localized:"Within about \(distance).")

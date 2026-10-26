@@ -37,16 +37,14 @@ nonisolated struct WhatsUp: Sendable {
     /// solstice, the gegenschein: the order `Layout` and every surface show them in.
     let highlights: [Item]
     let events: Events
-    /// Rare things first (an eclipse, a shower), then the core, the planets, brightest first, and
-    /// the night's highlights.
-    /// Everything, ranked as every screen ranks it (`layout`), for Siri and Ask Nyx, which read the
-    /// first few: the rows that lead, then a shower or eclipse that earns a row of its own, the
-    /// planets, the other rows, and last what the screens give one line (a weak shower, an eclipse
-    /// the park cannot see). So a Geminid peak is said before the planets, a shower of two an hour after them.
+    /// Everything, in exactly the order every screen shows it (`layout`), for Siri and Ask Nyx, which
+    /// read the first few: the rows above the planets (a shower or eclipse that earns a row among
+    /// them), the planets, the other rows, and last what the screens give one line (a weak shower,
+    /// an eclipse the park cannot see). So a Geminid peak is said before the planets, a shower of
+    /// two an hour after them, on the iPhone, iPad, the watch, Vision Pro and Siri alike.
     var items: [Item] {
         let layout=layout
-        let events=layout.after.filter { $0.kind == .meteors || $0.kind == .eclipse }
-        return layout.first + events + planets + layout.after.filter { item in !events.contains { $0.id == item.id } } + layout.mentions
+        return layout.first + planets + layout.after + layout.mentions
     }
     /// The rows above the planets, which the panel groups under one heading.
     var leading: [Item] { [eclipse, shower].compactMap { $0 } + [core] }
@@ -68,8 +66,9 @@ nonisolated struct WhatsUp: Sendable {
     // MARK: Layout: the one rule for the iPhone card, the watch page and every list
 
     /// Where each item goes: `first` above the planets, `after` below them, `mentions` a line each.
-    /// A total lunar eclipse the park can see leads, then aurora in reach; then the core; the planets; then a shower of
-    /// ten or more an hour, a partial eclipse, pairings, a Full Moon at its nearest and the
+    /// A total lunar eclipse the park can see leads, then aurora in reach; then the core; then the rare
+    /// things that earn a row, a shower of ten or more an hour and a partial eclipse, before the planets
+    /// that are up most nights; after the planets, pairings, a Full Moon at its nearest and the
     /// gegenschein. Weaker showers, a penumbral eclipse or one the park cannot see, Mercury or Venus
     /// at its best (the planet already has its row) and a solstice are mentions.
     struct Layout: Equatable { var first: [Item]; var after: [Item]; var mentions: [Item] }
@@ -78,14 +77,15 @@ nonisolated struct WhatsUp: Sendable {
     var layout: Layout {
         var layout=Layout(first: [core], after: [], mentions: [])
         if let shower {
-            if (events.shower?.hourlyRate ?? 0)>=Self.showerRow { layout.after.append(shower) } else { layout.mentions.append(shower) }
+            if (events.shower?.hourlyRate ?? 0)>=Self.showerRow { layout.first.append(shower) } else { layout.mentions.append(shower) }
         }
         if let eclipse, let night=events.eclipse {
             if night.visible == nil || night.eclipse.type == "penumbral" { layout.mentions.append(eclipse) }
             else if night.eclipse.type == "total" { layout.first.insert(eclipse, at: 0) }
-            else { layout.after.append(eclipse) }
+            else { layout.first.append(eclipse) }
         }
-        if let aurora { layout.first.insert(aurora, at: layout.first.count-1) }
+        // Aurora in reach comes just before the core (after a total eclipse, before the rare rows after the core).
+        if let aurora { layout.first.insert(aurora, at: layout.first.firstIndex { $0.id == core.id } ?? 0) }
         for item in highlights {
             switch item.kind {
             case .planetBest, .season: layout.mentions.append(item)

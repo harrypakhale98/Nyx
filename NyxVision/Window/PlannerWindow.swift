@@ -7,6 +7,7 @@ struct PlannerWindow: View {
     static let id = "planner"
     @Environment(VisionModel.self) private var model
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.legibilityWeight) private var legibilityWeight
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
@@ -23,7 +24,7 @@ struct PlannerWindow: View {
     @State private var counted = false
     var body: some View {
         @Bindable var model = model
-        let palette = VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency)
+        let palette = VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency || contrast == .increased, boldText: legibilityWeight == .bold)
         NavigationSplitView {
             ParkList(query: query)
                 .searchable(text: $query, prompt: Text("Search parks"))

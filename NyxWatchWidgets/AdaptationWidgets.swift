@@ -106,15 +106,15 @@ struct AdaptationComplicationView: View {
         ZStack {
             if let interval = entry.interval, !entry.adapted {
                 ProgressView(timerInterval: interval, countsDown: false) { EmptyView() } currentValueLabel: { EmptyView() }
-                    .progressViewStyle(.circular).tint(colors.accent).widgetAccentable()
+                    .progressViewStyle(.circular).tint(colors.ink).widgetAccentable()
                 Text(timerInterval: interval, countsDown: false, showsHours: false)
                     .font(.system(.footnote, design: .serif).weight(.medium)).monospacedDigit()
                     .multilineTextAlignment(.center).lineLimit(1).minimumScaleFactor(0.6).padding(.horizontal, 7)
             } else {
-                ProgressView(value: entry.adapted ? 1 : 0).progressViewStyle(.circular).tint(colors.accent).widgetAccentable()
+                ProgressView(value: entry.adapted ? 1 : 0).progressViewStyle(.circular).tint(colors.ink).widgetAccentable()
                 VStack(spacing: -1) {
                     Text(AdaptationClock.minutes, format: .number).font(.system(.body, design: .serif).weight(.medium)).monospacedDigit()
-                        .foregroundStyle(entry.adapted ? colors.accent : colors.ink)
+                        .foregroundStyle(colors.ink)
                     Group { if entry.adapted { Text("adapted") } else { Text("minutes") } }
                         .font(.system(.caption2, design: .serif)).foregroundStyle(colors.muted).lineLimit(1).minimumScaleFactor(0.6)
                 }
@@ -130,11 +130,11 @@ struct AdaptationComplicationView: View {
             }
             if let interval = entry.interval, !entry.adapted {
                 Text("\(Text(timerInterval: interval, countsDown: false, showsHours: false)) of 30 min")
-                    .font(.system(.body, design: .serif)).monospacedDigit().foregroundStyle(colors.accent).widgetAccentable().lineLimit(1)
+                    .font(.system(.body, design: .serif)).monospacedDigit().foregroundStyle(colors.ink).widgetAccentable().lineLimit(1)
                 ProgressView(timerInterval: interval, countsDown: false) { EmptyView() } currentValueLabel: { EmptyView() }
-                    .progressViewStyle(.linear).tint(colors.accent).widgetAccentable()
+                    .progressViewStyle(.linear).tint(colors.ink).widgetAccentable()
             } else if let start = entry.start {
-                Text("Adapted").font(.system(.body, design: .serif)).foregroundStyle(colors.accent).widgetAccentable().lineLimit(1)
+                Text("Adapted").font(.system(.body, design: .serif)).foregroundStyle(colors.ink).widgetAccentable().lineLimit(1)
                 Text("Started at \(start.formatted(date: .omitted, time: .shortened))").font(.caption2).foregroundStyle(colors.muted)
                     .lineLimit(1).minimumScaleFactor(0.8)
             } else {

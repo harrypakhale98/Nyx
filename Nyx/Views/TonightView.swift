@@ -112,7 +112,7 @@ struct TonightView: View {
                     if !model.startChosen { firstRun }
                     // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                     FoldColumns(narrow:.trailing,narrowMax:500,spacing:NyxMetrics.columnGap) {
-                        VStack(spacing:26) { GoingPanel(hero:park); hero(night,others:Array(shown.dropFirst()),offset:offset,ready:ready); farther(than:park,shortlist:widerList); darkArea(all); ahead(park) }.frame(maxWidth:.infinity)
+                        VStack(spacing:26) { GoingPanel(hero:offset==0 ? park : nil); hero(night,others:Array(shown.dropFirst()),offset:offset,ready:ready); if offset==0 { farther(than:park,shortlist:widerList) }; darkArea(all); ahead(night.park,held:offset>0 ? night.id : nil) }.frame(maxWidth:.infinity)
                         VStack(alignment:.leading,spacing:22) { StartingPointPanel(rule:false,choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID); more(shown,offset:offset); fromHome(hero:park); LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
@@ -123,13 +123,14 @@ struct TonightView: View {
                     if !model.startChosen { firstRun }
                     // A night the person said they are going to leads: their own plan before tonight's answer.
                     // At accessibility sizes it follows the answer, so the score stays on the first screen.
-                    if !loading, !typeSize.isAccessibilitySize { GoingPanel(hero:best.first) }
+                    if !loading, !typeSize.isAccessibilitySize { GoingPanel(hero:offset==0 ? best.first : nil) }
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
                     else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil,shortlist:widerList);darkArea(all);StartingPointPanel(choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID);fromHome(hero:nil) }
                     else if let park=best.first, let night=shown.first {
                         hero(night,others:Array(shown.dropFirst()),offset:offset,ready:ready)
-                        if typeSize.isAccessibilitySize { GoingPanel(hero:park) }
-                        farther(than:park,shortlist:widerList)
+                        if typeSize.isAccessibilitySize { GoingPanel(hero:offset==0 ? park : nil) }
+                        // "Darker within …" is weighed from tonight, so it waits while the dial holds a later night.
+                        if offset==0 { farther(than:park,shortlist:widerList) }
                         darkArea(all)
                         // The answer, then the alternatives; then where "within reach" is measured from.
                         more(shown,offset:offset)
@@ -171,6 +172,8 @@ struct TonightView: View {
         }
         // A new night (sunrise turned it over): "three nights on" means another night now, so the dial starts at tonight.
         .onChange(of:model.today) { dialNight=0; skyNight=0 }
+        // Wide: the river beside the dial follows the night the dial steps to, so a choice made on the river before gives way.
+        .onChange(of:dialNight) { riverNight=nil }
         // The nights the dial steps to: what's up each night (the verdict under the dial) worked out off the main thread.
         .task(id:ready ? TonightReach.key(aheadParks) : nil) {
             guard ready else { return }
@@ -346,11 +349,14 @@ struct TonightView: View {
     @ViewBuilder private func darkArea(_ all:[Park])->some View {
         if let darkerSky, darkerSky.key==darkerSkyKey(all), let offer=darkerSky.offer { DarkerSkyPanel(offer:offer) }
     }
-    /// Wide iPad: where, then when. The best park's next thirty nights beside the answer, with the
-    /// chosen night one tap away. (On iPhone the river lives on the park's page.)
-    private func ahead(_ park:Park)->some View {
-        let tonight=model.tonight(park), nights=model.nights(park,from:tonight,count:30)
-        let chosen=riverNight?.night(at:park).flatMap { id in nights.first { $0.id==id } }
+    /// Wide iPad: where, then when. The answer's park and its next thirty nights beside it, with the
+    /// chosen night one tap away. While the dial holds a later night (`held`), the river is that night's
+    /// park with that night chosen, so the two never show different places. (On iPhone the river lives
+    /// on the park's page.)
+    private func ahead(_ park:Park,held:Date?=nil)->some View {
+        let tonight=model.tonight(park), nights=model.nights(park,from:tonight,count:NightVerdict.horizon)
+        let picked=riverNight?.night(at:park) ?? held
+        let chosen=picked.flatMap { id in nights.first { $0.id==id } }
         return Panel { VStack(alignment:.leading,spacing:14) {
             TimeRiver(nights:nights,selected:Binding(get:{ chosen?.id ?? tonight },set:{ riverNight=RiverChoice(parkID:park.id,night:$0) }),outlooks:model.outlooks(nights),markers:model.markers(nights))
             if let chosen, chosen.id != tonight {
@@ -381,10 +387,13 @@ struct TonightView: View {
         return "No parks or dark-sky places fall inside this radius. Widen it or choose a different starting point."
     }
     private func stepRiver(_ delta:Int) {
-        guard let park=best(candidates).first else { return }
-        let tonight=model.tonight(park), current=riverNight?.night(at:park) ?? tonight
+        // The river's own park and night: the dial's held night when it holds one (`ahead(_:held:)`).
+        let best=best(candidates)
+        let held=dialNight>0 ? answer(offset:dialNight,best:best,ahead:aheadPool).first : nil
+        guard let park=held?.park ?? best.first else { return }
+        let tonight=model.tonight(park), current=riverNight?.night(at:park) ?? held?.id ?? tonight
         let next=park.date(current,addingDays:delta)
-        guard next>=tonight, next<park.date(tonight,addingDays:30) else { return }
+        guard next>=tonight, next<park.date(tonight,addingDays:NightVerdict.horizon) else { return }
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { riverNight=RiverChoice(parkID:park.id,night:next) }
     }
     /// The answer for the night `offset` nights after tonight: the places in reach ranked for that night,

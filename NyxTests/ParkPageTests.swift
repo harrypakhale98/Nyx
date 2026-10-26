@@ -193,7 +193,7 @@ import SwiftUI
             let layout=WhatsUpPanel.layout(up)
             #expect(layout.first.contains(up.core))
             if let shower=up.shower, let rate=up.events.shower?.hourlyRate {
-                #expect(rate>=WhatsUpPanel.showerRow ? layout.after.contains(shower) : layout.mentions.contains(shower))
+                #expect(rate>=WhatsUpPanel.showerRow ? layout.first.contains(shower) : layout.mentions.contains(shower))
             }
         }
     }

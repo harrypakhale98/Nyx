@@ -1,6 +1,6 @@
 import Foundation
 
-/// The darkest few of a park's next two weeks of nights, best first, each with how many nights
+/// The darkest few of a park's next thirty nights, best first, each with how many nights
 /// after tonight it falls, so a planner can step straight to it. Ranked by `NightPlanner.better`
 /// over `NightPlanner.bestNights`, so each night is scored exactly as everywhere else: the cloud
 /// forecast where it reaches, eased toward the park's usual clouds days ahead, the usual clouds
@@ -12,8 +12,9 @@ nonisolated struct NightsAhead: Sendable {
         let offset: Int
         var id: Date { night.id }
     }
-    /// How far ahead to look: tonight and the thirteen nights after it.
-    static let reach = 14
+    /// How far ahead to look: tonight and the 29 nights after it, the iPhone's best-night reach
+    /// (`NightVerdict.horizon`, not compiled here), so both name the same night at a park.
+    static let reach = 30
     let park: Park
     let picks: [Pick]
 

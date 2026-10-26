@@ -382,7 +382,11 @@ struct CalendarView: View {
             Button { choose(night) } label:{
                 VStack(alignment:.leading,spacing:8) {
                     Text(park.dayLabel(night.id)).font(.headline)
-                    Text("\(night.score.value) · \(night.score.band.label)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
+                    // The numeral in amber and the band word in ink, as everywhere a score is named (`scoreNumeral`, `bandWord`).
+                    HStack(alignment:.firstTextBaseline,spacing:8) {
+                        Text("\(night.score.value)").scoreNumeral(.title3,accent:palette.accent)
+                        Text(night.score.band.label).bandWord(.title3,ink:palette.ink)
+                    }
                     Text(Sentences.join([night.basisCaption(typical:true) ?? String(localized:"Forecast included"),night.smokeSentence() ?? ""])).font(.caption).foregroundStyle(palette.muted)
                     if let marker=model.events(night).marker(park:park) { Text(marker.name).font(.caption).foregroundStyle(palette.ink) }
                 }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
@@ -720,7 +724,7 @@ struct CalendarView: View {
     /// The "Best nights" rotor: tonight onward, Excellent or better; if none, the three best. Date order.
     static func bestNights(_ nights:[Night],after tonight:Date)->[RotorNight] {
         let ahead=nights.filter { $0.id>=tonight }
-        let excellent=ahead.filter { $0.score.value>=75 }
+        let excellent=ahead.filter { $0.score.value>=ScoreBand.excellent.minimum }
         let chosen=excellent.isEmpty ? Array(NightPlanner.ranked(ahead).prefix(3)) : excellent
         return rotor(chosen.sorted { $0.id<$1.id })
     }

@@ -336,7 +336,7 @@ extension Night {
             // nights that have some is named as the best, as any other.
             if noDarkness { return String(localized:"No true darkness at \(park.shortName) in the next \(count) nights. The best is \(day), \(score.value) out of 100.") }
             let basis=basisCaption(typical:true) ?? String(localized:"Includes a cached cloud forecast.")
-            return String(localized:"The best of the next \(count) nights: \(day) at \(park.shortName), \(score.value) out of 100, \(score.band.label). \(basis) Confirm park access before you go.")
+            return String(localized:"The best of the next \(count) nights: \(day) at \(park.shortName), \(score.value) out of 100, \(score.band.label). \(basis) Confirm conditions and park access before traveling.")
         case .snippet:
             return String(localized:"\(park.shortName) tonight: \(score.value) out of 100, \(bandWithBasis). \(sky.moon.name), \(Int((sky.moon.illumination*100).rounded())) percent lit.")
         }

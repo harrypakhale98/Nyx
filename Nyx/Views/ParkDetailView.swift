@@ -87,7 +87,7 @@ struct ParkDetailView: View {
         let tonight=model.tonight(park)
         guard let initialDate else { return tonight }
         let chosen=park.evening(initialDate)
-        return chosen>=tonight && chosen<park.date(tonight,addingDays:30) ? tonight : chosen
+        return chosen>=tonight && chosen<park.date(tonight,addingDays:NightVerdict.horizon) ? tonight : chosen
     }
     /// Two columns on a wide iPad: tonight (gauge, river, access) stays in view on the left while
     /// the sky and the place scroll on the right. One readable column otherwise.
@@ -170,7 +170,7 @@ struct ParkDetailView: View {
                     try? await Task.sleep(for:.milliseconds(600))
                     proxy.scrollTo("river",anchor:.center)
                     try? await Task.sleep(for:.seconds(2.5))
-                    let nights=model.nights(park,from:riverStart,count:30)
+                    let nights=model.nights(park,from:riverStart,count:NightVerdict.horizon)
                     for night in nights { guard !Task.isCancelled else { return }; selected=night.id; try? await Task.sleep(for:.milliseconds(110)) }
                     let best=NightPlanner.best(Array(nights.prefix(20)))
                     for night in nights.reversed() where night.id >= (best?.id ?? night.id) { guard !Task.isCancelled else { return }; selected=night.id; try? await Task.sleep(for:.milliseconds(70)) }
@@ -198,7 +198,7 @@ struct ParkDetailView: View {
         // Left open past sunrise, the river moves on to the new tonight; a chosen night that has
         // dropped off it is released, so the gauge and the river always show the same night.
         .onChange(of:riverStart) { _,start in
-            if let chosen=selected, chosen<start || chosen>=park.date(start,addingDays:30) { selected=nil }
+            if let chosen=selected, chosen<start || chosen>=park.date(start,addingDays:NightVerdict.horizon) { selected=nil }
         }
         .onAppear { KeepThisNight.container=context.container }
         // Handoff to another device, and the park Siri sees on screen.
@@ -225,7 +225,7 @@ struct ParkDetailView: View {
             // Again whenever the river moves on (left open past sunrise, or a night chosen beyond it), or the
             // page is handed another place, which cancels the old place's build.
             .task(id:RiverPrep(park:park.id,start:riverStart)) {
-                let nights=model.nights(park,from:riverStart,count:30)
+                let nights=model.nights(park,from:riverStart,count:NightVerdict.horizon)
                 await model.prepareWhatsUp(nights)
                 // Both skies for the river's nights, off the main thread, so a night chosen on release finds them ready.
                 await SkyAhead.prepare(nights,trusted:model.astronomyIsEngine)
@@ -258,7 +258,7 @@ struct ParkDetailView: View {
     /// Moves the chosen night within the river's thirty; false when that would leave them.
     @discardableResult func step(_ delta:Int)->Bool {
         let next=park.date(night.id,addingDays:delta)
-        guard next>=riverStart, next<park.date(riverStart,addingDays:30) else { return false }
+        guard next>=riverStart, next<park.date(riverStart,addingDays:NightVerdict.horizon) else { return false }
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { selected=next }
         return true
     }

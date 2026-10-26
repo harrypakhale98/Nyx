@@ -26,15 +26,20 @@ nonisolated struct WatchSkyEntry: TimelineEntry, Sendable {
     var relevance: TimelineEntryRelevance? { rank.map { TimelineEntryRelevance(score: $0.score, duration: $0.duration) } }
 }
 
-/// The wearer's colour choice as the complications read it: Automatic is decided per entry, by
-/// the Sun at that entry's park and moment, so a face turns red at civil dusk.
+/// The wearer's colour choice as the complications read it: At dusk is decided per entry, by the Sun
+/// at the iPhone's At-dusk place (`WatchContext.duskPlace`) or, before one is sent, at that entry's
+/// park, so a face turns red at civil dusk with the app and the phone.
 nonisolated struct WristLook: Sendable {
     let choice: PaletteChoice
     let phone: Bool?
-    static var current: WristLook { WristLook(choice: WatchSky.palette, phone: WatchSky.readContext()?.nightVision) }
+    var dusk: Park? = nil
+    static var current: WristLook {
+        let context = WatchSky.readContext()
+        return WristLook(choice: WatchSky.palette, phone: context?.nightVision, dusk: context?.duskPlace)
+    }
     /// Placeholders and the face gallery: red, as at a dark site.
     static let red = WristLook(choice: .red, phone: nil)
-    func nightVision(park: Park?, at date: Date) -> Bool { choice.nightVision(phone: phone, park: park, at: date) }
+    func nightVision(park: Park?, at date: Date) -> Bool { choice.nightVision(phone: phone, park: dusk ?? park, at: date) }
 }
 
 /// Colours every Nyx complication shares. In full colour they follow the palette; in the tinted
@@ -135,7 +140,7 @@ nonisolated enum WatchTimeline {
     /// snapshot's parks over the next day.
     static func paletteMoments(from now: Date, snapshot: SavedSkySnapshot?, look: WristLook) -> [Date] {
         guard look.choice == .automatic else { return [] }
-        return (snapshot?.parks ?? []).flatMap { WristSky.paletteChanges(at: $0, from: now, to: now.addingTimeInterval(86400)) }
+        return (look.dusk.map { [$0] } ?? snapshot?.parks ?? []).flatMap { WristSky.paletteChanges(at: $0, from: now, to: now.addingTimeInterval(86400)) }
     }
     /// The moments over the next day at which the park a face follows may change: every hour, and a
     /// second past each park's sunrise, when its night turns over (`Park.nightTurnovers`). Every

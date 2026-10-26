@@ -194,13 +194,13 @@ nonisolated struct NotificationScheduler {
     /// "Pristine night at Joshua Tree, Friday": the news first, in the title.
     /// A night a score reminder can announce: Pristine, with a full cloud forecast and some true
     /// darkness. Tonight's double tap uses the same rule.
-    static func worthAReminder(_ night:Night)->Bool { night.score.value>=90 && night.score.hasForecast && night.sky.darkHours>0 }
+    static func worthAReminder(_ night:Night)->Bool { night.score.value>=ScoreBand.pristine.minimum && night.score.hasForecast && night.sky.darkHours>0 }
     static func title(_ night:Night)->String {
         var weekday=Date.FormatStyle.dateTime.weekday(.wide)
         weekday.timeZone=night.park.timeZone
         return String(localized:"\(night.score.band.label) night at \(night.park.shortName), \(night.id.formatted(weekday))")
     }
-    /// "94 out of 100. Moon down all night. Check park alerts before you go." Never "94/100",
+    /// "94 out of 100. Moon-free through all of true darkness. Check park alerts before you go." Never "94/100",
     /// which VoiceOver reads as "slash". A place the Park Service does not run has no park alerts to
     /// check: it says "closures and access" instead. With a closure in the last park update, the
     /// closure comes first in the app's words (`ClosureLine`) and stands in for the advice.
@@ -213,7 +213,7 @@ nonisolated struct NotificationScheduler {
         return String(localized:"\(night.score.value) out of 100. \(why). Check park alerts before you go.")
     }
     /// One thing that is true of this night and makes it dark, the most telling first; with it,
-    /// when true, that all three forecast models are clear ("Moon down all night; all three
+    /// when true, that all three forecast models are clear ("Moon-free through all of true darkness; all three
     /// forecast models clear").
     static func reason(_ night:Night,models:ModelAgreement?=nil)->String {
         let moon=moonReason(night)
@@ -224,7 +224,8 @@ nonisolated struct NotificationScheduler {
     /// The Moon's part, when it is the reason; nil when it is not.
     private static func moonReason(_ night:Night)->String? {
         let sky=night.sky
-        if sky.moonDownPercent==100 { return String(localized:"Moon down all night") }
+        // The Moon's words on every surface (`NightVerdict.moonSentence`): only true darkness is promised.
+        if sky.moonDownPercent==100 { return String(localized:"Moon-free through all of true darkness") }
         if sky.moon.illumination<0.05 { return String(localized:"Almost no moonlight") }
         if let set=sky.moonset, let start=sky.darkStart, let end=sky.darkEnd, set>start, set<end, sky.moonrise.map({ $0<start || $0>end }) ?? true {
             return String(localized:"Moon sets at \(night.park.time(set))")

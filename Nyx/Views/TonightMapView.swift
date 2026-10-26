@@ -46,7 +46,7 @@ struct TonightMapCanvas: View {
             func visible(_ p:CGPoint,_ radius:Double)->Bool { p.x > -radius-8 && p.y > -radius-8 && p.x<size.width+radius+8 && p.y<size.height+radius+8 }
             // A soft glow for Excellent and Pristine nights (a dark sky glows a little), all in one blurred layer
             // under the marks: one blur a frame, however many places glow.
-            let glowing=palette.nightVision ? [] : map.marks.filter { $0.score>=75 }
+            let glowing=palette.nightVision ? [] : map.marks.filter { $0.score>=ScoreBand.excellent.minimum }
             if !glowing.isEmpty {
                 context.drawLayer { glow in
                     glow.addFilter(.blur(radius:TonightMap.radius(score:88)*size1*3/2.6))

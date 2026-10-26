@@ -47,7 +47,7 @@ nonisolated enum WristTonightAnswer {
         let park = night.park, score = night.score
         let body = night.sky.darkHours == 0
             ? String(localized: "No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.")
-            : String(localized: "\(park.shortName), \(score.value) out of 100, \(score.band.label). \(clouds(night, context: context, now: now))")
+            : String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). \(clouds(night, context: context, now: now)) Confirm conditions and park access before traveling.")
         guard let closure = context?.closures[park.id]?.trimmingCharacters(in: .whitespacesAndNewlines), !closure.isEmpty else { return body }
         let alert = WristClosure.spoken(closure)
         return Sentences.join([Sentences.end(alert), body])
