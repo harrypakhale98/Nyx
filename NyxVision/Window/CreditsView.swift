@@ -12,7 +12,7 @@ struct CreditsView: View {
                 VStack(alignment: .leading, spacing: 22) {
                     ForEach(Credits.Section.allCases, id: \.self) { section in
                         VStack(alignment: .leading, spacing: 10) {
-                            VisionEyebrow(text: LocalizedStringKey(section.title))
+                            VisionEyebrow(verbatim: section.title)
                             ForEach(section.lines(for: .vision), id: \.self) { line in
                                 Text(line).font(.body).fixedSize(horizontal: false, vertical: true)
                             }

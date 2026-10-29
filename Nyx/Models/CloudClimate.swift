@@ -256,11 +256,12 @@ extension Night {
     nonisolated func cloudSentence(forecastsOn: Bool = true) -> String {
         Sentences.join([basisCaption() ?? String(localized: "Includes cloud forecast."), forecastsOff(forecastsOn) ?? ""])
     }
-    /// Siri with no screen in view: "Tonight at Arches: 94, Pristine." and at most one caveat: the
-    /// clouds without a full forecast, else `smoke`.
-    fileprivate nonisolated func voiceAnswer(_ day: String, smoke: String? = nil) -> String {
+    /// Siri with no screen in view: "Tonight at Arches: 94, Pristine.", smoke that holds the score down
+    /// (`smokeCap`), always, since it is why the score is low; and at most one other caveat: the clouds
+    /// without a full forecast, else why smoke is not counted (`smokeNote`).
+    fileprivate nonisolated func voiceAnswer(_ day: String, smokeCap: String? = nil, smokeNote: String? = nil) -> String {
         let clouds = score.hasForecast ? "" : (basis.isEarlyLook ? String(localized: "An early look at the clouds.") : withTypicalClouds(noForecastSentence ?? ""))
-        return Sentences.join([String(localized: "\(day) at \(park.shortName): \(score.value), \(score.band.label)."), clouds.isEmpty ? smoke ?? "" : clouds])
+        return Sentences.join([String(localized: "\(day) at \(park.shortName): \(score.value), \(score.band.label)."), smokeCap ?? "", clouds.isEmpty ? smokeNote ?? "" : clouds])
     }
     /// The long form; nil with a forecast: "No cloud forecast yet." or "Cloud forecast
     /// unavailable." (`noForecastSentence`), then what the score uses instead. `typical` adds
@@ -311,16 +312,17 @@ nonisolated struct TonightAnswer: Sendable {
     /// "Cloud forecasts" in Your privacy; off, the answer says why a forecast that should reach the night is missing.
     var forecastsOn = true
 
-    /// `voiceOnly` (iOS 27, no screen in view): the closure, "Tonight at Arches: 94, Pristine.", at most
-    /// one caveat (the clouds, else smoke), and the closures line, which is never dropped.
+    /// `voiceOnly` (iOS 27, no screen in view): the closure, "Tonight at Arches: 94, Pristine.", smoke
+    /// that holds the score down, at most one other caveat (the clouds, else why smoke is not counted),
+    /// and the closures line, which is never dropped.
     func dialog(voiceOnly: Bool = false) -> String {
         let park = night.park, score = night.score
-        let smoke = night.smokeSentence(tonight: true) ?? smokeNote
+        let cap = night.smokeSentence(tonight: true), smoke = cap ?? smokeNote
         var parts: [String]
         if night.sky.darkHours == 0 {
             parts = [String(localized: "No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100."), smoke ?? ""]
         } else if voiceOnly {
-            parts = [night.voiceAnswer(String(localized: "Tonight"), smoke: smoke)]
+            parts = [night.voiceAnswer(String(localized: "Tonight"), smokeCap: cap, smokeNote: cap == nil ? smokeNote : nil)]
         } else {
             let clouds = self.clouds ?? night.cloudSentence(forecastsOn: forecastsOn)
             parts = [String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). \(clouds) Confirm conditions and park access before traveling."), smoke ?? ""]

@@ -76,6 +76,13 @@ struct OneVoiceTests {
         let clear = tonight(jotr, forecast: Forecast(updated: now, times: hours, clouds: hours.map { _ in 0 }))
         try #require(clear.score.hasForecast)
         #expect(TonightAnswer(night: clear, smokeNote: smokeOff).dialog(voiceOnly: true) == Sentences.join([String(localized: "Tonight at \(jotr.shortName): \(clear.score.value), \(clear.score.band.label)."), smokeOff]))
+        // Smoke that holds the score down is always said, since it is why the score is low, beside the clouds' caveat.
+        let air = HourlySeries(updated: now, times: hours, values: ["aerosol_optical_depth": hours.map { _ in 0.6 }])
+        let smoky = tonight(jotr, detail: ForecastDetail(air: air))
+        let cap = try #require(smoky.smokeSentence(tonight: true))
+        try #require(!smoky.score.hasForecast)
+        let spoken = TonightAnswer(night: smoky, smokeNote: smokeOff).dialog(voiceOnly: true)
+        #expect(spoken.contains(cap) && !spoken.contains(smokeOff))
         // The full answer says a full forecast in the one sentence every device uses.
         #expect(TonightAnswer(night: clear).dialog().contains(String(localized: "Includes cloud forecast.")))
     }
