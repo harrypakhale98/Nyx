@@ -523,6 +523,9 @@ targets:
         group: Shared
       - path: Nyx/Services/WhatsUp.swift
         group: Shared
+      # Siri's "When is it dark" and "What's up tonight", in the iPhone's words (`DarkWindowAnswer`, `WhatsUpAnswer`).
+      - path: Nyx/Intents/SkyAnswers.swift
+        group: Shared
       # Tonight's binocular sights in What's up, from the same bundled list as the iPhone.
       - path: Nyx/Services/DeepSky.swift
         group: Shared
@@ -581,7 +584,7 @@ targets:
       - path: Nyx/Models/PlaceIDText.swift
         group: Shared
     # Linked so the App Intents metadata step finds its framework instead of warning on every build
-    # ("Metadata extraction skipped"). The window's own intents (Siri and Shortcuts: a park's score, open a park, stand under tonight's sky) live in NyxVision/Intents.
+    # ("Metadata extraction skipped"). The window's own intents (Siri and Shortcuts: a park's score, when it is dark, what's up, open a park, stand under tonight's sky) live in NyxVision/Intents.
     dependencies:
       - sdk: AppIntents.framework
       - target: NyxVisionWidgets

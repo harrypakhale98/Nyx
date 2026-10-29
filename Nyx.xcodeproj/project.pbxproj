@@ -137,6 +137,7 @@
 		BA785E8BD3C69A9097A954AE /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE401E4AEE8751787D4278CB /* MoonDisc.swift */; };
 		BABB37E4FDB1ED5B94631020 /* NightLook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D6113E0456F689ACF6EFB46 /* NightLook.swift */; };
 		BABE8B1A44675DABE28C69A2 /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE8F62A781211AEED0D40D /* NightPlanner.swift */; };
+		BB7DB02F19C3AB0519653EE0 /* SkyAnswers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6A1D094AC6B3704B0028E6 /* SkyAnswers.swift */; };
 		BDF805BE459DDB0B102CCD8D /* SkyDome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D1F0093FB21BCC2BF3CE47 /* SkyDome.swift */; };
 		C1201D85688C47CB4928A3EF /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
 		C1C7DB07418934B05A45534F /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20EB09DA695F3C836EBD27CA /* SharedSettings.swift */; };
@@ -351,6 +352,7 @@
 		D54030FE628EFDD89DB8DC0D /* FieldModeIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FieldModeIntent.swift; path = Nyx/Intents/FieldModeIntent.swift; sourceTree = "<group>"; };
 		D6D04D625F5F18ACF2F82496 /* SharedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = SharedAssets.xcassets; path = Nyx/Resources/SharedAssets.xcassets; sourceTree = "<group>"; };
 		D7CE8F62A781211AEED0D40D /* NightPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NightPlanner.swift; path = Nyx/Services/NightPlanner.swift; sourceTree = "<group>"; };
+		DB6A1D094AC6B3704B0028E6 /* SkyAnswers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkyAnswers.swift; path = Nyx/Intents/SkyAnswers.swift; sourceTree = "<group>"; };
 		E0BFB122086DAA75F561950E /* SkyGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkyGrid.swift; path = Nyx/Services/SkyGrid.swift; sourceTree = "<group>"; };
 		E6D7F3033F470EAF9D5E9A25 /* ClearWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClearWindow.swift; path = Nyx/Services/ClearWindow.swift; sourceTree = "<group>"; };
 		E740BD818FFFBC42B994D3B0 /* ScoreEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScoreEngine.swift; path = Nyx/Services/ScoreEngine.swift; sourceTree = "<group>"; };
@@ -581,6 +583,7 @@
 				20EB09DA695F3C836EBD27CA /* SharedSettings.swift */,
 				504FC2DA615C646B33B4F0E3 /* sky-events.json */,
 				AF37B2E55E007D52451E0295 /* SkyAlmanac.swift */,
+				DB6A1D094AC6B3704B0028E6 /* SkyAnswers.swift */,
 				0237C0E0F5172A701CB7CE97 /* SkyConditions.swift */,
 				41D1F0093FB21BCC2BF3CE47 /* SkyDome.swift */,
 				CC857B159B3CE7AA07A7736B /* skyglow.json */,
@@ -987,6 +990,7 @@
 				82752C0E82916E54CBA7A3EE /* ScoreInputs.swift in Sources */,
 				E6439445EFAF13C7898A290E /* Sentences.swift in Sources */,
 				692A69AAFECED4C5EFBC49C7 /* SkyAlmanac.swift in Sources */,
+				BB7DB02F19C3AB0519653EE0 /* SkyAnswers.swift in Sources */,
 				C2ADDC2ECAC3B8E9DEB41A48 /* SkyConditions.swift in Sources */,
 				BDF805BE459DDB0B102CCD8D /* SkyDome.swift in Sources */,
 				46245A719A6B8E0DDD128627 /* SkyGrid.swift in Sources */,

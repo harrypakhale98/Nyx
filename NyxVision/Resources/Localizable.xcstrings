@@ -212,6 +212,41 @@
         }
       }
     },
+    "%@ has no true darkness tonight at this latitude.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In %@ gibt es heute Nacht auf dieser Breite keine echte Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ has no true darkness tonight at this latitude."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ no tiene oscuridad total esta noche a esta latitud."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas d’obscurité totale cette nuit à %@, à cette latitude."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@では今夜、この緯度のため完全には暗くなりません。"
+          }
+        }
+      }
+    },
     "%@ lit": {
       "extractionState": "manual",
       "localizations": {
@@ -488,6 +523,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@、%@。"
+          }
+        }
+      }
+    },
+    "%@, %@: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@ : %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@、%@：%@。"
           }
         }
       }
@@ -6442,6 +6512,41 @@
         }
       }
     },
+    "Milky Way core: up in true darkness from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milchstraßenzentrum: bei echter Dunkelheit von %@ bis %@ am Himmel."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core: up in true darkness from %@ to %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Núcleo de la Vía Láctea: visible en oscuridad total de %@ a %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cœur de la Voie lactée : levé en obscurité totale de %@ à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天の川の中心部：完全に暗い時間のうち、%@から%@まで空にあります。"
+          }
+        }
+      }
+    },
     "Models agree": {
       "extractionState": "manual",
       "localizations": {
@@ -7838,6 +7943,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "日の当たっている地名：%@。"
+          }
+        }
+      }
+    },
+    "Names what is worth seeing tonight at a national park: the Milky Way core, bright planets, a meteor shower or an eclipse, with times in the park's own time. Leave the park empty for the park chosen in Nyx.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nennt, was heute Nacht in einem Nationalpark sehenswert ist: das Milchstraßenzentrum, helle Planeten, einen Meteorstrom oder eine Finsternis, mit Zeiten in der Ortszeit des Parks. Lass den Park leer für den in Nyx gewählten Park."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Names what is worth seeing tonight at a national park: the Milky Way core, bright planets, a meteor shower or an eclipse, with times in the park's own time. Leave the park empty for the park chosen in Nyx."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombra lo que vale la pena ver esta noche en un parque nacional: el núcleo de la Vía Láctea, los planetas brillantes, una lluvia de meteoros o un eclipse, con horas del propio parque. Deja el parque vacío para usar el parque elegido en Nyx."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indique ce qui vaut le coup d’œil ce soir dans un parc national : le cœur de la Voie lactée, les planètes brillantes, une pluie de météores ou une éclipse, avec les heures du parc. Laissez le parc vide pour le parc choisi dans Nyx."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "国立公園で今夜見る価値のあるものを挙げます。天の川の中心部、明るい惑星、流星群、食など。時刻は公園の現地時間です。公園を空欄にすると、Nyxで選んだ公園を使います。"
           }
         }
       }
@@ -10887,6 +11027,41 @@
         }
       }
     },
+    "Says when true darkness begins and ends tonight at a national park, in the park's own time, worked out on this device. Leave the park empty for the park chosen in Nyx.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sagt, wann die echte Dunkelheit heute Nacht in einem Nationalpark beginnt und endet, in der Ortszeit des Parks, berechnet auf diesem Gerät. Lass den Park leer für den in Nyx gewählten Park."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Says when true darkness begins and ends tonight at a national park, in the park's own time, worked out on this device. Leave the park empty for the park chosen in Nyx."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dice cuándo empieza y termina la oscuridad total esta noche en un parque nacional, con la hora del parque, calculado en este dispositivo. Deja el parque vacío para usar el parque elegido en Nyx."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indique quand l’obscurité totale commence et finit ce soir dans un parc national, à l’heure du parc, calculé sur cet appareil. Laissez le parc vide pour le parc choisi dans Nyx."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "国立公園で今夜、完全な暗さがいつ始まりいつ終わるかを、公園の現地時間で伝えます。計算はこのデバイスで行います。公園を空欄にすると、Nyxで選んだ公園を使います。"
+          }
+        }
+      }
+    },
     "Search parks": {
       "extractionState": "manual",
       "localizations": {
@@ -12252,6 +12427,41 @@
         }
       }
     },
+    "Sunset is at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonnenuntergang ist um %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunset is at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puesta del sol: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le soleil se couche à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日の入りは%@です。"
+          }
+        }
+      }
+    },
     "Surrounds you with this park's computed sky at the time on the clock below the window": {
       "extractionState": "manual",
       "localizations": {
@@ -12987,6 +13197,41 @@
         }
       }
     },
+    "The Sun stays up all night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Sonne geht die ganze Nacht nicht unter."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Sun stays up all night."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Sol no se pone en toda la noche."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le Soleil reste levé toute la nuit."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "太陽は一晩中沈みません。"
+          }
+        }
+      }
+    },
     "The air is usually near its dew point before dawn this month: expect dew on lenses.": {
       "extractionState": "manual",
       "localizations": {
@@ -13617,6 +13862,41 @@
         }
       }
     },
+    "The sky stays in twilight from sunset at %@ to sunrise at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Himmel bleibt in der Dämmerung, vom Sonnenuntergang um %@ bis zum Sonnenaufgang um %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The sky stays in twilight from sunset at %@ to sunrise at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El cielo sigue en crepúsculo desde la puesta del sol (%@) hasta el amanecer (%@)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le ciel reste crépusculaire du coucher du soleil, à %@, à son lever, à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日の入り（%@）から日の出（%@）まで、空は薄明のままです。"
+          }
+        }
+      }
+    },
     "The skyline is the real terrain around %@, from elevation data.": {
       "extractionState": "manual",
       "localizations": {
@@ -14072,6 +14352,41 @@
         }
       }
     },
+    "Times in %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeiten in %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Times in %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Horario: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuseau horaire : %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時刻は%@"
+          }
+        }
+      }
+    },
     "To the eye, about %lld of the Little Dipper's 7 stars. An estimate, not part of the score.": {
       "extractionState": "manual",
       "localizations": {
@@ -14138,6 +14453,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "今夜"
+          }
+        }
+      }
+    },
+    "Tonight at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute Nacht in %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta noche en %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce soir à %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜の%@"
+          }
+        }
+      }
+    },
+    "Tonight at %@: true darkness from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute Nacht in %@: echte Dunkelheit von %@ bis %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight at %@: true darkness from %@ to %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta noche en %@: oscuridad total de %@ a %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce soir à %@ : obscurité totale de %@ à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜の%1$@：完全に暗いのは%2$@から%3$@まで。"
           }
         }
       }
@@ -14348,6 +14733,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "完全な暗さ"
+          }
+        }
+      }
+    },
+    "True darkness tonight at %@: from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Echte Dunkelheit heute Nacht in %@: von %@ bis %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "True darkness tonight at %@: from %@ to %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuridad total esta noche en %@: de %@ a %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obscurité totale ce soir à %@ : de %@ à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜の%1$@の完全な暗さ：%2$@から%3$@まで。"
           }
         }
       }
@@ -15122,6 +15542,41 @@
         }
       }
     },
+    "What's up": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Am Himmel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's up"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el cielo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans le ciel"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空に見えるもの"
+          }
+        }
+      }
+    },
     "What's up this night": {
       "extractionState": "manual",
       "localizations": {
@@ -15188,6 +15643,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "今夜の空"
+          }
+        }
+      }
+    },
+    "What's up tonight at ${park}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute Nacht am Himmel in ${park}"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's up tonight at ${park}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el cielo esta noche en ${park}"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans le ciel ce soir à ${park}"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜の${park}の空"
+          }
+        }
+      }
+    },
+    "When true darkness falls at ${park} tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wann heute Nacht in ${park} die echte Dunkelheit beginnt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When true darkness falls at ${park} tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuándo llega la oscuridad total en ${park} esta noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand vient l’obscurité totale à ${park} ce soir"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜${park}で完全に暗くなる時刻"
+          }
+        }
+      }
+    },
+    "When true darkness falls tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wann heute Nacht die echte Dunkelheit beginnt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When true darkness falls tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuándo llega la oscuridad total esta noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand vient l’obscurité totale ce soir"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜、完全に暗くなる時刻"
           }
         }
       }

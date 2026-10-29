@@ -160,6 +160,122 @@
           }
         }
       }
+    },
+    "What's up tonight in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Was ist heute Nacht am Himmel laut ${applicationName}",
+              "Was ist heute Nacht in ${park} am Himmel laut ${applicationName}",
+              "Was kann ich heute Nacht in ${park} sehen laut ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "What's up tonight in ${applicationName}",
+              "What's up tonight at ${park} in ${applicationName}",
+              "What can I see tonight at ${park} with ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Qué hay en el cielo esta noche según ${applicationName}",
+              "Qué hay en el cielo esta noche en ${park} según ${applicationName}",
+              "Qué puedo ver esta noche en ${park} con ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Qu’y a-t-il dans le ciel ce soir dans ${applicationName}",
+              "Qu’y a-t-il dans le ciel ce soir à ${park} dans ${applicationName}",
+              "Que puis-je voir ce soir à ${park} avec ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で今夜の空に何が見える",
+              "${applicationName}で今夜の空を教えて",
+              "${applicationName}で${park}の今夜の空に何が見える",
+              "${applicationName}で${park}の今夜の空を教えて",
+              "${applicationName}で${park}で今夜何が見られる",
+              "${applicationName}で${park}で今夜見えるものを教えて"
+            ]
+          }
+        }
+      }
+    },
+    "When is it dark tonight in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Wann wird es heute Nacht dunkel laut ${applicationName}",
+              "Wann wird es in ${park} dunkel laut ${applicationName}",
+              "Wann beginnt die echte Dunkelheit in ${park} laut ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "When is it dark tonight in ${applicationName}",
+              "When is it dark at ${park} in ${applicationName}",
+              "When does true darkness start at ${park} in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Cuándo oscurece esta noche según ${applicationName}",
+              "Cuándo oscurece en ${park} según ${applicationName}",
+              "Cuándo empieza la oscuridad total en ${park} según ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Quand fait-il nuit noire ce soir dans ${applicationName}",
+              "Quand fait-il nuit noire à ${park} dans ${applicationName}",
+              "Quand commence l’obscurité totale à ${park} dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で今夜はいつ暗くなる",
+              "${applicationName}で今夜暗くなる時間を教えて",
+              "${applicationName}で${park}はいつ暗くなる",
+              "${applicationName}で${park}が暗くなる時間を教えて",
+              "${applicationName}で${park}が完全に暗くなるのはいつ",
+              "${applicationName}で${park}の完全な暗さが始まる時間を教えて"
+            ]
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -1,9 +1,10 @@
 import AppIntents
 import Foundation
 
-// Siri and Shortcuts on Apple Vision Pro: a park's darkness score tonight, a park opened in the
-// planner, and tonight's sky to stand under. Everything is computed on the headset from the
-// bundled parks and the cached cloud forecast, smoke and park alerts; no intent makes a request.
+// Siri and Shortcuts on Apple Vision Pro: a park's darkness score tonight, when it is dark and what's
+// up there, a park opened in the planner, and tonight's sky to stand under. Everything is computed on
+// the headset from the bundled parks and the cached cloud forecast, smoke, park alerts and aurora
+// forecast; no intent makes a request.
 
 /// A national park, for Siri and Shortcuts. The iPhone's entity name, type name and identifiers
 /// (the park code), so a park means the same thing on every device; read from the bundled park list.
@@ -62,6 +63,63 @@ struct DarknessIntent: AppIntent {
     }
 }
 
+/// The park a question names, else the one chosen in the planner (Joshua Tree before any), as
+/// Stand under tonight's sky chooses; and its closure from this headset's last park update, which
+/// the darkness score says too (a known closure is never hidden).
+nonisolated enum VisionIntentPark {
+    static func resolve(_ entity: ParkEntity?) throws -> Park {
+        let parks = try ParkData.load()
+        let id = entity?.id ?? VisionModel.rememberedPark(in: parks)
+        guard let park = parks.first(where: { $0.id == id }) else { throw VisionIntentError.parkNotFound }
+        return park
+    }
+    static func closure(_ park: Park) -> String? { ParkStore.stored([park])?.closure(for: park) }
+}
+private extension AppIntent {
+    /// visionOS 27: Siri answers with no window in view, so the answer keeps only what matters.
+    nonisolated var voiceOnly: Bool {
+        if #available(visionOS 27.0, *) { return systemContext.isVoiceOnly }
+        return false
+    }
+}
+
+/// "When is it dark at Arches tonight?" True darkness, start to end, in the park's own time, or
+/// plainly that there is none at this latitude, in the iPhone's words (`DarkWindowAnswer`). A closure
+/// is said first. Returns when true darkness begins (sunset, or the evening, where there is none).
+struct DarkTonightIntent: AppIntent {
+    static let title: LocalizedStringResource = "When true darkness falls tonight"
+    static let description = IntentDescription("Says when true darkness begins and ends tonight at a national park, in the park's own time, worked out on this device. Leave the park empty for the park chosen in Nyx.")
+    @Parameter(title: "Park", description: "Leave empty for the park chosen in Nyx.") var park: ParkEntity?
+    static var parameterSummary: some ParameterSummary { Summary("When true darkness falls at \(\.$park) tonight") }
+    init() {}
+    func perform() async throws -> some IntentResult & ReturnsValue<Date> & ProvidesDialog {
+        let selected = try VisionIntentPark.resolve(park)
+        let sky = AstronomyEngine().conditions(for: selected, on: selected.currentNight(at: .now))
+        let dialog = DarkWindowAnswer.dialog(park: selected, sky: sky, closure: VisionIntentPark.closure(selected), voiceOnly: voiceOnly)
+        return .result(value: sky.darkStart ?? sky.sunset ?? sky.evening, dialog: IntentDialog(stringLiteral: dialog))
+    }
+}
+
+/// "What's up tonight at Arches?" The first three things in What's up (an eclipse or a shower first,
+/// then the Milky Way core and the brightest planets), in the iPhone's words (`WhatsUpAnswer`).
+struct WhatsUpTonightIntent: AppIntent {
+    static let title: LocalizedStringResource = "What's up tonight"
+    static let description = IntentDescription("Names what is worth seeing tonight at a national park: the Milky Way core, bright planets, a meteor shower or an eclipse, with times in the park's own time. Leave the park empty for the park chosen in Nyx.")
+    @Parameter(title: "Park", description: "Leave empty for the park chosen in Nyx.") var park: ParkEntity?
+    static var parameterSummary: some ParameterSummary { Summary("What's up tonight at \(\.$park)") }
+    init() {}
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let selected = try VisionIntentPark.resolve(park)
+        let now = Date.now
+        let sky = AstronomyEngine().conditions(for: selected, on: selected.currentNight(at: now))
+        // NOAA's aurora forecast as the window last kept it (no request from Siri), unless switched off.
+        let outlook = NetworkService.aurora.isOn() ? await AuroraService().cached() : nil
+        let whatsUp = WhatsUp(park: selected, sky: sky, isTonight: true, aurora: AuroraForecast.item(outlook, park: selected, sky: sky, now: now))
+        let dialog = WhatsUpAnswer.dialog(whatsUp, park: selected, closure: VisionIntentPark.closure(selected), voiceOnly: voiceOnly)
+        return .result(dialog: IntentDialog(stringLiteral: dialog))
+    }
+}
+
 /// What Siri or Shortcuts asked the planner window for: a park on tonight (nil keeps the chosen
 /// park), and whether to stand under its sky. Each request is new, even for the same park. With
 /// only the Moon volume open, the volume opens a planner window to answer it (`MoonVolume`).
@@ -110,6 +168,10 @@ struct NyxVisionShortcuts: AppShortcutsProvider {
                     shortTitle: "Stand under the sky", systemImageName: "sparkles")
         AppShortcut(intent: DarknessIntent(), phrases: ["What is the darkness score at \(\.$park) in \(.applicationName)", "Check tonight's sky at \(\.$park) with \(.applicationName)"],
                     shortTitle: "Tonight's sky", systemImageName: "moon.stars")
+        AppShortcut(intent: DarkTonightIntent(), phrases: ["When is it dark tonight in \(.applicationName)", "When is it dark at \(\.$park) in \(.applicationName)", "When does true darkness start at \(\.$park) in \(.applicationName)"],
+                    shortTitle: "True darkness", systemImageName: "moon.haze")
+        AppShortcut(intent: WhatsUpTonightIntent(), phrases: ["What's up tonight in \(.applicationName)", "What's up tonight at \(\.$park) in \(.applicationName)", "What can I see tonight at \(\.$park) with \(.applicationName)"],
+                    shortTitle: "What's up", systemImageName: "sparkles")
         AppShortcut(intent: OpenParkIntent(), phrases: ["Open \(\.$target) in \(.applicationName)"], shortTitle: "Open park", systemImageName: "mountain.2")
     }
 }

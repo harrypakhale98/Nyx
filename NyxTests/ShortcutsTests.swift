@@ -100,6 +100,58 @@ import Testing
         #expect(!dialog.contains("up in true darkness"))
     }
 
+    // MARK: Every device's words
+
+    // Pinned whole for fixed nights: Vision Pro's intents call the same file (SkyAnswers.swift,
+    // compiled into both apps), so these words guard both devices.
+
+    @Test func darkWindowWordsForOneNight() throws {
+        let jotr=try park("jotr"), sky=try sky(jotr, "2026-10-12")
+        let dark=try #require(sky.darkStart), light=try #require(sky.darkEnd), set=try #require(sky.sunset)
+        let start=jotr.time(dark), end=jotr.time(light), sunset=jotr.time(set)
+        let eastern=try #require(TimeZone(identifier: "America/New_York"))
+        #expect(DarkWindowAnswer.dialog(park: jotr, sky: sky, closure: nil, voiceOnly: false, device: jotr.timeZone)
+                == "True darkness tonight at Joshua Tree: from \(start) to \(end). Sunset is at \(sunset).")
+        #expect(DarkWindowAnswer.dialog(park: jotr, sky: sky, closure: closure, voiceOnly: false, device: eastern)
+                == "Closure alert: \(closure). True darkness tonight at Joshua Tree: from \(start) to \(end). Sunset is at \(sunset). Times in Pacific Time.")
+        #expect(DarkWindowAnswer.dialog(park: jotr, sky: sky, closure: nil, voiceOnly: true, device: jotr.timeZone)
+                == "Tonight at Joshua Tree: true darkness from \(start) to \(end).")
+    }
+    @Test func darkWindowWordsWithoutTrueDarkness() throws {
+        let gaar=try park("gaar"), sky=try sky(gaar, "2026-06-21")
+        #expect(sky.state == .polarDay)
+        #expect(DarkWindowAnswer.dialog(park: gaar, sky: sky, closure: nil, voiceOnly: false, device: gaar.timeZone)
+                == "Gates of the Arctic has no true darkness tonight at this latitude. The Sun stays up all night.")
+        #expect(DarkWindowAnswer.dialog(park: gaar, sky: sky, closure: nil, voiceOnly: true, device: gaar.timeZone)
+                == "Gates of the Arctic has no true darkness tonight at this latitude.")
+    }
+    @Test func whatsUpWordsForOneNight() throws {
+        let jotr=try park("jotr"), sky=try sky(jotr, "2026-08-12")
+        let whatsUp=WhatsUp(park: jotr, sky: sky, isTonight: true)
+        let dark=try #require(whatsUp.coreNight.dark)
+        let said=whatsUp.items.prefix(WhatsUpAnswer.limit)
+        // The Perseids' peak in the desert: the shower and the core are both among the three things said.
+        #expect(said.contains { $0.kind == .meteors } && said.contains { $0.kind == .core })
+        func line(_ item: WhatsUp.Item, voiceOnly: Bool) -> String {
+            switch item.kind {
+            case .core: "Milky Way core: up in true darkness from \(jotr.time(dark.start)) to \(jotr.time(dark.end))."
+            case .meteors: "\(item.title), \(item.note ?? ""): \(item.value ?? "")."
+            case .planet where voiceOnly: "\(item.title), \(item.note ?? ""): \(item.value ?? "")."
+            default: item.spoken
+            }
+        }
+        #expect(WhatsUpAnswer.dialog(whatsUp, park: jotr, closure: nil, voiceOnly: false, device: jotr.timeZone)
+                == (["Tonight at Joshua Tree."]+said.map { line($0, voiceOnly: false) }).joined(separator: " "))
+        let eastern=try #require(TimeZone(identifier: "America/New_York"))
+        #expect(WhatsUpAnswer.dialog(whatsUp, park: jotr, closure: closure, voiceOnly: true, device: eastern)
+                == (["Closure alert: \(closure).", "Tonight at Joshua Tree."]+said.map { line($0, voiceOnly: true) }+["Times in Pacific Time."]).joined(separator: " "))
+    }
+    @Test func everyAnswerAboutAPlaceLeadsWithItsClosure() throws {
+        let jotr=try park("jotr")
+        #expect(ClosureLine.around("Body.", park: jotr, closure: "Park closed") == "Closure alert: Park closed. Body.")
+        #expect(ClosureLine.around("Body.", park: jotr, closure: " ") == "Body.")
+    }
+
     // MARK: Follow this night
 
     @Test func everyFollowResultHasAnHonestDialog() throws {
