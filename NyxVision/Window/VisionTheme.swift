@@ -31,12 +31,14 @@ struct VisionPalette: Equatable {
     /// 4.5:1 for protan and deutan eyes too.
     var red: Color { base.red.color }
     /// Secondary text. On glass it is the system's vibrant secondary style, which keeps its
-    /// contrast over whatever the room shows through; night vision and Increase Contrast use a
-    /// near-solid ink instead.
+    /// contrast over whatever the room shows through; night vision and Increase Contrast use the
+    /// iPhone's rule (`NyxPalette.mutedOpacity`) over a solid panel instead.
     var muted: AnyShapeStyle {
-        highContrast || nightVision ? AnyShapeStyle(ink.opacity(highContrast ? 0.95 : 0.9)) : AnyShapeStyle(.secondary)
+        highContrast || nightVision ? AnyShapeStyle(ink.opacity(NyxPalette.mutedOpacity(nightVision: nightVision, highContrast: highContrast))) : AnyShapeStyle(.secondary)
     }
-    var line: Color { ink.opacity(highContrast ? 0.6 : 0.2) }
+    /// Hairlines, tracks and outlines at 3:1 for graphics, the iPhone's rule (`NyxPalette.line`):
+    /// heavier under Increase Contrast and through night vision's red, which dims them.
+    var line: Color { base.line }
     /// A switch that is on: the iPhone's lifted violet, so amber keeps to the score and light.
     var controlTint: Color { base.controlTint }
     /// Behind the window's content in night vision, where grey glass would read as a bright panel:
@@ -146,9 +148,8 @@ struct VisionMoon: View {
     static func phase(_ geometry: MoonGeometry) -> MoonPhase {
         geometry.phase ?? MoonPhase(fraction: (1-geometry.phaseAngle/Double.pi)/2)
     }
-    static func describe(_ geometry: MoonGeometry) -> String {
-        String(localized: "Moon, \(VisionMoon.phase(geometry).name), \(Int((geometry.illumination*100).rounded())) percent lit")
-    }
+    /// The phase as VoiceOver says it on every device (`MoonPhase.spoken`).
+    static func describe(_ geometry: MoonGeometry) -> String { VisionMoon.phase(geometry).spoken }
 }
 
 #Preview("Eyebrow and Moon") {

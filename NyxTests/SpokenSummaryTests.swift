@@ -16,7 +16,9 @@ import Testing
         let place=try park(id)
         let sky=engine.conditions(for: place, on: try #require(TripDay(iso: iso)).evening(in: place))
         let score=DarknessScore(value: value, moonPoints: 30, cloudPoints: moonAndDarkOnly ? nil : 20, bortlePoints: 17.5, lengthPoints: 12, basis: basis)
-        return Night(park: place, sky: sky, score: score, cloudCover: basis == .forecast ? 5 : nil, forecastUpdated: nil, usualCloud: usual)
+        // The month's share of clear nights from the bundled climate, as `NightPlanner.night` keeps it.
+        let clear=usual == nil ? nil : CloudClimate.shared.typical(place, on: sky.evening)?.clear
+        return Night(park: place, sky: sky, score: score, cloudCover: basis == .forecast ? 5 : nil, forecastUpdated: nil, usualCloud: usual, usualClear: clear)
     }
     /// A forecast, an early look, the usual clouds, Moon and darkness only, and two nights without true darkness.
     func fixtures() throws -> [Night] {
@@ -37,21 +39,21 @@ import Testing
     /// The time river, the calendar's list, the widget and the chart.
     @Test func screenSentencesAreUnchanged() throws {
         for night in try fixtures() {
-            let clouds=night.basisCaption(typical:true) ?? String(localized:"Forecast included")
+            let clouds=night.basisCaption(typical:true) ?? String(localized:"Includes cloud forecast.")
             #expect(night.spokenSummary(.river) == String(localized:"\(night.park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(clouds)"))
             for name in [nil, "Lunar eclipse"] as [String?] {
                 let marker=name.map { ". "+$0 } ?? ""
-                #expect(night.spokenSummary(.calendar(event: name)) == String(localized:"\(night.park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption(typical:true) ?? String(localized:"Forecast included"))\(marker)"))
+                #expect(night.spokenSummary(.calendar(event: name)) == String(localized:"\(night.park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption(typical:true) ?? String(localized:"Includes cloud forecast."))\(marker)"))
             }
-            #expect(night.spokenSummary(.widget) == String(localized:"\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption() ?? String(localized:"Cached forecast included"))"))
+            #expect(night.spokenSummary(.widget) == String(localized:"\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption() ?? String(localized:"Includes cloud forecast."))"))
             #expect(night.spokenSummary(.chartBest) == String(localized:"Best night: \(night.park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label)."))
             // Siri's card says what the clouds rest on with the band (2.0 design review): "Excellent, usual clouds".
-            #expect(night.spokenSummary(.snippet) == String(localized:"\(night.park.shortName) tonight: \(night.score.value) out of 100, \(night.bandWithBasis). \(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit."))
+            #expect(night.spokenSummary(.snippet) == String(localized:"\(night.park.shortName) tonight: \(night.score.value) out of 100, \(night.bandWithBasis). \(night.sky.moon.name), \(night.sky.moon.percentLit) percent lit."))
         }
         // The calendar's list reads in English as the time river does, under its own key.
         let first=try #require(try fixtures().first)
         #expect(first.spokenSummary(.calendar(event: nil)) == first.spokenSummary(.river))
-        #expect(first.spokenSummary(.river) == "\(first.park.dayLabel(first.id)), 94 out of 100, Pristine. Forecast included")
+        #expect(first.spokenSummary(.river) == "\(first.park.dayLabel(first.id)), 94 out of 100, Pristine. Includes cloud forecast.")
     }
     /// The trip planner's row, shared text and calendar notes.
     @Test func tripSentencesAreUnchanged() throws {
@@ -81,8 +83,9 @@ import Testing
                     body=String(localized:"\(tonight) at \(park.shortName): \(score.value), \(score.band.label).")+basis
                 }
                 else if let caption=night.basisCaption() { body=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
-                else { body=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.") }
-                #expect(night.spokenSummary(.siriTonight(voiceOnly: voiceOnly)) == body)
+                else { body=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). \(String(localized:"Includes cloud forecast.")) Confirm conditions and park access before traveling.") }
+                // One answer on every device (`TonightAnswer`), which the iPhone's intent says.
+                #expect(TonightAnswer(night: night).dialog(voiceOnly: voiceOnly) == body)
                 #expect(DarknessAnswer.dialog(night, closure: nil, voiceOnly: voiceOnly) == body)
                 #expect(DarknessAnswer.dialog(night, closure: "Park closed.", voiceOnly: voiceOnly) == "Closure alert: Park closed. "+body)
 
@@ -104,7 +107,7 @@ import Testing
         if answer.noDarkness {
             return String(localized:"No true darkness at \(park.shortName) in the next \(answer.count) nights. The best is \(day), \(night.score.value) out of 100.")
         }
-        let basis=night.basisCaption(typical:true) ?? String(localized:"Includes a cached cloud forecast.")
+        let basis=night.basisCaption(typical:true) ?? String(localized:"Includes cloud forecast.")
         return String(localized:"The best of the next \(answer.count) nights: \(day) at \(park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(basis) Confirm conditions and park access before traveling.")
     }
 

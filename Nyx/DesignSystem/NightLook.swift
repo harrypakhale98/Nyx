@@ -5,13 +5,7 @@ import SwiftUI
 // Apart from NyxTheme.swift (the app's views and its sky), so the widgets and complications
 // compile this alone.
 
-struct NightVisionFilter: ViewModifier {
-    let enabled:Bool
-    var red:NightTint = .standard
-    @ViewBuilder func body(content:Content)->some View {
-        content.saturation(enabled ? 0 : 1).colorMultiply(enabled ? red.color : .white)
-    }
-}
+// `NightVisionFilter`, the red itself, is in NyxPalette.swift, which Vision Pro compiles too.
 /// One night look for what Nyx draws outside its own windows: the widgets, the Live Activity, the
 /// alarm and Siri's cards. Night vision and the brighter-red choice come from the shared suite,
 /// where the app, Control Center and field mode write them; Increase Contrast comes from the view

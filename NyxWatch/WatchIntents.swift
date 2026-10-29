@@ -42,15 +42,10 @@ nonisolated enum WristTonightAnswer {
         }
         return dialog(night, context: context, now: now)
     }
-    /// A closure first, as on the iPhone: a long drive to a closed road is the worst outcome Nyx can cause.
+    /// The iPhone's answer (`TonightAnswer`): a closure first, smoke that holds the score down, and
+    /// where Nyx cannot know the closures. Only the clouds are the wrist's own: when the iPhone sent them.
     static func dialog(_ night: Night, context: WatchContext?, now: Date) -> String {
-        let park = night.park, score = night.score
-        let body = night.sky.darkHours == 0
-            ? String(localized: "No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.")
-            : String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). \(clouds(night, context: context, now: now)) Confirm conditions and park access before traveling.")
-        guard let closure = context?.closures[park.id]?.trimmingCharacters(in: .whitespacesAndNewlines), !closure.isEmpty else { return body }
-        let alert = WristClosure.spoken(closure)
-        return Sentences.join([Sentences.end(alert), body])
+        TonightAnswer(night: night, closure: context?.closures[night.park.id], clouds: clouds(night, context: context, now: now)).dialog()
     }
     /// What the clouds rest on, honestly: the forecast and when the iPhone sent it, or why there is none.
     static func clouds(_ night: Night, context: WatchContext?, now: Date) -> String {
@@ -63,10 +58,9 @@ nonisolated enum WristTonightAnswer {
             let sent = Calendar.current.isDate(context.sent, inSameDayAs: now)
                 ? String(localized: "From the cloud forecast your iPhone sent at \(time).")
                 : String(localized: "From the cloud forecast your iPhone sent on \(context.sent.formatted(.dateTime.weekday(.wide))) at \(time).")
-            return Sentences.join([sent, source.isStale || source == .dropped || source == .spotsOff ? source.line(for: night.park) : nil].compactMap { $0 })
+            return Sentences.join([sent, source.explainsItself ? source.line(for: night.park) : nil].compactMap { $0 })
         }
-        let fix = source.isStale || source == .missing(followed: false) || source == .dropped || source == .spotsOff ? source.line(for: night.park) : nil
-        return Sentences.join([night.basisCaption(), fix].compactMap { $0 })
+        return Sentences.join([night.basisCaption(), source.explainsItself ? source.line(for: night.park) : nil].compactMap { $0 })
     }
 }
 

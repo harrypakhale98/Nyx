@@ -22,7 +22,7 @@ struct MoonVolume: View {
     /// Nights after tonight, park-local. The volume keeps its own night, so scrubbing the Moon
     /// does not move the planner.
     @State private var nights = 0
-    @State private var view: MoonView?
+    @State private var view: MoonVolumeNight?
     var body: some View {
         let stepper = $nights
         RealityView { content in
@@ -30,7 +30,7 @@ struct MoonVolume: View {
             content.add(globe.root)
             // VoiceOver's swipe up and down on the Moon step through the nights, as the ornament does.
             globe.subscriptions = [
-                content.subscribe(to: AccessibilityEvents.Increment.self) { _ in stepper.wrappedValue = min(MoonView.lastNight, stepper.wrappedValue+1) },
+                content.subscribe(to: AccessibilityEvents.Increment.self) { _ in stepper.wrappedValue = min(MoonVolumeNight.lastNight, stepper.wrappedValue+1) },
                 content.subscribe(to: AccessibilityEvents.Decrement.self) { _ in stepper.wrappedValue = max(0, stepper.wrappedValue-1) },
             ]
         } update: { _ in
@@ -51,7 +51,7 @@ struct MoonVolume: View {
         .task(id: "\(model.selectedID ?? "")-\(evening.map { Int($0.timeIntervalSince1970) } ?? 0)-\(nights == 0)") {
             guard let park = model.park, let night = evening else { return }
             let tonight = nights == 0
-            let computed = await Task.detached(priority: .userInitiated) { MoonView(park: park, night: night, isTonight: tonight) }.value
+            let computed = await Task.detached(priority: .userInitiated) { MoonVolumeNight(park: park, night: night, isTonight: tonight) }.value
             guard !Task.isCancelled else { return }
             view = computed
         }
@@ -78,7 +78,7 @@ struct MoonVolume: View {
 }
 
 /// One night's Moon as the volume shows it, computed off the main thread.
-nonisolated struct MoonView: Sendable, Equatable {
+nonisolated struct MoonVolumeNight: Sendable, Equatable {
     /// A lunar month of nights from tonight.
     static let lastNight = 29
     let park: Park
@@ -86,7 +86,8 @@ nonisolated struct MoonView: Sendable, Equatable {
     let isTonight: Bool
     let moment: Date
     let geometry: MoonGeometry
-    let phaseName: String
+    /// The night's phase and lit fraction (`SkyConditions.moon`), the one figure the planner and the iPhone give.
+    let phase: MoonPhase
     init(park: Park, night: Date, isTonight: Bool) {
         let engine = AstronomyEngine()
         self.park = park
@@ -95,17 +96,14 @@ nonisolated struct MoonView: Sendable, Equatable {
         let sky = engine.conditions(for: park, on: night)
         moment = engine.moonViewTime(for: sky, park: park)
         geometry = engine.moonGeometry(for: park, at: moment)
-        // The night's phase and lit fraction, the one figure the planner and the iPhone give; the
-        // globe itself is turned and lit as at `moment`.
-        phaseName = sky.moon.name
-        illumination = sky.moon.illumination
+        // The night's phase and lit fraction; the globe itself is turned and lit as at `moment`.
+        phase = sky.moon
     }
-    /// The night's lit fraction (`SkyConditions.moon`).
-    let illumination: Double
-    var percent: Int { Int((illumination*100).rounded()) }
-    /// "Moon, waxing crescent, 23 percent lit".
-    var spoken: String { String(localized: "Moon, \(phaseName), \(percent) percent lit") }
-    static func == (a: MoonView, b: MoonView) -> Bool { a.park.id == b.park.id && a.moment == b.moment }
+    var phaseName: String { phase.name }
+    var illumination: Double { phase.illumination }
+    /// "Waxing crescent, 23 percent lit", as VoiceOver says the Moon on every device (`MoonPhase.spoken`).
+    var spoken: String { phase.spoken }
+    static func == (a: MoonVolumeNight, b: MoonVolumeNight) -> Bool { a.park.id == b.park.id && a.moment == b.moment }
 
     /// The Sun's direction as seen from the Moon, in the volume's frame (x right, y up, z toward
     /// the viewer): the same vector the Moon shader lights the disc with.
@@ -137,7 +135,7 @@ nonisolated struct MoonView: Sendable, Equatable {
     private var material: PhysicallyBasedMaterial?
     /// LOLA's relief as a normal map, worn except near full Moon (`MoonShading.globeShowsRelief`).
     private var relief: TextureResource?
-    private var shown: MoonView?
+    private var shown: MoonVolumeNight?
     private var shownNightVision = false
     private var shownRed = NightTint.standard
     private var spin: Float = 0
@@ -168,7 +166,7 @@ nonisolated struct MoonView: Sendable, Equatable {
     }
 
     /// `red`: night vision's red (`NightTint`, the brighter one under Increase Contrast), as the window's.
-    func show(_ view: MoonView, nightVision: Bool, red tint: NightTint = .standard, reduceMotion: Bool) {
+    func show(_ view: MoonVolumeNight, nightVision: Bool, red tint: NightTint = .standard, reduceMotion: Bool) {
         if shown != view || shownNightVision != nightVision || shownRed != tint {
             let first = shown == nil
             shown = view
@@ -297,7 +295,7 @@ struct MoonControls: View {
     @Environment(\.visionPalette) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.openWindow) private var openWindow
-    let view: MoonView?
+    let view: MoonVolumeNight?
     @Binding var nights: Int
     /// The planner is closed: the volume is the only Nyx window left, so it offers the way back.
     var offersPlanner = false
@@ -309,16 +307,16 @@ struct MoonControls: View {
                     .accessibilityLabel(Text("Previous night"))
                 VStack(spacing: 2) {
                     Text(title).font(.system(.headline, design: .serif))
-                    if let view { Text("\(view.phaseName) · \(view.percent)% lit").font(.callout).foregroundStyle(palette.muted) }
+                    if let view { Text("\(view.phaseName) · \(view.phase.litText)").font(.callout).foregroundStyle(palette.muted) }
                 }
                 .frame(minWidth: 200)
                 .accessibilityElement(children: .combine)
                 Button { nights += 1 } label: { Image(systemName: "chevron.forward") }
-                    .disabled(nights >= MoonView.lastNight)
+                    .disabled(nights >= MoonVolumeNight.lastNight)
                     .accessibilityLabel(Text("Next night"))
             }
             .buttonBorderShape(.circle)
-            Slider(value: Binding(get: { Double(nights) }, set: { nights = Int($0.rounded()) }), in: 0...Double(MoonView.lastNight), step: 1) {
+            Slider(value: Binding(get: { Double(nights) }, set: { nights = Int($0.rounded()) }), in: 0...Double(MoonVolumeNight.lastNight), step: 1) {
                 Text("Night")
             }
             .frame(minWidth: 320)
@@ -348,38 +346,37 @@ struct MoonControls: View {
             if palette.nightVision { RoundedRectangle(cornerRadius: 32).fill(palette.nightPanel) }
             else if palette.solid { RoundedRectangle(cornerRadius: 32).fill(palette.solidPanel) }
         }
-        .saturation(palette.nightVision ? 0 : 1)
-        .colorMultiply(palette.nightVision ? palette.red : .white)
+        .modifier(NightVisionFilter(enabled: palette.nightVision, red: palette.base.red))
     }
     private var title: String {
         guard let view else { return nights == 0 ? String(localized: "Tonight") : "" }
         return view.isTonight ? String(localized: "Tonight") : view.park.dayLabel(view.night)
     }
     /// "As seen from Joshua Tree at 10:42 PM. Drag it to turn it."
-    static func caption(_ view: MoonView) -> String {
+    static func caption(_ view: MoonVolumeNight) -> String {
         String(localized: "As seen from \(view.park.shortName) at \(view.park.time(view.moment)), its highest that night. Drag to turn it; it turns back to the face we always see.")
     }
 }
 
 #Preview("Moon controls") {
     let model = VisionModel(now: .now)
-    return MoonControls(view: model.park.map { MoonView(park: $0, night: $0.currentNight(at: .now), isTonight: true) }, nights: .constant(0))
+    return MoonControls(view: model.park.map { MoonVolumeNight(park: $0, night: $0.currentNight(at: .now), isTonight: true) }, nights: .constant(0))
 }
 
 #Preview("Moon controls, a later night, night vision") {
     let model = VisionModel(now: .now)
-    return MoonControls(view: model.park.map { MoonView(park: $0, night: $0.date($0.currentNight(at: .now), addingDays: 9), isTonight: false) }, nights: .constant(9))
+    return MoonControls(view: model.park.map { MoonVolumeNight(park: $0, night: $0.date($0.currentNight(at: .now), addingDays: 9), isTonight: false) }, nights: .constant(9))
         .environment(\.visionPalette, VisionPalette(nightVision: true))
 }
 
 #Preview("Moon controls, planner closed") {
     let model = VisionModel(now: .now)
-    return MoonControls(view: model.park.map { MoonView(park: $0, night: $0.date($0.currentNight(at: .now), addingDays: 3), isTonight: false) }, nights: .constant(3), offersPlanner: true)
+    return MoonControls(view: model.park.map { MoonVolumeNight(park: $0, night: $0.date($0.currentNight(at: .now), addingDays: 3), isTonight: false) }, nights: .constant(3), offersPlanner: true)
 }
 
 #Preview("Moon controls, accessibility size") {
     let model = VisionModel(now: .now)
-    return MoonControls(view: model.park.map { MoonView(park: $0, night: $0.currentNight(at: .now), isTonight: true) }, nights: .constant(0))
+    return MoonControls(view: model.park.map { MoonVolumeNight(park: $0, night: $0.currentNight(at: .now), isTonight: true) }, nights: .constant(0))
         .dynamicTypeSize(.accessibility3)
 }
 

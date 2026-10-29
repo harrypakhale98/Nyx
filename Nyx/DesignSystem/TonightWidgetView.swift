@@ -300,9 +300,6 @@ struct TonightWidgetView:View {
             }.summarized(String(localized:"Save a place in Nyx. Your next dark sky will appear here."))
         }
     }
-    /// "Eifel is no longer saved in Nyx.", or without a name when the setting kept none.
-    static func unsavedTitle(_ name:String)->String { UnsavedPlaceFace.title(name) }
-    static func unsavedSummary(_ name:String)->String { UnsavedPlaceFace.summary(name) }
     /// "2 of 3 ›": moves the widget to the next saved park. Only with two or more saved parks, and
     /// only where it fits (medium and large, outside accessibility sizes); a tap anywhere else opens the park.
     @ViewBuilder private func cycleButton(_ night:Night)->some View {
@@ -358,8 +355,6 @@ struct TonightWidgetView:View {
             text.textCase(caps ? .uppercase : nil).font(small).lineLimit(2).minimumScaleFactor(0.8)
         }.foregroundStyle(muted)
     }
-    /// "Excellent" with a forecast; "Excellent, early look" or "Excellent, usual clouds" without, as on the watch.
-    private func forecastLabel(_ night:Night)->String { night.bandWithBasis }
     /// The band word as the iPhone dial sets it (serif, in ink, a step quieter than the numeral).
     private func band(_ night:Night,_ style:Font.TextStyle)->some View {
         Text(night.score.band.label).bandWord(style,ink:ink).fixedSize(horizontal:false,vertical:true).modifier(NightTurn(reduceMotion:reduceMotion))
@@ -391,7 +386,7 @@ struct TonightWidgetView:View {
                 if closureBesideScore { closureMark(.caption) }
                 else if shortBand { Text(night.compactBandLabel).font(.caption).lineLimit(1).minimumScaleFactor(0.8) }
                 // Unlimited here, so a band that needs a third line does not fit and the short word is chosen.
-                else { Text(forecastLabel(night)).font(.caption).fixedSize(horizontal:false,vertical:true) }
+                else { Text(night.bandWithBasis).font(.caption).fixedSize(horizontal:false,vertical:true) }
             }
             if !closureBesideScore { closureMark(.caption) }
         }.frame(maxWidth:.infinity,alignment:.leading)
@@ -722,7 +717,7 @@ struct TonightWidgetView:View {
             // The words of `Night.spokenSummary`, with the closure between the score and the rest.
             let lead=ahead ? String(localized:"\(night.park.shortName), \(night.park.dayLabel(night.id)): \(night.score.value) out of 100, \(night.score.band.label).")
                 : String(localized:"\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label).")
-            tonight=Sentences.join([lead,Sentences.end(String(localized:"Closure alert: \(closure)")),night.basisCaption() ?? String(localized:"Cached forecast included"),
+            tonight=Sentences.join([lead,Sentences.end(ClosureLine.spoken(closure)),night.basisCaption() ?? String(localized:"Includes cloud forecast."),
                                     night.smokeSentence(tonight:!ahead) ?? ""])
         }
         var portraitXL=false

@@ -330,9 +330,6 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     }
     /// The same words on the faces (`FaceNote.versionsDiffer`), spoken.
     static var versionsNote: String { String(localized: "iPhone and Apple Watch have different versions of Nyx. Update both for matching scores.") }
-    /// A night's key in `ranges`: its park-local calendar day (`Park.isoDay`). Kept only for the
-    /// iPhone's sender (`SavedSkySync`) until it calls `isoDay` itself.
-    static func day(_ evening: Date, in park: Park) -> String { park.isoDay(evening) }
     /// The models' range to show beside the wrist's own score for this night, or nil. Shown only
     /// as the iPhone shows it (a full forecast, a spread of more than 4 points) and only while it
     /// still holds the score the watch worked out: a range that left the score out would

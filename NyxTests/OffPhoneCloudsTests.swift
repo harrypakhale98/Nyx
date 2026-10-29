@@ -119,8 +119,8 @@ import Testing
         let entry = builder.entry(at: now)
         #expect(entry.night == nil && entry.unsaved == "Eifel" && entry.savedCount == 0)
         #expect(builder.duskWindows(from: now, nights: 14).isEmpty)
-        #expect(TonightWidgetView.unsavedSummary("Eifel").hasPrefix("Eifel is no longer saved in Nyx."))
-        #expect(TonightWidgetView.unsavedTitle("") == "This place is no longer saved in Nyx.")
+        #expect(UnsavedPlaceFace.summary("Eifel").hasPrefix("Eifel is no longer saved in Nyx."))
+        #expect(UnsavedPlaceFace.title("") == "This place is no longer saved in Nyx.")
         #expect(TonightControlValue.unsaved.score == nil && TonightControlValue.unsaved.parkID == nil)
     }
 }

@@ -158,7 +158,7 @@ nonisolated enum NyxSchemaV2: VersionedSchema {
             self.id=id; self.name=name; self.latitude=latitude; self.longitude=longitude; self.timeZoneID=timeZoneID
             self.countryCode=countryCode; self.region=region; self.createdAt=createdAt; self.note=note
         }
-        static func newID() -> String { "pin:"+UUID().uuidString.lowercased() }
+        static func newID() -> String { Park.spotPrefix+UUID().uuidString.lowercased() }
     }
 }
 /// V0 → V1 moves each entry's photo array into photo records. SwiftData cannot read the old

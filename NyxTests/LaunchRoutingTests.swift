@@ -113,20 +113,21 @@ struct LaunchRoutingTests {
         let kruger=try Self.catalogPlace(Self.kruger), jotr=try #require(try ParkData.load().first { $0.id == "jotr" })
         let abroad=String(localized: "Nyx can't check closures here. Check the park's own site before you go.")
         let local=String(localized: "Nyx has no alerts for this place. Check access, local rules and closures before you go.")
-        #expect(DarknessAnswer.unknownClosures(kruger) == abroad && DarknessAnswer.unknownClosures(Self.spot) == local && DarknessAnswer.unknownClosures(jotr) == nil)
+        #expect(ClosureLine.unknown(kruger) == abroad && ClosureLine.unknown(Self.spot) == local && ClosureLine.unknown(jotr) == nil)
         let now=Date(timeIntervalSince1970: 1_790_899_200)
         for voiceOnly in [false, true] {
             for (park, line) in [(kruger, abroad), (Self.spot, local)] {
                 let night=DarknessAnswer(park: park, forecast: nil, detail: nil, now: now, voiceOnly: voiceOnly).night
                 let dialog=DarknessAnswer.dialog(night, closure: nil, voiceOnly: voiceOnly)
-                #expect(dialog == night.spokenSummary(.siriTonight(voiceOnly: voiceOnly)) + " " + line)
+                // Every device's answer (`TonightAnswer`) ends with it, full and voice-only.
+                #expect(dialog == TonightAnswer(night: night).dialog(voiceOnly: voiceOnly) && dialog.hasSuffix(" " + line))
                 let best=try #require(BestNightSearch.answer(parks: [park], planner: NightPlanner(forecasts: [:]), from: now, nights: 7, now: now))
                 #expect(BestNightSearch.dialog(best, voiceOnly: voiceOnly).hasSuffix(line))
                 #expect(DarkWindowAnswer.dialog(park: park, sky: night.sky, closure: nil, voiceOnly: voiceOnly, device: park.timeZone).hasSuffix(line))
                 #expect(WhatsUpAnswer.dialog(WhatsUp(park: park, sky: night.sky, isTonight: true), park: park, closure: nil, voiceOnly: voiceOnly, device: park.timeZone).hasSuffix(line))
             }
             let night=DarknessAnswer(park: jotr, forecast: nil, detail: nil, now: now).night
-            #expect(DarknessAnswer.dialog(night, closure: nil, voiceOnly: voiceOnly) == night.spokenSummary(.siriTonight(voiceOnly: voiceOnly)))
+            #expect(DarknessAnswer.dialog(night, closure: nil, voiceOnly: voiceOnly) == TonightAnswer(night: night).dialog(voiceOnly: voiceOnly))
             #expect(!DarknessAnswer.dialog(night, closure: "Park closed.", voiceOnly: voiceOnly).contains(abroad))
         }
     }

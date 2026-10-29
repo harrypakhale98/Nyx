@@ -5,10 +5,10 @@ import Foundation
 // planner, and tonight's sky to stand under. Everything is computed on the headset from the
 // bundled parks and the cached cloud forecast, smoke and park alerts; no intent makes a request.
 
-/// A national park, for Siri and Shortcuts. The iPhone's entity name and identifiers (the park
-/// code), so a park means the same thing on every device; read from the bundled park list.
+/// A national park, for Siri and Shortcuts. The iPhone's entity name, type name and identifiers
+/// (the park code), so a park means the same thing on every device; read from the bundled park list.
 struct ParkEntity: AppEntity {
-    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "National park")
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Place")
     static let defaultQuery = ParkQuery()
     let id: String
     let name: String
@@ -50,37 +50,15 @@ struct DarknessIntent: AppIntent {
         guard let selected = try ParkData.load().first(where: { $0.id == park.id }) else { throw VisionIntentError.parkNotFound }
         let forecast = await WeatherService().forecast(for: selected, network: false)
         let layers = await SummitLayerService().layers(for: [selected], network: false)[selected.id]
-        let defaults = UserDefaults.standard
-        let smokeOn = defaults.object(forKey: VisionModel.smokeKey) as? Bool ?? true
+        let smokeOn = NetworkService.smoke.isOn()
         let air = smokeOn ? await ForecastDetailService(extras: false).hydrate([selected])[selected.id]?.air : nil
-        let inputs = ScoreInputs(smokeOn: smokeOn, smokeKnown: air == nil ? [] : [selected.id],
-                                 alertsOn: defaults.object(forKey: VisionModel.alertsKey) as? Bool ?? true, alerts: ParkStore.stored([selected]))
-        let answer = VisionDarknessAnswer(park: selected, forecast: forecast, layers: layers, air: air, inputs: inputs, forecastsOn: CloudForecastSwitch.isOn(), now: .now)
-        return .result(value: answer.night.score.value, dialog: IntentDialog(stringLiteral: answer.dialog))
-    }
-}
-/// Siri's answer apart from the intent: tonight scored as the planner scores it (`NightPlan`),
-/// the clouds in the planner's words (`VisionModel.cloudCaption`): the forecast's cover, an early
-/// look, the usual clouds beyond its reach, or the switch that is off; smoke that holds the score
-/// down, or why smoke is not counted; and a closure first, as on the iPhone (`ClosureLine.first`),
-/// or that closures are not checked. Every answer asks to confirm conditions and access.
-nonisolated struct VisionDarknessAnswer: Sendable {
-    let night: Night
-    let dialog: String
-    init(park: Park, forecast: Forecast?, layers: HourlySeries?, air: HourlySeries?, inputs: ScoreInputs, forecastsOn: Bool, now: Date) {
-        let sky = AstronomyEngine().conditions(for: park, on: park.currentNight(at: now))
-        night = NightPlanner.night(park: park, sky: sky, forecast: forecast, detail: ForecastDetail.vision(layers: layers, air: air), now: now)
-        dialog = Self.dialog(night, caption: VisionModel.cloudCaption(night, forecastsOn: forecastsOn), inputs: inputs)
-    }
-    static func dialog(_ night: Night, caption: String, inputs: ScoreInputs) -> String {
-        let park = night.park, score = night.score
-        let body: String
-        if night.sky.darkHours == 0 { body = String(localized: "No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
-        else if caption.isEmpty { body = String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.") }
-        else { body = String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
-        let smoke = night.smokeSentence(tonight: true) ?? inputs.smokeNote(park, night: night) ?? ""
-        let access = inputs.closure(park) == nil && inputs.unchecked(park) ? inputs.accessNote(park) ?? "" : ""
-        return ClosureLine.first(Sentences.join([body, smoke, access]), closure: inputs.closure(park))
+        let inputs = ScoreInputs(smokeOn: smokeOn, smokeKnown: air == nil ? [] : [selected.id], alertsOn: NetworkService.alerts.isOn(), alerts: ParkStore.stored([selected]))
+        let now = Date.now
+        // Tonight scored as the planner scores it (`NightPlan`), said in every device's words (`TonightAnswer`).
+        let night = NightPlanner.night(park: selected, sky: AstronomyEngine().conditions(for: selected, on: selected.currentNight(at: now)),
+                                       forecast: forecast, detail: ForecastDetail.vision(layers: layers, air: air), now: now)
+        let dialog = inputs.answer(night, closure: inputs.closure(selected), forecastsOn: NetworkService.forecasts.isOn()).dialog()
+        return .result(value: night.score.value, dialog: IntentDialog(stringLiteral: dialog))
     }
 }
 

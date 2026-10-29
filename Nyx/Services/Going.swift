@@ -191,7 +191,7 @@ nonisolated enum TellSomeone {
         if let sunrise=sky.sunrise { lines.append(String(localized:"I expect to be back by sunrise, \(park.time(sunrise)).")) }
         if let closure { lines.append(Sentences.end(ClosureLine.spoken(closure))) }
         lines.append(park.countryCode=="US" ? String(localized:"In an emergency there, call 911.") : String(localized:"In an emergency there, call the local emergency number."))
-        lines.append(String(localized:"Times are \(park.timeZoneName)."))
+        lines.append(Sentences.end(String(localized:"Times in \(park.timeZoneName)")))
         return lines.joined(separator:"\n")
     }
 }

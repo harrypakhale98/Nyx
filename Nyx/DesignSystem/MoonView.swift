@@ -80,7 +80,8 @@ struct MoonView: View {
     /// "Waxing crescent, 34 percent lit, lit from the right": the phase first, as people name it.
     /// Below `litSideFrom` there is no lit side to see, so none is named.
     static func label(_ geometry:MoonGeometry,moment:String?=nil)->String {
-        let percent=Int((geometry.illumination*100).rounded())
+        // The night's figure where the geometry knows its phase, so VoiceOver and the label agree.
+        let percent=geometry.phase?.percentLit ?? Int((geometry.illumination*100).rounded())
         let name=geometry.phase?.name ?? String(localized:"Moon")
         guard geometry.illumination>=litSideFrom else {
             if let moment { return String(localized:"\(name), \(percent) percent lit, as seen \(moment)") }

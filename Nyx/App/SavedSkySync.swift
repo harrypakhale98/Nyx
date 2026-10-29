@@ -385,7 +385,7 @@ import WidgetKit
             guard let park=model.park(id) else { continue }
             for offset in 0..<7 {
                 let night=model.night(park,on:park.date(model.tonight(park),addingDays:offset))
-                if let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis) { ranges[id,default:[:]][WatchContext.day(night.id,in:park)]=range }
+                if let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis) { ranges[id,default:[:]][park.isoDay(night.id)]=range }
             }
         }
         return ranges

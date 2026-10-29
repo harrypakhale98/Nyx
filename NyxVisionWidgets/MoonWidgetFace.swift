@@ -17,11 +17,10 @@ nonisolated struct MoonFacts: Sendable, Equatable {
     let fraction: Double
     let nextNewMoon: Date
 
-    init(at date: Date, calendar: Calendar = .current) {
-        // Tonight's Moon at 10 PM, as the large face's week and the app draw each night's
-        // (`MoonWeek`): the same figure all evening, whenever the widget refreshes.
-        let tonight = MoonWeek.tonight(at: date, calendar: calendar)
-        let glance = MoonWeek.Glance(at: calendar.date(bySettingHour: MoonWeek.hour, minute: 0, second: 0, of: tonight) ?? date)
+    init(at date: Date) {
+        // The Moon at the entry's moment, as the iPhone's Moon widget and the watch's Moon face show
+        // it (`MoonNow`), so the three agree whenever each refreshes.
+        let glance = MoonWeek.Glance(at: date)
         self.date = date
         phaseName = glance.phaseName
         waxing = glance.waxing
@@ -30,12 +29,12 @@ nonisolated struct MoonFacts: Sendable, Equatable {
         illumination = glance.illumination
         nextNewMoon = MoonWeek.newMoon(after: date)
     }
-    var percent: Int { Int((illumination*100).rounded()) }
-    /// The phase as every device names it and picks its symbol (`MoonPhase.symbolName`).
+    /// The phase as every device names it, picks its symbol (`MoonPhase.symbolName`) and says it.
     var phase: MoonPhase { MoonPhase(fraction: fraction) }
-    /// "Moon, waxing crescent, 23 percent lit. Next new moon Tuesday, October 21."
+    var percent: Int { phase.percentLit }
+    /// "Waxing crescent, 23 percent lit. Next new moon Tuesday, October 21."
     var spoken: String {
-        String(localized: "Moon, \(phaseName), \(percent) percent lit. Next new moon \(nextNewMoon.formatted(.dateTime.weekday(.wide).month(.wide).day())).")
+        Sentences.join([Sentences.end(phase.spoken), String(localized: "Next new moon \(nextNewMoon.formatted(.dateTime.weekday(.wide).month(.wide).day())).")])
     }
 }
 
@@ -49,10 +48,10 @@ struct MoonWidgetFace: View {
     var simplified = false
     private static let ink = NyxPalette.starlight
     private static let amber = NyxPalette.amber
-    /// Increase Contrast lifts the quieter lines, as the iPhone's palette does (`NyxPalette.muted`, 0.9).
+    /// Secondary lines by the iPhone's rule (`NyxPalette.mutedOpacity`), lifted under Increase Contrast.
     private var high: Bool { contrast == .increased }
-    private var eyebrowInk: Color { Self.ink.opacity(high ? 0.9 : 0.7) }
-    private var quiet: Color { Self.ink.opacity(high ? 0.92 : 0.75) }
+    private var eyebrowInk: Color { Self.ink.opacity(NyxPalette.mutedOpacity(nightVision: false, highContrast: high)) }
+    private var quiet: Color { eyebrowInk }
     var body: some View {
         // The large face's week, from the entry's date alone.
         let week = family == .systemLarge && !simplified ? MoonWeek(at: facts.date) : nil
@@ -60,7 +59,7 @@ struct MoonWidgetFace: View {
             if simplified {
                 VStack(spacing: 10) {
                     WidgetMoon(facts: facts).frame(maxWidth: family == .systemLarge ? 200 : 120, maxHeight: family == .systemLarge ? 200 : 120)
-                    Text("\(facts.percent)%").font(.system(size: 44, weight: .light, design: .serif)).monospacedDigit().foregroundStyle(Self.amber)
+                    Text(Percent.text(facts.percent)).font(.system(size: 44, weight: .light, design: .serif)).monospacedDigit().foregroundStyle(Self.amber)
                     if family == .systemLarge {
                         Text("New moon \(facts.nextNewMoon.formatted(.dateTime.month(.abbreviated).day()))").font(.system(.title3, design: .serif)).foregroundStyle(Self.ink)
                     }
@@ -72,7 +71,7 @@ struct MoonWidgetFace: View {
                     WidgetMoon(facts: facts).frame(width: 64, height: 64)
                     Spacer(minLength: 4)
                     Text(facts.phaseName).font(.system(.headline, design: .serif)).foregroundStyle(Self.ink).lineLimit(2).minimumScaleFactor(0.85)
-                    Text("\(facts.percent)% lit").font(.subheadline).monospacedDigit().foregroundStyle(quiet)
+                    Text(facts.phase.litText).font(.subheadline).monospacedDigit().foregroundStyle(quiet)
                     Text("New moon \(facts.nextNewMoon.formatted(.dateTime.month(.abbreviated).day()))").font(.caption).foregroundStyle(quiet)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
@@ -82,7 +81,7 @@ struct MoonWidgetFace: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Tonight's Moon").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.semibold)).kerning(Lettering.spaced ? 1.4 : 0).foregroundStyle(eyebrowInk)
                         Text(facts.phaseName).font(.system(.title2, design: .serif)).foregroundStyle(Self.ink)
-                        Text("\(facts.percent)% lit").font(.headline).monospacedDigit().foregroundStyle(quiet)
+                        Text(facts.phase.litText).font(.headline).monospacedDigit().foregroundStyle(quiet)
                         Spacer(minLength: 6)
                         Text("Next new moon").font(.caption).foregroundStyle(quiet)
                         Text(facts.nextNewMoon.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())).font(.system(.headline, design: .serif)).foregroundStyle(Self.ink)
@@ -107,7 +106,7 @@ struct MoonWidgetFace: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Tonight's Moon").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.semibold)).kerning(Lettering.spaced ? 1.4 : 0).foregroundStyle(eyebrowInk)
                     Text(facts.phaseName).font(.system(.title2, design: .serif)).foregroundStyle(Self.ink).lineLimit(2).minimumScaleFactor(0.85)
-                    Text("\(facts.percent)% lit").font(.headline).monospacedDigit().foregroundStyle(quiet)
+                    Text(facts.phase.litText).font(.headline).monospacedDigit().foregroundStyle(quiet)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -121,7 +120,7 @@ struct MoonWidgetFace: View {
                         WidgetMoon(glance: night, side: 64).frame(width: 30, height: 30)
                             .padding(3)
                             .overlay { if newMoon { Circle().stroke(Self.amber, lineWidth: 1.5) } }
-                        Text("\(night.percent)%").font(.caption2).monospacedDigit().foregroundStyle(quiet)
+                        Text(Percent.text(night.percent)).font(.caption2).monospacedDigit().foregroundStyle(quiet)
                     }
                     .frame(maxWidth: .infinity)
                 }

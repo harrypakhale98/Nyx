@@ -112,7 +112,7 @@ struct FromHomePanel: View {
             if origin.source != .park, sky.light == .assumed {
                 Text("Nyx has no light map for homes. Streetlights hide faint stars; the Moon, the planets and the brightest stars still show.")
             }
-            Text("Times are \(sky.place.timeZoneName).")
+            Text("Times in \(sky.place.timeZoneName)")
         }
         .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
     }

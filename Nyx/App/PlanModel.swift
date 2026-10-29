@@ -172,8 +172,8 @@ import CoreLocation
     var startChosen: Bool { didSet { if DebugScenario.screen == nil { defaults.set(startChosen,forKey:"startChosen") } } }
     /// Tonight's reach, as the crow flies, in metres; shown in miles or kilometres by locale (`SearchRadius`).
     var radiusMeters: Double { didSet { if DebugScenario.screen == nil { SearchRadius.store(radiusMeters,defaults) } } }
-    var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(weatherEnabled,forKey:"weatherEnabled") } } }
-    var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(npsEnabled,forKey:"npsEnabled") } } }
+    var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(weatherEnabled,forKey:NetworkService.forecasts.key) } } }
+    var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(npsEnabled,forKey:NetworkService.alerts.key) } } }
     /// Saved spots' cloud forecasts (`SpotForecast`): a request with each spot's coordinates rounded
     /// to 0.1°, only while Cloud forecasts is on too. Off, spots keep what is cached, then their usual clouds.
     /// Apple Watch says why a spot's clouds stopped (`CloudSource.spotsOff`), so it hears the switch at once.
@@ -188,7 +188,7 @@ import CoreLocation
     /// Off, the copy here is dropped and nothing is asked.
     var auroraEnabled: Bool {
         didSet {
-            if DebugScenario.screen == nil { defaults.set(auroraEnabled,forKey:AuroraService.key) }
+            if DebugScenario.screen == nil { defaults.set(auroraEnabled,forKey:NetworkService.aurora.key) }
             guard !auroraEnabled, oldValue else { return }
             aurora=nil
             let service=auroraService
@@ -200,7 +200,7 @@ import CoreLocation
     }
     var smokeEnabled: Bool {
         didSet {
-            if DebugScenario.screen == nil { defaults.set(smokeEnabled,forKey:"smokeEnabled") }
+            if DebugScenario.screen == nil { defaults.set(smokeEnabled,forKey:NetworkService.smoke.key) }
             guard !smokeEnabled, oldValue else { return }
             // Switched off: cached smoke stops counting at once, here and in the cache Siri reads.
             details=Self.withoutAir(details)
@@ -288,11 +288,11 @@ import CoreLocation
         // A radius kept in miles before 2.0 is written once as metres, exactly.
         if DebugScenario.screen == nil { SearchRadius.migrate(defaults) }
         radiusMeters=SearchRadius.meters(defaults)
-        weatherEnabled=defaults.object(forKey:"weatherEnabled") as? Bool ?? true
-        npsEnabled=defaults.object(forKey:"npsEnabled") as? Bool ?? true
+        weatherEnabled=NetworkService.forecasts.isOn(defaults)
+        npsEnabled=NetworkService.alerts.isOn(defaults)
         spotForecastsEnabled=SpotForecast.isOn(defaults)
-        smokeEnabled=defaults.object(forKey:"smokeEnabled") as? Bool ?? true
-        auroraEnabled=defaults.object(forKey:AuroraService.key) as? Bool ?? true
+        smokeEnabled=NetworkService.smoke.isOn(defaults)
+        auroraEnabled=NetworkService.aurora.isOn(defaults)
         // What a request keeps after the screen that asked has moved on (it went back, or a background
         // refresh ran out of time) still reaches the screens, as it lands.
         weather.observe { [weak self] fresh in await self?.receiveForecasts(fresh) }

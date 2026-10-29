@@ -90,6 +90,15 @@ nonisolated enum NightTint: String, Sendable, CaseIterable {
     /// The setting's key in the shared defaults (the widgets and Control Center read the same suite).
     static let key="brighterRed"
 }
+/// Night vision on a view: everything drawn in grey, then multiplied by one red (`NightTint`). The
+/// one filter on every device, the iPhone's windows and Siri's cards, and Vision Pro's window and sheets.
+struct NightVisionFilter: ViewModifier {
+    let enabled:Bool
+    var red:NightTint = .standard
+    @ViewBuilder func body(content:Content)->some View {
+        content.saturation(enabled ? 0 : 1).colorMultiply(enabled ? red.color : .white)
+    }
+}
 /// Letter-spaced capitals are a Latin-script convention: Japanese kana and kanji spread apart read
 /// as broken words, so spaced labels set solid when Nyx speaks Japanese.
 nonisolated enum Lettering {

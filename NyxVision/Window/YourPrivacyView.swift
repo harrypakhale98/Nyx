@@ -64,8 +64,7 @@ struct YourPrivacyView: View {
         }
         .frame(minWidth: 560, minHeight: 600)
         // A sheet is its own presentation: it takes night vision's red here, as the window does.
-        .saturation(palette.nightVision ? 0 : 1)
-        .colorMultiply(palette.nightVision ? palette.red : .white)
+        .modifier(NightVisionFilter(enabled: palette.nightVision, red: palette.base.red))
         .background { if palette.nightVision { palette.nightPanel } }
     }
     /// When the last forecast arrived, in this headset's time.

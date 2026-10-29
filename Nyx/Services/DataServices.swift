@@ -440,8 +440,6 @@ extension ParkProviding {
 actor AuroraService {
     static let host="services.swpc.noaa.gov"
     static let path="/products/noaa-planetary-k-index-forecast.json"
-    /// The switch in Your privacy, on iPhone, iPad and Vision Pro (`SafeHTTP.preferences`).
-    static let key="auroraEnabled"
     static let freshFor: TimeInterval=3*3600
     /// Pulling to refresh asks again after an hour at the soonest.
     static let forcedAfter: TimeInterval=3600

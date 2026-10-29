@@ -15,10 +15,6 @@ nonisolated enum NightVerdict {
     /// for the park page and for Tonight, so the two never name "darker" nights by different measures.
     static let darkerMargin=10
     static let darkerFloor=ScoreBand.good.minimum
-    /// The nights from tonight over which a place's best night is chosen (`NightPlanner.horizon`).
-    /// One window and one ranking (`NightPlanner.best`), so every surface names the same night with
-    /// the same number.
-    static let horizon=NightPlanner.horizon
     /// Whether `ahead` clears `night` by the margin and reaches the floor.
     static func clearlyDarker(_ ahead: Night, than night: Night) -> Bool {
         ahead.score.value>=night.score.value+darkerMargin && ahead.score.value>=darkerFloor

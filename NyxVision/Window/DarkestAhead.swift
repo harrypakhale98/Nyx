@@ -38,7 +38,7 @@ struct DarkestAhead: View {
                 HStack(spacing: 8) {
                     // The phase as a symbol, swapped by name for the southern sky (American Samoa), as on every device.
                     Image(systemName: night.sky.moon.symbolName(southern: night.park.latitude < 0)).foregroundStyle(palette.ink)
-                    Text("\(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.subheadline).foregroundStyle(palette.muted)
+                    Text(night.sky.moon.litText).font(.subheadline).foregroundStyle(palette.muted)
                 }
                 if let smoke = night.smokeLabel { Text(smoke).font(.subheadline).foregroundStyle(palette.muted) }
                 // The closure's own words stand above the score; each night carries the mark.
@@ -57,7 +57,7 @@ struct DarkestAhead: View {
         .hoverEffect()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(name(pick)))
-        .accessibilityValue(Text(verbatim: Sentences.join([Sentences.end(String(localized: "\(night.score.value) out of 100, \(night.bandWithBasis)"))]+inputs.spoken(park, night: night))))
+        .accessibilityValue(Text(verbatim: Sentences.join([Sentences.end(night.scoreWithBasis)]+inputs.spoken(park, night: night))))
         .accessibilityHint(Text("Shows this night in the planner"))
         .accessibilityAddTraits(chosen ? [.isButton, .isSelected] : .isButton)
     }

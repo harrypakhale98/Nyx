@@ -38,7 +38,7 @@ nonisolated extension Place {
 }
 
 @MainActor enum SavedSpots {
-    nonisolated static let prefix="pin:"
+    nonisolated static let prefix=Park.spotPrefix
     /// Beyond this from every bundled place, the nearest one says nothing about the spot's clock or
     /// country: the zone follows the Sun's meridian instead (`Etc/GMT±N`) and the country is left empty.
     nonisolated static let nearestReach: Double=1_000_000

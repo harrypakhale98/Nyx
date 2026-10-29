@@ -74,7 +74,7 @@ struct NightDetail: View {
                 .scoreNumeral(size: numeral, accent: palette.accent)
                 .contentTransition(reduceMotion ? .opacity : .numericText(value: Double(plan.score.value)))
                 .accessibilityLabel(Text("Darkness score"))
-                .accessibilityValue(Text("\(plan.score.value) out of 100, \(plan.night.bandWithBasis)"))
+                .accessibilityValue(Text(plan.night.scoreWithBasis))
             // The band alone: the caption below always opens with the basis ("Early look: …").
             Text(plan.score.band.label).bandWord(.title, ink: palette.ink)
             // The scale, as under the iPhone's dial; left out at accessibility sizes, where it grew
@@ -113,10 +113,9 @@ struct NightDetail: View {
     private func moon(_ plan: NightPlan) -> some View {
         // One figure for the eye and VoiceOver: the night's, as the list, the Moon volume and the
         // iPhone give it. The picture is the Moon at its highest that night, and says so.
-        let lit = Int((plan.sky.moon.illumination*100).rounded())
         return VStack(spacing: 10) {
             VisionMoon(geometry: plan.moon,
-                       label: Sentences.join([Sentences.end(String(localized: "Moon, \(plan.sky.moon.name), \(lit) percent lit")),
+                       label: Sentences.join([Sentences.end(plan.sky.moon.spoken),
                                               Sentences.end(String(localized: "Drawn as seen at \(plan.park.time(plan.moonMoment))")),
                                               names ? MoonFeatures.shared.spoken(geometry: plan.moon, side: moonSide) ?? "" : ""]))
                 .frame(width: moonSide, height: moonSide)
@@ -130,7 +129,7 @@ struct NightDetail: View {
                 }
                 .shadow(color: palette.ink.opacity(0.12*plan.moon.illumination), radius: 30)
             Text(plan.sky.moon.name).font(.system(.headline, design: .serif))
-            Text("\(lit)% lit").font(.subheadline).foregroundStyle(palette.muted)
+            Text(plan.sky.moon.litText).font(.subheadline).foregroundStyle(palette.muted)
             if !MoonFeatures.shared.features.isEmpty {
                 Button { withAnimation(NyxMotion.spring(reduced: reduceMotion)) { names.toggle() } } label: { Label(names ? "Hide names" : "Show names", systemImage: names ? "tag.slash" : "tag") }
                     .accessibilityHint(Text("Shows or hides the names of the Moon's seas and craters in sunlight."))
@@ -156,11 +155,8 @@ struct NightDetail: View {
         // Three columns side by side; stacked at accessibility sizes, where columns would clip.
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14)) : AnyLayout(HStackLayout(alignment: .top, spacing: 14))
         // Without true darkness there is nothing for the Moon to stay out of, so say that instead.
-        // In the iPhone's and the watch's words (`NightVerdict.moonSentence`); how much is lit is the value above.
-        let moonNote = sky.darkHours <= 0 ? String(localized: "The Moon counts only in true darkness, and this night has none.")
-            : sky.moonDownPercent == 100 ? Sentences.end(String(localized: "Moon-free through all of true darkness"))
-            : sky.moonDownPercent == 0 ? Sentences.end(String(localized: "Moon up all through true darkness"))
-            : Sentences.end(String(localized: "Moon-free for \(sky.moonDownPercent)% of true darkness"))
+        // In the iPhone's and the watch's words (`SkyConditions.moonSentence`); how much is lit is the value above.
+        let moonNote = sky.moonSentence(park: park, withLit: false) ?? String(localized: "The Moon counts only in true darkness, and this night has none.")
         // The month's usual night (ERA5), in the iPhone's words: there is no hourly forecast detail here.
         let month = park.calendar.component(.month, from: plan.sky.evening)
         let usual = NightClimate.shared.lines(park, month: month)
@@ -242,7 +238,7 @@ private struct SkyNow: View {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
                     Text(body.name).font(.body.weight(.medium))
                     Text(body.place).foregroundStyle(palette.muted)
-                    if body.kind == .moon { Text("\(Int((moment.moonIllumination*100).rounded()))% lit").foregroundStyle(palette.muted) }
+                    if body.kind == .moon { Text("\(Percent.text(Int((moment.moonIllumination*100).rounded()))) lit").foregroundStyle(palette.muted) }
                     if body.kind == .planet { Text(WhatsUp.brightness(body.magnitude)).foregroundStyle(palette.muted) }
                 }
                 .accessibilityElement(children: .combine)
