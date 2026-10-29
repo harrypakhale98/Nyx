@@ -239,9 +239,14 @@ nonisolated enum TripPlanner {
         return stays
     }
     /// One line on why a night was chosen: "Moon down, 0% cloud forecast, Bortle 2". The Moon in the
-    /// words every glance uses for true darkness (`MoonInDarkness.short`).
+    /// words every glance uses for true darkness (`MoonInDarkness.short`), with how much is lit
+    /// whenever it is up for some of it ("Dark, Moon up, 98% lit").
     static func reason(_ night: Night) -> String {
         var parts=[night.sky.moonShort(park:night.park)]
+        switch night.sky.moonInDarkness {
+        case .allUp, .setsAt, .risesAt, .partial: parts.append(night.sky.moon.litText)
+        case .noDarkness, .allFree, .negligible: break
+        }
         if let cloud=night.cloudCover { parts.append(night.score.hasForecast ? String(localized:"\(Int(cloud.rounded()))% cloud forecast") : String(localized:"\(Int(cloud.rounded()))% cloud forecast, an early look")) }
         // "Not yet" beyond the forecast's reach, "unavailable" within it, as every surface says it.
         else if let usual=night.usualCloud { parts.append(night.beyondForecast ? String(localized:"no cloud forecast yet, usually \(Int(usual.rounded()))% cloud") : String(localized:"cloud forecast unavailable, usually \(Int(usual.rounded()))% cloud")) }
