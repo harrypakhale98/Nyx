@@ -5,31 +5,6 @@ import UIKit
 import Testing
 @testable import Nyx
 
-/// Records every request with its headers; answers by path, optionally after a pause, so tests
-/// can hold one request open while another screen asks.
-actor HeaderHTTP: HTTPTransport {
-    struct Call: Sendable { let url: URL; let headers: [String: String]; let constrained: Bool }
-    var calls: [Call]=[]
-    var bodies: [String: [String]]
-    var status: Int?
-    var error: URLError?
-    var delay: Duration?
-    init(_ bodies: [String: [String]]) { self.bodies=bodies }
-    func set(status: Int?) { self.status=status }
-    func set(error: URLError?) { self.error=error }
-    func set(delay: Duration?) { self.delay=delay }
-    func get(_ url: URL) async throws -> Data { try await get(url, headers: [:], constrained: true) }
-    func get(_ url: URL, headers: [String: String], constrained: Bool) async throws -> Data {
-        calls.append(Call(url: url, headers: headers, constrained: constrained))
-        if let delay { try? await Task.sleep(for: delay) }
-        if let error { throw error }
-        if let status { throw HTTPStatusError(status: status) }
-        guard var queue=bodies[url.path], !queue.isEmpty else { throw URLError(.badServerResponse) }
-        let body=queue.count>1 ? queue.removeFirst() : queue[0]
-        bodies[url.path]=queue
-        return Data(body.utf8)
-    }
-}
 private func alert(_ id: String, _ title: String, _ category: String, _ code: String) -> String {
     "{\"id\":\"\(id)\",\"title\":\"\(title)\",\"description\":\"<p>Details</p>\",\"category\":\"\(category)\",\"parkCode\":\"\(code)\",\"url\":\"\"}"
 }
