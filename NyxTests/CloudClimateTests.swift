@@ -54,7 +54,6 @@ struct CloudClimateTests {
         #expect(cloudy.score.value == scoring.score(sky: sky, bortle: jotr.bortleEstimate, cloud: 80, basis: .usual, aerosol: nil).value)
         #expect(cloudy.score.value < clear.score.value && cloudy.score.value <= ScoreEngine.cloudCap(80))
         #expect(clear.basis == .usual && clear.cloudCover == nil && clear.usualCloud == 10)
-        #expect(clear.rankScore == clear.score.value)
         // No climate data and no forecast: the guard keeps the old scaling, labelled as Moon and darkness only.
         let none = NightPlanner.night(park: jotr, sky: sky, forecast: nil, detail: nil, now: Self.now, climate: CloudClimate(parks: [:]))
         #expect(none.score.cloudPoints == nil && none.basisCaption()?.contains(String(localized: "This score counts the Moon and darkness only.")) == true)

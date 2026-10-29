@@ -18,7 +18,7 @@ struct ParkWindowRoot: View {
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.legibilityWeight) private var legibility
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     /// The night last chosen in this window, as seconds since 1970 (0: none yet).
     @SceneStorage("windowNight") private var chosenNight=0.0

@@ -16,7 +16,8 @@ nonisolated struct NightLook: Equatable, Sendable {
     let nightVision: Bool
     let brighterRed: Bool
     let highContrast: Bool
-    /// The night-vision switch's key in the shared defaults.
+    /// The night-vision switch's key in the shared defaults, the one name every iPhone, iPad and
+    /// widget read and write it by (Vision Pro keeps the same key, `VisionModel.nightVisionKey`).
     static let nightVisionKey="nightVision"
     /// Starlight and moon-amber, gamma-encoded sRGB, from `NyxPalette`.
     static let starlight=NyxPalette.starlightRGB, amber=NyxPalette.amberRGB

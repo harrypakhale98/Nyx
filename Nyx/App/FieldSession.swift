@@ -80,7 +80,7 @@ import WidgetKit
         guard changesPhone, prior == nil, !ended else { return }
         let defaults=SharedSettings.defaults
         // Opened from an alarm's "Open sky", which turned night vision on first: what it was before that.
-        prior=(OpenSkyPrior.take() ?? defaults.bool(forKey: "nightVision"), screen?.brightness, UIApplication.shared.isIdleTimerDisabled)
+        prior=(OpenSkyPrior.take() ?? defaults.bool(forKey: NightLook.nightVisionKey), screen?.brightness, UIApplication.shared.isIdleTimerDisabled)
         setNightVision(true)
         dim()
         UIApplication.shared.isIdleTimerDisabled=true
@@ -146,7 +146,7 @@ import WidgetKit
         if !StargazingFocus.holdsNightVision() { setNightVision(prior.nightVision) }
         if let brightness=prior.brightness { screen?.brightness=brightness }
         UIApplication.shared.isIdleTimerDisabled=prior.idle
-        Task { await FieldActivities.refresh(nightVision: SharedSettings.defaults.bool(forKey: "nightVision")) }
+        Task { await FieldActivities.refresh(nightVision: SharedSettings.defaults.bool(forKey: NightLook.nightVisionKey)) }
     }
     /// Start or stop the Lock Screen countdown; remembered as the default for next time.
     func follow(_ on: Bool) {
@@ -184,7 +184,7 @@ import WidgetKit
         if let brightness=prior?.brightness { screen?.brightness=brightness }
     }
     private func setNightVision(_ on: Bool) {
-        SharedSettings.defaults.set(on, forKey: "nightVision")
+        SharedSettings.defaults.set(on, forKey: NightLook.nightVisionKey)
         WidgetCenter.shared.reloadAllTimelines()
         ControlCenter.shared.reloadControls(ofKind: "NightVisionControl")
     }

@@ -19,7 +19,7 @@ struct OnboardingView:View {
     private var short:Bool { size.height>0 && size.height<720 && !beside && !compactHeight }
     @Environment(\.nyx) private var palette
     @MotionReduced private var reduceMotion: Bool
-    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     @State private var page=DebugScenario.onboardingPage
     /// The fade above the page dots grows with the text, so a large line fades out rather than being sliced.
     @ScaledMetric(relativeTo:.body) private var fade=24.0

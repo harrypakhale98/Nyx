@@ -387,7 +387,7 @@ struct CalendarView: View {
                         Text("\(night.score.value)").scoreNumeral(.title3,accent:palette.accent)
                         Text(night.score.band.label).bandWord(.title3,ink:palette.ink)
                     }
-                    Text(Sentences.join([night.basisCaption(typical:true) ?? String(localized:"Forecast included"),night.smokeSentence() ?? ""])).font(.caption).foregroundStyle(palette.muted)
+                    Text(Sentences.join([night.basisCaption(typical:true) ?? String(localized:"Includes cloud forecast."),night.smokeSentence() ?? ""])).font(.caption).foregroundStyle(palette.muted)
                     if let marker=model.events(night).marker(park:park) { Text(marker.name).font(.caption).foregroundStyle(palette.ink) }
                 }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
             }.buttonStyle(.plain).accessibilityElement(children:.ignore)
@@ -808,7 +808,7 @@ struct CalendarView: View {
         guard let first=month.first?.id,let last=month.last?.id else { return Stretch(kind:.moon,nights:[],inMonth:false) }
         let starts=nights.indices.filter { i in i+5<=nights.count && nights[i].id>=tonight }
         func touches(_ i:Int)->Bool { nights[i].id<=last && nights[i+4].id>=first }
-        func total(_ i:Int)->Int { nights[i..<(i+5)].reduce(0) { $0+$1.rankScore } }
+        func total(_ i:Int)->Int { nights[i..<(i+5)].reduce(0) { $0+$1.score.value } }
         let forecast=starts.filter { i in touches(i) && nights[i..<(i+5)].allSatisfy { $0.basis != .usual } }
         if let best=forecast.max(by:{ a,b in total(a) != total(b) ? total(a)<total(b) : a>b }) { return Stretch(kind:.best,nights:nights[best..<(best+5)],inMonth:true) }
         func light(_ i:Int)->Double { nights[i..<(i+5)].reduce(0) { $0+$1.sky.moon.illumination } }

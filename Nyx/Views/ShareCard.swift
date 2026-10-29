@@ -111,7 +111,7 @@ struct ShareCard:View {
         String(localized:"Forecast models: \(range.lowerBound)–\(range.upperBound)")
     }
     /// "Joshua Tree, Fri, Oct 9, darkness score 94 out of 100. Pristine. Forecast models: 88 to 96.
-    /// Waxing crescent, 12% lit. Moon-free all night. Forecast included…"
+    /// Waxing crescent, 12% lit. Moon-free all night. Cloud forecast included…"
     var summary:String {
         var parts=[String(localized:"\(night.park.shortName), \(night.park.dayLabel(night.id)), darkness score \(night.score.value) out of 100. \(night.score.band.label).")]
         if let range { parts.append(String(localized:"Forecast models: \(range.lowerBound) to \(range.upperBound).")) }
@@ -133,7 +133,7 @@ struct ShareCard:View {
     /// What the score rests on, in the words every surface uses (`Night.basisLine`), then smoke or
     /// haze when it holds the score down.
     var basis:String {
-        ([night.basisLine ?? String(localized:"Forecast included · conditions may change")]+[night.smokeLabel].compactMap { $0 }).joined(separator:" · ")
+        ([night.basisLine ?? String(localized:"Cloud forecast included")]+[night.smokeLabel].compactMap { $0 }).joined(separator:" · ")
     }
     /// The night's one reason, in a few words: the Moon gone through true darkness, else the
     /// Milky Way's core and its hours, else how much of true darkness is Moon-free. A core up only

@@ -41,7 +41,7 @@ import Testing
         // Ten points down: the other park leads unless the closed one is still ten points darker.
         let other = try #require(open.rows.first { $0.id != leader })
         let first = try #require(open.best)
-        if first.rankScore - NightPlanner.closurePenalty < other.best.rankScore { #expect(closed.best?.park.id == other.id) }
+        if first.score.value - NightPlanner.closurePenalty < other.best.score.value { #expect(closed.best?.park.id == other.id) }
         else { #expect(closed.best?.park.id == leader) }
         #expect(closed.closures[leader] == "Main road closed")
         // The scores themselves never change.

@@ -150,7 +150,7 @@ import WidgetKit
     /// Brings followed nights' Live Activities up to date with what Nyx knows now: each night's
     /// score and band from the latest forecasts, and its park's closure line once alerts are read.
     static func refreshFollowed(_ model:PlanModel) async {
-        await FieldActivities.refresh(nightVision:SharedSettings.defaults.bool(forKey:"nightVision")) { attributes in
+        await FieldActivities.refresh(nightVision:SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey)) { attributes in
             guard let park=model.park(attributes.parkID) else { return nil }
             return FieldActivities.Now(night:model.night(park,on:attributes.nightID ?? park.evening(attributes.dusk)),closure:model.closure(park),
                                        closureKnown:model.enrichments[park.id] != nil)

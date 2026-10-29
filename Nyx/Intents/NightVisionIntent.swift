@@ -26,7 +26,7 @@ enum NightVisionFollowers {
     @discardableResult static func set(_ value:Bool) async -> Bool {
         // A turn by hand: under At dusk it holds until the next dusk or dawn.
         NightVisionMode.turnedByHand()
-        SharedSettings.defaults.set(value,forKey:"nightVision")
+        SharedSettings.defaults.set(value,forKey:NightLook.nightVisionKey)
         WidgetCenter.shared.reloadAllTimelines()
         ControlCenter.shared.reloadAllControls()
         guard let changed else { return false }
@@ -55,7 +55,7 @@ nonisolated enum NightVisionMode: String, CaseIterable, Identifiable, Sendable {
         }
     }
     static func current(_ defaults:UserDefaults=SharedSettings.defaults)->NightVisionMode {
-        defaults.bool(forKey:atDuskKey) ? .dusk : defaults.bool(forKey:"nightVision") ? .on : .off
+        defaults.bool(forKey:atDuskKey) ? .dusk : defaults.bool(forKey:NightLook.nightVisionKey) ? .on : .off
     }
     static func heldAt(_ defaults:UserDefaults=SharedSettings.defaults)->Date? {
         (defaults.object(forKey:heldKey) as? Double).map(Date.init(timeIntervalSince1970:))

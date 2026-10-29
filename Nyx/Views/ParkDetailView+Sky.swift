@@ -44,7 +44,7 @@ extension ParkDetailView {
             Eyebrow(text:"Clouds and the air")
             VStack(alignment:.leading,spacing:6) {
                 LabeledContent("Clouds",value:cloudValue)
-                if night.upperCloudOnly { Text("The summit sits above most low cloud, so the score counts mid and high cloud only.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                if let summit=night.summitSentence { Text(summit).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 ForEach(cloudContext,id:\.self) { line in Text(line).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }
             if let air=outlook?.airLabel {

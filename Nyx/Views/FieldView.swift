@@ -611,7 +611,7 @@ struct FieldEntry: View {
     @Environment(PlanModel.self) private var model
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.nyx) private var palette
-    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     @Environment(\.modelContext) private var context
     let park: Park
     let night: Night

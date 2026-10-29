@@ -149,9 +149,6 @@ extension DarknessScore {
 }
 
 extension Night {
-    /// What every ranking of nights compares: the score itself, which already counts the park's
-    /// usual clouds where no forecast reaches. Ties are broken by `NightPlanner.better`.
-    nonisolated var rankScore: Int { score.value }
     /// "About 8 in 10 November nights here are mostly clear." for a night without a forecast, from
     /// the usual clouds the night was scored with (`NightPlanner.night`), so a place whose months the
     /// iPhone handed over says it on the watch and in widgets as it does on the iPhone.
