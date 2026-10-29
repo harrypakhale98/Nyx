@@ -4,7 +4,7 @@ import Testing
 @testable import Nyx
 
 /// What many suites share: the bundled data decoded once per test run, a defaults suite of a test's
-/// own, and the switch for wall-clock timing checks.
+/// own, an HTTP stub that keeps each request's headers, and the switch for wall-clock timing checks.
 enum TestData {
     /// The 63 bundled parks, decoded once.
     static let parks: [Park] = (try? ParkData.load()) ?? []
@@ -38,6 +38,32 @@ func isolatedDefaults(_ name: String = #function) -> UserDefaults {
     let defaults = UserDefaults(suiteName: suite) ?? .standard
     defaults.removePersistentDomain(forName: suite)
     return defaults
+}
+
+/// Records every request with its headers; answers by path, optionally after a pause, so tests
+/// can hold one request open while another screen asks.
+actor HeaderHTTP: HTTPTransport {
+    struct Call: Sendable { let url: URL; let headers: [String: String]; let constrained: Bool }
+    var calls: [Call]=[]
+    var bodies: [String: [String]]
+    var status: Int?
+    var error: URLError?
+    var delay: Duration?
+    init(_ bodies: [String: [String]]) { self.bodies=bodies }
+    func set(status: Int?) { self.status=status }
+    func set(error: URLError?) { self.error=error }
+    func set(delay: Duration?) { self.delay=delay }
+    func get(_ url: URL) async throws -> Data { try await get(url, headers: [:], constrained: true) }
+    func get(_ url: URL, headers: [String: String], constrained: Bool) async throws -> Data {
+        calls.append(Call(url: url, headers: headers, constrained: constrained))
+        if let delay { try? await Task.sleep(for: delay) }
+        if let error { throw error }
+        if let status { throw HTTPStatusError(status: status) }
+        guard var queue=bodies[url.path], !queue.isEmpty else { throw URLError(.badServerResponse) }
+        let body=queue.count>1 ? queue.removeFirst() : queue[0]
+        bodies[url.path]=queue
+        return Data(body.utf8)
+    }
 }
 
 /// Wall-clock limits are checked only when benchmarks are asked for (`TEST_RUNNER_NYX_BENCH=1`):
