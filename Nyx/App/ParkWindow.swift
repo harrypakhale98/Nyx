@@ -89,22 +89,6 @@ struct OpenParkWindowButton: View {
         }
     }
 }
-/// DEBUG captures: `-nyx-open-window deva` opens that park in a window of its own once the app is
-/// up, as "Open in New Window" would. Nothing in Release.
-struct DebugOpenParkWindow: ViewModifier {
-    @Environment(\.openWindow) private var openWindow
-    @Environment(\.supportsMultipleWindows) private var multipleWindows
-    func body(content:Content)->some View {
-        content.task {
-            #if DEBUG
-            let args=ProcessInfo.processInfo.arguments
-            guard multipleWindows, let index=args.firstIndex(of:"-nyx-open-window"), index+1<args.count else { return }
-            try? await Task.sleep(for:.seconds(2))
-            openWindow(value:ParkWindow(parkID:args[index+1]))
-            #endif
-        }
-    }
-}
 /// The park on screen in a window's current tab, for ⌘⇧N. A park's page reports itself while it is
 /// visible; another tab's page never answers for this one.
 struct ReportsVisiblePark: ViewModifier {

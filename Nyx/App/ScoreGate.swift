@@ -31,7 +31,7 @@ struct ScoreGate: ViewModifier {
     /// The tabs that never wait: the Journal's nights are scored with each month's usual clouds
     /// (`PlanModel.loggedNights`), never from the forecast caches. Every other tab, and any tab
     /// added later, waits.
-    nonisolated static let ungatedTabs: Set<Int>=[3]
+    nonisolated static let ungatedTabs: Set<Int>=[AppTab.journal.rawValue]
     nonisolated static func gates(tab:Int)->Bool { !ungatedTabs.contains(tab) }
 }
 extension View {

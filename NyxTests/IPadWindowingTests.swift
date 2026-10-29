@@ -120,10 +120,10 @@ import UniformTypeIdentifiers
     /// night, never the tab's page under it; closing it gives them back.
     @MainActor @Test func aParkOverTheWindowTakesTheKeys() {
         let commands=SceneCommands()
-        commands.tab=1
+        commands.tab = .parks
         commands.show(park:"jotr",tab:1)
         let layer=SceneCommands.newLayer()
-        #expect(layer>=SceneCommands.tabs.count && SceneCommands.newLayer() != layer)
+        #expect(layer>=AppTab.allCases.count && SceneCommands.newLayer() != layer)
         commands.layer(layer,shown:true)
         commands.show(park:"deva",tab:layer)
         #expect(commands.visiblePark=="deva")
@@ -156,7 +156,7 @@ import UniformTypeIdentifiers
         let commands=SceneCommands()
         commands.show(park:"jotr",tab:1)
         #expect(commands.visiblePark==nil)
-        commands.tab=1
+        commands.tab = .parks
         #expect(commands.visiblePark=="jotr")
         // Another tab's page leaving does not clear this one; this one leaving does.
         commands.hide(park:"jotr",tab:0)

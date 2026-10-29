@@ -12,9 +12,9 @@ import Testing
     // MARK: The score gate
 
     @Test func everyTabButTheJournalWaitsForTheCaches() {
-        for tab in SceneCommands.tabs.indices { #expect(ScoreGate.gates(tab: tab) == (tab != 3), "tab \(tab)") }
+        for tab in AppTab.allCases { #expect(ScoreGate.gates(tab: tab.rawValue) == (tab != .journal), "tab \(tab)") }
         // A tab added later waits unless it is listed as carrying no score.
-        #expect(ScoreGate.gates(tab: SceneCommands.tabs.count))
+        #expect(ScoreGate.gates(tab: AppTab.allCases.count))
         #expect(ScoreGate.waits(enabled: true, cachesPending: true))
         #expect(!ScoreGate.waits(enabled: true, cachesPending: false))
         #expect(!ScoreGate.waits(enabled: false, cachesPending: true))
