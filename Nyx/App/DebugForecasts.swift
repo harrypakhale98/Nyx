@@ -75,4 +75,24 @@ struct DebugForecasts {
         return AuroraOutlook(updated: now, periods: (0..<40).map { AuroraOutlook.Period(start: Date(timeIntervalSince1970: first+Double($0)*10800), kp: kp, predicted: $0>8) })
     }
 }
+#if os(iOS)
+extension PlanModel {
+    /// `-nyx-watch-export jotr,deva,…` (with `-nyx-state live` on a park page, which asks for forecast
+    /// detail): writes the context a paired iPhone would hand Apple Watch for those saved parks, the
+    /// models' ranges worked out by `SavedSkySync.modelRanges`, to the App Group as `watch-context.json`.
+    /// Store captures copy it into the watch simulator, which has no paired iPhone. Writes only a local file.
+    func exportWatchContext() {
+        guard let list=DebugScenario.text("-nyx-watch-export"), detailWanted else { return }
+        let ids=list.split(separator:",").map(String.init).filter { park($0) != nil }
+        guard let home=ids.first,
+              let url=FileManager.default.containerURL(forSecurityApplicationGroupIdentifier:SharedSettings.group)?.appendingPathComponent(WatchContextExport.file) else { return }
+        let closures=Dictionary(ids.compactMap { id in park(id).flatMap { closure($0) }.map { (id,$0) } },uniquingKeysWith:{ first,_ in first })
+        let context=WatchContext.make(savedParkIDs:ids,homeParkID:home,nightVision:false,forecasts:forecasts,details:details,closures:closures,
+                                      aboveInversion:Set(parks.filter { $0.aboveInversion == true }.map(\.id)),
+                                      ranges:SavedSkySync.modelRanges(self,ids:ids))
+        try? context.data?.write(to:url,options:.atomic)
+    }
+    private enum WatchContextExport { static let file="watch-context.json" }
+}
+#endif
 #endif

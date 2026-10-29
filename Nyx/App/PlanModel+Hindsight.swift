@@ -20,11 +20,11 @@ extension PlanModel {
         }
         guard records != hindsight else { return }
         hindsight=records
-        if DebugScenario.screen == nil { defaults.set(try? JSONEncoder().encode(records),forKey:"hindsight") }
+        defaults.set(try? JSONEncoder().encode(records),forKey:"hindsight")
     }
     /// "Forget these nights": every record let go.
     func forgetHindsight() {
         hindsight=[]
-        if DebugScenario.screen == nil { defaults.removeObject(forKey:"hindsight") }
+        defaults.removeObject(forKey:"hindsight")
     }
 }

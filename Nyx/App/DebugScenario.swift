@@ -100,6 +100,15 @@ enum DebugScenario {
         return false
         #endif
     }
+    /// Where the planner keeps its settings: the app's own defaults, or, under a debug route, a
+    /// scratch suite emptied at launch, so a capture neither reads nor changes the person's settings.
+    static func plannerDefaults() -> UserDefaults {
+        #if DEBUG
+        let suite="nyx.debug.planner"
+        if screen != nil, let scratch=UserDefaults(suiteName:suite) { scratch.removePersistentDomain(forName:suite); return scratch }
+        #endif
+        return .standard
+    }
     /// Parks opens its map: the `parks-map` route (as the accessibility audit launches it) or `-nyx-parks-map`.
     static var parksMap: Bool { screen == "parks-map" || isEnabled("parks-map") }
     private static func argument(_ key:String)->String? {

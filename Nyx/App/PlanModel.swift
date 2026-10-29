@@ -1,7 +1,5 @@
 import Foundation
-import Synchronization
 import Observation
-import CoreLocation
 
 @MainActor @Observable final class PlanModel {
     /// The catalogue: the bundled places, the same for everyone. Saved spots are never in it (`spots`).
@@ -114,7 +112,7 @@ import CoreLocation
     /// Forecast detail (models, layers, smoke) is fetched only once a park's page has been opened
     /// in this session: Tonight and the park list need only clouds, apart from a summit above the
     /// inversion, whose clouds are its layers (`refreshForecasts`).
-    @ObservationIgnored private var detailWanted=false
+    @ObservationIgnored private(set) var detailWanted=false
     /// A world catalogue place's page has been opened in this session: from then on smoke is asked
     /// for at catalogue places too, by their tiles, without starting the US parks' detail.
     @ObservationIgnored private var catalogSmokeWanted=false
@@ -132,9 +130,10 @@ import CoreLocation
     /// The parks' forecast was due but held back: the service asked Nyx to wait, or this iPhone's
     /// request budget was spent (`ForecastRequest`). Read by a refresh's closing line.
     @ObservationIgnored private(set) var forecastsHeldBack=false
-    /// Where the settings below are kept: the app's own defaults (tests pass a suite of their own).
+    /// Where the settings below are kept: the app's own defaults (tests pass a suite of their own, and
+    /// a debug route a scratch one, `DebugScenario.plannerDefaults`, so a capture never touches them).
     @ObservationIgnored let defaults: UserDefaults
-    var homeID: String { didSet { if DebugScenario.screen == nil { defaults.set(homeID,forKey:"homePark") } } }
+    var homeID: String { didSet { defaults.set(homeID,forKey:"homePark") } }
     /// The place Tonight last answered with on this iPhone (the darkest within reach, once a starting
     /// point is chosen), kept across launches with the place's night it was picked for
     /// (`tonightPickNight`). The widgets and Apple Watch follow it while that night is still tonight
@@ -144,7 +143,7 @@ import CoreLocation
             let night=tonightPickID.flatMap { park($0) }.map { $0.isoDay($0.currentNight(at:present)) }
             guard tonightPickID != oldValue || night != tonightPickNight else { return }
             tonightPickNight=night
-            if DebugScenario.screen == nil { defaults.set(tonightPickID,forKey:"tonightPick"); defaults.set(night,forKey:"tonightPickNight") }
+            defaults.set(tonightPickID,forKey:"tonightPick"); defaults.set(night,forKey:"tonightPickNight")
             savedSync.noteChange(self)
             updateHindsight()
         }
@@ -166,29 +165,28 @@ import CoreLocation
     }
     /// A city or town chosen as the starting point (`places.json`). Distances are measured from it
     /// and `homeID` holds the park nearest to it; nil when the starting point is a park.
-    var homePlace: StartingPlace? { didSet { if DebugScenario.screen == nil { defaults.set(homePlace.flatMap { try? JSONEncoder().encode($0) },forKey:"homePlace") } } }
+    var homePlace: StartingPlace? { didSet { defaults.set(homePlace.flatMap { try? JSONEncoder().encode($0) },forKey:"homePlace") } }
     /// Whether a starting point was ever chosen: a park, a place, or "Near me". Until then Tonight
     /// asks, and its answer is labelled an example. Anyone who chose a park before has.
-    var startChosen: Bool { didSet { if DebugScenario.screen == nil { defaults.set(startChosen,forKey:"startChosen") } } }
+    var startChosen: Bool { didSet { defaults.set(startChosen,forKey:"startChosen") } }
     /// Tonight's reach, as the crow flies, in metres; shown in miles or kilometres by locale (`SearchRadius`).
-    var radiusMeters: Double { didSet { if DebugScenario.screen == nil { SearchRadius.store(radiusMeters,defaults) } } }
-    var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(weatherEnabled,forKey:NetworkService.forecasts.key) } } }
-    var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(npsEnabled,forKey:NetworkService.alerts.key) } } }
+    var radiusMeters: Double { didSet { SearchRadius.store(radiusMeters,defaults) } }
+    var weatherEnabled: Bool { didSet { defaults.set(weatherEnabled,forKey:NetworkService.forecasts.key) } }
+    var npsEnabled: Bool { didSet { defaults.set(npsEnabled,forKey:NetworkService.alerts.key) } }
     /// Saved spots' cloud forecasts (`SpotForecast`): a request with each spot's coordinates rounded
     /// to 0.1°, only while Cloud forecasts is on too. Off, spots keep what is cached, then their usual clouds.
     /// Apple Watch says why a spot's clouds stopped (`CloudSource.spotsOff`), so it hears the switch at once.
     var spotForecastsEnabled: Bool {
         didSet {
-            guard DebugScenario.screen == nil else { return }
             defaults.set(spotForecastsEnabled,forKey:SpotForecast.key)
-            if spotForecastsEnabled != oldValue { savedSync.pushWatch(self) }
+            if spotForecastsEnabled != oldValue, DebugScenario.screen == nil { savedSync.pushWatch(self) }
         }
     }
     /// NOAA's aurora forecast (services.swpc.noaa.gov): one global file, nothing about the person.
     /// Off, the copy here is dropped and nothing is asked.
     var auroraEnabled: Bool {
         didSet {
-            if DebugScenario.screen == nil { defaults.set(auroraEnabled,forKey:NetworkService.aurora.key) }
+            defaults.set(auroraEnabled,forKey:NetworkService.aurora.key)
             guard !auroraEnabled, oldValue else { return }
             aurora=nil
             let service=auroraService
@@ -200,7 +198,7 @@ import CoreLocation
     }
     var smokeEnabled: Bool {
         didSet {
-            if DebugScenario.screen == nil { defaults.set(smokeEnabled,forKey:NetworkService.smoke.key) }
+            defaults.set(smokeEnabled,forKey:NetworkService.smoke.key)
             guard !smokeEnabled, oldValue else { return }
             // Switched off: cached smoke stops counting at once, here and in the cache Siri reads.
             details=Self.withoutAir(details)
@@ -276,17 +274,17 @@ import CoreLocation
         self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore; self.detailService=detail; self.auroraService=aurora
         self.defaults=defaults
         // Parks opens darkest tonight first: the list answers the app's question before it is asked.
-        // (A registered default: anyone who chose Name keeps it.)
-        defaults.register(defaults:["parksByScore":true])
+        // (A registered default, in the app's own defaults where `ParksList` reads it: anyone who chose Name keeps it.)
+        UserDefaults.standard.register(defaults:["parksByScore":true])
         homeID=defaults.string(forKey:"homePark") ?? Park.defaultID
         homePlace=defaults.data(forKey:"homePlace").flatMap { try? JSONDecoder().decode(StartingPlace.self,from:$0) }
-        hindsight=DebugScenario.screen == nil ? defaults.data(forKey:"hindsight").flatMap { try? JSONDecoder().decode([HindsightRecord].self,from:$0) } ?? [] : []
+        hindsight=defaults.data(forKey:"hindsight").flatMap { try? JSONDecoder().decode([HindsightRecord].self,from:$0) } ?? []
         hindsightLoaded=true
-        tonightPickID=DebugScenario.screen == nil ? defaults.string(forKey:"tonightPick").flatMap(PlaceIDText.validated) : nil
-        tonightPickNight=DebugScenario.screen == nil ? defaults.string(forKey:"tonightPickNight") : nil
+        tonightPickID=defaults.string(forKey:"tonightPick").flatMap(PlaceIDText.validated)
+        tonightPickNight=defaults.string(forKey:"tonightPickNight")
         startChosen=defaults.object(forKey:"startChosen") as? Bool ?? (defaults.string(forKey:"homePark") != nil)
         // A radius kept in miles before 2.0 is written once as metres, exactly.
-        if DebugScenario.screen == nil { SearchRadius.migrate(defaults) }
+        SearchRadius.migrate(defaults)
         radiusMeters=SearchRadius.meters(defaults)
         weatherEnabled=NetworkService.forecasts.isOn(defaults)
         npsEnabled=NetworkService.alerts.isOn(defaults)
@@ -871,24 +869,6 @@ import CoreLocation
             if let forecast=fresh[park.id], !forecastIsStale(forecast.updated) { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
         }
     }
-    #if DEBUG
-    /// `-nyx-watch-export jotr,deva,…` (with `-nyx-state live` on a park page, which asks for forecast
-    /// detail): writes the context a paired iPhone would hand Apple Watch for those saved parks, the
-    /// models' ranges worked out by `SavedSkySync.modelRanges`, to the App Group as `watch-context.json`.
-    /// Store captures copy it into the watch simulator, which has no paired iPhone. Writes only a local file.
-    private func exportWatchContext() {
-        guard let list=DebugScenario.text("-nyx-watch-export"), detailWanted else { return }
-        let ids=list.split(separator:",").map(String.init).filter { park($0) != nil }
-        guard let home=ids.first,
-              let url=FileManager.default.containerURL(forSecurityApplicationGroupIdentifier:SharedSettings.group)?.appendingPathComponent(WatchContextExport.file) else { return }
-        let closures=Dictionary(ids.compactMap { id in park(id).flatMap { closure($0) }.map { (id,$0) } },uniquingKeysWith:{ first,_ in first })
-        let context=WatchContext.make(savedParkIDs:ids,homeParkID:home,nightVision:false,forecasts:forecasts,details:details,closures:closures,
-                                      aboveInversion:Set(parks.filter { $0.aboveInversion == true }.map(\.id)),
-                                      ranges:SavedSkySync.modelRanges(self,ids:ids))
-        try? context.data?.write(to:url,options:.atomic)
-    }
-    private enum WatchContextExport { static let file="watch-context.json" }
-    #endif
     /// Alerts for every park arrive in one request (whichever screen asks first, at most every six
     /// hours), so the request never says which parks are near you; ranger programs follow only for
     /// the park whose page is open.
@@ -932,11 +912,6 @@ import CoreLocation
         let today=park.isoDay(Date.now)
         return (shown.programs.filter { $0.date>=today },shown.updated)
     }
-    /// A closure from the last park update, if any: a road, trail, campground, area or the park
-    /// itself, never an amenity notice. Shown beside every score for that park.
-    func closure(_ park:Park)->String? {
-        AlertRanking.closure(enrichments[park.id]?.alerts ?? [])?.displayTitle(park:park)
-    }
     /// Why this night's score does not count smoke, in Vision Pro's words (`ScoreInputs.smokeNote`):
     /// switched off, none fetched here yet (smoke comes with a park's page), or none reaching the
     /// night (past its few days). Nil when it counts (`Night.aerosol`).
@@ -951,185 +926,5 @@ import CoreLocation
         await hydration?.value
         let fresh=await parkStore.campgrounds(for:parks,key:npsKey,network:npsEnabled && live,force:force)
         if let fresh, fresh != campgrounds { campgrounds=fresh }
-    }
-    func alertSummary(_ park:Park)->String {
-        // The same words Vision Pro says beside its scores (`AlertRanking.summary`).
-        guard let data=enrichments[park.id] else { return AlertRanking.unchecked(busy:alertsBusy) }
-        return AlertRanking.summary(data.alerts,park:park)
-    }
-    /// Where a place's access stands for Ask Nyx, in Nyx's own fixed words only. A closure is a flag
-    /// (`OnDeviceGuide.closureRecord`), never the Park Service's title or text: that is free text,
-    /// and the on-device model must not read it as an instruction or quote it as access advice.
-    func guideAccess(_ park:Park)->String {
-        guard park.nps != nil else { return park.unknownClosuresLine }
-        guard let data=enrichments[park.id] else {
-            return alertsBusy ? String(localized:"Park alerts are busy. Check current conditions on nps.gov.") : String(localized:"Access not checked. Confirm closures with the park.")
-        }
-        if closure(park) != nil { return OnDeviceGuide.closureRecord }
-        if data.alerts.contains(where:{ $0.kind == .danger }) { return String(localized:"A safety alert is listed in the last park update. Read it in Nyx before you go.") }
-        if data.alerts.isEmpty { return String(localized:"No alerts in the last park update. Confirm access before travel.") }
-        return String(localized:"No closures in the last park update. Check all park alerts before you go.")
-    }
-    /// The curated parks with a closure in the last park update, for Ask Nyx's lookups.
-    var closedParks:Set<String> { Set(parks.filter { closure($0) != nil }.map(\.id)) }
-    /// `alertSummary` as short facts for one caption, only when the last park update lists nothing
-    /// to stop a trip (no closure, no danger): the fact, then the cue to check before going. Nil
-    /// otherwise, when the summary's full sentence stands alone.
-    func alertFacts(_ park:Park)->[String]? {
-        guard let data=enrichments[park.id], closure(park) == nil, !data.alerts.contains(where:{ $0.kind == .danger }) else { return nil }
-        if data.alerts.isEmpty { return [String(localized:"No alerts listed"),String(localized:"confirm access before you go")] }
-        return [String(localized:"No closures listed"),String(localized:"check alerts before you go")]
-    }
-}
-/// The world catalogue as the planner reads it, built once off the main thread (`prepareCatalog`):
-/// the places in file order, a lookup by id, a spatial index of 1° cells, folded search terms and
-/// the forecast regions (`CatalogForecast.Regions`).
-nonisolated struct PlaceCatalog: Sendable {
-    let places: [Park]
-    let regions: CatalogForecast.Regions
-    private let byID: [String: Int]
-    private let cells: [Cell: [Int]]
-    private let terms: [Terms]
-    static let empty=PlaceCatalog([])
-    /// The bundled catalogue without the curated parks, built once per process (about 60 ms on a
-    /// recent Mac: 20 to decode, 40 to fold the search terms) and kept: every model shares it.
-    static func bundled(excluding curated: Set<String>) -> PlaceCatalog {
-        if let kept=store.withLock({ $0 }), kept.excluded == curated { return kept.catalog }
-        let built=PlaceCatalog(((try? CatalogData.load()) ?? []).filter { !curated.contains($0.id) })
-        // A failed read (no file) is not kept, so a later model tries again.
-        if !built.places.isEmpty { store.withLock { $0=(curated,built) } }
-        return built
-    }
-    private static let store=Mutex<(excluded: Set<String>, catalog: PlaceCatalog)?>(nil)
-    /// One degree of latitude and longitude: rows −90…89, columns −180…179.
-    nonisolated struct Cell: Hashable, Sendable {
-        let row: Int
-        let column: Int
-        init(row: Int, column: Int) { self.row=row; self.column=Cell.wrap(column) }
-        init(latitude: Double, longitude: Double) {
-            self.init(row: min(89, max(-90, Int(latitude.rounded(.down)))), column: Int(longitude.rounded(.down)))
-        }
-        static func wrap(_ column: Int) -> Int { ((column+180)%360+360)%360-180 }
-    }
-    init(_ places: [Park], locale: Locale = .current) {
-        var seen=Set<String>()
-        let unique=places.filter { $0.latitude.isFinite && $0.longitude.isFinite && seen.insert($0.id).inserted }
-        self.places=unique
-        byID=Dictionary(unique.indices.map { (unique[$0].id,$0) },uniquingKeysWith:{ first,_ in first })
-        var cells: [Cell: [Int]]=[:]
-        for (index,place) in unique.enumerated() { cells[Cell(latitude: place.latitude, longitude: place.longitude),default:[]].append(index) }
-        self.cells=cells
-        terms=unique.map { Terms($0, locale: locale) }
-        regions=CatalogForecast.Regions(unique)
-    }
-    func place(_ id: String) -> Park? { byID[id].map { places[$0] } }
-    /// The places within `radiusMeters` (great-circle) of a point, in file order: only the 1° cells the
-    /// circle can reach are read (every column near a pole or for a radius past a quarter of the Earth).
-    func nearby(latitude: Double, longitude: Double, radiusMeters: Double) -> [Park] {
-        guard !places.isEmpty, latitude.isFinite, longitude.isFinite, radiusMeters.isFinite, radiusMeters>=0 else { return [] }
-        let angle=radiusMeters/Park.earthRadius, degrees=angle*180 / .pi+1e-6
-        let rows=Int(max(-90, latitude-degrees).rounded(.down))...Int(min(89.999_999, latitude+degrees).rounded(.down))
-        let ratio=sin(min(angle, .pi/2))/cos(latitude * .pi/180)
-        let columns: [Int]
-        if angle >= .pi/2 || latitude+degrees >= 90 || latitude-degrees <= -90 || !(ratio<1) {
-            columns=Array(-180...179)
-        } else {
-            let span=asin(ratio)*180 / .pi+1e-6
-            let low=Int((longitude-span).rounded(.down)), high=Int((longitude+span).rounded(.down))
-            columns=high-low >= 359 ? Array(-180...179) : Array(Set((low...high).map(Cell.wrap)))
-        }
-        var found: [Int]=[]
-        for row in rows { for column in columns { if let indices=cells[Cell(row: row, column: column)] { found += indices } } }
-        return found.sorted().map { places[$0] }.filter { $0.distanceMeters(latitude: latitude, longitude: longitude)<=radiusMeters }
-    }
-    /// Every place matching an already folded query, with its rank (`Terms.rank`).
-    func search(_ needle: String) -> [(Park, Int)] {
-        guard !needle.isEmpty else { return [] }
-        return zip(places, terms).compactMap { place, terms in terms.rank(needle).map { (place,$0) } }
-    }
-    /// A place's name (and short name and aliases), region and country (in the reader's language), folded once.
-    /// A place shown in the app's language is found by its English name and region too (`Place.searchNames`).
-    nonisolated struct Terms: Sendable {
-        let names: [String]
-        let others: [String]
-        init(_ place: Park, locale: Locale = .current) {
-            names=Array(Set(place.searchNames+(Park.aliases[place.id] ?? [])).map(Park.folded).filter { !$0.isEmpty }).sorted()
-            let country=place.countryCode.isEmpty ? nil : locale.localizedString(forRegionCode: place.countryCode)
-            others=(place.searchRegions+(country.map { [$0] } ?? [])).map(Park.folded).filter { !$0.isEmpty }
-        }
-        /// 0 the whole name, 1 a name beginning with the query, 2 a word of the name beginning with it,
-        /// 3 the name containing it; 4 to 7 the same for the region or country; nil for no match.
-        func rank(_ needle: String) -> Int? {
-            func tier(_ terms: [String]) -> Int? {
-                if terms.contains(needle) { return 0 }
-                if terms.contains(where: { $0.hasPrefix(needle) }) { return 1 }
-                if terms.contains(where: { $0.contains(" "+needle) }) { return 2 }
-                if terms.contains(where: { $0.contains(needle) }) { return 3 }
-                return nil
-            }
-            return tier(names) ?? tier(others).map { $0+4 }
-        }
-    }
-}
-@MainActor @Observable final class LocationService: NSObject, CLLocationManagerDelegate {
-    var latitude:Double?
-    var longitude:Double?
-    var denied=false
-    var locating=false
-    var message:String?
-    private let manager=CLLocationManager()
-    override init() { super.init(); manager.delegate=self; manager.desiredAccuracy=kCLLocationAccuracyThreeKilometers }
-    /// "Near me" as the starting point, kept across launches: the choice, never a position. While
-    /// location stays allowed, the next launch starts from where you are without asking.
-    private var remembered:Bool {
-        get { DebugScenario.screen == nil && UserDefaults.standard.bool(forKey:"nearMe") }
-        set { if DebugScenario.screen == nil { UserDefaults.standard.set(newValue,forKey:"nearMe") } }
-    }
-    /// The explainer has led to iOS's prompt once: after an "Allow Once" lapses, Near me goes
-    /// straight to the prompt instead of explaining again.
-    private var explained:Bool {
-        get { DebugScenario.screen == nil && UserDefaults.standard.bool(forKey:"locationExplained") }
-        set { if DebugScenario.screen == nil { UserDefaults.standard.set(newValue,forKey:"locationExplained") } }
-    }
-    private var allowed:Bool { manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways }
-    /// Near me should explain first: iOS has never asked, and Nyx has never explained.
-    var needsPermission:Bool { manager.authorizationStatus == .notDetermined && !explained }
-    func request() {
-        locating=true
-        if allowed { manager.requestLocation() }
-        else if manager.authorizationStatus == .denied || manager.authorizationStatus == .restricted { denied=true; locating=false; remembered=false }
-        else { explained=true; manager.requestWhenInUseAuthorization() }
-    }
-    func locationManagerDidChangeAuthorization(_ manager:CLLocationManager) {
-        switch manager.authorizationStatus {
-        case .authorizedWhenInUse,.authorizedAlways: denied=false; if locating { manager.requestLocation() } else { resume() }
-        // Turned off in Settings: back to the starting point, not a stale position.
-        case .denied,.restricted: denied=true; clear()
-        default: break
-        }
-    }
-    func locationManager(_ manager:CLLocationManager,didUpdateLocations locations:[CLLocation]) {
-        // A fix that lands after a starting point was chosen instead is dropped.
-        guard let location=locations.last, locating || latitude != nil else { locating=false; return }
-        latitude=location.coordinate.latitude; longitude=location.coordinate.longitude; locating=false; message=nil; remembered=true
-    }
-    /// Return to the chosen starting park.
-    func clear() { latitude=nil; longitude=nil; message=nil; locating=false; remembered=false }
-    /// Back in the app: a fresh fix, only when "near me" is in use and already allowed. Never asks.
-    func refreshIfAuthorized() {
-        guard allowed, !locating else { return }
-        if latitude != nil { manager.requestLocation() } else { resume() }
-    }
-    /// Near me from an earlier launch, only while still allowed. Never asks. iOS's last fix, when
-    /// recent, paints at once; a fresh one follows.
-    private func resume() {
-        guard remembered, latitude == nil, !locating, allowed else { return }
-        if let last=manager.location, last.timestamp.timeIntervalSinceNow > -900 { latitude=last.coordinate.latitude; longitude=last.coordinate.longitude }
-        else { locating=true }
-        manager.requestLocation()
-    }
-    func locationManager(_ manager:CLLocationManager,didFailWithError error:any Error) {
-        locating=false
-        if latitude == nil { message=String(localized:"Location is unavailable. Choose a starting point instead.") }
     }
 }
