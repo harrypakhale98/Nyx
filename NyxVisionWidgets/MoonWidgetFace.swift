@@ -79,7 +79,7 @@ struct MoonWidgetFace: View {
                 HStack(spacing: 20) {
                     WidgetMoon(facts: facts).frame(width: 112, height: 112)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Tonight's Moon").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.semibold)).kerning(Lettering.spaced ? 1.4 : 0).foregroundStyle(eyebrowInk)
+                        Text("The Moon").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.semibold)).kerning(Lettering.spaced ? 1.4 : 0).foregroundStyle(eyebrowInk)
                         Text(facts.phaseName).font(.system(.title2, design: .serif)).foregroundStyle(Self.ink)
                         Text(facts.phase.litText).font(.headline).monospacedDigit().foregroundStyle(quiet)
                         Spacer(minLength: 6)
@@ -98,13 +98,13 @@ struct MoonWidgetFace: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(week.map { facts.spoken+" "+Self.spokenWeek($0) } ?? facts.spoken))
     }
-    /// Tonight's Moon above the week: each night's weekday, its Moon and how much is lit.
+    /// The Moon now above the week: each night's weekday, its Moon and how much is lit.
     private func large(_ week: MoonWeek) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 18) {
                 WidgetMoon(facts: facts).frame(width: 112, height: 112)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Tonight's Moon").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.semibold)).kerning(Lettering.spaced ? 1.4 : 0).foregroundStyle(eyebrowInk)
+                    Text("The Moon").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.semibold)).kerning(Lettering.spaced ? 1.4 : 0).foregroundStyle(eyebrowInk)
                     Text(facts.phaseName).font(.system(.title2, design: .serif)).foregroundStyle(Self.ink).lineLimit(2).minimumScaleFactor(0.85)
                     Text(facts.phase.litText).font(.headline).monospacedDigit().foregroundStyle(quiet)
                 }

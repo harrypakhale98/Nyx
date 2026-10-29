@@ -24,7 +24,9 @@ struct VisionSmokeAlertsTests {
     /// Vision Pro compiles the same host table as the iPhone (no visionOS branch any more), and its
     /// target carries both network files and the iPhone's NPS key setting, nothing else that can ask.
     @Test func visionReachesTheSameThreeHostsBehindTheSameSwitches() throws {
-        #expect(SafeHTTP.preferences == Dictionary(uniqueKeysWithValues: NetworkService.allCases.map { ($0.host, $0.key) }))
+        // The keys written out: a renamed key would reset every person's choice.
+        #expect(SafeHTTP.preferences == ["api.open-meteo.com": "weatherEnabled", "air-quality-api.open-meteo.com": "smokeEnabled",
+                                         "services.swpc.noaa.gov": "auroraEnabled", "developer.nps.gov": "npsEnabled"])
         let client = try Self.source("Nyx/Services/CloudForecastClient.swift")
         #expect(!client.contains("#if os(visionOS)"))
         let hosts = Set((client+(try Self.source("Nyx/Services/DataServices.swift"))).matches(of: /host="([^"]+)"/).map { String($0.output.1) })

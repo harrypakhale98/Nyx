@@ -172,7 +172,13 @@ import Observation
     /// Tonight's reach, as the crow flies, in metres; shown in miles or kilometres by locale (`SearchRadius`).
     var radiusMeters: Double { didSet { SearchRadius.store(radiusMeters,defaults) } }
     var weatherEnabled: Bool { didSet { defaults.set(weatherEnabled,forKey:NetworkService.forecasts.key) } }
-    var npsEnabled: Bool { didSet { defaults.set(npsEnabled,forKey:NetworkService.alerts.key) } }
+    /// Apple Watch says when closures were not checked (`WatchContext.alertsOff`), so it hears the switch at once.
+    var npsEnabled: Bool {
+        didSet {
+            defaults.set(npsEnabled,forKey:NetworkService.alerts.key)
+            if npsEnabled != oldValue, DebugScenario.screen == nil { savedSync.pushWatch(self) }
+        }
+    }
     /// Saved spots' cloud forecasts (`SpotForecast`): a request with each spot's coordinates rounded
     /// to 0.1°, only while Cloud forecasts is on too. Off, spots keep what is cached, then their usual clouds.
     /// Apple Watch says why a spot's clouds stopped (`CloudSource.spotsOff`), so it hears the switch at once.
@@ -199,6 +205,8 @@ import Observation
     var smokeEnabled: Bool {
         didSet {
             defaults.set(smokeEnabled,forKey:NetworkService.smoke.key)
+            // Switched on, the watch stops saying smoke is not counted (`WatchContext.smokeOff`); off, the republish below tells it.
+            if smokeEnabled, !oldValue, DebugScenario.screen == nil { savedSync.pushWatch(self) }
             guard !smokeEnabled, oldValue else { return }
             // Switched off: cached smoke stops counting at once, here and in the cache Siri reads.
             details=Self.withoutAir(details)

@@ -77,16 +77,19 @@ enum VisionMotion {
 struct VisionEyebrow: View {
     @Environment(\.visionPalette) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
-    let text: LocalizedStringKey
+    let text: Text
     var meta = false
+    init(text: LocalizedStringKey, meta: Bool = false) { self.text = Text(text); self.meta = meta }
+    /// A heading already in the reader's language (the credits' sections, `Credits.Section.title`).
+    init(verbatim: String, meta: Bool = false) { self.text = Text(verbatim: verbatim); self.meta = meta }
     var body: some View {
         if meta {
             let spaced = Lettering.spaced && !typeSize.isAccessibilitySize
-            Text(text).font(.footnote.weight(.semibold)).kerning(spaced ? 1.6 : 0)
+            text.font(.footnote.weight(.semibold)).kerning(spaced ? 1.6 : 0)
                 .textCase(spaced ? .uppercase : nil).foregroundStyle(palette.muted)
                 .accessibilityAddTraits(.isHeader)
         } else {
-            Text(text).font(.system(.title3, design: .serif)).fixedSize(horizontal: false, vertical: true).foregroundStyle(palette.ink)
+            text.font(.system(.title3, design: .serif)).fixedSize(horizontal: false, vertical: true).foregroundStyle(palette.ink)
                 .accessibilityAddTraits(.isHeader)
         }
     }

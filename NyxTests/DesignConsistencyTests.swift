@@ -28,7 +28,6 @@ struct DesignConsistencyTests {
         #expect(score(.forecast).bandWithBasis == ScoreBand.band(81).label)
         #expect(score(.blended(weight: 0.5, leadDays: 6)).bandWithBasis == "\(ScoreBand.band(81).label), early look")
         #expect(score(.usual).bandWithBasis == "\(ScoreBand.band(81).label), usual clouds")
-        #expect(score(.usual).bandWithBasis == "\(ScoreBand.band(81).label), usual clouds")
     }
 
     @Test func theMoonsSymbolTurnsForTheSouthernSky() {

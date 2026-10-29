@@ -25,7 +25,7 @@ struct MoonEntry: TimelineEntry {
 }
 
 /// One entry every three hours for a day, so "next new moon" moves on soon after one passes; the
-/// Moon itself is tonight's at 10 PM and moves on at 6 AM (`MoonFacts`).
+/// Moon is the one at each entry's moment, as on the iPhone and the watch (`MoonFacts`).
 struct MoonProvider: TimelineProvider {
     func placeholder(in context: Context) -> MoonEntry { MoonEntry(date: .now, facts: MoonFacts(at: .now)) }
     func getSnapshot(in context: Context, completion: @escaping (MoonEntry) -> Void) {
