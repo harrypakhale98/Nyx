@@ -11,8 +11,6 @@ struct TripPlannerView: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     @MotionReduced private var reduceMotion: Bool
-    /// Inside Plan, which names the page and holds the toolbar; alone (a DEBUG route) it names itself.
-    var embedded=false
     /// The chosen nights as seconds since 1970; 0 until chosen, which means from tonight for a week.
     @SceneStorage("tripFirst") private var firstStamp=0.0
     @SceneStorage("tripLast") private var lastStamp=0.0
@@ -89,7 +87,6 @@ struct TripPlannerView: View {
         .foldSource()
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
         .background(NightBackground(seed:"trip",park:plan?.best?.night.park,night:plan?.best?.night.id))
-        .modifier(StandaloneTitle(embedded:embedded))
         .toolbar { if let plan, !plan.stops.isEmpty { ToolbarItem(placement:.topBarTrailing) {
             ShareLink(item:TripPlanner.shareText(plan,distance:Self.miles)) { Label("Share plan",systemImage:"square.and.arrow.up") }.accessibilityLabel("Share plan")
         } } }
@@ -223,13 +220,6 @@ struct TripPlannerView: View {
     private func routeSummary(_ plan:TripPlan)->String {
         let parks=Array(NSOrderedSet(array:plan.stops.map(\.night.park.shortName))).compactMap { $0 as? String }
         return String(localized:"Route map: \(Phrase.list(parks)).")
-    }
-}
-/// Alone, the planner names its own page; inside Plan, Plan does.
-private struct StandaloneTitle: ViewModifier {
-    let embedded:Bool
-    @ViewBuilder func body(content:Content)->some View {
-        if embedded { content } else { content.navigationTitle("My free nights").navigationBarTitleDisplayMode(.inline) }
     }
 }
 /// Back-to-back nights at one park: one row, one calendar event.

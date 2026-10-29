@@ -63,14 +63,14 @@ import Testing
     // MARK: Tabs and links
 
     @Test func fourTabsAndTheirRoutes() {
-        #expect(SceneCommands.tabs.count==4)
-        #expect(SceneCommands.tabIndex("tonight")==0 && SceneCommands.tabIndex("parks")==1 && SceneCommands.tabIndex("journal")==3)
+        #expect(AppTab.allCases.map(\.rawValue)==[0,1,2,3])
+        #expect(AppTab(route:"tonight") == .tonight && AppTab(route:"parks") == .parks && AppTab(route:"journal") == .journal)
         // The map is a mode of Parks; the accessibility audit opens it by this route.
-        #expect(SceneCommands.tabIndex("parks-map")==1)
+        #expect(AppTab(route:"parks-map") == .parks)
         // Screenshot scripts still say "calendar"; it is Plan's month.
-        #expect(SceneCommands.tabIndex("calendar")==2 && SceneCommands.tabIndex("plan")==2)
+        #expect(AppTab(route:"calendar") == .plan && AppTab(route:"plan") == .plan)
         // Learn is no longer a tab: its route opens the index on its own.
-        #expect(SceneCommands.tabIndex("learn")==nil)
+        #expect(AppTab(route:"learn") == nil)
     }
 
     // MARK: The calendar's stretch

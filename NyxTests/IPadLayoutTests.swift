@@ -61,25 +61,25 @@ import Testing
         menu=commands.menu(journalOpen:true)
         #expect(menu.nights && menu.refresh)
         // Parks has a list to refresh but no night to move.
-        commands.tab=1
+        commands.tab = .parks
         menu=commands.menu(journalOpen:true)
         #expect(!menu.nights && menu.refresh)
         // Plan and Journal have neither.
-        commands.tab=3
+        commands.tab = .journal
         menu=commands.menu(journalOpen:false)
         #expect(!menu.nights && !menu.refresh && !menu.record)
         // Tonight speaks its own result, so ⌘R there is quiet; the newest screen answers.
-        commands.tab=0
+        commands.tab = .tonight
         commands.refresh()
         #expect(commands.refreshRequest?.target == tonight.id && commands.refreshRequest?.quiet == true)
-        commands.tab=1
+        commands.tab = .parks
         commands.refresh()
         #expect(commands.refreshRequest?.target == list.id && commands.refreshRequest?.quiet == false)
         // Gone from screen, gone from the menu.
         commands.nights(night,tab:0,on:false)
         commands.refreshes(list,tab:1,on:false)
         #expect(!commands.menu(journalOpen:true).refresh)
-        commands.tab=0
+        commands.tab = .tonight
         #expect(!commands.menu(journalOpen:true).nights)
         // A park's own window has no tabs: no Settings or new entry from it, its night keys on tab 0.
         let window=SceneCommands(parkWindow:true)

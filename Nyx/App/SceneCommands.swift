@@ -1,14 +1,38 @@
 import SwiftUI
 
+/// The main window's four tabs, in order: where (Tonight, Parks), when (Plan) and remember (Journal).
+/// The raw value is the tab's place, ⌘1–⌘4, and what a window restores (`RootView.savedTab`).
+nonisolated enum AppTab: Int, CaseIterable, Hashable, Sendable {
+    case tonight, parks, plan, journal
+    var title: LocalizedStringKey {
+        switch self {
+        case .tonight: "Tonight"
+        case .parks: "Parks"
+        case .plan: "Plan"
+        case .journal: "Journal"
+        }
+    }
+    /// Tonight's icon is the Moon as it is now, drawn by `RootView`; this stands in until then.
+    var symbol: String {
+        switch self {
+        case .tonight: "moon"
+        case .parks: "mountain.2"
+        case .plan: "calendar"
+        case .journal: "book.closed"
+        }
+    }
+    /// A screenshot route's tab: `calendar` and `plan` are both Plan; `parks-map` is Parks showing its map. Nil for routes that are not tabs.
+    init?(route: String) {
+        guard let tab=["tonight":AppTab.tonight,"going":.tonight,"parks":.parks,"parks-map":.parks,"calendar":.plan,"plan":.plan,"best":.plan,"journal":.journal][route] else { return nil }
+        self=tab
+    }
+}
+
 /// One window's keyboard and menu-bar commands (iPad, or an iPhone with a keyboard). Each window
 /// owns one, so ⌘2 in one window never moves another; the menu bar reaches the focused window's
 /// through `focusedSceneValue`.
 @MainActor @Observable final class SceneCommands {
-    /// The tabs in order, for ⌘1–⌘4.
-    static let tabs:[LocalizedStringKey]=["Tonight","Parks","Plan","Journal"]
-    /// A screenshot route's tab: `calendar` and `plan` are both Plan; `parks-map` is Parks showing its map. Nil for routes that are not tabs.
-    nonisolated static func tabIndex(_ route:String)->Int? { ["tonight":0,"going":0,"parks":1,"parks-map":1,"calendar":2,"plan":2,"best":2,"journal":3][route] }
-    var tab=0
+    var tab=AppTab.tonight
     /// A park's own window (`ParkWindow`): one page, no tabs, so the tab keys and Find a Park rest.
     let parkWindow:Bool
     init(parkWindow:Bool=false) { self.parkWindow=parkWindow }
@@ -65,13 +89,13 @@ import SwiftUI
     private(set) var step:NightStep?
     /// A ⌘F not yet answered: the Parks list may not exist until its tab first opens.
     private var searchPending=false
-    func findPark() { tab=1; searchPending=true; searchRequest+=1 }
+    func findPark() { tab = .parks; searchPending=true; searchRequest+=1 }
     /// True once per ⌘F, for the list that focuses its field.
     func takeSearch()->Bool { guard searchPending else { return false }; searchPending=false; return true }
     func stepNight(_ delta:Int) { step=NightStep(id:(step?.id ?? 0)+1,delta:delta,tab:current) }
     /// The tab whose screens the keys reach: a park's window has one page, kept as tab 0; a park
     /// presented over the window is its own layer.
-    private var current:Int { parkWindow ? 0 : layers.last ?? tab }
+    private var current:Int { parkWindow ? 0 : layers.last ?? tab.rawValue }
     /// The night views on screen in each tab that ⌘← ⌘→ would move (`NightKeys`), so the menu
     /// enables the keys only where a night is there to move.
     private(set) var nightViews:[Int:Set<UUID>]=[:]
@@ -101,7 +125,7 @@ import SwiftUI
     }
     /// ⌘N and ⌘,: asked of the tab on screen, whose root toolbar presents them as its own buttons do.
     private(set) var sheetRequest:SheetRequest?
-    func ask(_ kind:SheetRequest.Kind) { sheetRequest=SheetRequest(id:(sheetRequest?.id ?? 0)+1,kind:kind,tab:tab) }
+    func ask(_ kind:SheetRequest.Kind) { sheetRequest=SheetRequest(id:(sheetRequest?.id ?? 0)+1,kind:kind,tab:tab.rawValue) }
     /// What the menu bar may offer for this window, as a value, so the menu redraws when it changes.
     func menu(journalOpen:Bool)->NyxMenu {
         let tabs = !parkWindow
@@ -189,9 +213,9 @@ struct NyxCommands: Commands {
                 .disabled(!multipleWindows || tabless || menu?.park == nil)
         }
         CommandGroup(before:.sidebar) {
-            ForEach(Array(SceneCommands.tabs.enumerated()),id:\.offset) { index,title in
-                Button(title) { scene?.tab=index }
-                    .keyboardShortcut(KeyEquivalent(Character(String(index+1))),modifiers:.command)
+            ForEach(AppTab.allCases,id:\.self) { tab in
+                Button(tab.title) { scene?.tab=tab }
+                    .keyboardShortcut(KeyEquivalent(Character(String(tab.rawValue+1))),modifiers:.command)
                     .disabled(tabless)
             }
             Divider()
@@ -364,10 +388,10 @@ private struct RefreshNote: View {
 struct TabChrome: ViewModifier {
     @Environment(\.tabBarPlacement) private var placement
     @Environment(SceneCommands.self) private var commands: SceneCommands?
-    let tab: Int
+    let tab: AppTab
     let tint: Color
     func body(content:Content)->some View {
-        content.scoreGate(ScoreGate.gates(tab:tab)).environment(\.nyxTab,tab).tint(tint).onChange(of:placement == .sidebar,initial:true) { _,sidebar in
+        content.scoreGate(ScoreGate.gates(tab:tab.rawValue)).environment(\.nyxTab,tab.rawValue).tint(tint).onChange(of:placement == .sidebar,initial:true) { _,sidebar in
             if commands?.sidebar != sidebar { commands?.sidebar=sidebar }
         }
     }

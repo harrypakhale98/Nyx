@@ -54,7 +54,7 @@ import UserNotifications
         WindowGroup {
             // Age assurance only where the system says the law requires it; stores and gates nothing (`AgeAssurance`).
             if let container { RootView().environment(model).modelContainer(container).modifier(AgeAssuranceCheck()) }
-            else { CalmState(symbol:"externaldrive",title:"Nyx could not open its storage",message:"Restart Nyx after making some space. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark) }
+            else { StorageFailure() }
         }
         // iPad's menu bar and ⌘-hold overlay: tabs, Find a Park, previous and next night, a park in a new window.
         .commands { NyxCommands() }
@@ -64,14 +64,21 @@ import UserNotifications
         // Assistive Access (Settings › Accessibility): one park, one word, the Moon and when it gets dark.
         AssistiveAccess {
             if let container { AssistiveAccessRoot().environment(model).modelContainer(container) }
-            else { CalmState(symbol:"externaldrive",title:"Nyx could not open its storage",message:"Restart Nyx after making some space. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark) }
+            else { StorageFailure() }
         }
         // iPad: a park in a window of its own ("Open in New Window", ⌘⇧N). Links and Spotlight keep
         // landing in the main window, never in a new park window.
         WindowGroup("Park",id:"park",for:ParkWindow.self) { $value in
-            if let container { ParkWindowRoot(value:$value).environment(model).modelContainer(container) }
+            if let container { ParkWindowRoot(value:$value).environment(model).modelContainer(container) } else { StorageFailure() }
         }
         .handlesExternalEvents(matching:[])
+    }
+}
+
+/// What every window shows when the journal's store could not open, in place of the app.
+private struct StorageFailure: View {
+    var body: some View {
+        CalmState(symbol:"externaldrive",title:"Nyx could not open its storage",message:"Restart Nyx after making some space. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark)
     }
 }
 

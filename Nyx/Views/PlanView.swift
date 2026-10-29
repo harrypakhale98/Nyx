@@ -31,7 +31,7 @@ struct PlanView: View {
             // The picker lives inside the month, so the inspector's column stays clear of it.
             case .month: CalendarView(bar:AnyView(picker))
             case .best: BestNightsView()
-            case .free: TripPlannerView(embedded:true)
+            case .free: TripPlannerView()
             }
         }
         .safeAreaBar(edge:.top,spacing:0) { if shown != .month { picker.readableColumn(WideLayout.pageWidth(width:width,largeText:typeSize.isAccessibilitySize)) } }

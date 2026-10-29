@@ -20,7 +20,7 @@ struct ParkRowMenu: View {
     var body: some View {
         let isSaved=saved.contains { $0.parkID==park.id }
         Button(SaveWords.title(saved:isSaved,spot:park.isSavedSpot,place:park.isCatalogPlace),systemImage:isSaved ? "bookmark.slash" : "bookmark") { toggle(isSaved) }
-        if showsPlan { Button("Show in Plan",systemImage:"calendar") { commands?.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil); commands?.tab=2 } }
+        if showsPlan { Button("Show in Plan",systemImage:"calendar") { commands?.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil); commands?.tab = .plan } }
         OpenParkWindowButton(park:park)
         if park.isSavedSpot, let deleteSpot { Button("Delete spot",systemImage:"trash",role:.destructive) { deleteSpot(park) } }
     }

@@ -39,7 +39,7 @@ struct RootView:View {
     @State private var promoHold=DebugScenario.number("-nyx-promo-hold") != nil
     /// The Tonight tab icon is today's real moon phase, drawn just after the first frame (the tab
     /// bar is still fading in) and again whenever Nyx returns.
-    @State private var moonIcon=Image(systemName:"moon")
+    @State private var moonIcon=Image(systemName:AppTab.tonight.symbol)
     /// The launch's own update of the saved parks has run: until then, becoming active (which
     /// also happens at launch) leaves it to that one rather than publishing twice.
     @State private var launchPublished=false
@@ -64,8 +64,8 @@ struct RootView:View {
     var body:some View {
         Group {
             if model.loadError { CalmState(symbol:"moon",title:"The park library could not open",message:"Close and reopen Nyx. Your saved nights remain on this iPhone.").background(Color.black) }
-            else if let screen=DebugScenario.screen,SceneCommands.tabIndex(screen) == nil {
-                NavigationStack { debugScreen(screen) }
+            else if let screen=DebugScenario.screen,AppTab(route:screen) == nil {
+                NavigationStack { DebugScreen(screen:screen,palette:palette) }
             } else {
                 ZStack {
                 // Removed once revealed, so its sky stops animating and sensing tilt behind the tabs.
@@ -75,11 +75,11 @@ struct RootView:View {
                 // Each tab's content is tinted starlight (back buttons, menus, links, the close and done
                 // buttons); only the selected tab below is amber, as the place you are.
                 TabView(selection:$commands.tab) {
-                    Tab(value:0) { NavigationStack { TonightView() }.modifier(TabChrome(tab:0,tint:palette.ink)) } label:{ Label { Text("Tonight") } icon:{ moonIcon } }
+                    Tab(value:AppTab.tonight) { NavigationStack { TonightView() }.modifier(TabChrome(tab:.tonight,tint:palette.ink)) } label:{ Label { Text(AppTab.tonight.title) } icon:{ moonIcon } }
                     // Parks becomes a list beside the park on a wide iPad; a stack in narrow windows and on iPhone.
-                    Tab("Parks",systemImage:"mountain.2",value:1) { ParksTab().modifier(TabChrome(tab:1,tint:palette.ink)) }
-                    Tab("Plan",systemImage:"calendar",value:2) { NavigationStack { PlanView() }.modifier(TabChrome(tab:2,tint:palette.ink)) }
-                    Tab("Journal",systemImage:"book.closed",value:3) { NavigationStack { JournalView() }.modifier(TabChrome(tab:3,tint:palette.ink)) }
+                    Tab(AppTab.parks.title,systemImage:AppTab.parks.symbol,value:.parks) { ParksTab().modifier(TabChrome(tab:.parks,tint:palette.ink)) }
+                    Tab(AppTab.plan.title,systemImage:AppTab.plan.symbol,value:.plan) { NavigationStack { PlanView() }.modifier(TabChrome(tab:.plan,tint:palette.ink)) }
+                    Tab(AppTab.journal.title,systemImage:AppTab.journal.symbol,value:.journal) { NavigationStack { JournalView() }.modifier(TabChrome(tab:.journal,tint:palette.ink)) }
                         // A night from Plan's month or a park held over the Journal's tab item or sidebar
                         // row opens the Journal, which takes the drop (`acceptsJournalDrop`). The tab item itself
                         // takes none: SwiftUI's tab drop destination did not fire on iPadOS 26 or 27.
@@ -113,7 +113,7 @@ struct RootView:View {
         // presented field mode does (the root's own preference would otherwise win over the field view's).
         .statusBarHidden(palette.nightVision || ["field","field-compass"].contains(DebugScenario.screen ?? ""))
         .modifier(DebugTypeSize())
-        .modifier(DebugWindow()).modifier(DebugOpenParkWindow())
+        .debugWindows()
         // Field mode draws its own red; filtering it twice would darken it below legible contrast.
         .modifier(NightVisionFilter(enabled:palette.nightVision && !["field","field-compass","assistive","assistive-tonight","assistive-saved"].contains(DebugScenario.screen ?? ""),red:palette.red))
         // The lamp turns the palette under its cover, at once; every other path (Control Center, Siri, a
@@ -129,10 +129,10 @@ struct RootView:View {
         .sheet(item:$launch) { launch in ParkSheet(park:launch.park,initialDate:launch.night,whatsUp:launch.whatsUp,commands:commands) }
         .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) } }
         .onAppear { LaunchSignposts.firstFrame() }
-        .onAppear { if DebugScenario.screen == nil, (0..<SceneCommands.tabs.count).contains(savedTab) { commands.tab=savedTab } }
+        .onAppear { if DebugScenario.screen == nil, let tab=AppTab(rawValue:savedTab) { commands.tab=tab } }
         // A location found is a starting point chosen, from whichever screen asked (Tonight or Plan).
         .onChange(of:model.location.latitude != nil) { _,found in if found, DebugScenario.screen == nil { model.startChosen=true } }
-        .onChange(of:commands.tab) { _,tab in savedTab=tab }
+        .onChange(of:commands.tab) { _,tab in savedTab=tab.rawValue }
         // Field mode can open from Tonight or Control Center before any park page has appeared; its dawn
         // "Keep this night" needs the journal's store.
         .onAppear { KeepThisNight.container=context.container }
@@ -142,37 +142,9 @@ struct RootView:View {
             moonIcon=RootView.currentMoonIcon()
             model.savedSync.palette=palette
             NotificationRouter.shared.connect(routerID) { route in openReminder(route) }
-            // Control Center's night-vision switch reaches the Live Activity and the watch from Nyx's process.
-            if DebugScenario.screen == nil { NightVisionFollowers.install(model) }
-            if let screen=DebugScenario.screen { commands.tab=SceneCommands.tabIndex(screen) ?? 0 }
-            #if DEBUG
-            DebugFollowing.install(model)
-            DebugHeaderExport.runIfRequested(model)
-            DebugPromoExport.runIfRequested(model)
+            if let screen=DebugScenario.screen { commands.tab=AppTab(route:screen) ?? .tonight }
+            DebugScreens.launch(model:model,context:context,commands:commands)
             if let hold=DebugScenario.number("-nyx-promo-hold") { Task { try? await Task.sleep(for:.seconds(hold)); promoHold=false } }
-            // `-nyx-journal-revisit`: leave the Journal after 5 s and come back a second later, so a
-            // capture can show that the figures do not draw themselves again.
-            if DebugScenario.isEnabled("journal-revisit") {
-                Task { try? await Task.sleep(for:.seconds(5)); commands.tab=0; try? await Task.sleep(for:.seconds(1)); commands.tab=SceneCommands.tabIndex("journal") ?? 3 }
-            }
-            if DebugScenario.state=="populated" {
-                // Illustrative sessions so store captures show a lived-in journal, written in the capture's language
-                // (sample text only; DEBUG never adds catalog keys).
-                let es=Bundle.main.preferredLocalizations.first=="es"
-                let day:TimeInterval=86_400
-                context.insert(JournalEntry(date:.now,parkID:model.homeID,notes:es ? "La Vía Láctea se extendía sobre la cresta. Una hora tranquila bajo las estrellas." : "The Milky Way stretched above the ridge. A quiet hour under the stars."))
-                context.insert(JournalEntry(date:.now-24*day,parkID:"grba",observedBortle:1,notes:es ? "Sin Luna. Había tantas estrellas que costaba encontrar las constelaciones." : "No moon. The sky was so full of stars the constellations were hard to find."))
-                context.insert(JournalEntry(date:.now-52*day,parkID:"brca",observedBortle:2,notes:es ? "Programa de astronomía con guardaparques. Saturno en un telescopio, con anillos y todo." : "Ranger astronomy program. Saturn through a telescope, rings and all."))
-                context.insert(JournalEntry(date:.now-81*day,parkID:"deva",observedBortle:2,notes:es ? "Viento tibio desde las dunas. El núcleo galáctico colgaba bajo en el sur." : "Warm wind off the dunes. The galactic core hung low in the south."))
-                context.insert(SavedPark(parkID:model.homeID))
-                try? context.save()
-                // `-nyx-star-new 4`: one more night recorded that many seconds in, as a save from the editor
-                // would, so the real arrival path (watcher, constellation, spring) can be captured mid-flight.
-                if let delay=DebugScenario.number("-nyx-star-new") {
-                    Task { try? await Task.sleep(for:.seconds(delay)); context.insert(JournalEntry(date:.now-10*day,parkID:"arch",observedBortle:2,notes:"")); try? context.save() }
-                }
-            }
-            #endif
             intro = !onboarded && DebugScenario.screen == nil
             if systemReduceMotion || DebugScenario.isEnabled("reduce-motion") { revealed=true; launchSettled=true }
             else {
@@ -252,7 +224,7 @@ struct RootView:View {
         }
         .onOpenURL { url in
             // A journal export opened from Files: the Journal tab offers to import it.
-            if url.isFileURL, url.pathExtension.lowercased() == JournalArchive.fileExtension { commands.tab=3; model.journalFile=url; return }
+            if url.isFileURL, url.pathExtension.lowercased() == JournalArchive.fileExtension { commands.tab = .journal; model.journalFile=url; return }
             handle(DeepLink(url))
         }
         // Differentiate Without Color, Reduce Highlighting, Cross-Fade, reduced resources: read once, for every screen and sheet.
@@ -309,102 +281,13 @@ struct RootView:View {
         switch link {
         case .park(let id): withPlace(id) { open($0) }
         case .parkNight(let id,let day): withPlace(id) { open($0,night:LaunchPark.night(day.evening(in:$0),tonight:model.tonight($0),whatsUp:false)) }
-        case .tonight: commands.tab=0
+        case .tonight: commands.tab = .tonight
         case .field(let id): withPlace(id) { FieldPresenter.present(park:$0,model:model,from:commands.topController) }
         case .whatsUp(let id,let day): withPlace(id) { open($0,night:LaunchPark.night(day.evening(in:$0),tonight:model.tonight($0),whatsUp:true)) }
         case .calendar(let id,let year,let month):
-            withPlace(id) { _ in commands.tab=2; commands.calendarRequest=CalendarRequest(parkID:id,year:year,month:month) }
+            withPlace(id) { _ in commands.tab = .plan; commands.calendarRequest=CalendarRequest(parkID:id,year:year,month:month) }
         case nil: break
         }
-    }
-    @ViewBuilder private func debugScreen(_ screen:String)->some View {
-        #if DEBUG
-        switch screen {
-        // Keyed by the place: a catalogue place named by `-nyx-park` arrives once the catalogue is read
-        // (the first park stands in until then), and its page must be its own, asking for its own tile.
-        case "detail": if let park=model.home { ParkDetailView(park:park).id(park.id) }
-        // Saved spot captures: the save sheet (`-nyx-state coordinates` for typed coordinates) and a saved spot's page.
-        case "save-spot": NavigationStack { SaveSpotView(source: DebugScenario.state == "coordinates" ? .coordinates : .here) }
-        case "spot":
-            let spot=Place(spotID:"pin:00000000-0000-4000-8000-0000000000aa",name:"Pullout off Pinto Basin Road",latitude:33.92,longitude:-115.93,
-                           timeZoneID:"America/Los_Angeles",countryCode:"US",region:"California")
-            ParkDetailView(park:spot).onAppear { model.setSpots(places:[spot]) }
-        case "breakdown": if let park=model.home { ScoreBreakdownView(night:model.night(park)).task { await model.refreshForecasts(watching:[park]) } }
-        case "editor": JournalEditorView()
-        case "entry": JournalDetailView(entry:JournalEntry(date:.now,parkID:model.homeID,notes:"The Milky Way stretched above the ridge. A quiet hour under the stars."))
-        case "onboarding": OnboardingView {}
-        case "settings": SettingsView()
-        case "credits": CreditsView()
-        // Learn is no longer a tab: its index as Settings › About the sky pushes it.
-        case "learn": LearnView()
-        case "places": StartingPointPicker(nearMe:nil) { _ in }
-        case "privacy": PrivacyView()
-        // Your privacy → Advanced on its own, opened (`-nyx-advanced`).
-        case "nps-key": Form { Section { NPSKeyField() } header:{ Text("Advanced") } }.readableForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
-        case "data": AboutDataView()
-        // "The next six months" for the starting park (`-nyx-park` for another), for audits and captures.
-        case "long-view": if let park=model.home { NavigationStack { LongViewPage(park:park) } }
-        // "With the lights out" alone, as Tonight shows it from Las Vegas (to Death Valley), for audits and captures.
-        case "lights-out": if let dark=model.park("deva") {
-            NavigationStack { ScrollView { Panel { LightsOutFigure(target:LightsOut.Target(place:dark,meters:dark.distanceMeters(latitude:36.17,longitude:-115.14),homeClass:8,homeKnown:true,
-                                                                                          best:NightPlanner.best(model.nights(dark,from:model.tonight(dark),count:NightPlanner.horizon))),origin:"Las Vegas") }.padding(24) }
-                .background(NightBackground(park:dark,night:model.tonight(dark))).navigationTitle(dark.shortName).navigationBarTitleDisplayMode(.inline) }
-        }
-        // The Sky glow panel (what city light takes, light pollution, Protect this sky) and viewing spots for one park:
-        // `-nyx-park deva | grca | sequ`; `-nyx-glow-compare city` opens the illustration on the city's sky (here and on the park page).
-        case "light": if let park=model.home { NavigationStack { ScrollView { VStack(spacing:26) { SkyGlowPanel(park:park,comparison:DebugScenario.text("-nyx-glow-compare") == "city" ? .city : .here); Panel { ViewingSpots(park:park) } }.padding(24) }.defaultScrollAnchor(DebugScenario.number("-nyx-scroll").map { UnitPoint(x:0.5,y:$0) } ?? .top).background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) } }
-        case "article": EssayView(essay:Essay(rawValue:DebugScenario.state ?? "") ?? .darkness)
-        // Where to stay for one park (`-nyx-park`; `-nyx-state live` loads campgrounds), and From home
-        // tonight for the starting point (`-nyx-place "Chicago, IL"`, `-nyx-date`).
-        case "stay": if let park=model.home { ScrollView { WhereToStayPanel(park:park).padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) }
-        case "from-home": if let origin=HomeSky.origin(location:nil,place:model.homePlace,park:model.home) { ScrollView { FromHomePanel(origin:origin,now:model.today).padding(24) }.background(NightBackground()).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline) }
-        case "ask": GuideView(mode:.planning)
-        case "widgets": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:false)).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
-        case "widgets-large": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),large:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
-        case "snippet": DebugSnippetView().task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
-        // About the data with the clearly labelled DEBUG luminance fixture (no real MetricKit report in the simulator).
-        case "metric": if DebugScenario.state=="privacy" { PrivacyView().defaultScrollAnchor(.bottom) } else { AboutDataView() }
-        case "widgets-xl": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),extraLarge:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
-        // 1.1 platform features: inline, the Moon, a closure line, a widget set to one park; iPad's portrait extra-large.
-        case "widgets-new": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),newer:true,moon:MoonEntry(date:.now,park:model.home,nightVision:false)).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
-        case "widgets-xl-portrait": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),portrait:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
-        case "widgets-step": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),stepped:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
-        case "widgets-step-large": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),steppedLarge:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
-        case "widgets-empty": WidgetReviewView(entry:TonightEntry(date:.now,night:nil,nightVision:false))
-        case "skyarc": if let park=model.home { ScrollView { Panel { SkyArc(night:model.night(park),core:model.whatsUp(model.night(park)).core) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
-        case "whatsup": if let park=model.home { ScrollView { Panel { WhatsUpPanel(whatsUp:model.whatsUp(model.night(park)),notes:model.skyNotes(model.night(park))) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
-        case "gauge": DebugGaugeSweep()
-        case "river": if let park=model.home { let nights=DebugScenario.state=="empty" ? [] : model.nights(park,from:model.tonight(park),count:30); ScrollView { Panel { DebugRiverHost(nights:nights,start:model.tonight(park),outlooks:model.outlooks(nights),markers:model.markers(nights)) }.padding(24) }.background(NightBackground()).task { await model.refreshForecasts(watching:[park]) } }
-        case "location-explainer": PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx compares distances on this iPhone. Your location is never sent to a service.",action:"Use my location") {}
-        case "notification-explainer": PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Local reminders use complete cloud forecasts. They are estimates, not confirmations of access.",action:"Enable reminders") {}
-        case "loader": ConstellationLoader().frame(maxWidth:.infinity,maxHeight:.infinity).background(NightBackground())
-        case "field","field-compass": if let park=model.home { DebugField(park:park,model:model,compass:screen=="field-compass") }
-        case "live-activity": if let park=model.home { FieldActivityReview(night:model.night(park)) }
-        case "alarm-explainer": PermissionExplainer(symbol:"alarm",title:"An alarm for the sky",message:"Nyx can set an alarm on this iPhone for a moment in the night, like the Milky Way's core rising, so you can rest until the sky is ready. Alarms ring through Silent and Focus. Nothing leaves this phone.",action:"Allow alarms") {}
-        case "share": if let park=model.home { ShareCardReview(park:park,daysAhead:Int(DebugScenario.number("-nyx-share-night") ?? 0)) }
-        case "listen": if let park=model.home { ScrollView { Panel { NightListenView(night:model.night(park),expanded:true) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) }
-        case "accessibility": SoundAndTouchView()
-        // The Assistive Access scene's root, for captures (the simulator cannot switch Assistive Access on),
-        // with that scene's own palette and red (the brighter one); the root's filter skips these routes.
-        case "assistive": AssistiveHome().modifier(AssistiveReview(nightVision:palette.nightVision))
-        case "assistive-tonight": AssistiveTonight().modifier(AssistiveReview(nightVision:palette.nightVision))
-        case "assistive-saved": AssistiveSaved().modifier(AssistiveReview(nightVision:palette.nightVision))
-        // Settings → Support → Diagnostics, with two illustrative reports (`-nyx-state empty` for none).
-        case "diagnostics": DiagnosticsView(records:DebugScenario.state=="empty" ? [] : [DiagnosticRecord(id:"a",kind:.crash,received:.now-86_400,json:"{}"),DiagnosticRecord(id:"b",kind:.hang,received:.now-3*86_400,json:"{}")])
-        // Delight: `trip` (`-nyx-state weekends`), `constellation` (`-nyx-state empty`), `recap`, `icons`, `first-light`.
-        case "trip": TripPlannerView()
-        case "constellation": ScrollView { YourSkyPanel(nights:DebugScenario.state=="empty" ? [] : DebugJournal.nights(now:model.today)) { _ in }.padding(24) }.background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
-        case "recap": YearRecapView(nights:DebugJournal.nights(now:model.today))
-        case "icons": AppIconPicker()
-        case "first-light": if let park=model.home { FirstLightView(park:park,night:model.tonight(park),moment:FirstLightDebug.moment(park:park,model:model)) {} }
-        // Store art (In-App Event media): the park's computed sky for the night alone, edge to edge,
-        // a little brighter than behind text. Same stars, Milky Way, planets and radiant as every screen.
-        case "sky": if let park=model.home { RealSky(park:park,night:model.tonight(park),twinkle:pow(Double(model.night(park).score.value)/100,2),strength:0.9).background(Color.black).ignoresSafeArea().toolbarVisibility(.hidden,for:.navigationBar) }
-        default: TonightView()
-        }
-        #else
-        TonightView()
-        #endif
     }
     /// Opens a park from a reminder, Spotlight, a widget or a link (at a given night, and at What's
     /// up, when the link names one). When another sheet is already up (a journal draft, a
@@ -434,7 +317,7 @@ struct RootView:View {
     /// or the Tonight tab when the Tonight control was tapped before any park was saved.
     private func openRequestedPark() {
         guard DebugScenario.screen == nil, let request=ParkOpenRequest.take() else { return }
-        if let id=request.parkID { withPlace(id) { open($0) } } else { commands.tab=0 }
+        if let id=request.parkID { withPlace(id) { open($0) } } else { commands.tab = .tonight }
     }
     /// Every route from outside (links, widgets, reminders, Spotlight, Handoff, Siri) finds its place
     /// here: at once when it is known; a place abroad named on a cold launch, before the world catalogue
@@ -493,50 +376,3 @@ private struct ParkSheet:View {
     }
 }
 #Preview("Tab shell") { RootView().environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self,SavedSpot.self],inMemory:true) }
-
-/// The moment first light shows in DEBUG scenarios: two hours into true darkness tonight.
-enum FirstLightDebug {
-    @MainActor static func moment(park:Park,model:PlanModel)->Date {
-        let sky=model.night(park).sky
-        return (sky.darkStart ?? sky.evening.addingTimeInterval(10*3600)).addingTimeInterval(2*3600)
-    }
-}
-/// iPad screenshot scenarios: `-nyx-narrow` draws the app in a 390-point compact column, as in a
-/// narrow window beside another app. (Landscape: `ScreenshotTests` turns the simulator.)
-private struct DebugWindow: ViewModifier {
-    /// The simulated window's origin on screen, for the stand-in fold (`debugWindowOrigin`).
-    @State private var origin:CGPoint?
-    @ViewBuilder func body(content:Content)->some View {
-        if DebugScenario.isEnabled("narrow") {
-            content.environment(\.horizontalSizeClass,.compact).frame(maxWidth:390).frame(maxWidth:.infinity).background(Color(white:0.12).ignoresSafeArea())
-        } else if let window=DebugScenario.window {
-            // iPhone Duo's inner display on an iPad simulator: regular both ways, at the display's size.
-            content.environment(\.horizontalSizeClass,.regular).environment(\.verticalSizeClass,.regular)
-                .environment(\.debugWindowOrigin,origin).frame(width:window.width,height:window.height).clipped()
-                .onGeometryChange(for:CGPoint.self) { $0.frame(in:.global).origin } action:{ origin=$0 }
-                .frame(maxWidth:.infinity,maxHeight:.infinity).background(Color(white:0.12).ignoresSafeArea())
-        } else { content }
-    }
-}
-/// DEBUG captures: `-nyx-ax5` and `-nyx-bold`, on the root and on the full-screen sky (a cover does not inherit them).
-struct DebugTypeSize: ViewModifier {
-    @ViewBuilder func body(content:Content)->some View {
-        #if DEBUG
-        // `-nyx-bold` stands in for Bold Text, which the simulator cannot switch from the command line.
-        let sized=DebugScenario.isEnabled("ax5") ? AnyView(content.dynamicTypeSize(.accessibility5)) : AnyView(content)
-        if DebugScenario.isEnabled("bold") { sized.environment(\.legibilityWeight,.bold) } else { sized }
-        #else
-        // Release: both switches are always off, so the app's root is never type-erased.
-        content
-        #endif
-    }
-}
-/// The `assistive*` capture routes: the Assistive Access scene's palette (high contrast) and its own
-/// night-vision filter with that palette's brighter red, as `AssistiveAccessRoot` applies them.
-private struct AssistiveReview: ViewModifier {
-    let nightVision: Bool
-    func body(content:Content)->some View {
-        let palette=NyxPalette(nightVision:nightVision,highContrast:true)
-        return content.environment(\.nyx,palette).modifier(NightVisionFilter(enabled:nightVision,red:palette.red))
-    }
-}
