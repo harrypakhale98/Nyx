@@ -8,7 +8,6 @@ import Testing
 /// and thin a crowded catalogue so a map never carries thousands of marks.
 struct WorldMapTests {
     let parks=(try? ParkData.load()) ?? []
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id==id }) }
     func g(_ latitude: Double, _ longitude: Double) -> GeoPoint { GeoPoint(latitude:latitude,longitude:longitude) }
     /// A catalogue place for a test: anywhere, with a chosen Bortle estimate.
     func place(_ id: String, _ latitude: Double, _ longitude: Double, bortle: Int = 3, curated: Bool = false, kind: Park.Kind = .darkSkyPark) -> Park {

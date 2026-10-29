@@ -9,7 +9,6 @@ import Testing
 @MainActor struct GuideStreamingTests {
     let parks: [Park]
     init() throws { parks=try ParkData.load() }
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     /// 2026-12-01, 21:00 UTC: afternoon in every US park.
     let now=Date(timeIntervalSince1970: 1_796_158_800)
 

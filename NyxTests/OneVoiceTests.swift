@@ -9,7 +9,6 @@ struct OneVoiceTests {
     private let now = Date(timeIntervalSince1970: 1_796_158_800)
     private static let spot = Place(spotID: "pin:00000000-0000-4000-8000-0000000000cd", name: "Pullout off Pinto Basin Road", latitude: 33.92, longitude: -115.93,
                                     timeZoneID: "America/Los_Angeles", countryCode: "US", region: "California")
-    private func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id == id }) }
     private func tonight(_ park: Park, forecast: Forecast? = nil, detail: ForecastDetail? = nil, climate: CloudClimate = .shared) -> Night {
         NightPlanner.night(park: park, sky: AstronomyEngine().conditions(for: park, on: park.currentNight(at: now)), forecast: forecast, detail: detail, now: now, climate: climate)
     }

@@ -6,7 +6,6 @@ import Testing
 struct ContentTests {
     let parks: [Park]
     init() throws { parks=try ParkData.load() }
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     static func date(_ iso: String) throws -> Date { try Date(iso+"T21:00:00Z", strategy: .iso8601) }
 
     // MARK: Learn
@@ -142,7 +141,7 @@ struct ContentTests {
     /// unconstrained network, and is not repeated for seven days.
     @Test func campgroundsAreOneWeeklyRequestForEveryPark() async throws {
         let body=String(decoding: try fixture(), as: UTF8.self)
-        let http=CampHTTP(["/api/v1/campgrounds": [body]])
+        let http=HeaderHTTP(["/api/v1/campgrounds": [body]])
         let clock=CampClock()
         let store=ParkStore(transport: http, persist: false, clock: { clock.now })
         let first=await store.campgrounds(for: parks, key: "TESTKEY", network: true, force: false)
@@ -169,7 +168,7 @@ struct ContentTests {
     }
     /// Low Data Mode holding the request back is not a refusal: nothing cached, no backoff.
     @Test func lowDataModeWaitsForCampgrounds() async throws {
-        let http=CampHTTP([:])
+        let http=HeaderHTTP([:])
         var info: [String: Any]=[:]
         info[NSURLErrorNetworkUnavailableReasonKey]=URLError.NetworkUnavailableReason.constrained.rawValue
         await http.set(error: URLError(.notConnectedToInternet, userInfo: info))
@@ -253,7 +252,7 @@ struct ContentTests {
         let place=try #require(StartingPlaces.named("Chicago, IL"))
         let origin=try #require(HomeSky.origin(location: (41.8781, -87.6298), place: place, park: nil))
         _=HomeSky(origin: origin, now: .now)
-        let http=CampHTTP([:])
+        let http=HeaderHTTP([:])
         let model=PlanModel(weather: WeatherService(transport: http, persist: false), parkStore: ParkStore(transport: http, persist: false),
                             detail: ForecastDetailService(transport: http, persist: false))
         await model.refresh(model.parks, force: true, programs: true)
@@ -264,23 +263,6 @@ struct ContentTests {
         for coordinate in ["41.8781", "-87.6298", String(place.latitude), String(place.longitude)] {
             #expect(!urls.contains { $0.contains(coordinate) }, "\(coordinate)")
         }
-    }
-}
-/// Records each request (URL, headers, whether it may use a constrained network) and answers by
-/// path; an error, when set, answers every request.
-private actor CampHTTP: HTTPTransport {
-    struct Call: Sendable { let url: URL; let headers: [String: String]; let constrained: Bool }
-    private(set) var calls: [Call]=[]
-    private let bodies: [String: [String]]
-    private var error: URLError?
-    init(_ bodies: [String: [String]]) { self.bodies=bodies }
-    func set(error: URLError?) { self.error=error }
-    func get(_ url: URL) async throws -> Data { try await get(url, headers: [:], constrained: true) }
-    func get(_ url: URL, headers: [String: String], constrained: Bool) async throws -> Data {
-        calls.append(Call(url: url, headers: headers, constrained: constrained))
-        if let error { throw error }
-        guard let body=bodies[url.path]?.first else { throw URLError(.badServerResponse) }
-        return Data(body.utf8)
     }
 }
 /// A settable clock for freshness tests.

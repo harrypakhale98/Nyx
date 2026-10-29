@@ -7,7 +7,6 @@ import Testing
 /// `noForecastSentence`, `bandWithBasis`, `smokeSentence`).
 @MainActor @Suite struct BasisWordingTests {
     let parks: [Park] = (try? ParkData.load()) ?? []
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     let now = Date(timeIntervalSince1970: 1_792_180_800) // 2026-10-16 20:00 UTC
 
     func night(_ park: Park, daysAhead: Int = 0, forecast: Forecast? = nil, detail: ForecastDetail? = nil, climate: CloudClimate = .shared) -> Night {

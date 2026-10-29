@@ -9,7 +9,6 @@ import Testing
 @MainActor struct PlatformTests {
     let parks: [Park]
     init() throws { parks=try ParkData.load() }
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     /// 2026-12-01, 21:00 UTC: afternoon in every US park, so "tonight" is Dec 1 everywhere.
     let now = Date(timeIntervalSince1970: 1_796_158_800)
     /// A full cloud forecast for `days` days from yesterday, clear (5%) unless `cover` says otherwise.

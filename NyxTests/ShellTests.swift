@@ -6,7 +6,6 @@ import Testing
 /// the review prompt's rules.
 @MainActor struct ShellTests {
     let parks=(try? ParkData.load()) ?? []
-    func park(_ id:String) throws -> Park { try #require(parks.first { $0.id==id }) }
 
     // MARK: Starting places
 

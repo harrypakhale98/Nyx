@@ -6,7 +6,6 @@ import Testing
 /// the widget's large face, the Moon over the coming week (`MoonWeek`). Both are shared code the
 /// visionOS targets compile, tested here against the iPhone's engine.
 struct VisionReachTests {
-    private static func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id == id }) }
     private static func date(_ iso: String) throws -> Date { try Date(iso, strategy: .iso8601) }
     /// Constant cover, issued at `issued`: sixteen days of hours from the day before, like Open-Meteo's.
     private static func forecast(cover: Double, issued: Date) -> Forecast {
@@ -20,14 +19,14 @@ struct VisionReachTests {
     /// Vision Pro looks as far ahead as the iPhone's best night (`NightPlanner.horizon`), so a park's
     /// darkest night is the same night on both; every older name for that window is the same window.
     @Test func reachIsTheIPhonesBestNightHorizon() throws {
-        let park = try Self.park("jotr"), now = try Self.date("2026-10-10T21:00:00Z")
+        let park = try park("jotr"), now = try Self.date("2026-10-10T21:00:00Z")
         let ahead = NightsAhead(park: park, planner: NightPlanner(forecasts: [:]), now: now, limit: .max)
         #expect(ahead.picks.count == NightPlanner.horizon)
     }
     /// The picks are `NightPlanner.bestNights` over tonight and the next 29 nights, in its
     /// order, and each offset steps the planner to exactly that night.
     @Test func picksAreThePlannersBestNightsWithTheirOffsets() throws {
-        let park = try Self.park("jotr"), now = try Self.date("2026-10-10T21:00:00Z")
+        let park = try park("jotr"), now = try Self.date("2026-10-10T21:00:00Z")
         let planner = NightPlanner(forecasts: [park.id: Self.forecast(cover: 30, issued: now)])
         let ahead = NightsAhead(park: park, planner: planner, now: now)
         let expected = planner.bestNights([park], from: now, count: NightPlanner.horizon, now: now, limit: 3)
@@ -46,7 +45,7 @@ struct VisionReachTests {
     /// Without any forecast, every night rests on the usual clouds, so the first pick is the one
     /// explained beneath ("No cloud forecast yet. …"), and none is presented as forecast.
     @Test func withoutAForecastEveryPickIsAnEstimate() throws {
-        let park = try Self.park("arch"), now = try Self.date("2026-11-03T20:00:00Z")
+        let park = try park("arch"), now = try Self.date("2026-11-03T20:00:00Z")
         let ahead = NightsAhead(park: park, planner: NightPlanner(forecasts: [:]), now: now)
         #expect(!ahead.picks.isEmpty)
         #expect(ahead.picks.allSatisfy { $0.night.basis == .usual && $0.night.compactBandLabel == String(localized: "Estimate") })
@@ -55,7 +54,7 @@ struct VisionReachTests {
     /// With a full forecast tonight, the first night not fully forecast is the one explained; a
     /// forecast night is never called an estimate.
     @Test func firstEstimateSkipsForecastNights() throws {
-        let park = try Self.park("jotr"), now = try Self.date("2026-10-10T21:00:00Z")
+        let park = try park("jotr"), now = try Self.date("2026-10-10T21:00:00Z")
         let ahead = NightsAhead(park: park, planner: NightPlanner(forecasts: [park.id: Self.forecast(cover: 0, issued: now)]), now: now, limit: 14)
         #expect(ahead.picks.count == 14)
         let first = try #require(ahead.firstEstimate)
@@ -65,14 +64,14 @@ struct VisionReachTests {
     }
     /// Denali in June has no true darkness on any of the nights: still ranked, and said once.
     @Test func noTrueDarknessInReachIsSaid() throws {
-        let denali = try Self.park("dena"), june = try Self.date("2026-06-21T21:00:00Z")
+        let denali = try park("dena"), june = try Self.date("2026-06-21T21:00:00Z")
         #expect(NightsAhead(park: denali, planner: NightPlanner(forecasts: [:]), now: june).noDarkness)
-        let arches = try Self.park("arch")
+        let arches = try park("arch")
         #expect(!NightsAhead(park: arches, planner: NightPlanner(forecasts: [:]), now: june).noDarkness)
     }
     /// Offsets count park-local nights, across the change from daylight time and never below zero.
     @Test func offsetsCountParkNights() throws {
-        let park = try Self.park("grsm")
+        let park = try park("grsm")
         let tonight = park.evening(try Self.date("2026-10-30T18:00:00Z"))
         #expect(NightsAhead.offset(of: tonight, after: tonight, in: park) == 0)
         #expect(NightsAhead.offset(of: park.date(tonight, addingDays: 5), after: tonight, in: park) == 5)

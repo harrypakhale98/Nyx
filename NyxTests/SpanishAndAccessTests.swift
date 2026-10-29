@@ -5,7 +5,6 @@ import Testing
 /// Spanish shipped in the bundle, data-backed names, access notes and the map outline.
 struct SpanishAndAccessTests {
     let parks=(try? ParkData.load()) ?? []
-    func park(_ id:String) throws -> Park { try #require(parks.first { $0.id==id }) }
     /// The compiled Spanish table, read directly so the test does not depend on the device language.
     func spanish(_ key:String) throws -> String {
         let path=try #require(Bundle.main.path(forResource:"es",ofType:"lproj"))

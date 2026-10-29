@@ -7,8 +7,6 @@ import Testing
 /// places Tonight weighs, a forecast is old by one measure, the Moon is thin by one threshold, and
 /// the lines under a dial follow one rule for a clear window.
 @MainActor @Suite struct OneAnswerTests {
-    let parks: [Park] = (try? ParkData.load()) ?? []
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     func model() -> PlanModel {
         PlanModel(weather: WeatherService(transport: StubHTTP([:]), persist: false), parkStore: ParkStore(transport: StubHTTP([:]), persist: false),
                   detail: ForecastDetailService(transport: StubHTTP([:]), persist: false), defaults: isolatedDefaults())

@@ -8,7 +8,6 @@ import Testing
 /// iPhone's score breakdown saying when smoke is not counted, in Vision Pro's words.
 @MainActor @Suite struct SnapshotAndNotesTests {
     let parks: [Park] = (try? ParkData.load()) ?? []
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     func model() -> PlanModel {
         PlanModel(weather: WeatherService(transport: StubHTTP([:]), persist: false), parkStore: ParkStore(transport: StubHTTP([:]), persist: false),
                   detail: ForecastDetailService(transport: StubHTTP([:]), persist: false), defaults: isolatedDefaults())

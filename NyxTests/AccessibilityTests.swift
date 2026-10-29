@@ -10,7 +10,6 @@ import Accessibility
 /// sky, journal photo descriptions, the Assistive Access card and the sky map's order.
 @MainActor @Suite struct AccessibilityTests {
     let engine=AstronomyEngine()
-    func date(_ text:String) throws -> Date { try #require(try? Date(text,strategy:.iso8601)) }
     func night(_ park:Park,_ day:String,score:Int=80,forecast:Bool=true) throws -> Night {
         let sky=engine.conditions(for:park,on:park.evening(try date(day+"T20:00:00Z")))
         return Night(park:park,sky:sky,score:ScoreEngine().score(sky:sky,bortle:park.bortleEstimate,cloudCover:forecast ? 5 : nil),cloudCover:forecast ? 5 : nil,forecastUpdated:forecast ? .now : nil)

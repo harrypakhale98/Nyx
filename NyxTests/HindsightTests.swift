@@ -6,10 +6,7 @@ import Testing
 /// ahead, answered only by a forecast issued after it, compared only under the same rules, and kept
 /// within its limits.
 @MainActor struct HindsightTests {
-    let parks: [Park]
     let engine = AstronomyEngine(), scoring = ScoreEngine()
-    init() throws { parks = try ParkData.load() }
-    private func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     private func night(_ park: Park, _ iso: String, cloud: Double?, issued: Date?) throws -> Night {
         let day = try #require(TripDay(iso: iso))
         let sky = engine.conditions(for: park, on: day.evening(in: park))

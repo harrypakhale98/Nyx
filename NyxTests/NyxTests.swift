@@ -7,10 +7,6 @@ import SwiftData
 @testable import Nyx
 
 struct NyxTests {
-    func date(_ string:String,park:Park) throws -> Date {
-        let f=DateFormatter(); f.dateFormat="yyyy-MM-dd HH:mm"; f.timeZone=park.timeZone
-        return try #require(f.date(from:string))
-    }
     /// The 18 national parks certified as International Dark Sky Parks by DarkSky International:
     /// the NPS Night Skies list (asterisked, updated July 2025) plus Badlands (July 2026).
     @Test func darkSkyDesignationsMatchTheOfficialList() throws {

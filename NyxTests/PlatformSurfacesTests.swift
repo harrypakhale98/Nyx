@@ -14,7 +14,6 @@ import Testing
     let parks: [Park]
     let engine=AstronomyEngine()
     init() throws { parks=try ParkData.load() }
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     func sky(_ park: Park, _ day: String) throws -> SkyConditions {
         engine.conditions(for: park, on: park.evening(try #require(try? Date(day+"T20:00:00Z", strategy: .iso8601))))
     }

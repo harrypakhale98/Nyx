@@ -7,9 +7,6 @@ import Testing
 /// and the watch app and every complication read the Sun there (`PaletteChoice.nightVision`'s `dusk`),
 /// whatever park the wrist's Tonight shows.
 struct DuskHandOverTests {
-    let parks: [Park]
-    init() throws { parks = try ParkData.load() }
-    private func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     private func local(_ park: Park, _ year: Int, _ month: Int, _ day: Int, _ hour: Int) throws -> Date {
         try #require(park.calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour)))
     }

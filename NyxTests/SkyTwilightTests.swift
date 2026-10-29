@@ -5,10 +5,6 @@ import Foundation
 /// The sky behind every screen shows what the Sun leaves: a white night in Denali has only its
 /// brightest stars over a faint lift, the Arctic winter has all of them, and Samoa is unchanged.
 @MainActor struct SkyTwilightTests {
-    func date(_ string:String,park:Park) throws -> Date {
-        let f=DateFormatter(); f.dateFormat="yyyy-MM-dd HH:mm"; f.timeZone=park.timeZone
-        return try #require(f.date(from:string))
-    }
     func visibility(_ id:String,_ stamp:String,highContrast:Bool=false) throws -> (sky:SkyProjection.Sky,seen:RealSky.Visibility) {
         let park=try park(id)
         let sky=SkyProjection.shared.sky(for:park,night:try date(stamp,park:park))

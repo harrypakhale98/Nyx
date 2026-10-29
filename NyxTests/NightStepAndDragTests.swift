@@ -9,7 +9,6 @@ import WidgetKit
 /// Journal (its id and Gregorian day in the park's zone, read back as the same night).
 @MainActor @Suite struct NightStepAndDragTests {
     private let now = Date(timeIntervalSince1970: 1_791_158_400) // 2026-10-05 00:00 UTC
-    private func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id == id }) }
     private func suite() throws -> (UserDefaults, String) {
         let name = "nyx-tests-night-step-\(UUID().uuidString)"
         return (try #require(UserDefaults(suiteName: name)), name)

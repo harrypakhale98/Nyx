@@ -7,7 +7,6 @@ import Testing
 struct CityLightTests {
     let parks: [Park]
     init() throws { parks=try ParkData.load() }
-    func park(_ id:String) throws -> Park { try #require(parks.first { $0.id==id }) }
     func spanish(_ key:String) throws -> String {
         let path=try #require(Bundle.main.path(forResource:"es",ofType:"lproj"))
         let bundle=try #require(Bundle(path:path))
