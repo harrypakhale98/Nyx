@@ -18,6 +18,9 @@ struct NightNotes<Alerts: View>: View {
     var align: TextAlignment = .center
     /// The month's usual clouds after the basis, on a night without a forecast (the park's page).
     var typicalClouds=false
+    /// Tonight's dial says a clear window only when it is part of the night; a park's page, the one
+    /// place that gives the window and the core's hours in words, says it whenever it is still ahead.
+    var partialWindowsOnly=true
     @ViewBuilder let alerts: Alerts
     private var inset: CGFloat { align == .center ? 12 : 0 }
     private var alignment: HorizontalAlignment { align == .center ? .center : .leading }
@@ -57,7 +60,7 @@ struct NightNotes<Alerts: View>: View {
         if agreement?.band == .disagree, let spread=ForecastSpread.line(agreement:agreement,range:range,tonight:isTonight) {
             Text(spread).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(align)
                 .fixedSize(horizontal:false,vertical:true).padding(.horizontal,inset)
-        } else if let window=Self.partialWindow(night,window:model.clearWindow(night),now:model.present) {
+        } else if let window=Self.partialWindow(night,window:model.clearWindow(night),now:model.present,partialOnly:partialWindowsOnly) {
             // At accessibility sizes the glyph would take a column of its own: the words alone. Under a
             // bright Moon the clear hours are not the night's best, and their glyph says so.
             Label { Text(window.line(park:night.park)).fixedSize(horizontal:false,vertical:true) } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:window.moonlit ? "moon" : "sparkles").accessibilityHidden(true) } }
@@ -68,11 +71,11 @@ struct NightNotes<Alerts: View>: View {
                 .fixedSize(horizontal:false,vertical:true).padding(.horizontal,inset).accessibilityHidden(true)
         }
     }
-    /// The night's best clear window when it is still ahead and covers at most three quarters of the
-    /// true darkness: a score earned late in the night must not read as an evening's promise.
-    nonisolated static func partialWindow(_ night: Night, window: ClearWindow?, now: Date) -> ClearWindow? {
+    /// The night's best clear window when it is still ahead and, with `partialOnly`, covers at most
+    /// three quarters of the true darkness: a score earned late in the night must not read as an evening's promise.
+    nonisolated static func partialWindow(_ night: Night, window: ClearWindow?, now: Date, partialOnly: Bool = true) -> ClearWindow? {
         guard let window, window.interval.end>now, night.sky.darkHours>0,
-              window.interval.duration<=0.75*night.sky.darkHours*3600 else { return nil }
+              !partialOnly || window.interval.duration<=0.75*night.sky.darkHours*3600 else { return nil }
         return window
     }
 }

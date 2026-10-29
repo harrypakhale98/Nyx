@@ -29,7 +29,7 @@ extension ParkDetailView {
             }
             gauge(range:range)
             if let closure=model.closure(park) { closureLine(closure,proxy) }
-            NightNotes(night:night,isTonight:isTonight,range:range,align:align,typicalClouds:true) { alertsLine(proxy) }
+            NightNotes(night:night,isTonight:isTonight,range:range,align:align,typicalClouds:true,partialWindowsOnly:false) { alertsLine(proxy) }
             if large { Eyebrow(text:"\(eyebrow)",meta:true).multilineTextAlignment(align) }
             darkerCapsule
             commit.padding(.top,4)

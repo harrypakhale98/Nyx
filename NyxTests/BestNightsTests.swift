@@ -60,6 +60,6 @@ import Testing
         #expect(spoken.contains(String(localized: "\(night.score.value), \(night.score.band.label)")))
         // No cloud figure: the usual-clouds label is said, so an estimate never sounds like a forecast.
         for label in night.basisLabels { #expect(spoken.contains(label)) }
-        #expect(spoken.contains(String(localized: "Closure: Keys View Road closed")))
+        #expect(spoken.contains(ClosureLine.spoken("Keys View Road closed")))
     }
 }

@@ -36,7 +36,7 @@ nonisolated struct BestNightsInReach: Sendable {
     static func spoken(_ night: Night, closure: String?) -> String {
         var parts = [night.park.shortName, night.park.dayLabel(night.id), String(localized: "\(night.score.value), \(night.score.band.label)")]
         parts += night.basisLabels
-        if let closure { parts.append(String(localized: "Closure: \(closure)")) }
+        if let closure { parts.append(ClosureLine.spoken(closure)) }
         return parts.joined(separator: ". ")
     }
 }

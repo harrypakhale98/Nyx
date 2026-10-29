@@ -112,7 +112,8 @@ struct TripPlannerView: View {
             if DebugScenario.state=="boats" { drivableOnly=false }
             #endif
             // Cached forecasts are enough; a refresh that is already due arrives in the background.
-            Task { await model.refreshForecasts(watching:[]) }
+            // Closures rank as well as show, so the parks' alerts are asked for too.
+            Task { await model.refreshForecasts(watching:[]); await model.refreshParkUpdates([]) }
         }
         .task(id:inputs) {
             guard prepared else { return }
