@@ -39,7 +39,7 @@ nonisolated struct WristLook: Sendable {
     }
     /// Placeholders and the face gallery: red, as at a dark site.
     static let red = WristLook(choice: .red, phone: nil)
-    func nightVision(park: Park?, at date: Date) -> Bool { choice.nightVision(phone: phone, park: dusk ?? park, at: date) }
+    func nightVision(park: Park?, at date: Date) -> Bool { choice.nightVision(phone: phone, park: park, dusk: dusk, at: date) }
 }
 
 /// Colours every Nyx complication shares. In full colour they follow the palette; in the tinted
@@ -140,7 +140,7 @@ nonisolated enum WatchTimeline {
     /// snapshot's parks over the next day.
     static func paletteMoments(from now: Date, snapshot: SavedSkySnapshot?, look: WristLook) -> [Date] {
         guard look.choice == .automatic else { return [] }
-        return (look.dusk.map { [$0] } ?? snapshot?.parks ?? []).flatMap { WristSky.paletteChanges(at: $0, from: now, to: now.addingTimeInterval(86400)) }
+        return (look.dusk.map { [$0] } ?? snapshot?.parks ?? []).flatMap { WristSky.paletteChanges(at: $0, from: now, to: now.addingTimeInterval(WristSky.dayAhead)) }
     }
     /// The moments over the next day at which the park a face follows may change: every hour, and a
     /// second past each park's sunrise, when its night turns over (`Park.nightTurnovers`). Every

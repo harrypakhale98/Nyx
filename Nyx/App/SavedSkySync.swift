@@ -318,7 +318,7 @@ import WidgetKit
                     places:all.compactMap { model.park($0) }.filter { $0.isSavedSpot || $0.isCatalogPlace },aurora:model.aurora,
                     // At dusk's place for the wrist: the chosen town or starting park, never where you are
                     // (location stays on this iPhone), so the two turn together except while Near me has found you.
-                    dusk:model.origin.map { [$0.latitude,$0.longitude] },complete:complete)
+                    dusk:NightVisionDusk.startingPoint(model),complete:complete)
         if watch { pushWatchMoons(model) }
     }
     /// The places whose Moons the watch is handed (`WatchMoons.places`); none without a watch with Nyx.

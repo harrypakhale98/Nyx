@@ -19,7 +19,7 @@ nonisolated enum NightVisionSchedule {
         var polar: Bool { next == nil }
     }
     /// How far ahead a dusk or dawn is looked for.
-    static let horizon: TimeInterval = 86_400
+    static let horizon: TimeInterval = WristSky.dayAhead
     /// A hold this old has met a dusk or dawn wherever one comes (outside polar seasons they are at
     /// most about a day apart), so it is not searched further back than this.
     static let holdLimit: TimeInterval = 2*86_400
@@ -27,6 +27,9 @@ nonisolated enum NightVisionSchedule {
     /// The Sun alone decides, so any place stands in for the starting point: a park, a town, or where
     /// you are. The time zone plays no part in the Sun's altitude.
     static func place(latitude: Double, longitude: Double) -> Park { WristSky.place(latitude: latitude, longitude: longitude) }
+    /// A chosen town or starting park as the watch is handed it (`WatchContext.dusk`): to a tenth of
+    /// a degree, and read that way here too, so phone and wrist follow one Sun and turn together.
+    static func startingPoint(latitude: Double, longitude: Double) -> [Double]? { WatchContext.duskPoint([latitude, longitude]) }
 
     /// What At dusk wants at `now`, given the switch as it stands (`current`) and when it was last
     /// turned by hand (`heldAt`). A turn by hand holds until the first dusk or dawn after it; where no
@@ -52,8 +55,12 @@ nonisolated enum NightVisionSchedule {
         if let lat = model.location.latitude, let lon = model.location.longitude {
             return (NightVisionSchedule.place(latitude: lat, longitude: lon), nil)
         }
-        guard let origin = model.origin else { return nil }
-        return (NightVisionSchedule.place(latitude: origin.latitude, longitude: origin.longitude), model.originName)
+        guard let point = startingPoint(model) else { return nil }
+        return (NightVisionSchedule.place(latitude: point[0], longitude: point[1]), model.originName)
+    }
+    /// The chosen town or starting park, as At dusk reads it and the watch is handed it.
+    static func startingPoint(_ model: PlanModel) -> [Double]? {
+        model.origin.flatMap { NightVisionSchedule.startingPoint(latitude: $0.latitude, longitude: $0.longitude) }
     }
     /// At dusk's plan now, without changing anything; nil unless At dusk is chosen.
     static func plan(_ model: PlanModel, defaults: UserDefaults = SharedSettings.defaults, now: Date = .now) -> NightVisionSchedule.Plan? {

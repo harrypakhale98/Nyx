@@ -156,9 +156,10 @@ nonisolated enum WatchSky {
                                 details: (context?.forecastDetails ?? [:]).filter { ids.contains($0.key) },
                                 closures: (context?.closures ?? [:]).filter { ids.contains($0.key) }, usualClouds: usual.isEmpty ? nil : usual)
     }
-    /// Red or not, for the park Tonight follows at that moment (At dusk reads its Sun).
-    static func nightVision(_ choice: PaletteChoice, context: WatchContext?, park: Park?, at now: Date) -> Bool {
-        choice.nightVision(phone: context?.nightVision, park: park, at: now)
+    /// Red or not at that moment: At dusk reads the Sun at the iPhone's starting point, else at the
+    /// park Tonight follows (worked out only then).
+    static func nightVision(_ choice: PaletteChoice, context: WatchContext?, park: @autoclosure () -> Park?, at now: Date) -> Bool {
+        choice.nightVision(phone: context?.nightVision, park: park(), dusk: context?.duskPlace, at: now)
     }
     /// What a score's clouds rest on when there is no full forecast, in one short honest line, in
     /// the iPhone's words (`Night.basisCaption`).
