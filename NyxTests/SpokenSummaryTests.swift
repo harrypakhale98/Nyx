@@ -7,10 +7,7 @@ import Testing
 /// what its surface said before, under the same String Catalog key: every oracle below is the
 /// inline expression the surface used, copied unchanged. The night look's colours keep their values.
 @MainActor struct SpokenSummaryTests {
-    let parks: [Park]
     let engine=AstronomyEngine()
-    init() throws { parks=try ParkData.load() }
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     /// A real sky on `iso`'s evening at the park, with a hand-set score and cloud basis.
     func night(_ id: String, _ iso: String, _ value: Int, _ basis: CloudBasis, usual: Double?=nil, moonAndDarkOnly: Bool=false) throws -> Night {
         let place=try park(id)

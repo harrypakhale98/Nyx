@@ -9,10 +9,7 @@ import Testing
 @MainActor struct FieldActivityRefreshTests {
     typealias State=FieldActivityAttributes.ContentState
     typealias Scored=FieldActivityAttributes.Scored
-    let parks: [Park]
     let engine=AstronomyEngine()
-    init() throws { parks=try ParkData.load() }
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     /// Joshua Tree on Sunday 13 December 2026, followed with a 94, Pristine and a closure.
     func followed() throws -> (park: Park, sky: SkyConditions, attributes: FieldActivityAttributes, heading: State) {
         let jotr=try park("jotr")

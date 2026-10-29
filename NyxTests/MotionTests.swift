@@ -9,7 +9,6 @@ import Testing
 /// milestone once at any frame rate; decoration rests by one rule; the lamp's growing dark covers
 /// the whole window at the moment the palette turns; a month's rings light along the way it moved.
 @MainActor struct MotionTests {
-    private static func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id == id }) }
     /// A fixed autumn night (October 15, 2026), so every run checks the same sky.
     private static let date=Date(timeIntervalSince1970: 1_792_080_000)
     private static func night(_ park: Park, days: Int=0) -> Night {
@@ -23,7 +22,7 @@ import Testing
     @Test func siderealOncePerSkyGivesIdenticalPositions() throws {
         let engine=AstronomyEngine()
         for id in ["jotr", "dena", "npsa"] {
-            let park=try Self.park(id), moment=Self.date.addingTimeInterval(9*3600)
+            let park=try park(id), moment=Self.date.addingTimeInterval(9*3600)
             let sidereal=engine.localSidereal(date: moment, park: park)
             for star in SkyProjection.catalogue.prefix(300) {
                 let each=engine.horizontal(date: moment, park: park, ra: star.ra, dec: star.dec)
@@ -34,7 +33,7 @@ import Testing
     }
     @Test func realSkyFromTheModelsAstronomyIsTheOnDemandSky() throws {
         for id in ["jotr", "dena", "npsa", "gaar"] {
-            let park=try Self.park(id), night=Self.night(park)
+            let park=try park(id), night=Self.night(park)
             let lights=SkyProjection.shared.lightSources(park)
             let ahead=SkyProjection.build(park: park, night: night.id, conditions: night.sky, lights: lights)
             let fresh=SkyProjection.build(park: park, night: night.id, lights: lights)
@@ -49,7 +48,7 @@ import Testing
     }
     @Test func skyWindowFromTheModelsAstronomyIsTheOnDemandSky() throws {
         for id in ["jotr", "acad"] {
-            let park=try Self.park(id), night=Self.night(park, days: 3)
+            let park=try park(id), night=Self.night(park, days: 3)
             let moment=SkyWindowCard.moment(night.sky), lights=SkyProjection.shared.lightSources(park)
             let ahead=HorizonSkies.build(park: park, night: night.id, at: moment, conditions: night.sky, lights: lights)
             let fresh=HorizonSkies.build(park: park, night: night.id, at: moment, lights: lights)
@@ -61,7 +60,7 @@ import Testing
         }
     }
     @Test func skiesBuiltAheadAreTheOnesTheScreensDraw() async throws {
-        let park=try Self.park("grba")
+        let park=try park("grba")
         let nights=(0..<2).map { Self.night(park, days: 40+$0) }
         await SkyAhead.prepare(nights, trusted: true)
         for night in nights {
@@ -73,7 +72,7 @@ import Testing
         }
     }
     @Test func theMoonsMomentIsKeptNotChanged() throws {
-        let park=try Self.park("jotr"), night=Self.night(park, days: 5)
+        let park=try park("jotr"), night=Self.night(park, days: 5)
         let kept=MoonMoments.moon(for: night), again=MoonMoments.moon(for: night), fresh=AstronomyEngine().moon(for: night)
         #expect(kept.moment == fresh.moment && kept.geometry == fresh.geometry && again.moment == kept.moment)
     }
@@ -88,7 +87,7 @@ import Testing
     // MARK: The river
 
     @Test func riverFindsTheNightAsTheSameParkDayDid() throws {
-        let park=try Self.park("jotr")
+        let park=try park("jotr")
         let nights=(0..<30).map { Self.night(park, days: $0) }
         let calendar=park.calendar
         for day in [0, 1, 7, 29, 30, -1] {

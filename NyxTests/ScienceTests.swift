@@ -9,7 +9,6 @@ struct ScienceTests {
     let parks: [Park]
     let engine = AstronomyEngine()
     init() throws { parks = try ParkData.load() }
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     func evening(_ park: Park, _ iso: String) throws -> Date { try #require(TripDay(iso: iso)).evening(in: park) }
     func local(_ text: String, _ park: Park) throws -> Date {
         var style = Date.ParseStrategy(format: "\(year: .defaultDigits)-\(month: .twoDigits)-\(day: .twoDigits) \(hour: .twoDigits(clock: .twentyFourHour, hourCycle: .zeroBased)):\(minute: .twoDigits)", timeZone: park.timeZone)

@@ -46,7 +46,6 @@ private func query(_ url: URL, _ name: String) -> String? { URLComponents(url: u
 struct DataIntegrityTests {
     let parks: [Park]
     init() throws { parks=try ParkData.load() }
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
 
     // MARK: NPS alerts: one request for every park
 
@@ -186,7 +185,7 @@ struct DataIntegrityTests {
         #expect(AlertRanking.closure(Array(alerts.prefix(2))) == nil)
     }
     @Test func headlinesReadAsSentences() throws {
-        func sentence(_ title: String, _ park: String) throws -> String { ParkAlert(id: "x", title: title, description: "", category: "").displayTitle(park: try self.park(park)) }
+        func sentence(_ title: String, _ id: String) throws -> String { ParkAlert(id: "x", title: title, description: "", category: "").displayTitle(park: try park(id)) }
         #expect(try sentence("Gas Pumps at Panamint Springs Resort are Closed at Night", "deva") == "Gas pumps at Panamint Springs Resort are closed at night")
         #expect(try sentence("Notch Trail Closure for Repairs", "badl") == "Notch Trail closure for repairs")
         #expect(try sentence("Keanakākoʻi Side of Kīlauea Volcano Closed Due to Volcanic Unrest", "havo") == "Keanakākoʻi side of Kīlauea Volcano closed due to volcanic unrest")

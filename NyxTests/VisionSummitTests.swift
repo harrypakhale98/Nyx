@@ -7,7 +7,6 @@ import Testing
 struct VisionSummitTests {
     let parks: [Park]
     init() throws { parks = try ParkData.load() }
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     func evening(_ park: Park, _ iso: String) throws -> Date {
         let day = try #require(TripDay(iso: iso))
         return day.evening(in: park)

@@ -8,7 +8,6 @@ struct LittleDipperTests {
     let parks: [Park]
     let engine = AstronomyEngine()
     init() throws { parks = try ParkData.load() }
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     func count(latitude: Double = 36, bortle: Int, moonlight: Double = 0, cloud: Double? = nil, aerosol: Double? = nil) throws -> Int {
         try #require(LittleDipper.reading(latitude: latitude, bortle: bortle, moonlight: moonlight, darkHours: 8, cloud: cloud, aerosol: aerosol)).visible
     }

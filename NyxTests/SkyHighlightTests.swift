@@ -9,7 +9,6 @@ import Testing
 struct SkyHighlightTests {
     let almanac=SkyAlmanac()
     let engine=AstronomyEngine()
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
     /// The night that begins on this local date (local noon to noon).
     func sky(_ park: Park, _ year: Int, _ month: Int, _ day: Int) throws -> SkyConditions {
         let noon=try #require(park.calendar.date(from: DateComponents(year: year, month: month, day: day, hour: 12)))
@@ -276,7 +275,6 @@ private final class KpClock: @unchecked Sendable {
 /// Tonight's binocular sights from the bundled list, by the sky each park has.
 struct DeepSkyTests {
     let almanac=SkyAlmanac()
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
     func sky(_ park: Park, _ year: Int, _ month: Int, _ day: Int) throws -> SkyConditions {
         let noon=try #require(park.calendar.date(from: DateComponents(year: year, month: month, day: day, hour: 12)))
         return AstronomyEngine().conditions(for: park, on: noon)
@@ -375,7 +373,6 @@ private extension MoonFeatures.Feature {
 
 /// The real terrain at the viewing spots, as bundled, and what Nyx says from it.
 struct HorizonTests {
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
     @Test func bundledProfilesAreSound() throws {
         let table=try #require(Horizon.Table.load())
         let parks=try ParkData.load()

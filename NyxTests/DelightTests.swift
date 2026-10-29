@@ -5,7 +5,6 @@ import Testing
 /// Trip planning, your constellation, the year's recap, first light and links.
 struct DelightTests {
     let parks=(try? ParkData.load()) ?? []
-    func park(_ id:String) throws -> Park { try #require(parks.first { $0.id==id }) }
     /// A night with a chosen score, for exercising the assignment alone.
     func night(_ park:Park,_ score:Int,day:TripDay,clouds:Double?=10)->Night {
         let evening=day.evening(in:park)

@@ -7,7 +7,6 @@ import Testing
 @MainActor @Suite struct CountsAndRowsTests {
     let engine=AstronomyEngine()
     func parks() throws -> [Park] { try ParkData.load() }
-    func park(_ id:String) throws -> Park { try #require(try parks().first { $0.id==id }) }
     func night(_ park:Park,_ day:String) throws -> Night {
         let at=try #require(try? Date(day+"T20:00:00Z",strategy:.iso8601))
         let sky=engine.conditions(for:park,on:park.evening(at))

@@ -7,7 +7,6 @@ import Testing
 /// the sky cache keeps what was used last; the dial's frames stop with its count, and a landing on
 /// 70 or 90 is one haptic, not two.
 @MainActor struct LaunchGateTests {
-    private static func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id == id }) }
 
     // MARK: The score gate
 
@@ -38,7 +37,7 @@ import Testing
     // MARK: The sky cache
 
     @Test func skyCacheLetsGoOfTheLeastRecentlyUsed() throws {
-        let park=try Self.park("jotr"), cache=SkyProjection(capacity: 3)
+        let park=try park("jotr"), cache=SkyProjection(capacity: 3)
         let start=park.currentNight(at: Date(timeIntervalSince1970: 1_792_080_000))
         let nights=(0..<4).map { park.date(start, addingDays: $0) }
         let keys=nights.map { SkyProjection.key(park: park, night: $0) }

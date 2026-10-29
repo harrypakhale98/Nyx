@@ -8,7 +8,6 @@ import Testing
 struct VisionSmokeAlertsTests {
     private static let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
     private static func source(_ path: String) throws -> String { try String(contentsOf: root.appending(path: path), encoding: .utf8) }
-    private static func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id == id }) }
     /// One hour apart from a day before `start`, six days on: the reach of a smoke forecast.
     private static func times(from start: Date) -> [Double] {
         let first = (start.timeIntervalSince1970/3600).rounded(.down)*3600-86400
@@ -46,7 +45,7 @@ struct VisionSmokeAlertsTests {
     /// The headset asks forecast detail for smoke only (one request, the air-quality host), and the
     /// night it scores with that smoke is the iPhone's exactly: same score, cap and words.
     @Test func visionCountsSmokeAsTheIPhone() async throws {
-        let jotr = try Self.park("jotr"), now = try Date("2026-10-10T21:00:00Z", strategy: .iso8601)
+        let jotr = try park("jotr"), now = try Date("2026-10-10T21:00:00Z", strategy: .iso8601)
         let sky = AstronomyEngine().conditions(for: jotr, on: jotr.currentNight(at: now))
         let times = Self.times(from: now)
         let http = RoutedHTTP(air: Self.airBody(times, aerosol: 0.6))
@@ -75,7 +74,7 @@ struct VisionSmokeAlertsTests {
     /// The closure beside each score on the headset is the iPhone's: the same alert chosen, the
     /// same headline, the same "Closure alert:" line, said first in a spoken answer.
     @Test func closureStandsBesideTheScore() throws {
-        let jotr = try Self.park("jotr"), arch = try Self.park("arch"), now = Date.now
+        let jotr = try park("jotr"), arch = try park("arch"), now = Date.now
         let jotrCode = try #require(jotr.nps), archCode = try #require(arch.nps)
         let notice = ParkAlert(id: "n1", title: "Visitor Center Hours Change", description: "", category: "Information")
         let cache = ParkAlertsCache(updated: now, alerts: [jotrCode: [notice, Self.closure], archCode: []])
@@ -97,7 +96,7 @@ struct VisionSmokeAlertsTests {
     }
     /// The park-page line is one function on both devices: a danger alert, a notice only, nothing.
     @Test func alertSummaryIsShared() throws {
-        let zion = try Self.park("zion")
+        let zion = try park("zion")
         let danger = ParkAlert(id: "d1", title: "Flash Flood Warning", description: "", category: "Danger")
         let notice = ParkAlert(id: "n1", title: "Shuttle Schedule", description: "", category: "Information")
         #expect(AlertRanking.summary([notice, danger], park: zion) == danger.displayTitle(park: zion))
@@ -114,7 +113,7 @@ struct VisionSmokeAlertsTests {
             #expect(update.cache == nil && !update.busy)
             #expect(await http.urls.isEmpty)
         }
-        let jotr = try Self.park("jotr")
+        let jotr = try park("jotr")
         let inputs = ScoreInputs(smokeKnown: [jotr.id])
         #expect(inputs.unchecked(jotr))
         #expect(inputs.accessNote(jotr) == String(localized: "Access not checked. Confirm closures with the park."))
@@ -126,7 +125,7 @@ struct VisionSmokeAlertsTests {
     /// A switch off, smoke not here yet, or the Park Service busy: each said in its own words
     /// beside the score, in the short row words, and once above the list.
     @Test func missingInputsAreSaid() throws {
-        let jotr = try Self.park("jotr")
+        let jotr = try park("jotr")
         let smokeOff = String(localized: "Smoke and haze are off in Your privacy, so smoke is not counted.")
         let smokeNotYet = String(localized: "No smoke forecast on this device yet, so smoke is not counted.")
         let alertsOff = String(localized: "Park alerts are off in Your privacy, so closures are not checked.")

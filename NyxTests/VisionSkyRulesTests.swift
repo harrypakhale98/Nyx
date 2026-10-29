@@ -5,7 +5,6 @@ import Testing
 /// Rules the Vision Pro sky shares with the iPhone: one weight for a night's drawn and scored
 /// clouds, one rule for pointing to the galactic core, and spoken lines that say their own note.
 struct VisionSkyRulesTests {
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
 
     /// Every hour of a night is eased toward the usual clouds by the weight the score gave the
     /// night (its lead to the middle of the cloud window), not by each hour's own lead: near the

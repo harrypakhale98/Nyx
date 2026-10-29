@@ -6,10 +6,7 @@ import Testing
 /// civil dawn at the starting point, a turn by hand holds until the next dusk or dawn, and where no
 /// dusk comes (the midnight Sun, polar night) the switch stays as it was set.
 struct NightVisionModeTests {
-    let parks: [Park]
     let engine = AstronomyEngine()
-    init() throws { parks = try ParkData.load() }
-    private func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     private func local(_ park: Park, _ year: Int, _ month: Int, _ day: Int, _ hour: Int, _ minute: Int = 0) throws -> Date {
         try #require(park.calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour, minute: minute)))
     }

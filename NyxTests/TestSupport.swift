@@ -22,6 +22,15 @@ enum TestData {
 /// A bundled park by id.
 func park(_ id: String) throws -> Park { try #require(TestData.parks.first { $0.id == id }) }
 
+/// An ISO 8601 instant: "2026-10-16T21:00:00Z".
+func date(_ text: String) throws -> Date { try #require(try? Date(text, strategy: .iso8601)) }
+
+/// "2026-10-03 01:30" on the park's own clock.
+func date(_ string: String, park: Park) throws -> Date {
+    let formatter=DateFormatter(); formatter.dateFormat="yyyy-MM-dd HH:mm"; formatter.timeZone=park.timeZone
+    return try #require(formatter.date(from: string))
+}
+
 /// A `UserDefaults` suite no other test touches, emptied before use, so a test that flips a
 /// setting never leaves it flipped for the app or for the next test.
 func isolatedDefaults(_ name: String = #function) -> UserDefaults {

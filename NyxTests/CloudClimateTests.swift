@@ -7,7 +7,6 @@ struct CloudClimateTests {
     let parks = (try? ParkData.load()) ?? []
     /// 2027-10-01 00:00 UTC: weeks before the nights these tests score, whatever day they run.
     static let now = Date(timeIntervalSince1970: 1_822_348_800)
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     func evening(_ park: Park, _ year: Int, _ month: Int, _ day: Int) throws -> Date {
         try #require(park.calendar.date(from: DateComponents(year: year, month: month, day: day, hour: 12)))
     }

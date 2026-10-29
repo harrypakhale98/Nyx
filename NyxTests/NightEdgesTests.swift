@@ -8,7 +8,6 @@ import Testing
 @Suite struct NightEdgesTests {
     let parks: [Park] = (try? ParkData.load()) ?? []
     let engine = AstronomyEngine()
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     func noon(_ park: Park, _ year: Int, _ month: Int, _ day: Int) throws -> Date {
         try #require(park.calendar.date(from: DateComponents(year: year, month: month, day: day, hour: 12)))
     }

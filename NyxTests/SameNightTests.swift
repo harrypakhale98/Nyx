@@ -6,7 +6,6 @@ import Testing
 /// closure, and the usual clouds handed to the widgets and the watch.
 @MainActor @Suite struct SameNightTests {
     let parks: [Park] = (try? ParkData.load()) ?? []
-    func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     let now = Date(timeIntervalSince1970: 1_792_180_800) // 2026-10-16 20:00 UTC
 
     /// A closed park's slightly darker night is not the best night in the trip planner, Siri's

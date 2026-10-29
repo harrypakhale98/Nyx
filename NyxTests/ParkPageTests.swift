@@ -8,7 +8,6 @@ import SwiftUI
 /// order, chapters and sharing.
 @MainActor @Suite struct ParkPageTests {
     let engine=AstronomyEngine()
-    func date(_ text:String) throws -> Date { try #require(try? Date(text,strategy:.iso8601)) }
     func night(_ park:Park,_ day:String,score:Int=80) throws -> Night {
         let sky=engine.conditions(for:park,on:park.evening(try date(day+"T20:00:00Z")))
         return Night(park:park,sky:sky,score:DarknessScore(value:score,moonPoints:30,cloudPoints:24,bortlePoints:16,lengthPoints:10),cloudCover:5,forecastUpdated:.now)
