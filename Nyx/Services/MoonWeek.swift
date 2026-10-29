@@ -17,7 +17,7 @@ nonisolated struct MoonWeek: Sendable, Equatable {
         let fraction: Double
         var id: Date { date }
         var phase: MoonPhase { MoonPhase(fraction: fraction) }
-        var percent: Int { Int((illumination*100).rounded()) }
+        var percent: Int { phase.percentLit }
         init(at date: Date, engine: AstronomyEngine = AstronomyEngine()) {
             let phase = engine.moonPhase(at: date)
             self.date = date

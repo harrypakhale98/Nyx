@@ -6,6 +6,10 @@ nonisolated struct Forecast: Codable, Sendable {
     let updated: Date
     let times: [Double]
     let clouds: [Double?]
+    /// How long a forecast stays recent: after this every surface asks for a fresh one and stops
+    /// describing what it says (model spread, layers, smoke), and a reminder no longer rests on it.
+    /// The score itself never drops it; it fades by lead time (`CloudBasis.forecastWeight`).
+    static let recentFor: TimeInterval = 36*3600
     /// Overlap-weighted hourly mean; a partial forecast is never treated as full. A forecast is
     /// never dropped for its age: `CloudBasis.forecastWeight` fades it toward the park's usual
     /// clouds by how far ahead of the night it was made, so an old forecast can only count less.

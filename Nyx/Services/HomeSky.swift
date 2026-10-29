@@ -81,28 +81,12 @@ nonisolated struct HomeSky: Sendable {
         shower=origin.park != nil ? (showerNight == nil ? nil : whatsUp.shower) : showerNight.map { Self.showerItem($0, place: place, sky: sky, light: skyLight) }
         moonFree=Self.moonFree(sky: sky, place: place, engine: engine)
     }
-    /// What's up's shower row, worded for a home sky rather than a park's.
+    /// What's up's shower row (`WhatsUp.showerItem`), worded for a home sky rather than a park's: the
+    /// rate is for the grid's sky or, without one, a suburban sky, and says which.
     static func showerItem(_ night: SkyAlmanac.ShowerNight, place: Park, sky: SkyConditions, light: Light = .assumed) -> WhatsUp.Item {
-        let shower=night.shower, note=WhatsUp.peakNote(night, park: place, sky: sky, isTonight: true)
-        let value: String, lead: String
-        if let best=night.best {
-            value=WhatsUp.rateText(night.hourlyRate)
-            let moon=night.moonDownAtBest ? String(localized: "Moon down") : String(localized: "Moon up, \(Int((sky.moon.illumination*100).rounded()))% lit")
-            var poor=""
-            if night.isPeakNight && Double(night.hourlyRate)<0.25*shower.zhr {
-                let reason=WhatsUp.poorReason(night, park: place, sky: sky)
-                // The fallback sentence names a park; under city lights the next sentence already says why.
-                if reason != String(localized: "A weak return from this park; a rough guide.") { poor=reason }
-            }
-            let observer=light == .assumed ? String(localized: "For one observer under a suburban sky; a rough guide. A darker yard shows more.")
-                : String(localized: "For one observer under a Bortle \(place.bortleEstimate) sky, estimated from satellite data; a rough guide.")
-            lead=Sentences.join([String(localized: "Best \(WhatsUp.whenPhrase(best, sky: sky, park: place)), \(moon)."), poor, observer])
-        } else {
-            value=String(localized: "No true darkness")
-            lead=String(localized: "Without true darkness at this latitude, few meteors will show.")
-        }
-        return WhatsUp.Item(id: "shower-\(shower.code)", kind: .meteors, title: shower.localizedName, note: note, value: value, detail: lead,
-                            spoken: "\(shower.localizedName), \(note): \(value). \(lead)", timed: night.best != nil)
+        let observer=light == .assumed ? String(localized: "For one observer under a suburban sky; a rough guide. A darker yard shows more.")
+            : String(localized: "For one observer under a Bortle \(place.bortleEstimate) sky, estimated from satellite data; a rough guide.")
+        return WhatsUp.showerItem(night, park: place, sky: sky, isTonight: true, homeObserver: observer)
     }
 
     // MARK: Where "home" is
@@ -124,7 +108,7 @@ nonisolated struct HomeSky: Sendable {
 
     /// "Waxing crescent, 18% lit"
     var moonPhase: String {
-        String(localized: "\(sky.moon.name), \((sky.moon.illumination).formatted(.percent.precision(.fractionLength(0)))) lit")
+        String(localized: "\(sky.moon.name), \(Percent.text(sky.moon.percentLit)) lit")
     }
     /// "Sets 8:53 PM · Rises 4:42 AM" in time order, from noon to sunrise (a rise late the next
     /// morning is not tonight's news), or "Up all night" / "Below the horizon all night". Without a
@@ -173,14 +157,16 @@ nonisolated struct HomeSky: Sendable {
         guard case .satellite=light else { return nil }
         return BortleScale.name(place.bortleEstimate)+". "+String(localized: "Estimated from satellite data. A light close by can make your own sky brighter.")
     }
-    /// How the Moon shares the dark hours, in one sentence.
+    /// How the Moon shares the dark hours, in one sentence: the words every surface uses
+    /// (`MoonInDarkness`), without how much is lit (the phase line above says it), and where the Moon
+    /// is down for part of the dark, the longest Moon-free stretch as times.
     var moonlightLine: String? {
-        guard hasDarkness else { return nil }
-        if sky.moon.illumination<0.05 { return String(localized: "No moonlight to speak of: a good night for faint stars.") }
-        // "All" and "none" by the one Moon rule every surface uses (`SkyConditions.moonDownPercent`), in its words.
-        if sky.moonDownPercent==100 { return Sentences.end(String(localized: "Moon-free through all of true darkness")) }
-        guard let free=moonFree, sky.moonDownPercent>0 else { return Sentences.end(String(localized: "Moon up all through true darkness")) }
-        return String(localized: "Moon-free from \(place.time(free.start)) to \(place.time(free.end)).")
+        switch sky.moonInDarkness {
+        case .setsAt, .risesAt, .partial:
+            if let free=moonFree { return String(localized: "Moon-free from \(place.time(free.start)) to \(place.time(free.end)).") }
+        case .noDarkness, .allFree, .negligible, .allUp: break
+        }
+        return sky.moonSentence(park: place, withLit: false)
     }
     /// The whole panel as one VoiceOver summary.
     var summary: String {
@@ -194,23 +180,12 @@ nonisolated struct HomeSky: Sendable {
         parts.append(planets.isEmpty ? String(localized: "No bright planets up in true darkness.") : planets.map(\.spoken).joined(separator: " "))
         return parts.joined(separator: " ")
     }
-    /// The longest moon-down stretch inside true darkness, sampled every five minutes.
+    /// The longest Moon-free stretch inside true darkness (`SkyAlmanac.longest`), its edges on the
+    /// engine's own moonset and moonrise where they fall within a step of one, so the times match the
+    /// Moon's line; nil without true darkness or a Moon that matters.
     static func moonFree(sky: SkyConditions, place: Park, engine: AstronomyEngine) -> DateInterval? {
-        guard sky.moon.illumination>=0.05, let start=sky.darkStart, let end=sky.darkEnd, end>start else { return nil }
-        var best: DateInterval?, runStart: Date?
-        var t=start
-        while t<=end {
-            let down=engine.lunarAltitude(at: t, park: place) < -0.833
-            if down, runStart == nil { runStart=t }
-            if !down || t.addingTimeInterval(300)>end, let s=runStart {
-                let e=down ? end : t
-                if e>s, (best?.duration ?? 0)<e.timeIntervalSince(s) { best=DateInterval(start: s, end: e) }
-                runStart=nil
-            }
-            t=t.addingTimeInterval(300)
-        }
-        // The engine's exact moonset and moonrise, where a sampled edge lies within a step of one.
-        guard var found=best else { return nil }
+        guard !sky.moon.negligible, let start=sky.darkStart, let end=sky.darkEnd, end>start,
+              var found=SkyAlmanac().longest(in: DateInterval(start: start, end: end), where: { engine.moonHidden(at: $0, park: place, phase: sky.moon) }) else { return nil }
         if let set=sky.moonset, abs(set.timeIntervalSince(found.start))<=300, set>=start, set<found.end { found=DateInterval(start: set, end: found.end) }
         if let rise=sky.moonrise, abs(rise.timeIntervalSince(found.end))<=300, rise<=end, rise>found.start { found=DateInterval(start: found.start, end: rise) }
         return found

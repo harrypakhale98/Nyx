@@ -216,8 +216,8 @@ nonisolated struct WhatsUp: Sendable {
     }
     /// How the Moon shares the core's dark hours.
     static func moonSentence(dark: DateInterval, free: DateInterval?, sky: SkyConditions, park: Park) -> String {
-        if sky.moon.illumination<0.05 { return String(localized: "No moonlight to wash it out.") }
-        guard let free else { return String(localized: "The Moon is up all that time, \(Int((sky.moon.illumination*100).rounded()))% lit.") }
+        if sky.moon.negligible { return String(localized: "No moonlight to wash it out.") }
+        guard let free else { return String(localized: "The Moon is up all that time, \(sky.moon.percentLit)% lit.") }
         let tolerance=120.0
         let fromStart=abs(free.start.timeIntervalSince(dark.start))<tolerance, toEnd=abs(free.end.timeIntervalSince(dark.end))<tolerance
         switch (fromStart, toEnd) {
@@ -306,23 +306,29 @@ nonisolated struct WhatsUp: Sendable {
         if let end=sky.darkEnd, end.timeIntervalSince(date)<2*3600 { return String(localized: "before dawn") }
         return String(localized: "around \(around(date, park: park))")
     }
-    static func showerItem(_ night: SkyAlmanac.ShowerNight, park: Park, sky: SkyConditions, isTonight: Bool) -> Item {
+    /// A shower's row. `homeObserver`: the sky a home's rate is for (`HomeSky.showerItem`), which
+    /// replaces the park's observer line, leaves out the published rate and a poor return's
+    /// park-worded fallback (the observer line already says why under city lights).
+    static func showerItem(_ night: SkyAlmanac.ShowerNight, park: Park, sky: SkyConditions, isTonight: Bool, homeObserver: String? = nil) -> Item {
         let shower=night.shower, note=peakNote(night, park: park, sky: sky, isTonight: isTonight)
         let published=shower.variable == true ? String(localized: "The published peak rate is \(Int(shower.zhr)) an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization); it varies from year to year.")
             : String(localized: "The published peak rate is \(Int(shower.zhr)) an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization).")
         let value: String, lead: String
         if let best=night.best {
             value=rateText(night.hourlyRate)
-            let moon=night.moonDownAtBest ? String(localized: "Moon down") : String(localized: "Moon up, \(Int((sky.moon.illumination*100).rounded()))% lit")
+            let moon=night.moonDownAtBest ? String(localized: "Moon down") : String(localized: "Moon up, \(sky.moon.percentLit)% lit")
             // A peak night far below the published rate says why, plainly.
-            let poor=night.isPeakNight && Double(night.hourlyRate)<0.25*shower.zhr ? poorReason(night, park: park, sky: sky) : ""
-            lead=Sentences.join([String(localized: "Best \(whenPhrase(best, sky: sky, park: park)), \(moon)."), poor, String(localized: "For one observer under this park's sky; a rough guide.")])
+            var poor=night.isPeakNight && Double(night.hourlyRate)<0.25*shower.zhr ? poorReason(night, park: park, sky: sky) : ""
+            if homeObserver != nil, poor == String(localized: "A weak return from this park; a rough guide.") { poor="" }
+            lead=Sentences.join([String(localized: "Best \(whenPhrase(best, sky: sky, park: park)), \(moon)."), poor, homeObserver ?? String(localized: "For one observer under this park's sky; a rough guide.")])
         } else {
             value=String(localized: "No true darkness")
             lead=String(localized: "Without true darkness at this latitude, few meteors will show.")
         }
+        let home=homeObserver != nil
         return Item(id: "shower-\(shower.code)", kind: .meteors, title: shower.localizedName, note: note, value: value, detail: lead,
-            spoken: "\(shower.localizedName), \(note): \(value). \(lead) \(published)", footnote: published, timed: night.best != nil)
+            spoken: home ? "\(shower.localizedName), \(note): \(value). \(lead)" : "\(shower.localizedName), \(note): \(value). \(lead) \(published)",
+            footnote: home ? nil : published, timed: night.best != nil)
     }
     /// Why a peak night will be poor from this park, in one honest sentence.
     static func poorReason(_ night: SkyAlmanac.ShowerNight, park: Park, sky: SkyConditions) -> String {

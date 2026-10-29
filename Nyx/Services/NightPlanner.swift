@@ -38,7 +38,7 @@ nonisolated struct NightPlanner: Sendable {
     /// **Smoke.** The aerosol forecast's average over the window, whenever it covers it (it can
     /// only lower a score, so its age never hides it); kept on the night (`aerosol`) so the
     /// outlook's smoke words always describe the smoke the score used. **Ties.** The three models'
-    /// cloud spread. `now` decides only whether the model spread is recent enough to describe (36 hours).
+    /// cloud spread. `now` decides only whether the model spread is recent enough to describe (`Forecast.recentFor`).
     static func night(park: Park, sky: SkyConditions, forecast: Forecast?, detail: ForecastDetail?, now: Date,
                       climate: CloudClimate = .shared, scoring: any ScoreProviding = ScoreEngine()) -> Night {
         let window = sky.cloudWindow
@@ -65,11 +65,7 @@ nonisolated struct NightPlanner: Sendable {
         case let (nil, u): u
         }
         let aerosol = detail?.air?.mean("aerosol_optical_depth", from: window.start, to: window.end, valid: 0...10)
-        var spread: Double?
-        if let models = detail?.models, models.usable(now: now) {
-            let means = ForecastDetail.modelKeys.compactMap { models.mean($0, from: window.start, to: window.end, valid: 0...100) }
-            if means.count == ForecastDetail.modelKeys.count, let low = means.min(), let high = means.max() { spread = high-low }
-        }
+        let spread = detail?.agreement(from: window.start, to: window.end, now: now)?.spread
         let used = weight > 0
         let score = scoring.score(sky: sky, bortle: park.bortleEstimate, cloud: counted, basis: CloudBasis.from(weight: weight, leadDays: lead), aerosol: aerosol)
         var night = Night(park: park, sky: sky, score: score, cloudCover: used ? predicted : nil, forecastUpdated: used ? issued : nil,
@@ -102,7 +98,7 @@ nonisolated struct NightPlanner: Sendable {
         }
         let middle = window.start.addingTimeInterval(window.end.timeIntervalSince(window.start)/2)
         // A recent forecast is measured from its issue, as the score measures it; a stale one from now.
-        let recent = forecast.flatMap { now.timeIntervalSince($0.updated) < 36*3600 ? $0 : nil }
+        let recent = forecast.flatMap { now.timeIntervalSince($0.updated) < Forecast.recentFor ? $0 : nil }
         if CloudBasis.forecastWeight(leadDays: middle.timeIntervalSince(recent?.updated ?? now)/86400) == 0 { return true }
         // Past the last hour of a recent forecast only: a stale one that ends before the night should
         // have been replaced by now, so a night within reach of today's is "unavailable".
@@ -132,6 +128,10 @@ nonisolated struct NightPlanner: Sendable {
     func bestNights(_ parks: [Park], day: DateComponents, count: Int, now: Date, limit: Int = 3, closures: [String: String] = [:]) -> [Night] {
         Array(Self.ranked(parks.flatMap { nights($0, day: day, count: count, now: now) }, closures: closures).prefix(max(0, limit)))
     }
+    /// How many nights from tonight every best night is chosen over, wherever one is named: the park
+    /// page's "Darker on…", Tonight's capsule, Best nights, the river's "Best night", With the lights
+    /// out, Siri and Vision Pro's nights ahead. A whole lunar cycle, so the next new Moon is always in it.
+    static let horizon = 30
     /// Best first, by score. Every night's score already counts clouds (forecast, early look or
     /// the park's usual clouds), so scores compare directly. Ties, which are common near new moon,
     /// go to the darker measured sky (Black Marble glow, `glowRank`), then the higher sum of parts
@@ -148,7 +148,7 @@ nonisolated struct NightPlanner: Sendable {
         if a.score.value != b.score.value { return a.score.value > b.score.value }
         let ga = glowRank(a.park.id), gb = glowRank(b.park.id)
         if ga != gb { return ga < gb }
-        let ra = tieGrid(partsSum(a.score), 0.5), rb = tieGrid(partsSum(b.score), 0.5)
+        let ra = tieGrid(a.score.rawPartsSum, 0.5), rb = tieGrid(b.score.rawPartsSum, 0.5)
         if ra != rb { return ra > rb }
         let da = tieGrid(a.sky.darkHours, 1.0/60), db = tieGrid(b.sky.darkHours, 1.0/60)
         if da != db { return da > db }
@@ -161,10 +161,6 @@ nonisolated struct NightPlanner: Sendable {
     /// `value` rounded to the nearest multiple of `step`, as a count of steps: two values tie
     /// exactly when they share a step. Infinity stays infinite.
     static func tieGrid(_ value: Double, _ step: Double) -> Double { value.isFinite ? (value/step).rounded() : value }
-    /// The score's parts before any cap: what the night would score if nothing held it down.
-    static func partsSum(_ score: DarknessScore) -> Double {
-        score.moonPoints+(score.cloudPoints ?? 0)+score.bortlePoints+score.lengthPoints
-    }
     static func certainty(_ basis: CloudBasis) -> Double {
         switch basis { case .forecast: 1; case .blended(let w, _): w; case .usual: 0 }
     }
@@ -186,7 +182,10 @@ nonisolated struct NightPlanner: Sendable {
     static func ranked(_ nights: [Night], closures: [String: String]) -> [Night] {
         closures.isEmpty ? ranked(nights) : nights.sorted { better($0, $1, closures: closures) }
     }
-    static func best(_ nights: [Night]) -> Night? { ranked(nights).first }
+    /// The first of `nights` by `better`: the night every surface names as a place's best. `better` is
+    /// a strict total order (it falls through to the night and the park's name), so this is the night
+    /// `ranked` puts first, found without sorting.
+    static func best(_ nights: [Night]) -> Night? { nights.min(by: better) }
     /// Where a park's measured sky glow sits among the 63 park centres, 0 (darkest) to 1
     /// (brightest); 1 when unknown. NASA Black Marble (`skyglow.json`) separates the 35 parks a
     /// hand estimate calls Bortle 2, which the score cannot.
@@ -214,7 +213,7 @@ nonisolated struct NightPlanner: Sendable {
     /// Whether a night is worth surfacing in a Smart Stack at all, on iPhone and on the watch alike:
     /// some true darkness, and Good or better with a full cloud forecast, Excellent without one.
     static func worthSurfacing(_ night: Night) -> Bool {
-        night.sky.darkHours > 0 && night.score.value >= (night.score.hasForecast ? 60 : 75)
+        night.sky.darkHours > 0 && night.score.value >= (night.score.hasForecast ? ScoreBand.good : ScoreBand.excellent).minimum
     }
     /// How strongly the widget should rise at `date`: 0 outside every dusk window, else the
     /// night's score (0.6...1.0) and the time left in its window. WidgetKit compares scores only

@@ -17,10 +17,13 @@ struct VisionReachTests {
 
     // MARK: Darkest of the next 30 nights
 
-    /// Vision Pro looks as far ahead as the iPhone's best night (`NightVerdict.horizon`), so a park's
-    /// darkest night is the same night on both.
-    @Test func reachIsTheIPhonesBestNightHorizon() {
-        #expect(NightsAhead.reach == NightVerdict.horizon)
+    /// Vision Pro looks as far ahead as the iPhone's best night (`NightPlanner.horizon`), so a park's
+    /// darkest night is the same night on both; every older name for that window is the same window.
+    @Test func reachIsTheIPhonesBestNightHorizon() throws {
+        #expect(NightVerdict.horizon == NightPlanner.horizon && LightsOut.horizon == NightPlanner.horizon && BestNightsInReach.nights == NightPlanner.horizon)
+        let park = try Self.park("jotr"), now = try Self.date("2026-10-10T21:00:00Z")
+        let ahead = NightsAhead(park: park, planner: NightPlanner(forecasts: [:]), now: now, limit: .max)
+        #expect(ahead.picks.count == NightPlanner.horizon)
     }
     /// The picks are `NightPlanner.bestNights` over tonight and the next 29 nights, in its
     /// order, and each offset steps the planner to exactly that night.
@@ -28,13 +31,13 @@ struct VisionReachTests {
         let park = try Self.park("jotr"), now = try Self.date("2026-10-10T21:00:00Z")
         let planner = NightPlanner(forecasts: [park.id: Self.forecast(cover: 30, issued: now)])
         let ahead = NightsAhead(park: park, planner: planner, now: now)
-        let expected = planner.bestNights([park], from: now, count: NightsAhead.reach, now: now, limit: 3)
+        let expected = planner.bestNights([park], from: now, count: NightPlanner.horizon, now: now, limit: 3)
         #expect(ahead.picks.count == 3)
         #expect(ahead.picks.map(\.id) == expected.map(\.id))
         #expect(ahead.picks.map(\.night.score.value) == expected.map(\.score.value))
         let tonight = park.currentNight(at: now)
         for pick in ahead.picks {
-            #expect((0..<NightsAhead.reach).contains(pick.offset))
+            #expect((0..<NightPlanner.horizon).contains(pick.offset))
             // The planner's own night for that offset (`VisionModel.night(for:)`) is the pick's night.
             #expect(park.date(tonight, addingDays: pick.offset) == pick.night.id)
         }

@@ -39,8 +39,8 @@ nonisolated struct HourlySeries: Codable, Sendable, Equatable {
     let updated: Date
     let times: [Double]
     let values: [String: [Double?]]
-    /// Forecasts older than 36 hours are not described, as with clouds.
-    func usable(now: Date) -> Bool { now.timeIntervalSince(updated)<36*3600 }
+    /// Forecasts older than `Forecast.recentFor` are not described, as with clouds.
+    func usable(now: Date) -> Bool { now.timeIntervalSince(updated)<Forecast.recentFor }
     func samples(_ key: String, from start: Date, to end: Date, valid: ClosedRange<Double>, timing: HourlyWindow.Timing = .instant) -> [(value: Double, weight: Double)]? {
         guard let series=values[key] else { return nil }
         return HourlyWindow.samples(times:times,values:series,from:start,to:end,valid:valid,timing:timing)
@@ -98,13 +98,18 @@ nonisolated struct ForecastDetail: Codable, Sendable, Equatable {
 
     /// What the detail says about one night's window. `scoreRange` is filled in by the caller,
     /// which owns the score engine.
+    /// How far apart the three models' cloud averages are over a window, while they are recent. All
+    /// three or none: the copy promises three models, and two cannot show a spread honestly. One
+    /// figure for the outlook's words and for the ranking's tie-break (`NightPlanner.night`).
+    func agreement(from start: Date, to end: Date, now: Date) -> ModelAgreement? {
+        guard let models, models.usable(now:now) else { return nil }
+        let means=Self.modelKeys.compactMap { models.mean($0,from:start,to:end,valid:0...100) }
+        guard means.count==Self.modelKeys.count, let low=means.min(), let high=means.max() else { return nil }
+        return ModelAgreement(low:low,high:high)
+    }
     func outlook(from start: Date, to end: Date, now: Date = .now) -> NightOutlook {
         var outlook=NightOutlook()
-        if let models, models.usable(now:now) {
-            let means=Self.modelKeys.compactMap { models.mean($0,from:start,to:end,valid:0...100) }
-            // All three or none: the copy promises three models, and two cannot show a spread honestly.
-            if means.count==Self.modelKeys.count, let low=means.min(), let high=means.max() { outlook.agreement=ModelAgreement(low:low,high:high) }
-        }
+        outlook.agreement=agreement(from:start,to:end,now:now)
         if let layers, layers.usable(now:now) {
             if let low=layers.mean("cloud_cover_low",from:start,to:end,valid:0...100),
                let mid=layers.mean("cloud_cover_mid",from:start,to:end,valid:0...100),

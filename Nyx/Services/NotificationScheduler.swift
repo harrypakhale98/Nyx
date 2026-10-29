@@ -117,7 +117,7 @@ nonisolated struct NotificationScheduler {
     static let horizon:TimeInterval=5*86400
     /// ...and only when its forecast will be at most this old when it fires: the age after which
     /// the app itself stops using a forecast. A background refresh brings later nights in range.
-    static let maxForecastAge:TimeInterval=36*3600
+    static let maxForecastAge=Forecast.recentFor
     /// At most one score reminder per park in this many nights: the best of a run (`NightPlanner.better`).
     static let spacing=7
     /// Only full forecasts can trigger a 'pristine' reminder. No fabricated clouds.
@@ -187,7 +187,7 @@ nonisolated struct NotificationScheduler {
     static func agreement(_ night:Night,detail:ForecastDetail?,now:Date)->ModelAgreement? {
         guard let detail, night.score.hasForecast, !night.upperCloudOnly else { return nil }
         let window=night.sky.cloudWindow
-        return detail.outlook(from:window.start,to:window.end,now:now).agreement
+        return detail.agreement(from:window.start,to:window.end,now:now)
     }
     /// True when all three models agree on a clear night (at most 15% cloud in the cloudiest).
     static func modelsClear(_ models:ModelAgreement?)->Bool { models.map { $0.band == .agree && $0.high<=15 } ?? false }
@@ -200,7 +200,7 @@ nonisolated struct NotificationScheduler {
         weekday.timeZone=night.park.timeZone
         return String(localized:"\(night.score.band.label) night at \(night.park.shortName), \(night.id.formatted(weekday))")
     }
-    /// "94 out of 100. Moon-free through all of true darkness. Check park alerts before you go." Never "94/100",
+    /// "94 out of 100. Moon down. Check park alerts before you go." Never "94/100",
     /// which VoiceOver reads as "slash". A place the Park Service does not run has no park alerts to
     /// check: it says "closures and access" instead. With a closure in the last park update, the
     /// closure comes first in the app's words (`ClosureLine`) and stands in for the advice.
@@ -213,7 +213,7 @@ nonisolated struct NotificationScheduler {
         return String(localized:"\(night.score.value) out of 100. \(why). Check park alerts before you go.")
     }
     /// One thing that is true of this night and makes it dark, the most telling first; with it,
-    /// when true, that all three forecast models are clear ("Moon-free through all of true darkness; all three
+    /// when true, that all three forecast models are clear ("Moon down; all three
     /// forecast models clear").
     static func reason(_ night:Night,models:ModelAgreement?=nil)->String {
         let moon=moonReason(night)
@@ -221,16 +221,13 @@ nonisolated struct NotificationScheduler {
         guard let moon else { return String(localized:"All three forecast models clear") }
         return String(localized:"\(moon); all three forecast models clear")
     }
-    /// The Moon's part, when it is the reason; nil when it is not.
+    /// The Moon's part, when it is the reason (out of the way for all of true darkness, or from a
+    /// moonset inside it), in the words every glance uses (`MoonInDarkness.short`); nil when it is not.
     private static func moonReason(_ night:Night)->String? {
-        let sky=night.sky
-        // The Moon's words on every surface (`NightVerdict.moonSentence`): only true darkness is promised.
-        if sky.moonDownPercent==100 { return String(localized:"Moon-free through all of true darkness") }
-        if sky.moon.illumination<0.05 { return String(localized:"Almost no moonlight") }
-        if let set=sky.moonset, let start=sky.darkStart, let end=sky.darkEnd, set>start, set<end, sky.moonrise.map({ $0<start || $0>end }) ?? true {
-            return String(localized:"Moon sets at \(night.park.time(set))")
+        switch night.sky.moonInDarkness {
+        case .allFree, .negligible, .setsAt: night.sky.moonShort(park:night.park)
+        case .noDarkness, .allUp, .risesAt, .partial: nil
         }
-        return nil
     }
     /// Without a Moon reason: a clear forecast, else the hours of true darkness.
     private static func cloudReason(_ night:Night)->String {

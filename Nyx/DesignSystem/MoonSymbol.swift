@@ -7,11 +7,13 @@ struct MoonSymbol: View {
     let night: Night
     var body: some View {
         Image(systemName: night.sky.moon.symbolName(southern: night.park.latitude < 0))
-            .accessibilityLabel("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit")
+            .accessibilityLabel(night.sky.moon.spoken)
     }
 }
 
 extension MoonPhase {
+    /// The phase as VoiceOver says it on every surface, the name first: "Waxing crescent, 23 percent lit".
+    nonisolated var spoken: String { String(localized: "\(name), \(percentLit) percent lit") }
     /// The SF Symbol for this phase as seen from a place: south of the equator the Moon stands
     /// upside down, so its lit side is the other one (a waxing crescent lit on the left). Chosen by
     /// name rather than by turning the image, so it holds inside text (an inline widget's
