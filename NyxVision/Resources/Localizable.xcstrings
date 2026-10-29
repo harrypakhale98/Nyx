@@ -107,6 +107,41 @@
         }
       }
     },
+    "%@ at %@: %lld, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ in %@: %lld, %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ at %@: %lld, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ en %@: %lld, %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ à %@ : %lld, %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%2$@：%3$lld点、%4$@。"
+          }
+        }
+      }
+    },
     "%@ at its best": {
       "extractionState": "manual",
       "localizations": {
@@ -173,6 +208,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@は%2$@から%3$@まで、%4$@。"
+          }
+        }
+      }
+    },
+    "%@ lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ beleuchtet"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ lit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ iluminada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ éclairée"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "輝面比%@"
           }
         }
       }
@@ -313,41 +383,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ · %@"
-          }
-        }
-      }
-    },
-    "%@ · %lld%% lit": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %lld %% beleuchtet"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %lld%% lit"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %lld%% iluminada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · éclairée à %lld %%"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · 輝面比%lld%%"
           }
         }
       }
@@ -807,41 +842,6 @@
         }
       }
     },
-    "%@: %lld out of 100, %@. Includes a cached cloud forecast. Confirm conditions and park access before traveling.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@: %lld von 100, %@. Enthält eine gespeicherte Wolkenvorhersage. Prüfe vor der Fahrt die Bedingungen und ob der Park zugänglich ist."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@: %lld out of 100, %@. Includes a cached cloud forecast. Confirm conditions and park access before traveling."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@: %lld de 100, %@. Incluye un pronóstico de nubes guardado. Confirma las condiciones y el acceso al parque antes de viajar."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ : %lld sur 100, %@. Comprend une prévision de nuages en cache. Vérifiez les conditions et l’accès au parc avant de partir."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@：100点中%2$lld点、%3$@。保存済みの雲予報を含みます。出発前に、天候と公園に入れるかを確認してください。"
-          }
-        }
-      }
-    },
     "%lld nights after the peak": {
       "extractionState": "manual",
       "localizations": {
@@ -982,41 +982,6 @@
         }
       }
     },
-    "%lld%%": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %%"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%%"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%%"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %%"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%%"
-          }
-        }
-      }
-    },
     "%lld%% average cover through true darkness.": {
       "extractionState": "manual",
       "localizations": {
@@ -1048,41 +1013,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "完全に暗い時間の平均雲量は%lld%%。"
-          }
-        }
-      }
-    },
-    "%lld%% lit": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% beleuchtet"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% lit"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% iluminada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% éclairée"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "輝面比%lld%%"
           }
         }
       }
@@ -1752,6 +1682,76 @@
         }
       }
     },
+    "Almost no moonlight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fast kein Mondlicht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almost no moonlight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Casi sin luz de luna"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Presque pas de clair de lune"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月明かりはほとんどなし"
+          }
+        }
+      }
+    },
+    "An early look at the clouds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine erste Einschätzung der Wolken."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An early look at the clouds."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una vista anticipada de las nubes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une tendance pour les nuages."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲の早めの見通しです。"
+          }
+        }
+      }
+    },
     "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide.": {
       "extractionState": "manual",
       "localizations": {
@@ -1997,37 +1997,72 @@
         }
       }
     },
-    "Aurora latitude": {
+    "Aurora forecast: the planetary K-index forecast of NOAA's Space Weather Prediction Center, U.S. Government work.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Polarlicht-Breite"
+            "value": "Polarlichtvorhersage: die Vorhersage des planetaren K-Index des Space Weather Prediction Center der NOAA, Werk der US-Regierung."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aurora latitude"
+            "value": "Aurora forecast: the planetary K-index forecast of NOAA's Space Weather Prediction Center, U.S. Government work."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Latitud de las auroras"
+            "value": "Pronóstico de auroras: el pronóstico del índice K planetario del Space Weather Prediction Center de la NOAA, obra del Gobierno de EE. UU."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Latitude des aurores"
+            "value": "Prévision d’aurores : la prévision de l’indice K planétaire du Space Weather Prediction Center de la NOAA, œuvre du gouvernement des États-Unis."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "オーロラの緯度"
+            "value": "オーロラ予報：NOAAのSpace Weather Prediction Centerによる惑星K指数の予報、米国政府の著作物。"
+          }
+        }
+      }
+    },
+    "Aurora latitude: computed from the International Geomagnetic Reference Field (IGRF-14, IAGA; coefficients from NOAA NCEI, U.S. Government work).": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polarlicht-Breite: berechnet aus dem International Geomagnetic Reference Field (IGRF-14, IAGA; Koeffizienten von NOAA NCEI, Werk der US-Regierung)."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aurora latitude: computed from the International Geomagnetic Reference Field (IGRF-14, IAGA; coefficients from NOAA NCEI, U.S. Government work)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latitud para las auroras: calculada a partir del Campo Geomagnético Internacional de Referencia (IGRF-14, IAGA; coeficientes de NOAA NCEI, obra del Gobierno de EE. UU.)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latitude des aurores : calculée à partir de l’International Geomagnetic Reference Field (IGRF-14, IAGA ; coefficients de NOAA NCEI, œuvre du gouvernement des États-Unis)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オーロラ緯度：国際標準地球磁場（IGRF-14、IAGA。係数はNOAA NCEI、米国政府著作物）から計算しています。"
           }
         }
       }
@@ -2168,6 +2203,181 @@
           "stringUnit": {
             "state": "translated",
             "value": "見ごろは%1$@、%2$@。"
+          }
+        }
+      }
+    },
+    "Best this week: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche am besten: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best this week: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor de la semana: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meilleure de la semaine : %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今週いちばんよい夜：%@"
+          }
+        }
+      }
+    },
+    "Best this week: %@ · %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche am besten: %@ · %lld"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best this week: %@ · %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor de la semana: %@ · %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meilleure de la semaine : %@ · %lld"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今週いちばんよい夜：%@ · %lld"
+          }
+        }
+      }
+    },
+    "Best this week: every night": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche am besten: jede Nacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best this week: every night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor de la semana: todas las noches"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meilleure de la semaine : toutes les nuits"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今週いちばんよい夜：どの夜も"
+          }
+        }
+      }
+    },
+    "Best this week: tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche am besten: heute Nacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best this week: tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor de la semana: esta noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meilleure de la semaine : ce soir"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今週いちばんよい夜：今夜"
+          }
+        }
+      }
+    },
+    "Busy and quiet months: National Park Service Visitor Use Statistics, 2021 to 2025 monthly averages, CC0.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Besuchsstarke und ruhige Monate: Besucherstatistik des National Park Service, Monatsmittel 2021 bis 2025, CC0."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Busy and quiet months: National Park Service Visitor Use Statistics, 2021 to 2025 monthly averages, CC0."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meses con más y menos visitantes: estadísticas de visitas del National Park Service, promedios mensuales de 2021 a 2025, CC0."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mois fréquentés et calmes : statistiques de fréquentation du National Park Service, moyennes mensuelles de 2021 à 2025, CC0."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "混み合う月と空いている月：National Park Serviceの来訪者統計、2021〜2025年の月平均、CC0。"
           }
         }
       }
@@ -2697,6 +2907,41 @@
         }
       }
     },
+    "Cloud forecasts and the three forecast models: Open-Meteo, CC BY 4.0.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersagen und die drei Vorhersagemodelle: Open-Meteo, CC BY 4.0."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecasts and the three forecast models: Open-Meteo, CC BY 4.0."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronósticos de nubes y los tres modelos de pronóstico: Open-Meteo, CC BY 4.0."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévisions de nuages et les trois modèles de prévision : Open-Meteo, CC BY 4.0."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報と3つの予報モデル：Open-Meteo、CC BY 4.0。"
+          }
+        }
+      }
+    },
     "Cloud forecasts are off in Your privacy.": {
       "extractionState": "manual",
       "localizations": {
@@ -3187,41 +3432,6 @@
         }
       }
     },
-    "Computed from the International Geomagnetic Reference Field (IGRF-14, IAGA; coefficients from NOAA NCEI).": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Berechnet mit dem International Geomagnetic Reference Field (IGRF-14, IAGA; Koeffizienten von NOAA NCEI)."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Computed from the International Geomagnetic Reference Field (IGRF-14, IAGA; coefficients from NOAA NCEI)."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calculada con el Campo Geomagnético Internacional de Referencia (IGRF-14, IAGA; coeficientes de NOAA NCEI)."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calculée avec l’International Geomagnetic Reference Field (IGRF-14, AIGA ; coefficients de NOAA NCEI)."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "国際標準地球磁場（IGRF-14、IAGA。係数はNOAA NCEIによる）から計算しています。"
-          }
-        }
-      }
-    },
     "Computing": {
       "extractionState": "manual",
       "localizations": {
@@ -3257,41 +3467,6 @@
         }
       }
     },
-    "Constellation figures": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sternbildfiguren"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Constellation figures"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Figuras de las constelaciones"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Figures des constellations"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "星座線"
-          }
-        }
-      }
-    },
     "Constellations": {
       "extractionState": "manual",
       "localizations": {
@@ -3323,111 +3498,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "星座"
-          }
-        }
-      }
-    },
-    "Contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enthält veränderte Informationen des Copernicus Atmosphere Monitoring Service (2026), über Open-Meteo. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contiene información modificada del Copernicus Atmosphere Monitoring Service (2026), a través de Open-Meteo. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contient des informations modifiées du Copernicus Atmosphere Monitoring Service (2026), via Open-Meteo. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Copernicus Atmosphere Monitoring Serviceの情報（2026）を加工して含みます。Open-Meteo経由。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。"
-          }
-        }
-      }
-    },
-    "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024. Licensed under CC BY 4.0.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enthält veränderte Informationen des Copernicus Climate Change Service (2026): ERA5, 2015 bis 2024. Lizenziert unter CC BY 4.0."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024. Licensed under CC BY 4.0."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contiene información modificada del Copernicus Climate Change Service (2026): ERA5, de 2015 a 2024. Con licencia CC BY 4.0."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, de 2015 à 2024. Sous licence CC BY 4.0."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Copernicus Climate Change Serviceの情報（2026）を加工して含みます。ERA5、2015〜2024年。CC BY 4.0ライセンス。"
-          }
-        }
-      }
-    },
-    "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enthält veränderte Informationen des Copernicus Climate Change Service (2026): ERA5, 2015 bis 2024. Lizenziert unter CC BY 4.0. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contiene información modificada del Servicio de Cambio Climático de Copernicus (2026): ERA5, 2015 a 2024. Con licencia CC BY 4.0. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, 2015 à 2024. Sous licence CC BY 4.0. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Copernicus Climate Change Serviceの情報（2026）を加工して含んでいます：ERA5、2015〜2024年。CC BY 4.0でライセンスされています。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。"
           }
         }
       }
@@ -3498,6 +3568,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "クレジット"
+          }
+        }
+      }
+    },
+    "Dark until %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkel bis %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark until %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuro hasta %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit noire jusqu’à %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@まで暗夜"
+          }
+        }
+      }
+    },
+    "Dark, Moon up": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkel, Mond oben"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark, Moon up"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuro, con Luna"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit noire, Lune levée"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暗夜、月が出ている"
           }
         }
       }
@@ -3642,37 +3782,37 @@
         }
       }
     },
-    "Deep sky": {
+    "Deep-sky positions and magnitudes: Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalogue.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Deep Sky"
+            "value": "Positionen und Helligkeiten der Deep-Sky-Objekte: Wikidata (CC0), die Datenbank SIMBAD (CDS, Straßburg) und der Harris-Katalog der Kugelsternhaufen."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Deep sky"
+            "value": "Deep-sky positions and magnitudes: Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalogue."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cielo profundo"
+            "value": "Posiciones y magnitudes de cielo profundo: Wikidata (CC0), la base de datos SIMBAD (CDS, Estrasburgo) y el catálogo de cúmulos globulares de Harris."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ciel profond"
+            "value": "Positions et magnitudes du ciel profond : Wikidata (CC0), la base de données SIMBAD (CDS, Strasbourg) et le catalogue des amas globulaires de Harris."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "星雲・星団"
+            "value": "星雲・星団などの位置と等級：Wikidata（CC0）、SIMBADデータベース（CDS、ストラスブール）、Harrisの球状星団カタログ。"
           }
         }
       }
@@ -3778,41 +3918,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@の時点の見え方で描いています"
-          }
-        }
-      }
-    },
-    "Drawn for Nyx between catalog stars.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Für Nyx zwischen Katalogsternen gezeichnet."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drawn for Nyx between catalog stars."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trazadas para Nyx entre estrellas del catálogo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tracées pour Nyx entre des étoiles du catalogue."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "カタログの星を結んでNyxのために描いたもの。"
           }
         }
       }
@@ -5182,76 +5287,6 @@
         }
       }
     },
-    "IAU Gazetteer of Planetary Nomenclature, USGS (public domain).": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "IAU Gazetteer of Planetary Nomenclature, USGS (gemeinfrei)."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "IAU Gazetteer of Planetary Nomenclature, USGS (public domain)."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "IAU Gazetteer of Planetary Nomenclature, USGS (dominio público)."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "IAU Gazetteer of Planetary Nomenclature, USGS (domaine public)."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "IAU Gazetteer of Planetary Nomenclature、USGS（パブリックドメイン）。"
-          }
-        }
-      }
-    },
-    "IAU Working Group on Star Names.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "IAU Working Group on Star Names."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "IAU Working Group on Star Names."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Grupo de Trabajo sobre Nombres de Estrellas de la UAI."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Groupe de travail de l’UAI sur les noms d’étoiles."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "IAU Working Group on Star Names（国際天文学連合 恒星命名ワーキンググループ）。"
-          }
-        }
-      }
-    },
     "In Earth's shadow": {
       "extractionState": "manual",
       "localizations": {
@@ -5318,6 +5353,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "夕暮れ後、%1$@の空。%2$@に沈みます。"
+          }
+        }
+      }
+    },
+    "Includes cloud forecast.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enthält eine Wolkenvorhersage."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Includes cloud forecast."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incluye pronóstico de nubes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprend la prévision de nuages."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報を含みます。"
           }
         }
       }
@@ -5987,6 +6057,41 @@
         }
       }
     },
+    "Lunar eclipses: NASA eclipse predictions by Fred Espenak (NASA/GSFC).": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondfinsternisse: Finsternisvorhersagen der NASA von Fred Espenak (NASA/GSFC)."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lunar eclipses: NASA eclipse predictions by Fred Espenak (NASA/GSFC)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eclipses lunares: predicciones de eclipses de la NASA de Fred Espenak (NASA/GSFC)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Éclipses de Lune : prévisions d’éclipses de la NASA par Fred Espenak (NASA/GSFC)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月食：Fred Espenak（NASA/GSFC）によるNASAの食の予報。"
+          }
+        }
+      }
+    },
     "Mars": {
       "extractionState": "manual",
       "localizations": {
@@ -6022,6 +6127,41 @@
         }
       }
     },
+    "Measured night skies: the National Park Service Night Skies Program, public domain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemessene Nachthimmel: das Night Skies Program des National Park Service, gemeinfrei."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measured night skies: the National Park Service Night Skies Program, public domain."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cielos nocturnos medidos: Night Skies Program del National Park Service, dominio público."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciels nocturnes mesurés : Night Skies Program du National Park Service, domaine public."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "測定された夜空：National Park Service Night Skies Program、パブリックドメイン。"
+          }
+        }
+      }
+    },
     "Mercury": {
       "extractionState": "manual",
       "localizations": {
@@ -6053,6 +6193,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "水星"
+          }
+        }
+      }
+    },
+    "Meteor showers: the International Meteor Organization (IMO) calendar.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meteorströme: der Kalender der International Meteor Organization (IMO)."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meteor showers: the International Meteor Organization (IMO) calendar."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lluvias de meteoros: el calendario de la Organización Internacional de Meteoros (IMO)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pluies de météores : le calendrier de l’International Meteor Organization (IMO)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "流星群：国際流星機構（IMO）のカレンダー。"
           }
         }
       }
@@ -6442,37 +6617,37 @@
         }
       }
     },
-    "Moon %@, %lld%% lit": {
+    "Moon %@, %@ lit": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mond %@, %lld %% beleuchtet"
+            "value": "Mond %@, %@ beleuchtet"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moon %@, %lld%% lit"
+            "value": "Moon %@, %@ lit"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Luna %@, %lld%% iluminada"
+            "value": "Luna %@, %@ iluminada"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lune, %@, éclairée à %lld %%"
+            "value": "Lune, %@, %@ éclairée"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "月 %1$@、輝面比%2$lld%%"
+            "value": "月 %1$@、輝面比%2$@"
           }
         }
       }
@@ -6582,6 +6757,41 @@
         }
       }
     },
+    "Moon down at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond ab %@ untergegangen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon down at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna oculta desde %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune couchée à %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@に月が沈む"
+          }
+        }
+      }
+    },
     "Moon high in the %@": {
       "extractionState": "manual",
       "localizations": {
@@ -6652,72 +6862,177 @@
         }
       }
     },
-    "Moon map": {
+    "Moon names and positions: the IAU Gazetteer of Planetary Nomenclature, USGS (public domain).": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mondkarte"
+            "value": "Namen und Positionen auf dem Mond: das IAU Gazetteer of Planetary Nomenclature, USGS (gemeinfrei)."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moon map"
+            "value": "Moon names and positions: the IAU Gazetteer of Planetary Nomenclature, USGS (public domain)."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mapa de la Luna"
+            "value": "Nombres y posiciones de la Luna: el IAU Gazetteer of Planetary Nomenclature, USGS (dominio público)."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Carte de la Lune"
+            "value": "Noms et positions sur la Lune : l’IAU Gazetteer of Planetary Nomenclature, USGS (domaine public)."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "月面図"
+            "value": "月の地名と位置：IAU Gazetteer of Planetary Nomenclature、USGS（パブリックドメイン）。"
           }
         }
       }
     },
-    "Moon names": {
+    "Moon rises at %@, %@ lit.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Namen auf dem Mond"
+            "value": "Mondaufgang um %@, %@ beleuchtet."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moon names"
+            "value": "Moon rises at %@, %@ lit."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nombres de la Luna"
+            "value": "La Luna sale (%@), %@ iluminada."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Noms de la Lune"
+            "value": "Lever de la Lune à %@, %@ éclairée."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "月の地名"
+            "value": "月は%@に昇ります（輝面比%@）。"
+          }
+        }
+      }
+    },
+    "Moon rises at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondaufgang um %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon rises at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna sale: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lever de la Lune à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月は%@に昇ります。"
+          }
+        }
+      }
+    },
+    "Moon too thin to matter, %@ lit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond zu schmal, um zu stören, %@ beleuchtet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon too thin to matter, %@ lit."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna es demasiado fina para importar, %@ iluminada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune trop mince pour compter, %@ éclairée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月は細く、影響はほとんどありません（輝面比%@）。"
+          }
+        }
+      }
+    },
+    "Moon too thin to matter.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond zu schmal, um zu stören."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon too thin to matter."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna es demasiado fina para importar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune trop mince pour compter."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月は細く、影響はほとんどありません。"
           }
         }
       }
@@ -6753,6 +7068,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "完全に暗い時間はずっと月あり"
+          }
+        }
+      }
+    },
+    "Moon up all through true darkness, %@ lit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond während der gesamten echten Dunkelheit am Himmel, %@ beleuchtet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up all through true darkness, %@ lit."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo durante toda la oscuridad total, %@ iluminada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée pendant toute l’obscurité totale, %@ éclairée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間はずっと月が空にあります（輝面比%@）。"
+          }
+        }
+      }
+    },
+    "Moon up until %@, %@ lit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond bis %@ am Himmel, %@ beleuchtet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up until %@, %@ lit."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo hasta %@, %@ iluminada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée jusqu’à %@, %@ éclairée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月は%@まで空にあります（輝面比%@）。"
+          }
+        }
+      }
+    },
+    "Moon up until %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond bis %@ am Himmel."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up until %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo hasta %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée jusqu’à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月は%@まで空にあります。"
           }
         }
       }
@@ -6823,41 +7243,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "月、%1$@、輝面比%2$lldパーセント"
-          }
-        }
-      }
-    },
-    "Moon, %@, %lld percent lit. Next new moon %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mond, %@, zu %lld Prozent beleuchtet. Nächster Neumond %@."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon, %@, %lld percent lit. Next new moon %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna, %@, %lld por ciento iluminada. Próxima luna nueva: %@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lune, %@, éclairée à %lld pour cent. Prochaine nouvelle lune : %@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月、%1$@、輝面比%2$lldパーセント。次の新月は%3$@。"
           }
         }
       }
@@ -7282,41 +7667,6 @@
         }
       }
     },
-    "NASA's Scientific Visualization Studio; LRO LROC and LOLA teams.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scientific Visualization Studio der NASA; LRO-Teams LROC und LOLA."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NASA's Scientific Visualization Studio; LRO LROC and LOLA teams."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scientific Visualization Studio de la NASA; equipos LROC y LOLA del LRO."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scientific Visualization Studio de la NASA ; équipes LROC et LOLA de LRO."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NASA Scientific Visualization Studio、LRO LROCおよびLOLAチーム。"
-          }
-        }
-      }
-    },
     "NOAA estimate": {
       "extractionState": "manual",
       "localizations": {
@@ -7492,76 +7842,6 @@
         }
       }
     },
-    "National Park Service.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "National Park Service."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "National Park Service."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "National Park Service."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "National Park Service."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "National Park Service。"
-          }
-        }
-      }
-    },
-    "National park": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nationalpark"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "National park"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parque nacional"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parc national"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "国立公園"
-          }
-        }
-      }
-    },
     "Nearly dark": {
       "extractionState": "manual",
       "localizations": {
@@ -7663,6 +7943,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "ここでは%@のほとんどの夜は、おおむね晴れます。"
+          }
+        }
+      }
+    },
+    "Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。"
           }
         }
       }
@@ -7772,6 +8087,41 @@
         }
       }
     },
+    "Next new moon %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächster Neumond %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next new moon %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próxima luna nueva: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prochaine nouvelle lune : %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "次の新月は%@。"
+          }
+        }
+      }
+    },
     "Next night": {
       "extractionState": "manual",
       "localizations": {
@@ -7838,6 +8188,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "夜"
+          }
+        }
+      }
+    },
+    "Night and seasonal access: National Park Service, nps.gov, public domain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zugang bei Nacht und je nach Jahreszeit: National Park Service, nps.gov, gemeinfrei."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night and seasonal access: National Park Service, nps.gov, public domain."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acceso de noche y por temporada: National Park Service, nps.gov, dominio público."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accès de nuit et selon la saison : National Park Service, nps.gov, domaine public."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "夜間と季節ごとの通行：National Park Service、nps.gov、パブリックドメイン。"
+          }
+        }
+      }
+    },
+    "Night lights from space: NASA Black Marble (VNP46A4, Román et al. 2018), public domain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nachtlichter aus dem All: NASA Black Marble (VNP46A4, Román et al. 2018), gemeinfrei."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night lights from space: NASA Black Marble (VNP46A4, Román et al. 2018), public domain."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luces nocturnas desde el espacio: NASA Black Marble (VNP46A4, Román et al. 2018), dominio público."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lumières nocturnes vues de l’espace : NASA Black Marble (VNP46A4, Román et al. 2018), domaine public."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "宇宙から見た夜の光：NASA Black Marble（VNP46A4、Román et al. 2018）、パブリックドメイン。"
           }
         }
       }
@@ -8752,6 +9172,41 @@
         }
       }
     },
+    "Nyx can't check closures here. Check the park's own site before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx kann hier keine Sperrungen prüfen. Sieh vor der Fahrt auf der Website des Parks nach."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx can't check closures here. Check the park's own site before you go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx no puede comprobar los cierres aquí. Consulta el sitio del propio parque antes de ir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx ne peut pas vérifier les fermetures ici. Consultez le site du parc avant de partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxはここの閉鎖情報を確認できません。出かける前に、公園の公式サイトを確認してください。"
+          }
+        }
+      }
+    },
     "Nyx could not read the park list that ships inside the app. Reinstalling Nyx restores it.": {
       "extractionState": "manual",
       "localizations": {
@@ -8818,6 +9273,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyxにはアカウントも広告もトラッキングもありません。"
+          }
+        }
+      }
+    },
+    "Nyx has no alerts for this place. Check access, local rules and closures before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx hat für diesen Ort keine Hinweise. Prüfe vor der Fahrt Zugang, örtliche Regeln und Sperrungen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx has no alerts for this place. Check access, local rules and closures before you go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx no tiene alertas para este lugar. Comprueba el acceso, las normas locales y los cierres antes de ir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx n’a pas d’alertes pour ce lieu. Vérifiez l’accès, les règles locales et les fermetures avant de partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxには、この場所のアラートはありません。出かける前に、アクセス、現地のルール、閉鎖情報を確認してください。"
           }
         }
       }
@@ -9417,41 +9907,6 @@
         }
       }
     },
-    "Park data": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parkdaten"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Park data"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Datos de los parques"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Données des parcs"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "公園のデータ"
-          }
-        }
-      }
-    },
     "Park data unavailable": {
       "extractionState": "manual",
       "localizations": {
@@ -9483,6 +9938,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "公園のデータを利用できません"
+          }
+        }
+      }
+    },
+    "Parks and places": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parks und Orte"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parks and places"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parques y lugares"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parcs et lieux"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園と場所"
+          }
+        }
+      }
+    },
+    "Parks, alerts and ranger programs: the National Park Service.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parks, Hinweise und Ranger-Programme: der National Park Service."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parks, alerts and ranger programs: the National Park Service."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parques, alertas y programas de guardaparques: el National Park Service."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parcs, alertes et programmes des rangers : le National Park Service."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園、アラート、レンジャープログラム：National Park Service。"
           }
         }
       }
@@ -9553,6 +10078,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "半影月食"
+          }
+        }
+      }
+    },
+    "Place": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ort"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Place"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lugar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lieu"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "場所"
           }
         }
       }
@@ -10817,6 +11377,41 @@
         }
       }
     },
+    "Sky and light": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Himmel und Licht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky and light"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cielo y luz"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciel et lumière"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空と光"
+          }
+        }
+      }
+    },
     "Sky glow": {
       "extractionState": "manual",
       "localizations": {
@@ -11023,6 +11618,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "「あなたのプライバシー」で煙ともやがオフになっているため、煙は考慮していません。"
+          }
+        }
+      }
+    },
+    "Smoke and haze: contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rauch und Dunst: enthält veränderte Informationen des Copernicus Atmosphere Monitoring Service (2026), über Open-Meteo."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke and haze: contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Humo y bruma: contiene información modificada del Servicio de Vigilancia Atmosférica de Copernicus (2026), vía Open-Meteo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fumée et brume : contient des informations modifiées du Copernicus Atmosphere Monitoring Service (2026), via Open-Meteo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "煙ともや：Copernicus Atmosphere Monitoring Serviceの情報（2026）を加工して含んでいます。Open-Meteo経由。"
           }
         }
       }
@@ -11377,72 +12007,142 @@
         }
       }
     },
-    "Star names": {
+    "Star names: the IAU Working Group on Star Names (WGSN).": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sternnamen"
+            "value": "Sternnamen: die IAU Working Group on Star Names (WGSN)."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Star names"
+            "value": "Star names: the IAU Working Group on Star Names (WGSN)."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nombres de estrellas"
+            "value": "Nombres de estrellas: el Grupo de Trabajo sobre Nombres de Estrellas de la UAI (WGSN)."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Noms des étoiles"
+            "value": "Noms d’étoiles : le groupe de travail de l’UAI sur les noms d’étoiles (WGSN)."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "星の名前"
+            "value": "星の名前：IAU Working Group on Star Names（WGSN）。"
           }
         }
       }
     },
-    "Stars": {
+    "Stars: the Yale Bright Star Catalogue (Hoffleit and Warren), via NASA HEASARC.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sterne"
+            "value": "Sterne: der Yale Bright Star Catalogue (Hoffleit und Warren), über NASA HEASARC."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stars"
+            "value": "Stars: the Yale Bright Star Catalogue (Hoffleit and Warren), via NASA HEASARC."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Estrellas"
+            "value": "Estrellas: el Yale Bright Star Catalogue (Hoffleit y Warren), vía NASA HEASARC."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Étoiles"
+            "value": "Étoiles : le Yale Bright Star Catalogue (Hoffleit et Warren), via NASA HEASARC."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "星"
+            "value": "星：Yale Bright Star Catalogue（Hoffleit and Warren）、NASA HEASARC経由。"
+          }
+        }
+      }
+    },
+    "Starting points in the United States and its outline: U.S. Census Bureau Gazetteer Files, population estimates and cartographic boundaries, public domain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgangspunkte in den USA und ihr Umriss: U.S. Census Bureau Gazetteer Files, Bevölkerungsschätzungen und kartografische Grenzen, gemeinfrei."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting points in the United States and its outline: U.S. Census Bureau Gazetteer Files, population estimates and cartographic boundaries, public domain."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puntos de partida en Estados Unidos y su contorno: archivos Gazetteer, estimaciones de población y límites cartográficos de la Oficina del Censo de EE. UU., dominio público."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Points de départ aux États-Unis et contour du pays : U.S. Census Bureau Gazetteer Files, estimations de population et limites cartographiques, domaine public."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "米国内の出発地と米国の輪郭：U.S. Census Bureau Gazetteer Files、人口推計、地図境界データ、パブリックドメイン。"
+          }
+        }
+      }
+    },
+    "Starting points outside the United States: GeoNames (geonames.org), CC BY 4.0.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgangspunkte außerhalb der USA: GeoNames (geonames.org), CC BY 4.0."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting points outside the United States: GeoNames (geonames.org), CC BY 4.0."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puntos de partida fuera de Estados Unidos: GeoNames (geonames.org), CC BY 4.0."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Points de départ hors des États-Unis : GeoNames (geonames.org), CC BY 4.0."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "米国外の出発地：GeoNames（geonames.org）、CC BY 4.0。"
           }
         }
       }
@@ -11622,37 +12322,37 @@
         }
       }
     },
-    "Terrain": {
+    "Terrain horizons: USGS 3D Elevation Program (public domain); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gelände"
+            "value": "Geländehorizonte: 3D Elevation Program des USGS (gemeinfrei); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Terrain"
+            "value": "Terrain horizons: USGS 3D Elevation Program (public domain); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Relieve"
+            "value": "Horizontes del relieve: 3D Elevation Program del USGS (dominio público); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Relief"
+            "value": "Horizons du relief : 3D Elevation Program de l’USGS (domaine public) ; produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "地形"
+            "value": "地形の地平線：USGS 3D Elevation Program（パブリックドメイン）。 produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
           }
         }
       }
@@ -11863,6 +12563,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "これほど北では、天の川の明るい中心部は地平線の上に出ません。より淡い天の川の帯は、暗い空を横切ります。"
+          }
+        }
+      }
+    },
+    "The Moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Mond"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Lune"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月"
           }
         }
       }
@@ -12143,6 +12878,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "月の満ち欠けと次の新月。いちばん暗い夜が始まる時期です。"
+          }
+        }
+      }
+    },
+    "The Moon: NASA's Scientific Visualization Studio, CGI Moon Kit, with the LRO LROC (Hapke Normalized WAC Mosaic) and LOLA teams.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Mond: Scientific Visualization Studio der NASA, CGI Moon Kit, mit den LRO-Teams LROC (Hapke Normalized WAC Mosaic) und LOLA."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon: NASA's Scientific Visualization Studio, CGI Moon Kit, with the LRO LROC (Hapke Normalized WAC Mosaic) and LOLA teams."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna: Scientific Visualization Studio de la NASA, CGI Moon Kit, con los equipos LRO LROC (Hapke Normalized WAC Mosaic) y LOLA."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Lune : Scientific Visualization Studio de la NASA, CGI Moon Kit, avec les équipes LRO LROC (Hapke Normalized WAC Mosaic) et LOLA."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月：NASA Scientific Visualization Studio、CGI Moon Kit、LRO LROC（Hapke Normalized WAC Mosaic）およびLOLAチーム。"
           }
         }
       }
@@ -12668,41 +13438,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "ここでは極大のとき放射点が低いため、この空に届く流星はわずかです。"
-          }
-        }
-      }
-    },
-    "The planetary K-index forecast of NOAA's Space Weather Prediction Center, U.S. Government work.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die Vorhersage des planetaren K-Index des Space Weather Prediction Center der NOAA, Werk der US-Regierung."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The planetary K-index forecast of NOAA's Space Weather Prediction Center, U.S. Government work."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El pronóstico del índice K planetario del Space Weather Prediction Center de la NOAA, obra del Gobierno de EE. UU."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La prévision de l’indice K planétaire du Space Weather Prediction Center de la NOAA, œuvre du gouvernement des États-Unis."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NOAAのSpace Weather Prediction Centerによる惑星K指数の予報、米国政府の著作物。"
           }
         }
       }
@@ -13722,41 +14457,6 @@
         }
       }
     },
-    "USGS 3D Elevation Program (public domain); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "3D Elevation Program des USGS (gemeinfrei); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "USGS 3D Elevation Program (public domain); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "3D Elevation Program del USGS (dominio público); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "3D Elevation Program de l’USGS (domaine public) ; produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "USGS 3D Elevation Program（パブリックドメイン）。 produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
-          }
-        }
-      }
-    },
     "Until %@": {
       "extractionState": "manual",
       "localizations": {
@@ -13897,72 +14597,72 @@
         }
       }
     },
-    "Usual clouds": {
+    "Usual clouds: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024, Hersbach et al. 2020, CC BY 4.0.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Übliche Bewölkung"
+            "value": "Übliche Bewölkung: enthält veränderte Informationen des Copernicus Climate Change Service (2026): ERA5, 2015 bis 2024, Hersbach et al. 2020, CC BY 4.0."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Usual clouds"
+            "value": "Usual clouds: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024, Hersbach et al. 2020, CC BY 4.0."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nubes habituales"
+            "value": "Nubes habituales: contiene información modificada del Servicio de Cambio Climático de Copernicus (2026): ERA5, 2015 a 2024, Hersbach et al. 2020, CC BY 4.0."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nébulosité habituelle"
+            "value": "Nébulosité habituelle : contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, 2015 à 2024, Hersbach et al. 2020, CC BY 4.0."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "平年の雲量"
+            "value": "平年の雲量：Copernicus Climate Change Serviceの情報（2026）を加工して含んでいます。ERA5、2015〜2024年、Hersbach et al. 2020、CC BY 4.0。"
           }
         }
       }
     },
-    "Usual night temperatures": {
+    "Usual night temperatures: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024, CC BY 4.0.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Übliche Nachttemperaturen"
+            "value": "Übliche Nachttemperaturen: enthält veränderte Informationen des Copernicus Climate Change Service (2026): ERA5, 2015 bis 2024, CC BY 4.0."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Usual night temperatures"
+            "value": "Usual night temperatures: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024, CC BY 4.0."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Temperaturas habituales de noche"
+            "value": "Temperaturas habituales de noche: contiene información modificada del Copernicus Climate Change Service (2026): ERA5, de 2015 a 2024, CC BY 4.0."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Températures nocturnes habituelles"
+            "value": "Températures nocturnes habituelles : contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, de 2015 à 2024, CC BY 4.0."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "夜のふだんの気温"
+            "value": "夜のふだんの気温：Copernicus Climate Change Serviceの情報（2026）を加工して含みます。ERA5、2015〜2024年、CC BY 4.0。"
           }
         }
       }
@@ -14317,6 +15017,41 @@
         }
       }
     },
+    "Weather and air": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wetter und Luft"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weather and air"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clima y aire"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Météo et air"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天気と大気"
+          }
+        }
+      }
+    },
     "Weather data by Open-Meteo.com (CC BY 4.0), as averaged by Nyx.": {
       "extractionState": "manual",
       "localizations": {
@@ -14457,41 +15192,6 @@
         }
       }
     },
-    "Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalogue.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wikidata (CC0), die Datenbank SIMBAD (CDS, Straßburg) und der Harris-Katalog der Kugelsternhaufen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalogue."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wikidata (CC0), la base de datos SIMBAD (CDS, Estrasburgo) y el catálogo de cúmulos globulares de Harris."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wikidata (CC0), la base de données SIMBAD (CDS, Strasbourg) et le catalogue des amas globulaires de Harris."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wikidata（CC0）、SIMBADデータベース（CDS、ストラスブール）、Harrisの球状星団カタログ。"
-          }
-        }
-      }
-    },
     "Without true darkness at this latitude, few meteors will show.": {
       "extractionState": "manual",
       "localizations": {
@@ -14562,37 +15262,72 @@
         }
       }
     },
-    "Yale Bright Star Catalogue (HEASARC).": {
+    "World map: Natural Earth, public domain.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Yale Bright Star Catalogue (HEASARC)."
+            "value": "Weltkarte: Natural Earth, gemeinfrei."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Yale Bright Star Catalogue (HEASARC)."
+            "value": "World map: Natural Earth, public domain."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Yale Bright Star Catalogue (HEASARC)."
+            "value": "Mapa del mundo: Natural Earth, dominio público."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Yale Bright Star Catalogue (HEASARC)."
+            "value": "Carte du monde : Natural Earth, domaine public."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Yale Bright Star Catalogue（HEASARC）。"
+            "value": "世界地図：Natural Earth、パブリックドメイン。"
+          }
+        }
+      }
+    },
+    "World parks and dark-sky places: Wikidata, CC0.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parks und Dunkelorte weltweit: Wikidata, CC0."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "World parks and dark-sky places: Wikidata, CC0."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parques y lugares de cielo oscuro del mundo: Wikidata, CC0."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parcs et sites de ciel étoilé du monde : Wikidata, CC0."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "世界の公園と暗い空の場所：Wikidata、CC0。"
           }
         }
       }
