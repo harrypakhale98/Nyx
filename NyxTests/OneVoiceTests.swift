@@ -159,20 +159,20 @@ struct OneVoiceTests {
 
     // MARK: The Moon
 
-    /// Vision Pro's Moon note under its night is the iPhone's and the watch's rule
-    /// (`SkyConditions.moonSentence`, without the percent the line above shows): the words it wrote
-    /// by hand for a Moon-free night, a Moon up all through, and a share; nothing without true darkness.
+    /// Vision Pro's Moon note under its night is the glance the iPhone's Moonlight caption uses
+    /// (`SkyConditions.moonShort`): the rise and set are the value above it, so the note says what they
+    /// mean for true darkness; nothing of the kind without true darkness.
     @Test func visionMoonNoteIsTheSharedRule() throws {
         let jotr = try park("jotr")
         var found: Set<String> = []
         for offset in 0..<30 {
             let sky = AstronomyEngine().conditions(for: jotr, on: jotr.date(jotr.currentNight(at: now), addingDays: offset))
-            let note = try #require(sky.moonSentence(park: jotr, withLit: false))
-            #expect(!note.contains("%") || note.contains("of true darkness"))
+            let note = sky.moonShort(park: jotr)
             switch sky.moonInDarkness {
-            case .allFree: #expect(note == Sentences.end(String(localized: "Moon-free through all of true darkness"))); found.insert("free")
-            case .allUp: #expect(note == Sentences.end(String(localized: "Moon up all through true darkness"))); found.insert("up")
-            case .partial(let free): #expect(note == Sentences.end(String(localized: "Moon-free for \(free)% of true darkness"))); found.insert("partial")
+            case .allFree: #expect(note == String(localized: "Moon down")); found.insert("free")
+            case .allUp: #expect(note == String(localized: "Dark, Moon up")); found.insert("up")
+            case .risesAt(let rise): #expect(note == String(localized: "Dark until \(jotr.time(rise))")); found.insert("rises")
+            case .partial(let free): #expect(note == String(localized: "Moon-free for \(free)% of true darkness")); found.insert("partial")
             default: break
             }
         }

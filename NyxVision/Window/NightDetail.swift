@@ -65,11 +65,6 @@ struct NightDetail: View {
                 VisionEyebrow(text: park.darkSkyDesignated ? "\(states) · \(String(localized: "International Dark Sky Park"))" : "\(states)", meta: true)
                 Text(park.dayLabel(plan.sky.evening)).font(.subheadline).foregroundStyle(palette.muted)
             }
-            // The closure is the one line that must never be lost: beside the score.
-            if let closure = inputs.closure(park) {
-                VisionCaution(text: Text(closure)).font(.headline)
-                    .accessibilityLabel(Text(ClosureLine.spoken(closure)))
-            }
             Text(plan.score.value, format: .number)
                 .scoreNumeral(size: numeral, accent: palette.accent)
                 .contentTransition(reduceMotion ? .opacity : .numericText(value: Double(plan.score.value)))
@@ -81,6 +76,12 @@ struct NightDetail: View {
             // larger than the band (the score's spoken value says "out of 100").
             if !typeSize.isAccessibilitySize {
                 Text("Darkness / 100").font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true)
+            }
+            // The closure is the one line that must never be lost: directly under the score, as on
+            // every device (`ClosureLabel` on the iPhone).
+            if let closure = inputs.closure(park) {
+                VisionCaution(text: Text(closure)).font(.headline)
+                    .accessibilityLabel(Text(ClosureLine.spoken(closure)))
             }
             // Haze or smoke thick enough to wash out the Milky Way, in ink beside the score, by
             // the iPhone's rule and words (`Night.smokeCaveat`), whether or not it holds the score down.
@@ -155,8 +156,9 @@ struct NightDetail: View {
         // Three columns side by side; stacked at accessibility sizes, where columns would clip.
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14)) : AnyLayout(HStackLayout(alignment: .top, spacing: 14))
         // Without true darkness there is nothing for the Moon to stay out of, so say that instead.
-        // In the iPhone's and the watch's words (`SkyConditions.moonSentence`); how much is lit is the value above.
-        let moonNote = sky.moonSentence(park: park, withLit: false) ?? String(localized: "The Moon counts only in true darkness, and this night has none.")
+        // At a glance, as the iPhone's Moonlight caption says it (`SkyConditions.moonShort`): the rise and
+        // set are the value above, so the note says what they mean for true darkness ("Dark until 7:48 PM").
+        let moonNote = sky.darkHours > 0 ? sky.moonShort(park: park) : String(localized: "The Moon counts only in true darkness, and this night has none.")
         // The month's usual night (ERA5), in the iPhone's words: there is no hourly forecast detail here.
         let month = park.calendar.component(.month, from: plan.sky.evening)
         let usual = NightClimate.shared.lines(park, month: month)
