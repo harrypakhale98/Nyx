@@ -23,7 +23,7 @@ import UserNotifications
         container=opened.container
         LaunchSignposts.end(store)
         let planner=LaunchSignposts.begin("PlanModel init")
-        let model=PlanModel(preload:preload)
+        let model=PlanModel(preload:preload,defaults:DebugScenario.plannerDefaults())
         // `-nyx-journal-unavailable` (DEBUG) shows the journal banner for screenshots.
         model.journalUnavailable=opened.failed || DebugScenario.isEnabled("journal-unavailable")
         model.journalNeedsSpace=opened.shortOfSpace
