@@ -43,8 +43,11 @@ struct ClosureLabel: View {
                     .background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:NyxMetrics.chipRadius,style:.continuous))
             } else { label }
         }
+        // One element in its own words, and text, as a label is: an element without the trait reads as
+        // a control, held to a control's tap target.
         .accessibilityElement(children:.ignore)
         .accessibilityLabel(ClosureLine.spoken(closure))
+        .accessibilityAddTraits(.isStaticText)
     }
 }
 
