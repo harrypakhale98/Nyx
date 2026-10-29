@@ -91,7 +91,7 @@ nonisolated enum BestNightSearch {
     /// Service does not run, it ends by saying Nyx cannot check closures there. `closure`: the best
     /// night's park's closure, said first.
     static func dialog(_ answer: Answer, voiceOnly: Bool, closure: String? = nil) -> String {
-        DarknessAnswer.withClosures(answer.best.spokenSummary(.siriBest(count:answer.count,voiceOnly:voiceOnly,noDarkness:answer.noDarkness)),park:answer.best.park,closure:closure)
+        ClosureLine.around(answer.best.spokenSummary(.siriBest(count:answer.count,voiceOnly:voiceOnly,noDarkness:answer.noDarkness)),park:answer.best.park,closure:closure)
     }
 }
 

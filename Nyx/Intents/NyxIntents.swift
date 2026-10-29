@@ -121,12 +121,6 @@ nonisolated struct DarknessAnswer:Sendable {
     static func dialog(_ night:Night,closure:String?,inputs:ScoreInputs?=nil,forecastsOn:Bool=true,voiceOnly:Bool)->String {
         (inputs?.answer(night,closure:closure,forecastsOn:forecastsOn) ?? TonightAnswer(night:night,closure:closure,forecastsOn:forecastsOn)).dialog(voiceOnly:voiceOnly)
     }
-    /// Every other spoken answer about a place, as to closures: a park's closure first; at a place
-    /// the Park Service does not run, a last sentence that says Nyx cannot know its closures
-    /// (`ClosureLine.unknown`), so silence never reads as "nothing is closed".
-    static func withClosures(_ body:String,park:Park,closure:String?)->String {
-        ClosureLine.first(Sentences.join([body,ClosureLine.unknown(park) ?? ""]),closure:closure)
-    }
 }
 /// Siri's card for tonight's score: the score on a still dial (Siri shows a snapshot, so nothing
 /// counts up), the Moon as it is tonight, what the clouds rest on, and the closure the answer led with.
@@ -168,7 +162,7 @@ struct DarknessSnippetView:View {
     }
     /// What VoiceOver reads for the card: the closure first, as the dialog says it.
     static func spoken(_ night:Night,closure:String?)->String {
-        DarknessAnswer.withClosures(night.spokenSummary(.snippet),park:night.park,closure:closure)
+        ClosureLine.around(night.spokenSummary(.snippet),park:night.park,closure:closure)
     }
 }
 /// The celestial gauge's arc and numeral, drawn once: for snapshots (Siri) where nothing animates.
