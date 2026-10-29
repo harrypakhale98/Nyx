@@ -14,12 +14,11 @@ nonisolated enum NightVerdict {
     /// A darker night counts only this many points above the one shown, and from "Good" up: one rule
     /// for the park page and for Tonight, so the two never name "darker" nights by different measures.
     static let darkerMargin=10
-    static let darkerFloor=60
-    /// The nights from tonight over which a place's best night is chosen, wherever one is named: the
-    /// park page's "Darker on…", Tonight's capsule, Best nights, the river's "Best night", With the
-    /// lights out. One window (Best nights' 30, a whole lunar cycle, so the next new Moon is always in
-    /// it) and one ranking (`best`), so every surface names the same night with the same number.
-    static let horizon=BestNightsInReach.nights
+    static let darkerFloor=ScoreBand.good.minimum
+    /// The nights from tonight over which a place's best night is chosen (`NightPlanner.horizon`).
+    /// One window and one ranking (`NightPlanner.best`), so every surface names the same night with
+    /// the same number.
+    static let horizon=NightPlanner.horizon
     /// Whether `ahead` clears `night` by the margin and reaches the floor.
     static func clearlyDarker(_ ahead: Night, than night: Night) -> Bool {
         ahead.score.value>=night.score.value+darkerMargin && ahead.score.value>=darkerFloor
@@ -29,7 +28,7 @@ nonisolated enum NightVerdict {
 
     static func line(sky: SkyConditions, core: SkyAlmanac.CoreNight, park: Park, darker: Night?=nil) -> Line? {
         guard sky.darkHours>0 else { return nil }
-        let moon=moonSentence(sky: sky, park: park)
+        let moon=sky.moonSentence(park: park)
         let milkyWay=coreSentence(core, sky: sky, park: park)
         // In the capsule's own words (`capsule`), so "Darker on…" is said one way wherever it is said.
         let ahead=darker.map { Sentences.end(capsule($0, here: true)) }
@@ -37,20 +36,8 @@ nonisolated enum NightVerdict {
         let spoken=Sentences.join([moon, milkyWay?.spoken, ahead].compactMap { $0 })
         return text.isEmpty ? nil : Line(text: text, spoken: spoken)
     }
-    /// Where the Moon is during true darkness, with how much of it is lit.
-    static func moonSentence(sky: SkyConditions, park: Park) -> String? {
-        let lit=sky.moon.illumination.formatted(.percent.precision(.fractionLength(0)))
-        // In the words the watch and the share card use for the same night.
-        if sky.moonDownPercent==100 { return Sentences.end(String(localized: "Moon-free through all of true darkness")) }
-        if sky.moon.illumination<0.05 { return String(localized: "Moon too thin to matter, \(lit) lit.") }
-        if sky.moonDownPercent==0 { return String(localized: "Moon up all through true darkness, \(lit) lit.") }
-        if let start=sky.darkStart, let end=sky.darkEnd {
-            let dark=DateInterval(start: start, end: max(start, end))
-            if let set=sky.moonset, dark.contains(set) { return String(localized: "Moon up until \(park.time(set)), \(lit) lit.") }
-            if let rise=sky.moonrise, dark.contains(rise) { return String(localized: "Moon rises at \(park.time(rise)), \(lit) lit.") }
-        }
-        return Sentences.end(String(localized: "Moon-free for \(sky.moonDownPercent)% of true darkness"))
-    }
+    /// Where the Moon is during true darkness, with how much of it is lit (`SkyConditions.moonSentence`).
+    static func moonSentence(sky: SkyConditions, park: Park) -> String? { sky.moonSentence(park: park) }
     /// The core in true darkness: its Moon-free stretch, briefly, under the Moon, or not up at all.
     /// Nil where the core is never usefully up (far north), as What's up explains it there.
     static func coreSentence(_ core: SkyAlmanac.CoreNight, sky: SkyConditions, park: Park) -> Line? {
@@ -75,11 +62,9 @@ nonisolated enum NightVerdict {
     /// "82, Moon and darkness only" where the place has no usual clouds), and ", haze or smoke" when
     /// smoke holds it down. A later night is never set beside tonight's as if both were forecasts.
     static func scored(_ night: Night) -> String { night.score.withBasis(String(night.score.value)) }
-    /// A place's best night: the first of `nights` (its nights from tonight over `horizon`) by
-    /// `NightPlanner.better`, the ranking every best night uses (score, then the darker measured sky,
-    /// the parts beneath a cap, the longer darkness, the surer forecast, the earlier night). A
-    /// closure is left out: it costs every night of one park alike, so it never moves the night.
-    static func best(_ nights: [Night]) -> Night? { nights.min(by: NightPlanner.better) }
+    /// A place's best night (`NightPlanner.best`). A closure is left out: it costs every night of
+    /// one park alike, so it never moves the night.
+    static func best(_ nights: [Night]) -> Night? { NightPlanner.best(nights) }
     /// The park page's "Darker on…": the place's best night (`best` over its nights from tonight),
     /// when it falls after the night shown, clears it by `darkerMargin` and reaches "Good". Never a
     /// nearer night that is merely darker than this one, so the page and every list name one night.

@@ -461,8 +461,9 @@ nonisolated struct CompactDetail: Codable, Sendable, Equatable {
     }
 }
 
-/// The moments of one night that change what you can see, in order. Moon events count only
-/// between sunset and sunrise (or across the whole night where the Sun never sets or rises).
+/// The moments of one night that change what you can see, in order. Moon events count as on the
+/// iPhone's field night (`FieldNight`): only for a Moon that matters (`MoonPhase.negligible` is not)
+/// and inside the night (`SkyAlmanac.nightWindow`, sunset to sunrise or the midnight sun's cloud window).
 nonisolated struct NightMilestone: Sendable, Equatable, Identifiable {
     enum Kind: Int, Sendable, CaseIterable { case sunset, darkStart, moonrise, moonset, darkEnd, sunrise }
     let kind: Kind
@@ -490,13 +491,14 @@ nonisolated struct NightMilestone: Sendable, Equatable, Identifiable {
         }
     }
     static func list(for sky: SkyConditions) -> [NightMilestone] {
-        let from = sky.sunset ?? sky.evening, to = sky.sunrise ?? sky.end
+        // Within a minute of the window's edges, as the iPhone's list bounds it.
+        let window = SkyAlmanac.nightWindow(sky), from = window.start.addingTimeInterval(-60), to = window.end.addingTimeInterval(60)
         var all: [NightMilestone] = []
         func add(_ kind: Kind, _ date: Date?) { if let date { all.append(NightMilestone(kind: kind, date: date)) } }
         add(.sunset, sky.sunset); add(.darkStart, sky.darkStart); add(.darkEnd, sky.darkEnd); add(.sunrise, sky.sunrise)
         // A dark window that runs to the night's edge (polar night) has no real crossing there.
         all.removeAll { ($0.kind == .darkStart && $0.date <= sky.evening) || ($0.kind == .darkEnd && $0.date >= sky.end) }
-        for (kind, date) in [(Kind.moonrise, sky.moonrise), (.moonset, sky.moonset)] {
+        for (kind, date) in [(Kind.moonrise, sky.moonrise), (.moonset, sky.moonset)] where !sky.moon.negligible {
             if let date, date >= from, date <= to { all.append(NightMilestone(kind: kind, date: date)) }
         }
         return all.sorted { $0.date == $1.date ? $0.kind.rawValue < $1.kind.rawValue : $0.date < $1.date }

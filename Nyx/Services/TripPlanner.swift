@@ -99,7 +99,7 @@ nonisolated enum TripPlanner {
         var glow=0.0, parts=0.0, dark=0.0, spread=0.0, certainty=0.0
         init() {}
         init(_ night: Night) {
-            glow=NightPlanner.glowRank(night.park.id); parts=NightPlanner.partsSum(night.score); dark=night.sky.darkHours
+            glow=NightPlanner.glowRank(night.park.id); parts=night.score.rawPartsSum; dark=night.sky.darkHours
             // No models' spread ranks below any spread, as in `better`.
             spread=night.modelSpread ?? 1000; certainty=NightPlanner.certainty(night.basis)
         }
@@ -238,15 +238,10 @@ nonisolated enum TripPlanner {
         }
         return stays
     }
-    /// One line on why a night was chosen: "New moon, 0% cloud forecast, Bortle 2".
+    /// One line on why a night was chosen: "Moon down, 0% cloud forecast, Bortle 2". The Moon in the
+    /// words every glance uses for true darkness (`MoonInDarkness.short`).
     static func reason(_ night: Night) -> String {
-        let lit=Int((night.sky.moon.illumination*100).rounded())
-        var parts:[String]=[]
-        if night.sky.darkHours==0 { parts.append(String(localized:"No true darkness at this latitude")) }
-        else if lit<=1 { parts.append(String(localized:"New moon")) }
-        // "All" only when it is all, as the park's page says it (`SkyConditions.moonDownPercent`).
-        else if night.sky.moonDownPercent==100 { parts.append(String(localized:"Moon-free through all of true darkness")) }
-        else { parts.append(String(localized:"Moon \(lit)% lit")) }
+        var parts=[night.sky.moonShort(park:night.park)]
         if let cloud=night.cloudCover { parts.append(night.score.hasForecast ? String(localized:"\(Int(cloud.rounded()))% cloud forecast") : String(localized:"\(Int(cloud.rounded()))% cloud forecast, an early look")) }
         // "Not yet" beyond the forecast's reach, "unavailable" within it, as every surface says it.
         else if let usual=night.usualCloud { parts.append(night.beyondForecast ? String(localized:"no cloud forecast yet, usually \(Int(usual.rounded()))% cloud") : String(localized:"cloud forecast unavailable, usually \(Int(usual.rounded()))% cloud")) }

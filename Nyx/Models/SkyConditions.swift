@@ -21,6 +21,13 @@ nonisolated struct MoonPhase: Codable, Sendable {
         default: String(localized: "Waning crescent")
         }
     }
+    /// How much of the disc is lit, as a whole percent: the one number every surface shows.
+    var percentLit: Int { Int((illumination*100).rounded()) }
+    /// Too thin to matter (under 5% lit), judged on the number shown, so "5% lit" is never called negligible
+    /// and "4% lit" always is. The one threshold for "is the Moon in the way?" (`AstronomyEngine.moonHidden`).
+    var negligible: Bool { percentLit < 5 }
+    /// "23% lit", the percent written as the reader's locale writes it.
+    var litText: String { String(localized: "\(Percent.text(percentLit)) lit") }
 }
 nonisolated struct SkyConditions: Sendable {
     let evening: Date
@@ -57,6 +64,63 @@ nonisolated struct SkyConditions: Sendable {
         if let lowestSun { return (lowestSun.addingTimeInterval(-2*3600), lowestSun.addingTimeInterval(2*3600)) }
         return (evening.addingTimeInterval(10*3600), evening.addingTimeInterval(14*3600))
     }
+    /// Where the Moon is during true darkness, decided once for every surface (`MoonInDarkness`).
+    /// "All" and "none" by `moonDownPercent`, so the iPhone, the watch and Vision Pro round alike.
+    var moonInDarkness: MoonInDarkness {
+        guard darkHours > 0 else { return .noDarkness }
+        if moonDownPercent == 100 { return .allFree }
+        if moon.negligible { return .negligible }
+        if moonDownPercent == 0 { return .allUp }
+        if let darkStart, let darkEnd {
+            let dark = DateInterval(start: darkStart, end: max(darkStart, darkEnd))
+            if let moonset, dark.contains(moonset) { return .setsAt(moonset) }
+            if let moonrise, dark.contains(moonrise) { return .risesAt(moonrise) }
+        }
+        return .partial(percentFree: moonDownPercent)
+    }
+}
+/// The Moon during a night's true darkness, in the order it is decided: none to speak of, then a
+/// Moon that sets or rises inside it, then how much of it is Moon-free. One rule, two lengths of
+/// words (`sentence`, `short`), so no surface says the Moon matters where another says it does not.
+nonisolated enum MoonInDarkness: Sendable, Equatable {
+    case noDarkness, allFree, negligible, allUp
+    case setsAt(Date)
+    case risesAt(Date)
+    case partial(percentFree: Int)
+    /// One sentence for under a dial: "Moon up until 11:40 PM, 23% lit." `withLit: false` leaves out
+    /// how much is lit, for a surface that shows the phase and percent on the line above (the watch,
+    /// Vision Pro). Nil without true darkness: the heroes already say "No true darkness tonight at
+    /// this latitude."
+    func sentence(park: Park, moon: MoonPhase, withLit: Bool = true) -> String? {
+        let lit = Percent.text(moon.percentLit)
+        switch self {
+        case .noDarkness: return nil
+        case .allFree: return Sentences.end(String(localized: "Moon-free through all of true darkness"))
+        case .negligible: return withLit ? String(localized: "Moon too thin to matter, \(lit) lit.") : String(localized: "Moon too thin to matter.")
+        case .allUp: return withLit ? String(localized: "Moon up all through true darkness, \(lit) lit.") : Sentences.end(String(localized: "Moon up all through true darkness"))
+        case .setsAt(let set): return withLit ? String(localized: "Moon up until \(park.time(set)), \(lit) lit.") : String(localized: "Moon up until \(park.time(set)).")
+        case .risesAt(let rise): return withLit ? String(localized: "Moon rises at \(park.time(rise)), \(lit) lit.") : String(localized: "Moon rises at \(park.time(rise)).")
+        case .partial(let free): return Sentences.end(String(localized: "Moon-free for \(free)% of true darkness"))
+        }
+    }
+    /// The same at a glance, a few words with no full stop: "Moon down at 11:40 PM".
+    func short(park: Park) -> String {
+        switch self {
+        case .noDarkness: String(localized: "No true darkness")
+        case .negligible: String(localized: "Almost no moonlight")
+        case .allFree: String(localized: "Moon down")
+        case .allUp: String(localized: "Dark, Moon up")
+        case .setsAt(let set): String(localized: "Moon down at \(park.time(set))")
+        case .risesAt(let rise): String(localized: "Dark until \(park.time(rise))")
+        case .partial(let free): String(localized: "Moon-free for \(free)% of true darkness")
+        }
+    }
+}
+extension SkyConditions {
+    /// `moonInDarkness` in one sentence (`MoonInDarkness.sentence`).
+    nonisolated func moonSentence(park: Park, withLit: Bool = true) -> String? { moonInDarkness.sentence(park: park, moon: moon, withLit: withLit) }
+    /// `moonInDarkness` at a glance (`MoonInDarkness.short`).
+    nonisolated func moonShort(park: Park) -> String { moonInDarkness.short(park: park) }
 }
 nonisolated enum ScoreBand: String, Codable, CaseIterable, Sendable {
     case pristine, excellent, good, fair, poor
@@ -146,8 +210,11 @@ nonisolated struct DarknessScore: Sendable {
         self.basis=basis ?? (cloudPoints == nil ? .usual : .forecast); self.cloudUsed=cloudUsed; self.limit=limit
     }
     var band: ScoreBand { .band(value) }
+    /// The four parts added, unrounded: what the night would score if nothing held it down (ties
+    /// between equal scores are broken on it, `NightPlanner.better`).
+    var rawPartsSum: Double { moonPoints+(cloudPoints ?? 0)+bortlePoints+lengthPoints }
     /// The four parts added, rounded once: the score before any cap.
-    var partsSum: Int { Int((moonPoints+(cloudPoints ?? 0)+bortlePoints+lengthPoints).rounded()) }
+    var partsSum: Int { Int(rawPartsSum.rounded()) }
     /// The parts as whole points that always add up to `partsSum` (largest remainder), so the numbers
     /// a reader adds on a breakdown make the total beside them; rounding each part alone could show
     /// 40 + 25 + 15 + 15 beside a sum of 94.

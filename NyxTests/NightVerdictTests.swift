@@ -31,7 +31,7 @@ import Testing
     @Test func moonlessSummerNightGivesTheCoreWindow() throws {
         let jotr = try park("jotr")
         let days = (1...28).map { String(format: "2027-07-%02d", $0) }
-        let dark = try #require(try days.map { try sky(jotr, $0) }.first { $0.moon.illumination < 0.05 })
+        let dark = try #require(try days.map { try sky(jotr, $0) }.first { $0.moon.negligible })
         let line = try #require(verdict(jotr, dark))
         // In the watch's and share card's words.
         #expect(line.text.hasPrefix("Moon-free through all of true darkness.") || line.text.hasPrefix("Moon too thin to matter, "))
@@ -66,7 +66,7 @@ import Testing
             let sky = engine.conditions(for: jotr, on: jotr.evening(day))
             guard sky.darkHours > 0, let line = NightVerdict.moonSentence(sky: sky, park: jotr) else { continue }
             #expect(line.hasPrefix("Moon-free through all") == (sky.moonDownPercent == 100))
-            if sky.moonDownPercent == 0 && sky.moon.illumination >= 0.05 { #expect(line.hasPrefix("Moon up all through")) }
+            if sky.moonDownPercent == 0 && !sky.moon.negligible { #expect(line.hasPrefix("Moon up all through")) }
         }
     }
     /// A short name never ends in a bare number: "Constitution 1857" read as a place and a figure.

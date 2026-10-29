@@ -247,6 +247,13 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
     }
     enum Body { case sun, moon }
     func lunarAltitude(at date: Date, park: Park) -> Double { lunarAltitude(at: date, park: park, moon: lunarPosition(at: date)) }
+    /// Whether the Moon is out of the way at a moment: too thin to matter (`MoonPhase.negligible`) or
+    /// its upper limb below the refracted horizon, as rises and sets are timed. The one rule for every
+    /// "Moon down" a surface names (the core's Moon-free window, a shower's best moment, the clear
+    /// window, the watch's next dark).
+    func moonHidden(at date: Date, park: Park, phase: MoonPhase) -> Bool {
+        phase.negligible || lunarAltitude(at: date, park: park) + 0.833 < 0
+    }
     /// The Moon's distance from Earth's centre, km (Meeus ch. 47, main terms; within about 300 km).
     func lunarDistance(at date: Date) -> Double { lunarPosition(at: date).distance }
     /// The Moon's altitude (parallax-corrected, as seen from the park) and azimuth, degrees. Parallax

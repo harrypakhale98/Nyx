@@ -42,7 +42,19 @@ nonisolated struct NyxPalette: Equatable, Sendable {
     /// The iPad sidebar's selected row: "now" is amber, as the selected tab is on iPhone, deepened so
     /// its starlight label keeps its contrast on the fill. Through night vision a dark grey.
     var selectionTint:Color { nightVision ? Color(white:0.22) : Color(red:0.65,green:0.35,blue:0.10) }
-    var muted: Color { ink.opacity(nightVision ? 0.96 : highContrast ? 0.9 : 0.72) }
+    /// Secondary text's opacity over its ink, the one rule for every surface (the app, `NightLook`'s
+    /// widgets, Live Activity and Siri cards): starlight at 72%, 90% under Increase Contrast; night
+    /// vision's red, already dim, at 96% (4.5:1 for protan eyes too, `Scripts/contrast.py`) and in full
+    /// under Increase Contrast.
+    static func mutedOpacity(nightVision: Bool, highContrast: Bool) -> Double {
+        nightVision ? (highContrast ? 1 : 0.96) : highContrast ? 0.9 : 0.72
+    }
+    /// A quieter level than muted, for starlight only (a footnote under a line, a passed moment): in
+    /// red, or under Increase Contrast, it is muted, since nothing dimmer would still read.
+    static func faintOpacity(nightVision: Bool, highContrast: Bool) -> Double {
+        nightVision || highContrast ? mutedOpacity(nightVision: nightVision, highContrast: highContrast) : 0.62
+    }
+    var muted: Color { ink.opacity(Self.mutedOpacity(nightVision: nightVision, highContrast: highContrast)) }
     var panel: Color { nightVision ? Color(red:0.07,green:0.008,blue:0.005) : Self.indigo }
     /// Hairlines, tracks and outlines reach 3:1 against black and the panel (WCAG 1.4.11 for
     /// graphical objects): starlight at 40%, and at 70% through night vision's red, which dims it.

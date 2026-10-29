@@ -105,7 +105,8 @@ struct DelightTests {
         #expect(plan.stops.count==3)
         for stop in plan.stops {
             #expect(stop.night.score.value<=39 && !stop.night.score.hasForecast)
-            #expect(stop.reason.hasPrefix(String(localized:"No true darkness at this latitude")))
+            // The Moon's glance words (`MoonInDarkness.short`), which lead with the darkness when there is none.
+            #expect(stop.reason.hasPrefix(String(localized:"No true darkness")+", "))
             // "Not yet" beyond the forecast's reach, "unavailable" within it, as everywhere else.
             #expect(stop.reason.contains(stop.night.beyondForecast ? String(localized:"no cloud forecast yet") : String(localized:"cloud forecast unavailable")))
         }

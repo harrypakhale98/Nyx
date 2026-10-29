@@ -108,7 +108,8 @@ nonisolated struct AdaptationClock: Equatable, Sendable {
     }
 }
 
-/// The next stretch of truly dark sky: the Sun 18° down and the Moon below the horizon. What the
+/// The next stretch of truly dark sky: the Sun 18° down and the Moon out of the way (below the
+/// horizon, or too thin to matter, `AstronomyEngine.moonHidden`, as the iPhone judges it). What the
 /// "Next dark" complication counts down to.
 nonisolated enum DarkMoment: Equatable, Sendable {
     /// Moon-free true darkness now, until the Moon rises (`moonrise`) or dawn twilight begins.
@@ -128,10 +129,12 @@ nonisolated enum DarkMoment: Equatable, Sendable {
             let evening = park.date(tonight, addingDays: offset)
             let sky = conditions?(evening) ?? engine.conditions(for: park, on: evening)
             guard let darkStart = sky.darkStart, let darkEnd = sky.darkEnd, darkEnd > darkStart, darkEnd > now else { continue }
-            // Split true darkness at the Moon's crossings and keep the stretches it is down.
-            let edges = [darkStart] + [sky.moonrise, sky.moonset].compactMap { $0 }.filter { $0 > darkStart && $0 < darkEnd }.sorted() + [darkEnd]
+            // Split true darkness at the Moon's crossings and keep the stretches it is out of the way.
+            // A Moon too thin to matter never splits it: all of true darkness is one dark stretch.
+            let crossings = sky.moon.negligible ? [] : [sky.moonrise, sky.moonset].compactMap { $0 }
+            let edges = [darkStart] + crossings.filter { $0 > darkStart && $0 < darkEnd }.sorted() + [darkEnd]
             let free = zip(edges, edges.dropFirst()).filter { a, b in
-                engine.lunarAltitude(at: a.addingTimeInterval(b.timeIntervalSince(a)/2), park: park) + 0.833 < 0
+                engine.moonHidden(at: a.addingTimeInterval(b.timeIntervalSince(a)/2), park: park, phase: sky.moon)
             }
             // The Moon up through all of tonight's darkness is tonight's answer; a moon-free stretch
             // already over leaves only moonlight tonight, so the answer is tomorrow night's.
@@ -164,7 +167,7 @@ nonisolated struct MoonNow: Sendable {
     /// Nil without a park: the phase is the same everywhere, rising and setting are not.
     let isUp: Bool?
     let next: Event?
-    var percent: Int { Int((phase.illumination*100).rounded()) }
+    var percent: Int { phase.percentLit }
 
     /// Rises and sets from the night before the park's current one through the night after, in
     /// order. Nights run noon to noon, and in the morning "tonight" is the coming evening, so a
@@ -213,7 +216,7 @@ nonisolated enum CloudSource: Equatable, Sendable {
     case spotsOff
 
     /// After this the watch asks for a fresh forecast; the score itself fades an old one by lead time.
-    static let lifetime: TimeInterval = 36*3600
+    static let lifetime = Forecast.recentFor
 
     /// `wanted`: the places this watch asks the iPhone for (`WatchSky.wantedPlaces`).
     static func of(context: WatchContext?, park: Park, now: Date, wanted: [String] = []) -> CloudSource {

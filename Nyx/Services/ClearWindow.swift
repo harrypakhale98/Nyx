@@ -5,7 +5,8 @@ import Foundation
 /// the hourly forecast already on the phone, or handed to the watch; only forecast nights have one.
 nonisolated struct ClearWindow: Sendable, Equatable {
     let interval: DateInterval
-    /// True when the Moon (at least 5% lit) is below the horizon throughout; a new Moon is not named.
+    /// True when a Moon that matters (`MoonPhase.negligible` is not) is below the horizon throughout;
+    /// a new Moon is not named.
     let moonDown: Bool
     /// Where the core is 10° up inside the window, when for at least half an hour.
     let core: DateInterval?
@@ -31,9 +32,8 @@ nonisolated struct ClearWindow: Sendable, Equatable {
                 .flatMap { abs($0.time.timeIntervalSince(date)) <= 1800 ? $0.cloud : nil }
         }
         let clear = { (date: Date) in (cloud(date) ?? 100) < clearBelow }
-        let lit = sky.moon.illumination >= 0.05
-        let moonOK = { (date: Date) in !lit || engine.lunarAltitude(at: date, park: park) < -0.833 }
-        var moonDown = lit
+        let moonOK = { (date: Date) in engine.moonHidden(at: date, park: park, phase: sky.moon) }
+        var moonDown = !sky.moon.negligible
         var base = almanac.longest(in: dark) { clear($0) && moonOK($0) }
         if (base?.duration ?? 0) < minimum { base = almanac.longest(in: dark, where: clear); moonDown = false }
         guard let base, base.duration >= minimum else { return nil }
@@ -49,13 +49,8 @@ nonisolated struct ClearWindow: Sendable, Equatable {
     static func find(_ night: Night, forecast: Forecast?, layers: HourlySeries?) -> ClearWindow? {
         guard night.score.hasForecast else { return nil }
         let window = night.sky.cloudWindow
-        var hours: [(time: Date, cloud: Double)] = []
-        if night.upperCloudOnly, let layers, let mid = layers.values["cloud_cover_mid"], let high = layers.values["cloud_cover_high"], mid.count == layers.times.count, high.count == layers.times.count {
-            hours = layers.times.indices.compactMap { i in
-                guard let m = mid[i], let h = high[i], layers.times[i]+1800 > window.start.timeIntervalSince1970, layers.times[i]-1800 < window.end.timeIntervalSince1970 else { return nil }
-                return (Date(timeIntervalSince1970: layers.times[i]), 100*(1-(1-m/100)*(1-h/100)))
-            }
-        } else if let forecast { hours = forecast.hours(from: window.start, to: window.end) }
-        return find(park: night.park, sky: night.sky, hours: hours)
+        // The summit's layers combined as the score combines them (`HourlySeries.upperCloud`), invalid hours left out.
+        let clouds = night.upperCloudOnly ? layers?.upperCloud ?? forecast : forecast
+        return find(park: night.park, sky: night.sky, hours: clouds?.hours(from: window.start, to: window.end) ?? [])
     }
 }

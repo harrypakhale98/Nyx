@@ -21,7 +21,8 @@ import Testing
         let look=try NightLook(defaults: defaults(nightVision: true))
         #expect(look.nightVision && look.red == .standard)
         #expect(look.inkRGB == NightTint.standard.rgb && look.accentRGB == NightTint.standard.rgb)
-        #expect(look.mutedOpacity == 0.9)
+        // 96%, as in the app: 90% fell under 4.5:1 for protan eyes.
+        #expect(look.mutedOpacity == 0.96)
         #expect(look.palette == NyxPalette(nightVision: true, highContrast: false))
     }
     @Test func brighterRedWhenChosen() throws {
@@ -42,7 +43,7 @@ import Testing
         let look=try NightLook(defaults: defaults(nightVision: false, brighterRed: true))
         #expect(!look.nightVision)
         #expect(look.inkRGB == NightLook.starlight && look.accentRGB == NightLook.amber)
-        #expect(look.mutedOpacity == 0.7)
+        #expect(look.mutedOpacity == 0.72)
     }
     @Test func aSurfaceCarryingItsOwnSwitchKeepsIt() throws {
         // A widget's entry or a Live Activity's state says whether night vision was on when it was made.

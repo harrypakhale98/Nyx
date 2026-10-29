@@ -41,9 +41,8 @@ nonisolated struct NightLook: Equatable, Sendable {
     var accentRGB: SIMD3<Double> { nightVision ? red.rgb : Self.amber }
     var ink: Color { Color(red:inkRGB.x,green:inkRGB.y,blue:inkRGB.z) }
     var accent: Color { Color(red:accentRGB.x,green:accentRGB.y,blue:accentRGB.z) }
-    /// Secondary text. Night vision's red is already dim, so it stays near full, and full under
-    /// Increase Contrast; starlight is held at 90% there, as in the app.
-    var mutedOpacity: Double { nightVision ? (highContrast ? 1 : 0.9) : highContrast ? 0.9 : 0.7 }
+    /// Secondary text, as in the app (`NyxPalette.mutedOpacity`).
+    var mutedOpacity: Double { NyxPalette.mutedOpacity(nightVision: nightVision, highContrast: highContrast) }
     var muted: Color { ink.opacity(mutedOpacity) }
 }
 /// How text contrast holds up for the commonest colour-vision deficiencies: Machado, Oliveira and

@@ -108,7 +108,7 @@ nonisolated enum SkyNotes {
         let south = park.latitude < 0
         let evening = south ? (8...10).contains(month) : (2...4).contains(month)
         let morning = south ? (3...5).contains(month) : (9...11).contains(month)
-        let moonFree = { (date: Date) in sky.moon.illumination < 0.05 || engine.lunarAltitude(at: date, park: park) < -0.833 }
+        let moonFree = { (date: Date) in engine.moonHidden(at: date, park: park, phase: sky.moon) }
         if evening, moonFree(start.addingTimeInterval(2700)) {
             return String(localized: "Zodiacal light may show in the west after dusk: a faint cone of sunlit dust rising along the Sun's path.")
         }

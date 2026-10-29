@@ -30,7 +30,7 @@ nonisolated struct SkyAlmanac: Sendable {
         let highestAzimuth: Double
         /// The core is 10° up during true darkness (the longest such stretch).
         let dark: DateInterval?
-        /// …and the Moon is below the horizon (or under 5% lit) as well. The window to go out.
+        /// …and the Moon is out of the way as well (`AstronomyEngine.moonHidden`). The window to go out.
         let moonFree: DateInterval?
         /// The highest the core can ever get at this latitude.
         let peakPossible: Double
@@ -46,7 +46,7 @@ nonisolated struct SkyAlmanac: Sendable {
         sample(window) { date in let a = altitude(date); if a > bestAltitude { bestAltitude = a; best = date } }
         let edges = transitions(in: window, where: up)
         let darkWindow = sky.darkStart.flatMap { start in sky.darkEnd.map { DateInterval(start: start, end: max(start, $0)) } }
-        let moonDown = { (date: Date) in sky.moon.illumination < 0.05 || engine.lunarAltitude(at: date, park: park) < -0.833 }
+        let moonDown = { (date: Date) in engine.moonHidden(at: date, park: park, phase: sky.moon) }
         let dark = darkWindow.flatMap { longest(in: $0, where: up) }
         let free = darkWindow.flatMap { longest(in: $0, where: { up($0) && moonDown($0) }) }
         return CoreNight(rises: edges.rises.first, sets: edges.sets.first, highest: best, highestAltitude: bestAltitude,
@@ -267,7 +267,7 @@ nonisolated struct SkyAlmanac: Sendable {
                 sample(DateInterval(start: start, end: end), step: 600) { date in
                     let altitude = engine.horizontal(date: date, park: park, ra: ra, dec: dec).altitude
                     guard altitude > 0 else { return }
-                    let moonDown = sky.moon.illumination < 0.05 || engine.lunarAltitude(at: date, park: park) < -0.833
+                    let moonDown = engine.moonHidden(at: date, park: park, phase: sky.moon)
                     // Moonlight costs up to about 1.5 magnitudes of faint meteors.
                     let magnitude = moonDown ? limiting : limiting - 1.5*sky.moon.illumination
                     let rate = shower.zhr*activity(date)*sin(altitude*Self.rad)/pow(r, 6.5-magnitude)
@@ -401,7 +401,7 @@ nonisolated struct SkyAlmanac: Sendable {
     }
     /// The longest stretch of `window` where `condition` holds, edges refined to a few seconds.
     func longest(in window: DateInterval, step: TimeInterval = 300, where condition: (Date) -> Bool) -> DateInterval? {
-        guard window.duration > 0 else { return condition(window.start) ? nil : nil }
+        guard window.duration > 0 else { return nil }
         var best: DateInterval?, start: Date?
         var previous = window.start, previousValue = condition(previous)
         if previousValue { start = previous }
@@ -570,7 +570,7 @@ nonisolated extension SkyAlmanac {
         guard park.bortleEstimate <= 3, let start = sky.darkStart, let end = sky.darkEnd, end > start else { return nil }
         var best: Gegenschein?
         sample(DateInterval(start: start, end: end), step: 600) { date in
-            guard sky.moon.illumination < 0.05 || engine.lunarAltitude(at: date, park: park) < -0.833 else { return }
+            guard engine.moonHidden(at: date, park: park, phase: sky.moon) else { return }
             let sun = engine.equatorial(of: .sun, at: date)
             let ra = Self.normalizedRadians(sun.ra + Double.pi), dec = -sun.dec
             guard abs(Self.galacticLatitude(ra: ra, dec: dec)) >= Self.gegenscheinGalactic else { return }
