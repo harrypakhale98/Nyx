@@ -124,7 +124,7 @@ struct WristSkyTests {
             for step in 0..<60 {
                 let now = start.addingTimeInterval(Double(step)*7*3600)
                 let moon = MoonNow(at: now, park: park)
-                #expect(moon.percent == Int((engine.moonPhase(at: now).illumination*100).rounded()))
+                #expect(moon.phase.percentLit == Int((engine.moonPhase(at: now).illumination*100).rounded()))
                 // Above the Arctic Circle the Moon can stay up, or down, for more than a day.
                 guard let next = moon.next else { #expect(id == "gaar", "\(id) \(step)"); continue }
                 #expect(next.date > now && next.date < now.addingTimeInterval(2*86400))

@@ -69,6 +69,8 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     static let defaultID = "jotr"
     /// A world catalogue place's id begins with this (`wd:Q123456`, a Wikidata item; `catalog.json`).
     static let catalogPrefix = "wd:"
+    /// A saved spot's id begins with this (`pin:` and a UUID), on the iPhone, the widgets and the watch.
+    static let spotPrefix = "pin:"
     /// True for a world catalogue place (`catalog.json`), as opposed to a curated park or a saved spot.
     /// The watch and the widgets bundle no catalogue, so such a place travels to them whole.
     var isCatalogPlace: Bool { id.hasPrefix(Self.catalogPrefix) }
@@ -86,10 +88,13 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     /// Whether a car reaches somewhere in the park to watch the sky. Parks without a note are.
     var drivable: Bool { access?.road ?? true }
     var shortName: String { localShortName ?? Self.shortened(name) }
-    /// An English name without its designation: "Etosha National Park" is "Etosha". A name that would
-    /// end in a number keeps it ("Constitution 1857 National Park"): alone, the year reads as a figure.
+    /// An English name without its designation: "Etosha National Park" is "Etosha", and "National Park
+    /// of American Samoa" is "American Samoa" on every device. A name that would end in a number keeps
+    /// it ("Constitution 1857 National Park"): alone, the year reads as a figure.
     static func shortened(_ name: String) -> String {
-        let short=name.replacingOccurrences(of: " National Park & Preserve", with: "")
+        let lead="National Park of "
+        let short=(name.hasPrefix(lead) ? String(name.dropFirst(lead.count)) : name)
+            .replacingOccurrences(of: " National Park & Preserve", with: "")
             .replacingOccurrences(of: " National Park", with: "")
             .replacingOccurrences(of: " National and State Parks", with: "")
         guard let last=short.split(separator: " ").last, last.allSatisfy(\.isNumber) else { return short }

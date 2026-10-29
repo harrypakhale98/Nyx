@@ -523,8 +523,8 @@ struct TonightWidgetView:View {
                 }
             }.accessibilityHidden(true)
             // A closure takes this line's room below; the ring already marks the best night.
-            if entry.closure == nil, let top=week.first(where:{ $0.id==best }), let first=week.first {
-                Text(WeekBest.label(top,first:first)).font(.caption2).foregroundStyle(ink).lineLimit(1).minimumScaleFactor(0.8)
+            if entry.closure == nil, let line=WeekBest.label(week) {
+                Text(line).font(.caption2).foregroundStyle(ink).lineLimit(1).minimumScaleFactor(0.8)
                     .accessibilityHidden(true)
             }
         }.dynamicTypeSize(...DynamicTypeSize.large) // Seven fixed columns: 11 pt text that always fits.
@@ -574,7 +574,7 @@ struct TonightWidgetView:View {
                     VStack(alignment:.trailing,spacing:3) {
                         moon(night).frame(width:34,height:34).id(night.id)
                         Text(night.sky.moon.name).font(.caption2)
-                        Text("\(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption2).foregroundStyle(muted)
+                        Text(night.sky.moon.litText).font(.caption2).foregroundStyle(muted)
                     }
                 }.invalidatableContent(entry.stepScope != nil)
                 monthGrid(night.park,month:month,shown:entry.marks(night) ? night.id : nil)
@@ -606,17 +606,18 @@ struct TonightWidgetView:View {
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).lineLimit(2).minimumScaleFactor(0.8)
                 Text("\(night.score.value)").scoreNumeral(size:72,accent:accent).widgetAccentable().modifier(NightTurn(value:night.score.value,reduceMotion:reduceMotion))
                 VStack(alignment:.leading,spacing:0) { band(night,.title3); basisNote(night,.subheadline) }
+                // Directly under the score, before the Moon and the month's best, as the spoken summary says it.
+                closureLine(.caption).padding(.top,4)
                 HStack(alignment:.center,spacing:10) {
                     moon(night).frame(width:34,height:34)
                     VStack(alignment:.leading,spacing:2) {
                         Text(night.sky.moon.name).font(.caption)
-                        Text("\(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption2).foregroundStyle(muted)
+                        Text(night.sky.moon.litText).font(.caption2).foregroundStyle(muted)
                     }
                 }.padding(.top,10)
                 if let best=month.best, let top=month.nights.compactMap({ $0 }).first(where:{ $0.id==best }) {
                     Text("Best: \(top.park.dayLabel(top.id)) · \(top.score.value)").font(.caption).lineLimit(1).minimumScaleFactor(0.8)
                 }
-                closureLine(.caption).padding(.top,4)
             }.frame(width:200,alignment:.leading)
             VStack(alignment:.leading,spacing:8) {
                 // Room for the "2 of 3" button laid over the top corner.
@@ -648,7 +649,7 @@ struct TonightWidgetView:View {
                 VStack(alignment:.center,spacing:4) {
                     moon(night).frame(width:56,height:56)
                     Text(night.sky.moon.name).font(.caption)
-                    Text("\(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption2).foregroundStyle(muted)
+                    Text(night.sky.moon.litText).font(.caption2).foregroundStyle(muted)
                 }
             }
             closureLine(.subheadline)
@@ -710,23 +711,30 @@ struct TonightWidgetView:View {
     }
     private func summary(_ night:Night)->String { Self.summary(night,entry:entry,family:family) }
     /// What VoiceOver says for the widget: the park, its score and band, then any closure in full
-    /// in every family (the Lock Screen and the small widget show only its mark), then what the
+    /// in every family (the Lock Screen and the small widget show only its mark), right after the
+    /// score it stands beside, as the watch says it; then what the score rests on, and what the
     /// larger families add.
     static func summary(_ night:Night,entry:TonightEntry,family:WidgetFamily)->String {
         // Another night of the week, moved to with the night buttons: its date, then its Moon.
         let ahead=entry.night.map { $0.id != night.id } ?? false
         var tonight=night.spokenSummary(ahead ? .widgetNight : .widget)
-        if let closure=entry.closure { tonight+=" "+String(localized:"Closure alert: \(closure)") }
+        if let closure=entry.closure {
+            // The words of `Night.spokenSummary`, with the closure between the score and the rest.
+            let lead=ahead ? String(localized:"\(night.park.shortName), \(night.park.dayLabel(night.id)): \(night.score.value) out of 100, \(night.score.band.label).")
+                : String(localized:"\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label).")
+            tonight=Sentences.join([lead,Sentences.end(String(localized:"Closure alert: \(closure)")),night.basisCaption() ?? String(localized:"Cached forecast included"),
+                                    night.smokeSentence(tonight:!ahead) ?? ""])
+        }
         var portraitXL=false
         if #available(iOS 27.0,*) { portraitXL = family == .systemExtraLargePortrait }
         if family == .systemLarge || family == .systemExtraLarge || portraitXL, let month=entry.month, let best=month.best, let top=month.nights.compactMap({ $0 }).first(where:{ $0.id==best }) {
             let count=month.nights.compactMap { $0 }.count
             let events=month.nights.compactMap { $0 }.filter { month.events[$0.id] != nil }
                 .map { night in String(localized:"\(month.events[night.id] == .eclipse ? String(localized:"Lunar eclipse") : String(localized:"Meteor shower peak")), \(night.park.dayLabel(night.id))") }
-            return ([tonight,String(localized:"\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit."),
+            return ([tonight,Sentences.end(night.sky.moon.spoken),
                      String(localized:"Best of the next \(count) nights: \(top.park.dayLabel(top.id)), \(top.score.value).")]+events.map { $0+"." }).joined(separator:" ")
         }
-        if ahead { tonight+=" "+String(localized:"\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit.") }
+        if ahead { tonight+=" "+Sentences.end(night.sky.moon.spoken) }
         guard family == .systemMedium,let top=NightPlanner.best(entry.week) else { return tonight }
         return tonight+" "+String(localized:"Best of the next seven nights: \(top.park.dayLabel(top.id)), \(top.score.value).")
     }
@@ -746,21 +754,30 @@ struct NightTurn:ViewModifier {
     }
 }
 /// A still, seeded sky behind the widget. Widgets render once per entry, so nothing animates.
+/// The real sky shows what the app's sky shows for that night (`RealSky.Visibility`): by the Sun's
+/// height at the moment drawn, only the brightest stars in a white night and none under the midnight
+/// sun (Denali in June), and without the faint stars under Increase Contrast. Plain black behind:
+/// no twilight lift, so the widget's text keeps its contrast in every rendering mode.
 struct WidgetSky:View {
+    @Environment(\.colorSchemeContrast) private var contrast
     let seed:String
     let ink:Color
     /// When known, the real stars over that park that night; seeded dots otherwise.
     var night:Night?=nil
     var body:some View {
+        let highContrast=contrast == .increased
         Canvas { context,size in
             if let night {
                 let sky=SkyProjection.shared.sky(for:night.park,night:night.id)
-                for star in sky.bright+sky.middle+sky.faint {
-                    let p=SkyProjection.screen(star.position,size:CGSize(width:size.width,height:size.height*1.6))
-                    let y=p.y-size.height*0.3
-                    guard p.x>=0,p.x<=size.width,y>=0,y<=size.height else { continue }
-                    let d=star.diameter*0.7
-                    context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:y-d/2,width:d,height:d)),with:.color(star.tint(ink).opacity(star.brightness*0.55)))
+                let seen=RealSky.Visibility(sunAltitude:sky.sunAltitude,highContrast:highContrast,liftAllowed:false)
+                for (stars,level) in [(sky.bright,seen.bright),(sky.middle,seen.middle),(sky.faint,seen.faint)] where level>0 {
+                    for star in stars {
+                        let p=SkyProjection.screen(star.position,size:CGSize(width:size.width,height:size.height*1.6))
+                        let y=p.y-size.height*0.3
+                        guard p.x>=0,p.x<=size.width,y>=0,y<=size.height else { continue }
+                        let d=star.diameter*0.7
+                        context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:y-d/2,width:d,height:d)),with:.color(star.tint(ink).opacity(star.brightness*0.55*level)))
+                    }
                 }
                 return
             }
@@ -893,14 +910,3 @@ struct WidgetReviewView:View {
     }
 }
 #endif
-
-/// The week's best night in one short line, said as the week's: "Best this week: Thu · 62", or
-/// "Best this week: tonight". A Parks row and the medium widget look seven nights ahead, while the
-/// park page and Best nights name the best of thirty, so "best" alone would name two nights.
-nonisolated enum WeekBest {
-    static func label(_ best:Night,first:Night)->String {
-        if best.id==first.id { return String(localized:"Best this week: tonight") }
-        let day=best.id.formatted(Date.FormatStyle(timeZone:best.park.timeZone).weekday(.abbreviated))
-        return String(localized:"Best this week: \(day) · \(best.score.value)")
-    }
-}

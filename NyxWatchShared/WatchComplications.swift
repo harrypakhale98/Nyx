@@ -64,7 +64,7 @@ struct WristInk {
     /// A closure's warning glyph: the app's warm red in full colour (`NyxPalette.cautionColor`), so
     /// amber stays the score's; ink in night vision and wherever the face is tinted.
     var caution: Color { nightVision || !layered ? ink : NyxPalette.cautionColor }
-    var mutedOpacity: Double { nightVision ? (highContrast ? NightRed.levels[0] : NightRed.levels[1]) : (highContrast ? 0.9 : 0.72) }
+    var mutedOpacity: Double { NyxPalette.mutedOpacity(nightVision: nightVision, highContrast: highContrast) }
     var muted: Color { layered ? ink.opacity(mutedOpacity) : ink }
 }
 
@@ -82,21 +82,17 @@ nonisolated enum WatchTimeline {
         return sky
     }
     /// The park Tonight would show at `date`: the darkest of the snapshot's parks, ties broken as
-    /// on the iPhone (`NightPlanner.best`).
-    static func best(at date: Date, snapshot: SavedSkySnapshot?, cache: inout [String: SkyConditions]) -> Night? {
-        var scored: [String: Night] = [:]
-        return best(at: date, snapshot: snapshot, cache: &cache, scored: &scored)
-    }
-    /// The same, for a timeline: each park's night is scored once (`scored`, by park and evening) and
-    /// reused at every entry, since the snapshot holds still. Only whether a night lies beyond the
-    /// forecast depends on the moment (`NightPlanner.beyondForecast`), so that is worked out again;
-    /// a night whose models' spread is known (also read against the moment) is scored afresh.
+    /// on the iPhone (`NightPlanner.best`). For a timeline: each park's night is scored once
+    /// (`scored`, by park and evening) and reused at every entry, since the snapshot holds still.
+    /// Only whether a night lies beyond the forecast depends on the moment
+    /// (`NightPlanner.beyondForecast`), so that is worked out again. The watch's details carry no
+    /// models' spread (`CompactDetail`), the one other input read against the moment.
     static func best(at date: Date, snapshot: SavedSkySnapshot?, cache: inout [String: SkyConditions], scored: inout [String: Night]) -> Night? {
         var nights: [Night] = []
         for park in snapshot?.parks ?? [] {
             let evening = park.currentNight(at: date), forecast = snapshot?.forecasts[park.id], detail = snapshot?.details?[park.id]
             let key = "\(park.id)-\(Int(evening.timeIntervalSince1970))"
-            if var night = scored[key], detail?.models == nil {
+            if var night = scored[key] {
                 night.beyondForecast = NightPlanner.beyondForecast(night, forecast: forecast, detail: detail, now: date)
                 nights.append(night)
                 continue
@@ -218,7 +214,9 @@ nonisolated enum WristClosure {
 /// self-updating time text out of the app's paged views (it looped layout there on watchOS 27).
 /// A complication's line has room for about twenty characters once the duration is on it, so
 /// there the two long names give way to the short ones the inline complication already uses
-/// ("Dark in 1 hr, 10 min", "Dawn in 5 min"); the app keeps the full words.
+/// ("Dark in 1 hr, 10 min", "Dawn in 5 min"); the app keeps the full words. The moments are named as
+/// the iPhone's field mode and Live Activity name them (`FieldNight`): Sunset, True darkness,
+/// Moonrise, Moonset, Dawn twilight, Sunrise.
 func countdownText(_ milestone: NightMilestone, now: Date? = nil) -> Text {
     let reference = now.map { Text(verbatim: inDuration(until: milestone.date, from: $0)) }
         ?? Text(.currentDate, format: .reference(to: milestone.date, allowedFields: [.hour, .minute]))
@@ -226,8 +224,8 @@ func countdownText(_ milestone: NightMilestone, now: Date? = nil) -> Text {
     return switch milestone.kind {
     case .sunset: Text("Sunset \(reference)")
     case .darkStart: compact ? Text("Dark \(reference)") : Text("True darkness \(reference)")
-    case .moonrise: Text("Moon rises \(reference)")
-    case .moonset: Text("Moon sets \(reference)")
+    case .moonrise: Text("Moonrise \(reference)")
+    case .moonset: Text("Moonset \(reference)")
     case .darkEnd: compact ? Text("Dawn \(reference)") : Text("Dawn twilight \(reference)")
     case .sunrise: Text("Sunrise \(reference)")
     }
@@ -306,7 +304,7 @@ struct WatchComplicationView: View {
             if entry.closure != nil { Text("\(Image(systemName: WristClosure.symbol)) \(WristClosure.inline(score: night.score.value))") }
             // The park's clock, with its zone where it is not this watch's (`wristTime`).
             else if let next = entry.next { Text("\(night.score.value) · \(next.shortTitle) at \(night.park.wristTime(next.date))") }
-            else { Text("\(night.score.value) \(night.score.band.label) · \(night.park.wristName)") }
+            else { Text("\(night.score.value) \(night.score.band.label) · \(night.park.shortName)") }
         }.foregroundStyle(ink)
     }
     /// How much of a closure the rectangular complication has room for.
@@ -345,7 +343,7 @@ struct WatchComplicationView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 4) {
                 MoonSymbol(night: night).font(.caption2).foregroundStyle(muted)
-                Text(night.park.wristName).font(.system(.headline, design: .serif)).lineLimit(1)
+                Text(night.park.shortName).font(.system(.headline, design: .serif)).lineLimit(1)
             }
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text(night.score.value, format: .number).scoreNumeral(.title2, accent: accent).widgetAccentable()
@@ -412,7 +410,7 @@ struct WatchComplicationView: View {
         }.foregroundStyle(ink)
     }
     private func summary(_ night: Night) -> String {
-        var text = String(localized: "\(night.park.wristName), \(night.score.value) out of 100, \(night.score.band.label).")
+        var text = String(localized: "\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label).")
         // The closure is spoken in every family, right after the score it stands beside.
         if let closure = entry.closure { text += " " + WristClosure.spoken(closure) }
         if let caption = night.basisCaption() { text += " " + caption }

@@ -150,7 +150,7 @@ enum WatchDebug {
                 let evening = park.date(park.currentNight(at: now), addingDays: offset)
                 let night = WatchSky.night(park, evening: evening, forecast: fixture.forecasts[park.id], detail: detail, now: now)
                 if let range = NightOutlook.of(night, detail: detail, now: now, scoring: ScoreEngine())?.dialRange(basis: night.basis) {
-                    ranges[park.id, default: [:]][WatchContext.day(night.id, in: park)] = range
+                    ranges[park.id, default: [:]][park.isoDay(night.id)] = range
                 }
             }
         }

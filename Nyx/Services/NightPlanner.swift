@@ -268,3 +268,23 @@ nonisolated extension HourlySeries {
         return Forecast(updated: updated, times: times, clouds: clouds)
     }
 }
+
+/// The week's best night in one short line, said as the week's, on every surface that looks seven
+/// nights ahead (a Parks row, the medium widget, the watch's week): the park page and Best nights
+/// name the best of thirty, so "best" alone would name two nights. The best is `NightPlanner.best`'s,
+/// ties broken by its ranking. Every night scoring alike (usual clouds all week) singles none out:
+/// "Best this week: every night". Else the first night is "Best this week: tonight", and any other
+/// "Best this week: Thu · 62" (its abbreviated weekday in park time, and its score). Nil for no nights.
+nonisolated enum WeekBest {
+    static func label(_ week: [Night]) -> String? {
+        guard let best = NightPlanner.best(week), let first = week.first else { return nil }
+        if week.count > 1, week.allSatisfy({ $0.score.value == best.score.value }) { return String(localized: "Best this week: every night") }
+        return label(best, first: first)
+    }
+    /// The same for a best night already found, without the "every night" case, which needs the week.
+    static func label(_ best: Night, first: Night) -> String {
+        if best.id == first.id { return String(localized: "Best this week: tonight") }
+        let day = best.id.formatted(Date.FormatStyle(timeZone: best.park.timeZone).weekday(.abbreviated))
+        return String(localized: "Best this week: \(day) · \(best.score.value)")
+    }
+}

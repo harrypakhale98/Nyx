@@ -83,8 +83,10 @@ struct WatchGauge: View {
         }
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement(children: .ignore)
+        // The iPhone dial's first words as the label; the rest is the value, which VoiceOver says
+        // again whenever the Crown moves the dial to another night.
         .accessibilityLabel("Darkness score")
-        .accessibilityValue(ring.map { spoken + " " + $0.spoken(sky: night.sky, park: night.park, best: window) } ?? spoken)
+        .accessibilityValue(spoken(ring: ring))
         .task(id: score) {
             if reduceMotion || dimmed || shown > 0 { withAnimation(reduceMotion || dimmed ? nil : NyxMotion.spring) { shown = Double(score) }; return }
             try? await Task.sleep(for: WatchDebug.revealDelay)
@@ -127,17 +129,24 @@ struct WatchGauge: View {
         let word = WatchDialFace.Line.serif(night.score.band.label, size: WatchDialFace.wordSize(side: side), weight: .regular, bold: bold)
         return WatchDialFace.choose(side: side, numeral: numeral, word: word, wordSize: WatchDialFace.wordSize(side: side))
     }
-    /// The night, the score and its band, what the clouds rest on (with the models' range on a
-    /// night that has one, as the iPhone's dial says it), then the Moon.
-    private var spoken: String {
-        var clouds = night.basisCaption() ?? String(localized: "Includes cloud forecast.")
-        if let models { clouds += " " + String(localized: "Forecast models: \(models.lowerBound) to \(models.upperBound).") }
-        let day = nightLabel.map { $0 + ", " } ?? "", lit = Int((night.sky.moon.illumination*100).rounded())
-        let spoken = String(localized: "\(day)\(night.score.value) out of 100, \(night.score.band.label). \(clouds) \(night.sky.moon.name), \(lit) percent lit.")
-        // Haze or smoke, as the iPhone's dial says it beside the score.
-        let withSmoke = night.smokeCaveat.map { spoken + " " + $0 } ?? spoken
-        // The words under the dial give park times; where the park's clock is not the watch's, say whose.
-        return night.park.spokenZone(at: night.sky.evening).map { withSmoke + " " + $0 } ?? withSmoke
+    /// What follows "Darkness score", the same things in the same order and words as the iPhone's
+    /// dial (`CelestialGauge`): the night when it is not tonight (said here, so a turn of the Crown
+    /// says which night it reached), the score and its band, what the clouds rest on, the forecast
+    /// models' range, haze or smoke that caps the score, the night the track shows (`ring`), and
+    /// whose time it is where the park's clock is not the watch's. Never the Moon or a closure:
+    /// each has its own element.
+    private func spoken(ring: NightRing?) -> String {
+        let basis = night.basisCaption() ?? (night.score.hasForecast ? String(localized: "Includes cloud forecast.") : String(localized: "No full cloud forecast; usual clouds count."))
+        return Sentences.join([
+            nightLabel.map { Sentences.end($0) } ?? "",
+            String(localized: "\(night.score.value) out of 100. \(night.score.band.label)."),
+            basis,
+            models.map { String(localized: "Forecast models: \($0.lowerBound) to \($0.upperBound).") } ?? "",
+            night.smokeCaveat.map { Sentences.end($0) } ?? "",
+            ring?.spoken(sky: night.sky, park: night.park, best: window) ?? "",
+            // The words under the dial give park times; where the park's clock is not the watch's, say whose.
+            night.park.spokenZone(at: night.sky.evening) ?? ""
+        ])
     }
 }
 

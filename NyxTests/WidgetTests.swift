@@ -24,11 +24,11 @@ import WidgetKit
             entry.closure = closure
             let spoken = TonightWidgetView.summary(night, entry: entry, family: family)
             #expect(spoken.contains("Closure alert: \(closure)"), "\(family)")
-            // The score is said first, and the closure adds to the summary without replacing anything.
-            let score = try #require(spoken.range(of: "\(night.score.value) out of 100"), "\(family)")
-            let alert = try #require(spoken.range(of: "Closure alert"), "\(family)")
-            #expect(score.upperBound <= alert.lowerBound, "\(family)")
-            #expect(spoken.replacingOccurrences(of: " Closure alert: \(closure)", with: "") == plain, "\(family)")
+            // The place and score are said first, the closure second, before what the score rests on,
+            // and the closure adds to the summary without replacing anything.
+            let lead = "\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label)."
+            #expect(spoken.hasPrefix(lead + " Closure alert: \(closure)."), "\(family)")
+            #expect(spoken.replacingOccurrences(of: " Closure alert: \(closure).", with: "") == plain, "\(family)")
         }
     }
 
@@ -41,7 +41,7 @@ import WidgetKit
             let moon = MoonNow(at: date, park: jotr)
             let text = MoonRectangleText(moon: moon, park: jotr, locale: Locale(identifier: "en_US"))
             #expect(text.phase == moon.phase.name)
-            #expect(text.lit == "\(moon.percent)% lit")
+            #expect(text.lit == "\(moon.phase.percentLit)% lit")
             let next = try #require(moon.next)
             let time = next.date.formatted(parkTime)
             #expect(text.shortEvent == (next.rises ? "Rises \(time)" : "Sets \(time)"), "\(step)")
@@ -54,7 +54,7 @@ import WidgetKit
         let moon = MoonNow(at: now, park: nil)
         // The reader's own percent style: "42 %" in French, never the English "42%".
         let french = MoonRectangleText(moon: moon, park: nil, locale: Locale(identifier: "fr_FR"))
-        #expect(french.lit.hasPrefix("\(moon.percent)") && french.lit != "\(moon.percent)% lit")
+        #expect(french.lit.hasPrefix("\(moon.phase.percentLit)") && french.lit != "\(moon.phase.percentLit)% lit")
         // Without a park there is no rise or set; far north, the Moon may neither rise nor set for days.
         #expect(french.event == nil && french.shortEvent == nil)
         let north = MoonRectangleText(moon: MoonNow(at: now, park: gaar, events: []), park: gaar)

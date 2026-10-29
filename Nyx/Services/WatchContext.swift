@@ -229,8 +229,6 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         guard place.id == tonightParkID else { return false }
         return place.isoDay(place.currentNight(at: now)) == (tonightNight ?? place.isoDay(place.currentNight(at: sent)))
     }
-    /// The id prefix of a saved spot (`SavedSpots.prefix`, which the watch does not compile).
-    static let spotPrefix = "pin:"
     /// Whether the watch should tell the iPhone, unasked, which places it wants clouds for
     /// (`wanted`: the one kept on Tonight, then those its faces are set to): when `context` follows
     /// another list (a place kept while the iPhone was out of reach, a face set to a park it does not
@@ -332,17 +330,15 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     }
     /// The same words on the faces (`FaceNote.versionsDiffer`), spoken.
     static var versionsNote: String { String(localized: "iPhone and Apple Watch have different versions of Nyx. Update both for matching scores.") }
-    /// A night's key in `ranges`: its park-local calendar day, as `WatchLink` writes a date.
-    static func day(_ evening: Date, in park: Park) -> String {
-        let parts = park.calendar.dateComponents([.year, .month, .day], from: evening)
-        return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
-    }
+    /// A night's key in `ranges`: its park-local calendar day (`Park.isoDay`). Kept only for the
+    /// iPhone's sender (`SavedSkySync`) until it calls `isoDay` itself.
+    static func day(_ evening: Date, in park: Park) -> String { park.isoDay(evening) }
     /// The models' range to show beside the wrist's own score for this night, or nil. Shown only
     /// as the iPhone shows it (a full forecast, a spread of more than 4 points) and only while it
     /// still holds the score the watch worked out: a range that left the score out would
     /// contradict the number above it, so it is dropped rather than stretched.
     func modelRange(for night: Night) -> ClosedRange<Int>? {
-        guard night.basis == .forecast, let pair = ranges[night.park.id]?[Self.day(night.id, in: night.park)], pair.count == 2 else { return nil }
+        guard night.basis == .forecast, let pair = ranges[night.park.id]?[night.park.isoDay(night.id)], pair.count == 2 else { return nil }
         let low = pair[0], high = pair[1], score = night.score.value
         guard 0 <= low, low <= score, score <= high, high <= 100, high-low > 4 else { return nil }
         return low...high
@@ -521,8 +517,9 @@ extension SkyConditions {
 /// Night-vision red as it reaches the eye: the app multiplies white by the standard red
 /// (`NightTint.standard`). The watch's red text levels live here, so each can be measured in tests.
 nonisolated enum NightRed {
-    /// Text opacities the watch uses on black in red: primary, secondary, tertiary.
-    static let levels = [1.0, 0.96, 0.86]
+    /// Text opacities the watch uses on black in red: primary, then muted and faint, which are one
+    /// level in red (`NyxPalette.mutedOpacity`, `faintOpacity`).
+    static let levels = [1.0, NyxPalette.mutedOpacity(nightVision: true, highContrast: false)]
     /// WCAG 2 contrast of red at an opacity, composited over black.
     static func contrastOnBlack(opacity: Double) -> Double { ColorVision.typical.contrast(NightTint.standard.rgb*opacity, .zero) }
 }
