@@ -171,18 +171,12 @@ targets:
         group: Shared
       - path: Nyx/Services/ScoreEngine.swift
         group: Shared
-      - path: Nyx/Services/DataServices.swift
-        group: Shared
-      # The aurora forecast types `AuroraService` caches (the widget never asks for it or shows it);
-      # without the grid the geomagnetic latitude falls back to the dipole, which nothing here reads.
+      # The aurora outlook the watch context carries (the widget never shows it); without the grid the
+      # geomagnetic latitude falls back to the dipole, which nothing here reads. No network code: the
+      # widgets read what the app cached in the App Group and never make a request.
       - path: Nyx/Services/Aurora.swift
         group: Shared
       - path: Nyx/Services/Geomagnetic.swift
-        group: Shared
-      # The campground types `ParkStore` reads and caches (the widget never asks for them).
-      - path: Nyx/Models/Campground.swift
-        group: Shared
-      - path: Nyx/Services/CloudForecastClient.swift
         group: Shared
       - path: Nyx/Models/Forecast.swift
         group: Shared

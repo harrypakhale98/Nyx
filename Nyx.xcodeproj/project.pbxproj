@@ -16,7 +16,6 @@
 		08EA694F6AB6FF7EB2BE0157 /* FieldActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB37AE2807D0FD113C27DC0D /* FieldActivityView.swift */; };
 		092DD8031C747916C4A36133 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
 		09E343E681A4650B091467CD /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE8F62A781211AEED0D40D /* NightPlanner.swift */; };
-		0AECB067EC930F38926E44EC /* CloudForecastClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D166F2461DDF8E880670FC /* CloudForecastClient.swift */; };
 		0C1211C364C7B8A2D326E7B7 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
 		0F5702CE8A12C10676333C87 /* SharedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D6D04D625F5F18ACF2F82496 /* SharedAssets.xcassets */; };
 		0FE35656AA49598D7396AA03 /* constellations.json in Resources */ = {isa = PBXBuildFile; fileRef = 828535E0682831644E0634EA /* constellations.json */; };
@@ -55,7 +54,6 @@
 		3C46A1DA1B1D353EA7719F6A /* ForecastDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9998D8250D17F15D09BC11C4 /* ForecastDetail.swift */; };
 		3E7E4C6C4336CA9450570CD6 /* ParkEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C2F1D1E3D52DA0E3424C92C /* ParkEntity.swift */; };
 		3F06B201A3F3771922AA4458 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
-		40435812B77530EC31184150 /* Campground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F2E16F6D3215FAA0CDD1BF /* Campground.swift */; };
 		43E0812C8587586D11653F2B /* Geomagnetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A05D06651099344A67C4602 /* Geomagnetic.swift */; };
 		43FBDE5B2A4AFA4C6E748740 /* Campground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F2E16F6D3215FAA0CDD1BF /* Campground.swift */; };
 		44CEAEA71452256B4DF00524 /* MoonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2871EBD10E9E6E21E24FE3CE /* MoonSymbol.swift */; };
@@ -135,7 +133,6 @@
 		ABB41DEEA4FFF1D9A64E2CED /* skyglow.json in Resources */ = {isa = PBXBuildFile; fileRef = CC857B159B3CE7AA07A7736B /* skyglow.json */; };
 		AE963C213E538BEFE9895049 /* WristSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C65FC6A4D1EC6134F16FE8F /* WristSky.swift */; };
 		B00E3E3717F8A9536639A020 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
-		B2BCC9A5769EC83274D79A02 /* DataServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D319BAF3907884E43F8316F /* DataServices.swift */; };
 		B7E0F27E967C498A458A24E0 /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30FAB15A78C4224F9A91117 /* Forecast.swift */; };
 		BA785E8BD3C69A9097A954AE /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE401E4AEE8751787D4278CB /* MoonDisc.swift */; };
 		BABB37E4FDB1ED5B94631020 /* NightLook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D6113E0456F689ACF6EFB46 /* NightLook.swift */; };
@@ -1058,10 +1055,7 @@
 			files = (
 				B00E3E3717F8A9536639A020 /* AstronomyEngine.swift in Sources */,
 				8A2E1F8A166250B533626367 /* Aurora.swift in Sources */,
-				40435812B77530EC31184150 /* Campground.swift in Sources */,
 				2F55AFD3A62973F36E9742CB /* CloudClimate.swift in Sources */,
-				0AECB067EC930F38926E44EC /* CloudForecastClient.swift in Sources */,
-				B2BCC9A5769EC83274D79A02 /* DataServices.swift in Sources */,
 				2397D174BFC90F47102DE536 /* DeepSky.swift in Sources */,
 				4D3CFCB5F02D6A5D5E6CAEBA /* FieldActivity.swift in Sources */,
 				08EA694F6AB6FF7EB2BE0157 /* FieldActivityView.swift in Sources */,
