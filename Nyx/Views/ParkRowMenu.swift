@@ -39,9 +39,10 @@ struct ParkRowMenu: View {
 extension View {
     /// A park row outside the Parks list behaves as one inside it: the same menu, the highlight
     /// under a pointer, and the park dragged onto Plan (its month), Journal (a new entry) or another window.
-    /// `showsPlan` false leaves out "Show in Plan" (`ParkRowMenu.showsPlan`).
-    func parkRowActions(_ park:Park,showsPlan:Bool=true,failed:@escaping ()->Void)->some View {
-        contextMenu { ParkRowMenu(park:park,failed:failed,showsPlan:showsPlan) }.hoverEffect(.highlight).draggable(park)
+    /// `showsPlan` false leaves out "Show in Plan" (`ParkRowMenu.showsPlan`); `deleteSpot` offers deleting a
+    /// saved spot where the list confirms it (`ParkRowMenu.deleteSpot`).
+    func parkRowActions(_ park:Park,showsPlan:Bool=true,deleteSpot:((Park)->Void)?=nil,failed:@escaping ()->Void)->some View {
+        contextMenu { ParkRowMenu(park:park,failed:failed,deleteSpot:deleteSpot,showsPlan:showsPlan) }.hoverEffect(.highlight).draggable(park)
     }
     /// "Saved places unavailable", after saving or removing a park, place or spot could not be stored.
     func parkSaveAlert(isPresented:Binding<Bool>,journalUnavailable:Bool)->some View {

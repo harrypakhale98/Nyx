@@ -109,7 +109,7 @@ struct ParkRow: View {
             } else {
                 HStack(alignment:.center,spacing:16) { VStack(alignment:.leading,spacing:6) { name; details }.layoutPriority(1); Spacer(minLength:8); number }
             }
-            if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).labelStyle(.caution).fixedSize(horizontal:false,vertical:true) }
+            if let closure { ClosureLabel(closure) }
         }.padding(.vertical,14)
             .accessibilityElement(children:.ignore)
             // Short, so a list of 63 parks is quick to swipe through: the name, the score, the band and
@@ -311,12 +311,3 @@ struct AlertsBusyNote: View {
     }
 }
 #Preview("Alerts busy") { if let park=try? ParkData.load().first { AlertsBusyNote(park:park).padding(24).background(Color.black).preferredColorScheme(.dark) } }
-extension SkyConditions {
-    /// How much of true darkness the Moon spends below the horizon, in words: "Up through all of
-    /// true darkness." rather than a bare 0%; nil on a night without true darkness.
-    var moonBelowLine:String? {
-        guard darkHours>0 else { return nil }
-        let percent=moonDownPercent
-        return percent==0 ? String(localized:"Up through all of true darkness.") : String(localized:"Below the horizon for \(percent)% of true darkness.")
-    }
-}

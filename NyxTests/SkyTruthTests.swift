@@ -94,7 +94,7 @@ struct SkyTruthTests {
             #expect(sky.moonSentence(park: jotr, withLit: false) == bare)
             #expect(sky.moonShort(park: jotr) == short)
             // The verdict under the dial says exactly this.
-            #expect(NightVerdict.moonSentence(sky: sky, park: jotr) == long)
+            #expect(sky.moonSentence(park: jotr) == long)
         }
         // A Moon that sets and rises again inside true darkness is neither a moonset nor a moonrise.
         let back = start.addingTimeInterval(9000)
@@ -146,7 +146,7 @@ struct SkyTruthTests {
         let nights = NightPlanner(forecasts: [:]).nights(jotr, from: now, count: NightPlanner.horizon, now: now)
         let first = try #require(NightPlanner.ranked(nights).first)
         for order in [nights, nights.reversed(), nights.shuffled()] {
-            #expect(NightPlanner.best(order)?.id == first.id && NightVerdict.best(order)?.id == first.id && LightsOut.best(order, closure: "Closed")?.id == first.id)
+            #expect(NightPlanner.best(order)?.id == first.id)
         }
     }
 

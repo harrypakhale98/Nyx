@@ -868,7 +868,7 @@ import CoreLocation
         // A spot whose forecasts are switched off is not "stale": it was never asked about.
         // Nor is a catalogue place beyond this refresh's budget (`CatalogForecast.maxPointsPerRefresh`).
         for park in parks where (spotForecastsEnabled || !park.isSavedSpot) && (!park.isCatalogPlace || askedCatalog.contains(park.id)) {
-            if let forecast=fresh[park.id],Date.now.timeIntervalSince(forecast.updated)<6*3600 { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
+            if let forecast=fresh[park.id], !forecastIsStale(forecast.updated) { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
         }
     }
     #if DEBUG

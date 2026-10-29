@@ -24,7 +24,7 @@ extension ParkDetailView {
                 WhatsUpPanel(whatsUp:model.whatsUp(night),isTonight:isTonight,notes:model.skyNotes(night))
                 // Tonight's wake-ups (AlarmKit), beside the moments they are for.
                 if FieldAlarms.supported, isTonight {
-                    let options=FieldNight.alarmOptions(park:park,sky:night.sky,at:DebugScenario.date ?? .now)
+                    let options=FieldNight.alarmOptions(park:park,sky:night.sky,at:model.present)
                     if !options.isEmpty { Divider().overlay(palette.line); FieldAlarmRows(park:park,options:options,showsHeading:true) }
                 }
             }
@@ -33,7 +33,7 @@ extension ParkDetailView {
             VStack(alignment:.leading,spacing:18) {
                 Eyebrow(text:"Moonlight")
                 MoonHero(night:night) { delta in step(delta) }
-                if let line=night.sky.moonBelowLine {
+                if let line=night.sky.moonSentence(park:park,withLit:false) {
                     Text(line).font(.caption).foregroundStyle(palette.muted).frame(maxWidth:.infinity)
                         .multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
                 }

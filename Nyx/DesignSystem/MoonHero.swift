@@ -50,7 +50,7 @@ struct MoonHero: View {
             VStack(spacing:18) {
                 VStack(spacing:6) {
                     Text(night.sky.moon.name).font(.system(.title2,design:.serif)).foregroundStyle(palette.ink).contentTransition(.opacity)
-                    Text("\(Self.percent(night))% lit").font(.subheadline).foregroundStyle(palette.muted).contentTransition(.numericText())
+                    Text(night.sky.moon.litText).font(.subheadline).foregroundStyle(palette.muted).contentTransition(.numericText())
                 }.multilineTextAlignment(.center)
                 ViewThatFits(in:.horizontal) {
                     HStack(spacing:28) { times }
@@ -93,7 +93,7 @@ struct MoonHero: View {
     @ViewBuilder private var times: some View {
         ForEach(Self.events(night),id:\.label) { event in
             VStack(spacing:2) {
-                Text(event.label).font(.caption.weight(.medium)).foregroundStyle(palette.muted).textCase(typeSize.isAccessibilitySize || !Lettering.spaced ? nil : .uppercase).kerning(typeSize.isAccessibilitySize ? 0 : 1.2)
+                Text(event.label).eyebrow().foregroundStyle(palette.muted)
                 Text(event.time).font(.system(.title3,design:.serif)).monospacedDigit().foregroundStyle(palette.ink)
             }
         }
@@ -123,7 +123,6 @@ struct MoonHero: View {
     nonisolated static func nearest(_ angle:Double,to reference:Double)->Double {
         angle+2*Double.pi*((reference-angle)/(2*Double.pi)).rounded()
     }
-    nonisolated static func percent(_ night:Night)->Int { Int((night.sky.moon.illumination*100).rounded()) }
     /// Moonrise and moonset within the night, in the order they happen.
     nonisolated static func events(_ night:Night)->[(label:String,time:String,date:Date)] {
         let park=night.park
@@ -137,7 +136,7 @@ struct MoonHero: View {
     /// "Waxing crescent, 23 percent lit, lit from the lower right. Sets 9:40 PM."
     static func spoken(night:Night,geometry:MoonGeometry)->String {
         let side=MoonView.side(ofDegrees:Int((geometry.brightLimb*180/Double.pi).rounded()))
-        var line=String(localized:"\(night.sky.moon.name), \(percent(night)) percent lit, lit from the \(side).")
+        var line=String(localized:"\(night.sky.moon.spoken), lit from the \(side).")
         for event in events(night) { line+=" "+String(localized:"\(event.label) \(event.time).") }
         return line
     }

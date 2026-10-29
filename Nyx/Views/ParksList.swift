@@ -371,6 +371,9 @@ struct ParksView: View {
             if selection?.wrappedValue == spot.id { selection?.wrappedValue=nil }
         } catch { saveFailed=true }
     }
+    /// Every row is the park row the rest of the app has (`parkRowActions`): its menu, with deleting a
+    /// spot, which this list confirms, the highlight under a pointer, and the park dragged onto Plan
+    /// (its month), Journal (a new entry) or out as its name.
     @ViewBuilder private func link(_ park:Park,week:Bool=true)->some View {
         let row=ParkRow(night:model.night(park),closure:model.closure(park),week:week ? model.nights(park,from:model.tonight(park),count:7) : [],stepFree:stepFreeOnly)
         if let selection {
@@ -378,20 +381,13 @@ struct ParksView: View {
             Button { selection.wrappedValue=park.id } label:{
                 row.padding(.horizontal,12).background(RoundedRectangle(cornerRadius:16).fill(palette.ink.opacity(chosen ? (palette.nightVision ? 0.22 : 0.1) : 0))).padding(.horizontal,-12)
                     .contentShape(.hoverEffect,RoundedRectangle(cornerRadius:16).inset(by:-2))
-            }.buttonStyle(.plain).hoverEffect(.highlight)
+            }.buttonStyle(.plain)
                 .accessibilityAddTraits(chosen ? .isSelected : [])
-                .contextMenu { rowMenu(park) }
-                // iPad: drag a park onto Plan (its month) or Journal (a new entry), or out as its name.
-                .draggable(park)
+                .parkRowActions(park,deleteSpot:{ deletingSpot=$0 }) { saveFailed=true }
         } else {
-            NavigationLink(value:park) { row }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom).hoverEffect(.highlight).contextMenu { rowMenu(park) }
-                .draggable(park)
+            NavigationLink(value:park) { row }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
+                .parkRowActions(park,deleteSpot:{ deletingSpot=$0 }) { saveFailed=true }
         }
-    }
-    /// Long press, or a secondary click with a pointer: the menu every park row shares (`ParkRowMenu`),
-    /// with deleting a spot, which this list confirms.
-    private func rowMenu(_ park:Park)->some View {
-        ParkRowMenu(park:park,failed:{ saveFailed=true },deleteSpot:{ deletingSpot=$0 })
     }
     private func focusSearchIfAsked() {
         guard commands?.takeSearch() == true else { return }

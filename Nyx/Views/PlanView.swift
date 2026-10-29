@@ -10,7 +10,6 @@ struct PlanView: View {
     /// This window's commands, which carry its calendar requests.
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.nyx) private var palette
     /// Kept per window. A new key, so a window saved on the month before best nights existed opens on them.
     @SceneStorage("planView") private var mode:Mode = .best
@@ -56,25 +55,25 @@ struct PlanView: View {
         // A `nyx://calendar` link always lands on the month it names.
         .onChange(of:commands?.calendarRequest,initial:true) { _,request in if request != nil { forced=nil; mode = .month } }
     }
-    /// Segmented where it fits; from the largest standard size up a menu, which grows with the text
-    /// instead of truncating ("My free nights" no longer fits a third of a 375 pt phone there).
-    @ViewBuilder private var picker: some View {
+    /// Segmented where its three names fit; a menu otherwise (`FittingPicker`), which grows with the
+    /// text instead of truncating ("My free nights" does not fit a third of a 375 pt phone at the
+    /// largest standard sizes). Across iPhone Duo's fold, the leading half only: centred, the middle
+    /// segment sat on the crease.
+    private var picker: some View {
         let control=Picker("Plan",selection:Binding(get:{ shown },set:{ forced=nil; mode=$0 })) {
             Text("Best nights").tag(Mode.best)
             Text("One park").tag(Mode.month)
             Text("My free nights").tag(Mode.free)
         }
-        Group {
-            // Starlight, as every control that is not the score: amber is the score's and light's.
-            if typeSize.isAccessibilitySize || (typeSize >= .xxxLarge && sizeClass != .regular) {
-                let menu=control.pickerStyle(.menu).tint(palette.ink)
-                // A narrow phone at the largest sizes takes the menu a step smaller rather than breaking a mode's name.
-                ViewThatFits(in:.horizontal) { menu;menu.dynamicTypeSize(...DynamicTypeSize.accessibility3) }.frame(maxWidth:.infinity,alignment:.leading)
-            }
-            // Across iPhone Duo's fold, the leading half only: centred, the middle segment sat on the crease.
-            else if let fold, fold.dividesWidth, fold.minX>300 { control.pickerStyle(.segmented).frame(maxWidth:fold.minX-48).frame(maxWidth:.infinity,alignment:.leading) }
-            else { control.pickerStyle(.segmented) }
+        // Starlight, as every control that is not the score: amber is the score's and light's.
+        let menu=control.pickerStyle(.menu).tint(palette.ink)
+        return FittingPicker {
+            control.pickerStyle(.segmented)
+        } menu:{
+            // A narrow phone at the largest sizes takes the menu a step smaller rather than breaking a mode's name.
+            ViewThatFits(in:.horizontal) { menu;menu.dynamicTypeSize(...DynamicTypeSize.accessibility3) }
         }
+        .frame(maxWidth:fold.flatMap { $0.dividesWidth && $0.minX>300 ? $0.minX-48 : nil } ?? .infinity).frame(maxWidth:.infinity,alignment:.leading)
         // As wide as the page under it (the month's column, or the planner's), set by whoever places it.
         .padding(.horizontal,24).padding(.vertical,8)
         .accessibilityHint("The best nights in reach this month, one park's month, or the best park for each night you are free.")

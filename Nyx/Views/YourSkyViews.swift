@@ -339,7 +339,7 @@ struct YearRecapView: View {
         VStack(spacing:4) {
             Text("\(value)").font(.system(.largeTitle,design:.serif,weight:.light)).foregroundStyle(palette.ink).minimumScaleFactor(0.6).lineLimit(1)
             Text(label).font(.caption).foregroundStyle(palette.ink).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-        }.frame(maxWidth:.infinity).padding(.vertical,16).background(RoundedRectangle(cornerRadius:18).fill(palette.panel)).overlay(RoundedRectangle(cornerRadius:18).stroke(palette.line,lineWidth:0.5))
+        }.frame(maxWidth:.infinity).padding(.vertical,16).nyxCard(radius:NyxMetrics.rowRadius,fill:palette.panel)
             .accessibilityElement(children:.combine)
     }
 }

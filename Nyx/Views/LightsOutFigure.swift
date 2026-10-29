@@ -7,7 +7,6 @@ import SwiftUI
 /// by itself and the control switches at once. An illustration, labelled as one, with one spoken summary.
 struct LightsOutFigure: View {
     @Environment(\.nyx) private var palette
-    @Environment(\.dynamicTypeSize) private var typeSize
     @MotionReduced private var reduceMotion: Bool
     let target: LightsOut.Target
     let origin: String
@@ -33,7 +32,7 @@ struct LightsOutFigure: View {
             }
             .frame(height:CityLightFigure.height)
             .clipShape(shape)
-            .overlay(shape.stroke(palette.line,lineWidth:0.5))
+            .overlay(shape.stroke(palette.line,lineWidth:0.5*palette.stroke))
             .frame(maxWidth:CityLightFigure.height*CityLightFigure.aspect)
             .frame(maxWidth:.infinity)
             .onScrollVisibilityChange(threshold:0.6) { visible in
@@ -91,21 +90,9 @@ struct LightsOutFigure: View {
     private var darkShort: String { String(localized:"\(target.place.shortName) · Class \(target.place.bortleEstimate)") }
     private var homeLabel: String { String(localized:"Your sky (Class\u{00A0}\(target.homeClass))") }
     private var darkLabel: String { String(localized:"\(target.place.shortName) (Class\u{00A0}\(target.place.bortleEstimate))") }
-    @State private var available: CGFloat=0
-    @State private var segmentedWidth: CGFloat=0
-    /// Segmented when the short labels fit, a menu otherwise (accessibility sizes, a long place name).
-    @ViewBuilder private var picker: some View {
-        if typeSize.isAccessibilitySize { menu }
-        else {
-            Group { if available>0 && segmentedWidth>available { menu } else { segmented } }
-                .frame(maxWidth:.infinity,alignment:.leading)
-                .onGeometryChange(for:CGFloat.self) { $0.size.width } action:{ available=$0 }
-                .background {
-                    segmented.fixedSize().onGeometryChange(for:CGFloat.self) { $0.size.width } action:{ segmentedWidth=$0 }
-                        .hidden().accessibilityHidden(true)
-                }
-        }
-    }
+    /// Segmented when the short labels fit, a menu otherwise (accessibility sizes, a long place name,
+    /// a narrow column), decided by the layout (`FittingPicker`).
+    private var picker: some View { FittingPicker { segmented } menu:{ menu } }
     private var segmented: some View {
         Picker("Sky drawn",selection:$selection) {
             Text(homeShort).tag(Sky.home)

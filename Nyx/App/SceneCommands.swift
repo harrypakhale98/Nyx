@@ -342,7 +342,7 @@ private struct RefreshNote: View {
         }
         .foregroundStyle(palette.ink).tint(palette.ink)
         .padding(.horizontal,16).padding(.vertical,10).frame(minHeight:36)
-        .background(RoundedRectangle(cornerRadius:18).fill(palette.panel)).overlay(RoundedRectangle(cornerRadius:18).stroke(palette.line,lineWidth:0.5))
+        .nyxCard(radius:NyxMetrics.rowRadius,fill:palette.panel)
         .frame(maxWidth:460).padding(.horizontal,24).padding(.top,8)
         .allowsHitTesting(false).accessibilityHidden(true)
     }

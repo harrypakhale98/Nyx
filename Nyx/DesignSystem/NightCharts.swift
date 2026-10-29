@@ -79,7 +79,6 @@ nonisolated struct NightChart: Sendable {
         let sun=times.map { Point(x:hours($0),y:engine.solarAltitude(at:$0,park:park).rounded(),label:nil) }
         let moon=times.map { Point(x:hours($0),y:engine.lunarAltitude(at:$0,park:park).rounded(),label:nil) }
         let core=times.map { Point(x:hours($0),y:engine.horizontal(date:$0,park:park,ra:SkyAlmanac.coreRA,dec:SkyAlmanac.coreDec).altitude.rounded(),label:nil) }
-        let lit=Int((night.sky.moon.illumination*100).rounded())
         return NightChart(title:String(localized:"Sun, Moon and Milky Way core heights, \(park.dayLabel(night.id))"),summary:summary,
             x:Axis(title:String(localized:"Time in \(park.timeZoneName)"),range:0...span/3600,gridlines:stride(from:0,through:span/3600,by:3).map { $0 }) { value in
                 park.time(start.addingTimeInterval(value*3600))
@@ -89,7 +88,7 @@ nonisolated struct NightChart: Sendable {
                 return degrees>=0 ? String(localized:"\(degrees)° up") : String(localized:"\(-degrees)° below the horizon")
             },
             series:[Series(name:String(localized:"Sun"),continuous:true,points:sun),
-                    Series(name:String(localized:"Moon, \(lit)% lit"),continuous:true,points:moon),
+                    Series(name:String(localized:"Moon, \(night.sky.moon.litText)"),continuous:true,points:moon),
                     Series(name:String(localized:"Milky Way core"),continuous:true,points:core)])
     }
 }

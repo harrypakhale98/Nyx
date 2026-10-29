@@ -61,8 +61,7 @@ struct InlineSearchField: View {
         .padding(.horizontal,16).padding(.vertical,10).frame(minHeight:44)
         // The whole capsule takes the tap, not only the line of text.
         .contentShape(Rectangle()).onTapGesture { focus.wrappedValue=true }
-        .background(RoundedRectangle(cornerRadius:22,style:.continuous).fill(palette.panel))
-        .overlay(RoundedRectangle(cornerRadius:22,style:.continuous).stroke(palette.line,lineWidth:0.5))
+        .nyxCard(radius:NyxMetrics.heroRadius,fill:palette.panel)
     }
 }
 

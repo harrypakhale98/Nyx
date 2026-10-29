@@ -17,8 +17,6 @@ struct JournalView: View {
     @State private var recap=false
     @State private var width=0.0
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.horizontalSizeClass) private var sizeClass
-    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @State private var exporting:JournalDocument?
     @State private var staged:URL?
     @State private var importing=false
@@ -33,21 +31,11 @@ struct JournalView: View {
     @State private var dropped:JournalPrefill?
     /// A wide iPad: your constellation large on the left, the nights themselves on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
-    /// "Journals stay on each device" where a second device is likely: a window wider than any
-    /// iPhone (440 pt) or a regular-width one, by width rather than by device; never at compact
-    /// height, so an iPhone turned on its side (wide, and regular on the largest) says nothing new.
-    nonisolated static func mentionsOtherDevices(width:Double,regular:Bool,compactHeight:Bool=false)->Bool { !compactHeight && (regular || width>=480) }
     var body:some View {
         let nights=model.loggedNights(entries)
         ScrollView {
             VStack(alignment:.leading,spacing:24) {
                 if model.journalUnavailable { JournalUnavailableBanner(needsSpace:model.journalNeedsSpace) }
-                // A journal lives on the device it was written on; say so where a second device is likely.
-                if JournalView.mentionsOtherDevices(width:width,regular:sizeClass == .regular,compactHeight:verticalSizeClass == .compact) {
-                    Text("Journals stay on each device. Export to move yours.").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                        // Over the centred constellation when there are no nights yet, in line with its edge.
-                        .frame(maxWidth:wide && entries.isEmpty ? 760 : .infinity,alignment:.leading).frame(maxWidth:.infinity)
-                }
                 // One way into the year: at the top in recap season (December, early January), else under the constellation.
                 let season=recapSeason(nights)
                 if season { recapCard() }
@@ -207,10 +195,14 @@ struct JournalView: View {
     }
     /// The empty constellation's "Record a night", never into a journal that could not open.
     /// Export and import, in the system overflow menu (iOS 27) or the Journal's own (iOS 26).
+    /// Export and import, under the one thing to know about them on every device, said once: a journal
+    /// lives on the device it was written on.
     @ViewBuilder private var journalFileActions: some View {
-        Button("Export journal",systemImage:"square.and.arrow.up") { exportJournal() }
-            .disabled(entries.isEmpty || model.journalUnavailable || working != nil)
-        Button("Import journal",systemImage:"square.and.arrow.down") { importing=true }.disabled(model.journalUnavailable || working != nil)
+        Section("Journals stay on each device. Export to move yours.") {
+            Button("Export journal",systemImage:"square.and.arrow.up") { exportJournal() }
+                .disabled(entries.isEmpty || model.journalUnavailable || working != nil)
+            Button("Import journal",systemImage:"square.and.arrow.down") { importing=true }.disabled(model.journalUnavailable || working != nil)
+        }
     }
     private var recordButton: some View {
         Button { editing=true } label:{ Label { Text("Record a night") } icon:{ Image(systemName:"plus").opacity(model.journalUnavailable ? 0.35 : 1) } }
@@ -249,8 +241,7 @@ private struct WorkingNote: View {
     var body: some View {
         ProgressView { Text(title) }.tint(palette.ink).foregroundStyle(palette.ink)
             .padding(.vertical,18).padding(.horizontal,24)
-            .background(palette.nightVision ? Color.black : palette.panel,in:RoundedRectangle(cornerRadius:18))
-            .overlay(RoundedRectangle(cornerRadius:18).stroke(palette.line,lineWidth:0.5))
+            .nyxCard(radius:NyxMetrics.rowRadius,fill:palette.nightVision ? Color.black : palette.panel)
             .accessibilityElement(children:.combine)
     }
 }
@@ -274,7 +265,7 @@ struct JournalCard:View {
                 if let moon { MoonDisc(illumination:moon.illumination,waxing:moon.waxing,southern:(park?.latitude ?? 0)<0).frame(width:30,height:30).accessibilityHidden(true) }
             }
             if !entry.notes.isEmpty { Text(entry.notes).font(.subheadline).lineLimit(3).foregroundStyle(palette.ink.opacity(0.86)) }
-            Text(moon.map { String(localized:"Bortle \(entry.observedBortle) observed · \($0.name), \(Int(($0.illumination*100).rounded()))% lit") } ?? String(localized:"Observed Bortle class \(entry.observedBortle)"))
+            Text(moon.map { String(localized:"Bortle \(entry.observedBortle) observed · \($0.name), \($0.litText)") } ?? String(localized:"Observed Bortle class \(entry.observedBortle)"))
                 .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         } }
     }
@@ -535,8 +526,7 @@ struct JournalEditorView:View {
                         if editor.notes.isEmpty { Text("What you noticed").foregroundStyle(palette.muted).padding(.top,8).padding(.leading,5).allowsHitTesting(false).accessibilityHidden(true) }
                     }
                     .padding(.horizontal,8).padding(.vertical,4)
-                    .background(palette.panel.opacity(0.5),in:RoundedRectangle(cornerRadius:12))
-                    .overlay(RoundedRectangle(cornerRadius:12).stroke(palette.line,lineWidth:0.5))
+                    .nyxCard(radius:NyxMetrics.chipRadius,fill:palette.panel.opacity(0.5))
                     .focused($writingNotes).id(Self.notesID).accessibilityLabel("Observation notes")
             } header:{ Text("Notes") }.openRows(palette)
             Section {
@@ -595,14 +585,13 @@ struct PhotoDescriptionRow:View {
             layout {
                 // A dark photo on the void would have no edge: a panel behind it and a hairline around it.
                 PhotoView(data:data,maxPixels:240,fill:true).frame(width:80,height:80)
-                    .background(palette.panel).clipShape(RoundedRectangle(cornerRadius:10))
-                    .overlay(RoundedRectangle(cornerRadius:10).stroke(palette.line,lineWidth:0.5))
+                    .background(palette.panel).clipShape(RoundedRectangle(cornerRadius:NyxMetrics.chipRadius,style:.continuous))
+                    .nyxCard(radius:NyxMetrics.chipRadius)
                     .accessibilityLabel(JournalPhotoLabel.text(description.wrappedValue,index:index))
                 // Bounded and prompted as the notes are, so the two places to write look alike.
                 TextField("Describe this photo",text:description,prompt:Text("Describe this photo").foregroundStyle(palette.muted),axis:.vertical).lineLimit(1...4)
                     .padding(.horizontal,10).padding(.vertical,8)
-                    .background(palette.panel.opacity(0.5),in:RoundedRectangle(cornerRadius:10))
-                    .overlay(RoundedRectangle(cornerRadius:10).stroke(palette.line,lineWidth:0.5))
+                    .nyxCard(radius:NyxMetrics.chipRadius,fill:palette.panel.opacity(0.5))
                     .accessibilityLabel("Description of photo \(index+1)")
                     .accessibilityHint("VoiceOver reads this when the photo is shown.")
             }
@@ -616,7 +605,7 @@ struct PhotoDescriptionRow:View {
                     }.frame(minHeight:44)
                 }
                 .padding(12).frame(maxWidth:.infinity,alignment:.leading)
-                .background(RoundedRectangle(cornerRadius:12).stroke(palette.line,lineWidth:0.5))
+                .nyxCard(radius:NyxMetrics.chipRadius)
                 .accessibilityElement(children:.contain)
             }
             if editor.unsuggested.contains(index) {
@@ -695,7 +684,7 @@ struct JournalDetailView:View {
                 MoonView(geometry:moon.geometry).frame(width:64,height:64).accessibilityHidden(true)
                 VStack(alignment:.leading,spacing:4) {
                     Text("The Moon that night").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
-                    Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.system(.title3,design:.serif))
+                    Text("\(night.sky.moon.name), \(night.sky.moon.litText)").font(.system(.title3,design:.serif))
                     Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted)
                 }
             }
@@ -744,7 +733,7 @@ struct JournalUnavailableBanner:View {
             icon:{ Image(systemName:"externaldrive.badge.exclamationmark").foregroundStyle(palette.caution).accessibilityHidden(true) }
             .font(.subheadline).foregroundStyle(palette.ink)
             .padding(14).frame(maxWidth:.infinity,alignment:.leading)
-            .background(palette.panel,in:RoundedRectangle(cornerRadius:16)).overlay(RoundedRectangle(cornerRadius:16).stroke(palette.line,lineWidth:0.5))
+            .nyxCard(radius:NyxMetrics.rowRadius,fill:palette.panel)
             .accessibilityElement(children:.combine)
     }
 }

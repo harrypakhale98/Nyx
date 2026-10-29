@@ -18,8 +18,6 @@ nonisolated struct BestNightsInReach: Sendable {
     var inReach = 0
     /// Each ranked park's closure from its last park update, said beside its name.
     var closures: [String: String] = [:]
-    /// The nights each place is judged over, from tonight (`NightPlanner.horizon`).
-    static let nights = NightPlanner.horizon
     static let rowLimit = 10
     var best: Night? { rows.first?.best }
     /// `months`: each place's nights from tonight, in the order to keep on a tie.

@@ -218,20 +218,23 @@ extension ButtonStyle where Self == CapsuleActionStyle {
 
 /// A secondary action ("Tell someone", "Near me", "Add all to Calendar"): clear glass with a starlight
 /// label, so amber stays with the score and light and no action reads as a tinted web button. Bordered
-/// in starlight where glass would not read: night vision, Reduce Transparency, Increase Contrast.
+/// in starlight where glass would not read: night vision, Reduce Transparency, Increase Contrast. One look
+/// for every such button, "I'm here tonight" and "Keep this night" too.
 struct SecondaryAction: ViewModifier {
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.dynamicTypeSize) private var typeSize
     /// A rounded rectangle at accessibility sizes, where a wrapped label would meet a capsule's rim.
     private var shape: ButtonBorderShape { typeSize.isAccessibilitySize ? .roundedRectangle(radius:22) : .capsule }
+    /// Bordered always: a quieter action beside a glass one ("Keep this night" under another answer).
+    var bordered=false
     @ViewBuilder func body(content:Content)->some View {
-        if palette.nightVision || reduceTransparency || palette.highContrast { content.buttonStyle(.bordered).buttonBorderShape(shape).tint(palette.ink) }
+        if bordered || NyxGlass<Capsule>.solid(palette,reduceTransparency:reduceTransparency) { content.buttonStyle(.bordered).buttonBorderShape(shape).tint(palette.ink) }
         else { content.buttonStyle(.glass).buttonBorderShape(shape).tint(palette.ink) }
     }
 }
 extension View {
-    func secondaryAction()->some View { modifier(SecondaryAction()) }
+    func secondaryAction(bordered:Bool=false)->some View { modifier(SecondaryAction(bordered:bordered)) }
 }
 
 /// The three action looks side by side: a text action, a capsule, and a secondary action on glass.

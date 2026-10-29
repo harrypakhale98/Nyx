@@ -419,7 +419,7 @@ struct FieldNightPager: View {
             // (not when the journal could not open, since the entry would not last).
             if status.phase == .over, !JournalAccess.unavailable, KeepThisNight.container != nil || DebugScenario.screen != nil {
                 KeepThisNightButton(prefill:JournalPrefill(parkID:session.park.id,date:session.night.sky.evening,observedBortle:session.park.bortleEstimate,
-                    notes:String(localized:"Nyx scored this night \(session.score.value), \(session.score.band.label). \(session.night.sky.moon.name), \(Int((session.night.sky.moon.illumination*100).rounded()))% lit.")),prominent:false)
+                    notes:JournalPrefill.note(score:session.score,moon:session.night.sky.moon)),prominent:false)
                     .padding(.top,10)
             }
             Text(moonLine(now)).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,6)
@@ -469,11 +469,12 @@ struct FieldNightPager: View {
     /// Where the Moon is now, in one line.
     private func moonLine(_ now:Date)->String {
         let night=session.night, sky=night.sky
-        // Under 5% lit, as reminders say it; "new moon" is the phase name, under 3% (`MoonPhase.name`).
-        if sky.moon.illumination<0.05 { return String(localized:"Almost no moonlight tonight.") }
-        let lit=Int((sky.moon.illumination*100).rounded())
+        // Too thin to matter (`MoonPhase.negligible`), as the verdict and reminders say it; "new moon" is the
+        // phase name, under 3% (`MoonPhase.name`).
+        if sky.moon.negligible { return String(localized:"Almost no moonlight tonight.") }
+        let lit=sky.moon.litText
         let up=AstronomyEngine().lunarAltitude(at:now,park:night.park) > -0.833
-        if up { return sky.moonset.flatMap { $0>now ? String(localized:"Moon up, \(lit)% lit. It sets at \(night.park.time($0)).") : nil } ?? String(localized:"Moon up, \(lit)% lit.") }
+        if up { return sky.moonset.flatMap { $0>now ? String(localized:"Moon up, \(lit). It sets at \(night.park.time($0)).") : nil } ?? String(localized:"Moon up, \(lit).") }
         return sky.moonrise.flatMap { $0>now ? String(localized:"Moon below the horizon until \(night.park.time($0)).") : nil } ?? String(localized:"Moon below the horizon.")
     }
 }
@@ -610,7 +611,6 @@ struct FieldEntry: View {
     @Environment(PlanModel.self) private var model
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @Environment(\.modelContext) private var context
     let park: Park
@@ -621,32 +621,23 @@ struct FieldEntry: View {
                 Button { FieldPresenter.present(park:park,model:model,from:commands?.topController ?? SceneCommands.top(in:nil)) } label:{
                     Label("I'm here tonight",systemImage:"scope").font(.headline).padding(.horizontal,10).frame(minHeight:44)
                 }
-                .modifier(FieldButtonStyle())
+                .secondaryAction()
                 .accessibilityHint("Opens field mode: a dark red screen with tonight's milestones and where to look.")
             }
             // Tonight, followed: scheduled for half an hour before sunset, or at once after that (`FollowNight`).
-            if FollowNight.offered(night) {
+            if FollowNight.offered(night,now:model.present) {
                 let following=NightFollowing.shared.isFollowing(park:park,night:night.id)
                 Button { Task { await FollowNight.toggle(night,closure:model.closure(park),nightVision:nightVision) } } label:{
                     // The whole 44-point row is the target, not just the line of text.
                     Text(following ? "On your Lock Screen tonight. Stop" : "Follow tonight on the Lock Screen")
                         .font(.footnote).multilineTextAlignment(.center).padding(.horizontal,12).frame(minHeight:44).contentShape(Rectangle())
                 }
-                .accessibilityValue(FollowNight.caption(night,following:following))
+                .accessibilityValue(FollowNight.caption(night,following:following,now:model.present))
             }
         }
         .task { NightFollowing.shared.reload() }
         // Field mode is presented over the app; its dawn "Keep this night" needs the journal's store.
         .onAppear { KeepThisNight.container=context.container }
-    }
-}
-/// Liquid Glass normally; a plain bordered capsule in night vision and under Reduce Transparency.
-private struct FieldButtonStyle:ViewModifier {
-    @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @ViewBuilder func body(content:Content)->some View {
-        if palette.nightVision || reduceTransparency || palette.highContrast { content.buttonStyle(.bordered).buttonBorderShape(.capsule) }
-        else { content.buttonStyle(.glass).buttonBorderShape(.capsule) }
     }
 }
 

@@ -8,7 +8,6 @@ import SwiftUI
 struct CityLightFigure: View {
     enum Sky: Hashable { case here, city }
     @Environment(\.nyx) private var palette
-    @Environment(\.dynamicTypeSize) private var typeSize
     @MotionReduced private var reduceMotion: Bool
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.verticalSizeClass) private var verticalSize
@@ -61,7 +60,7 @@ struct CityLightFigure: View {
             }
             .frame(height:figureHeight)
             .clipShape(shape)
-            .overlay(shape.stroke(palette.line,lineWidth:0.5))
+            .overlay(shape.stroke(palette.line,lineWidth:0.5*palette.stroke))
             .frame(maxWidth:figureHeight*Self.aspect)
             .frame(maxWidth:.infinity)
             .onScrollVisibilityChange(threshold:0.01) { visible in if visible { onScreen=true } }
@@ -93,25 +92,9 @@ struct CityLightFigure: View {
     private var hereShort: String { String(localized:"Here · Class \(park.bortleEstimate)") }
     private var cityLabel: String { String(localized:"From a city (Class 8)") }
     private var cityShort: String { String(localized:"City · Class 8") }
-    @State private var available: CGFloat=0
-    @State private var segmentedWidth: CGFloat=0
-    /// Segmented and full width; a menu with a wrapping label at accessibility sizes, or where even
-    /// the short segments would not fit (a narrow column), measured rather than guessed.
-    @ViewBuilder private var picker: some View {
-        if typeSize.isAccessibilitySize { menu }
-        else {
-            Group {
-                if available>0 && segmentedWidth>available { menu } else { segmented }
-            }
-            .frame(maxWidth:.infinity,alignment:.leading)
-            .onGeometryChange(for:CGFloat.self) { $0.size.width } action:{ available=$0 }
-            .background {
-                // The segmented form at its natural width, measured and never shown.
-                segmented.fixedSize().onGeometryChange(for:CGFloat.self) { $0.size.width } action:{ segmentedWidth=$0 }
-                    .hidden().accessibilityHidden(true)
-            }
-        }
-    }
+    /// Segmented when the short labels fit, a menu otherwise (accessibility sizes, a long place name,
+    /// a narrow column), decided by the layout (`FittingPicker`).
+    private var picker: some View { FittingPicker { segmented } menu:{ menu } }
     private var segmented: some View {
         Picker("Sky drawn",selection:$selection) {
             Text(hereShort).tag(Sky.here)

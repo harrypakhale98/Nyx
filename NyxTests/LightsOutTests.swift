@@ -35,7 +35,7 @@ import Testing
     @Test func bestNightIsTheHighestAndSaidPlainly() throws {
         let grba = try park("grba")
         let nights = [try night(grba, "2026-10-24", score: 61), try night(grba, "2026-10-25", score: 88), try night(grba, "2026-10-26", score: 88)]
-        let best = try #require(LightsOut.best(nights, closure: nil))
+        let best = try #require(NightPlanner.best(nights))
         // The highest score; between equals, whichever the shared ranking prefers (`NightPlanner.better`).
         #expect(best.score.value == 88)
         #expect(best.id == (NightPlanner.better(nights[1], nights[2], closures: [:]) ? nights[1] : nights[2]).id)

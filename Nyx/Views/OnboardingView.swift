@@ -144,7 +144,7 @@ struct OnboardingView:View {
         }
         .tint(palette.controlTint)
         .padding(.horizontal,20).padding(.vertical,12).frame(maxWidth:340,minHeight:56)
-        .background(shape.fill(palette.panel)).overlay(shape.stroke(palette.line,lineWidth:0.5))
+        .background(shape.fill(palette.panel)).overlay(shape.stroke(palette.line,lineWidth:0.5*palette.stroke))
         // The soft tap of the turn comes once, from RootView, whichever switch changed it.
         .accessibilityHint("Turns the screen red. You can change it any time.")
     }

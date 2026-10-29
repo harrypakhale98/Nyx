@@ -7,7 +7,7 @@ import Testing
 @MainActor struct BestNightsTests {
     let parks: [Park]
     init() throws { parks = try ParkData.load() }
-    private func months(_ ids: [String], from start: Date, count: Int = BestNightsInReach.nights) -> [[Night]] {
+    private func months(_ ids: [String], from start: Date, count: Int = NightPlanner.horizon) -> [[Night]] {
         let engine = AstronomyEngine(), scoring = ScoreEngine()
         return ids.compactMap { id in parks.first { $0.id == id } }.map { park in
             (0..<count).map { day in

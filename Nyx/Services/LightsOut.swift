@@ -11,13 +11,11 @@ nonisolated enum LightsOut {
         /// The starting point's class, and whether it is the grid's estimate or the assumed suburban sky.
         let homeClass: Int
         let homeKnown: Bool
-        /// The place's best night in the next `horizon` nights, when one is worth naming.
+        /// The place's best night in the next `NightPlanner.horizon` nights, when one is worth naming.
         var best: Night?=nil
     }
     /// Only where the difference is plain to see: two classes or more.
     static let difference=2
-    /// The nights looked at for the best one: the window every best night is named from.
-    static let horizon=NightPlanner.horizon
     /// The starting point's class: the sky grid's estimate where it has one, else a suburban sky.
     static func homeClass(latitude: Double, longitude: Double, grid: SkyGrid = .shared) -> (bortle: Int, known: Bool) {
         guard let magnitude=grid.skyBrightness(latitude:latitude,longitude:longitude) else { return (HomeSky.assumedBortle,false) }
@@ -34,10 +32,6 @@ nonisolated enum LightsOut {
         guard let ranked, ranked.0.bortleEstimate<=homeClass-difference else { return nil }
         return (ranked.0,ranked.1)
     }
-    /// The best of the coming nights, as every surface names a place's best night (`NightPlanner.best`).
-    /// `closure` is not weighed: it costs every night of the one place alike, so it never moves the
-    /// night; it is said beside it.
-    static func best(_ nights: [Night], closure: String?) -> Night? { NightPlanner.best(nights) }
     /// "That's the sky at Great Basin, 160 mi away."
     static func sentence(_ target: Target) -> String {
         String(localized:"That's the sky at \(target.place.shortName), \(DarkerSky.distance(target.meters)) away.")
@@ -45,7 +39,7 @@ nonisolated enum LightsOut {
     /// "Best night at Great Basin in the next 30 nights: Sat, Oct 31, 88." Names the place, so it
     /// reads on its own before the sky has cleared.
     static func bestLine(_ night: Night) -> String {
-        String(localized:"Best night at \(night.park.shortName) in the next \(horizon) nights: \(night.park.dayLabel(night.id)), \(NightVerdict.scored(night)).")
+        String(localized:"Best night at \(night.park.shortName) in the next \(NightPlanner.horizon) nights: \(night.park.dayLabel(night.id)), \(NightVerdict.scored(night)).")
     }
     /// The figure for VoiceOver: what is drawn, both classes, and what the dark sky shows.
     static func spoken(_ target: Target, origin: String) -> String {

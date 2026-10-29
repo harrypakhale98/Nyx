@@ -174,7 +174,7 @@ struct TonightSkyView: View {
     }
     private var closeButton: some View {
         Button { dismiss() } label:{ Image(systemName:"xmark").font(.body.weight(.semibold)).frame(width:44,height:44) }
-            .modifier(FloatingGlass(shape:Circle()))
+            .nyxGlass(Circle())
             .accessibilityLabel("Close")
     }
     private var titleBlock: some View {
@@ -213,12 +213,12 @@ struct TonightSkyView: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .frame(width:large ? (screen.width*0.5).rounded() : min(360,max(320,(screen.width*0.38).rounded())))
-        .modifier(FloatingGlass(shape:RoundedRectangle(cornerRadius:26)))
+        .nyxGlass(RoundedRectangle(cornerRadius:26))
         .padding(.vertical,8).padding(.trailing,8)
     }
     private func controls(sky:HorizonSky)->some View {
         ScrollView { controlRows(sky:sky).padding(16) }.scrollBounceBehavior(.basedOnSize).frame(maxHeight:max(240,screenHeight*0.5)).fixedSize(horizontal:false,vertical:true)
-        .modifier(FloatingGlass(shape:RoundedRectangle(cornerRadius:26)))
+        .nyxGlass(RoundedRectangle(cornerRadius:26))
         .padding(.horizontal,12).padding(.bottom,8)
         .readableColumn(WideLayout.proseWidth)
     }
@@ -409,21 +409,6 @@ private struct SkyChrome<Header: View, Controls: View, Column: View>: ViewModifi
             .safeAreaInset(edge:.trailing,spacing:0) { if beside { column } }
     }
 }
-/// Liquid Glass for a floating control; a solid panel under Reduce Transparency, Increase
-/// Contrast and night vision.
-struct FloatingGlass<S: Shape>: ViewModifier {
-    @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    let shape: S
-    @ViewBuilder func body(content:Content)->some View {
-        if reduceTransparency || palette.nightVision || palette.highContrast {
-            content.background(shape.fill(palette.panel)).overlay(shape.stroke(palette.line,lineWidth:0.5))
-        } else {
-            content.glassEffect(.regular.tint(palette.panel.opacity(0.35)),in:shape)
-        }
-    }
-}
-
 /// The sky for a night as a window on the park's page: a still render that opens the full sky.
 struct SkyWindowCard: View {
     @Environment(\.nyx) private var palette
@@ -461,7 +446,7 @@ struct SkyWindowCard: View {
                 }
             }
             .clipShape(shape)
-            .overlay(shape.stroke(palette.line,lineWidth:0.5))
+            .overlay(shape.stroke(palette.line,lineWidth:0.5*palette.stroke))
             .contentShape(shape)
         }
         .buttonStyle(.plain)
@@ -511,14 +496,14 @@ struct BortleFigure: View {
     private var shownClass: Int { Int(level.rounded()) }
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
-            Text("An illustration").font(.caption.weight(.medium)).foregroundStyle(palette.muted).textCase(Lettering.spaced ? .uppercase : nil).kerning(1.6)
+            Text("An illustration").eyebrow().foregroundStyle(palette.muted)
             if let park {
                 // Never more than 45% of the visible height, so the picture stays in view above the
                 // slider while it is dragged (a landscape iPhone, accessibility sizes).
                 PanoramaCanvas(sky:Self.sky(park),options:Self.options(park,bortle:level))
                     .containerRelativeFrame(.vertical) { length,_ in min(260,(length*0.45).rounded()) }
-                    .clipShape(RoundedRectangle(cornerRadius:20))
-                    .overlay(RoundedRectangle(cornerRadius:20).stroke(palette.line,lineWidth:0.5))
+                    .clipShape(RoundedRectangle(cornerRadius:NyxMetrics.rowRadius,style:.continuous))
+                    .nyxCard(radius:NyxMetrics.rowRadius)
                     .accessibilityHidden(true)
             }
             Slider(value:$level,in:1...9) { Text("Bortle class") } minimumValueLabel:{ Text("1").font(.caption).foregroundStyle(palette.muted) } maximumValueLabel:{ Text("9").font(.caption).foregroundStyle(palette.muted) } onEditingChanged:{ editing in
@@ -544,8 +529,7 @@ struct BortleFigure: View {
         .sensoryFeedback(.selection,trigger:shownClass)
         // A card like `Panel`, a little tighter so the sky figure keeps its width inside an essay's column.
         .padding(18)
-        .background(RoundedRectangle(cornerRadius:NyxMetrics.cardRadius).fill(palette.panel))
-        .overlay(RoundedRectangle(cornerRadius:NyxMetrics.cardRadius).stroke(palette.line,lineWidth:0.5))
+        .nyxCard(radius:NyxMetrics.heroRadius,fill:palette.panel)
     }
 }
 /// A live figure an essay can carry, placed after one of its paragraphs.

@@ -134,8 +134,8 @@ struct ScoreBreakdownView: View {
         }
     }
     private var moonFact:String {
-        let lit=String(localized:"\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit.")
-        guard let line=night.sky.moonBelowLine else { return lit }
+        let lit=Sentences.end(String(localized:"\(night.sky.moon.name), \(night.sky.moon.litText)"))
+        guard let line=night.sky.moonSentence(park:night.park,withLit:false) else { return lit }
         return Sentences.join([lit,line])
     }
     /// Model agreement, the cloud layer and the air, each one sentence with a quiet symbol, so the
