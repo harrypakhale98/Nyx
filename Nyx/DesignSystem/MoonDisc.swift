@@ -109,11 +109,10 @@ struct MoonDisc: View, Animatable {
     }
 }
 extension MoonDisc {
-    /// "Waxing crescent, 34 percent lit": the phase's name first, then how much is lit.
+    /// "Waxing crescent, 34 percent lit": the phase's name first, then how much is lit (`MoonPhase.spoken`).
     nonisolated static func label(illumination:Double,waxing:Bool)->String {
-        let lit=min(1,max(0,illumination))
-        let half=acos(1-2*lit)/(2*Double.pi)
-        return String(localized:"\(MoonPhase(fraction:waxing ? half : 1-half).name), \(Int((lit*100).rounded())) percent lit")
+        let half=acos(1-2*min(1,max(0,illumination)))/(2*Double.pi)
+        return MoonPhase(fraction:waxing ? half : 1-half).spoken
     }
 }
 #Preview("Phases") {

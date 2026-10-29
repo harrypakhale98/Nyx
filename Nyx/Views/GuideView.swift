@@ -10,7 +10,6 @@ enum GuideMode {
 struct GuideView:View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     let mode:GuideMode
@@ -38,16 +37,8 @@ struct GuideView:View {
     }
     /// The places in reach, weighed as Tonight weighs them (`TonightReach`): from a US starting point with
     /// only US places in range, the national parks; otherwise every place in range, a shortlist of the
-    /// darkest skies first when there are many.
-    private var inReach:[Park] {
-        let parks=model.nearby(latitude:model.location.latitude,longitude:model.location.longitude)
-        let from:(latitude:Double,longitude:Double)?
-        if let latitude=model.location.latitude, let longitude=model.location.longitude { from=(latitude,longitude) } else { from=model.origin }
-        guard !model.catalog.isEmpty, let from else { return parks }
-        let all=model.places(near:from.latitude,longitude:from.longitude,radiusMeters:model.radiusMeters)
-        let chosen=TonightReach.candidates(parks:parks,places:all,originInUS:USOutline.contains(latitude:from.latitude,longitude:from.longitude))
-        return chosen.count>TonightReach.shortlistSize ? TonightReach.shortlist(chosen,latitude:from.latitude,longitude:from.longitude) : chosen
-    }
+    /// darkest skies first when there are many (`PlanModel.shortlistInReach`).
+    private var inReach:[Park] { model.shortlistInReach }
     /// Where a record's access stands, in Nyx's own fixed words (`PlanModel.guideAccess`); a closure
     /// is already flagged in the night's own line (`NightLookup.describe`).
     private func closures(_ park:Park,lookup:NightLookup)->String? { lookup.closed.contains(park.id) ? nil : model.guideAccess(park) }
@@ -180,7 +171,6 @@ struct GuideView:View {
     /// A glass bar floating over the night, pinned to the bottom; solid where glass would cost contrast.
     private var inputBar:some View {
         let shape=RoundedRectangle(cornerRadius:24,style:.continuous)
-        let solid=reduceTransparency || palette.nightVision || palette.highContrast
         return HStack(alignment:.bottom,spacing:10) {
             // A placeholder never wraps: at accessibility sizes the long one was cut off mid-word.
             TextField(typeSize.isAccessibilitySize ? "Ask Nyx" : mode.isPlanning ? "Ask about parks and nights" : "Ask about this essay",text:$question,axis:.vertical)
@@ -194,9 +184,7 @@ struct GuideView:View {
                 .accessibilityLabel("Ask").accessibilityInputLabels([Text("Ask"),Text("Send")])
         }
         .padding(.leading,18).padding(.trailing,8)
-        .background { if solid { shape.fill(palette.nightVision ? Color.black : palette.panel) } }
-        .glassEffect(solid ? .identity : .regular.tint(palette.panel.opacity(0.5)).interactive(),in:shape)
-        .overlay(shape.stroke(palette.line,lineWidth:0.5))
+        .nyxGlass(shape,role:.pill)
         .padding(.horizontal,16).padding(.bottom,8)
         .frame(maxWidth:WideLayout.readableWidth).frame(maxWidth:.infinity)
     }
@@ -479,7 +467,7 @@ struct GuideRecordRow: View {
     /// Turned for the southern sky, as `MoonSymbol` is.
     static func moonGlyph(_ night:Night)->some View {
         let moon=night.sky.moon
-        return Image(systemName:Int((moon.illumination*100).rounded())<5 ? "moonphase.new.moon" : moon.symbolName(southern:night.park.latitude<0))
+        return Image(systemName:moon.negligible ? "moonphase.new.moon" : moon.symbolName(southern:night.park.latitude<0))
     }
     /// The basis said once above the records: on the usual clouds, the longer line every surface
     /// uses (`Night.basisLine`), which also says what the score counts instead, when all the nights share it.
@@ -556,15 +544,15 @@ struct GuideRecordRow: View {
     /// cannot work out itself), the Moon and the basis, the closure, and how to get there.
     @ViewBuilder private func nightLines(_ night:Night)->some View {
         if let distance=record.detail { Text(distance).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-        let lit=Int((night.sky.moon.illumination*100).rounded())
-        let line=showsBasis ? "\(String(localized:"\(lit)% lit")) · \(Self.basis(night))" : String(localized:"\(lit)% lit")
+        let moon=night.sky.moon
+        let line=showsBasis ? "\(moon.litText) · \(Self.basis(night))" : moon.litText
         Label { Text(line).fixedSize(horizontal:false,vertical:true) } icon:{ Self.moonGlyph(night).accessibilityHidden(true) }
             .font(.subheadline).foregroundStyle(palette.muted).labelStyle(GuideLineLabelStyle())
             .accessibilityElement(children:.ignore)
-            .accessibilityLabel(showsBasis ? "\(String(localized:"\(night.sky.moon.name), \(lit)% lit")). \(Self.basis(night))" : String(localized:"\(night.sky.moon.name), \(lit)% lit"))
+            .accessibilityLabel(showsBasis ? "\(moon.spoken). \(Self.basis(night))" : moon.spoken)
         if let closure {
             // The caution glyph and starlight words, as every closure (`CautionLabelStyle`), in this row's column.
-            Label { Text(closure).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"exclamationmark.triangle").foregroundStyle(palette.caution).accessibilityHidden(true) }
+            Label { Text(closure).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"exclamationmark.triangle.fill").foregroundStyle(palette.caution).accessibilityHidden(true) }
                 .font(.subheadline.weight(.medium)).labelStyle(GuideLineLabelStyle())
         }
         if let park=record.park { AccessNoteLabel(park:park) }

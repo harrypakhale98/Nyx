@@ -130,9 +130,12 @@ nonisolated struct JournalPrefill: Equatable, Identifiable, Sendable {
         self.parkID=parkID; self.date=date; self.observedBortle=observedBortle; self.notes=notes
     }
     init(night: Night) {
-        let moon=night.sky.moon
-        self.init(parkID:night.park.id,date:night.park.evening(night.id),observedBortle:night.park.bortleEstimate,
-                  notes:String(localized:"Nyx scored this night \(night.score.value), \(night.score.band.label). \(moon.name), \(Int((moon.illumination*100).rounded()))% lit."))
+        self.init(parkID:night.park.id,date:night.park.evening(night.id),observedBortle:night.park.bortleEstimate,notes:Self.note(score:night.score,moon:night.sky.moon))
+    }
+    /// The first line of a kept night, one way wherever a night is kept: "Nyx scored this night 88,
+    /// Excellent. Waxing crescent, 23% lit."
+    nonisolated static func note(score: DarknessScore, moon: MoonPhase) -> String {
+        String(localized:"Nyx scored this night \(score.value), \(score.band.label). \(moon.name), \(moon.litText).")
     }
 }
 /// Field mode remembers the nights it was used at each park, so the park's page can offer
@@ -167,21 +170,12 @@ struct KeepThisNightButton: View {
         Button { editing=prefill } label:{
             Label("Keep this night",systemImage:"book.closed").font(.headline).padding(.horizontal,10).frame(minHeight:44)
         }
-        .modifier(KeepButtonStyle(prominent:prominent))
+        .secondaryAction(bordered:!prominent)
         .accessibilityHint("Opens a journal entry for this night, with the park, the date and the score filled in.")
         .accessibilityInputLabels([Text("Keep this night"),Text("Journal")])
         .sheet(item:$editing) { prefill in
             NavigationStack { JournalEditorView(prefill:prefill) { ReviewPrompt.noteFieldNightKept() } }.nyxPresentation()
         }
-    }
-}
-private struct KeepButtonStyle: ViewModifier {
-    @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    let prominent: Bool
-    @ViewBuilder func body(content:Content)->some View {
-        if !prominent || palette.nightVision || reduceTransparency || palette.highContrast { content.buttonStyle(.bordered).buttonBorderShape(.capsule) }
-        else { content.buttonStyle(.glass).buttonBorderShape(.capsule) }
     }
 }
 /// On a park's page the morning after a night in field mode: "Keep this night", until the night
@@ -197,7 +191,7 @@ struct KeepThisNightOffer: View {
         _entries=Query(filter:#Predicate<JournalEntry> { $0.parkID == id })
     }
     private var night: Night? {
-        let now=DebugScenario.date ?? .now
+        let now=model.present
         let last=park.lastNightBegun(at:now)
         let candidate=model.night(park,on:last)
         let journaled=entries.contains { park.calendar.isDate($0.date,inSameDayAs:last) }

@@ -320,7 +320,7 @@ struct CalendarView: View {
             .nightKeys(enabled:wide && chosen == nil) { delta in step(delta) }
             #if DEBUG
             // Review captures: `-nyx-night-sheet` opens the park's best night's breakdown, as a tap does.
-            .task(id:park?.id) { if DebugScenario.isEnabled("night-sheet"), let park, let best=NightVerdict.best(model.nights(park,from:model.tonight(park),count:NightVerdict.horizon)) { chosen=best } }
+            .task(id:park?.id) { if DebugScenario.isEnabled("night-sheet"), let park, let best=NightPlanner.best(model.nights(park,from:model.tonight(park),count:NightPlanner.horizon)) { chosen=best } }
             #endif
     }
     /// The park whose month this is, as the page's title: its state and Dark Sky status above it
@@ -578,7 +578,7 @@ struct CalendarView: View {
     }
     /// "I'm going" in a night's menu, as `GoingButton` offers it on the night's page: kept, it reads "Not going".
     @ViewBuilder private func goingItem(_ night:Night)->some View {
-        if !FieldNight.isOver(night.sky,at:DebugScenario.date ?? .now) {
+        if !FieldNight.isOver(night.sky,at:model.present) {
             let going=GoingNights.shared.going(park:night.park,night:night.id)
             Button(going == nil ? "I'm going" : "Not going",systemImage:going == nil ? "checkmark.circle" : "checkmark.circle.fill") { toggleGoing(night,going) }
         }
@@ -617,13 +617,13 @@ struct CalendarView: View {
         return settled.offset
     }
     /// What the ring marks, said once: the best stretch while forecasts reach it, else the darkest Moon,
-    /// then the park's best night (`NightVerdict.best`, the night its page, Tonight and Best nights
+    /// then the park's best night (`NightPlanner.best`, the night its page, Tonight and Best nights
     /// name) on tonight's month and on the month or stretch that holds it. How the ring is chosen is in
     /// the key under the month.
     private func windowPanel(_ park:Park,_ data:Month)->some View {
         let stretch=data.stretch
         let thisMonth=data.nights.contains { $0.id==data.tonight }
-        let best=NightVerdict.best(model.nights(park,from:model.tonight(park),count:NightVerdict.horizon))
+        let best=NightPlanner.best(model.nights(park,from:model.tonight(park),count:NightPlanner.horizon))
             .flatMap { best in thisMonth || (data.nights+stretch.nights).contains { $0.id==best.id } ? best : nil }
         return Panel { VStack(alignment:.leading,spacing:8) {
             Label(stretch.kind == .moon && !stretch.inMonth && !stretch.nights.isEmpty ? String(localized:"The next darkest moon stretch") : stretch.kind.title,systemImage:"circle.circle").font(.subheadline).foregroundStyle(palette.muted)

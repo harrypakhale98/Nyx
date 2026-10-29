@@ -19,8 +19,6 @@ struct RootView:View {
     /// Night vision At dusk (`NightVisionDusk`): followed while this window is active, never in the background.
     @AppStorage(NightVisionMode.atDuskKey,store:SharedSettings.defaults) private var atDusk=false
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @AppStorage("notificationsEnabled") private var notificationsEnabled=false
-    @AppStorage("showerReminders") private var showerReminders=true
     /// This window's tab and keyboard commands (each iPad window has its own).
     @State private var commands=SceneCommands()
     /// This window's tab, restored with the window (each iPad window keeps its own).
@@ -54,8 +52,6 @@ struct RootView:View {
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @Environment(\.accessibilitySwitchControlEnabled) private var switchControl
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.horizontalSizeClass) private var horizontalSize
-    @Environment(\.verticalSizeClass) private var verticalSize
     /// This window's place among the windows a tapped reminder may open in (`NotificationRouter`).
     @State private var routerID=UUID()
     /// The tab bar recedes as a page scrolls down and returns on the way up, except where a bar that
@@ -84,10 +80,10 @@ struct RootView:View {
                     Tab("Parks",systemImage:"mountain.2",value:1) { ParksTab().modifier(TabChrome(tab:1,tint:palette.ink)) }
                     Tab("Plan",systemImage:"calendar",value:2) { NavigationStack { PlanView() }.modifier(TabChrome(tab:2,tint:palette.ink)) }
                     Tab("Journal",systemImage:"book.closed",value:3) { NavigationStack { JournalView() }.modifier(TabChrome(tab:3,tint:palette.ink)) }
-                        // iPad and iPhone Duo's inner display: a night from Plan's month or a park held over the Journal's tab item or sidebar
+                        // A night from Plan's month or a park held over the Journal's tab item or sidebar
                         // row opens the Journal, which takes the drop (`acceptsJournalDrop`). The tab item itself
                         // takes none: SwiftUI's tab drop destination did not fire on iPadOS 26 or 27.
-                        .springLoadingBehavior(NightDragPolicy.drags(horizontal:horizontalSize,vertical:verticalSize) ? .enabled : .automatic)
+                        .springLoadingBehavior(.enabled)
                 }
                 // A tab bar on iPhone; on iPad a tab bar that opens into a sidebar.
                 .tabViewStyle(.sidebarAdaptable)
@@ -240,14 +236,9 @@ struct RootView:View {
             model.savedSync.pushWatch(model)
             if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:nightVision) } }
         }
-        // The starting park is followed by the widgets' snapshot and the watch (which falls back to it
-        // when nothing is saved): a new one is handed over at once, then its clouds are fetched.
-        .onChange(of:model.homeID) { _,_ in Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
-        .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await model.savedSync.update(model,saved:saved,spots:spots) } else { await NotificationScheduler().remove() } } }
-        .onChange(of:saved.map(\.parkID)) { _,_ in Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
-        // A spot saved, renamed or deleted: the model first, then the widget, the watch and reminders follow.
-        .onChange(of:SavedSpotsFeed.signature(spots)) { _,_ in model.setSpots(spots); Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
-        .onChange(of:showerReminders) { _,_ in Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
+        // The saved parks and spots, the starting park and the reminder switches: the widgets' snapshot,
+        // the watch and reminders follow each change, as in Assistive Access (`savedUpkeep`).
+        .savedUpkeep(saved:saved,spots:spots)
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
             withPlace(activity.userInfo?[CSSearchableItemActivityIdentifier] as? String) { open($0) }
         }
@@ -356,7 +347,7 @@ struct RootView:View {
         // "With the lights out" alone, as Tonight shows it from Las Vegas (to Death Valley), for audits and captures.
         case "lights-out": if let dark=model.park("deva") {
             NavigationStack { ScrollView { Panel { LightsOutFigure(target:LightsOut.Target(place:dark,meters:dark.distanceMeters(latitude:36.17,longitude:-115.14),homeClass:8,homeKnown:true,
-                                                                                          best:LightsOut.best(model.nights(dark,from:model.tonight(dark),count:LightsOut.horizon),closure:model.closure(dark))),origin:"Las Vegas") }.padding(24) }
+                                                                                          best:NightPlanner.best(model.nights(dark,from:model.tonight(dark),count:NightPlanner.horizon))),origin:"Las Vegas") }.padding(24) }
                 .background(NightBackground(park:dark,night:model.tonight(dark))).navigationTitle(dark.shortName).navigationBarTitleDisplayMode(.inline) }
         }
         // The Sky glow panel (what city light takes, light pollution, Protect this sky) and viewing spots for one park:

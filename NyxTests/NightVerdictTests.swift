@@ -64,7 +64,7 @@ import Testing
         let days = (1...60).map { Calendar.current.date(byAdding: .day, value: $0, to: Date(timeIntervalSince1970: 1_793_000_000)) ?? .now }
         for day in days {
             let sky = engine.conditions(for: jotr, on: jotr.evening(day))
-            guard sky.darkHours > 0, let line = NightVerdict.moonSentence(sky: sky, park: jotr) else { continue }
+            guard sky.darkHours > 0, let line = sky.moonSentence(park: jotr) else { continue }
             #expect(line.hasPrefix("Moon-free through all") == (sky.moonDownPercent == 100))
             if sky.moonDownPercent == 0 && !sky.moon.negligible { #expect(line.hasPrefix("Moon up all through")) }
         }
@@ -111,15 +111,14 @@ import Testing
         let scores = [49, 55, 62, 70, 82, 80, 82, 66, 58, 50]
         let here = zip(skies, scores).map { night(jotr, $0, score: $1) }
         let there = zip(other, [50, 52, 60, 64, 70, 77, 75, 70, 60, 55]).map { night(grba, $0, score: $1) }
-        let best = try #require(NightVerdict.best(here))
+        let best = try #require(NightPlanner.best(here))
         #expect(best.score.value == 82 && best.id == NightPlanner.ranked(here).first?.id)
         // The park page, from tonight or from any night before the best.
         #expect(NightVerdict.darker(than: here[0], among: here)?.id == best.id)
         #expect(NightVerdict.darker(than: here[2], among: here)?.id == best.id)
-        // Best nights' row for the park, and With the lights out.
+        // Best nights' row for the park.
         let ranking = BestNightsInReach.make([here, there])
         #expect(ranking.rows.first { $0.id == jotr.id }?.best.id == best.id)
-        #expect(LightsOut.best(here, closure: "Road closed")?.id == best.id)
         // Tonight: the answer's own park first, though a closure ranks another place above it.
         let closures = [jotr.id: "Road closed"]
         #expect(BestNightsInReach.make([here, there], closures: closures).best?.park.id == grba.id)

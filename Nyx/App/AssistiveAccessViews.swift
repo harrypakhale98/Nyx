@@ -39,20 +39,18 @@ struct AssistiveAccessRoot: View {
 /// The main window's saved-park upkeep, for this scene: the full app's `RootView` does not run in
 /// Assistive Access, so "Remind me" would otherwise save a park and switch reminders on without
 /// anything being scheduled. The widget's snapshot, the watch and reminders follow the saved parks
-/// through the same `SavedSkySync`, which keeps the last snapshot's parks when the store could not open.
+/// through the same `SavedSkySync`, on the same changes as the full app (`savedUpkeep`), which keeps
+/// the last snapshot's parks when the store could not open.
 private struct AssistiveSavedSync: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.scenePhase) private var scenePhase
     @Query private var saved: [SavedPark]
     /// Saved spots are saved places too: the model resolves their `pin:` ids from these.
     @Query private var spots: [SavedSpot]
-    @AppStorage("notificationsEnabled") private var reminders=false
     var body: some View {
         Color.clear.frame(width: 0, height: 0).accessibilityHidden(true)
             .task { await model.savedSync.update(model, saved: saved, spots: spots) }
-            .onChange(of: saved.map(\.parkID)) { _, _ in Task { await model.savedSync.update(model, saved: saved, spots: spots) } }
-            .onChange(of: SavedSpotsFeed.signature(spots)) { _, _ in Task { await model.savedSync.update(model, saved: saved, spots: spots) } }
-            .onChange(of: reminders) { _, enabled in Task { if enabled { await model.savedSync.update(model, saved: saved, spots: spots) } else { await NotificationScheduler().remove() } } }
+            .savedUpkeep(saved: saved, spots: spots)
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { model.tick(); Task { await model.savedSync.update(model, saved: saved, spots: spots) } }
                 if phase == .background, DebugScenario.screen == nil { SavedSkySync.scheduleRefresh() }
@@ -84,16 +82,10 @@ struct AssistiveHome: View {
 struct AssistiveTonight: View {
     @Environment(PlanModel.self) private var model
     @State private var darker:DarkerSky.Offer?
-    /// The places within the radius of the starting point (the first run's choice, or the example
-    /// park until one is chosen), weighed as Tonight weighs them (`TonightReach`): from a US starting
-    /// point with only US places in range, the national parks; anywhere else, every place in range.
-    static func inReach(_ model: PlanModel) -> [Park] {
-        let parks=model.nearby(latitude: nil, longitude: nil)
-        guard !model.catalog.isEmpty, let from=model.origin else { return parks }
-        let all=model.places(near: from.latitude, longitude: from.longitude, radiusMeters: model.radiusMeters)
-        let chosen=TonightReach.candidates(parks: parks, places: all, originInUS: USOutline.contains(latitude: from.latitude, longitude: from.longitude))
-        return chosen.count>TonightReach.shortlistSize ? TonightReach.shortlist(chosen, latitude: from.latitude, longitude: from.longitude) : chosen
-    }
+    /// The places in reach exactly as Tonight weighs them (`PlanModel.shortlistInReach`): within the
+    /// radius of the device under Near me, else of the starting point (the first run's choice, or the
+    /// example until one is chosen), so this screen and the full app name the same place.
+    static func inReach(_ model: PlanModel) -> [Park] { model.shortlistInReach }
     /// The darkest place in reach tonight.
     static func best(_ model: PlanModel) -> Park? { model.ranked(inReach(model)).first }
     var body: some View {
@@ -116,7 +108,7 @@ struct AssistiveTonight: View {
         .navigationTitle("Tonight")
         .assistiveAccessNavigationIcon(systemImage: "moon.stars")
         .task(id: Self.darkerKey(model, reach)) {
-            guard let from=model.origin, Self.darkerKey(model, reach) != nil else { darker=nil; return }
+            guard let from=model.reachOrigin, Self.darkerKey(model, reach) != nil else { darker=nil; return }
             let radius=model.radiusMeters, darkest=reach.map(\.bortleEstimate).min()
             let offer=await Task.detached(priority: .utility) { DarkerSky.offer(from: from, radiusMeters: radius, darkestInReach: darkest) }.value
             if !Task.isCancelled { darker=offer }
@@ -124,7 +116,7 @@ struct AssistiveTonight: View {
     }
     /// What the nearest dark sky depends on; nil when a place in reach is dark already.
     static func darkerKey(_ model: PlanModel, _ reach: [Park]) -> String? {
-        guard let from=model.origin else { return nil }
+        guard let from=model.reachOrigin else { return nil }
         let darkest=reach.map(\.bortleEstimate).min()
         guard DarkerSky.needed(darkestInReach: darkest) != nil else { return nil }
         return String(format: "%.3f,%.3f,%.0f,%d", from.latitude, from.longitude, model.radiusMeters, darkest ?? 0)
@@ -169,11 +161,8 @@ struct AssistiveParkCard: View {
         VStack(alignment: .leading, spacing: 18) {
             Text(park.shortName).font(.system(.largeTitle, design: .serif).weight(.semibold)).fixedSize(horizontal: false, vertical: true)
             // A closure is the second thing said, before the night itself, as on every other surface:
-            // the warning glyph in its red, the words in starlight.
-            if let closure=model.closure(park) {
-                Label { Text("Closure alert: \(closure)").fixedSize(horizontal: false, vertical: true) } icon:{ Image(systemName: "exclamationmark.triangle.fill") }
-                    .font(.title3.weight(.semibold)).labelStyle(.caution)
-            }
+            // the warning glyph in its red, the words in starlight, named in full here (`ClosureLabel`).
+            if let closure=model.closure(park) { ClosureLabel(closure, named: true, font: .title3.weight(.semibold)) }
             Text(Self.word(night)).font(.title.weight(.semibold)).foregroundStyle(palette.ink).fixedSize(horizontal: false, vertical: true)
             MoonView(geometry: AstronomyEngine().moon(for: night).geometry).frame(maxWidth: 200).frame(maxWidth: .infinity)
             Text(Self.darkLine(night)).font(.title2).fixedSize(horizontal: false, vertical: true)

@@ -9,9 +9,9 @@ struct BestNightsView: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     @MotionReduced private var reduceMotion: Bool
-    /// The best night's numeral: the hero, scaling with Dynamic Type but never past the screen.
-    @ScaledMetric(relativeTo:.largeTitle) private var heroSize=96.0
     @State private var ranking:BestNightsInReach?
+    /// A save from a place's menu could not be stored.
+    @State private var saveFailed=false
     @State private var choosing=false
     @State private var explaining=false
     @State private var width=0.0
@@ -52,6 +52,7 @@ struct BestNightsView: View {
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
         .background(NightBackground(seed:"best",park:ranking?.best?.park,night:ranking?.best?.id))
         .modifier(StartingPointSheets(choosing:$choosing,explaining:$explaining))
+        .parkSaveAlert(isPresented:$saveFailed,journalUnavailable:model.journalUnavailable)
         .task(id:key) { await rank(key) }
         // Cached forecasts are enough to rank; a refresh that is already due arrives in the background.
         .task { if DebugScenario.screen == nil { await model.refreshForecasts(watching:[]) } }
@@ -70,7 +71,7 @@ struct BestNightsView: View {
     /// The best night in reach, or why there is none yet.
     @ViewBuilder private var answer:some View {
         if !loading, let ranking, let best=ranking.best {
-            hero(best,closure:ranking.closures[best.park.id])
+            BestNightHero(night:best,closure:ranking.closures[best.park.id]) { saveFailed=true }
         } else if !loading, ranking != nil {
             CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No parks or dark-sky places fall inside this radius. Widen it or choose a different starting point.")
         } else {
@@ -105,30 +106,6 @@ struct BestNightsView: View {
             if ranking.rows.contains(where:{ $0.best.basis != .forecast }) { Text("Nights past the forecast are ranked on each place's usual clouds and the Moon. Check again as they come closer.") }
         }.font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
     }
-    private func hero(_ night:Night,closure:String?)->some View {
-        let park=night.park
-        return NavigationLink { ParkDetailView(park:park,initialDate:night.id).onAppear { ReviewPrompt.noteNightViewed(score:night.score.value) } } label:{
-            VStack(spacing:10) {
-                // One row of small capitals over the place, as above a park's page; the band and what it
-                // rests on stay a quiet line under the numeral, never a second heading.
-                Eyebrow(text:"The best night",meta:true)
-                Text(park.shortName).font(.system(.title,design:.serif)).multilineTextAlignment(.center).foregroundStyle(palette.ink)
-                Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
-                Text("\(night.score.value)").scoreNumeral(size:min(heroSize,150),accent:palette.accent)
-                    .contentTransition(reduceMotion ? .opacity : .numericText(value:Double(night.score.value)))
-                Text(night.bandWithBasis).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center)
-                // On a dark scrim, as on Tonight: the one line here that must never be lost in the sky.
-                if let closure {
-                    Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).multilineTextAlignment(.center)
-                        .fixedSize(horizontal:false,vertical:true)
-                        .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12))
-                }
-                AccessNoteLabel(park:park,alignment:.center)
-            }.frame(maxWidth:.infinity)
-        }.buttonStyle(.plain)
-        .accessibilityElement(children:.combine)
-        .accessibilityHint("Opens that night at the park.")
-    }
     /// The place and its night beside the score; at accessibility sizes the score goes underneath, as
     /// the trip planner's stays do, so a long name keeps the width.
     private func row(_ night:Night,closure:String?)->some View {
@@ -138,7 +115,7 @@ struct BestNightsView: View {
             // The night, then what it rests on in the hero's words ("Thu, Nov 5, usual clouds"; the
             // hero says "Excellent, usual clouds"), so one screen says it one way. The note below explains them.
             Text(night.score.withBasis(park.dayLabel(night.id))).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.leading)
-            if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.footnote).labelStyle(.caution).multilineTextAlignment(.leading) }
+            if let closure { ClosureLabel(closure) }
             AccessNoteLabel(park:park,alignment:.leading)
         }.fixedSize(horizontal:false,vertical:true)
         let score=HStack(alignment:.firstTextBaseline,spacing:6) {
@@ -155,10 +132,11 @@ struct BestNightsView: View {
         .accessibilityLabel(BestNightsInReach.spoken(night,closure:closure))
         .accessibilityHint("Opens that night at the park.")
         .accessibilityAddTraits(.isButton)
+        .parkRowActions(park) { saveFailed=true }
     }
     /// Each place's next 30 nights, worked out off the main thread first (`prepareNights`), then
     /// scored as every other screen scores them, so the numbers match the park pages exactly. Abroad a
-    /// radius can hold hundreds of places: a shortlist is ranked (`TonightReach.shortlist`). The result
+    /// radius can hold hundreds of places: a shortlist is ranked (`PlanModel.shortlist`). The result
     /// is kept by its key in the model, so coming back to the page shows it at once.
     private func rank(_ key:String) async {
         guard key != "loading" else { return }
@@ -166,16 +144,62 @@ struct BestNightsView: View {
         try? await Task.sleep(for:.milliseconds(150))
         guard !Task.isCancelled else { return }
         let all=model.placesInReach().places
-        let origin=model.reachOrigin
-        let pool=all.count<=TonightReach.shortlistSize ? all : TonightReach.shortlist(all,latitude:origin?.latitude ?? 0,longitude:origin?.longitude ?? 0)
-        await model.prepareNights(pool,count:BestNightsInReach.nights)
+        let pool=model.shortlist(all)
+        await model.prepareNights(pool,count:NightPlanner.horizon)
         guard !Task.isCancelled else { return }
-        let months=pool.map { model.nights($0,from:model.tonight($0),count:BestNightsInReach.nights) }
+        let months=pool.map { model.nights($0,from:model.tonight($0),count:NightPlanner.horizon) }
         let closed=Dictionary(pool.compactMap { park in model.closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
         let result=BestNightsInReach.make(months,closures:closed,inReach:all.count)
         model.bestNightsKept=(key,result)
         // The first answer simply appears; a later one (a new radius or day) moves on the shared spring.
         withAnimation(reduceMotion || ranking == nil ? nil : NyxMotion.spring) { ranking=result }
+    }
+}
+/// "The best night", one place's best night as a hero, on Best nights and in the trip planner alike:
+/// one row of small capitals over the place, the night, the numeral, then the band and what it rests on
+/// as a quiet line under it (never a second heading). A closure sits directly under the score, on a
+/// dark scrim (`ClosureLabel`). A tap opens that night; a long press is the park row's menu
+/// (`parkRowActions`), as every place standing in a list has.
+struct BestNightHero: View {
+    @Environment(\.nyx) private var palette
+    @MotionReduced private var reduceMotion: Bool
+    /// The numeral, scaling with Dynamic Type but never past the screen.
+    @ScaledMetric(relativeTo:.largeTitle) private var heroSize=96.0
+    let night: Night
+    let closure: String?
+    /// Why this night (the trip planner's reason), under the closure.
+    var reason: String?=nil
+    /// A save from the menu could not be stored.
+    let failed: ()->Void
+    var body: some View {
+        let park=night.park
+        NavigationLink { ParkDetailView(park:park,initialDate:night.id).onAppear { ReviewPrompt.noteNightViewed(score:night.score.value) } } label:{
+            VStack(spacing:10) {
+                Eyebrow(text:"The best night",meta:true)
+                Text(park.shortName).font(.system(.title,design:.serif)).multilineTextAlignment(.center).foregroundStyle(palette.ink)
+                Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
+                Text("\(night.score.value)").scoreNumeral(size:min(heroSize,150),accent:palette.accent)
+                    .contentTransition(reduceMotion ? .opacity : .numericText(value:Double(night.score.value)))
+                Text(night.bandWithBasis).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+                if let closure { ClosureLabel(closure,prominence:.hero) }
+                if let reason { Text(reason).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
+                AccessNoteLabel(park:park,alignment:.center)
+            }.frame(maxWidth:.infinity).contentShape(Rectangle())
+        }.buttonStyle(.plain)
+        .accessibilityElement(children:.combine)
+        .accessibilityHint("Opens that night at the park.")
+        .parkRowActions(park,failed:failed)
+    }
+}
+#Preview("The best night") {
+    let m=PlanModel()
+    if let p=m.home { NavigationStack { BestNightHero(night:m.night(p),closure:nil) {}.padding(24) }.environment(m).background(.black).preferredColorScheme(.dark) }
+}
+#Preview("The best night • closure, reason, AX5") {
+    let m=PlanModel()
+    if let p=m.home {
+        NavigationStack { ScrollView { BestNightHero(night:m.night(p),closure:"Keys View Road closed at night",reason:"Moon-free through all of true darkness") {}.padding(24) } }
+            .environment(m).background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark)
     }
 }
 #Preview("Best nights") { NavigationStack { BestNightsView() }.environment(PlanModel()).preferredColorScheme(.dark) }

@@ -34,16 +34,16 @@ struct TonightView: View {
     private var from:(latitude:Double,longitude:Double)? { model.reachOrigin }
     /// Ranked once per update of the page (the body reads it into `best` and passes it down). Abroad a
     /// radius can hold hundreds of places: until their nights are worked out off the main thread
-    /// (`prepared`), the page ranks a shortlist (`TonightReach.shortlist`), never hundreds at once.
+    /// (`prepared`), the page ranks a shortlist (`PlanModel.shortlist`), never hundreds at once.
     private func best(_ all:[Park])->[Park] { Array(model.ranked(pool(all)).prefix(5)) }
     private func pool(_ all:[Park])->[Park] {
-        all.count<=TonightReach.shortlistSize || prepared==TonightReach.key(all) ? all : TonightReach.shortlist(all,latitude:from?.latitude ?? 0,longitude:from?.longitude ?? 0)
+        prepared==TonightReach.key(all) ? all : model.shortlist(all)
     }
     /// The places in reach whose tonight has been worked out in the background (`TonightReach.key`).
     @State private var prepared:String?
     /// The same for the places a wider radius would add (`farther(than:shortlist:)`).
     @State private var widerPrepared:String?
-    /// The places' 30 nights behind "Darker on…" (`NightVerdict.horizon`), worked out off the main thread first.
+    /// The places' 30 nights behind "Darker on…" (`NightPlanner.horizon`), worked out off the main thread first.
     @State private var aheadPrepared:String?
     /// The nearest dark sky when the places in reach are bright or absent (`DarkerSky`), for the
     /// key it was worked out for; worked out off the main thread from the bundled light map.
@@ -209,7 +209,7 @@ struct TonightView: View {
             .task(id:loading ? nil : TonightReach.key(aheadPool)) {
                 let pool=aheadPool
                 guard !loading, !pool.isEmpty else { return }
-                await model.prepareNights(pool,count:NightVerdict.horizon)
+                await model.prepareNights(pool,count:NightPlanner.horizon)
                 if !Task.isCancelled { aheadPrepared=TonightReach.key(pool) }
             }
             .task(id:TonightReach.key(all)) {
@@ -314,7 +314,7 @@ struct TonightView: View {
         guard model.radiusMeters<SearchRadius.wider(), current.count<3 || (best?.bortleEstimate ?? 9)>=5 else { return [] }
         let inReach=Set(current.map(\.id))
         let wide=reach(radiusMeters:SearchRadius.wider()).places.filter { !inReach.contains($0.id) }
-        return wide.count>TonightReach.shortlistSize ? TonightReach.shortlist(wide,latitude:from?.latitude ?? 0,longitude:from?.longitude ?? 0) : wide
+        return model.shortlist(wide)
     }
     /// A thin answer points to the darkest park within 500 miles (800 km) when it scores higher
     /// tonight. A tap widens the radius. Ranked only once the shortlist's nights have been worked
@@ -354,7 +354,7 @@ struct TonightView: View {
     /// park with that night chosen, so the two never show different places. (On iPhone the river lives
     /// on the park's page.)
     private func ahead(_ park:Park,held:Date?=nil)->some View {
-        let tonight=model.tonight(park), nights=model.nights(park,from:tonight,count:NightVerdict.horizon)
+        let tonight=model.tonight(park), nights=model.nights(park,from:tonight,count:NightPlanner.horizon)
         let picked=riverNight?.night(at:park) ?? held
         let chosen=picked.flatMap { id in nights.first { $0.id==id } }
         return Panel { VStack(alignment:.leading,spacing:14) {
@@ -393,7 +393,7 @@ struct TonightView: View {
         guard let park=held?.park ?? best.first else { return }
         let tonight=model.tonight(park), current=riverNight?.night(at:park) ?? held?.id ?? tonight
         let next=park.date(current,addingDays:delta)
-        guard next>=tonight, next<park.date(tonight,addingDays:NightVerdict.horizon) else { return }
+        guard next>=tonight, next<park.date(tonight,addingDays:NightPlanner.horizon) else { return }
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { riverNight=RiverChoice(parkID:park.id,night:next) }
     }
     /// The answer for the night `offset` nights after tonight: the places in reach ranked for that night,
@@ -410,56 +410,28 @@ struct TonightView: View {
         // The first line is the answer's own context: the night, and from where. At accessibility sizes
         // it follows the dial and the closure, so the park, its score and any closure fill the first screen.
         // Another night than tonight is said in starlight, so the held night reads as chosen, not as the default.
-        let context=reachLine(park,day:park.dayLabel(night.id)).font(.caption.weight(.medium)).kerning(large ? 0 : 1.6).textCase(large || !Lettering.spaced ? nil : .uppercase)
+        let context=reachLine(park,day:park.dayLabel(night.id)).eyebrow()
             .foregroundStyle(later ? palette.ink : palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-        // A forecast more than six hours old says when it is from.
-        let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { Date.now.timeIntervalSince($0)>6*3600 ? $0 : nil } : nil
+        // A forecast older than the age at which clouds are asked for again says when it is from.
+        let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { model.forecastIsStale($0) ? $0 : nil } : nil
         let closure=park.nps == nil ? nil : model.closure(park)
         let scores=Dictionary(others.map { ($0.park.id,$0.score.value) },uniquingKeysWith:{ first,_ in first })
         return VStack(spacing:10) {
             if !large { context }
             // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`), scored for the dial's night.
             ParkPillPicker(park:park,others:others.map(\.park),score:{ scores[$0.id] ?? model.night($0).score.value },zoom:zoom,night:later ? park.dayLabel(night.id) : nil)
-            let basis=night.basisCaption()
             let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis)
-            dial(night,basis:basis,range:range,offset:offset,ready:ready)
+            dial(night,basis:night.basisCaption(),range:range,offset:offset,ready:ready)
             // A closure is the one line here that must never be lost in the sky: straight under the score,
             // as on the park's page, on a dark scrim.
-            if let closure {
-                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).multilineTextAlignment(large ? .leading : .center)
-                    .fixedSize(horizontal:false,vertical:true)
-                    .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12))
-                    .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
-            }
+            if let closure { ClosureLabel(closure,prominence:.hero) }
             // Switch Control and "prefers action slider alternative": the nights a button at a time.
             if ready && access.preferSteps { dialSteps(offset) }
             // A later night is held after the finger lifts, with the way back right under it.
             if later { backToTonight }
             if large { context }
-            // The night in plain words: where the Moon is, and whether the Milky Way is worth the drive.
-            if let verdict=NightVerdict.line(sky:night.sky,core:model.whatsUp(night).coreNight,park:park) {
-                Text(verdict.text).font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.center)
-                    .fixedSize(horizontal:false,vertical:true).padding(.horizontal,12)
-                    .accessibilityLabel(verdict.spoken)
-            }
-            // Only the exceptions (no forecast yet, an early look); a full forecast is the norm and goes unsaid.
-            // The gauge speaks this line, so VoiceOver does not hear it twice.
-            if let basis { Text(basis).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true) }
-            skyLine(night,range:range)
-            // A place the Park Service does not run: Nyx cannot see its closures, and says so.
-            if park.nps == nil {
-                if let stale { forecastAsOf(park,stale) }
-                UnknownClosuresNote(park:park,compact:true).padding(.horizontal,12)
-            }
-            else if closure != nil { if let stale { forecastAsOf(park,stale) } }
-            // Nothing listed: the alerts and the forecast's age share one quiet caption, the safety cue kept.
-            else if let listed=model.alertFacts(park) { CaveatLine(facts:listed+(stale.map { [String(localized:"forecast from \(park.timestamp($0))")] } ?? [])).padding(.horizontal,12) }
-            else {
-                if let stale { forecastAsOf(park,stale) }
-                Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12)
-            }
-            if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.center).padding(.horizontal,12) }
-            AccessNoteLabel(park:park,alignment:.center).padding(.horizontal,12)
+            // The rest in the park page's order (`NightNotes`), the alerts in Tonight's own words.
+            NightNotes(night:night,isTonight:!later,range:range) { alerts(park,closure:closure,stale:stale) }
             // "Darker on…", an eclipse or shower ahead, and field mode are tonight's: weighed against tonight
             // and said from it, they would contradict a later night on the dial, so they wait for its return.
             if !later {
@@ -547,31 +519,21 @@ struct TonightView: View {
         .secondaryAction().font(.subheadline.weight(.medium))
         .accessibilityElement(children:.contain)
     }
-    /// One sky line under the dial, the first that applies: the forecast models disagreeing (said
-    /// first, because the best window rests on the same clouds), then a clear, dark stretch that is
-    /// only part of the night (a Moon up all evening, cloud clearing late), else the models' range
-    /// in words, as the share card and the river say it (the gauge speaks the range).
-    /// The disagreement and the range are `ForecastSpread`'s, as on the park's page.
-    @ViewBuilder private func skyLine(_ night:Night,range:ClosedRange<Int>?)->some View {
-        let agreement=model.outlook(night)?.agreement
-        if agreement?.band == .disagree, let spread=ForecastSpread.line(agreement:agreement,range:range,tonight:true) {
-            Text(spread).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
-                .fixedSize(horizontal:false,vertical:true).padding(.horizontal,12)
-        } else if let window=partialWindow(night) {
-            // At accessibility sizes the glyph would take a column of its own: the words alone.
-            Label { Text(window.line(park:night.park)).fixedSize(horizontal:false,vertical:true) } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:window.moonlit ? "moon" : "sparkles").accessibilityHidden(true) } }
-                .font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.center).padding(.horizontal,12)
-                .accessibilityElement(children:.combine)
-        } else if let spread=ForecastSpread.line(agreement:agreement,range:range,tonight:true) {
-            Text(spread).font(.caption).monospacedDigit().foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true)
+    /// The park's alerts under the answer, with the forecast's age when it is old. A place the Park
+    /// Service does not run: Nyx cannot see its closures, and says so. Nothing listed beyond a closure
+    /// already said under the dial: the age alone. Alerts listed: they and the age share one quiet
+    /// caption, the safety cue kept. Otherwise the alerts' summary.
+    @ViewBuilder private func alerts(_ park:Park,closure:String?,stale:Date?)->some View {
+        if park.nps == nil {
+            if let stale { forecastAsOf(park,stale) }
+            UnknownClosuresNote(park:park,compact:true).padding(.horizontal,12)
         }
-    }
-    /// Tonight's best clear window when it is still ahead and covers at most three quarters of the
-    /// true darkness: a score earned late in the night must not read as an evening's promise.
-    private func partialWindow(_ night:Night)->ClearWindow? {
-        guard let window=model.clearWindow(night), window.interval.end>Date.now, night.sky.darkHours>0,
-              window.interval.duration<=0.75*night.sky.darkHours*3600 else { return nil }
-        return window
+        else if closure != nil { if let stale { forecastAsOf(park,stale) } }
+        else if let listed=model.alertFacts(park) { CaveatLine(facts:listed+(stale.map { [String(localized:"forecast from \(park.timestamp($0))")] } ?? [])).padding(.horizontal,12) }
+        else {
+            if let stale { forecastAsOf(park,stale) }
+            Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12)
+        }
     }
     private func forecastAsOf(_ park:Park,_ updated:Date)->some View {
         Text("Forecast as of \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
@@ -629,8 +591,8 @@ struct TonightView: View {
         guard origin.source != .park else { return nil }
         let home=LightsOut.homeClass(latitude:origin.latitude,longitude:origin.longitude)
         guard let dark=LightsOut.darkest(candidates,latitude:origin.latitude,longitude:origin.longitude,homeClass:home.bortle) else { return nil }
-        let nights=model.nights(dark.place,from:model.tonight(dark.place),count:LightsOut.horizon)
-        return LightsOut.Target(place:dark.place,meters:dark.meters,homeClass:home.bortle,homeKnown:home.known,best:LightsOut.best(nights,closure:model.closure(dark.place)))
+        let nights=model.nights(dark.place,from:model.tonight(dark.place),count:NightPlanner.horizon)
+        return LightsOut.Target(place:dark.place,meters:dark.meters,homeClass:home.bortle,homeKnown:home.known,best:NightPlanner.best(nights))
     }
     @ViewBuilder private var extras: some View {
         if DebugScenario.state=="error" || DebugScenario.state=="offline" || (model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
@@ -651,7 +613,7 @@ struct TonightView: View {
         if FieldPresenter.supported { fieldOfferButton(best:best) }
     }
     @ViewBuilder private func fieldOfferButton(best:Park)->some View {
-        let now=DebugScenario.date ?? Date.now
+        let now=model.present
         let here=location.latitude.flatMap { lat in location.longitude.flatMap { model.fieldPark(latitude:lat,longitude:$0) } }
         let focus=StargazingFocus.offersField() || DebugScenario.state=="stargazing"
         if let here, Self.isEvening(here,model.night(here),now:now) {
@@ -699,8 +661,8 @@ struct TonightView: View {
     }
     @ViewBuilder private func darkerCapsule(than tonight:Night)->some View {
         let closures=Dictionary(aheadPool.compactMap { park in model.closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
-        let here=model.nights(tonight.park,from:model.tonight(tonight.park),count:NightVerdict.horizon)
-        let ahead=NightVerdict.darkerAhead(than:tonight,here:here,across:aheadPool.map { model.nights($0,from:model.tonight($0),count:NightVerdict.horizon) },closures:closures)
+        let here=model.nights(tonight.park,from:model.tonight(tonight.park),count:NightPlanner.horizon)
+        let ahead=NightVerdict.darkerAhead(than:tonight,here:here,across:aheadPool.map { model.nights($0,from:model.tonight($0),count:NightPlanner.horizon) },closures:closures)
         if let ahead {
             capsule(text:NightVerdict.capsule(ahead,here:ahead.park.id==tonight.park.id),hint:"Opens that night at the park.") {
                 ParkDetailView(park:ahead.park,initialDate:ahead.id)
@@ -710,9 +672,7 @@ struct TonightView: View {
             // Darker is the sky alone: a closure there is said beside it, never weighed into it. At the
             // answer's own park it is already said under the dial, and is not said twice.
             if ahead.park.id != tonight.park.id, let closure=model.closure(ahead.park) {
-                Label(closure,systemImage:"exclamationmark.triangle").font(.footnote).labelStyle(.caution).multilineTextAlignment(typeSize.isAccessibilitySize ? .leading : .center)
-                    .fixedSize(horizontal:false,vertical:true).padding(.horizontal,12)
-                    .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
+                ClosureLabel(closure,centered:true).padding(.horizontal,12)
             }
         }
     }

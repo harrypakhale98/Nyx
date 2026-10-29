@@ -19,7 +19,7 @@ extension PlanModel {
         let ids=Set(candidates.map(\.id))
         let forecasts=self.forecasts.filter { ids.contains($0.key) }, details=self.details.filter { ids.contains($0.key) }
         let closures=Dictionary(candidates.compactMap { park in closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
-        let now=DebugScenario.date ?? .now
+        let now=present
         return await Task.detached(priority:.userInitiated) {
             TripPlanner.plan(days:days,grid:TripPlanner.nights(parks:candidates,days:days,forecasts:forecasts,details:details,now:now),closures:closures,maxHopMeters:maxHopMeters)
         }.value

@@ -15,13 +15,13 @@ struct FollowNightButton: View {
     private var following: Bool { NightFollowing.shared.isFollowing(park:night.park,night:night.id) }
     private var start: Date { FieldActivityAttributes.followStart(night.sky) }
     var body: some View {
-        if FollowNight.offered(night) {
+        if FollowNight.offered(night,now:model.present) {
             Button { Task { await FollowNight.toggle(night,closure:model.closure(night.park),nightVision:nightVision) } } label:{
                 HStack(alignment:.firstTextBaseline,spacing:8) {
                     Image(systemName:following ? "moon.stars.fill" : "moon.stars").accessibilityHidden(true)
                     VStack(alignment:.leading,spacing:2) {
                         Text(following ? "Following this night" : "Follow this night").font(.subheadline)
-                        Text(FollowNight.caption(night,following:following)).font(.caption).foregroundStyle(palette.muted)
+                        Text(FollowNight.caption(night,following:following,now:model.present)).font(.caption).foregroundStyle(palette.muted)
                             .fixedSize(horizontal:false,vertical:true)
                     }
                     Spacer(minLength:8)
@@ -32,7 +32,7 @@ struct FollowNightButton: View {
             .buttonStyle(.plain).foregroundStyle(palette.ink)
             .accessibilityLabel(following ? String(localized:"Stop following \(night.park.shortName) on \(night.park.dayLabel(night.id))")
                                           : String(localized:"Follow \(night.park.shortName) on \(night.park.dayLabel(night.id))"))
-            .accessibilityValue(FollowNight.caption(night,following:following))
+            .accessibilityValue(FollowNight.caption(night,following:following,now:model.present))
             .accessibilityHint(following ? "Removes the night from your Lock Screen." : "Puts the night's countdown on your Lock Screen before sunset, without opening Nyx.")
             .accessibilityInputLabels(following ? [Text("Stop following"),Text("Unfollow")] : [Text("Follow this night"),Text("Follow")])
             .sensoryFeedback(.selection,trigger:following)
@@ -46,7 +46,7 @@ struct FollowNightMenuItem: View {
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     let night: Night
     var body: some View {
-        if FollowNight.offered(night) {
+        if FollowNight.offered(night,now:model.present) {
             let following=NightFollowing.shared.isFollowing(park:night.park,night:night.id)
             Button(following ? "Stop following" : "Follow this night",systemImage:following ? "moon.stars.fill" : "moon.stars") {
                 Task { await FollowNight.toggle(night,closure:model.closure(night.park),nightVision:nightVision) }
@@ -55,15 +55,16 @@ struct FollowNightMenuItem: View {
     }
 }
 @MainActor enum FollowNight {
-    static func offered(_ night: Night, now: Date = .now) -> Bool {
-        FieldPresenter.supported && FieldActivities.enabled && !FieldNight.isOver(night.sky,at:DebugScenario.date ?? now)
+    /// `now`: the model's present (`PlanModel.present`), which DEBUG captures fix.
+    static func offered(_ night: Night, now: Date) -> Bool {
+        FieldPresenter.supported && FieldActivities.enabled && !FieldNight.isOver(night.sky,at:now)
     }
     static func toggle(_ night: Night, closure: String?, nightVision: Bool) async {
         if NightFollowing.shared.isFollowing(park:night.park,night:night.id) { await FieldActivities.unfollow(park:night.park,night:night.id) }
         else { await FieldActivities.follow(night:night,closure:closure,nightVision:nightVision) }
     }
     /// "On your Lock Screen from 5:50 PM" (park time), or what following will do.
-    static func caption(_ night: Night, following: Bool, now: Date = .now) -> String {
+    static func caption(_ night: Night, following: Bool, now: Date) -> String {
         let start=FieldActivityAttributes.followStart(night.sky), park=night.park
         if following { return start>now ? String(localized:"On your Lock Screen from \(park.time(start))") : String(localized:"On your Lock Screen now") }
         return start>now ? String(localized:"On your Lock Screen from \(park.time(start)), without opening Nyx") : String(localized:"On your Lock Screen now, until dawn")

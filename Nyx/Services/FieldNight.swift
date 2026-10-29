@@ -46,21 +46,21 @@ nonisolated struct FieldNight: Sendable {
         if let sunrise=sky.sunrise {
             list.append(Milestone(kind: .sunrise, date: sunrise, title: String(localized: "Sunrise"), detail: String(localized: "The night is over."), symbol: "sunrise"))
         }
-        // The Moon, when it is bright enough to matter (5% lit or more).
-        let lit=Int((sky.moon.illumination*100).rounded())
-        if sky.moon.illumination>=0.05 {
+        // The Moon, when it is bright enough to matter (5% lit or more, `MoonPhase.negligible`).
+        let lit=sky.moon.litText
+        if !sky.moon.negligible {
             let moonAt={ (date: Date) in engine.equatorial(of: .moon, at: date) }
             if let rise=inside(sky.moonrise) {
                 let p=moonAt(rise)
-                let detail=sky.moon.illumination>=0.25 ? String(localized: "\(lit)% lit, in the \(direction(rise, ra: p.ra, dec: p.dec)). Faint stars fade where it shines.")
-                    : String(localized: "A thin Moon, \(lit)% lit, low in the \(direction(rise, ra: p.ra, dec: p.dec)).")
+                let detail=sky.moon.illumination>=0.25 ? String(localized: "\(lit), in the \(direction(rise, ra: p.ra, dec: p.dec)). Faint stars fade where it shines.")
+                    : String(localized: "A thin Moon, \(lit), low in the \(direction(rise, ra: p.ra, dec: p.dec)).")
                 list.append(Milestone(kind: .moonrise, date: rise, title: String(localized: "Moonrise"), detail: detail, symbol: "moonrise"))
             }
             if let set=inside(sky.moonset) {
                 let p=moonAt(set)
                 let inDarkness=sky.darkStart.map { set>$0 } ?? false && sky.darkEnd.map { set<$0 } ?? false
                 let detail=inDarkness ? String(localized: "It sets in the \(direction(set, ra: p.ra, dec: p.dec)). Moon-free true darkness from here.")
-                    : String(localized: "\(lit)% lit, setting in the \(direction(set, ra: p.ra, dec: p.dec)).")
+                    : String(localized: "\(lit), setting in the \(direction(set, ra: p.ra, dec: p.dec)).")
                 list.append(Milestone(kind: .moonset, date: set, title: String(localized: "Moonset"), detail: detail, symbol: "moonset"))
             }
         }
@@ -88,7 +88,7 @@ nonisolated struct FieldNight: Sendable {
         }
         // A meteor shower's best moment, when one is worth looking for.
         if let shower=WhatsUp.Events(park: park, sky: sky, table: table, almanac: almanac).shower, let best=shower.best, shower.hourlyRate>=2 {
-            let moon=shower.moonDownAtBest ? String(localized: "Moon down") : String(localized: "Moon up, \(lit)% lit")
+            let moon=shower.moonDownAtBest ? String(localized: "Moon down") : String(localized: "Moon up, \(lit)")
             list.append(Milestone(kind: .shower, date: best, title: String(localized: "\(shower.shower.localizedName) at their best"),
                 detail: String(localized: "\(WhatsUp.rateText(shower.hourlyRate).capitalizedFirst) from this park, \(moon). A rough guide."), subject: shower.shower.code, symbol: "sparkles"))
         }
@@ -210,7 +210,7 @@ nonisolated struct FieldNight: Sendable {
             options.append(AlarmOption(kind: .core, fire: dark.start, label: String(localized: "Wake me when the core is up"), alarmTitle: String(localized: "The Milky Way core is up at \(name)")))
         }
         // Thirty minutes before a Moon that sets in true darkness, for the moon-free hours before dawn.
-        if sky.moon.illumination>=0.05, let set=sky.moonset, let start=sky.darkStart, let end=sky.darkEnd, set>start, set<end {
+        if !sky.moon.negligible, let set=sky.moonset, let start=sky.darkStart, let end=sky.darkEnd, set>start, set<end {
             options.append(AlarmOption(kind: .moonset, fire: set.addingTimeInterval(-1800), label: String(localized: "Wake me 30 minutes before the Moon sets"),
                 alarmTitle: String(localized: "The Moon sets in 30 minutes at \(name)")))
         }

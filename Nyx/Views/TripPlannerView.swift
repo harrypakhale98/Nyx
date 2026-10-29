@@ -32,8 +32,8 @@ struct TripPlannerView: View {
     @State private var announced:String?
     @State private var prepared=false
     @State private var width=0.0
-    /// The best night's numeral: the hero, scaling with Dynamic Type but never past the screen.
-    @ScaledMetric(relativeTo:.largeTitle) private var heroSize=96.0
+    /// A save from the best night's menu could not be stored.
+    @State private var saveFailed=false
     /// The planning inputs on the left and the plan on the right, on a wide iPad.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
     /// Never earlier than last night: a window kept from another day starts again from tonight.
@@ -67,7 +67,7 @@ struct TripPlannerView: View {
                 FoldColumns(narrow:.leading,narrowMax:420,spacing:NyxMetrics.columnGap) {
                     VStack(alignment:.leading,spacing:22) { intro; startingPoint; Panel { controls } }.frame(maxWidth:.infinity,alignment:.leading)
                     VStack(alignment:.leading,spacing:24) {
-                        if let best=plan?.best { hero(best) }
+                        if let best=plan?.best { BestNightHero(night:best.night,closure:best.closure,reason:best.reason) { saveFailed=true } }
                         results
                     }.frame(maxWidth:.infinity)
                 }.padding(NyxMetrics.pagePadding).readableColumn(WideLayout.twoColumnMaximum)
@@ -75,7 +75,7 @@ struct TripPlannerView: View {
                 VStack(alignment:.leading,spacing:24) {
                     intro
                     // The answer first; the questions that shape it just below.
-                    if let best=plan?.best { hero(best) }
+                    if let best=plan?.best { BestNightHero(night:best.night,closure:best.closure,reason:best.reason) { saveFailed=true } }
                     startingPoint
                     Panel { controls }
                     results
@@ -94,6 +94,7 @@ struct TripPlannerView: View {
             ShareLink(item:TripPlanner.shareText(plan,distance:Self.miles)) { Label("Share plan",systemImage:"square.and.arrow.up") }.accessibilityLabel("Share plan")
         } } }
         .modifier(StartingPointSheets(choosing:$choosingStart,explaining:$explainLocation))
+        .parkSaveAlert(isPresented:$saveFailed,journalUnavailable:model.journalUnavailable)
         .sheet(item:$calendarStay) { stay in
             if let draft=CalendarDraft(stay:stay.stops) { CalendarEditor(draft:draft) { calendarStay=nil }.ignoresSafeArea().nyxPresentation() }
         }
@@ -196,25 +197,6 @@ struct TripPlannerView: View {
     private var onlyByBoatOrPlane:Bool {
         guard drivableOnly, let point else { return false }
         return !model.tripCandidates(latitude:point.latitude,longitude:point.longitude,radiusMeters:radius).isEmpty
-    }
-    private func hero(_ best:TripStop)->some View {
-        let park=best.night.park
-        return NavigationLink { ParkDetailView(park:park,initialDate:best.night.id).onAppear { ReviewPrompt.noteNightViewed(score:best.night.score.value) } } label:{
-            VStack(spacing:10) {
-                // As Best nights' hero: one row of small capitals over the place, the band a quiet line under the numeral.
-                Eyebrow(text:"The best night",meta:true)
-                Text(park.shortName).font(.system(.title,design:.serif)).multilineTextAlignment(.center).foregroundStyle(palette.ink)
-                Text(park.dayLabel(best.night.id)).font(.subheadline).foregroundStyle(palette.muted)
-                Text("\(best.night.score.value)").scoreNumeral(size:min(heroSize,150),accent:palette.accent)
-                    .contentTransition(reduceMotion ? .opacity : .numericText(value:Double(best.night.score.value)))
-                Text(best.night.bandWithBasis).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center)
-                Text(best.reason).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-                if let closure=best.closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).multilineTextAlignment(.center) }
-                AccessNoteLabel(park:park,alignment:.center)
-            }.frame(maxWidth:.infinity)
-        }.buttonStyle(.plain)
-        .accessibilityElement(children:.combine)
-        .accessibilityHint("Opens that night at the park.")
     }
     /// The route on a map fitted around the trip's places and the parks in reach of its first night
     /// (Lambert, centred on them), so a trip of a few hundred kilometres fills the panel wherever
@@ -334,7 +316,7 @@ struct TripStayRow: View {
             Text(lead.reason).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             if let hop=first.hopMeters, hop>1000 { Label(String(localized:"\(distance(hop)) from the night before"),systemImage:"arrow.triangle.turn.up.right.diamond").font(.caption).foregroundStyle(palette.muted) }
             if let label=night.basisLabel { Text(label).font(.caption).foregroundStyle(palette.muted) }
-            if let closure=stay.stops.compactMap(\.closure).first { Label(String(localized:"Closure alert: \(closure)"),systemImage:"exclamationmark.triangle").font(.caption).labelStyle(.caution).fixedSize(horizontal:false,vertical:true) }
+            if let closure=stay.stops.compactMap(\.closure).first { ClosureLabel(closure,named:true) }
             if showsAccess { AccessNoteLabel(park:park) }
         }
     }

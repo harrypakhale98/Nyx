@@ -21,7 +21,7 @@ struct GoingButton: View {
     @MotionReduced private var reduceMotion: Bool
     private var store: GoingNights { .shared }
     var body: some View {
-        if !FieldNight.isOver(night.sky,at:DebugScenario.date ?? .now) {
+        if !FieldNight.isOver(night.sky,at:model.present) {
             let going=store.going(park:night.park,night:night.id)
             VStack(alignment:alignment,spacing:6) {
                 Button { toggle(going) } label:{
@@ -106,7 +106,7 @@ struct GoingPanel: View {
     }
     /// The soonest night kept that is not over and is at most a week away.
     private var soonest: (going: GoingNight, night: Night)? {
-        let now=DebugScenario.date ?? .now
+        let now=model.present
         for going in kept {
             guard let park=model.park(going.parkID) else { continue }
             let night=model.night(park,on:going.night)
@@ -149,8 +149,7 @@ struct GoingPanel: View {
             }
             .font(.subheadline).foregroundStyle(palette.ink)
             if let closure, !repeated {
-                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution).fixedSize(horizontal:false,vertical:true)
-                    .accessibilityLabel(ClosureLine.spoken(closure))
+                ClosureLabel(closure)
             }
             // The time to leave is also the way to the drive time: one row, no extra button.
             if night.sky.sunset != nil {

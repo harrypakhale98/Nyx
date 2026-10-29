@@ -20,7 +20,7 @@ struct ParkPillPicker: View {
     /// `-nyx-pill-open` (DEBUG captures) opens it.
     @State private var open=DebugScenario.isEnabled("pill-open")
     @Namespace private var glass
-    private var solid: Bool { palette.nightVision || reduceTransparency || palette.highContrast }
+    private var solid: Bool { NyxGlass<Capsule>.solid(palette,reduceTransparency:reduceTransparency) }
     private var large: Bool { typeSize.isAccessibilitySize }
     var body: some View {
         Group {
@@ -57,7 +57,7 @@ struct ParkPillPicker: View {
                 }
                 .padding(.vertical,4)
                 .frame(maxWidth:360)
-                .modifier(PillGlass(solid:solid,shape:RoundedRectangle(cornerRadius:22),id:"list",namespace:glass))
+                .nyxGlass(RoundedRectangle(cornerRadius:22),role:.pill,id:"list",in:glass)
                 .transition(.opacity)
             }
         }
@@ -75,7 +75,7 @@ extension ParkPillPicker {
     private var capsulePill: some View {
         HStack { Text(park.shortName).font(.system(.title2,design:.serif)).lineLimit(1); Image(systemName:"arrow.up.right").font(.subheadline).accessibilityHidden(true) }
             .padding(.vertical,14).padding(.horizontal,22)
-            .modifier(PillGlass(solid:solid,shape:Capsule(),id:"pill",namespace:glass))
+            .nyxGlass(Capsule(),role:.pill,id:"pill",in:glass)
     }
     private var wrappedPill: some View {
         // The arrow rides at the end of the words, so the name has the whole width and long words stay whole.
@@ -83,7 +83,7 @@ extension ParkPillPicker {
             .accessibilityLabel(park.shortName)
             .multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
             .frame(maxWidth:.infinity).padding(.vertical,14).padding(.horizontal,16)
-            .modifier(PillGlass(solid:solid,shape:RoundedRectangle(cornerRadius:22,style:.continuous),id:"pill",namespace:glass))
+            .nyxGlass(RoundedRectangle(cornerRadius:22,style:.continuous),role:.pill,id:"pill",in:glass)
     }
     @ViewBuilder private var toggle: some View {
         if !others.isEmpty {
@@ -92,32 +92,13 @@ extension ParkPillPicker {
                     .rotationEffect(.degrees(open ? 180 : 0)).accessibilityHidden(true)
                     // The whole 44 pt circle is the target, for the finger and for accessibility, not the glyph.
                     .frame(width:44,height:44).contentShape(Circle())
-                    .modifier(PillGlass(solid:solid,shape:Circle(),id:"toggle",namespace:glass))
+                    .nyxGlass(Circle(),role:.pill,id:"toggle",in:glass)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Other parks within reach")
             .accessibilityValue(open ? "Shown" : "Hidden")
             .accessibilityHint(open ? "Hides the list." : night == nil ? "Shows the other parks in reach and their scores tonight." : "Shows the other parks in reach and their scores that night.")
             .accessibilityInputLabels([Text("Other parks"),Text("More parks")])
-        }
-    }
-}
-/// Glass for the pill, its button and its list: tinted like the panels, so a name keeps its
-/// contrast over a bright stretch of the Milky Way; interactive, so it answers the finger; and
-/// with an id, so the list grows out of the pill. Solid black with a hairline otherwise.
-private struct PillGlass<S: Shape>: ViewModifier {
-    @Environment(\.nyx) private var palette
-    let solid: Bool
-    let shape: S
-    let id: String
-    let namespace: Namespace.ID
-    @ViewBuilder func body(content: Content) -> some View {
-        if solid {
-            content.background(Color.black,in:shape).overlay(shape.stroke(palette.line,lineWidth:0.8))
-        } else {
-            content.glassEffect(.regular.tint(palette.panel.opacity(0.5)).interactive(),in:shape)
-                .glassEffectID(id,in:namespace)
-                .glassEffectTransition(.matchedGeometry)
         }
     }
 }

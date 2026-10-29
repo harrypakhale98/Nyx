@@ -335,8 +335,7 @@ struct ParksMapView: View {
                 }
                 TonightMapView(map:map,ring:ring,origin:start,title:area == .around ? aroundTitle : area.name,pending:!ready) { id in if let park=byID[id] { open(park) } }
                     .padding(12)
-                    .background(RoundedRectangle(cornerRadius:24).fill(palette.panel))
-                    .overlay(RoundedRectangle(cornerRadius:24).stroke(palette.line,lineWidth:0.5))
+                    .nyxCard(radius:NyxMetrics.heroRadius,fill:palette.panel)
                 // What the marks mean, under the picture it explains (and clear of the tab bar's fade at rest). At
                 // accessibility sizes it runs long, so the answer comes first and the legend follows the list.
                 if !typeSize.isAccessibilitySize { legend(ring:ring != nil) }
@@ -425,7 +424,7 @@ struct ParksMapView: View {
                 if park.rowLocality.isEmpty { Text(verbatim:model.night(park).bandWithBasis) }
                 else { Text("\(park.rowLocality) · \(model.night(park).bandWithBasis)") }
             }.font(.subheadline).foregroundStyle(palette.muted)
-            if let closure=mark.closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution) }
+            if let closure=mark.closure { ClosureLabel(closure) }
         }.multilineTextAlignment(.leading).frame(maxWidth:.infinity,alignment:.leading)
         return Group {
             if typeSize.isAccessibilitySize {

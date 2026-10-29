@@ -40,9 +40,14 @@ private struct NyxAccessKey: EnvironmentKey { static let defaultValue=NyxAccess(
 extension EnvironmentValues {
     var nyxAccess: NyxAccess { get { self[NyxAccessKey.self] } set { self[NyxAccessKey.self]=newValue } }
 }
-/// The page's measures, one copy: a content card's corner and inner padding, and a page's margin.
+/// The page's measures, one copy: corners by what a surface is, a section's inner padding, and a page's margin.
 enum NyxMetrics {
-    static let cardRadius=24.0
+    /// A chip, a small field, or the scrim behind one line (a closure under a score).
+    static let chipRadius=12.0
+    /// A card that stands as a row or a note: a journal field, a working note, a tile.
+    static let rowRadius=18.0
+    /// A hero's card: the sky window, the map's place card.
+    static let heroRadius=24.0
     static let cardPadding=20.0
     static let pagePadding=24.0
     /// Between a wide page's two columns, the same on every tab.
@@ -92,16 +97,51 @@ struct SectionVeil: View {
 /// keeps the small spaced capitals for the one line of facts above a page's title (the state and
 /// designation, the day and reach), so each screen has at most one row of capitals.
 struct Eyebrow: View {
-    @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
     let text: LocalizedStringKey
     var meta=false
     var body: some View {
         if meta {
-            Text(text).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize || !Lettering.spaced ? 0 : 2.4).textCase(typeSize.isAccessibilitySize || !Lettering.spaced ? nil : .uppercase).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader)
+            Text(text).eyebrow().fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader)
         } else {
             Text(text).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader)
         }
+    }
+}
+/// The small spaced capitals of an eyebrow, one setting everywhere: the text style's medium weight,
+/// tracked by `tracking` of its size so the spacing grows with Dynamic Type. Capitals and tracking
+/// only where they help: not at accessibility sizes, where every word needs its width, nor in
+/// Japanese, which has no capitals and is set solid (`Lettering.spaced`).
+struct EyebrowLettering: ViewModifier {
+    /// A share of the type size (0.12 em): 1.4 points at the caption's default size.
+    static let tracking=0.12
+    let style: Font.TextStyle
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @ScaledMetric private var size: CGFloat
+    init(style: Font.TextStyle) {
+        self.style=style
+        _size=ScaledMetric(wrappedValue:ScoreNumeral.nominalSize(style),relativeTo:style)
+    }
+    func body(content: Content) -> some View {
+        let spaced=Lettering.spaced && !typeSize.isAccessibilitySize
+        content.font(.system(style).weight(.medium)).tracking(spaced ? size*Self.tracking : 0).textCase(spaced ? .uppercase : nil)
+    }
+}
+extension View {
+    /// An eyebrow's lettering (`EyebrowLettering`), at the caption size unless another is named.
+    func eyebrow(_ style: Font.TextStyle = .caption) -> some View { modifier(EyebrowLettering(style:style)) }
+    /// A card's surface, one rule everywhere: continuous corners at one of `NyxMetrics`' radii, an
+    /// optional fill, and the hairline in `line` at half the palette's stroke, so Increase Contrast
+    /// and Bold Text thicken every card's edge alike. Card surfaces only, never a chart's or map's lines.
+    func nyxCard(radius: Double = NyxMetrics.rowRadius, fill: Color? = nil) -> some View { modifier(NyxCard(radius:radius,fill:fill)) }
+}
+private struct NyxCard: ViewModifier {
+    @Environment(\.nyx) private var palette
+    let radius: Double
+    let fill: Color?
+    func body(content: Content) -> some View {
+        let shape=RoundedRectangle(cornerRadius:radius,style:.continuous)
+        content.background { if let fill { shape.fill(fill) } }.overlay(shape.stroke(palette.line,lineWidth:0.5*palette.stroke))
     }
 }
 struct NightBackground: View {

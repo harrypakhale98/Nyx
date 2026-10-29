@@ -239,7 +239,7 @@ struct TimeRiver: View {
     /// date, "Fri 16") above its score in light serif, on glass tinted like the panel so both keep
     /// their contrast over the river. Solid panel colour where glass would cost legibility or is unwanted.
     @ViewBuilder private func lens(_ night:Night,size:Double)->some View {
-        let solid=palette.nightVision || palette.highContrast || reduceTransparency
+        let solid=NyxGlass<Circle>.solid(palette,reduceTransparency:reduceTransparency)
         ZStack {
             if lifted {
                 VStack(spacing:1) {

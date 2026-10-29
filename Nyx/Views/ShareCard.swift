@@ -22,11 +22,10 @@ struct ShareCard:View {
     /// The forecast models' range (`CelestialGauge.modelRange`: full forecast, models apart, more
     /// than 4 points), so a shared number is never more certain than the app; nil leaves it out.
     var range:ClosedRange<Int>?=nil
-    /// From 5% lit the Moon is drawn; below, a 120 pt disc would read as a dark hole, so the date
-    /// line names the Moon in words instead.
-    nonisolated static let moonDrawnFrom=0.05
     nonisolated static let numeralSize=120.0
-    private var drawsMoon:Bool { night.sky.moon.illumination>=Self.moonDrawnFrom }
+    /// The Moon is drawn from 5% lit; thinner (`MoonPhase.negligible`), a 120 pt disc would read as a dark
+    /// hole, so the date line names the Moon in words instead.
+    private var drawsMoon:Bool { !night.sky.moon.negligible }
     var body:some View {
         ZStack {
             NightBackground(seed:night.park.id,score:night.score.value,park:night.park,night:night.id)
@@ -105,9 +104,8 @@ struct ShareCard:View {
         let day=night.park.dayLabel(night.id)
         guard !drawsMoon else { return day }
         if night.sky.moon.isNew { return String(localized:"\(day) · New moon") }
-        return String(localized:"\(day) · Moon \(Self.percent(night))% lit")
+        return String(localized:"\(day) · Moon \(night.sky.moon.litText)")
     }
-    nonisolated static func percent(_ night:Night)->Int { Int((night.sky.moon.illumination*100).rounded()) }
     /// "Forecast models: 70–84"
     nonisolated static func rangeLine(_ range:ClosedRange<Int>)->String {
         String(localized:"Forecast models: \(range.lowerBound)–\(range.upperBound)")
@@ -124,9 +122,9 @@ struct ShareCard:View {
     }
     /// The Moon as the card shows it: its phase and how much is lit, or in words when not drawn.
     private var moonPhrase:String {
-        if drawsMoon { return String(localized:"\(night.sky.moon.name), \(Self.percent(night))% lit") }
+        if drawsMoon { return String(localized:"\(night.sky.moon.name), \(night.sky.moon.litText)") }
         if night.sky.moon.isNew { return String(localized:"New moon") }
-        return String(localized:"Moon \(Self.percent(night))% lit")
+        return String(localized:"Moon \(night.sky.moon.litText)")
     }
     /// What travels beside the image: the summary, then where it came from.
     var message:String { Sentences.join([summary,String(localized:"Planned with Nyx.")])+(Self.storeURL.map { " "+$0.absoluteString } ?? "") }
@@ -181,7 +179,7 @@ nonisolated struct ShareArtwork: Transferable {
     /// for a preview the palette's red and contrast.
     @MainActor var key: String {
         let look=palette.map { ["preview",String($0.nightVision),String($0.highContrast),String($0.brighterRed)] } ?? ["export"]
-        return ([night.park.id,night.id.description,String(night.score.value),String(describing:night.basis),String(night.beyondForecast),night.smokeLabel ?? "",String(ShareCard.percent(night)),String(describing:shape),
+        return ([night.park.id,night.id.description,String(night.score.value),String(describing:night.basis),String(night.beyondForecast),night.smokeLabel ?? "",String(night.sky.moon.percentLit),String(describing:shape),
                  why ?? "",range.map { "\($0.lowerBound)-\($0.upperBound)" } ?? "",String(Double(scale))]+look).joined(separator:"|")
     }
     @MainActor func png() throws -> Data {

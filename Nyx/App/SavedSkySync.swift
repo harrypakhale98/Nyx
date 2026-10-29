@@ -493,3 +493,27 @@ nonisolated struct FollowedData:Equatable,Sendable {
         }
     }
 }
+
+/// What a scene watches to keep the widgets, the watch and reminders in line (`SavedSkySync`): the
+/// saved parks, the saved spots (the model first), the starting park the widgets and the watch fall
+/// back to, and the reminder switches. One list, for the full app's window and Assistive Access alike.
+private struct SavedUpkeep: ViewModifier {
+    @Environment(PlanModel.self) private var model
+    @AppStorage("notificationsEnabled") private var reminders=false
+    @AppStorage("showerReminders") private var showerReminders=true
+    let saved: [SavedPark]
+    let spots: [SavedSpot]
+    func body(content: Content) -> some View {
+        content
+            .onChange(of:model.homeID) { _,_ in update() }
+            .onChange(of:reminders) { _,enabled in if enabled { update() } else { Task { await NotificationScheduler().remove() } } }
+            .onChange(of:saved.map(\.parkID)) { _,_ in update() }
+            .onChange(of:SavedSpotsFeed.signature(spots)) { _,_ in model.setSpots(spots); update() }
+            .onChange(of:showerReminders) { _,_ in update() }
+    }
+    private func update() { Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
+}
+extension View {
+    /// `SavedUpkeep`, for a scene's saved parks and spots.
+    func savedUpkeep(saved: [SavedPark], spots: [SavedSpot]) -> some View { modifier(SavedUpkeep(saved:saved,spots:spots)) }
+}

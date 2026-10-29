@@ -36,8 +36,6 @@ nonisolated enum NightVerdict {
         let spoken=Sentences.join([moon, milkyWay?.spoken, ahead].compactMap { $0 })
         return text.isEmpty ? nil : Line(text: text, spoken: spoken)
     }
-    /// Where the Moon is during true darkness, with how much of it is lit (`SkyConditions.moonSentence`).
-    static func moonSentence(sky: SkyConditions, park: Park) -> String? { sky.moonSentence(park: park) }
     /// The core in true darkness: its Moon-free stretch, briefly, under the Moon, or not up at all.
     /// Nil where the core is never usefully up (far north), as What's up explains it there.
     static func coreSentence(_ core: SkyAlmanac.CoreNight, sky: SkyConditions, park: Park) -> Line? {
@@ -62,14 +60,11 @@ nonisolated enum NightVerdict {
     /// "82, Moon and darkness only" where the place has no usual clouds), and ", haze or smoke" when
     /// smoke holds it down. A later night is never set beside tonight's as if both were forecasts.
     static func scored(_ night: Night) -> String { night.score.withBasis(String(night.score.value)) }
-    /// A place's best night (`NightPlanner.best`). A closure is left out: it costs every night of
-    /// one park alike, so it never moves the night.
-    static func best(_ nights: [Night]) -> Night? { NightPlanner.best(nights) }
     /// The park page's "Darker on…": the place's best night (`best` over its nights from tonight),
     /// when it falls after the night shown, clears it by `darkerMargin` and reaches "Good". Never a
     /// nearer night that is merely darker than this one, so the page and every list name one night.
     static func darker(than night: Night, among nights: [Night]) -> Night? {
-        guard let best=best(nights), best.id>night.id, clearlyDarker(best,than:night) else { return nil }
+        guard let best=NightPlanner.best(nights), best.id>night.id, clearlyDarker(best,than:night) else { return nil }
         return best
     }
     /// Tonight's "Darker on…" under the answer: first the answer's own park, its best night by the

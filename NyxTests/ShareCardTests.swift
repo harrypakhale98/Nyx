@@ -34,13 +34,13 @@ import SwiftUI
         let jotr=try park("jotr")
         // A crescent well past 5% is drawn, and the summary gives its phase and light.
         let crescent=try night(jotr,"2026-10-16")
-        #expect(crescent.sky.moon.illumination>=ShareCard.moonDrawnFrom)
+        #expect(!crescent.sky.moon.negligible)
         let card=ShareCard(night:crescent)
-        #expect(card.summary.contains("\(crescent.sky.moon.name), \(ShareCard.percent(crescent))% lit."))
+        #expect(card.summary.contains("\(crescent.sky.moon.name), \(crescent.sky.moon.litText)."))
         #expect(card.dateLine==jotr.dayLabel(crescent.id))
         // At new moon no disc is drawn; the date line and the summary say it in words.
         let new=try night(jotr,"2026-10-10")
-        #expect(new.sky.moon.illumination<ShareCard.moonDrawnFrom)
+        #expect(new.sky.moon.negligible)
         let dark=ShareCard(night:new)
         if new.sky.moon.name=="New moon" {
             #expect(dark.dateLine==jotr.dayLabel(new.id)+" · New moon")
