@@ -55,8 +55,12 @@ struct BestNightsView: View {
         .parkSaveAlert(isPresented:$saveFailed,journalUnavailable:model.journalUnavailable)
         .task(id:key) { await rank(key) }
         // Cached forecasts are enough to rank; a refresh that is already due arrives in the background.
-        // Closures rank as well as show, so the parks' alerts are asked for here as on a park's page.
-        .task { if DebugScenario.screen == nil { await model.refreshForecasts(watching:[]); await model.refreshParkUpdates([]) } }
+        // Closures rank as well as show, so the parks' alerts are asked for here as on a park's page; a
+        // capture reads the cached ones (`refreshParkUpdates` asks the network only when live).
+        .task {
+            if DebugScenario.screen == nil { await model.refreshForecasts(watching:[]) }
+            await model.refreshParkUpdates([])
+        }
     }
     /// One plain line on what this mode answers; Plan's bar already names the page. Before a starting
     /// point is chosen the answer is from the example town, and says so, as Tonight does.
