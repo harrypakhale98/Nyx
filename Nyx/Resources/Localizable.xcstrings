@@ -2050,37 +2050,37 @@
         }
       }
     },
-    "%@ · Moon %lld%% lit": {
+    "%@ · Moon %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · Mond %lld %% beleuchtet"
+            "value": "%@ · Mond %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · Moon %lld%% lit"
+            "value": "%@ · Moon %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · Luna %lld%% iluminada"
+            "value": "%@ · Luna %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · Lune éclairée à %lld %%"
+            "value": "%@ · Lune %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · 月の輝面比%lld%%"
+            "value": "%1$@ · 月の%2$@"
           }
         }
       }
@@ -2155,6 +2155,76 @@
         }
       }
     },
+    "%@ · rises %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Aufgang %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · rises %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · sale: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · lever %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · 月の出%2$@"
+          }
+        }
+      }
+    },
+    "%@ · sets %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Untergang %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · sets %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · se pone: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · coucher %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · 月の入り%2$@"
+          }
+        }
+      }
+    },
     "%@ – %@": {
       "extractionState": "manual",
       "localizations": {
@@ -2221,41 +2291,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@%@"
-          }
-        }
-      }
-    },
-    "%@%lld out of 100, %@. %@ %@, %lld percent lit.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@%2$lld von 100, %3$@. %4$@ %5$@, zu %6$lld Prozent beleuchtet."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@%lld out of 100, %@. %@ %@, %lld percent lit."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@%lld de 100, %@. %@ %@, %lld por ciento iluminada."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@%lld sur 100, %@. %@ %@, éclairée à %lld pour cent."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@100点中%2$lld点、%3$@。%4$@%5$@、輝面比%6$lldパーセント。"
           }
         }
       }
@@ -2714,6 +2749,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@、%@：%@。"
+          }
+        }
+      }
+    },
+    "%@, %@: %lld out of 100, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %lld von 100, %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %lld out of 100, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %lld de 100, %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@ : %lld sur 100, %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%2$@：100点中%3$lld点、%4$@。"
           }
         }
       }
@@ -3243,76 +3313,6 @@
         }
       }
     },
-    "%@, %lld percent lit, lit from the %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, zu %2$lld Prozent beleuchtet, Licht von %3$@."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld percent lit, lit from the %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, %2$lld por ciento iluminada, con luz desde %3$@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, éclairée à %2$lld pour cent, côté éclairé %3$@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@、輝面比%2$lldパーセント、%3$@側が明るい。"
-          }
-        }
-      }
-    },
-    "%@, %lld percent lit.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, zu %lld Prozent beleuchtet."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld percent lit."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld por ciento iluminada."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, éclairée à %lld pour cent."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@、輝面比%2$lldパーセント。"
-          }
-        }
-      }
-    },
     "%@, %lld tonight": {
       "extractionState": "manual",
       "localizations": {
@@ -3344,76 +3344,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@、今夜%2$lld点"
-          }
-        }
-      }
-    },
-    "%@, %lld%% lit": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld %% beleuchtet"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld%% lit"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld%% iluminada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, éclairée à %lld %%"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@、輝面比%2$lld%%"
-          }
-        }
-      }
-    },
-    "%@, %lld%% lit.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld %% beleuchtet."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld%% lit."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld%% iluminada."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, éclairée à %lld %%."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@、輝面比%2$lld%%。"
           }
         }
       }
@@ -3624,6 +3554,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@、もやまたは煙"
+          }
+        }
+      }
+    },
+    "%@, in the %@. Faint stars fade where it shines.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, im %@. Wo er scheint, verblassen schwache Sterne."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, in the %@. Faint stars fade where it shines."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, en el %@. Las estrellas débiles se apagan donde brilla."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, direction %@. Les étoiles faibles s’effacent là où elle brille."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%2$@の空。月が照らす方向では暗い星が見えにくくなります。"
+          }
+        }
+      }
+    },
+    "%@, lit from the %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, Licht von %2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, lit from the %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, con luz desde %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, côté éclairé %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%2$@側が明るい。"
+          }
+        }
+      }
+    },
+    "%@, setting in the %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, geht im %@ unter."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, setting in the %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, poniéndose en el %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, se couche direction %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%2$@の空に沈んでいきます。"
           }
         }
       }
@@ -4499,41 +4534,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@：100点中%2$lld点、%3$@。%4$@出発前に、天候と公園に入れるかを確認してください。"
-          }
-        }
-      }
-    },
-    "%@: %lld out of 100, %@. Includes a cached cloud forecast. Confirm conditions and park access before traveling.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@: %lld von 100, %@. Enthält eine gespeicherte Wolkenvorhersage. Prüfe vor der Fahrt die Bedingungen und ob der Park zugänglich ist."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@: %lld out of 100, %@. Includes a cached cloud forecast. Confirm conditions and park access before traveling."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@: %lld de 100, %@. Incluye un pronóstico de nubes guardado. Confirma las condiciones y el acceso al parque antes de viajar."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ : %lld sur 100, %@. Comprend une prévision de nuages en cache. Vérifiez les conditions et l’accès au parc avant de partir."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@：100点中%2$lld点、%3$@。保存済みの雲予報を含みます。出発前に、天候と公園に入れるかを確認してください。"
           }
         }
       }
@@ -7572,251 +7572,6 @@
         }
       }
     },
-    "%lld%% lit": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% beleuchtet"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% lit"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% iluminada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% éclairée"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "輝面比%lld%%"
-          }
-        }
-      }
-    },
-    "%lld%% lit · down now": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% beleuchtet · jetzt untergegangen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% lit · down now"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% iluminada · oculta"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% éclairée · couchée"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "輝面比%lld%% · 地平線の下"
-          }
-        }
-      }
-    },
-    "%lld%% lit · up now": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% beleuchtet · jetzt am Himmel"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% lit · up now"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% iluminada · en el cielo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% éclairée · levée"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "輝面比%lld%% · 空に出ている"
-          }
-        }
-      }
-    },
-    "%lld%% lit, in the %@. Faint stars fade where it shines.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% beleuchtet, im %@. Wo er scheint, verblassen schwache Sterne."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% lit, in the %@. Faint stars fade where it shines."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% iluminada, en el %@. Las estrellas débiles se apagan donde brilla."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Éclairée à %lld %%, direction %@. Les étoiles faibles s’effacent là où elle brille."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "輝面比%1$lld%%、%2$@の空。月が照らす方向では暗い星が見えにくくなります。"
-          }
-        }
-      }
-    },
-    "%lld%% lit, setting in the %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% beleuchtet, geht im %@ unter."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% lit, setting in the %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% iluminada, poniéndose en el %@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Éclairée à %lld %%, se couche direction %@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "輝面比%1$lld%%、%2$@の空に沈んでいきます。"
-          }
-        }
-      }
-    },
-    "%lld%% · rises %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% · Aufgang %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% · rises %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% · sale: %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% · lever %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$lld%% · 月の出%2$@"
-          }
-        }
-      }
-    },
-    "%lld%% · sets %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% · Untergang %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% · sets %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% · se pone: %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %% · coucher %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$lld%% · 月の入り%2$@"
-          }
-        }
-      }
-    },
     "%lld, %@": {
       "extractionState": "manual",
       "localizations": {
@@ -9452,37 +9207,37 @@
         }
       }
     },
-    "A thin Moon, %lld%% lit, low in the %@.": {
+    "A thin Moon, %@, low in the %@.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ein schmaler Mond, %lld %% beleuchtet, tief im %@."
+            "value": "Ein schmaler Mond, %@, tief im %@."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A thin Moon, %lld%% lit, low in the %@."
+            "value": "A thin Moon, %@, low in the %@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Una Luna fina, %lld%% iluminada, baja en el %@."
+            "value": "Una Luna fina, %@, baja en el %@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Une fine Lune, éclairée à %lld %%, basse, direction %@."
+            "value": "Une fine Lune, %@, basse, direction %@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "細い月。輝面比%1$lld%%、%2$@の低い空。"
+            "value": "細い月。%1$@、%2$@の低い空。"
           }
         }
       }
@@ -14187,41 +13942,6 @@
         }
       }
     },
-    "Below the horizon for %lld%% of true darkness.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Während %lld %% der echten Dunkelheit unter dem Horizont."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Below the horizon for %lld%% of true darkness."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bajo el horizonte durante el %lld%% de la oscuridad total."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sous l’horizon pendant %lld %% de l’obscurité totale."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "完全に暗い時間の%lld%%は地平線の下にあります。"
-          }
-        }
-      }
-    },
     "Best %@, %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -15048,41 +14768,6 @@
         }
       }
     },
-    "Best of the next seven nights: %@, %lld.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die beste der nächsten sieben Nächte: %@, %lld."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Best of the next seven nights: %@, %lld."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La mejor de las próximas siete noches: %@, %lld."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meilleure des sept prochaines nuits : %@, %lld."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "この先7夜でいちばんよい夜：%1$@、%2$lld点。"
-          }
-        }
-      }
-    },
     "Best stretch": {
       "extractionState": "manual",
       "localizations": {
@@ -15184,41 +14869,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "今週いちばんよい夜：%@"
-          }
-        }
-      }
-    },
-    "Best this week: %@ and %lld more": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Diese Woche am besten: %@ und %lld weitere"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Best this week: %@ and %lld more"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mejor de la semana: %@ y %lld más"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meilleure de la semaine : %@ et %lld autres"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今週いちばんよい夜：%1$@ほか%2$lld夜"
           }
         }
       }
@@ -15538,37 +15188,37 @@
         }
       }
     },
-    "Bortle %lld observed · %@, %lld%% lit": {
+    "Bortle %lld observed · %@, %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle %lld beobachtet · %@, %lld %% beleuchtet"
+            "value": "Bortle %lld beobachtet · %@, %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle %lld observed · %@, %lld%% lit"
+            "value": "Bortle %lld observed · %@, %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle %lld observado · %@, %lld%% iluminada"
+            "value": "Bortle %lld observado · %@, %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle %lld observé · %@, éclairée à %lld %%"
+            "value": "Bortle %lld observé · %@, %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "観察したボートル%1$lld · %2$@、輝面比%3$lld%%"
+            "value": "観察したボートル%1$lld · %2$@、%3$@"
           }
         }
       }
@@ -16268,41 +15918,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "混み合う月と空いている月：National Park Serviceの来訪者統計、2021〜2025年の月平均、CC0。"
-          }
-        }
-      }
-    },
-    "Cached forecast included": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mit gespeicherter Vorhersage"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cached forecast included"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Incluye pronóstico guardado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prévision en cache incluse"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存済みの予報を含む"
           }
         }
       }
@@ -18583,6 +18198,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "「あなたのプライバシー」で雲の予報がオフのため、この夜は月、暗さ、平年の雲量にもとづきます。"
+          }
+        }
+      }
+    },
+    "Cloud forecasts are off in Your privacy.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersagen sind unter „Deine Privatsphäre“ ausgeschaltet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecasts are off in Your privacy."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los pronósticos de nubes están desactivados en Tu privacidad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les prévisions de nuages sont désactivées dans Votre vie privée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「あなたのプライバシー」で雲予報がオフになっています。"
           }
         }
       }
@@ -25442,6 +25092,41 @@
         }
       }
     },
+    "Facing south": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blick nach Süden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Facing south"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hacia el sur"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orienté sud"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "南向き"
+          }
+        }
+      }
+    },
     "Faintest stars to the eye at the darkest hour: about magnitude %@, an estimate. Higher numbers are fainter stars.": {
       "extractionState": "manual",
       "localizations": {
@@ -27763,76 +27448,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "省データモードのため、予報の詳細を一時停止しています。"
-          }
-        }
-      }
-    },
-    "Forecast included": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mit Vorhersage"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forecast included"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Con pronóstico"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prévision incluse"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "予報を含む"
-          }
-        }
-      }
-    },
-    "Forecast included · conditions may change": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mit Vorhersage · Bedingungen können sich ändern"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forecast included · conditions may change"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Con pronóstico · las condiciones pueden cambiar"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prévision incluse · les conditions peuvent changer"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "予報を含む · 状況は変わることがあります"
           }
         }
       }
@@ -31843,41 +31458,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "見えているもの：%@。"
-          }
-        }
-      }
-    },
-    "Includes a cached cloud forecast.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enthält eine gespeicherte Wolkenvorhersage."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Includes a cached cloud forecast."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Incluye un pronóstico de nubes guardado."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comprend une prévision de nuages en cache."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存済みの雲予報を含みます。"
           }
         }
       }
@@ -37136,37 +36716,37 @@
         }
       }
     },
-    "Moon %lld%% lit": {
+    "Moon %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mond %lld %% beleuchtet"
+            "value": "Mond %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moon %lld%% lit"
+            "value": "Moon %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Luna %lld%% iluminada"
+            "value": "Luna %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lune éclairée à %lld %%"
+            "value": "Lune %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "月の輝面比%lld%%"
+            "value": "月の%@"
           }
         }
       }
@@ -37626,41 +37206,6 @@
         }
       }
     },
-    "Moon rises %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mondaufgang %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon rises %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Luna sale %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lever de la Lune %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月の出 %@"
-          }
-        }
-      }
-    },
     "Moon rises at %@, %@ lit.": {
       "extractionState": "manual",
       "localizations": {
@@ -37696,72 +37241,37 @@
         }
       }
     },
-    "Moon sets %@": {
+    "Moon rises at %@.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Monduntergang %@"
+            "value": "Mondaufgang um %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moon sets %@"
+            "value": "Moon rises at %@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La Luna se pone %@"
+            "value": "La Luna sale: %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Coucher de la Lune %@"
+            "value": "Lever de la Lune à %@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "月の入り %@"
-          }
-        }
-      }
-    },
-    "Moon sets at %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Monduntergang um %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon sets at %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Luna se pone: %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Lune se couche à %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@に月の入り"
+            "value": "月は%@に昇ります。"
           }
         }
       }
@@ -37832,6 +37342,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "月は細く、影響はほとんどありません（輝面比%@）。"
+          }
+        }
+      }
+    },
+    "Moon too thin to matter.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond zu schmal, um zu stören."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon too thin to matter."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna es demasiado fina para importar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune trop mince pour compter."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月は細く、影響はほとんどありません。"
           }
         }
       }
@@ -37941,6 +37486,146 @@
         }
       }
     },
+    "Moon up until %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond bis %@ am Himmel."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up until %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo hasta %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée jusqu’à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月は%@まで空にあります。"
+          }
+        }
+      }
+    },
+    "Moon up, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond am Himmel, %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up, %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo, %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée, %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月が出ている、%@"
+          }
+        }
+      }
+    },
+    "Moon up, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond am Himmel, %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo, %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée, %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月が出ています。%@。"
+          }
+        }
+      }
+    },
+    "Moon up, %@. It sets at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond am Himmel, %1$@. Er geht um %2$@ unter."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up, %@. It sets at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo, %1$@. Se pone: %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée, %1$@. Elle se couche à %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月が出ています。%1$@。%2$@に沈みます。"
+          }
+        }
+      }
+    },
     "Moon up, %lld%% lit": {
       "extractionState": "manual",
       "localizations": {
@@ -37976,107 +37661,37 @@
         }
       }
     },
-    "Moon up, %lld%% lit.": {
+    "Moon, %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mond am Himmel, %lld %% beleuchtet."
+            "value": "Mond, %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moon up, %lld%% lit."
+            "value": "Moon, %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Luna en el cielo, %lld%% iluminada."
+            "value": "Luna, %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lune levée, éclairée à %lld %%."
+            "value": "Lune, %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "月が出ています。輝面比%lld%%。"
-          }
-        }
-      }
-    },
-    "Moon up, %lld%% lit. It sets at %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mond am Himmel, %1$lld %% beleuchtet. Er geht um %2$@ unter."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon up, %lld%% lit. It sets at %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna en el cielo, %1$lld%% iluminada. Se pone: %2$@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lune levée, éclairée à %1$lld %%. Elle se couche à %2$@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月が出ています。輝面比%1$lld%%。%2$@に沈みます。"
-          }
-        }
-      }
-    },
-    "Moon, %lld%% lit": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mond, %lld %% beleuchtet"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon, %lld%% lit"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna, %lld%% iluminada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lune, éclairée à %lld %%"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月、輝面比%lld%%"
+            "value": "月、%@"
           }
         }
       }
@@ -38287,41 +37902,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "月：%@。%@。"
-          }
-        }
-      }
-    },
-    "Moon: NASA's Scientific Visualization Studio; LRO LROC and LOLA teams.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mond: Scientific Visualization Studio der NASA; LRO-Teams LROC und LOLA."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon: NASA's Scientific Visualization Studio; LRO LROC and LOLA teams."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna: Scientific Visualization Studio de la NASA; equipos LROC y LOLA del LRO."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lune : Scientific Visualization Studio de la NASA ; équipes LROC et LOLA de LRO."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月：NASA Scientific Visualization Studio、LRO LROCおよびLOLAチーム。"
           }
         }
       }
@@ -38641,6 +38221,41 @@
         }
       }
     },
+    "Moonrise %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondaufgang %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonrise %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna sale %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lever de la Lune %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月の出 %@"
+          }
+        }
+      }
+    },
     "Moonrise %@, moonset %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -38711,6 +38326,41 @@
         }
       }
     },
+    "Moonrise at %@, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondaufgang um %1$@, %2$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonrise at %@, %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salida de la Luna: %1$@, %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lever de la Lune à %1$@, %2$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@に月の出、%2$@"
+          }
+        }
+      }
+    },
     "Moonrise at %@, %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -38746,41 +38396,6 @@
         }
       }
     },
-    "Moonrise at %@, %lld%% lit": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mondaufgang um %1$@, %2$lld %% beleuchtet"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moonrise at %@, %lld%% lit"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Salida de la Luna: %1$@, %2$lld%% iluminada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lever de la Lune à %1$@, éclairée à %2$lld %%"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@に月の出、輝面比%2$lld%%"
-          }
-        }
-      }
-    },
     "Moonset": {
       "extractionState": "manual",
       "localizations": {
@@ -38812,6 +38427,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "月の入り"
+          }
+        }
+      }
+    },
+    "Moonset %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monduntergang %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonset %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna se pone %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coucher de la Lune %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月の入り %@"
           }
         }
       }
@@ -40412,6 +40062,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "ここでは%@のほとんどの夜は、おおむね晴れます。"
+          }
+        }
+      }
+    },
+    "Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。"
           }
         }
       }
@@ -42996,41 +42681,6 @@
         }
       }
     },
-    "No moonlight to speak of: a good night for faint stars.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kaum Mondlicht: eine gute Nacht für schwache Sterne."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No moonlight to speak of: a good night for faint stars."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Casi sin luz de luna: buena noche para estrellas tenues."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pratiquement pas de clair de lune : une bonne nuit pour les étoiles faibles."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月明かりはほとんどありません。暗い星を見るのによい夜です。"
-          }
-        }
-      }
-    },
     "No moonlight to wash it out.": {
       "extractionState": "manual",
       "localizations": {
@@ -44196,41 +43846,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "No true darkness at this latitude": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keine echte Dunkelheit auf dieser Breite"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No true darkness at this latitude"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sin oscuridad total a esta latitud"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pas d’obscurité totale à cette latitude"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "この緯度では完全に暗くなりません"
           }
         }
       }
@@ -47144,37 +46759,37 @@
         }
       }
     },
-    "Nyx scored this night %lld, %@. %@, %lld%% lit.": {
+    "Nyx scored this night %lld, %@. %@, %@.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx hat diese Nacht mit %lld bewertet, %@. %@, %lld %% beleuchtet."
+            "value": "Nyx hat diese Nacht mit %lld bewertet, %@. %@, %@."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx scored this night %lld, %@. %@, %lld%% lit."
+            "value": "Nyx scored this night %lld, %@. %@, %@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx le dio a esta noche %lld, %@. %@, %lld%% iluminada."
+            "value": "Nyx le dio a esta noche %lld, %@. %@, %@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx a noté cette nuit %lld, %@. %@, éclairée à %lld %%."
+            "value": "Nyx a noté cette nuit %lld, %@. %@, %@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyxによるこの夜のスコアは%1$lld点、%2$@。%3$@、輝面比%4$lld%%。"
+            "value": "Nyxによるこの夜のスコアは%1$lld点、%2$@。%3$@、%4$@。"
           }
         }
       }
@@ -50730,41 +50345,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "公園のアラートには、すべてのNyxで共有するキーを使っていて、1時間に1,000リクエストまでに制限されています。アラートがよく混み合う場合は、National Park Serviceから無料で取得できる自分のキーを使えます。キーはこのデバイスのキーチェーンに保存され、developer.nps.govにだけ送信されます。"
-          }
-        }
-      }
-    },
-    "Park data: National Park Service.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parkdaten: National Park Service."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Park data: National Park Service."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Datos de los parques: National Park Service."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Données des parcs : National Park Service."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "公園のデータ：National Park Service。"
           }
         }
       }
@@ -62342,41 +61922,6 @@
         }
       }
     },
-    "Stars: Yale Bright Star Catalogue.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sterne: Yale Bright Star Catalogue."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stars: Yale Bright Star Catalogue."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estrellas: Yale Bright Star Catalogue."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Étoiles : Yale Bright Star Catalogue."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "星：Yale Bright Star Catalogue。"
-          }
-        }
-      }
-    },
     "Stars: the Yale Bright Star Catalogue (Hoffleit and Warren), via NASA HEASARC.": {
       "extractionState": "manual",
       "localizations": {
@@ -66317,6 +65862,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "太陽は沈んだばかりで、空はまだ明るいです。"
+          }
+        }
+      }
+    },
+    "The Sun is up": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Sonne steht am Himmel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Sun is up"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es de día"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le Soleil est levé"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "太陽が出ています"
           }
         }
       }
@@ -71155,41 +70735,6 @@
         }
       }
     },
-    "Times are %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeitangaben: %@."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Times are %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Horario: %@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heures : %@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "時刻は%@です。"
-          }
-        }
-      }
-    },
     "Times here keep %@, from the nearest town on Nyx's list. Near a border, that can be the neighbor's.": {
       "extractionState": "manual",
       "localizations": {
@@ -74415,41 +73960,6 @@
         }
       }
     },
-    "Up through all of true darkness.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Während der gesamten echten Dunkelheit über dem Horizont."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Up through all of true darkness."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sobre el horizonte durante toda la oscuridad total."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Au-dessus de l’horizon pendant toute l’obscurité totale."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "完全に暗い時間はずっと空にあります。"
-          }
-        }
-      }
-    },
     "Up to date. Forecast from %@": {
       "extractionState": "manual",
       "localizations": {
@@ -75206,41 +74716,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "平年の雲量：Copernicus Climate Change Serviceの情報（2026）を加工して含んでいます。ERA5、2015〜2024年、Hersbach et al. 2020、CC BY 4.0。"
-          }
-        }
-      }
-    },
-    "Usual clouds: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Übliche Bewölkung: enthält veränderte Informationen des Copernicus Climate Change Service (2026): ERA5, 2015 bis 2024."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Usual clouds: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nubosidad habitual: contiene información modificada del Servicio de Cambio Climático de Copernicus (2026): ERA5, 2015 a 2024."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nébulosité habituelle : contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, 2015 à 2024."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "平年の雲量：Copernicus Climate Change Serviceの情報（2026）を加工して含んでいます：ERA5、2015〜2024年。"
           }
         }
       }
