@@ -637,13 +637,17 @@ struct WeekPage: View {
                 } else {
                     HStack(spacing: 0) { ForEach(nights) { night in column(night, best: night.id == best?.id, low: low, high: high) } }
                 }
-                if let best, let line = WeekBest.label(nights) {
+                if let best, let line = WeekBest.label(nights, scored: false) {
                     VStack(alignment: .leading, spacing: 0) {
-                        // "Best this week: Sat · 74", "…: tonight" or "…: every night", as the iPhone's
-                        // Parks rows and medium widget say it; the scores stand under the dots above.
+                        // "Best this week: Sat", "…: tonight" or "…: every night", as the iPhone's Parks
+                        // rows and medium widget say it, with the score as a numeral under it.
                         Text(line).font(.footnote)
-                        // Its band word in ink as the dial sets it, and what the score rests on in a line of its own.
-                        Text(best.score.band.label).bandWord(.subheadline, ink: palette.ink)
+                        // The score in the accent, its band word in ink as the dial sets it, and what
+                        // the score rests on in a line of its own.
+                        HStack(alignment: .firstTextBaseline, spacing: 5) {
+                            Text(best.score.value, format: .number).scoreNumeral(.body, accent: palette.accent)
+                            Text(best.score.band.label).bandWord(.subheadline, ink: palette.ink)
+                        }
                         if let note = best.basisNote { Text(note).font(.caption2).foregroundStyle(palette.muted) }
                     }
                     .fixedSize(horizontal: false, vertical: true).accessibilityElement(children: .combine)

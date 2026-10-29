@@ -143,6 +143,8 @@ struct WatchGauge: View {
             basis,
             models.map { String(localized: "Forecast models: \($0.lowerBound) to \($0.upperBound).") } ?? "",
             night.smokeCaveat.map { Sentences.end($0) } ?? "",
+            // The Moon drawn inside the dial has no element of its own on the watch, so the dial says it.
+            Sentences.end(night.sky.moon.spoken),
             ring?.spoken(sky: night.sky, park: night.park, best: window) ?? "",
             // The words under the dial give park times; where the park's clock is not the watch's, say whose.
             night.park.spokenZone(at: night.sky.evening) ?? ""

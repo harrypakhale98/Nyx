@@ -735,8 +735,9 @@ struct TonightWidgetView:View {
                      String(localized:"Best of the next \(count) nights: \(top.park.dayLabel(top.id)), \(top.score.value).")]+events.map { $0+"." }).joined(separator:" ")
         }
         if ahead { tonight+=" "+Sentences.end(night.sky.moon.spoken) }
-        guard family == .systemMedium,let top=NightPlanner.best(entry.week) else { return tonight }
-        return tonight+" "+String(localized:"Best of the next seven nights: \(top.park.dayLabel(top.id)), \(top.score.value).")
+        // The week's best as the strip shows it (`WeekBest`), "every night" included.
+        guard family == .systemMedium,let week=WeekBest.label(entry.week) else { return tonight }
+        return tonight+" "+Sentences.end(week)
     }
 }
 private extension View {
