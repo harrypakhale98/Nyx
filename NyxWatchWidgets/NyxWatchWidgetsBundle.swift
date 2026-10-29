@@ -24,7 +24,7 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
     func recommendations() -> [AppIntentRecommendation<TonightParkIntent>] {
         let saved = WristParkQuery.savedParks().prefix(8)
         return [AppIntentRecommendation(intent: TonightParkIntent(), description: Text("Same as Tonight"))]
-            + saved.map { AppIntentRecommendation(intent: TonightParkIntent(park: WristParkEntity($0)), description: Text(verbatim: $0.wristName)) }
+            + saved.map { AppIntentRecommendation(intent: TonightParkIntent(park: WristParkEntity($0)), description: Text(verbatim: $0.shortName)) }
     }
     /// The gallery's sample sky, so the system's redacted placeholder has the complication's real shape.
     func placeholder(in context: Context) -> WatchSkyEntry {
@@ -92,7 +92,7 @@ struct WristParkEntity: AppEntity {
     let id: String
     let name: String
     var displayRepresentation: DisplayRepresentation { DisplayRepresentation(title: LocalizedStringResource(stringLiteral: name)) }
-    init(_ park: Park) { id = park.id; name = park.wristName }
+    init(_ park: Park) { id = park.id; name = park.shortName }
     init(id: String, name: String) { self.id = id; self.name = name }
     static var darkest: WristParkEntity { WristParkEntity(id: darkestID, name: String(localized: "Same as Tonight")) }
 }

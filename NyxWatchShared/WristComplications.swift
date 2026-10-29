@@ -18,6 +18,9 @@ nonisolated struct NextDarkEntry: TimelineEntry, Sendable {
     let park: Park?
     let moment: DarkMoment
     let nightVision: Bool
+    /// The night of a moonlit moment (`DarkMoment.moonlit`), so the face says the Moon during true
+    /// darkness by the iPhone's rule (`SkyConditions.moonShort`, `moonSentence`).
+    var sky: SkyConditions? = nil
 }
 
 nonisolated enum WristTimeline {
@@ -67,7 +70,9 @@ nonisolated enum WristTimeline {
         return ([now] + moments.sorted()).map { date in
             let followed = park(at: date, snapshot: snapshot, cache: &cache, scored: &scored)
             let moment = followed.map { park in DarkMoment.next(at: park, now: date) { WatchTimeline.sky(park, evening: $0, cache: &cache) } } ?? .none
-            return NextDarkEntry(date: date, park: followed, moment: moment, nightVision: look.nightVision(park: followed, at: date))
+            var sky: SkyConditions?
+            if case .moonlit(let from, _) = moment, let park = followed { sky = WatchTimeline.sky(park, evening: park.currentNight(at: from), cache: &cache) }
+            return NextDarkEntry(date: date, park: followed, moment: moment, nightVision: look.nightVision(park: followed, at: date), sky: sky)
         }
     }
 }
@@ -96,7 +101,7 @@ struct MoonComplicationView: View {
                     AccessoryWidgetBackground()
                     VStack(spacing: 0) {
                         glyph.font(.title3).widgetAccentable()
-                        Text("\(entry.moon.percent)%").font(.system(.caption2, design: .serif).weight(.medium)).foregroundStyle(colors.muted)
+                        Text(verbatim: Percent.text(entry.moon.phase.percentLit)).font(.system(.caption2, design: .serif).weight(.medium)).foregroundStyle(colors.muted)
                     }
                 }
             case .accessoryCorner:
@@ -109,8 +114,8 @@ struct MoonComplicationView: View {
                     glyph.font(.title).foregroundStyle(colors.accent).widgetAccentable()
                     VStack(alignment: .leading, spacing: 0) {
                         Text(entry.moon.phase.name).font(.system(.headline, design: .serif)).lineLimit(1).minimumScaleFactor(0.8)
-                        Text(litLine).font(.caption2).foregroundStyle(colors.muted).lineLimit(1).minimumScaleFactor(0.8)
-                        if let event = eventLine { Text(event).font(.caption2).lineLimit(1).minimumScaleFactor(0.8) }
+                        Text(text.litNow).font(.caption2).foregroundStyle(colors.muted).lineLimit(1).minimumScaleFactor(0.8)
+                        if let event = text.event { Text(event).font(.caption2).lineLimit(1).minimumScaleFactor(0.8) }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -124,35 +129,19 @@ struct MoonComplicationView: View {
         // A tap opens tonight at the park whose Moon this is.
         .widgetURL(entry.park.flatMap { WatchLink(park: $0, evening: $0.currentNight(at: entry.date)).url })
     }
-    /// "34% lit · up now", or the phase's light alone before a park is chosen.
-    private var litLine: String {
-        switch entry.moon.isUp {
-        case true?: String(localized: "\(entry.moon.percent)% lit · up now")
-        case false?: String(localized: "\(entry.moon.percent)% lit · down now")
-        case nil: String(localized: "\(entry.moon.percent)% lit")
-        }
-    }
-    /// "Sets 11:40 PM · Joshua Tree" in park time, with the park's zone where its clock is not this watch's.
-    private var eventLine: String? {
-        guard let park = entry.park, let next = entry.moon.next else { return nil }
-        let time = park.wristTime(next.date)
-        return next.rises ? String(localized: "Rises \(time) · \(park.wristName)") : String(localized: "Sets \(time) · \(park.wristName)")
-    }
+    /// The iPhone Moon widget's words (`MoonRectangleText`): "34% lit · up now", then "Sets 11:40 PM ·
+    /// Joshua Tree" in park time, with the park's zone where its clock is not this watch's.
+    private var text: MoonRectangleText { MoonRectangleText(moon: entry.moon, park: entry.park) { $0.wristTime($1) } }
     /// "34% · rises 11:40 PM" in park time. `zoned`: with the park's zone where its clock is not this
     /// watch's (the inline line has room for it; the corner's short curve does not).
     private func line(zoned: Bool) -> String {
-        guard let park = entry.park, let next = entry.moon.next else { return String(localized: "\(entry.moon.percent)% lit") }
-        let time = zoned ? park.wristTime(next.date) : park.time(next.date)
-        return next.rises ? String(localized: "\(entry.moon.percent)% · rises \(time)") : String(localized: "\(entry.moon.percent)% · sets \(time)")
+        guard let park = entry.park, let next = entry.moon.next else { return text.lit }
+        return text.glance(time: zoned ? park.wristTime(next.date) : park.time(next.date))
     }
+    /// The iPhone widget's summary, with whose time it is where the park's clock is not this watch's.
     private var summary: String {
-        var text = String(localized: "\(entry.moon.phase.name), \(entry.moon.percent) percent lit.")
-        if let up = entry.moon.isUp { text += " " + (up ? String(localized: "The Moon is up.") : String(localized: "The Moon is down.")) }
-        if let park = entry.park, let next = entry.moon.next {
-            text += " " + (next.rises ? String(localized: "Moonrise at \(park.time(next.date)), \(park.wristName).") : String(localized: "Moonset at \(park.time(next.date)), \(park.wristName)."))
-            if let zone = park.spokenZone(at: next.date) { text += " " + zone }
-        }
-        return text
+        guard let park = entry.park, let next = entry.moon.next, let zone = park.spokenZone(at: next.date) else { return text.spoken }
+        return text.spoken + " " + zone
     }
 }
 
@@ -194,7 +183,7 @@ struct NextDarkComplicationView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(spacing: 4) {
                         Image(systemName: symbol).font(.caption2).foregroundStyle(colors.muted)
-                        Text(entry.park?.wristName ?? "Nyx").font(.system(.headline, design: .serif)).lineLimit(1)
+                        Text(entry.park?.shortName ?? "Nyx").font(.system(.headline, design: .serif)).lineLimit(1)
                     }
                     headline.font(.system(.body, design: .serif)).foregroundStyle(colors.accent).widgetAccentable().lineLimit(1).minimumScaleFactor(0.7)
                     Text(detail).font(.caption2).foregroundStyle(colors.muted).lineLimit(1).minimumScaleFactor(0.8)
@@ -239,7 +228,8 @@ struct NextDarkComplicationView: View {
             case .begins(let date, true): Text("Moon down \(reference(date))")
             case .begins(let date, false): Text("Dark \(reference(date))")
             case .moonlit(let from, _) where from > entry.date: Text("Dark \(reference(from))")
-            case .moonlit: Text("Dark, Moon up")
+            // The Moon through true darkness at a glance, in the iPhone's words.
+            case .moonlit: Text(entry.park.flatMap { park in entry.sky.map { $0.moonShort(park: park) } } ?? String(localized: "Dark, Moon up"))
             case .none: Text("No true darkness")
             }
         }
@@ -251,7 +241,8 @@ struct NextDarkComplicationView: View {
         case .darkNow(let until, false): return String(localized: "Until dawn twilight at \(park.wristTime(until))")
         case .begins(let date, true): return String(localized: "Moonset at \(park.wristTime(date))")
         case .begins(let date, false): return String(localized: "At \(park.wristTime(date))")
-        case .moonlit: return Sentences.end(String(localized: "Moon up all through true darkness"))
+        // The iPhone's sentence for the Moon in true darkness; how much is lit is the Moon complication's.
+        case .moonlit: return entry.sky?.moonSentence(park: park, withLit: false) ?? Sentences.end(String(localized: "Moon up all through true darkness"))
         case .none: return String(localized: "The Sun stays too high at this latitude.")
         }
     }
@@ -275,11 +266,11 @@ struct NextDarkComplicationView: View {
     }
     private func spoken(_ park: Park) -> String {
         switch entry.moment {
-        case .darkNow(let until, _): return String(localized: "\(park.wristName). Truly dark now, until \(park.time(until)).")
-        case .begins(let date, true): return String(localized: "\(park.wristName). The Moon sets at \(park.time(date)); truly dark from then.")
-        case .begins(let date, false): return String(localized: "\(park.wristName). True darkness at \(park.time(date)).")
-        case .moonlit(let from, let to): return String(localized: "\(park.wristName). True darkness from \(park.time(from)) to \(park.time(to)), with the Moon up all through it.")
-        case .none: return String(localized: "\(park.wristName). No true darkness tonight at this latitude.")
+        case .darkNow(let until, _): return String(localized: "\(park.shortName). Truly dark now, until \(park.time(until)).")
+        case .begins(let date, true): return String(localized: "\(park.shortName). The Moon sets at \(park.time(date)); truly dark from then.")
+        case .begins(let date, false): return String(localized: "\(park.shortName). True darkness at \(park.time(date)).")
+        case .moonlit(let from, let to): return String(localized: "\(park.shortName). True darkness from \(park.time(from)) to \(park.time(to)), with the Moon up all through it.")
+        case .none: return String(localized: "\(park.shortName). No true darkness tonight at this latitude.")
         }
     }
 }

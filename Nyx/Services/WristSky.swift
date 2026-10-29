@@ -167,7 +167,6 @@ nonisolated struct MoonNow: Sendable {
     /// Nil without a park: the phase is the same everywhere, rising and setting are not.
     let isUp: Bool?
     let next: Event?
-    var percent: Int { phase.percentLit }
 
     /// Rises and sets from the night before the park's current one through the night after, in
     /// order. Nights run noon to noon, and in the morning "tonight" is the coming evening, so a
@@ -188,6 +187,57 @@ nonisolated struct MoonNow: Sendable {
         guard let park else { isUp = nil; next = nil; return }
         isUp = engine.lunarAltitude(at: now, park: park) + 0.833 > 0
         next = (events ?? Self.events(at: park, around: now)).first { $0.date > now }
+    }
+}
+
+/// The Moon in words, one builder for the iPhone's Moon widget and the watch's Moon complication:
+/// the phase, how much is lit in the reader's own percent style ("42 %" where that is the custom),
+/// whether it is up, and the next moonrise or moonset in the park's time, with the park's name
+/// where it fits. No event without a park, or where the Moon neither rises nor sets in the next
+/// two days (far north).
+nonisolated struct MoonRectangleText: Equatable, Sendable {
+    let phase: String
+    /// "23% lit"
+    let lit: String
+    /// "23% lit · up now", or `lit` alone before a park is chosen.
+    let litNow: String
+    /// "Rises 8:12 PM · Joshua Tree"
+    let event: String?
+    /// "Rises 8:12 PM"
+    let shortEvent: String?
+    /// For VoiceOver: "Waxing crescent, 23 percent lit. The Moon is up. Moonset at 11:40 PM, Joshua Tree."
+    let spoken: String
+    private let percent: String
+    private let rises: Bool?
+    /// `time` writes the event's clock time: the park's, by default; the watch adds the park's zone
+    /// where its clock is not the watch's. VoiceOver hears the park's time, without a zone.
+    init(moon: MoonNow, park: Park?, locale: Locale = .current, time: ((Park, Date) -> String)? = nil) {
+        phase=moon.phase.name
+        percent=moon.phase.percentLit.formatted(.percent.locale(locale))
+        lit=String(localized: "\(percent) lit")
+        switch moon.isUp {
+        case true?: litNow=String(localized: "\(percent) lit · up now")
+        case false?: litNow=String(localized: "\(percent) lit · down now")
+        case nil: litNow=lit
+        }
+        var spoken=Sentences.end(moon.phase.spoken)
+        if let up=moon.isUp { spoken+=" "+(up ? String(localized: "The Moon is up.") : String(localized: "The Moon is down.")) }
+        guard let park, let next=moon.next else { event=nil; shortEvent=nil; rises=nil; self.spoken=spoken; return }
+        let clock=time?(park, next.date) ?? park.time(next.date)
+        rises=next.rises
+        event=next.rises ? String(localized: "Rises \(clock) · \(park.shortName)") : String(localized: "Sets \(clock) · \(park.shortName)")
+        shortEvent=next.rises ? String(localized: "Rises \(clock)") : String(localized: "Sets \(clock)")
+        let at=park.time(next.date)
+        self.spoken=spoken+" "+(next.rises ? String(localized: "Moonrise at \(at), \(park.shortName).") : String(localized: "Moonset at \(at), \(park.shortName)."))
+    }
+    /// One short line for a face with room for little else: "23% · rises 11:40 PM" at `time`, or
+    /// how much is lit alone without a next rise or set.
+    func glance(time: String) -> String {
+        switch rises {
+        case true?: String(localized: "\(percent) · rises \(time)")
+        case false?: String(localized: "\(percent) · sets \(time)")
+        case nil: lit
+        }
     }
 }
 
@@ -221,7 +271,7 @@ nonisolated enum CloudSource: Equatable, Sendable {
     /// `wanted`: the places this watch asks the iPhone for (`WatchSky.wantedPlaces`).
     static func of(context: WatchContext?, park: Park, now: Date, wanted: [String] = []) -> CloudSource {
         guard let context else { return .unsynced }
-        let spotsOff = context.spotForecastsOff && park.id.hasPrefix(WatchContext.spotPrefix)
+        let spotsOff = context.spotForecastsOff && park.id.hasPrefix(Park.spotPrefix)
         guard let updated = issued(park, forecast: context.forecasts[park.id]?.updated, layers: context.details[park.id]?.layers?.updated) else {
             // Left out for room: nothing of the place's forecast came, and asking again would not help.
             if context.droppedParkIDs.contains(park.id) { return .dropped }
@@ -241,6 +291,14 @@ nonisolated enum CloudSource: Equatable, Sendable {
     static func faceOld(_ park: Park, forecast: Date?, layers: Date?, at date: Date) -> Bool {
         guard let updated = issued(park, forecast: forecast, layers: layers) else { return forecast != nil }
         return date.timeIntervalSince(updated) >= lifetime
+    }
+    /// The source's own line (`line(for:)`) already says why the clouds are not a fresh forecast, so
+    /// a basis note beside it can be its short label: every case but a fresh forecast and no sync yet.
+    var explainsItself: Bool {
+        switch self {
+        case .fresh, .unsynced: false
+        case .expired, .missing, .dropped, .wanted, .spotsOff: true
+        }
     }
     /// The forecast can no longer be used and the iPhone could fix that (`AskIPhoneRow` offers to ask).
     var isStale: Bool {

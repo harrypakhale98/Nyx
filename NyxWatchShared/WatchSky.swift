@@ -213,8 +213,6 @@ nonisolated struct WatchLink: Hashable, Sendable {
 }
 
 extension Park {
-    /// The name as it fits a wrist: "American Samoa", not "National Park of American Samoa".
-    nonisolated var wristName: String { shortName.replacingOccurrences(of: "National Park of ", with: "") }
     /// Whether the park's clock reads differently from this watch's at `date`: its times are park-local.
     nonisolated func keepsOtherTime(at date: Date) -> Bool { timeZone.secondsFromGMT(for: date) != TimeZone.current.secondsFromGMT(for: date) }
     /// A park-local time, carrying the park's short zone ("4:52 AM MST") where its clock is not
@@ -232,6 +230,8 @@ extension Park {
 }
 
 extension NyxPalette {
-    /// The quietest text level on the watch (past milestones); still ≥ 4.5:1 on black in red.
-    var faint: Color { ink.opacity(nightVision ? NightRed.levels[2] : 0.62) }
+    /// The quietest text level on the watch (past milestones), by the one rule every surface reads
+    /// (`NyxPalette.faintOpacity`): in red, or under Increase Contrast, it is muted, so it holds 4.5:1
+    /// for protan eyes too.
+    var faint: Color { ink.opacity(Self.faintOpacity(nightVision: nightVision, highContrast: highContrast)) }
 }

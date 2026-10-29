@@ -44,7 +44,7 @@ struct WatchModelRangeTests {
         let forecast = Forecast(updated: now.addingTimeInterval(-3600), times: hours, clouds: hours.map { _ in 20 })
         let night = NightPlanner.night(park: jotr, sky: AstronomyEngine().conditions(for: jotr, on: jotr.currentNight(at: now)), forecast: forecast, detail: nil, now: now)
         try #require(night.basis == .forecast)
-        let day = WatchContext.day(night.id, in: jotr), score = night.score.value
+        let day = jotr.isoDay(night.id), score = night.score.value
         func context(_ pair: [Int]) -> WatchContext {
             WatchContext(sent: now, savedParkIDs: ["jotr"], homeParkID: "jotr", nightVision: false, forecasts: [:], ranges: ["jotr": [day: pair]])
         }

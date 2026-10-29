@@ -170,7 +170,7 @@ struct ParkNightView: View {
             // A wrist tap as a moment of the night passes, while its countdown is on screen.
             .modifier(MilestoneTap(park: park, next: NightMilestone.next(after: now, in: night.sky), active: page < 2 && !darkMode))
         }
-        .nyxTitle(park.wristName)
+        .nyxTitle(park.shortName)
         .toolbar {
             if isHome {
                 ToolbarItem(placement: .topBarLeading) {
@@ -295,7 +295,7 @@ struct TonightFace: View {
                 // At accessibility sizes the band word leaves the dial for this line.
                 if typeSize.isAccessibilitySize { Text(shown.score.band.label).bandWord(.headline, ink: palette.ink) }
                 if looking { NightGlance(night: shown, isTonight: offset == 0, models: models) } else { NextMoment(night: night, now: now, models: models, wraps: true) }
-                if let closure { ClosureLine(text: closure) }
+                if let closure { WristClosureLine(text: closure) }
                 if let smoke = shown.smokeCaveat { SmokeLine(text: smoke, spoken: smoke) }
                 ForEach(cloudLines(shown, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
@@ -328,7 +328,7 @@ struct TonightFace: View {
         }
         // A closure stands beside the score on every surface, whole, so the road or trail it names is
         // never cut off: it wraps, and the face scrolls where it would leave the gauge too small.
-        if let closure { ClosureLine(text: closure).layoutPriority(1) }
+        if let closure { WristClosureLine(text: closure).layoutPriority(1) }
         // Haze or smoke beside the score, as on the iPhone and Vision Pro (`Night.smokeCaveat`): the short
         // words where a line is all there is, the whole sentence for VoiceOver and at the large sizes.
         if let smoke = shown.smokeCaveat, let label = shown.smokeCaveatLabel {
@@ -369,7 +369,7 @@ struct TonightFace: View {
 
 /// A park's closure, the warning mark in `caution` and the words in ink, as the iPhone shows it
 /// beside the score: whole, wrapped, never shrunk or cut.
-struct ClosureLine: View {
+struct WristClosureLine: View {
     @Environment(\.nyx) private var palette
     let text: String
     var body: some View {
@@ -462,9 +462,8 @@ struct NightGlance: View {
 func cloudLines(_ night: Night, context: WatchContext?, now: Date) -> [String] {
     let source = WatchSky.cloudSource(night.park, context: context, now: now)
     // A forecast the iPhone could refresh says so plainly, never "no forecast for this night".
-    let refreshable = source.isStale || source == .missing(followed: false) || source == .dropped || source == .spotsOff
     var lines: [String] = []
-    if let note = WatchSky.forecastNote(night, context: context, short: refreshable) { lines.append(note) }
+    if let note = WatchSky.forecastNote(night, context: context, short: source.explainsItself) { lines.append(note) }
     if let line = source.line(for: night.park) { lines.append(line) }
     if let line = context?.dataNote { lines.append(line) }
     return lines
@@ -572,7 +571,7 @@ struct MilestonesPage: View {
                 }
                 if list.isEmpty { Text("No sunset, darkness or moonrise tonight.").font(.footnote) }
                 Rectangle().fill(palette.line).frame(height: 0.5*palette.stroke).padding(.vertical, 2).accessibilityHidden(true)
-                Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.footnote)
+                Text("\(night.sky.moon.name), \(Percent.text(night.sky.moon.percentLit)) lit").font(.footnote)
                 ForEach(cloudLines(night, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.muted).nonEssential()
                 }
@@ -584,7 +583,10 @@ struct MilestonesPage: View {
                 }
                 if night.sky.darkHours > 0 {
                     Text("\(Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated))) of true darkness").font(.footnote)
-                    Text(moonLine).font(.caption2).foregroundStyle(palette.muted).nonEssential()
+                    // The iPhone's rule for the Moon in true darkness; how much is lit is the line above.
+                    if let moon = night.sky.moonSentence(park: night.park, withLit: false) {
+                        Text(moon).font(.caption2).foregroundStyle(palette.muted).nonEssential()
+                    }
                 } else {
                     Text(SkyConditions.noDarknessMessage(tonight: true)).font(.footnote)
                 }
@@ -594,15 +596,6 @@ struct MilestonesPage: View {
             }
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-    /// In the iPhone's words (`NightVerdict.moonSentence`); how much is lit is the line above.
-    private var moonLine: String {
-        let below = night.sky.moonDownPercent
-        switch below {
-        case 100: return Sentences.end(String(localized: "Moon-free through all of true darkness"))
-        case 0: return Sentences.end(String(localized: "Moon up all through true darkness"))
-        default: return Sentences.end(String(localized: "Moon-free for \(below)% of true darkness"))
         }
     }
 }
@@ -623,9 +616,8 @@ struct WeekPage: View {
     let now: Date
     let isHome: Bool
     var body: some View {
+        // The best by the iPhone's tie-breaks is ringed and named in the words of every surface (`WeekBest`).
         let best = NightPlanner.best(nights)
-        // The best by the iPhone's tie-breaks is ringed and named, as on every surface; nights tying it are counted.
-        let tied = nights.filter { $0.score.value == best?.score.value }
         let scores = nights.map(\.score.value), low = scores.min() ?? 0, high = scores.max() ?? 0
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
@@ -645,18 +637,13 @@ struct WeekPage: View {
                 } else {
                     HStack(spacing: 0) { ForEach(nights) { night in column(night, best: night.id == best?.id, low: low, high: high) } }
                 }
-                if let best {
+                if let best, let line = WeekBest.label(nights) {
                     VStack(alignment: .leading, spacing: 0) {
-                        // Every night alike (usual clouds all week): no night to single out.
-                        if tied.count > 1, tied.count == nights.count { Text("Best this week: every night").font(.footnote) }
-                        else if tied.count > 1 { Text("Best this week: \(park.dayLabel(best.id)) and \(tied.count-1) more").font(.footnote) }
-                        else { Text("Best this week: \(park.dayLabel(best.id))").font(.footnote) }
-                        // The score in the accent, its band word in ink as the dial sets it, and what
-                        // the score rests on in a line of its own.
-                        HStack(alignment: .firstTextBaseline, spacing: 5) {
-                            Text(best.score.value, format: .number).scoreNumeral(.body, accent: palette.accent)
-                            Text(best.score.band.label).bandWord(.subheadline, ink: palette.ink)
-                        }
+                        // "Best this week: Sat · 74", "…: tonight" or "…: every night", as the iPhone's
+                        // Parks rows and medium widget say it; the scores stand under the dots above.
+                        Text(line).font(.footnote)
+                        // Its band word in ink as the dial sets it, and what the score rests on in a line of its own.
+                        Text(best.score.band.label).bandWord(.subheadline, ink: palette.ink)
                         if let note = best.basisNote { Text(note).font(.caption2).foregroundStyle(palette.muted) }
                     }
                     .fixedSize(horizontal: false, vertical: true).accessibilityElement(children: .combine)
@@ -736,7 +723,7 @@ struct ParksList: View {
                 if let pinned = store.park(store.pinned) {
                     Section {
                         Button { store.pin(nil) } label: { Label("Follow iPhone again", systemImage: "pin.slash") }
-                    } footer: { Text("Tonight shows \(pinned.wristName).") }
+                    } footer: { Text("Tonight shows \(pinned.shortName).") }
                 }
                 if !store.savedParks.isEmpty {
                     Section("Saved on iPhone") { ForEach(store.savedParks) { row($0, now: now, scored: true) } }
@@ -757,7 +744,7 @@ struct ParksList: View {
         NavigationLink(value: WatchRoute.night(WatchLink(park: park, evening: nil))) {
             HStack(spacing: 6) {
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(park.wristName).font(.system(.body, design: .serif)).lineLimit(2)
+                    Text(park.shortName).font(.system(.body, design: .serif)).lineLimit(2)
                     Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
                 }
                 Spacer(minLength: 2)
@@ -795,7 +782,7 @@ struct ParkChooser: View {
         Button { store.pin(park) } label: {
             HStack(spacing: 6) {
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(park.wristName).font(.system(.body, design: .serif))
+                    Text(park.shortName).font(.system(.body, design: .serif))
                     Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
                 }
                 Spacer(minLength: 2)

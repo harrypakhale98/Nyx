@@ -70,7 +70,7 @@ import UIKit
     @Test func aSpotWithItsCloudsOffOnIPhoneSaysSo() throws {
         let spot = Place(spotID: "pin:00000000-0000-4000-8000-000000000001", name: "Test spot", latitude: 34.01, longitude: -116.17,
                          timeZoneID: "America/Los_Angeles", countryCode: "US", region: "CA")
-        #expect(spot.id.hasPrefix(WatchContext.spotPrefix) && WatchContext.spotPrefix == SavedSpots.prefix)
+        #expect(spot.id.hasPrefix(Park.spotPrefix) && Park.spotPrefix == SavedSpots.prefix)
         let off = WatchContext.make(savedParkIDs: [spot.id, "deva"], homeParkID: "jotr", nightVision: false, forecasts: [:], places: [spot], spotForecastsOff: true, now: now)
         let source = CloudSource.of(context: off, park: spot, now: now)
         #expect(source == .spotsOff && !source.isStale)
