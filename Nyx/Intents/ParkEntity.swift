@@ -26,7 +26,7 @@ struct ParkEntity:IndexedEntity {
     /// A catalogue place's English name when the app shows it in another language, so Spotlight finds either.
     var englishName=""
     /// A spot the person saved (`pin:`), rather than a catalogue park.
-    var isSpot:Bool { id.hasPrefix(ParkLibrary.spotPrefix) }
+    var isSpot:Bool { id.hasPrefix(Park.spotPrefix) }
     var displayRepresentation:DisplayRepresentation {
         if isSpot { return DisplayRepresentation(title:"\(name)",subtitle:"Your spot",image:.init(systemName:"mappin.and.ellipse")) }
         let place=Self.locality(state:state,country:country)
@@ -93,7 +93,7 @@ struct ParkQuery:EntityStringQuery {
     }
     /// A well-formed spot or catalogue id (`pin:…`, `wd:Q…`) that no list knows any more.
     static func unsavedPlace(_ id:String)->Bool {
-        (id.hasPrefix("pin:") || id.hasPrefix("wd:Q")) && id.count<=64 && !id.contains(where: { $0.isWhitespace || $0=="/" })
+        (id.hasPrefix(Park.spotPrefix) || id.hasPrefix(Park.catalogPrefix+"Q")) && id.count<=64 && !id.contains(where: { $0.isWhitespace || $0=="/" })
     }
     /// Saved spots first, then followed places abroad and saved parks (the ones people ask about), then
     /// the rest of the 63 by name. Never the whole world: a list of 3,400 helps no one choose.
@@ -112,9 +112,8 @@ struct ParkQuery:EntityStringQuery {
 /// app's next update. Any catalogue place resolves by its `wd:` id and is found by search, in the app
 /// (which bundles `catalog.json`); the widget extension bundles no catalogue and knows only the followed ones.
 nonisolated enum ParkLibrary {
-    static let spotPrefix="pin:"
     /// The followed spots in a snapshot, in its order.
-    static func spots(in snapshot:SavedSkySnapshot?)->[Park] { (snapshot?.parks ?? []).filter { $0.id.hasPrefix(spotPrefix) } }
+    static func spots(in snapshot:SavedSkySnapshot?)->[Park] { (snapshot?.parks ?? []).filter { $0.id.hasPrefix(Park.spotPrefix) } }
     /// The followed places that are not bundled parks: spots first, then catalogue places, each in the snapshot's order.
     static func followed(in snapshot:SavedSkySnapshot?)->[Park] {
         spots(in:snapshot)+(snapshot?.parks ?? []).filter(\.isCatalogPlace)
@@ -126,7 +125,7 @@ nonisolated enum ParkLibrary {
     }
     /// One place by id: a park, a followed place, or (in the app) any world catalogue place.
     static func place(_ id:String,snapshot:SavedSkySnapshot?=SharedSettings.read()) -> Park? {
-        if id.hasPrefix(spotPrefix) { return spots(in:snapshot).first { $0.id==id } }
+        if id.hasPrefix(Park.spotPrefix) { return spots(in:snapshot).first { $0.id==id } }
         if id.hasPrefix(Park.catalogPrefix) { return snapshot?.parks.first { $0.id==id } ?? catalog().first { $0.id==id } }
         return (try? ParkData.load())?.first { $0.id==id }
     }

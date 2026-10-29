@@ -47,14 +47,13 @@ nonisolated struct NightSonification: Sendable {
         let lit=sky.moon.illumination
         moonlight=times.map { lit*min(1,max(0,engine.lunarAltitude(at:$0,park:park)/3)) }
         func offset(_ date: Date) -> Double { min(duration,max(0,date.timeIntervalSince(window.start)/span*duration)) }
-        let percent=Int((lit*100).rounded())
         var cues: [Cue]=FieldNight(park:park,sky:sky).milestones.compactMap { milestone in
             let time=park.time(milestone.date)
             switch milestone.kind {
             case .sunset, .darkness, .dawn, .sunrise:
                 return Cue(kind:milestone.kind,date:milestone.date,offset:offset(milestone.date),sound:.none,line:String(localized:"\(milestone.title) at \(time)"),symbol:milestone.symbol)
             case .moonrise:
-                return Cue(kind:.moonrise,date:milestone.date,offset:offset(milestone.date),sound:.pulseRising,line:String(localized:"Moonrise at \(time), \(percent)% lit"),symbol:milestone.symbol)
+                return Cue(kind:.moonrise,date:milestone.date,offset:offset(milestone.date),sound:.pulseRising,line:String(localized:"Moonrise at \(time), \(sky.moon.litText)"),symbol:milestone.symbol)
             case .moonset:
                 return Cue(kind:.moonset,date:milestone.date,offset:offset(milestone.date),sound:.pulseFalling,line:String(localized:"Moonset at \(time)"),symbol:milestone.symbol)
             case .coreRises:

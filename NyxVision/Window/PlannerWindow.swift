@@ -166,8 +166,7 @@ private struct NightVisionWindow: ViewModifier {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     func body(content: Content) -> some View {
         content
-            .saturation(enabled ? 0 : 1)
-            .colorMultiply(enabled ? palette.red : .white)
+            .modifier(NightVisionFilter(enabled: enabled, red: palette.base.red))
             .background { if enabled { palette.nightPanel } }
             .animation(NyxMotion.spring(reduced: reduceMotion), value: enabled)
     }
@@ -253,7 +252,7 @@ struct ParkRow: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text(park.name))
-        .accessibilityValue(night.map { Text(verbatim: Sentences.join([Sentences.end(String(localized: "\($0.score.value) out of 100, \($0.bandWithBasis)"))]+notes)) } ?? Text("Computing"))
+        .accessibilityValue(night.map { Text(verbatim: Sentences.join([Sentences.end($0.scoreWithBasis)]+notes)) } ?? Text("Computing"))
     }
 }
 

@@ -20,7 +20,6 @@ struct VisionReachTests {
     /// Vision Pro looks as far ahead as the iPhone's best night (`NightPlanner.horizon`), so a park's
     /// darkest night is the same night on both; every older name for that window is the same window.
     @Test func reachIsTheIPhonesBestNightHorizon() throws {
-        #expect(NightVerdict.horizon == NightPlanner.horizon)
         let park = try Self.park("jotr"), now = try Self.date("2026-10-10T21:00:00Z")
         let ahead = NightsAhead(park: park, planner: NightPlanner(forecasts: [:]), now: now, limit: .max)
         #expect(ahead.picks.count == NightPlanner.horizon)

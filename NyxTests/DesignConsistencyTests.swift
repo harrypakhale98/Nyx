@@ -28,7 +28,7 @@ struct DesignConsistencyTests {
         #expect(score(.forecast).bandWithBasis == ScoreBand.band(81).label)
         #expect(score(.blended(weight: 0.5, leadDays: 6)).bandWithBasis == "\(ScoreBand.band(81).label), early look")
         #expect(score(.usual).bandWithBasis == "\(ScoreBand.band(81).label), usual clouds")
-        #expect(score(.usual).withBand == "81 · \(ScoreBand.band(81).label), usual clouds")
+        #expect(score(.usual).bandWithBasis == "\(ScoreBand.band(81).label), usual clouds")
     }
 
     @Test func theMoonsSymbolTurnsForTheSouthernSky() {
@@ -60,7 +60,6 @@ struct DesignConsistencyTests {
     @MainActor @Test func aPlaceNoLongerSavedIsNamedTheSameOnEveryWidget() {
         #expect(UnsavedPlaceFace.title("Eifel") == "Eifel is no longer saved in Nyx.")
         #expect(UnsavedPlaceFace.title("") == "This place is no longer saved in Nyx.")
-        #expect(TonightWidgetView.unsavedSummary("Eifel") == UnsavedPlaceFace.summary("Eifel"))
     }
 
     @MainActor @Test func theJournalEditorKnowsWhenThereIsSomethingToLose() {

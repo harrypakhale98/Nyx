@@ -44,7 +44,7 @@ struct VisionSummitTests {
         let url = try #require(urls.first)
         let point = hale.forecastPoint
         #expect(url.absoluteString == "https://api.open-meteo.com/v1/forecast?latitude=\(point.latitude)&longitude=\(point.longitude)&hourly=cloud_cover_mid,cloud_cover_high&forecast_days=7&past_days=1&timeformat=unixtime&timezone=GMT")
-        #expect(url.host == "api.open-meteo.com" && SafeHTTP.preferences[url.host ?? ""] == CloudForecastSwitch.key)
+        #expect(url.host == "api.open-meteo.com" && SafeHTTP.preferences[url.host ?? ""] == NetworkService.forecasts.key)
         #expect(SummitLayerService.url(for: [hale]) == url)
         // Nothing else rides along: no low cloud, models, weather or air.
         for word in ["cloud_cover_low", "models", "temperature", "aerosol", "pm2_5", "air-quality"] { #expect(!url.absoluteString.contains(word)) }

@@ -24,7 +24,7 @@ import Testing
         #expect(full.hasPrefix("True darkness tonight at \(jotr.shortName): from \(jotr.time(start)) to \(jotr.time(end))."))
         #expect(full.contains("Sunset is at \(jotr.time(sky.sunset))."))
         // Same clock as the device: no time zone said.
-        #expect(!full.contains("Times are"))
+        #expect(!full.contains(String(localized: "Times in \(jotr.timeZoneName)")))
         let voice=DarkWindowAnswer.dialog(park: jotr, sky: sky, closure: nil, voiceOnly: true, device: jotr.timeZone)
         #expect(voice == "Tonight at \(jotr.shortName): true darkness from \(jotr.time(start)) to \(jotr.time(end)).")
         #expect(!full.contains("!") && !voice.contains("!"))
@@ -33,8 +33,8 @@ import Testing
         let jotr=try park("jotr"), sky=try sky(jotr, "2026-10-12")
         let eastern=try #require(TimeZone(identifier: "America/New_York"))
         let full=DarkWindowAnswer.dialog(park: jotr, sky: sky, closure: nil, voiceOnly: false, device: eastern)
-        #expect(full.hasSuffix("Times are \(jotr.timeZoneName)."))
-        #expect(DarkWindowAnswer.dialog(park: jotr, sky: sky, closure: nil, voiceOnly: true, device: eastern).hasSuffix("Times are \(jotr.timeZoneName)."))
+        #expect(full.hasSuffix("Times in \(jotr.timeZoneName)."))
+        #expect(DarkWindowAnswer.dialog(park: jotr, sky: sky, closure: nil, voiceOnly: true, device: eastern).hasSuffix("Times in \(jotr.timeZoneName)."))
     }
     @Test func denaliInJuneHasNoTrueDarkness() throws {
         let denali=try park("dena"), sky=try sky(denali, "2026-06-21")
@@ -58,7 +58,7 @@ import Testing
         // A blank headline is no closure.
         #expect(DarkWindowAnswer.dialog(park: jotr, sky: sky, closure: "  ", voiceOnly: false, device: jotr.timeZone) == plain)
         // The darkness score's dialog still leads with the same words.
-        #expect(DarknessAnswer.closureFirst("Body.", closure: "Park closed.") == "Closure alert: Park closed. Body.")
+        #expect(ClosureLine.first("Body.", closure: "Park closed.") == "Closure alert: Park closed. Body.")
     }
 
     // MARK: What's up

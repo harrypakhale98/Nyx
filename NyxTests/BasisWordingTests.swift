@@ -17,7 +17,7 @@ import Testing
     /// Every surface's words for one night, in one list.
     func surfaces(_ night: Night) -> [String] {
         [night.basisCaption(typical: true) ?? "", night.spokenSummary(.calendar(event: nil)), night.spokenSummary(.river),
-         night.spokenSummary(.widget), night.spokenSummary(.siriTonight(voiceOnly: false)), ShareCard(night: night).summary]
+         night.spokenSummary(.widget), TonightAnswer(night: night).dialog(voiceOnly: false), ShareCard(night: night).summary]
     }
 
     @Test func missingWithinTheHorizonIsUnavailableEverywhere() throws {
@@ -90,7 +90,7 @@ import Testing
         for words in [smoky.spokenSummary(.river), smoky.spokenSummary(.calendar(event: nil)), smoky.spokenSummary(.widgetNight)] {
             #expect(words.contains("Smoke or haze limits this night to 59."), "\(words)")
         }
-        for words in [smoky.spokenSummary(.widget), smoky.spokenSummary(.siriTonight(voiceOnly: false)), smoky.spokenSummary(.siriTonight(voiceOnly: true))] {
+        for words in [smoky.spokenSummary(.widget), TonightAnswer(night: smoky).dialog(voiceOnly: false), TonightAnswer(night: smoky).dialog(voiceOnly: true)] {
             #expect(words.contains("Smoke or haze limits tonight to 59."), "\(words)")
         }
         #expect(smoky.spokenSummary(.scoreWithBasis).hasSuffix("haze or smoke"))

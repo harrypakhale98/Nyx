@@ -198,17 +198,6 @@ nonisolated enum WatchTimeline {
     }
 }
 
-/// A park's closure on the wrist, in the iPhone's words: the line every surface must show beside
-/// the score. Pure, so it can move wherever a test target can reach it.
-nonisolated enum WristClosure {
-    static let symbol = "exclamationmark.triangle.fill"
-    /// Spoken after the score, as on the iPhone and the watch's Tonight: "Closure alert: …".
-    static func spoken(_ closure: String) -> String { String(localized: "Closure alert: \(closure)") }
-    /// The inline complication's line, "94 · Closure alert": one short line has no room for the
-    /// closure's own words, which the rectangular complication, the spoken label and a tap give.
-    static func inline(score: Int) -> String { String(localized: "\(score) · \(String(localized: "Closure alert"))") }
-}
-
 /// "True darkness in 1 hr, 10 min". In a complication (`now` nil) the time updates itself; in the
 /// app it is written for `now` and refreshed by the screen's minute timeline, which keeps
 /// self-updating time text out of the app's paged views (it looped layout there on watchOS 27).
@@ -276,7 +265,7 @@ struct WatchComplicationView: View {
         Gauge(value: Double(night.score.value), in: 0...100) {
             // Coloured explicitly: the label otherwise renders white, the one bright thing on a red face.
             // A closure takes the Moon's place, in the warning's red: it stands beside the score on every surface.
-            if entry.closure != nil { Image(systemName: WristClosure.symbol).foregroundStyle(caution) } else { MoonSymbol(night: night).foregroundStyle(muted) }
+            if entry.closure != nil { Image(systemName: ClosureLine.symbol).foregroundStyle(caution) } else { MoonSymbol(night: night).foregroundStyle(muted) }
         } currentValueLabel: {
             // Two digits inside a fixed ring: shrink rather than spill over the arc, as on the iPhone's Lock Screen.
             Text(night.score.value, format: .number).scoreNumeral(.title3, accent: accent).minimumScaleFactor(0.6).widgetAccentable()
@@ -291,7 +280,7 @@ struct WatchComplicationView: View {
             .widgetLabel {
                 // A closure takes the curved label from the gauge: the numeral stays, the warning is read first.
                 if entry.closure != nil {
-                    Text("\(Text(Image(systemName: WristClosure.symbol)).foregroundStyle(caution)) \(Text("Closure alert"))").foregroundStyle(ink).widgetAccentable()
+                    Text("\(Text(Image(systemName: ClosureLine.symbol)).foregroundStyle(caution)) \(Text("Closure alert"))").foregroundStyle(ink).widgetAccentable()
                 } else {
                     Gauge(value: Double(night.score.value), in: 0...100) { Text(night.score.band.label) }.tint(accent).widgetAccentable()
                 }
@@ -301,7 +290,7 @@ struct WatchComplicationView: View {
         // Inline is one short line: the next moment's clock time reads at a glance and never goes stale.
         // A closure outranks it.
         Group {
-            if entry.closure != nil { Text("\(Image(systemName: WristClosure.symbol)) \(WristClosure.inline(score: night.score.value))") }
+            if entry.closure != nil { Text("\(Image(systemName: ClosureLine.symbol)) \(ClosureLine.inline(score: night.score.value))") }
             // The park's clock, with its zone where it is not this watch's (`wristTime`).
             else if let next = entry.next { Text("\(night.score.value) · \(next.shortTitle) at \(night.park.wristTime(next.date))") }
             else { Text("\(night.score.value) \(night.score.band.label) · \(night.park.shortName)") }
@@ -348,7 +337,7 @@ struct WatchComplicationView: View {
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text(night.score.value, format: .number).scoreNumeral(.title2, accent: accent).widgetAccentable()
                 .contentTransition(reduceMotion ? .opacity : .numericText(value: Double(night.score.value)))
-                if case .mark = closure { Image(systemName: WristClosure.symbol).font(.caption2).foregroundStyle(caution).widgetAccentable() }
+                if case .mark = closure { Image(systemName: ClosureLine.symbol).font(.caption2).foregroundStyle(caution).widgetAccentable() }
                 // Whole or the one word: a basis or smoke note cut mid-word would say less than the
                 // word under the score (VoiceOver hears it all in the summary).
                 ViewThatFits(in: .horizontal) {
@@ -376,7 +365,7 @@ struct WatchComplicationView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     private func closureLine(_ text: Text) -> some View {
-        Label { text.foregroundStyle(ink) } icon: { Image(systemName: WristClosure.symbol).foregroundStyle(caution) }
+        Label { text.foregroundStyle(ink) } icon: { Image(systemName: ClosureLine.symbol).foregroundStyle(caution) }
             .font(.caption2.weight(.medium)).widgetAccentable()
             .fixedSize(horizontal: false, vertical: true)
     }
@@ -412,7 +401,7 @@ struct WatchComplicationView: View {
     private func summary(_ night: Night) -> String {
         var text = String(localized: "\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label).")
         // The closure is spoken in every family, right after the score it stands beside.
-        if let closure = entry.closure { text += " " + WristClosure.spoken(closure) }
+        if let closure = entry.closure { text += " " + ClosureLine.spoken(closure) }
         if let caption = night.basisCaption() { text += " " + caption }
         if let smoke = night.smokeSentence() { text += " " + smoke }
         // In every family, though only the rectangular one has room to show them.

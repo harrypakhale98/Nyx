@@ -5,7 +5,7 @@ import Testing
 /// A park's closure on its way to the wrist, where it stands beside the score on the watch's
 /// Tonight and on every complication: the iPhone's context carries it, the followed parks' first
 /// when room runs short, and a context from before closures still decodes. The complication views
-/// themselves (`WristClosure`, `WatchComplicationView`) build only in the watch targets.
+/// themselves (`WatchComplicationView`) build only in the watch targets; their words are `ClosureLine`'s.
 struct WatchClosureTests {
     private let now = Date(timeIntervalSince1970: 1_791_158_400) // 2026-10-05 00:00 UTC
 

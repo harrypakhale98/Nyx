@@ -39,6 +39,18 @@ nonisolated struct ScoreInputs: Sendable, Equatable {
         if !alertsOn { return String(localized: "Park alerts are off in Your privacy, so closures are not checked.") }
         return AlertRanking.unchecked(busy: false)
     }
+    /// Why a national park's closures are not known, when no closure stands beside its score and no
+    /// park update covers it: park alerts off, the Park Service busy, or not checked yet. Nil when the
+    /// last update covers it, and for a place the Park Service does not run (`ClosureLine.unknown`).
+    func uncheckedNote(_ park: Park, closure: String?) -> String? {
+        guard park.nps != nil, closure == nil, unchecked(park) else { return nil }
+        return accessNote(park)
+    }
+    /// Siri's tonight answer (`TonightAnswer`) with what this device knows beside the score.
+    func answer(_ night: Night, closure: String?, forecastsOn: Bool = true) -> TonightAnswer {
+        TonightAnswer(night: night, closure: closure, smokeNote: smokeNote(night.park, night: night),
+                      unchecked: uncheckedNote(night.park, closure: closure), forecastsOn: forecastsOn)
+    }
     /// What a short spoken row says after its score: the closure, or that closures are not
     /// checked, and that smoke is not counted.
     func spoken(_ park: Park, night: Night?) -> [String] {

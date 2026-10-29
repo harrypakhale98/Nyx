@@ -19,7 +19,7 @@ struct WeekStrip: View {
     var body: some View {
         if let best, let first=nights.first {
             // Said as the week's best: the park page and Best nights name the best of thirty nights.
-            let line=Text(WeekBest.label(best,first:first))
+            let line=Text(WeekBest.label(nights) ?? WeekBest.label(best,first:first))
                 .font(.caption2.monospacedDigit()).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             // At accessibility sizes the sentence carries the week alone: it already names the best
             // night, and dots a few points across beside 40 pt text read as specks.

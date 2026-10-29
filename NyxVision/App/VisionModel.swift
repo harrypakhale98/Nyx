@@ -99,13 +99,7 @@ nonisolated struct SkyMoment: Sendable {
         rotation = SkyDome.rotation(at: date, park: park)
     }
     /// The sky's state in words, as the iPhone's sky says it: "True darkness", "Late twilight".
-    var twilight: String {
-        if sunAltitude > -0.833 { return String(localized: "The Sun is up") }
-        if sunAltitude > -6 { return String(localized: "Twilight") }
-        if sunAltitude > -12 { return String(localized: "Late twilight") }
-        if sunAltitude > -18 { return String(localized: "Nearly dark") }
-        return String(localized: "True darkness")
-    }
+    var twilight: String { SkyPhase.name(sunAltitude: sunAltitude) }
     /// Whether the galactic core is up in a sky dark enough to point to it (`SkyDome.coreVisible`).
     var coreShown: Bool { SkyDome.coreVisible(altitude: core.altitude, sunAltitude: sunAltitude) }
     /// Planets worth showing: above the horizon in a sky dark enough to see them.
@@ -178,41 +172,40 @@ nonisolated struct SkyMoment: Sendable {
     var alertsBusy = false
     /// "Cloud forecasts" in Your privacy: on unless turned off. The transport reads
     /// the same preference before any request (`SafeHTTP`), so off means no request at all.
-    var forecastsOn = CloudForecastSwitch.isOn() {
+    var forecastsOn = NetworkService.forecasts.isOn() {
         didSet {
             guard forecastsOn != oldValue else { return }
-            UserDefaults.standard.set(forecastsOn, forKey: CloudForecastSwitch.key)
+            UserDefaults.standard.set(forecastsOn, forKey: NetworkService.forecasts.key)
             if forecastsOn { Task { await refreshForecasts() } }
         }
     }
     /// "Smoke and haze" in Your privacy, the iPhone's preference and words. Off, the aerosol
     /// forecast on this headset is dropped, so no score counts it, and nothing more is asked.
-    var smokeOn = UserDefaults.standard.object(forKey: VisionModel.smokeKey) as? Bool ?? true {
+    var smokeOn = NetworkService.smoke.isOn() {
         didSet {
             guard smokeOn != oldValue else { return }
-            UserDefaults.standard.set(smokeOn, forKey: Self.smokeKey)
+            UserDefaults.standard.set(smokeOn, forKey: NetworkService.smoke.key)
             if smokeOn { Task { await refreshForecasts() } } else { smoke = [:]; Task { await detailService.forgetAir() } }
         }
     }
     /// "Park alerts" in Your privacy, the iPhone's preference. Off, nothing more is asked; closures
     /// already on this headset still stand beside the score, as on the iPhone.
-    var alertsOn = UserDefaults.standard.object(forKey: VisionModel.alertsKey) as? Bool ?? true {
+    var alertsOn = NetworkService.alerts.isOn() {
         didSet {
             guard alertsOn != oldValue else { return }
-            UserDefaults.standard.set(alertsOn, forKey: Self.alertsKey)
+            UserDefaults.standard.set(alertsOn, forKey: NetworkService.alerts.key)
             if alertsOn { Task { await refreshForecasts() } }
         }
     }
     /// "Aurora forecast" in Your privacy, the iPhone's preference. Off, the copy here is dropped and
     /// nothing more is asked.
-    var auroraOn = UserDefaults.standard.object(forKey: AuroraService.key) as? Bool ?? true {
+    var auroraOn = NetworkService.aurora.isOn() {
         didSet {
             guard auroraOn != oldValue else { return }
-            UserDefaults.standard.set(auroraOn, forKey: AuroraService.key)
+            UserDefaults.standard.set(auroraOn, forKey: NetworkService.aurora.key)
             if auroraOn { Task { await refreshForecasts() } } else { aurora = nil; Task { await auroraService.forget() } }
         }
     }
-    nonisolated static let smokeKey = "smokeEnabled", alertsKey = "npsEnabled"
     /// What every score here counts, and what it says it does not (`ScoreInputs`).
     var inputs: ScoreInputs {
         ScoreInputs(smokeOn: smokeOn, smokeKnown: Set(smoke.keys), alertsOn: alertsOn, alerts: alerts, alertsBusy: alertsBusy)

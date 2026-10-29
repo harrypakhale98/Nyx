@@ -42,7 +42,7 @@ nonisolated struct NightPlanner: Sendable {
     static func night(park: Park, sky: SkyConditions, forecast: Forecast?, detail: ForecastDetail?, now: Date,
                       climate: CloudClimate = .shared, scoring: any ScoreProviding = ScoreEngine()) -> Night {
         let window = sky.cloudWindow
-        let usual = climate.typical(park, on: sky.evening)?.cloud
+        let typical = climate.typical(park, on: sky.evening), usual = typical?.cloud
         var predicted = forecast?.mean(from: window.start, to: window.end), issued = forecast?.updated, upper = false
         if park.aboveInversion == true {
             // The summit's total cloud is never its cloud: the layers when they cover the night, else nothing.
@@ -69,7 +69,8 @@ nonisolated struct NightPlanner: Sendable {
         let used = weight > 0
         let score = scoring.score(sky: sky, bortle: park.bortleEstimate, cloud: counted, basis: CloudBasis.from(weight: weight, leadDays: lead), aerosol: aerosol)
         var night = Night(park: park, sky: sky, score: score, cloudCover: used ? predicted : nil, forecastUpdated: used ? issued : nil,
-                          usualCloud: usual, upperCloudOnly: upper && used, modelSpread: spread, aerosol: aerosol)
+                          usualCloud: usual, usualClear: typical?.clear, usualEstimated: typical?.estimated == true,
+                          upperCloudOnly: upper && used, modelSpread: spread, aerosol: aerosol)
         night.beyondForecast = beyondForecast(night, forecast: forecast, detail: detail, now: now)
         return night
     }

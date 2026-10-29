@@ -7,14 +7,40 @@ import Synchronization
 // cloud forecast and Haleakalā's summit cloud layers (`SummitLayerService`), the smoke forecast and
 // the park alerts, and the aurora forecast: the same four hosts as the iPhone, each behind its own switch.
 
-/// The cloud forecast's switch in Your privacy (on unless turned off), read by the transport
-/// before any request to the forecast host.
-nonisolated enum CloudForecastSwitch {
-    static let key = "weatherEnabled"
-    static func isOn(_ defaults: UserDefaults = .standard) -> Bool { defaults.object(forKey: key) as? Bool ?? true }
+/// The four services Nyx may reach, each with its one host and its switch in Your privacy (on
+/// unless turned off), on iPhone, iPad and Vision Pro alike. The transport refuses a host whose
+/// switch is off before any connection (`SafeHTTP.preferences`, built from this table), and every
+/// screen and intent reads a switch here. The keys are the ones people's choices are stored under:
+/// never renamed, or a switch someone turned off would quietly turn back on.
+nonisolated enum NetworkService: CaseIterable, Sendable {
+    /// Cloud forecasts and their models (Open-Meteo).
+    case forecasts
+    /// The aerosol forecast that warns of smoke and haze (Open-Meteo's air quality API).
+    case smoke
+    /// NOAA's planetary K-index forecast, one global file that names no place.
+    case aurora
+    /// Park alerts and ranger programs (the National Park Service).
+    case alerts
+    var host: String {
+        switch self {
+        case .forecasts: "api.open-meteo.com"
+        case .smoke: "air-quality-api.open-meteo.com"
+        case .aurora: "services.swpc.noaa.gov"
+        case .alerts: "developer.nps.gov"
+        }
+    }
+    var key: String {
+        switch self {
+        case .forecasts: "weatherEnabled"
+        case .smoke: "smokeEnabled"
+        case .aurora: "auroraEnabled"
+        case .alerts: "npsEnabled"
+        }
+    }
+    func isOn(_ defaults: UserDefaults = .standard) -> Bool { defaults.object(forKey: key) as? Bool ?? true }
 }
 /// Saved spots' cloud forecasts: their own switch in Your privacy, on unless turned off, and
-/// effective only while `CloudForecastSwitch` is on too. A saved spot is the one request that
+/// effective only while `NetworkService.forecasts` is on too. A saved spot is the one request that
 /// carries a place the person chose rather than a public park, so it carries less: the spot's
 /// coordinates rounded to 0.1° (about 11 km), clouds only, in a request of its own that never
 /// mixes spots with the parks. Never the device's location, unless the person saved it as a spot.
@@ -556,8 +582,7 @@ nonisolated struct SafeHTTP: HTTPTransport {
     /// Each host and the preference that must not be off before it is contacted, on iPhone, iPad
     /// and Vision Pro alike (since 2026-10-14 the headset asks for smoke and park alerts too, so its
     /// scores and closures match the iPhone's; since 2026-10-15 both ask NOAA for the aurora forecast).
-    static let preferences: [String: String] = ["developer.nps.gov": "npsEnabled", "api.open-meteo.com": CloudForecastSwitch.key,
-                                                 "air-quality-api.open-meteo.com": "smokeEnabled", "services.swpc.noaa.gov": "auroraEnabled"]
+    static let preferences: [String: String] = Dictionary(uniqueKeysWithValues: NetworkService.allCases.map { ($0.host, $0.key) })
     static var hosts: Set<String> { Set(preferences.keys) }
     /// Where the switches live; tests use their own suite.
     let suite: String?

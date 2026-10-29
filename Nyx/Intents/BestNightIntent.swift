@@ -9,7 +9,7 @@ struct FindBestNightIntent: AppIntent {
     static let title: LocalizedStringResource="Find the best night"
     static let description=IntentDescription("Finds the best night ahead at a park or dark-sky place, or across your saved parks, using Nyx's on-device darkness score. A closure in the last park update counts against a park. Clouds count only where a cached forecast reaches.")
     @Parameter(title:"Park",description:"Leave empty to compare your saved parks.") var park: ParkEntity?
-    // 30 by default, the app's best-night reach (`NightVerdict.horizon`; App Intents wants a literal), so
+    // 30 by default, the app's best-night reach (`NightPlanner.horizon`; App Intents wants a literal), so
     // "Find the best night at Joshua Tree" names the night the park's page and Tonight name.
     @Parameter(title:"Nights",description:"How many nights ahead to look, up to 30.",default:30,inclusiveRange:(1,30)) var nights: Int
     @Parameter(title:"Starting",description:"The first night to consider. Tonight if empty.") var start: Date?
@@ -20,19 +20,16 @@ struct FindBestNightIntent: AppIntent {
     /// Returns the moment the best night's true darkness begins (sunset where there is none), so a
     /// shortcut can put it in a calendar or a reminder.
     func perform() async throws -> some IntentResult & ReturnsValue<Date> & ProvidesDialog & ShowsSnippetIntent {
-        let saved=await SharedSettings.load()
-        let library=try ParkLibrary.places(snapshot:saved)
-        // A chosen place the library lacks (a world catalogue place found by search, not followed) resolves by its id.
-        let parks=park.map { chosen in (library.first { $0.id==chosen.id } ?? ParkLibrary.place(chosen.id,snapshot:saved)).map { [$0] } ?? [] } ?? (saved?.parks ?? [])
-        guard !parks.isEmpty else { throw park == nil ? NyxIntentError.noParks : NyxIntentError.parkNotFound }
+        // The chosen place, else the saved parks.
+        let sky=try await IntentSky.load(park.map { [$0.id] })
+        guard !sky.parks.isEmpty else { throw park == nil ? NyxIntentError.noParks : NyxIntentError.parkNotFound }
         let now=Date.now, day=start.map { TripDay($0) }
-        let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:saved),details:BestNightSearch.details(for:parks,shared:saved))
-        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:day,nights:nights,now:now,closures:IntentClosure.closures(parks,shared:saved)) else { throw NyxIntentError.noNights }
+        guard let answer=BestNightSearch.answer(parks:sky.parks,planner:sky.planner,day:day,nights:nights,now:now,closures:sky.closures) else { throw NyxIntentError.noNights }
         BestNightBrowse.reset()
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
-        return .result(value:BestNightSearch.value(answer),dialog:IntentDialog(stringLiteral:BestNightSearch.dialog(answer,voiceOnly:voiceOnly,closure:IntentClosure.closure(answer.best.park,shared:saved))),
-                       snippetIntent:BestNightSnippetIntent(parkIDs:parks.map(\.id),start:start,nights:answer.count))
+        return .result(value:BestNightSearch.value(answer),dialog:IntentDialog(stringLiteral:BestNightSearch.dialog(answer,voiceOnly:voiceOnly,closure:sky.closures[answer.best.park.id])),
+                       snippetIntent:BestNightSnippetIntent(parkIDs:sky.parks.map(\.id),start:start,nights:answer.count))
     }
 }
 
@@ -54,7 +51,7 @@ nonisolated enum BestNightSearch {
     /// `closures`: each park's closure, which counts against its nights as in the trip planner
     /// (`NightPlanner.better(_:_:closures:)`), so Siri and the planner pick the same best night.
     static func answer(parks: [Park], planner: NightPlanner, from start: Date, nights: Int, now: Date, closures: [String: String] = [:]) -> Answer? {
-        let count=min(NightVerdict.horizon,max(1,nights))
+        let count=min(NightPlanner.horizon,max(1,nights))
         let all=planner.bestNights(parks,from:start,count:count,now:now,limit:.max,closures:closures)
         return all.isEmpty ? nil : Answer(nights:all,count:count)
     }
@@ -63,7 +60,7 @@ nonisolated enum BestNightSearch {
     /// or from tonight when no day was picked.
     static func answer(parks: [Park], planner: NightPlanner, day: TripDay?, nights: Int, now: Date, closures: [String: String] = [:]) -> Answer? {
         guard let day else { return answer(parks:parks,planner:planner,from:now,nights:nights,now:now,closures:closures) }
-        let count=min(NightVerdict.horizon,max(1,nights))
+        let count=min(NightPlanner.horizon,max(1,nights))
         let all=planner.bestNights(parks,day:DateComponents(year:day.year,month:day.month,day:day.day),count:count,now:now,limit:.max,closures:closures)
         return all.isEmpty ? nil : Answer(nights:all,count:count)
     }
@@ -117,24 +114,20 @@ struct BestNightSnippetIntent: SnippetIntent {
     init() {}
     init(parkIDs: [String], start: Date?, nights: Int) { self.parkIDs=parkIDs; self.start=start; self.nights=nights }
     func perform() async throws -> some IntentResult & ShowsSnippetView {
-        let shared=await SharedSettings.load()
-        let library=try ParkLibrary.places(snapshot:shared)
-        let known=library.filter { parkIDs.contains($0.id) }
-        // An unfollowed world catalogue place the answer was about resolves by its id, as it did for the answer.
-        let parks=known+parkIDs.filter { id in !known.contains { $0.id==id } }.compactMap { ParkLibrary.place($0,snapshot:shared) }
+        // The places the answer was about, resolved as they were for it.
+        let sky=try await IntentSky.load(parkIDs)
         let now=Date.now
-        let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:shared),details:BestNightSearch.details(for:parks,shared:shared))
         // Nothing left to show (the nights have passed since Siri first answered): a calm card that
         // says so and offers Nyx, never an empty one.
-        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:start.map { TripDay($0) },nights:nights,now:now,closures:IntentClosure.closures(parks,shared:shared)) else {
-            return .result(view:BestNightEmptySnippetView(parkID:parks.count==1 ? parks.first?.id : nil))
+        guard let answer=BestNightSearch.answer(parks:sky.parks,planner:sky.planner,day:start.map { TripDay($0) },nights:nights,now:now,closures:sky.closures) else {
+            return .result(view:BestNightEmptySnippetView(parkID:sky.parks.count==1 ? sky.parks.first?.id : nil))
         }
         let rank=min(BestNightBrowse.rank(),answer.ranked.count-1)
         let night=answer.ranked[rank]
         // "Follow this night" where Live Activities are on and the night is still ahead.
         let follow: Bool?=FieldActivities.enabled && !FieldNight.isOver(night.sky,at:now) ? FieldActivities.isFollowing(park:night.park,night:night.id) : nil
         return .result(view:BestNightSnippetView(night:night,rank:rank,total:answer.ranked.count,nights:answer.count,following:follow,
-                                                 closure:IntentClosure.closure(night.park,shared:shared)))
+                                                 closure:sky.closures[night.park.id]))
     }
 }
 /// "Next best": steps the snippet to the next of the ranked nights, then back to the best.
@@ -182,23 +175,23 @@ struct BestNightSnippetView: View {
             if let closure {
                 Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).labelStyle(.caution)
                     .fixedSize(horizontal:false,vertical:true)
-                    .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
+                    .accessibilityLabel(ClosureLine.spoken(closure))
             }
             HStack(alignment:.firstTextBaseline,spacing:10) {
                 Text("\(night.score.value)").scoreNumeral(size:min(numeral,76),accent:palette.accent)
                 VStack(alignment:.leading,spacing:2) {
                     Text(night.score.band.label).bandWord(.headline,ink:palette.ink)
-                    Text(night.basisLabel ?? String(localized:"Cached forecast included")).font(.caption).foregroundStyle(palette.muted)
+                    Text(night.basisLabel ?? String(localized:"Cloud forecast included")).font(.caption).foregroundStyle(palette.muted)
                 }
             }
             .accessibilityElement(children:.combine)
             if let typical=night.typicalClouds { Text(typical).font(.caption).foregroundStyle(palette.muted) }
             // A place the Park Service does not run: Nyx cannot see its closures, and says so instead.
-            if let unknown=DarknessAnswer.unknownClosures(night.park) {
-                Text("\(night.sky.moon.name), \(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption).foregroundStyle(palette.muted)
+            if let unknown=ClosureLine.unknown(night.park) {
+                Text("\(night.sky.moon.name), \(Percent.text(night.sky.moon.percentLit)) lit").font(.caption).foregroundStyle(palette.muted)
                 Text(unknown).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             } else {
-                Text("\(night.sky.moon.name), \(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit. Confirm conditions and park access before traveling.").font(.caption).foregroundStyle(palette.muted)
+                Text("\(night.sky.moon.name), \(Percent.text(night.sky.moon.percentLit)) lit. Confirm conditions and park access before traveling.").font(.caption).foregroundStyle(palette.muted)
             }
             HStack(spacing:10) {
                 if total>1 {

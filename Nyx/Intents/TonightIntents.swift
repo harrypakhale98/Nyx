@@ -76,9 +76,10 @@ nonisolated enum DarkWindowAnswer {
         }
         return DarknessAnswer.withClosures(Sentences.join(sentences),park:park,closure:closure)
     }
-    /// "Times are Pacific Time." only when the park's clock differs from this device's.
+    /// "Times in Pacific Time." only when the park's clock differs from this device's: the note every
+    /// surface sets under park-local times, as a sentence.
     static func zoneNote(park: Park, at date: Date, device: TimeZone) -> String {
-        park.timeZone.secondsFromGMT(for:date)==device.secondsFromGMT(for:date) ? "" : String(localized:"Times are \(park.timeZoneName).")
+        park.timeZone.secondsFromGMT(for:date)==device.secondsFromGMT(for:date) ? "" : Sentences.end(String(localized:"Times in \(park.timeZoneName)"))
     }
 }
 
@@ -99,7 +100,7 @@ struct WhatsUpTonightIntent: AppIntent {
         let now=Date.now
         let sky=AstronomyEngine().conditions(for:selected,on:selected.currentNight(at:now))
         // NOAA's aurora forecast as the app last kept it (no request from Siri), unless switched off.
-        let outlook=UserDefaults.standard.object(forKey:AuroraService.key) as? Bool == false ? nil : await AuroraService().cached()
+        let outlook=NetworkService.aurora.isOn() ? await AuroraService().cached() : nil
         let whatsUp=WhatsUp(park:selected,sky:sky,isTonight:true,aurora:AuroraForecast.item(outlook,park:selected,sky:sky,now:now))
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
@@ -124,7 +125,7 @@ nonisolated enum WhatsUpAnswer {
         switch item.kind {
         case .core:
             if item.timed, let dark=core.dark { return String(localized:"Milky Way core: up in true darkness from \(park.time(dark.start)) to \(park.time(dark.end)).") }
-            return item.value.map { DarknessAnswer.sentence("\(item.title): \($0)") } ?? item.spoken
+            return item.value.map { Sentences.end("\(item.title): \($0)") } ?? item.spoken
         case .meteors:
             guard let note=item.note, let value=item.value else { return item.spoken }
             return String(localized:"\(item.title), \(note): \(value).")

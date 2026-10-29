@@ -253,6 +253,10 @@ nonisolated struct Night: Identifiable, Sendable {
     let forecastUpdated: Date?
     /// The park's usual cloud for the month (ERA5), percent, when known.
     var usualCloud: Double? = nil
+    /// The same month's share of mostly clear nights, percent, and whether it is the world grid's
+    /// estimate: from the climate the night was scored with, for `typicalClouds`.
+    var usualClear: Double? = nil
+    var usualEstimated = false
     /// A summit above the inversion, scored from mid and high cloud only (`Park.aboveInversion`).
     var upperCloudOnly = false
     /// How far apart three forecast models' cloud averages are, in percentage points, within

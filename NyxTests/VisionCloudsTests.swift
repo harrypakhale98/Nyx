@@ -28,12 +28,12 @@ struct VisionCloudsTests {
         let suite="nyx-vision-clouds-\(UUID().uuidString)"
         let defaults=try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
-        #expect(CloudForecastSwitch.isOn(defaults))
-        defaults.set(false, forKey: CloudForecastSwitch.key)
-        #expect(!CloudForecastSwitch.isOn(defaults))
-        #expect(SafeHTTP.preferences["api.open-meteo.com"] == CloudForecastSwitch.key)
+        #expect(NetworkService.forecasts.isOn(defaults))
+        defaults.set(false, forKey: NetworkService.forecasts.key)
+        #expect(!NetworkService.forecasts.isOn(defaults))
+        #expect(SafeHTTP.preferences["api.open-meteo.com"] == NetworkService.forecasts.key)
         let http=StubHTTP([:]), parks=try ParkData.load()
-        let result=await WeatherService(transport: http, persist: false).forecasts(for: parks, network: CloudForecastSwitch.isOn(defaults), force: true)
+        let result=await WeatherService(transport: http, persist: false).forecasts(for: parks, network: NetworkService.forecasts.isOn(defaults), force: true)
         #expect(result.isEmpty)
         #expect(await http.urls.isEmpty)
         let url=try #require(URL(string: "https://api.open-meteo.com/v1/forecast?latitude=34&longitude=-116&hourly=cloud_cover"))

@@ -26,8 +26,7 @@ struct NightControls: View {
             if model.nightVision { Capsule().fill(palette.nightPanel) }
             else if palette.solid { Capsule().fill(palette.solidPanel) }
         }
-        .saturation(model.nightVision ? 0 : 1)
-        .colorMultiply(model.nightVision ? palette.red : .white)
+        .modifier(NightVisionFilter(enabled: model.nightVision, red: palette.base.red))
         // Turns red with the window (`NightVisionWindow`), on the same curve, not a frame apart.
         .animation(NyxMotion.spring(reduced: reduceMotion), value: model.nightVision)
     }

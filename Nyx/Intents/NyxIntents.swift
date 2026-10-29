@@ -38,75 +38,95 @@ struct DarknessIntent:AppIntent {
     @Parameter(title:"Park") var park:ParkEntity
     static var parameterSummary:some ParameterSummary { Summary("Darkness at \(\.$park) tonight") }
     func perform() async throws -> some IntentResult & ReturnsValue<Int> & ProvidesDialog & ShowsSnippetView {
-        // Saved parks share their forecast with the widget; the app's own cache may be newer. Read once.
-        let shared=await SharedSettings.load()
-        // A park or followed place, else any world catalogue place by its id (one found by search, not followed).
-        guard let selected=try ParkLibrary.places(snapshot:shared).first(where:{$0.id==park.id}) ?? ParkLibrary.place(park.id,snapshot:shared) else { throw NyxIntentError.parkNotFound }
+        let sky=try await IntentSky.load([park.id])
+        guard let selected=sky.parks.first else { throw NyxIntentError.parkNotFound }
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
         // The park's closure from the app's last park update, said before the score.
-        let answer=DarknessAnswer(park:selected,forecast:BestNightSearch.forecasts(for:[selected],shared:shared)[selected.id],
-                                  detail:BestNightSearch.details(for:[selected],shared:shared)[selected.id],closure:IntentClosure.closure(selected,shared:shared),now:.now,voiceOnly:voiceOnly)
+        let answer=DarknessAnswer(park:selected,forecast:sky.planner.forecasts[selected.id],detail:sky.planner.details[selected.id],closure:sky.closures[selected.id],
+                                  inputs:sky.inputs(selected),forecastsOn:NetworkService.forecasts.isOn(),now:.now,voiceOnly:voiceOnly)
         return .result(value:answer.night.score.value,dialog:IntentDialog(stringLiteral:answer.dialog),view:DarknessSnippetView(night:answer.night,closure:answer.closure))
+    }
+}
+/// What Siri's answers about places read, once, and never a request: the copy shared with the
+/// widgets, the places asked about, a planner with their newest forecasts (`BestNightSearch`), the
+/// last park alerts on this device and each place's closure (`IntentClosure`). Tonight's darkness
+/// score, Find the best night and its card all start here, so they name the same night.
+nonisolated struct IntentSky {
+    let shared: SavedSkySnapshot?
+    let parks: [Park]
+    let planner: NightPlanner
+    /// The app's last park alerts on disk, read only while park alerts are on in Your privacy.
+    let alerts: ParkAlertsCache?
+    /// Each place's closure, by id.
+    let closures: [String: String]
+    /// `ids`: the places asked about, nil for the saved parks. A place the library lacks (a world
+    /// catalogue place found by search, not followed) resolves by its id; one that resolves to nothing is left out.
+    static func load(_ ids: [String]?) async throws -> IntentSky {
+        // Saved parks share their forecast with the widget; the app's own cache may be newer. Read once.
+        let shared=await SharedSettings.load()
+        guard let ids else { return IntentSky(shared:shared,parks:shared?.parks ?? []) }
+        let library=try ParkLibrary.places(snapshot:shared)
+        return IntentSky(shared:shared,parks:ids.compactMap { id in library.first { $0.id==id } ?? ParkLibrary.place(id,snapshot:shared) })
+    }
+    init(shared: SavedSkySnapshot?, parks: [Park]) {
+        self.shared=shared; self.parks=parks
+        planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:shared),details:BestNightSearch.details(for:parks,shared:shared))
+        let enabled=NetworkService.alerts.isOn(), alerts=enabled ? ParkStore.stored(parks) : nil
+        self.alerts=alerts
+        closures=IntentClosure.closures(parks,shared:shared,enabled:enabled,cached:{ _ in alerts })
+    }
+    /// What a score here counts and leaves out, as the app's switches and caches say (`ScoreInputs`).
+    func inputs(_ park: Park) -> ScoreInputs {
+        ScoreInputs(smokeOn:NetworkService.smoke.isOn(),smokeKnown:planner.details[park.id]?.air == nil ? [] : [park.id],alertsOn:NetworkService.alerts.isOn(),alerts:alerts)
     }
 }
 /// A place's closure for a spoken answer or a followed night, from whichever is newer: the copy
 /// shared with the widgets, or the app's own last park alerts on disk (while park alerts are on in
 /// Your privacy). Never a request. A closure the newer alerts cleared is never said.
 nonisolated enum IntentClosure {
-    static func closure(_ park:Park,shared:SavedSkySnapshot?,enabled:Bool=alertsEnabled(),cached:(Park)->ParkAlertsCache?={ ParkStore.stored([$0]) })->String? {
+    static func closure(_ park:Park,shared:SavedSkySnapshot?,enabled:Bool=NetworkService.alerts.isOn(),cached:(Park)->ParkAlertsCache?={ ParkStore.stored([$0]) })->String? {
         let saved=shared?.closures[park.id]
         guard enabled, let code=park.nps, let cache=cached(park) else { return saved }
         // The shared copy stands when it was made from these alerts or newer ones, and for a park the
         // alerts on disk do not cover (each fetch lists every park asked for, with or without alerts).
         if let stamp=shared?.closuresUpdated, stamp>=cache.updated { return saved }
-        guard let alerts=cache.alerts[code] else { return saved }
-        return AlertRanking.closure(alerts)?.displayTitle(park:park)
+        guard cache.alerts[code] != nil else { return saved }
+        return cache.closure(for:park)
     }
-    /// Every closure among these places, by park id, with the alerts on disk read once.
-    static func closures(_ parks:[Park],shared:SavedSkySnapshot?,enabled:Bool=alertsEnabled())->[String:String] {
-        let cache=enabled ? ParkStore.stored(parks) : nil
-        return Dictionary(parks.compactMap { park in closure(park,shared:shared,enabled:enabled,cached:{ _ in cache }).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
+    /// Every closure among these places, by park id. `cached`: the alerts on disk, read once by the caller.
+    static func closures(_ parks:[Park],shared:SavedSkySnapshot?,enabled:Bool,cached:(Park)->ParkAlertsCache?)->[String:String] {
+        Dictionary(parks.compactMap { park in closure(park,shared:shared,enabled:enabled,cached:cached).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
     }
-    /// The Your privacy switch for the Park Service (on unless turned off).
-    static func alertsEnabled(_ defaults:UserDefaults = .standard)->Bool { defaults.object(forKey:"npsEnabled") as? Bool ?? true }
 }
-/// The darkness answer apart from the intent, so its words and value can be tested.
+/// The darkness answer apart from the intent, so its words and value can be tested. The words are
+/// every device's (`TonightAnswer`).
 nonisolated struct DarknessAnswer:Sendable {
     let night:Night
     let dialog:String
     /// The closure the dialog leads with, for the card beside it.
     let closure:String?
-    /// `closure` is the park's closure as Nyx words it beside the score; `voiceOnly` (iOS 27, no
-    /// screen in view) keeps the closure, the score and the one caveat that matters.
-    init(park:Park,forecast:Forecast?,detail:ForecastDetail?,closure:String?=nil,now:Date,voiceOnly:Bool=false) {
+    /// `closure` is the park's closure as Nyx words it beside the score; `inputs`, what the score counts
+    /// and leaves out (smoke, whether closures were checked; the detail's smoke is counted in); `voiceOnly`
+    /// (iOS 27, no screen in view) keeps the closure, the score and the one caveat that matters.
+    init(park:Park,forecast:Forecast?,detail:ForecastDetail?,closure:String?=nil,inputs:ScoreInputs?=nil,forecastsOn:Bool=true,now:Date,voiceOnly:Bool=false) {
         let sky=AstronomyEngine().conditions(for:park,on:park.currentNight(at:now))
         night=NightPlanner.night(park:park,sky:sky,forecast:forecast,detail:detail,now:now)
         self.closure=closure
-        dialog=Self.dialog(night,closure:closure,voiceOnly:voiceOnly)
+        var inputs=inputs
+        if detail?.air != nil { inputs?.smokeKnown.insert(park.id) }
+        dialog=Self.dialog(night,closure:closure,inputs:inputs,forecastsOn:forecastsOn,voiceOnly:voiceOnly)
     }
-    /// A closure comes first: a long drive to a closed road is the worst outcome Nyx can cause.
-    static func dialog(_ night:Night,closure:String?,voiceOnly:Bool)->String {
-        withClosures(night.spokenSummary(.siriTonight(voiceOnly:voiceOnly)),park:night.park,closure:closure)
+    /// Without `inputs`, the answer says nothing of smoke left out or closures unchecked.
+    static func dialog(_ night:Night,closure:String?,inputs:ScoreInputs?=nil,forecastsOn:Bool=true,voiceOnly:Bool)->String {
+        (inputs?.answer(night,closure:closure,forecastsOn:forecastsOn) ?? TonightAnswer(night:night,closure:closure,forecastsOn:forecastsOn)).dialog(voiceOnly:voiceOnly)
     }
-    /// Every spoken answer about a place, as to closures: a park's closure first (`closureFirst`); at a
-    /// place the Park Service does not run, where Nyx has no closures to know, a last sentence that says
-    /// so, so silence never reads as "nothing is closed".
+    /// Every other spoken answer about a place, as to closures: a park's closure first; at a place
+    /// the Park Service does not run, a last sentence that says Nyx cannot know its closures
+    /// (`ClosureLine.unknown`), so silence never reads as "nothing is closed".
     static func withClosures(_ body:String,park:Park,closure:String?)->String {
-        let answer=closureFirst(body,closure:closure)
-        return unknownClosures(park).map { Sentences.join([answer, $0]) } ?? answer
+        ClosureLine.first(Sentences.join([body,ClosureLine.unknown(park) ?? ""]),closure:closure)
     }
-    /// What the place's own page says where the Park Service has no alerts (`Place.unknownClosuresLine`):
-    /// a place abroad points to its own site, a saved spot to local checks. Nil for a national park.
-    static func unknownClosures(_ park:Park)->String? {
-        guard park.nps == nil else { return nil }
-        return park.isCatalogPlace ? String(localized:"Nyx can't check closures here. Check the park's own site before you go.")
-            : String(localized:"Nyx has no alerts for this place. Check access, local rules and closures before you go.")
-    }
-    /// "Closure alert: …" before any answer about a park, when it has one. Shared by every spoken answer.
-    static func closureFirst(_ body:String,closure:String?)->String { ClosureLine.first(body,closure:closure) }
-    /// An NPS headline usually ends without a full stop; one is added so the score reads as its own sentence.
-    static func sentence(_ text:String)->String { Sentences.end(text) }
 }
 /// Siri's card for tonight's score: the score on a still dial (Siri shows a snapshot, so nothing
 /// counts up), the Moon as it is tonight, what the clouds rest on, and the closure the answer led with.
@@ -129,11 +149,11 @@ struct DarknessSnippetView:View {
                 HStack(spacing:8) {
                     MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0)
                         .frame(width:22,height:22).accessibilityIgnoresInvertColors()
-                    Text("\(night.sky.moon.name), \(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption).foregroundStyle(palette.muted)
+                    Text("\(night.sky.moon.name), \(night.sky.moon.litText)").font(.caption).foregroundStyle(palette.muted)
                 }
-                Text(night.basisLabel ?? String(localized:"Cached forecast included")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                Text(night.basisLabel ?? String(localized:"Cloud forecast included")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 // A place the Park Service does not run: Nyx cannot see its closures, and says so.
-                if let unknown=DarknessAnswer.unknownClosures(night.park) { Text(unknown).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                if let unknown=ClosureLine.unknown(night.park) { Text(unknown).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }
             Spacer(minLength:0)
         }

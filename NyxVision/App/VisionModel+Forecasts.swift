@@ -90,22 +90,12 @@ extension VisionModel {
     func cloudCaption(_ night: Night) -> String {
         Self.cloudCaption(night, forecastsOn: forecastsOn)
     }
-    /// The same words from what the caller holds (Siri's answer reads the cache itself). Whether a
-    /// night is beyond the forecast's reach ("not yet") or within it ("unavailable") comes with the
-    /// night (`Night.beyondForecast`), as on the iPhone.
+    /// The same words from what the caller holds: the iPhone's caption (`Night.cloudCaption`), and
+    /// with a forecast when it was issued. Whether a night is beyond the forecast's reach ("not yet")
+    /// or within it ("unavailable") comes with the night (`Night.beyondForecast`), as on the iPhone.
     nonisolated static func cloudCaption(_ night: Night, forecastsOn: Bool) -> String {
-        let summit = night.upperCloudOnly ? String(localized: "The summit sits above most low cloud, so the score counts mid and high cloud only.") : ""
-        switch night.basis {
-        case .forecast:
-            let cover = night.cloudCover.map { String(localized: "\(Int($0.rounded()))% average cover through true darkness.") } ?? ""
-            let issued = night.forecastUpdated.map { String(localized: "Forecast as of \(night.park.timestamp($0))") } ?? ""
-            return Sentences.join([cover, summit, issued])
-        case .blended, .usual:
-            let unavailable = !(night.basis == .usual && night.beyondForecast)
-            let caption = night.basisCaption(typical: true) ?? ""
-            let off = unavailable && !forecastsOn ? String(localized: "Cloud forecasts are off in Your privacy.") : ""
-            return Sentences.join([caption, summit, off])
-        }
+        let issued = night.basis == .forecast ? night.forecastUpdated.map { String(localized: "Forecast as of \(night.park.timestamp($0))") } : nil
+        return Sentences.join([night.cloudCaption(forecastsOn: forecastsOn), issued ?? ""])
     }
 
     /// What the window and the plaque in the sky say about what is computed, and about clouds.

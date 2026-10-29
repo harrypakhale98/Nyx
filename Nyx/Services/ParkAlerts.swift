@@ -86,18 +86,7 @@ nonisolated enum AlertRanking {
         busy ? String(localized: "Park alerts are busy. Check current conditions on nps.gov.") : String(localized: "Access not checked. Confirm closures with the park.")
     }
 }
-/// The closure beside a score, said one way on every device that has park alerts.
-nonisolated enum ClosureLine {
-    /// "Closure alert: Kolob Canyons Road closed"
-    static func spoken(_ closure: String) -> String { String(localized: "Closure alert: \(closure)") }
-    /// "Closure alert: …." before an answer about a park, when it has one: a long drive to a closed
-    /// road is the worst outcome Nyx can cause. An NPS headline usually ends without a full stop;
-    /// one is added so the score reads as its own sentence.
-    static func first(_ body: String, closure: String?) -> String {
-        guard let closure=closure?.trimmingCharacters(in: .whitespacesAndNewlines), !closure.isEmpty else { return body }
-        return Sentences.join([Sentences.end(spoken(closure)), body])
-    }
-}
+// The closure's own line (`ClosureLine`) is in Sentences.swift, which Apple Watch compiles too.
 extension ParkAlertsCache {
     /// The park's closure as Nyx words it beside the score; nil without one, or when this update
     /// does not cover the park.
