@@ -359,7 +359,7 @@ struct TripStayRow: View {
         }
         parts.append(lead.reason)
         if let hop=first.hopMeters, hop>1000 { parts.append(String(localized:"\(distance(hop)) from the night before")) }
-        if let closure=stay.stops.compactMap(\.closure).first { parts.append(String(localized:"Closure alert: \(closure)")) }
+        if let closure=stay.stops.compactMap(\.closure).first { parts.append(ClosureLine.spoken(closure)) }
         if let access=park.accessNote { parts.append(String(localized:"Getting there: \(access)")) }
         return Phrase.sentences(parts)
     }

@@ -88,6 +88,8 @@ struct NightVisionModeTests {
     @Test func theModeIsTheSwitchUnlessAtDuskIsChosen() throws {
         let defaults = try suite()
         #expect(NightVisionMode.current(defaults) == .off)
+        // The key every surface, Vision Pro's own and builds already installed read: never renamed.
+        #expect(NightLook.nightVisionKey == "nightVision")
         defaults.set(true, forKey: NightLook.nightVisionKey)
         #expect(NightVisionMode.current(defaults) == .on)
         // Off and On: a turn by hand needs no hold.

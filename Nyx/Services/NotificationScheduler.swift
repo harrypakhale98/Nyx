@@ -164,7 +164,7 @@ nonisolated struct NotificationScheduler {
         // nights each refresh. Only the slots one park's equal scores hold are reordered, so every other
         // pick stands as `better` ranks it; with nothing pending, the night every surface names.
         if !pending.isEmpty {
-            let tied=Dictionary(grouping:ranked.indices) { "\(ranked[$0].night.park.id)|\(ranked[$0].night.rankScore)" }
+            let tied=Dictionary(grouping:ranked.indices) { "\(ranked[$0].night.park.id)|\(ranked[$0].night.score.value)" }
             for slots in tied.values where slots.count>1 {
                 let held=slots.map { ranked[$0] }
                 let kept=held.filter { pending.contains(Self.identifier(park:$0.night.park,night:$0.night.id)) }

@@ -176,7 +176,7 @@ nonisolated struct NightPlanner: Sendable {
     /// `better`, with each closed park's nights `closurePenalty` points down (`closures`: park id →
     /// closure, as the app words it).
     static func better(_ a: Night, _ b: Night, closures: [String: String]) -> Bool {
-        let va = a.rankScore-(closures[a.park.id] == nil ? 0 : closurePenalty), vb = b.rankScore-(closures[b.park.id] == nil ? 0 : closurePenalty)
+        let va = a.score.value-(closures[a.park.id] == nil ? 0 : closurePenalty), vb = b.score.value-(closures[b.park.id] == nil ? 0 : closurePenalty)
         if va != vb { return va > vb }
         return better(a, b)
     }

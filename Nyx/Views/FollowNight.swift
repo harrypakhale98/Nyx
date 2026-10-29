@@ -10,7 +10,7 @@ import SwiftUI
 struct FollowNightButton: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
-    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     let night: Night
     private var following: Bool { NightFollowing.shared.isFollowing(park:night.park,night:night.id) }
     private var start: Date { FieldActivityAttributes.followStart(night.sky) }
@@ -43,7 +43,7 @@ struct FollowNightButton: View {
 /// The same action for a context menu (the calendar's long-press on a night).
 struct FollowNightMenuItem: View {
     @Environment(PlanModel.self) private var model
-    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     let night: Night
     var body: some View {
         if FollowNight.offered(night,now:model.present) {
@@ -90,7 +90,7 @@ struct FollowNightIntent: LiveActivityIntent {
         let now=Date.now
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:[chosen],shared:shared),details:BestNightSearch.details(for:[chosen],shared:shared))
         let found=planner.night(chosen,on:night.map { FollowNightWords.evening(of:$0,at:chosen) } ?? chosen.currentNight(at:now),now:now)
-        let result=await FieldActivities.follow(night:found,closure:IntentClosure.closure(chosen,shared:shared),nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),now:now)
+        let result=await FieldActivities.follow(night:found,closure:IntentClosure.closure(chosen,shared:shared),nightVision:SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey),now:now)
         BestNightSnippetIntent.reload()
         return .result(dialog:IntentDialog(stringLiteral:FollowNightWords.followed(result,park:chosen,night:found.id)))
     }

@@ -14,7 +14,7 @@ struct RootView:View {
     @Query private var spots:[SavedSpot]
     @Environment(\.modelContext) private var context
     @AppStorage("onboardingComplete") private var onboarded=false
-    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     /// Night vision At dusk (`NightVisionDusk`): followed while this window is active, never in the background.
     @AppStorage(NightVisionMode.atDuskKey,store:SharedSettings.defaults) private var atDusk=false
@@ -480,7 +480,7 @@ private struct ParkSheet:View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.legibilityWeight) private var legibility
-    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     var body:some View {
         NavigationStack {

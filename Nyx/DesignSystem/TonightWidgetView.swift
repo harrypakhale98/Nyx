@@ -68,7 +68,7 @@ struct TonightTimeline {
         return planner.night(park,sky:sky,now:date)
     }
     mutating func entry(at date:Date)->TonightEntry {
-        if let unsaved { return TonightEntry(date:date,night:nil,nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),unsaved:unsaved) }
+        if let unsaved { return TonightEntry(date:date,night:nil,nightVision:SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey),unsaved:unsaved) }
         let parks=pinned.map { [$0] } ?? snapshot?.parks ?? []
         let tonight=parks.map { night($0,$0.currentNight(at:date),at:date) }
         // A widget set to one park shows that park; otherwise the darkest saved park (or the one "next" moved to).
@@ -85,7 +85,7 @@ struct TonightTimeline {
             months[key]=month
         }
         let relevance=NightPlanner.relevance(at:date,nights:tonight)
-        return TonightEntry(date:date,night:shown,nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),week:week,month:month,
+        return TonightEntry(date:date,night:shown,nightVision:SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey),week:week,month:month,
                             position:pinned == nil ? shown.map { WidgetSelection.position(of:$0,in:tonight) } ?? 0 : 0,savedCount:pinned == nil ? parks.count : 0,
                             relevance:TimelineEntryRelevance(score:relevance.score,duration:relevance.duration),
                             closure:shown.flatMap { snapshot?.closures[$0.park.id] },offset:offset,stepScope:shown == nil ? nil : stepScope)

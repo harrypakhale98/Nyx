@@ -43,9 +43,10 @@ nonisolated enum WristTonightAnswer {
         return dialog(night, context: context, now: now)
     }
     /// The iPhone's answer (`TonightAnswer`): a closure first, smoke that holds the score down, and
-    /// where Nyx cannot know the closures. Only the clouds are the wrist's own: when the iPhone sent them.
+    /// where Nyx cannot know the closures, or the iPhone's switches leave closures or smoke out. Only the clouds are the wrist's own: when the iPhone sent them.
     static func dialog(_ night: Night, context: WatchContext?, now: Date) -> String {
-        TonightAnswer(night: night, closure: context?.closures[night.park.id], clouds: clouds(night, context: context, now: now)).dialog()
+        TonightAnswer(night: night, closure: context?.closures[night.park.id], clouds: clouds(night, context: context, now: now),
+                      smokeNote: context?.smokeNote, unchecked: context?.alertsNote(night.park)).dialog()
     }
     /// What the clouds rest on, honestly: the forecast and when the iPhone sent it, or why there is none.
     static func clouds(_ night: Night, context: WatchContext?, now: Date) -> String {

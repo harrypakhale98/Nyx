@@ -66,13 +66,13 @@ import UserNotifications
         let previous=defaults.string(forKey:askedKey)
         guard DebugScenario.screen == nil,
               let scene=UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first(where:{ $0.activationState == .foregroundActive }),
-              claim(defaults:defaults,version:version,nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),inField:inField(presented(in:scene))) else { return }
+              claim(defaults:defaults,version:version,nightVision:SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey),inField:inField(presented(in:scene))) else { return }
         // A beat after the moment itself, so the prompt never lands on top of a closing sheet.
         Task {
             try? await Task.sleep(for:.seconds(delay))
             // Night vision or field mode may have come on during the beat: no prompt, and the
             // version is left free to ask at a later moment.
-            guard !SharedSettings.defaults.bool(forKey:"nightVision"), !inField(presented(in:scene)) else {
+            guard !SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey), !inField(presented(in:scene)) else {
                 defaults.set(previous,forKey:askedKey); return
             }
             AppStore.requestReview(in:scene)

@@ -285,11 +285,9 @@ struct TonightSkyView: View {
             .accessibilityLabel(String(localized:"Face \(name)"))
             .accessibilityAddTraits(facingIt ? .isSelected : [])
     }
+    /// `SkyPhase`'s words; the slider's sunset and sunrise ends read "Twilight", never "The Sun is up".
     private func phase(_ sky:HorizonSky)->String {
-        if sky.sunAltitude > -6 { return String(localized:"Twilight") }
-        if !sky.dark { return String(localized:"Late twilight") }
-        if sky.sunAltitude > -18 { return String(localized:"Nearly dark") }
-        return String(localized:"True darkness")
+        sky.sunAltitude > -6 ? String(localized:"Twilight") : SkyPhase.name(sunAltitude:sky.sunAltitude)
     }
     /// Facing is kept unwrapped (370° is 10°): the projection is trigonometry and `Compass.name`
     /// normalises, so a turn across north animates the short way instead of spinning back.

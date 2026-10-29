@@ -246,24 +246,24 @@ import simd
     @Test func stargazingFocusRestoresNightVision() throws {
         let defaults = try #require(UserDefaults(suiteName: "nyx-tests-focus"))
         defaults.removePersistentDomain(forName: "nyx-tests-focus")
-        defaults.set(false, forKey: "nightVision")
+        defaults.set(false, forKey: NightLook.nightVisionKey)
         // The system calls the filter with its defaults (both off) when Nyx launches with no Focus on: nothing changes.
         StargazingFocus.apply(nightVision: false, offerField: false, defaults: defaults)
-        #expect(!defaults.bool(forKey: "nightVision") && !StargazingFocus.offersField(defaults) && !StargazingFocus.holdsNightVision(defaults))
+        #expect(!defaults.bool(forKey: NightLook.nightVisionKey) && !StargazingFocus.offersField(defaults) && !StargazingFocus.holdsNightVision(defaults))
         StargazingFocus.apply(nightVision: true, offerField: true, defaults: defaults)
-        #expect(defaults.bool(forKey: "nightVision") && StargazingFocus.offersField(defaults) && StargazingFocus.holdsNightVision(defaults))
+        #expect(defaults.bool(forKey: NightLook.nightVisionKey) && StargazingFocus.offersField(defaults) && StargazingFocus.holdsNightVision(defaults))
         // A second call while on (the filter changed) keeps the original value to restore.
         StargazingFocus.apply(nightVision: true, offerField: false, defaults: defaults)
-        #expect(!StargazingFocus.offersField(defaults) && defaults.bool(forKey: "nightVision"))
+        #expect(!StargazingFocus.offersField(defaults) && defaults.bool(forKey: NightLook.nightVisionKey))
         // The Focus ends: the system passes the defaults.
         StargazingFocus.apply(nightVision: false, offerField: false, defaults: defaults)
-        #expect(!defaults.bool(forKey: "nightVision") && !StargazingFocus.holdsNightVision(defaults))
+        #expect(!defaults.bool(forKey: NightLook.nightVisionKey) && !StargazingFocus.holdsNightVision(defaults))
         // A Focus that only offers field mode leaves night vision as the person set it.
-        defaults.set(true, forKey: "nightVision")
+        defaults.set(true, forKey: NightLook.nightVisionKey)
         StargazingFocus.apply(nightVision: false, offerField: true, defaults: defaults)
         #expect(StargazingFocus.offersField(defaults) && !StargazingFocus.holdsNightVision(defaults))
         StargazingFocus.apply(nightVision: false, offerField: false, defaults: defaults)
-        #expect(defaults.bool(forKey: "nightVision") && !StargazingFocus.offersField(defaults))
+        #expect(defaults.bool(forKey: NightLook.nightVisionKey) && !StargazingFocus.offersField(defaults))
         defaults.removePersistentDomain(forName: "nyx-tests-focus")
     }
     @Test func fieldRequestsAreTakenOnceAndFresh() throws {
@@ -285,9 +285,9 @@ import simd
         let defaults = try #require(UserDefaults(suiteName: suite))
         defaults.removePersistentDomain(forName: suite)
         let now = Date(timeIntervalSince1970: 1_800_000_000)
-        defaults.set(false, forKey: "nightVision")
+        defaults.set(false, forKey: NightLook.nightVisionKey)
         OpenSkyPrior.store(now: now, defaults: defaults)
-        defaults.set(true, forKey: "nightVision")
+        defaults.set(true, forKey: NightLook.nightVisionKey)
         // A second tap while night vision is already on keeps the first tap's value.
         OpenSkyPrior.store(now: now.addingTimeInterval(20), defaults: defaults)
         #expect(OpenSkyPrior.take(now: now.addingTimeInterval(30), defaults: defaults) == false)

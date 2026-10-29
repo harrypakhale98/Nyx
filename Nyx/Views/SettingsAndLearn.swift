@@ -3,7 +3,7 @@ import SwiftUI
 struct SettingsView:View {
     @Environment(\.nyx) private var palette
     @Environment(PlanModel.self) private var model
-    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     @AppStorage(NightVisionMode.atDuskKey,store:SharedSettings.defaults) private var atDusk=false
     @AppStorage("notificationsEnabled") private var notifications=false

@@ -71,7 +71,7 @@ struct SettingsSheet: View {
 /// from elsewhere (Voice Control with VoiceOver running). Voice Control answers to "Night vision",
 /// "Red light" or "Flashlight".
 struct NightVisionToggle: View {
-    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     @Environment(SceneCommands.self) private var commands:SceneCommands?
     @MotionReduced private var reduceMotion: Bool
     @Environment(\.nyxAccess) private var access

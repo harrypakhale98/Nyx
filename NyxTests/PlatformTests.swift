@@ -120,15 +120,15 @@ import Testing
         let answer = try #require(BestNightSearch.answer(parks: [jotr, grba], planner: planner, from: now, nights: 14, now: now))
         let all = [jotr, grba].flatMap { planner.nights($0, from: now, count: 14, now: now) }
         // Ranked as every list of nights is: the score with a forecast, the usual clouds without one.
-        #expect(answer.best.rankScore == all.map(\.rankScore).max())
+        #expect(answer.best.score.value == all.map(\.score.value).max())
         #expect(answer.ranked.count == 5 && zip(answer.ranked, answer.ranked.dropFirst()).allSatisfy { NightPlanner.better($0, $1) })
         #expect(BestNightSearch.answer(parks: [jotr], planner: planner, from: now, nights: 0, now: now)?.count == 1)
         #expect(BestNightSearch.answer(parks: [jotr], planner: planner, from: now, nights: 99, now: now)?.count == 30)
         #expect(BestNightSearch.answer(parks: [], planner: planner, from: now, nights: 14, now: now) == nil)
         // A night with a forecast outranks an equal rank without one: it is the surer number. (A night
-        // without a forecast ranks by its score under the park's usual clouds, `Night.rankScore`.)
+        // without a forecast ranks by its score under the park's usual clouds, `Night.score`.)
         let unsure = night(jotr, offset: 1, value: 80, forecast: false)
-        let sure = night(jotr, offset: 3, value: unsure.rankScore, forecast: true)
+        let sure = night(jotr, offset: 3, value: unsure.score.value, forecast: true)
         #expect(NightPlanner.best([unsure, sure])?.id == sure.id)
     }
     /// A picked day is that day's night, whatever the time attached to it: midnight Pacific, or

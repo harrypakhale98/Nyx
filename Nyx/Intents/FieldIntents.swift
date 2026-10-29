@@ -33,7 +33,7 @@ struct OpenSkyIntent: LiveActivityIntent {
         // What night vision was before this tap, so leaving field mode puts it back (`FieldSession`).
         // Field mode already open set it itself, and keeps what it was before.
         if await MainActor.run(body:{ !FieldPresenter.isOpen(in:nil) }) { OpenSkyPrior.store() }
-        SharedSettings.defaults.set(true,forKey:"nightVision")
+        SharedSettings.defaults.set(true,forKey:NightLook.nightVisionKey)
         FieldModeRequest.post(parkID:parkID)
         return .result()
     }
@@ -47,7 +47,7 @@ nonisolated enum OpenSkyPrior {
     static let lifetime: TimeInterval=300
     static func store(now: Date = .now, defaults: UserDefaults = SharedSettings.defaults) {
         if let kept=defaults.dictionary(forKey:key), let at=kept["at"] as? Double, abs(now.timeIntervalSince1970-at)<lifetime { return }
-        defaults.set(["on":defaults.bool(forKey:"nightVision"),"at":now.timeIntervalSince1970],forKey:key)
+        defaults.set(["on":defaults.bool(forKey:NightLook.nightVisionKey),"at":now.timeIntervalSince1970],forKey:key)
     }
     /// The value kept, once, if it is recent; nil otherwise.
     static func take(now: Date = .now, defaults: UserDefaults = SharedSettings.defaults) -> Bool? {
@@ -85,7 +85,7 @@ struct StargazingFocusFilter: SetFocusFilterIntent {
         WidgetCenter.shared.reloadAllTimelines()
         ControlCenter.shared.reloadAllControls()
         // A followed night's Live Activity takes the new colours too, even with Nyx in the background.
-        await FieldActivities.refresh(nightVision:SharedSettings.defaults.bool(forKey:"nightVision"))
+        await FieldActivities.refresh(nightVision:SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey))
         return .result()
     }
 }
@@ -102,11 +102,11 @@ nonisolated enum StargazingFocus {
     static func apply(nightVision: Bool, offerField: Bool, defaults: UserDefaults = SharedSettings.defaults) {
         let active=nightVision || offerField
         if nightVision && !defaults.bool(forKey:holdKey) {
-            defaults.set(defaults.bool(forKey:"nightVision"),forKey:priorKey)
-            defaults.set(true,forKey:"nightVision")
+            defaults.set(defaults.bool(forKey:NightLook.nightVisionKey),forKey:priorKey)
+            defaults.set(true,forKey:NightLook.nightVisionKey)
         } else if !nightVision && defaults.bool(forKey:holdKey) {
             // Put it back only if it is still as the Focus left it (on); a person who turned it off meanwhile keeps it off.
-            if defaults.bool(forKey:"nightVision"), defaults.object(forKey:priorKey) != nil { defaults.set(defaults.bool(forKey:priorKey),forKey:"nightVision") }
+            if defaults.bool(forKey:NightLook.nightVisionKey), defaults.object(forKey:priorKey) != nil { defaults.set(defaults.bool(forKey:priorKey),forKey:NightLook.nightVisionKey) }
             defaults.removeObject(forKey:priorKey)
         }
         defaults.set(nightVision,forKey:holdKey)

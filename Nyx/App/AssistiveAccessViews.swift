@@ -13,7 +13,7 @@ struct AssistiveAccessRoot: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.legibilityWeight) private var legibility
-    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     var body: some View {
         // High contrast throughout: amber and starlight at full strength, and the brighter red.
         let palette=NyxPalette(nightVision:nightVision,highContrast:true,boldText:legibility == .bold)
@@ -61,7 +61,7 @@ private struct AssistiveSavedSync: View {
 struct AssistiveHome: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
-    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     var body: some View {
         List {
             NavigationLink { AssistiveTonight() } label:{ Label("Tonight",systemImage:"moon.stars") }

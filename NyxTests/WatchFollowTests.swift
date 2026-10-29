@@ -109,13 +109,22 @@ import UIKit
         var object = try #require(try JSONSerialization.jsonObject(with: bytes) as? [String: Any])
         object["tonightNight"] = nil
         object["spotForecastsOff"] = nil
+        object["alertsOff"] = nil; object["smokeOff"] = nil
         let older = try #require(WatchContext(data: try JSONSerialization.data(withJSONObject: object)))
         #expect(older.tonightNight == nil && !older.spotForecastsOff && older.tonightParkID == "jotr")
+        #expect(!older.alertsOff && !older.smokeOff && older.alertsNote(jotr) == nil && older.smokeNote == nil)
         #expect(older.stillPicks(jotr, at: evening.addingTimeInterval(3600)) && !older.stillPicks(jotr, at: evening.addingTimeInterval(86400)))
         // A night without a pick is never carried.
         #expect(WatchContext.make(savedParkIDs: [], homeParkID: "deva", nightVision: false, forecasts: [:], tonightNight: night, now: evening).tonightNight == nil)
         // The two new values count in what was sent.
         #expect(context != context.stamped(tonightNight: "2026-10-08") && context != context.stamped(spotsOff: true))
+        #expect(context != context.stamped(alertsOff: true) && context != context.stamped(smokeOff: true))
+        // The iPhone's switches off: its own words, said on the wrist, and they survive the trip.
+        let off = try #require(context.stamped(alertsOff: true, smokeOff: true).data.flatMap { WatchContext(data: $0) })
+        #expect(off.alertsNote(jotr) == String(localized: "Park alerts are off in Your privacy, so closures are not checked."))
+        #expect(off.smokeNote == String(localized: "Smoke and haze are off in Your privacy, so smoke is not counted."))
+        #expect(off.stamped(alertsOff: true).alertsNote(jotr) != nil && WatchContext(sent: evening, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:],
+                closures: ["jotr": "Road closed"], alertsOff: true).alertsNote(jotr) == nil)
     }
 
     /// A spot or world place travels with its usual clouds or not at all: without them the wrist
@@ -143,10 +152,11 @@ import UIKit
 
 private extension WatchContext {
     /// The same context with one of the new values changed.
-    func stamped(tonightNight: String? = nil, spotsOff: Bool? = nil) -> WatchContext {
+    func stamped(tonightNight: String? = nil, spotsOff: Bool? = nil, alertsOff: Bool? = nil, smokeOff: Bool? = nil) -> WatchContext {
         WatchContext(sent: sent, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: forecasts,
                      details: details, closures: closures, ranges: ranges, places: places, usualClouds: usualClouds, tonightParkID: tonightParkID,
                      watchParkIDs: watchParkIDs, droppedParkIDs: droppedParkIDs, dataVersion: dataVersion, sequence: sequence, aurora: aurora,
-                     tonightNight: tonightNight ?? self.tonightNight, spotForecastsOff: spotsOff ?? spotForecastsOff)
+                     tonightNight: tonightNight ?? self.tonightNight, spotForecastsOff: spotsOff ?? spotForecastsOff,
+                     alertsOff: alertsOff ?? self.alertsOff, smokeOff: smokeOff ?? self.smokeOff)
     }
 }

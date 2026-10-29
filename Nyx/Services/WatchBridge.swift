@@ -64,11 +64,12 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
             lock.withLock { latest = nil; self.complete = complete ?? self.complete }
             return
         }
-        let nightVision = SharedSettings.defaults.bool(forKey: "nightVision"), brighterRed = SharedSettings.defaults.bool(forKey: NightTint.key)
+        let nightVision = SharedSettings.defaults.bool(forKey: NightLook.nightVisionKey), brighterRed = SharedSettings.defaults.bool(forKey: NightTint.key)
         let context = WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: forecasts,
                                         details: details, closures: closures, aboveInversion: aboveInversion, ranges: ranges ?? [:], places: places,
                                         tonightParkID: tonightParkID, tonightNight: tonightNight, watchParkIDs: watchParkIDs, aurora: aurora,
-                                        spotForecastsOff: !SpotForecast.isOn(), dusk: dusk)
+                                        spotForecastsOff: !SpotForecast.isOn(), dusk: dusk,
+                                        alertsOff: !NetworkService.alerts.isOn(), smokeOff: !NetworkService.smoke.isOn())
         lock.withLock { latest = context; self.complete = ranges == nil ? complete : nil }
         if session.activationState == .activated { send(session) } else { activate() }
     }
@@ -177,7 +178,7 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
     /// will ask for fresh clouds or, with forecasts switched off, only hand over what it has. The
     /// context itself follows by application context, as always, and is sent even if unchanged.
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
-        let forecastsOn = UserDefaults.standard.object(forKey: "weatherEnabled") as? Bool ?? true
+        let forecastsOn = NetworkService.forecasts.isOn()
         guard let reply = WatchRequest.reply(to: message, forecastsOn: forecastsOn) else { replyHandler([:]); return }
         replyHandler([WatchRequest.replyKey: reply.rawValue])
         // A watch before 2.2 names no places: what an earlier request asked for stays followed.

@@ -24,7 +24,7 @@ import SwiftUI
         #expect(summary.contains("Forecast models: 88 to 97."))
         #expect(summary.contains("Moon-free for 70% of true darkness."))
         // The basis line always travels, so a shared number is never more certain than the app.
-        #expect(summary.contains("Forecast included"))
+        #expect(summary.contains("Cloud forecast included"))
         #expect(card.message.contains(summary))
         #expect(ShareCard.rangeLine(88...97)=="Forecast models: 88–97")
         let plain=ShareCard(night:night).summary

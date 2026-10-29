@@ -76,7 +76,7 @@ struct TimeRiver: View {
     nonisolated static func peaks(_ nights:[Night])->Set<Int> { Set(peakOrder(nights)) }
     /// The same nights, best first.
     nonisolated static func peakOrder(_ nights:[Night])->[Int] {
-        Array(nights.indices.filter { nights[$0].rankScore>=ScoreBand.good.minimum }.sorted { NightPlanner.better(nights[$0],nights[$1]) }.prefix(3))
+        Array(nights.indices.filter { nights[$0].score.value>=ScoreBand.good.minimum }.sorted { NightPlanner.better(nights[$0],nights[$1]) }.prefix(3))
     }
     private let inset=14.0, moonSize=30.0, lensSize=30.0
     /// The loupe while scrubbing: its size, its lift above the night's point, and how far it may

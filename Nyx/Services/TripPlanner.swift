@@ -184,7 +184,7 @@ nonisolated enum TripPlanner {
         let n=parks.count
         var hop=Array(repeating:Array(repeating:0.0,count:n),count:n)
         for a in 0..<n { for b in 0..<n where a != b { hop[a][b]=Park.distance(parks[a].latitude,parks[a].longitude,parks[b].latitude,parks[b].longitude) } }
-        let ranks=grid.map { $0.map(\.rankScore) }
+        let ranks=grid.map { $0.map(\.score.value) }
         func value(_ d: Int, _ p: Int) -> Int { ranks[d][p]-(closures[parks[p].id] == nil ? 0 : closurePenalty) }
         // Equal totals are broken in `NightPlanner.better`'s order, each term summed over the nights,
         // so a one-night choice is exactly the one every other best surface makes.
@@ -261,7 +261,7 @@ nonisolated enum TripPlanner {
             let park=stop.night.park
             var parts=[stop.night.spokenSummary(.tripLine(reason:stop.reason))]
             if let hop=stop.hopMeters, hop>1000 { parts.append(String(localized:"\(distance(hop)) from the night before.")) }
-            if let closure=stop.closure { parts.append(String(localized:"Closure alert: \(closure)")) }
+            if let closure=stop.closure { parts.append(ClosureLine.spoken(closure)) }
             if let access=park.accessNote { parts.append(access) }
             lines.append(Sentences.join(parts))
         }

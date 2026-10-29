@@ -121,7 +121,7 @@ struct ParkRow: View {
     static func spokenLabel(night:Night,closure:String?)->String {
         // Smoke or haze that holds the score down is said with it ("Haze or smoke.").
         let main=Sentences.join([String(localized:"\(night.park.shortName). Darkness score \(night.score.value), \(night.score.band.label)."),night.smokeLabel.map(Sentences.end) ?? ""])
-        return closure.map { main+" "+String(localized:"Closure alert: \($0)") } ?? main
+        return closure.map { main+" "+ClosureLine.spoken($0) } ?? main
     }
     /// The row's custom content, most important first.
     static func moreContent(night:Night,closure:String?,week:[Night],stepFree:Bool)->[ParkRowContent.Item] {

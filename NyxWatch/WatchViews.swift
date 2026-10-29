@@ -377,7 +377,7 @@ struct WristClosureLine: View {
             .font(.caption2)
             .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(String(localized: "Closure alert: \(text)"))
+            .accessibilityLabel(ClosureLine.spoken(text))
     }
 }
 

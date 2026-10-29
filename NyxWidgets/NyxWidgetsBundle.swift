@@ -112,13 +112,13 @@ struct MoonProvider:AppIntentTimelineProvider {
     func placeholder(in context:Context)->MoonEntry { .placeholder() }
     func snapshot(for configuration:MoonWidgetIntent,in context:Context) async -> MoonEntry {
         let snapshot=SharedSettings.read()
-        return MoonEntry(date:.now,park:Self.park(configuration.park,snapshot:snapshot),nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),
+        return MoonEntry(date:.now,park:Self.park(configuration.park,snapshot:snapshot),nightVision:SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey),
                          unsaved:TonightProvider.unsaved(configuration.park,snapshot:snapshot))
     }
     /// Every hour for a day, plus each rise and set, so "up now" and the next event turn over on time.
     func timeline(for configuration:MoonWidgetIntent,in context:Context) async -> Timeline<MoonEntry> {
         let now=Date.now, snapshot=SharedSettings.read()
-        let park=Self.park(configuration.park,snapshot:snapshot), vision=SharedSettings.defaults.bool(forKey:"nightVision")
+        let park=Self.park(configuration.park,snapshot:snapshot), vision=SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey)
         // A deleted spot or unsaved place abroad: one entry that says so, as the Tonight widget does.
         if let unsaved=TonightProvider.unsaved(configuration.park,snapshot:snapshot) {
             return Timeline(entries:[MoonEntry(date:now,park:nil,nightVision:vision,unsaved:unsaved)],policy:.never)
@@ -167,7 +167,7 @@ struct FieldModeControl:ControlWidget {
 }
 struct NightVisionProvider:ControlValueProvider {
     var previewValue:Bool { false }
-    func currentValue() async throws -> Bool { SharedSettings.defaults.bool(forKey:"nightVision") }
+    func currentValue() async throws -> Bool { SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey) }
 }
 /// "Tonight 93": tonight's score at a park (the darkest saved park unless one is chosen), read
 /// from the widgets' snapshot. A tap opens that park. Read only: it changes nothing.
