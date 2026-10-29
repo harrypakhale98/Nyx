@@ -92,8 +92,9 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     /// of American Samoa" is "American Samoa" on every device. A name that would end in a number keeps
     /// it ("Constitution 1857 National Park"): alone, the year reads as a figure.
     static func shortened(_ name: String) -> String {
-        let lead="National Park of "
-        let short=(name.hasPrefix(lead) ? String(name.dropFirst(lead.count)) : name)
+        // The one U.S. park named designation first; abroad, "National Park of Upper Niger" alone would read as a region.
+        if name == "National Park of American Samoa" { return "American Samoa" }
+        let short=name
             .replacingOccurrences(of: " National Park & Preserve", with: "")
             .replacingOccurrences(of: " National Park", with: "")
             .replacingOccurrences(of: " National and State Parks", with: "")

@@ -276,15 +276,16 @@ nonisolated extension HourlySeries {
 /// "Best this week: every night". Else the first night is "Best this week: tonight", and any other
 /// "Best this week: Thu · 62" (its abbreviated weekday in park time, and its score). Nil for no nights.
 nonisolated enum WeekBest {
-    static func label(_ week: [Night]) -> String? {
+    /// `scored: false` leaves the score out ("Best this week: Sat"), for a surface that sets it as a numeral beside it.
+    static func label(_ week: [Night], scored: Bool = true) -> String? {
         guard let best = NightPlanner.best(week), let first = week.first else { return nil }
         if week.count > 1, week.allSatisfy({ $0.score.value == best.score.value }) { return String(localized: "Best this week: every night") }
-        return label(best, first: first)
+        return label(best, first: first, scored: scored)
     }
     /// The same for a best night already found, without the "every night" case, which needs the week.
-    static func label(_ best: Night, first: Night) -> String {
+    static func label(_ best: Night, first: Night, scored: Bool = true) -> String {
         if best.id == first.id { return String(localized: "Best this week: tonight") }
         let day = best.id.formatted(Date.FormatStyle(timeZone: best.park.timeZone).weekday(.abbreviated))
-        return String(localized: "Best this week: \(day) · \(best.score.value)")
+        return scored ? String(localized: "Best this week: \(day) · \(best.score.value)") : String(localized: "Best this week: \(day)")
     }
 }

@@ -52,6 +52,8 @@ struct WatchWordsTests {
         #expect(try park("jotr").shortName == "Joshua Tree")
         #expect(Park.shortened("Wrangell-St. Elias National Park & Preserve") == "Wrangell-St. Elias")
         #expect(Park.shortened("Constitution 1857 National Park") == "Constitution 1857 National Park")
+        // Abroad the designation-first name stays whole: alone, the rest reads as a region.
+        #expect(Park.shortened("National Park of Upper Niger") == "National Park of Upper Niger")
         #expect(Park.spotPrefix == SavedSpots.prefix)
     }
 
