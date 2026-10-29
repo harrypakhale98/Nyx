@@ -21,15 +21,22 @@ nonisolated enum PaletteChoice: String, CaseIterable, Identifiable, Sendable {
         }
     }
     /// Whether the wrist wears red. `phone` is the iPhone's night-vision switch, nil before the
-    /// first sync (red then: at a dark site that is the safe default). At dusk needs a park for
-    /// the Sun; with none chosen yet it reads the watch's clock, red from 6 PM to 7 AM.
-    func nightVision(phone: Bool?, park: Park?, at now: Date, calendar: Calendar = .current) -> Bool {
+    /// first sync (red then: at a dark site that is the safe default). At dusk reads the Sun at the
+    /// iPhone's starting point (`dusk`, `WatchContext.duskPlace`) when one was sent, else at `park`
+    /// (read only then); with neither it reads the watch's clock, red from 6 PM to 7 AM. Where no
+    /// dusk or dawn comes within a day at the starting point, the iPhone keeps its switch as set
+    /// (`NightVisionSchedule.plan`), and so does the wrist.
+    func nightVision(phone: Bool?, park: @autoclosure () -> Park?, dusk: Park? = nil, at now: Date, calendar: Calendar = .current) -> Bool {
         switch self {
         case .red: return true
         case .standard: return false
         case .phone: return phone ?? true
         case .automatic:
-            if let park { return WristSky.isCivilNight(at: park, now) }
+            if let dusk {
+                if let phone, WristSky.isPolar(at: dusk, now) { return phone }
+                return WristSky.isCivilNight(at: dusk, now)
+            }
+            if let park = park() { return WristSky.isCivilNight(at: park, now) }
             let hour = calendar.component(.hour, from: now)
             return hour >= 18 || hour < 7
         }
@@ -48,6 +55,14 @@ nonisolated enum WristSky {
     /// in polar night it lasts all day.
     static func isCivilNight(at park: Park, _ date: Date) -> Bool {
         AstronomyEngine().solarAltitude(at: date, park: park) < -6
+    }
+    /// How far ahead At dusk looks for a dusk or dawn, on iPhone (`NightVisionSchedule.horizon`) and wrist.
+    static let dayAhead: TimeInterval = 86_400
+    /// No dusk or dawn within a day: the midnight Sun or polar night. Below 60° the Sun crosses −6°
+    /// every day (staying above it all night needs a latitude over 90° − 23.4° − 6°, staying below it
+    /// all day one over 72.6°), so only higher latitudes are searched.
+    static func isPolar(at park: Park, _ date: Date) -> Bool {
+        abs(park.latitude) > 60 && paletteChanges(at: park, from: date, to: date.addingTimeInterval(dayAhead)).isEmpty
     }
     /// When Automatic changes colour between `from` and `to` (the Sun crossing −6°), to the
     /// minute: complication timelines add an entry at each so the face turns red on time.
