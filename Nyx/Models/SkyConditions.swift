@@ -73,8 +73,10 @@ nonisolated struct SkyConditions: Sendable {
         if moonDownPercent == 0 { return .allUp }
         if let darkStart, let darkEnd {
             let dark = DateInterval(start: darkStart, end: max(darkStart, darkEnd))
-            if let moonset, dark.contains(moonset) { return .setsAt(moonset) }
-            if let moonrise, dark.contains(moonrise) { return .risesAt(moonrise) }
+            // A Moon that both sets and rises inside true darkness is neither: say how much is Moon-free.
+            let sets = moonset.flatMap { dark.contains($0) ? $0 : nil }, rises = moonrise.flatMap { dark.contains($0) ? $0 : nil }
+            if let sets, rises == nil { return .setsAt(sets) }
+            if let rises, sets == nil { return .risesAt(rises) }
         }
         return .partial(percentFree: moonDownPercent)
     }

@@ -96,6 +96,9 @@ struct SkyTruthTests {
             // The verdict under the dial says exactly this.
             #expect(NightVerdict.moonSentence(sky: sky, park: jotr) == long)
         }
+        // A Moon that sets and rises again inside true darkness is neither a moonset nor a moonrise.
+        let back = start.addingTimeInterval(9000)
+        #expect(Self.sky(real, moon: full, rise: back, set: set, below: 0.5).moonInDarkness == .partial(percentFree: 50))
         // All of the dark Moon-free comes first, even for a Moon too thin to matter.
         #expect(Self.sky(real, moon: Self.phase(lit: 0.02), below: 1).moonInDarkness == .allFree)
         let dena = try park("dena")
@@ -111,7 +114,8 @@ struct SkyTruthTests {
         // A Moon up all through true darkness is never the reason a reminder gives.
         let up = NightPlanner.night(park: jotr, sky: real, forecast: nil, detail: nil, now: real.evening)
         #expect(!NotificationScheduler.reason(up).contains("Moon"))
-        #expect(TripPlanner.reason(up).hasPrefix("Dark, Moon up, "))
+        #expect(TripPlanner.reason(up).hasPrefix("Dark, Moon up, \(real.moon.litText), "))
+        #expect(!TripPlanner.reason(free).contains(free.sky.moon.litText))
     }
 
     // MARK: One window, one best night
