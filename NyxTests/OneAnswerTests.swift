@@ -45,6 +45,8 @@ import Testing
         let whole = ClearWindow(interval: DateInterval(start: start, duration: dark), moonDown: true, core: nil)
         #expect(NightNotes<EmptyView>.partialWindow(night, window: late, now: now) == late)
         #expect(NightNotes<EmptyView>.partialWindow(night, window: whole, now: now) == nil)
+        // A park's page says the whole-night window too, while it is still ahead.
+        #expect(NightNotes<EmptyView>.partialWindow(night, window: whole, now: now, partialOnly: false) == whole)
         #expect(NightNotes<EmptyView>.partialWindow(night, window: late, now: late.interval.end.addingTimeInterval(60)) == nil)
     }
     /// A kept night's first line and the share card say the Moon in the shared words (`MoonPhase.litText`),

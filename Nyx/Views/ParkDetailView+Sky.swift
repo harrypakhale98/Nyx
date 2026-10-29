@@ -33,7 +33,8 @@ extension ParkDetailView {
             VStack(alignment:.leading,spacing:18) {
                 Eyebrow(text:"Moonlight")
                 MoonHero(night:night) { delta in step(delta) }
-                if let line=night.sky.moonSentence(park:park,withLit:false) {
+                // The glance words: the full sentence is the verdict's, under the dial.
+                if night.sky.darkHours>0, case let line=night.sky.moonShort(park:park) {
                     Text(line).font(.caption).foregroundStyle(palette.muted).frame(maxWidth:.infinity)
                         .multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
                 }
