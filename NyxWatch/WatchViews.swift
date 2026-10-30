@@ -529,9 +529,11 @@ struct NextMoment: View {
         .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .combine)
     }
+    /// "Truly dark now" only with the Moon out of the way, as the next-dark complication says it
+    /// (`DarkMoment`); under the Moon, the iPhone's words for true darkness with the Moon up.
     private var nowLine: String? {
         switch night.sky.phase(at: now) {
-        case .dark: String(localized: "Truly dark now")
+        case .dark: AstronomyEngine().moonHidden(at: now, park: night.park, phase: night.sky.moon) ? String(localized: "Truly dark now") : String(localized: "Dark, Moon up")
         case .twilight: String(localized: "Twilight now")
         case .day: nil
         }
