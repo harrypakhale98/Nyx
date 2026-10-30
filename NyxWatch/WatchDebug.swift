@@ -114,7 +114,8 @@ enum WatchDebug {
             // A fixture closure, for reviewing the line beside the score; it never touches a score.
             let closed = WatchContext(sent: .now, savedParkIDs: synced.savedParkIDs, homeParkID: "jotr", nightVision: true, forecasts: [:],
                                       closures: ["jotr": "Keys View Road closed for repairs through November"])
-            store.debugSet(context: closed, pinned: nil)
+            // Kept on Joshua Tree, so Tonight shows the closure beside its score (unpinned, Tonight led with the best saved park).
+            store.debugSet(context: closed, pinned: "jotr")
         case "models":
             // The forecast models' range, for review: the iPhone's own "disagree" forecast fixture
             // (`DebugForecasts`, a different spread each night), its ranges worked out by the
