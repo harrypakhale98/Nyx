@@ -1,5 +1,6 @@
 import Foundation
 import CoreGraphics
+import UIKit
 import Testing
 @testable import Nyx
 
@@ -60,6 +61,19 @@ struct MapAreaTests {
         #expect(pool.rest.map(\.id)==received)
         #expect(pool.rest.count<=300 && pool.fixed.map(\.id)==["curated"])
         #expect(direct.places.map(\.id)==split.places.map(\.id) && direct.inView==split.inView && split.inView>pool.rest.count)
+    }
+    /// German on iPad's narrow column: the longest word, set at the scale chosen for it, fits its column
+    /// whole, so it never loses its last letter to a second line ("Himmelsaufhellun" / "g").
+    @Test @MainActor func shrunkTitlesFitTheirColumn() {
+        let titles=["Mondlicht","Wolken","Himmelsaufhellung","Echte Dunkelheit"]
+        let widest=SubscoreTitles.widestWord(titles,typeSize:.large,spaced:false,bold:false)
+        for width in stride(from:220.0,through:400,by:5) {
+            let style=SubscoreTitles.style(widestSpaced:nil,widestPlain:widest,width:width,spacing:14)
+            guard style.scale>0.7 else { continue }
+            let column=(width-Double(style.columns-1)*14)/Double(style.columns)
+            let font=UIFont.systemFont(ofSize:SubscoreTitles.pointSize(.large)*style.scale,weight:.medium)
+            #expect(("Himmelsaufhellung" as NSString).size(withAttributes:[.font:font]).width<=column,"width \(width)")
+        }
     }
     /// The sub-score titles are measured by their longest word, wider in spaced capitals.
     @Test @MainActor func subscoreTitlesMeasureTheLongestWord() {

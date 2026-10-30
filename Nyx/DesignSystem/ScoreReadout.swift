@@ -256,9 +256,16 @@ enum SubscoreTitles {
     }
     /// The widest single word among `titles` (or, `whole`, the widest title): spaced capitals, or the words as written.
     static func widestWord(_ titles:[String],typeSize:DynamicTypeSize,spaced:Bool,bold:Bool,whole:Bool=false)->Double {
-        let font=UIFont.systemFont(ofSize:pointSize(typeSize),weight:bold ? .semibold : .medium)
-        let attributes:[NSAttributedString.Key:Any]=spaced ? [.font:font,.kern:kerning] : [.font:font]
-        let words=whole ? titles : titles.flatMap { $0.split(whereSeparator:\.isWhitespace).map(String.init) }
-        return words.map { word in Double(((spaced ? word.uppercased() : word) as NSString).size(withAttributes:attributes).width.rounded(.up)) }.max() ?? 0
+        // Measured at full size and at the smallest a style sets (70%), taking the wider once scaled back up, and
+        // a point to spare: San Francisco tracks small sizes looser, so a word shrunk to fit exactly by its
+        // full-size width came out wider and lost its last letter to a second line ("Himmelsaufhellun" / "g",
+        // German on iPad).
+        let weight:UIFont.Weight=bold ? .semibold : .medium, words=whole ? titles : titles.flatMap { $0.split(whereSeparator:\.isWhitespace).map(String.init) }
+        func width(_ word:String,scale:Double)->Double {
+            let font=UIFont.systemFont(ofSize:pointSize(typeSize)*scale,weight:weight)
+            let attributes:[NSAttributedString.Key:Any]=spaced ? [.font:font,.kern:kerning*scale] : [.font:font]
+            return Double(((spaced ? word.uppercased() : word) as NSString).size(withAttributes:attributes).width)/scale
+        }
+        return words.map { (max(width($0,scale:1),width($0,scale:0.7))+1).rounded(.up) }.max() ?? 0
     }
 }
