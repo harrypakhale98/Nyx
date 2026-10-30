@@ -384,7 +384,12 @@ struct ParksMapView: View {
     @ViewBuilder private func eyebrow(_ map:TonightMap,ready:Bool)->some View {
         if let home=model.home {
             let day=home.dayLabel(model.tonight(home))
-            if ready { Eyebrow(text:"\(day) · \(map.marks.count) places on this map",meta:true) } else { Eyebrow(text:"\(day)",meta:true) }
+            if ready && typeSize.isAccessibilitySize {
+                // At the largest sizes the night and the count take a line each, with room to spare: as one run,
+                // "places on this map" filled the column to its last point.
+                VStack(alignment:.leading,spacing:2) { Eyebrow(text:"\(day)",meta:true); Eyebrow(text:"\(map.marks.count) places on this map",meta:true) }
+                    .accessibilityElement(children:.combine)
+            } else if ready { Eyebrow(text:"\(day) · \(map.marks.count) places on this map",meta:true) } else { Eyebrow(text:"\(day)",meta:true) }
         }
     }
     /// Above this many places to score, a map works their nights out off the main thread before drawing.

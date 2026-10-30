@@ -3103,41 +3103,6 @@
         }
       }
     },
-    "%@, %lld out of 100, %@. %@%@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld von 100, %@. %@%@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld out of 100, %@. %@%@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld de 100, %@. %@%@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld sur 100, %@. %@%@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@、100点中%2$lld点、%3$@。%4$@%5$@"
-          }
-        }
-      }
-    },
     "%@, %lld percent lit": {
       "extractionState": "manual",
       "localizations": {
@@ -6108,7 +6073,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%2$lld中%1$lld"
+            "value": "%1$lld/%2$lld"
           }
         }
       }
@@ -6828,6 +6793,95 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": "%lldか所"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld places on this map": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Ort auf dieser Karte"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Orte auf dieser Karte"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld place on this map"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld places on this map"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld lugar en este mapa"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld lugares en este mapa"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld lieu sur cette carte"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld lieux sur cette carte"
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "この地図に%lldか所"
                 }
               }
             }
