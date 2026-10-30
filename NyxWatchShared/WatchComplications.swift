@@ -275,8 +275,9 @@ struct WatchComplicationView: View {
                 .contentTransition(reduceMotion ? .opacity : .numericText(value: Double(night.score.value)))
             .widgetLabel {
                 // A closure takes the curved label from the gauge: the numeral stays, the warning is read first.
-                if entry.closure != nil {
-                    Text("\(Text(Image(systemName: ClosureLine.symbol)).foregroundStyle(caution)) \(Text("Closure alert"))").foregroundStyle(ink).widgetAccentable()
+                if let closure = entry.closure {
+                    // The park's own words, cut by the curve: "Closure alert" alone read as the whole park closed.
+                    Text("\(Text(Image(systemName: ClosureLine.symbol)).foregroundStyle(caution)) \(Text(closure))").foregroundStyle(ink).widgetAccentable()
                 } else {
                     Gauge(value: Double(night.score.value), in: 0...100) { Text(night.score.band.label) }.tint(accent).widgetAccentable()
                 }
@@ -286,17 +287,18 @@ struct WatchComplicationView: View {
         // Inline is one short line: the next moment's clock time reads at a glance and never goes stale.
         // A closure outranks it.
         Group {
-            if entry.closure != nil { Text("\(Image(systemName: ClosureLine.symbol)) \(ClosureLine.inline(score: night.score.value))") }
+            if let closure = entry.closure { Text("\(Image(systemName: ClosureLine.symbol)) \(ClosureLine.inline(score: night.score.value, closure: closure))") }
             // The park's clock, with its zone where it is not this watch's (`wristTime`).
             else if let next = entry.next { Text("\(night.score.value) · \(next.shortTitle) at \(night.park.wristTime(next.date))") }
             else { Text("\(night.score.value) \(night.score.band.label) · \(night.park.shortName)") }
         }.foregroundStyle(ink)
     }
     /// How much of a closure the rectangular complication has room for.
-    private enum ClosureFit { case whole(String), alert, mark }
+    private enum ClosureFit { case whole(String), firstLine(String), mark }
     /// Park, score and band, then the next moment; at large text sizes the moment line drops first.
-    /// A closure comes before the moment and is never cut: its own words wrapped whole, else
-    /// "Closure alert", else the warning mark beside the numeral (the spoken label always has it all).
+    /// A closure comes before the moment: its own words wrapped whole, else their first line (what is
+    /// closed, never a bare "Closure alert", which reads as the whole park), else the warning mark beside
+    /// the numeral (the spoken label always has it all).
     /// A note on the data beneath the score ("Nyx versions differ", "No recent forecast") says so in a
     /// line of its own, which gives way after the next moment and before the closure is shortened;
     /// with two, the second goes first.
@@ -309,8 +311,8 @@ struct WatchComplicationView: View {
                     rectangular(night, closure: .whole(closure), notes: notes, showsNext: false)
                     rectangular(night, closure: .whole(closure), notes: first, showsNext: false)
                     rectangular(night, closure: .whole(closure), notes: [], showsNext: false)
-                    rectangular(night, closure: .alert, notes: first, showsNext: false)
-                    rectangular(night, closure: .alert, notes: [], showsNext: false)
+                    rectangular(night, closure: .firstLine(closure), notes: first, showsNext: false)
+                    rectangular(night, closure: .firstLine(closure), notes: [], showsNext: false)
                     rectangular(night, closure: .mark, notes: [], showsNext: false)
                 }
             } else {
@@ -345,7 +347,7 @@ struct WatchComplicationView: View {
             // Measured at full height, so a closure that would need cutting gives way to a shorter form instead.
             switch closure {
             case .whole(let text): closureLine(Text(text))
-            case .alert: closureLine(Text("Closure alert"))
+            case .firstLine(let text): closureLine(Text(text), lines: 1)
             case .mark, nil: EmptyView()
             }
             ForEach(notes, id: \.self) { note in
@@ -360,8 +362,8 @@ struct WatchComplicationView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-    private func closureLine(_ text: Text) -> some View {
-        Label { text.foregroundStyle(ink) } icon: { Image(systemName: ClosureLine.symbol).foregroundStyle(caution) }
+    private func closureLine(_ text: Text, lines: Int? = nil) -> some View {
+        Label { text.foregroundStyle(ink).lineLimit(lines) } icon: { Image(systemName: ClosureLine.symbol).foregroundStyle(caution) }
             .font(.caption2.weight(.medium)).widgetAccentable()
             .fixedSize(horizontal: false, vertical: true)
     }
