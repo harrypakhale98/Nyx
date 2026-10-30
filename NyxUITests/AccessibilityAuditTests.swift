@@ -382,7 +382,12 @@ final class AccessibilityAuditTests:XCTestCase {
             // full (capture 2026-10-21), and the text grows with its content, so a real third line would show.
             // The same quirk as the Learn title. This line only, at standard sizes; AX5 still measures it.
             let designationLine=screen=="light" && pass != "ax5" && issue.element?.elementType == .staticText && issue.element?.label=="An International Dark Sky Park, certified by DarkSky International."
-            return !visible || pastHomeIndicator || learnTitle || privacyCaption || designationLine || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
+            // The Parks map's line above the map (2026-10-30): "FRI, OCT 30 · 71 PLACES ON THIS MAP", one line in a frame
+            // hugging it (276 of the column's 351 pt); laid out again by the audit's own measure it takes a second line. It
+            // renders in full (capture 2026-10-30, default and night vision), and widening its container did not change the
+            // text's own frame. The same quirk as the Learn title; standard sizes only, as AX5 sets it on two lines and is measured.
+            let mapLine=screen=="parks-map" && pass != "ax5" && issue.element?.elementType == .staticText && (issue.element?.label ?? "").lowercased().hasSuffix("places on this map")
+            return !visible || pastHomeIndicator || learnTitle || privacyCaption || designationLine || mapLine || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
         case .elementDetection:
             // Decorative "NYX" wordmark; the sky map's Canvas-drawn inset names (Alaska, Hawaiʻi, Am. Samoa, Virgin Is.):
             // decoration; each star is a labelled button and the map has a spoken summary.
