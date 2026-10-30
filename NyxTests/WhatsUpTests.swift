@@ -77,7 +77,7 @@ import Testing
     @Test func showerSelectionRules() throws {
         let jotr = try park("jotr"), sky = try sky(jotr, "2026-12-13"), now = Date.now
         func shower(_ code: String, zhr: Double) -> SkyAlmanac.MeteorShower {
-            SkyAlmanac.MeteorShower(code: code, name: code, start: "12-01", end: "12-31", peakSolarLongitude: 262, radiantRA: 112, radiantDec: 33, zhr: zhr, velocity: 35)
+            SkyAlmanac.MeteorShower(code: code, name: code, start: "12-01", end: "12-31", peakSolarLongitude: 262, radiantRA: 112, radiantDec: 33, zhr: zhr)
         }
         func night(_ s: SkyAlmanac.MeteorShower, rate: Int, peak: Bool) -> SkyAlmanac.ShowerNight {
             SkyAlmanac.ShowerNight(shower: s, peak: now, isPeakNight: peak, activity: 1, best: sky.darkStart, radiantAltitude: 40, moonDownAtBest: true, hourlyRate: rate)

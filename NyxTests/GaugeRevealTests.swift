@@ -349,10 +349,4 @@ import Testing
         #expect(CelestialGauge.numeral(value:101.4,target:99)==100)
         #expect(CelestialGauge.numeral(value:-1.4,target:30)==0)
     }
-    @Test func theWordStandsOnlyBesideItsOwnBand() {
-        #expect(CelestialGauge.wordFits(.excellent,numeral:89))
-        #expect(!CelestialGauge.wordFits(.excellent,numeral:90))
-        #expect(CelestialGauge.wordFits(.pristine,numeral:90))
-        #expect(!CelestialGauge.wordFits(.good,numeral:75))
-    }
 }

@@ -409,7 +409,7 @@ struct PanoramaCanvas: View {
             let fade=min(1,max(0,limit-star.magnitude))*contrast
             let d=max(1.1,3.9-0.6*star.magnitude)
             let brightness=max(0.4,min(1,1.25-0.15*star.magnitude))*fade
-            let color=resolved?[index] ?? tint(star.colorIndex,ink:ink)
+            let color=resolved?[index] ?? SkyTint.star(star.colorIndex,ink:ink)
             if star.magnitude<1.2 {
                 let r=d*2.4
                 context.fill(Path(ellipseIn:CGRect(x:p.x-r,y:p.y-r,width:2*r,height:2*r)),with:.radialGradient(Gradient(colors:[color.opacity(0.25*fade),.clear]),center:p,startRadius:0,endRadius:r))
@@ -510,8 +510,7 @@ struct PanoramaCanvas: View {
     /// How far the figures have arrived, 0…1: they wait until the adapting eye reaches within 1.5
     /// magnitudes of the sky's own limit, so they come in last, with the faintest stars.
     nonisolated static func figuresArrived(limit:Double,skyLimit:Double)->Double {
-        let t=max(0,min(1,(limit-(skyLimit-1.5))/1.5))
-        return t*t*(3-2*t)
+        SkyDome.smooth((limit-(skyLimit-1.5))/1.5)
     }
     /// The limiting magnitude while eyes adapt: at 0 nothing fainter than magnitude −1.5 (no star
     /// at all), rising to the sky's own limit at 1, so the brightest stars arrive first.
@@ -520,11 +519,8 @@ struct PanoramaCanvas: View {
     }
     /// How much of the Milky Way shows while eyes adapt: none until 0.7, all of it at 1 (smoothstep).
     nonisolated static func milkyWayGathered(_ adaptation:Double)->Double {
-        let t=max(0,min(1,(adaptation-0.7)/0.3))
-        return t*t*(3-2*t)
+        SkyDome.smooth((adaptation-0.7)/0.3)
     }
-    /// B−V colour index to a gentle warm or cool tint over starlight (`SkyTint`, as RealSky draws it).
-    static func tint(_ colorIndex:Double,ink:Color)->Color { SkyTint.star(colorIndex,ink:ink) }
     /// What is up and where, for VoiceOver: "Facing south at 11:40 PM. Jupiter, high in the southeast. …"
     /// `size` is the view's, for which named stars are in view (as `labelledStars`). The floating
     /// header is ignored here: a star under the title is still in the sky, so the summary does not

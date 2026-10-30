@@ -70,10 +70,10 @@ nonisolated enum SkyClouds {
         let through = 1-pow(1-cover, 3)
         return SkyTextures.image(width: width, height: height) { x, y in
             let n = field[y*width+x], a = altitude(row: y)
-            let edge = SkyTextures.smooth(Double((n-t+soft)/(2*soft)))
+            let edge = SkyDome.smooth(Double((n-t+soft)/(2*soft)))
             // Thicker toward a cloud's heart, so a deck reads as clouds rather than a stencil.
-            let body = edge*(0.55+0.45*SkyTextures.smooth(Double((n-t)/0.12)))
-            let w = SkyTextures.smooth((a-3)/14)
+            let body = edge*(0.55+0.45*SkyDome.smooth(Double((n-t)/0.12)))
+            let w = SkyDome.smooth((a-3)/14)
             let alpha = peak*(w*(cover >= 1 ? 1 : body)+(1-w)*through)
             // Premultiplied white: encoded, its colour equals its alpha, so it un-premultiplies to white.
             return (SIMD3(repeating: SRGB.linear(alpha)), alpha)

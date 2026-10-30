@@ -99,10 +99,6 @@ nonisolated struct MoonVolumeNight: Sendable, Equatable {
         // The night's phase and lit fraction; the globe itself is turned and lit as at `moment`.
         phase = sky.moon
     }
-    var phaseName: String { phase.name }
-    var illumination: Double { phase.illumination }
-    /// "Waxing crescent, 23 percent lit", as VoiceOver says the Moon on every device (`MoonPhase.spoken`).
-    var spoken: String { phase.spoken }
     static func == (a: MoonVolumeNight, b: MoonVolumeNight) -> Bool { a.park.id == b.park.id && a.moment == b.moment }
 
     /// The Sun's direction as seen from the Moon, in the volume's frame (x right, y up, z toward
@@ -208,7 +204,7 @@ nonisolated struct MoonVolumeNight: Sendable, Equatable {
             }
             var access = AccessibilityComponent()
             access.isAccessibilityElement = true
-            access.label = LocalizedStringResource(stringLiteral: view.spoken)
+            access.label = LocalizedStringResource(stringLiteral: view.phase.spoken)
             access.value = LocalizedStringResource(stringLiteral: MoonControls.caption(view))
             access.systemActions = [.increment, .decrement]
             sphere.components.set(access)
@@ -307,7 +303,7 @@ struct MoonControls: View {
                     .accessibilityLabel(Text("Previous night"))
                 VStack(spacing: 2) {
                     Text(title).font(.system(.headline, design: .serif))
-                    if let view { Text("\(view.phaseName) · \(view.phase.litText)").font(.callout).foregroundStyle(palette.muted) }
+                    if let view { Text("\(view.phase.name) · \(view.phase.litText)").font(.callout).foregroundStyle(palette.muted) }
                 }
                 .frame(minWidth: 200)
                 .accessibilityElement(children: .combine)

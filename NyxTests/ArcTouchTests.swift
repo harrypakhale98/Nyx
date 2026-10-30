@@ -134,10 +134,10 @@ import Testing
     }
     /// The week strip's dots span the week's own range, so 40 to 62 reads as a peak, not as seven specks.
     @Test func weekStripDotsSpanTheWeek() {
-        #expect(WeekStrip.radius(score:40,low:40,high:62) == 1.6)
-        #expect(WeekStrip.radius(score:62,low:40,high:62) == 5)
-        #expect(abs(WeekStrip.radius(score:51,low:40,high:62) - 3.3) < 1e-9)
-        #expect(WeekStrip.radius(score:70,low:70,high:70) == 3.3)
+        #expect(NightMark.radius(score:40,low:40,high:62) == 1.6)
+        #expect(NightMark.radius(score:62,low:40,high:62) == 5)
+        #expect(abs(NightMark.radius(score:51,low:40,high:62) - 3.3) < 1e-9)
+        #expect(NightMark.radius(score:70,low:70,high:70) == 3.3)
     }
     @Test func theNowMarkerStepsByTheMinuteInsideTheNight() {
         let start=Date(timeIntervalSinceReferenceDate:799_999_980), end=start.addingTimeInterval(12*3600)

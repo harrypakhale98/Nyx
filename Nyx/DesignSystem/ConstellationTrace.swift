@@ -101,7 +101,6 @@ private struct LoaderFigure: View, Animatable {
     }
     /// A star's opacity as the line nears it: none until the line is within a few percent, whole once it arrives.
     nonisolated static func arrival(progress:Double,at:Double)->Double {
-        let t=min(1,max(0,(progress-at+0.06)/0.06))
-        return t*t*(3-2*t)
+        SkyDome.smooth((progress-at+0.06)/0.06)
     }
 }

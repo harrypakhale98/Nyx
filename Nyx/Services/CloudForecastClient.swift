@@ -644,23 +644,22 @@ nonisolated enum CacheDirectory {
     static let url: URL = {
         let manager=FileManager.default
         guard var folder=manager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent("Offline", isDirectory: true),
-              (try? manager.createDirectory(at: folder, withIntermediateDirectories: true)) != nil else { return legacy }
+              (try? manager.createDirectory(at: folder, withIntermediateDirectories: true)) != nil else { return legacyFolder }
         var values=URLResourceValues()
         values.isExcludedFromBackup=true
         try? folder.setResourceValues(values)
         return folder
     }()
     /// Where earlier versions kept these files; still read until the next successful update.
-    private static var legacy: URL {
+    static var legacyFolder: URL {
         FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory
     }
-    static var legacyFolder: URL { legacy }
     /// A file that is missing costs one existence check, not two failed reads. A park's forecast is
     /// read only once `ForecastPoints` has dropped any kept for a point the park no longer uses.
     static func read<T: Decodable>(_ type: T.Type, name: String) -> T? {
         if ForecastPoints.prefixes.contains(where: name.hasPrefix) { ForecastPoints.reconcileOnce() }
         let file="nyx-\(name).json", manager=FileManager.default
-        let current=url.appendingPathComponent(file), old=legacy.appendingPathComponent(file)
+        let current=url.appendingPathComponent(file), old=legacyFolder.appendingPathComponent(file)
         let source=manager.fileExists(atPath: current.path) ? current : manager.fileExists(atPath: old.path) ? old : nil
         guard let source, let data=try? Data(contentsOf: source) else { return nil }
         return try? JSONDecoder().decode(type, from: data)
@@ -670,7 +669,7 @@ nonisolated enum CacheDirectory {
         try? data.write(to: url.appendingPathComponent("nyx-\(name).json"), options: .atomic)
     }
     static func remove(name: String) {
-        for folder in [url, legacy] { try? FileManager.default.removeItem(at: folder.appendingPathComponent("nyx-\(name).json")) }
+        for folder in [url, legacyFolder] { try? FileManager.default.removeItem(at: folder.appendingPathComponent("nyx-\(name).json")) }
     }
 }
 /// A kept forecast belongs to the point it was asked for. When a park's forecast point moves (its

@@ -215,8 +215,6 @@ nonisolated struct SkyAlmanac: Sendable {
         var driftDec: Double?
         let zhr: Double
         var variable: Bool?
-        let velocity: Double
-        var parent: String?
         /// Published peak instants by year, ISO 8601 — preferred over the computed one when present.
         var peaks: [String: String]?
         /// Activity profile steepness, ZHR ∝ 10^(−B·|Δλ|) (IMO). Most showers rise and fall over days.
@@ -227,7 +225,7 @@ nonisolated struct SkyAlmanac: Sendable {
         /// for every shower on every calendar night, and parsing ISO dates each time dominated them.
         var publishedPeaks: [Int: Date]?
         private enum CodingKeys: String, CodingKey {
-            case code, name, start, end, peakSolarLongitude, radiantRA, radiantDec, driftRA, driftDec, zhr, variable, velocity, parent, peaks, profileB, populationIndex
+            case code, name, start, end, peakSolarLongitude, radiantRA, radiantDec, driftRA, driftDec, zhr, variable, peaks, profileB, populationIndex
         }
     }
     struct ShowerNight: Sendable, Equatable, Identifiable {

@@ -50,9 +50,9 @@ struct CityLightTests {
     @MainActor @Test func revealTiming() {
         #expect(SkyAdaptation.duration==4)
         #expect(SkyAdaptation.floor==0.3 && SkyAdaptation.landingHold==3)
-        #expect(SkyAdaptation.eased(0)==0)
-        #expect(SkyAdaptation.eased(1)==1)
-        #expect(SkyAdaptation.eased(-1)==0 && SkyAdaptation.eased(3)==1)
+        #expect(SkyDome.smooth(0)==0)
+        #expect(SkyDome.smooth(1)==1)
+        #expect(SkyDome.smooth(-1)==0 && SkyDome.smooth(3)==1)
         let start=Date(timeIntervalSince1970:1_000)
         #expect(SkyAdaptation.progress(since:nil,now:start)==0.3)
         #expect(SkyAdaptation.progress(since:start,now:start)==0.3)

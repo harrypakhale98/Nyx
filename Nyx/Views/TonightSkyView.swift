@@ -387,9 +387,8 @@ nonisolated enum SkyTurn {
     static func progress(since start:Date?,now:Date)->Double {
         if let frozen { return frozen }
         guard let start else { return floor }
-        return floor+(1-floor)*eased(now.timeIntervalSince(start)/duration)
+        return floor+(1-floor)*SkyDome.smooth(now.timeIntervalSince(start)/duration)
     }
-    nonisolated static func eased(_ t:Double)->Double { let t=max(0,min(1,t)); return t*t*(3-2*t) }
 }
 /// Where the full-screen sky's title and controls stand: over the top and under the bottom of the
 /// sky, or, at compact height, together in a column at its side. One structure in both, with only

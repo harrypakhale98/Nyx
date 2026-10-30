@@ -126,10 +126,8 @@ struct ShareCard:View {
         if night.sky.moon.isNew { return String(localized:"New moon") }
         return String(localized:"Moon \(night.sky.moon.litText)")
     }
-    /// What travels beside the image: the summary, then where it came from.
-    var message:String { Sentences.join([summary,String(localized:"Planned with Nyx.")])+(Self.storeURL.map { " "+$0.absoluteString } ?? "") }
-    /// The App Store page (`SupportLink.storePage`), nil if the app ID is ever unset, so no link is guessed.
-    static var storeURL:URL? { SupportLink.storePage }
+    /// What travels beside the image: the summary, then where it came from (no link if the app ID is unset).
+    var message:String { Sentences.join([summary,String(localized:"Planned with Nyx.")])+(SupportLink.storePage.map { " "+$0.absoluteString } ?? "") }
     /// What the score rests on, in the words every surface uses (`Night.basisLine`), then smoke or
     /// haze when it holds the score down.
     var basis:String {
