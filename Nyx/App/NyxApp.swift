@@ -40,10 +40,11 @@ import UserNotifications
         _model=State(initialValue:model)
         LaunchSignposts.end(planner)
         #if DEBUG
-        // Captures (`-nyx-river-tip`): the river's tip shows even after a test run has closed it.
-        if DebugScenario.isEnabled("river-tip") { Tips.showAllTipsForTesting() }
+        // Captures (`-nyx-river-tip`, `-nyx-dial-tip`): a tip shows even after a test run has closed it, or on a first launch.
+        if DebugScenario.isEnabled("river-tip") || DebugScenario.isEnabled("dial-tip") { Tips.showAllTipsForTesting() }
         #endif
         try? Tips.configure([.datastoreLocation(.applicationDefault)])
+        if DebugScenario.screen == nil { DialNightsTip.launched.sendDonation() }
         UNUserNotificationCenter.current().delegate=NotificationRouter.shared
         // Registers park names as Siri / Shortcuts phrase parameters.
         NyxShortcuts.updateAppShortcutParameters()

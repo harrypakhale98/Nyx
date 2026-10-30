@@ -63,7 +63,7 @@ struct PlanView: View {
         let control=Picker("Plan",selection:Binding(get:{ shown },set:{ forced=nil; mode=$0 })) {
             Text("Best nights").tag(Mode.best)
             Text("One park").tag(Mode.month)
-            Text("My free nights").tag(Mode.free)
+            Text("Nights I can go").tag(Mode.free)
         }
         // Starlight, as every control that is not the score: amber is the score's and light's.
         let menu=control.pickerStyle(.menu).tint(palette.ink)

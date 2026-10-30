@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 struct NightCell: View {
@@ -136,8 +137,9 @@ struct CalendarView: View {
     @MotionReduced private var reduceMotion: Bool
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyxAccess) private var access
-    /// Kept for the window, so switching Plan to "My free nights" and back returns to this park.
+    /// Kept for the window, so switching Plan to "Nights I can go" and back returns to this park.
     @SceneStorage("planPark") private var parkID=""
+    @Query(sort:\SavedPark.savedAt,order:.reverse) private var saved:[SavedPark]
     /// The key to the marks, open while the person reads it.
     @State private var legendShown=false
     @State private var monthOffset=0
@@ -197,7 +199,9 @@ struct CalendarView: View {
     /// The window's place; the starting park only once the place is known not to be there. A place
     /// abroad restored with the window waits for the world catalogue (`waiting`) rather than
     /// showing the starting park's month first.
-    private var park:Park? { model.park(parkID) ?? (waiting ? nil : model.home) }
+    /// Before a park is chosen here: the park saved most recently (someone who just saved a park opens
+    /// its month, not the starting park's), else the starting park.
+    private var park:Park? { model.park(parkID) ?? (waiting ? nil : saved.lazy.compactMap { model.park($0.parkID) }.first ?? model.home) }
     private var waiting:Bool { model.awaitsCatalog(parkID) }
     /// A wide iPad window shows the chosen night's breakdown in a trailing inspector beside a larger
     /// month, and a tap chooses the night; otherwise a tap opens the breakdown in a sheet.
@@ -665,8 +669,7 @@ struct CalendarView: View {
         case (false,true): String(localized:"Solid: full forecast. Half-filled: an early look, the forecast counted as it stands.")
         default: String(localized:"Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds.")
         }
-        return Sentences.join([half,UsualCloudsNote(ahead)?.hollow ?? "",
-                        String(localized:"Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.")])
+        return Sentences.join([String(localized:"The number under each night is its darkness score, from 0 to 100, and the dot grows with it. A cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score."),half,UsualCloudsNote(ahead)?.hollow ?? ""])
     }
     /// The marks, with what this month's hollow nights rest on in their own words (`UsualCloudsNote`); past nights are faint dots, not hollow.
     /// The key stays one tap away under the month rather than a paragraph across it; the night cells
@@ -674,8 +677,9 @@ struct CalendarView: View {
     @ViewBuilder private func legend(_ data:Month)->some View {
         DisclosureGroup(isExpanded:$legendShown) {
             VStack(alignment:.leading,spacing:8) {
-                if let note=Self.stretchNote(data.stretch) { Text(note).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                // What the number is, first; then the ring.
                 Text(Self.legend(data.nights.filter { $0.id>=data.tonight })).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                if let note=Self.stretchNote(data.stretch) { Text(note).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if access.differentiate { Text(Sentences.join([NightMark.legend,String(localized:"A line through the date marks a night that has passed.")])).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }.padding(.top,6).frame(maxWidth:.infinity,alignment:.leading)
         } label:{

@@ -43,12 +43,17 @@ struct ParkPillPicker: View {
                     ForEach(Array(others.enumerated()),id:\.element.id) { index,other in
                         if index>0 { Divider().overlay(palette.line) }
                         NavigationLink(value:ZoomRoute.pillList(other)) {
-                            HStack(spacing:10) {
-                                Text(other.shortName).font(.system(.body,design:.serif)).multilineTextAlignment(.leading)
-                                Spacer(minLength:8)
-                                Text("\(score(other))").font(.body.monospacedDigit()).foregroundStyle(palette.accent)
-                                Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
-                            }
+                            // At accessibility sizes the name takes the whole line and the score goes under it:
+                            // beside a fixed score column, "Grand Canyon" broke inside a word on an iPhone SE.
+                            let row=typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment:.leading,spacing:4)) : AnyLayout(HStackLayout(spacing:10))
+                            row {
+                                Text(other.shortName).font(.system(.body,design:.serif)).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
+                                if !typeSize.isAccessibilitySize { Spacer(minLength:8) }
+                                HStack(spacing:10) {
+                                    Text("\(score(other))").font(.body.monospacedDigit()).foregroundStyle(palette.accent)
+                                    Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
+                                }
+                            }.frame(maxWidth:.infinity,alignment:.leading)
                             .padding(.horizontal,18).frame(minHeight:44).contentShape(Rectangle())
                         }
                         .buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.pillList(other).source,in:zoom)

@@ -69,8 +69,8 @@ struct DebugScreen: View {
         case "whatsup": if let park=model.home { ScrollView { Panel { WhatsUpPanel(whatsUp:model.whatsUp(model.night(park)),notes:model.skyNotes(model.night(park))) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
         case "gauge": DebugGaugeSweep()
         case "river": if let park=model.home { let nights=DebugScenario.state=="empty" ? [] : model.nights(park,from:model.tonight(park),count:30); ScrollView { Panel { DebugRiverHost(nights:nights,start:model.tonight(park),outlooks:model.outlooks(nights),markers:model.markers(nights)) }.padding(24) }.background(NightBackground()).task { await model.refreshForecasts(watching:[park]) } }
-        case "location-explainer": PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx compares distances on this iPhone. Your location is never sent to a service.",action:"Use my location") {}
-        case "notification-explainer": PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Local reminders use complete cloud forecasts. They are estimates, not confirmations of access.",action:"Enable reminders") {}
+        case "location-explainer": PermissionExplainer(symbol:"location",title:"Find dark places near you",message:"Nyx compares distances on this iPhone. Your location is never sent to a service.",action:"Use my location") {}
+        case "notification-explainer": PermissionExplainer(symbol:"bell",title:"A reminder before a very dark night",message:"Local reminders use complete cloud forecasts. They are estimates, not confirmations of access.",action:"Enable reminders") {}
         case "loader": ConstellationLoader().frame(maxWidth:.infinity,maxHeight:.infinity).background(NightBackground())
         case "field","field-compass": if let park=model.home { DebugField(park:park,model:model,compass:screen=="field-compass") }
         case "live-activity": if let park=model.home { FieldActivityReview(night:model.night(park)) }
@@ -86,7 +86,7 @@ struct DebugScreen: View {
         // Settings → Support → Diagnostics, with two illustrative reports (`-nyx-state empty` for none).
         case "diagnostics": DiagnosticsView(records:DebugScenario.state=="empty" ? [] : [DiagnosticRecord(id:"a",kind:.crash,received:.now-86_400,json:"{}"),DiagnosticRecord(id:"b",kind:.hang,received:.now-3*86_400,json:"{}")])
         // Delight: `trip` (`-nyx-state weekends`), `constellation` (`-nyx-state empty`), `recap`, `icons`, `first-light`.
-        case "trip": TripPlannerView().navigationTitle("My free nights").navigationBarTitleDisplayMode(.inline)
+        case "trip": TripPlannerView().navigationTitle("Nights I can go").navigationBarTitleDisplayMode(.inline)
         case "constellation": ScrollView { YourSkyPanel(nights:DebugScenario.state=="empty" ? [] : DebugJournal.nights(now:model.today)) { _ in }.padding(24) }.background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
         case "recap": YearRecapView(nights:DebugJournal.nights(now:model.today))
         case "icons": AppIconPicker()

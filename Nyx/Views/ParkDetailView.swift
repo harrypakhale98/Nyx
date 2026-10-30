@@ -71,6 +71,8 @@ struct ParkDetailView: View {
     /// Chapter positions, kept out of observation so scrolling never re-evaluates the page.
     @State private var tracker=ChapterTracker()
     @State var titleGone=false
+    /// The score's readout has been scrolled fully into view (its tip waits for it).
+    @State var readoutSeen=false
     @State var showsSky=DebugScenario.isEnabled("sky-view")
     @State private var description=false
     /// What's up has been scrolled to for a link that asked for it (`focusWhatsUp`).
@@ -220,7 +222,7 @@ struct ParkDetailView: View {
             // DEBUG captures (`-nyx-inspector`): the breakdown open beside the page where it has room.
             .task { if DebugScenario.isEnabled("inspector") { try? await Task.sleep(for:.seconds(1)); if inspectorRoom { inspector=true } } }
             .modifier(ReportsVisiblePark(parkID:park.id))
-            .fullScreenCover(isPresented:$showsSky) { TonightSkyView(night:night,isTonight:isTonight).environment(\.nyx,palette).nyxPresentation().modifier(DebugTypeSize()) }
+            .fullScreenCover(isPresented:$showsSky) { TonightSkyView(night:night,isTonight:isTonight).nyxPresentation().environment(\.nyx,palette).modifier(DebugTypeSize()) }
             .parkSaveAlert(isPresented:$persistenceError,journalUnavailable:model.journalUnavailable)
             // Again whenever the river moves on (left open past sunrise, or a night chosen beyond it), or the
             // page is handed another place, which cancels the old place's build.
@@ -288,7 +290,9 @@ struct ParkDetailView: View {
         // across iPhone Duo's fold, where the bar's centre is the crease and the hero already names the park.
         ToolbarItem(placement:.principal) {
             let shows=(titleGone || wide) && fold == nil
-            Text(park.shortName).font(.headline).opacity(shows ? 1 : 0).accessibilityHidden(!shows)
+            // Capped as iOS caps its own bar titles, on one line, so at accessibility sizes it never runs under the buttons.
+            Text(park.shortName).font(.headline).lineLimit(1).minimumScaleFactor(0.8).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                .opacity(shows ? 1 : 0).accessibilityHidden(!shows)
         }
         // Nothing to share until the page has its score (`ScoreGate`).
         ToolbarItem(placement:.topBarTrailing) { ShareNightMenu(night:night).disabled(model.cachesPending) }

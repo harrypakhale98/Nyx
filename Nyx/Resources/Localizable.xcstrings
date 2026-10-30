@@ -7992,37 +7992,37 @@
         }
       }
     },
-    "90 Pristine · 75 Excellent · 60 Good": {
+    "90 Pristine · 75 Excellent · 60 Good · 40 Fair · lower, Poor": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "90 Makellos · 75 Sehr gut · 60 Gut"
+            "value": "90 Makellos · 75 Sehr gut · 60 Gut · 40 Mäßig · darunter Schlecht"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "90 Pristine · 75 Excellent · 60 Good"
+            "value": "90 Pristine · 75 Excellent · 60 Good · 40 Fair · lower, Poor"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "90 Prístina · 75 Excelente · 60 Buena"
+            "value": "90 Prístina · 75 Excelente · 60 Buena · 40 Regular · menos, Mala"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "90 Immaculée · 75 Excellente · 60 Bonne"
+            "value": "90 Immaculée · 75 Excellente · 60 Bonne · 40 Passable · en dessous, Médiocre"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "90 極上 · 75 上々 · 60 好条件"
+            "value": "90 極上 · 75 上々 · 60 好条件 · 40 まずまず · それ未満は不向き"
           }
         }
       }
@@ -8822,41 +8822,6 @@
         }
       }
     },
-    "A night worth making time for": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eine Nacht, für die es sich lohnt, Zeit zu nehmen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A night worth making time for"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Una noche que merece tu tiempo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Une nuit qui mérite qu’on lui fasse de la place"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "時間をつくる価値のある夜"
-          }
-        }
-      }
-    },
     "A park's closure (illustrative text)": {
       "extractionState": "manual",
       "localizations": {
@@ -8993,6 +8958,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "赤い配色で、目が暗さに慣れたままになります。画面の明るさも下げてください。"
+          }
+        }
+      }
+    },
+    "A reminder before a very dark night": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Erinnerung vor einer sehr dunklen Nacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A reminder before a very dark night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un aviso antes de una noche muy oscura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un rappel avant une nuit très sombre"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "とても暗い夜の前にお知らせ"
           }
         }
       }
@@ -13172,6 +13172,41 @@
         }
       }
     },
+    "At night": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nachts"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La nuit"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "夜に"
+          }
+        }
+      }
+    },
     "At this latitude the bright center never climbs more than %lld° up. An open view to the south matters most.": {
       "extractionState": "manual",
       "localizations": {
@@ -15397,37 +15432,37 @@
         }
       }
     },
-    "Bortle class %lld of 9, estimated.": {
+    "Bortle class %lld of 9 (1 is the darkest), estimated.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle-Klasse %lld von 9, geschätzt."
+            "value": "Bortle-Klasse %lld von 9 (1 ist die dunkelste), geschätzt."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle class %lld of 9, estimated."
+            "value": "Bortle class %lld of 9 (1 is the darkest), estimated."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Clase Bortle %lld de 9, estimada."
+            "value": "Clase Bortle %lld de 9 (1 es la más oscura), estimada."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Classe de Bortle %lld sur 9, estimée."
+            "value": "Classe de Bortle %lld sur 9 (1 est la plus sombre), estimée."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ボートルクラス%lld（9段階中、推定）。"
+            "value": "ボートルクラス%lld（9段階中、1がもっとも暗い、推定）。"
           }
         }
       }
@@ -19582,6 +19617,101 @@
         }
       }
     },
+    "Crash reports that iOS gives Nyx stay on this iPhone, under Settings › Diagnostics, until you choose to share one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Absturzberichte, die iOS an Nyx gibt, bleiben auf diesem iPad, unter Einstellungen › Diagnose, bis du einen teilst."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Absturzberichte, die iOS an Nyx gibt, bleiben auf diesem iPhone, unter Einstellungen › Diagnose, bis du einen teilst."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Crash reports that iOS gives Nyx stay on this iPad, under Settings › Diagnostics, until you choose to share one."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Crash reports that iOS gives Nyx stay on this iPhone, under Settings › Diagnostics, until you choose to share one."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Los informes de fallos que iOS da a Nyx se quedan en este iPad, en Configuración › Diagnóstico, hasta que decidas compartir uno."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Los informes de fallos que iOS da a Nyx se quedan en este iPhone, en Configuración › Diagnóstico, hasta que decidas compartir uno."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Les rapports de plantage qu’iOS donne à Nyx restent sur cet iPad, dans Réglages › Diagnostic, jusqu’à ce que vous choisissiez d’en partager un."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Les rapports de plantage qu’iOS donne à Nyx restent sur cet iPhone, dans Réglages › Diagnostic, jusqu’à ce que vous choisissiez d’en partager un."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "iOSがNyxに渡すクラッシュレポートは、共有を選ぶまでこのiPadの「設定」›「診断」に残ります。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "iOSがNyxに渡すクラッシュレポートは、共有を選ぶまでこのiPhoneの「設定」›「診断」に残ります。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Creative Commons Attribution 4.0 (CC BY 4.0)": {
       "extractionState": "manual",
       "localizations": {
@@ -21437,19 +21567,19 @@
         }
       }
     },
-    "Dashed ring: your search radius, as the crow flies": {
+    "Dashed ring: your search radius, in a straight line": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gestrichelter Ring: dein Suchradius, Luftlinie"
+            "value": "Gestrichelter Ring: dein Suchradius, in Luftlinie"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dashed ring: your search radius, as the crow flies"
+            "value": "Dashed ring: your search radius, in a straight line"
           }
         },
         "es": {
@@ -21461,7 +21591,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Anneau en pointillés : votre rayon de recherche, à vol d’oiseau"
+            "value": "Anneau en pointillés : votre rayon de recherche, en ligne droite"
           }
         },
         "ja": {
@@ -22662,41 +22792,6 @@
         }
       }
     },
-    "Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die Punktgröße folgt dem Wert; eine Wolke markiert bedeckten Himmel. Vergangene Nächte behalten nur einen blassen Punkt. Ein kleiner Strich markiert das Maximum eines Meteorstroms, ein schattierter Mond eine sichtbare Mondfinsternis; beides ändert den Wert nicht."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El tamaño del punto sigue al índice; una nube indica cielo cubierto. Las noches pasadas conservan solo un punto tenue. Un pequeño trazo marca el máximo de una lluvia de meteoros, y una Luna sombreada, un eclipse de Luna visible; ninguno cambia el índice."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La taille du point suit l’indice ; un nuage marque un ciel couvert. Les nuits passées ne gardent qu’un point pâle. Un petit trait marque le maximum d’une pluie de météores, une Lune ombrée une éclipse de Lune visible ; ni l’un ni l’autre ne modifie l’indice."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "点の大きさはスコアを表し、雲の印は全天曇りを示します。過ぎた夜は淡い点だけが残ります。小さな流れの印は流星群の極大を、影のある月は見られる月食を示します。どちらもスコアは変えません。"
-          }
-        }
-      }
-    },
     "Double-tap, then slide a finger to explore the night.": {
       "extractionState": "manual",
       "localizations": {
@@ -23622,76 +23717,6 @@
         }
       }
     },
-    "Early look: a forecast of %lld%% from %lld days out, counted as it stands.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Erste Einschätzung: eine Vorhersage von %1$lld %% aus %2$lld Tagen Abstand, unverändert gezählt."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Early look: a forecast of %lld%% from %lld days out, counted as it stands."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vista anticipada: un pronóstico de %lld%% a %lld días, contado tal cual."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tendance : une prévision de %lld %% à %lld jours, comptée telle quelle."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "早めの見通し：%2$lld日先の雲量予報%1$lld%%を、そのまま計算しています。"
-          }
-        }
-      }
-    },
-    "Early look: a forecast of %lld%% from %lld days out, eased toward the usual clouds. Counted as %lld%%.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Erste Einschätzung: eine Vorhersage von %1$lld %% aus %2$lld Tagen Abstand, an die übliche Bewölkung angenähert. Gezählt als %3$lld %%."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Early look: a forecast of %lld%% from %lld days out, eased toward the usual clouds. Counted as %lld%%."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vista anticipada: un pronóstico de %lld%% a %lld días, ajustado hacia la nubosidad habitual. Se cuenta como %lld%%."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tendance : une prévision de %lld %% à %lld jours, rapprochée de la nébulosité habituelle. Comptée comme %lld %%."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "早めの見通し：%2$lld日先の雲量予報%1$lld%%を、平年の雲量に寄せています。%3$lld%%として計算しています。"
-          }
-        }
-      }
-    },
     "Early look: forecast %lld days out, counted as it stands. There are no usual clouds for this place.": {
       "extractionState": "manual",
       "localizations": {
@@ -23758,6 +23783,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "早めの見通し：%lld日先の予報を、平年の雲量に寄せています。"
+          }
+        }
+      }
+    },
+    "Early look: the forecast says %lld%% cloud, %lld days ahead. Nyx counts it as it stands.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erste Einschätzung: Die Vorhersage sagt %1$lld %% Wolken, %2$lld Tage im Voraus. Nyx zählt sie so, wie sie ist."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Early look: the forecast says %lld%% cloud, %lld days ahead. Nyx counts it as it stands."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista anticipada: el pronóstico dice %lld%% de nubes, a %lld días. Nyx lo cuenta tal cual."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tendance : la prévision annonce %lld %% de nuages, à %lld jours. Nyx la compte telle quelle."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早めの見通し：%2$lld日先の予報は雲量%1$lld%%です。Nyxはそのまま計算しています。"
+          }
+        }
+      }
+    },
+    "Early look: the forecast says %lld%% cloud, but it is %lld days ahead, so Nyx mixes it with the usual clouds for this month and counts %lld%%.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erste Einschätzung: Die Vorhersage sagt %1$lld %% Wolken, aber sie liegt %2$lld Tage im Voraus, deshalb mischt Nyx sie mit der üblichen Bewölkung dieses Monats und zählt %3$lld %%."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Early look: the forecast says %lld%% cloud, but it is %lld days ahead, so Nyx mixes it with the usual clouds for this month and counts %lld%%."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista anticipada: el pronóstico dice %1$lld%% de nubes, pero faltan %2$lld días, así que Nyx lo mezcla con la nubosidad habitual de este mes y cuenta %3$lld%%."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tendance : la prévision annonce %1$lld %% de nuages, mais elle est à %2$lld jours ; Nyx la mélange donc avec la nébulosité habituelle de ce mois et compte %3$lld %%."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早めの見通し：予報は雲量%1$lld%%ですが%2$lld日先のため、Nyxは今月の平年の雲量と混ぜて%3$lld%%として計算しています。"
           }
         }
       }
@@ -25722,41 +25817,6 @@
         }
       }
     },
-    "Find a sky nearby": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Einen Himmel in der Nähe finden"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Find a sky nearby"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Encuentra un cielo cercano"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trouvez un ciel tout près"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "近くの空を探す"
-          }
-        }
-      }
-    },
     "Find again": {
       "extractionState": "manual",
       "localizations": {
@@ -25788,6 +25848,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "もう一度探す"
+          }
+        }
+      }
+    },
+    "Find dark places near you": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkle Orte in deiner Nähe finden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find dark places near you"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encuentra lugares oscuros cerca de ti"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trouver des lieux sombres près de vous"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "近くの暗い場所を探す"
           }
         }
       }
@@ -27592,76 +27687,6 @@
         }
       }
     },
-    "Forecast models: %lld to %lld.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vorhersagemodelle: %lld bis %lld."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forecast models: %lld to %lld."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modelos de pronóstico: de %lld a %lld."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modèles de prévision : de %lld à %lld."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "予報モデル：%lld〜%lld。"
-          }
-        }
-      }
-    },
-    "Forecast models: %lld–%lld": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vorhersagemodelle: %lld–%lld"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forecast models: %lld–%lld"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modelos de pronóstico: %lld–%lld"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modèles de prévision : %lld–%lld"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "予報モデル：%lld–%lld"
-          }
-        }
-      }
-    },
     "Forecast requests are paused for a while. Showing saved data.": {
       "extractionState": "manual",
       "localizations": {
@@ -27963,6 +27988,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "これらの夜を消去しますか？"
+          }
+        }
+      }
+    },
+    "Four parts add up to 100: moonlight, clouds, sky glow and true darkness. The weakest part can hold the whole night down. The details follow.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vier Teile ergeben 100: Mondlicht, Wolken, Himmelsaufhellung und echte Dunkelheit. Der schwächste Teil kann die ganze Nacht nach unten ziehen. Die Einzelheiten folgen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Four parts add up to 100: moonlight, clouds, sky glow and true darkness. The weakest part can hold the whole night down. The details follow."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuatro partes suman 100: luz de luna, nubes, resplandor del cielo y oscuridad total. La parte más débil puede bajar toda la noche. Abajo, los detalles."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quatre composantes font 100 : clair de lune, nuages, halo lumineux et obscurité totale. La plus faible peut faire baisser toute la nuit. Les détails suivent."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "4つの要素で合計100点：月明かり、雲、夜空の明るさ、完全な暗さ。いちばん弱い要素が夜全体を下げることがあります。詳しくは以下のとおりです。"
           }
         }
       }
@@ -29127,37 +29187,37 @@
         }
       }
     },
-    "Half-filled nights are an early look. A soft glow spans what three forecast models expect.": {
+    "Half-filled nights are an early look: a forecast several days ahead, mixed with the usual clouds. The soft glow shows the range of scores from three forecast models.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Halb gefüllte Nächte sind eine erste Einschätzung. Ein sanfter Schein umfasst, was drei Vorhersagemodelle erwarten."
+            "value": "Halb gefüllte Nächte sind eine erste Einschätzung: eine Vorhersage mehrere Tage im Voraus, gemischt mit der üblichen Bewölkung. Der sanfte Schein zeigt die Spanne der Werte aus drei Vorhersagemodellen."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Half-filled nights are an early look. A soft glow spans what three forecast models expect."
+            "value": "Half-filled nights are an early look: a forecast several days ahead, mixed with the usual clouds. The soft glow shows the range of scores from three forecast models."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las noches de medio relleno son una vista anticipada. Un brillo suave abarca lo que esperan tres modelos de pronóstico."
+            "value": "Las noches a medio rellenar son una vista anticipada: un pronóstico a varios días, mezclado con la nubosidad habitual. El brillo suave muestra el rango de índices de tres modelos de pronóstico."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les nuits à moitié pleines sont une tendance. Un halo doux couvre ce qu’attendent trois modèles de prévision."
+            "value": "Les nuits à moitié remplies sont une tendance : une prévision à plusieurs jours, mélangée à la nébulosité habituelle. La lueur douce montre l’écart des indices de trois modèles de prévision."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "半分塗りの夜は早めの見通しです。淡い光の帯は、3つの予報モデルが予想する範囲を示しています。"
+            "value": "半分塗りの夜は早めの見通しです。数日先の予報を平年の雲量と混ぜています。やわらかな光は、3つの予報モデルによるスコアの幅を示します。"
           }
         }
       }
@@ -29992,107 +30052,107 @@
         }
       }
     },
-    "Hollow: %@, so the Moon and darkness only.": {
+    "Hollow: %@. Nyx uses only the Moon and darkness.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leer: %@, also nur Mond und Dunkelheit."
+            "value": "Leer: %@. Nyx nutzt nur den Mond und die Dunkelheit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hollow: %@, so the Moon and darkness only."
+            "value": "Hollow: %@. Nyx uses only the Moon and darkness."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sin relleno: %@, así que solo cuentan la Luna y la oscuridad."
+            "value": "Sin relleno: %@. Nyx usa solo la Luna y la oscuridad."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vide : %@, donc seulement la Lune et l’obscurité."
+            "value": "Vide : %@. Nyx n’utilise que la Lune et l’obscurité."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "白抜き：%@。月と暗さだけで計算しています。"
+            "value": "白抜き：%@。Nyxは月と暗さだけを使っています。"
           }
         }
       }
     },
-    "Hollow: %@, so the park's usual clouds, or the Moon and darkness only where those are not known.": {
+    "Hollow: %@. Nyx uses the park's usual clouds, or only the Moon and darkness where those are not known.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leer: %@, also die übliche Bewölkung des Parks oder nur Mond und Dunkelheit, wo diese unbekannt ist."
+            "value": "Leer: %@. Nyx nutzt die übliche Bewölkung des Parks oder, wo sie nicht bekannt ist, nur den Mond und die Dunkelheit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hollow: %@, so the park's usual clouds, or the Moon and darkness only where those are not known."
+            "value": "Hollow: %@. Nyx uses the park's usual clouds, or only the Moon and darkness where those are not known."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sin relleno: %@, así que cuenta la nubosidad habitual del parque, o solo la Luna y la oscuridad donde no se conoce."
+            "value": "Sin relleno: %@. Nyx usa la nubosidad habitual del parque, o solo la Luna y la oscuridad donde no se conoce."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vide : %@, donc la nébulosité habituelle du parc, ou seulement la Lune et l’obscurité là où elle est inconnue."
+            "value": "Vide : %@. Nyx utilise la nébulosité habituelle du parc, ou seulement la Lune et l’obscurité là où elle n’est pas connue."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "白抜き：%@。公園の平年の雲量を使い、それが分からない場合は月と暗さだけで計算しています。"
+            "value": "白抜き：%@。Nyxは公園の平年の雲量を使い、それがわからない場所では月と暗さだけを使っています。"
           }
         }
       }
     },
-    "Hollow: %@, so the park's usual clouds.": {
+    "Hollow: %@. Nyx uses the park's usual clouds.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leer: %@, also die übliche Bewölkung des Parks."
+            "value": "Leer: %@. Nyx nutzt die übliche Bewölkung des Parks."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hollow: %@, so the park's usual clouds."
+            "value": "Hollow: %@. Nyx uses the park's usual clouds."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sin relleno: %@, así que cuenta la nubosidad habitual del parque."
+            "value": "Sin relleno: %@. Nyx usa la nubosidad habitual del parque."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vide : %@, donc la nébulosité habituelle du parc."
+            "value": "Vide : %@. Nyx utilise la nébulosité habituelle du parc."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "白抜き：%@。公園の平年の雲量を使っています。"
+            "value": "白抜き：%@。Nyxは公園の平年の雲量を使っています。"
           }
         }
       }
@@ -31283,41 +31343,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "いちばんよい連夜の中。スコアの内訳を開きます。"
-          }
-        }
-      }
-    },
-    "In the dark": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Im Dunkeln"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In the dark"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En la oscuridad"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dans le noir"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "暗がりで"
           }
         }
       }
@@ -33097,37 +33122,37 @@
         }
       }
     },
-    "Learn to look up": {
+    "Learn about the night sky": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lerne, nach oben zu schauen"
+            "value": "Mehr über den Nachthimmel"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Learn to look up"
+            "value": "Learn about the night sky"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aprende a mirar el cielo"
+            "value": "Aprende sobre el cielo nocturno"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apprendre à lever les yeux"
+            "value": "En savoir plus sur le ciel nocturne"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "空の見上げ方"
+            "value": "夜空について学ぶ"
           }
         }
       }
@@ -34942,37 +34967,37 @@
         }
       }
     },
-    "Made for dark eyes": {
+    "Made for use in the dark": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gemacht für Augen im Dunkeln"
+            "value": "Gemacht für die Dunkelheit"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Made for dark eyes"
+            "value": "Made for use in the dark"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hecho para ojos en la oscuridad"
+            "value": "Hecha para usar en la oscuridad"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fait pour des yeux habitués au noir"
+            "value": "Conçue pour le noir"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "暗さに慣れた目のために"
+            "value": "暗い場所で使うために"
           }
         }
       }
@@ -36016,111 +36041,6 @@
         }
       }
     },
-    "Milky Way core not up in true darkness.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Das Milchstraßenzentrum steht in der echten Dunkelheit nicht am Himmel."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Milky Way core not up in true darkness."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El núcleo de la Vía Láctea no está en el cielo durante la oscuridad total."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le cœur de la Voie lactée n’est pas levé pendant l’obscurité totale."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "完全に暗い時間に天の川の中心部は空にありません。"
-          }
-        }
-      }
-    },
-    "Milky Way core only briefly, under the Moon.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Milchstraßenzentrum nur kurz, bei Mondlicht."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Milky Way core only briefly, under the Moon."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Núcleo de la Vía Láctea solo un momento, con Luna."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cœur de la Voie lactée, brièvement et sous la Lune."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "天の川の中心部は短時間だけで、月明かりの中です。"
-          }
-        }
-      }
-    },
-    "Milky Way core only briefly.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Milchstraßenzentrum nur kurz."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Milky Way core only briefly."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Núcleo de la Vía Láctea solo un momento."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cœur de la Voie lactée, brièvement seulement."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "天の川の中心部は短時間だけ。"
-          }
-        }
-      }
-    },
     "Milky Way core up": {
       "extractionState": "manual",
       "localizations": {
@@ -36257,41 +36177,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "天の川の中心部はずっと空に"
-          }
-        }
-      }
-    },
-    "Milky Way core up, but under the Moon.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Milchstraßenzentrum am Himmel, aber bei Mondlicht."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Milky Way core up, but under the Moon."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Núcleo de la Vía Láctea visible, pero con Luna."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cœur de la Voie lactée levé, mais sous la Lune."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "天の川の中心部は見えますが、月明かりの中です。"
           }
         }
       }
@@ -36506,37 +36391,37 @@
         }
       }
     },
-    "Models differ": {
+    "Models disagree": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Modelle uneinig"
+            "value": "Modelle weichen ab"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Models differ"
+            "value": "Models disagree"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Modelos difieren"
+            "value": "Los modelos discrepan"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Modèles divergents"
+            "value": "Les modèles divergent"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "モデルに差"
+            "value": "モデルが不一致"
           }
         }
       }
@@ -36607,6 +36492,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "モデルが一致していません：雲量%@。明日もう一度確認してください。"
+          }
+        }
+      }
+    },
+    "Models roughly agree": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelle sind sich etwa einig"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models roughly agree"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los modelos casi coinciden"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les modèles concordent à peu près"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "モデルはほぼ一致"
           }
         }
       }
@@ -38011,41 +37931,6 @@
         }
       }
     },
-    "Moonlight, clouds, sky glow and true darkness become one score. Every estimate tells you what is still unknown.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mondlicht, Wolken, Himmelsaufhellung und echte Dunkelheit werden zu einem Wert. Jede Schätzung sagt dir, was noch unbekannt ist."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moonlight, clouds, sky glow and true darkness become one score. Every estimate tells you what is still unknown."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La luz de la Luna, las nubes, el resplandor del cielo y la oscuridad total se convierten en un solo índice. Cada estimación te dice qué sigue sin saberse."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clair de lune, nuages, halo lumineux et obscurité totale forment un seul indice. Chaque estimation vous dit ce qui reste inconnu."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月明かり、雲、夜空の明るさ、完全に暗い時間を、一つのスコアにまとめます。どの推定値も、まだわからないことを伝えます。"
-          }
-        }
-      }
-    },
     "Moonlit hours are lighter and hatched.": {
       "extractionState": "manual",
       "localizations": {
@@ -38641,76 +38526,6 @@
         }
       }
     },
-    "More skies within reach": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weitere Himmel in Reichweite"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "More skies within reach"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Más cielos a tu alcance"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "D’autres ciels à portée"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "行ける範囲のほかの空"
-          }
-        }
-      }
-    },
-    "More skies within reach on %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weitere Himmel in Reichweite am %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "More skies within reach on %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Más cielos a tu alcance el %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "D’autres ciels à portée le %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@に行ける範囲のほかの空"
-          }
-        }
-      }
-    },
     "More up this night (%lld)": {
       "extractionState": "manual",
       "localizations": {
@@ -39082,41 +38897,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "「今夜の空」ウィジェットを、今夜のスコア順で次の保存した場所に切り替えます。明日はいちばん暗い場所に戻ります。"
-          }
-        }
-      }
-    },
-    "My free nights": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meine freien Nächte"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "My free nights"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mis noches libres"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mes nuits libres"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "自由に使える夜"
           }
         }
       }
@@ -39891,19 +39671,19 @@
         }
       }
     },
-    "Nearest dark area on the satellite light map (no name, no score, not checked on the ground): %@ %@ of %@ as the crow flies, Bortle %lld.": {
+    "Nearest dark area on the satellite light map (no name, no score, not checked on the ground): %@ %@ of %@ in a straight line, Bortle %lld.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nächste dunkle Gegend auf der Satelliten-Lichtkarte (kein Name, kein Wert, vor Ort nicht geprüft): %1$@ Richtung %2$@ von %3$@, Luftlinie, Bortle %4$lld."
+            "value": "Nächste dunkle Gegend auf der Satelliten-Lichtkarte (kein Name, kein Wert, vor Ort nicht geprüft): %1$@ Richtung %2$@ von %3$@, in Luftlinie, Bortle %4$lld."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nearest dark area on the satellite light map (no name, no score, not checked on the ground): %@ %@ of %@ as the crow flies, Bortle %lld."
+            "value": "Nearest dark area on the satellite light map (no name, no score, not checked on the ground): %@ %@ of %@ in a straight line, Bortle %lld."
           }
         },
         "es": {
@@ -39915,7 +39695,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zone sombre la plus proche sur la carte satellite de la lumière (sans nom, sans indice, non vérifiée sur le terrain) : à %1$@ depuis %3$@, direction %2$@, à vol d’oiseau, Bortle %4$lld."
+            "value": "Zone sombre la plus proche sur la carte satellite de la lumière (sans nom, sans indice, non vérifiée sur le terrain) : à %1$@ depuis %3$@, direction %2$@, en ligne droite, Bortle %4$lld."
           }
         },
         "ja": {
@@ -41287,6 +41067,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "夜"
+          }
+        }
+      }
+    },
+    "Nights I can go": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächte, in denen ich kann"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights I can go"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noches en que puedo ir"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuits où je peux y aller"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行ける夜"
           }
         }
       }
@@ -43501,6 +43316,41 @@
         }
       }
     },
+    "No report from iOS yet. The first usually arrives about a day after you start using Nyx.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch kein Bericht von iOS. Der erste kommt meist etwa einen Tag, nachdem du Nyx zu nutzen beginnst."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No report from iOS yet. The first usually arrives about a day after you start using Nyx."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay informe de iOS. El primero suele llegar un día después de empezar a usar Nyx."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de rapport d’iOS. Le premier arrive en général environ un jour après vos débuts avec Nyx."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOSからのレポートはまだありません。最初のレポートは、Nyxを使い始めてから1日ほどで届くことが多いです。"
+          }
+        }
+      }
+    },
     "No road access": {
       "extractionState": "manual",
       "localizations": {
@@ -44126,6 +43976,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "最新情報に予定されているプログラムはありません。ビジターセンターで尋ねてください。"
+          }
+        }
+      }
+    },
+    "No viewing spot is listed for this park yet. The park's own site says where night visitors go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für diesen Park ist noch kein Beobachtungsplatz eingetragen. Die Website des Parks sagt, wohin Besucher nachts gehen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No viewing spot is listed for this park yet. The park's own site says where night visitors go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay ningún punto de observación en la lista de este parque. El sitio web del parque indica adónde van los visitantes de noche."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun point d’observation n’est encore indiqué pour ce parc. Le site du parc dit où vont les visiteurs la nuit."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この公園にはまだ観察スポットが登録されていません。夜の訪問者がどこへ行くかは、公園の公式サイトに載っています。"
           }
         }
       }
@@ -45169,7 +45054,7 @@
         }
       }
     },
-    "Nyx can remind you the evening before a Pristine night, 90 or higher, at a park or place you save or a spot you add: only with a full cloud forecast, up to five days ahead, and at most once a week for each place. It can also mark the peak of a major meteor shower. Reminders are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access.": {
+    "Nyx can remind you the evening before a night of 90 or higher at a place you save. It does this only with a full cloud forecast, up to five days ahead, and at most once a week for each place. It can also remind you of a major meteor shower. Reminders stay on this iPhone. They are estimates, not promises of clear skies or open roads.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -45178,13 +45063,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx kann dich am Abend vor einer Nacht mit „Makellos“ (90 oder mehr) erinnern, an einem gespeicherten Park oder Ort oder einem hinzugefügten Platz: nur mit vollständiger Wolkenvorhersage, bis zu fünf Tage im Voraus und höchstens einmal pro Woche für jeden Ort. Nyx kann auch den Höhepunkt eines großen Meteorstroms melden. Erinnerungen werden auf diesem iPad geplant. Sie sind Schätzungen, keine Bestätigung von klarem Himmel oder Zugang."
+                  "value": "Nyx kann dich am Abend vor einer Nacht mit 90 oder mehr an einem gespeicherten Ort erinnern. Das geschieht nur mit einer vollen Wolkenvorhersage, bis zu fünf Tage im Voraus, und höchstens einmal pro Woche für jeden Ort. Nyx kann dich auch an einen großen Meteorstrom erinnern. Erinnerungen bleiben auf diesem iPad. Sie sind Schätzungen, keine Zusage für klaren Himmel oder offene Straßen."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx kann dich am Abend vor einer Nacht mit „Makellos“ (90 oder mehr) erinnern, an einem gespeicherten Park oder Ort oder einem hinzugefügten Platz: nur mit vollständiger Wolkenvorhersage, bis zu fünf Tage im Voraus und höchstens einmal pro Woche für jeden Ort. Nyx kann auch den Höhepunkt eines großen Meteorstroms melden. Erinnerungen werden auf diesem iPhone geplant. Sie sind Schätzungen, keine Bestätigung von klarem Himmel oder Zugang."
+                  "value": "Nyx kann dich am Abend vor einer Nacht mit 90 oder mehr an einem gespeicherten Ort erinnern. Das geschieht nur mit einer vollen Wolkenvorhersage, bis zu fünf Tage im Voraus, und höchstens einmal pro Woche für jeden Ort. Nyx kann dich auch an einen großen Meteorstrom erinnern. Erinnerungen bleiben auf diesem iPhone. Sie sind Schätzungen, keine Zusage für klaren Himmel oder offene Straßen."
                 }
               }
             }
@@ -45196,13 +45081,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx can remind you the evening before a Pristine night, 90 or higher, at a park or place you save or a spot you add: only with a full cloud forecast, up to five days ahead, and at most once a week for each place. It can also mark the peak of a major meteor shower. Reminders are scheduled on this iPad. They are estimates, not confirmations of clear skies or access."
+                  "value": "Nyx can remind you the evening before a night of 90 or higher at a place you save. It does this only with a full cloud forecast, up to five days ahead, and at most once a week for each place. It can also remind you of a major meteor shower. Reminders stay on this iPad. They are estimates, not promises of clear skies or open roads."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx can remind you the evening before a Pristine night, 90 or higher, at a park or place you save or a spot you add: only with a full cloud forecast, up to five days ahead, and at most once a week for each place. It can also mark the peak of a major meteor shower. Reminders are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access."
+                  "value": "Nyx can remind you the evening before a night of 90 or higher at a place you save. It does this only with a full cloud forecast, up to five days ahead, and at most once a week for each place. It can also remind you of a major meteor shower. Reminders stay on this iPhone. They are estimates, not promises of clear skies or open roads."
                 }
               }
             }
@@ -45214,13 +45099,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx puede avisarte la tarde anterior a una noche Prístina, de 90 o más, en un parque o lugar que guardes o un sitio que añadas: solo con una previsión de nubes completa, con hasta cinco días de antelación y como mucho una vez por semana para cada lugar. También puede avisarte del máximo de una gran lluvia de meteoros. Los recordatorios se programan en este iPad. Son estimaciones, no confirmaciones de cielo despejado ni de acceso."
+                  "value": "Nyx puede avisarte la tarde anterior a una noche de 90 o más en un lugar que guardes. Solo lo hace con un pronóstico de nubes completo, hasta cinco días antes, y como mucho una vez por semana para cada lugar. También puede avisarte de una gran lluvia de meteoros. Los avisos se quedan en este iPad. Son estimaciones, no promesas de cielo despejado ni de carreteras abiertas."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx puede avisarte la tarde anterior a una noche Prístina, de 90 o más, en un parque o lugar que guardes o un sitio que añadas: solo con una previsión de nubes completa, con hasta cinco días de antelación y como mucho una vez por semana para cada lugar. También puede avisarte del máximo de una gran lluvia de meteoros. Los recordatorios se programan en este iPhone. Son estimaciones, no confirmaciones de cielo despejado ni de acceso."
+                  "value": "Nyx puede avisarte la tarde anterior a una noche de 90 o más en un lugar que guardes. Solo lo hace con un pronóstico de nubes completo, hasta cinco días antes, y como mucho una vez por semana para cada lugar. También puede avisarte de una gran lluvia de meteoros. Los avisos se quedan en este iPhone. Son estimaciones, no promesas de cielo despejado ni de carreteras abiertas."
                 }
               }
             }
@@ -45232,13 +45117,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit Immaculée, de 90 ou plus, dans un parc ou un lieu enregistré, ou un endroit ajouté : seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance et au plus une fois par semaine pour chaque lieu. Nyx peut aussi signaler le maximum d’une grande pluie d’étoiles filantes. Les rappels sont programmés sur cet iPad. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
+                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit de 90 ou plus dans un lieu enregistré. Seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance, et au plus une fois par semaine pour chaque lieu. Nyx peut aussi vous rappeler une grande pluie de météores. Les rappels restent sur cet iPad. Ce sont des estimations, pas la promesse d’un ciel dégagé ni de routes ouvertes."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit Immaculée, de 90 ou plus, dans un parc ou un lieu enregistré, ou un endroit ajouté : seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance et au plus une fois par semaine pour chaque lieu. Nyx peut aussi signaler le maximum d’une grande pluie d’étoiles filantes. Les rappels sont programmés sur cet iPhone. Ce sont des estimations, pas des confirmations de ciel dégagé ni d’accès."
+                  "value": "Nyx peut vous prévenir la veille au soir d’une nuit de 90 ou plus dans un lieu enregistré. Seulement avec une prévision de nuages complète, jusqu’à cinq jours à l’avance, et au plus une fois par semaine pour chaque lieu. Nyx peut aussi vous rappeler une grande pluie de météores. Les rappels restent sur cet iPhone. Ce sont des estimations, pas la promesse d’un ciel dégagé ni de routes ouvertes."
                 }
               }
             }
@@ -45250,13 +45135,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyxは、保存した公園や場所、追加したスポットで90以上の「極上」の夜があるとき、その前日の夕方にお知らせします。対象は雲の予報がそろった5日先までの夜で、各場所につき週1回までです。大きな流星群の極大日もお知らせできます。リマインダーはこのiPad上で設定されます。これは見込みであり、晴天や通行を保証するものではありません。"
+                  "value": "Nyxは、保存した場所で90点以上になる夜の前日の夕方にお知らせできます。お知らせは雲の予報が5日先までそろっているときだけで、各場所につき週1回までです。大きな流星群もお知らせできます。お知らせはこのiPadに残ります。推定であり、晴れや道路の通行を約束するものではありません。"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyxは、保存した公園や場所、追加したスポットで90以上の「極上」の夜があるとき、その前日の夕方にお知らせします。対象は雲の予報がそろった5日先までの夜で、各場所につき週1回までです。大きな流星群の極大日もお知らせできます。リマインダーはこのiPhone上で設定されます。これは見込みであり、晴天や通行を保証するものではありません。"
+                  "value": "Nyxは、保存した場所で90点以上になる夜の前日の夕方にお知らせできます。お知らせは雲の予報が5日先までそろっているときだけで、各場所につき週1回までです。大きな流星群もお知らせできます。お知らせはこのiPhoneに残ります。推定であり、晴れや道路の通行を約束するものではありません。"
                 }
               }
             }
@@ -45524,6 +45409,41 @@
         }
       }
     },
+    "Nyx checks this night's forecast and tells you if it gets clearly worse.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx prüft die Vorhersage für diese Nacht und sagt dir, wenn sie deutlich schlechter wird."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx checks this night's forecast and tells you if it gets clearly worse."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx revisa el pronóstico de esta noche y te avisa si empeora claramente."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx vérifie la prévision de cette nuit et vous prévient si elle se dégrade nettement."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxがこの夜の予報を確認し、はっきり悪くなったらお知らせします。"
+          }
+        }
+      }
+    },
     "Nyx compares distances on this iPhone. Your location is never sent to a service.": {
       "extractionState": "manual",
       "localizations": {
@@ -45619,37 +45539,37 @@
         }
       }
     },
-    "Nyx compares national parks and dark-sky places around the world, night by night, so you know where to go and which night to take off.": {
+    "Nyx compares national parks and dark-sky places around the world, night by night, so you know where to go, and on which night.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx vergleicht Nationalparks und Dunkelorte auf der ganzen Welt, Nacht für Nacht, damit du weißt, wohin du fährst und welche Nacht du dir freinimmst."
+            "value": "Nyx vergleicht Nationalparks und Dunkelorte auf der ganzen Welt, Nacht für Nacht, damit du weißt, wohin du fährst und in welcher Nacht."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx compares national parks and dark-sky places around the world, night by night, so you know where to go and which night to take off."
+            "value": "Nyx compares national parks and dark-sky places around the world, night by night, so you know where to go, and on which night."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx compara parques nacionales y lugares de cielo oscuro de todo el mundo, noche a noche, para que sepas adónde ir y qué noche tomarte libre."
+            "value": "Nyx compara parques nacionales y lugares de cielo oscuro de todo el mundo, noche a noche, para que sepas adónde ir y qué noche."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx compare les parcs nationaux et les sites de ciel étoilé du monde entier, nuit après nuit, pour que vous sachiez où aller et quelle nuit prendre."
+            "value": "Nyx compare les parcs nationaux et les sites de ciel étoilé du monde entier, nuit après nuit, pour que vous sachiez où aller, et quelle nuit."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyxは世界の国立公園と暗い空の場所を一夜ずつ比較します。どこへ行き、どの夜に休みを取ればよいかがわかります。"
+            "value": "Nyxは世界の国立公園と暗い空の場所を一夜ずつ比較します。どこへ、どの夜に行けばよいかがわかります。"
           }
         }
       }
@@ -46134,6 +46054,41 @@
         }
       }
     },
+    "Nyx is free, with no purchases and no subscriptions.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx ist kostenlos, ohne Käufe und ohne Abos."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx is free, with no purchases and no subscriptions."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx es gratis, sin compras ni suscripciones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx est gratuit, sans achats ni abonnements."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxは無料です。購入もサブスクリプションもありません。"
+          }
+        }
+      }
+    },
     "Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.": {
       "extractionState": "manual",
       "localizations": {
@@ -46165,41 +46120,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyxは、National Park Service、NASA、DarkSky Internationalとは提携しておらず、これらの組織から推奨を受けているものでもありません。"
-          }
-        }
-      }
-    },
-    "Nyx keeps watch and tells you if this night gets clearly worse.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx behält die Nacht im Blick und sagt dir, wenn sie deutlich schlechter wird."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx keeps watch and tells you if this night gets clearly worse."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx vigila y te avisa si esta noche empeora claramente."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx veille et vous prévient si cette nuit se dégrade nettement."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyxが見守り、この夜がはっきり悪くなったらお知らせします。"
           }
         }
       }
@@ -46305,6 +46225,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyxはそこからの直線距離を測ります。選ぶまでは、下の夜は例として表示されます。"
+          }
+        }
+      }
+    },
+    "Nyx never sends where you are. A spot you save is sent only as its position, rounded to about %@, for its cloud forecast; you can turn that off below. Opening a U.S. park's page asks for that park's ranger programs, and places abroad are asked about by whole regions, never one at a time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx sendet nie, wo du bist. Ein gespeicherter Platz wird nur als seine Position gesendet, auf etwa %@ gerundet, für seine Wolkenvorhersage; du kannst das unten ausschalten. Wenn du die Seite eines US-Parks öffnest, werden die Rangerprogramme dieses Parks abgefragt, und Orte im Ausland werden nach ganzen Regionen abgefragt, nie einzeln."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx never sends where you are. A spot you save is sent only as its position, rounded to about %@, for its cloud forecast; you can turn that off below. Opening a U.S. park's page asks for that park's ranger programs, and places abroad are asked about by whole regions, never one at a time."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx nunca envía dónde estás. Un sitio que guardes se envía solo como su posición, redondeada a unos %@, para su pronóstico de nubes; puedes desactivarlo más abajo. Abrir la página de un parque de EE. UU. pide los programas de guardaparques de ese parque, y los lugares del extranjero se piden por regiones enteras, nunca uno a uno."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx n’envoie jamais l’endroit où vous êtes. Un endroit enregistré n’est envoyé que par sa position, arrondie à environ %@, pour sa prévision de nuages ; vous pouvez le désactiver plus bas. Ouvrir la page d’un parc américain demande les programmes des rangers de ce parc, et les lieux à l’étranger sont demandés par régions entières, jamais un par un."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxがあなたの居場所を送ることはありません。保存したスポットは、雲の予報のために約%@に丸めた位置だけが送られます（下でオフにできます）。米国の公園のページを開くとその公園のレンジャープログラムを問い合わせ、海外の場所は1か所ずつではなく地域ごとに問い合わせます。"
           }
         }
       }
@@ -46794,7 +46749,7 @@
         }
       }
     },
-    "Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a city or a park.": {
+    "Nyx uses your location while you use it: to find parks within a straight-line distance, to start from where you are next time, to notice when you are at a U.S. national park, to turn the star map to true north and to turn night vision on at dusk. It stays on this iPhone. You can also choose a city or a park.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -46803,13 +46758,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx nutzt deinen Standort einmal, um Parks in einem Luftlinienradius zu finden. Er bleibt auf diesem iPad. Du kannst auch eine Stadt oder einen Park wählen."
+                  "value": "Nyx nutzt deinen Standort, während du die App verwendest: um Parks innerhalb einer Luftlinienentfernung zu finden, beim nächsten Mal dort zu starten, wo du bist, zu erkennen, wann du in einem US-Nationalpark bist, die Himmelskarte nach geografisch Nord auszurichten und die Nachtsicht in der Dämmerung einzuschalten. Er bleibt auf diesem iPad. Du kannst auch eine Stadt oder einen Park wählen."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx nutzt deinen Standort einmal, um Parks in einem Luftlinienradius zu finden. Er bleibt auf diesem iPhone. Du kannst auch eine Stadt oder einen Park wählen."
+                  "value": "Nyx nutzt deinen Standort, während du die App verwendest: um Parks innerhalb einer Luftlinienentfernung zu finden, beim nächsten Mal dort zu starten, wo du bist, zu erkennen, wann du in einem US-Nationalpark bist, die Himmelskarte nach geografisch Nord auszurichten und die Nachtsicht in der Dämmerung einzuschalten. Er bleibt auf diesem iPhone. Du kannst auch eine Stadt oder einen Park wählen."
                 }
               }
             }
@@ -46821,13 +46776,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx uses your location once to find parks within a straight-line radius. It stays on this iPad. You can also choose a city or a park."
+                  "value": "Nyx uses your location while you use it: to find parks within a straight-line distance, to start from where you are next time, to notice when you are at a U.S. national park, to turn the star map to true north and to turn night vision on at dusk. It stays on this iPad. You can also choose a city or a park."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a city or a park."
+                  "value": "Nyx uses your location while you use it: to find parks within a straight-line distance, to start from where you are next time, to notice when you are at a U.S. national park, to turn the star map to true north and to turn night vision on at dusk. It stays on this iPhone. You can also choose a city or a park."
                 }
               }
             }
@@ -46839,13 +46794,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx usa tu ubicación una vez para encontrar parques dentro de un radio en línea recta. Se queda en este iPad. También puedes elegir una ciudad o un parque."
+                  "value": "Nyx usa tu ubicación mientras lo usas: para encontrar parques dentro de una distancia en línea recta, empezar desde donde estés la próxima vez, saber cuándo estás en un parque nacional de EE. UU., orientar el mapa del cielo hacia el norte verdadero y activar la visión nocturna al anochecer. Se queda en este iPad. También puedes elegir una ciudad o un parque."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx usa tu ubicación una vez para encontrar parques dentro de un radio en línea recta. Se queda en este iPhone. También puedes elegir una ciudad o un parque."
+                  "value": "Nyx usa tu ubicación mientras lo usas: para encontrar parques dentro de una distancia en línea recta, empezar desde donde estés la próxima vez, saber cuándo estás en un parque nacional de EE. UU., orientar el mapa del cielo hacia el norte verdadero y activar la visión nocturna al anochecer. Se queda en este iPhone. También puedes elegir una ciudad o un parque."
                 }
               }
             }
@@ -46857,13 +46812,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx utilise votre position une fois pour trouver les parcs dans un rayon à vol d’oiseau. Elle reste sur cet iPad. Vous pouvez aussi choisir une ville ou un parc."
+                  "value": "Nyx utilise votre position pendant que vous l’utilisez : pour trouver des parcs à une distance en ligne droite, partir de là où vous êtes la prochaine fois, savoir quand vous êtes dans un parc national des États-Unis, orienter la carte du ciel vers le nord géographique et activer la vision nocturne au crépuscule. Elle reste sur cet iPad. Vous pouvez aussi choisir une ville ou un parc."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx utilise votre position une fois pour trouver les parcs dans un rayon à vol d’oiseau. Elle reste sur cet iPhone. Vous pouvez aussi choisir une ville ou un parc."
+                  "value": "Nyx utilise votre position pendant que vous l’utilisez : pour trouver des parcs à une distance en ligne droite, partir de là où vous êtes la prochaine fois, savoir quand vous êtes dans un parc national des États-Unis, orienter la carte du ciel vers le nord géographique et activer la vision nocturne au crépuscule. Elle reste sur cet iPhone. Vous pouvez aussi choisir une ville ou un parc."
                 }
               }
             }
@@ -46875,13 +46830,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyxは、直線距離で一定の範囲内にある公園を探すため、位置情報を一度だけ使います。位置情報はこのiPadの外に出ません。都市や公園を選ぶこともできます。"
+                  "value": "Nyxは使用中に位置情報を使い、直線距離の範囲内にある公園を探し、次回もいる場所から始め、米国の国立公園にいることを確認し、星図を真北に合わせ、夕暮れにナイトビジョンをオンにします。位置情報はこのiPadに残ります。都市や公園を選ぶこともできます。"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyxは、直線距離で一定の範囲内にある公園を探すため、位置情報を一度だけ使います。位置情報はこのiPhoneの外に出ません。都市や公園を選ぶこともできます。"
+                  "value": "Nyxは使用中に位置情報を使い、直線距離の範囲内にある公園を探し、次回もいる場所から始め、米国の国立公園にいることを確認し、星図を真北に合わせ、夕暮れにナイトビジョンをオンにします。位置情報はこのiPhoneに残ります。都市や公園を選ぶこともできます。"
                 }
               }
             }
@@ -49820,6 +49775,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "オプション"
+          }
+        }
+      }
+    },
+    "Other dark places in reach": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weitere dunkle Orte in Reichweite"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other dark places in reach"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otros lugares oscuros a tu alcance"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "D’autres lieux sombres à portée"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行ける範囲のほかの暗い場所"
+          }
+        }
+      }
+    },
+    "Other dark places in reach on %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weitere dunkle Orte in Reichweite am %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other dark places in reach on %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otros lugares oscuros a tu alcance el %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "D’autres lieux sombres à portée le %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@に行ける範囲のほかの暗い場所"
           }
         }
       }
@@ -53899,6 +53924,101 @@
         }
       }
     },
+    "Red light keeps your eyes used to the dark. Turn it on here or from Control Center. Nyx has no account, no ads, no tracking. Your journal never leaves this phone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rotes Licht hält deine Augen an die Dunkelheit gewöhnt. Schalte es hier oder im Kontrollzentrum ein. Nyx hat keinen Account, keine Werbung, kein Tracking. Dein Journal verlässt dieses iPad nie."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rotes Licht hält deine Augen an die Dunkelheit gewöhnt. Schalte es hier oder im Kontrollzentrum ein. Nyx hat keinen Account, keine Werbung, kein Tracking. Dein Journal verlässt dieses iPhone nie."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Red light keeps your eyes used to the dark. Turn it on here or from Control Center. Nyx has no account, no ads, no tracking. Your journal never leaves this iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Red light keeps your eyes used to the dark. Turn it on here or from Control Center. Nyx has no account, no ads, no tracking. Your journal never leaves this phone."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "La luz roja mantiene tus ojos acostumbrados a la oscuridad. Actívala aquí o desde el Centro de control. Nyx no tiene cuentas, anuncios ni rastreo. Tu diario nunca sale de este iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "La luz roja mantiene tus ojos acostumbrados a la oscuridad. Actívala aquí o desde el Centro de control. Nyx no tiene cuentas, anuncios ni rastreo. Tu diario nunca sale de este teléfono."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "La lumière rouge garde vos yeux habitués au noir. Activez-la ici ou depuis le centre de contrôle. Nyx n’a ni compte, ni publicité, ni pistage. Votre journal ne quitte jamais cet iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "La lumière rouge garde vos yeux habitués au noir. Activez-la ici ou depuis le centre de contrôle. Nyx n’a ni compte, ni publicité, ni pistage. Votre journal ne quitte jamais ce téléphone."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "赤い光で目を暗さに慣れたままにできます。ここかコントロールセンターでオンにできます。Nyxにはアカウントも広告もトラッキングもありません。ジャーナルがこのiPadの外に出ることはありません。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "赤い光で目を暗さに慣れたままにできます。ここかコントロールセンターでオンにできます。Nyxにはアカウントも広告もトラッキングもありません。ジャーナルがこの電話の外に出ることはありません。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Red light only. Nyx taps your wrist at 25 and 30 minutes, even with the screen off.": {
       "extractionState": "manual",
       "localizations": {
@@ -55565,41 +55685,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "桿体が働き始める"
-          }
-        }
-      }
-    },
-    "Roughly agree": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Etwa einig"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Roughly agree"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Casi coinciden"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Concordent à peu près"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ほぼ一致"
           }
         }
       }
@@ -57325,6 +57410,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "スコアの内訳"
+          }
+        }
+      }
+    },
+    "Score range across forecast models: %lld to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wertespanne der Vorhersagemodelle: %1$lld bis %2$lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score range across forecast models: %lld to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rango del índice según los modelos de pronóstico: %1$lld a %2$lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Écart d’indice selon les modèles de prévision : %1$lld à %2$lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報モデルによるスコアの幅：%1$lld〜%2$lld。"
+          }
+        }
+      }
+    },
+    "Score range across forecast models: %lld–%lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wertespanne der Vorhersagemodelle: %1$lld–%2$lld"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score range across forecast models: %lld–%lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rango del índice según los modelos de pronóstico: %1$lld–%2$lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Écart d’indice selon les modèles de prévision : %1$lld–%2$lld"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報モデルによるスコアの幅：%1$lld–%2$lld"
           }
         }
       }
@@ -64921,6 +65076,41 @@
         }
       }
     },
+    "The Milky Way core is below the horizon during true darkness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Milchstraßenzentrum steht während der echten Dunkelheit unter dem Horizont."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Milky Way core is below the horizon during true darkness."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El núcleo de la Vía Láctea está bajo el horizonte durante la oscuridad total."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le cœur de la Voie lactée est sous l’horizon pendant l’obscurité totale."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間、天の川の中心部は地平線の下にあります。"
+          }
+        }
+      }
+    },
     "The Milky Way core is up at %@": {
       "extractionState": "manual",
       "localizations": {
@@ -64952,6 +65142,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "天の川の中心部は%@に空にあります"
+          }
+        }
+      }
+    },
+    "The Milky Way core is up only briefly, under the Moon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Milchstraßenzentrum steht nur kurz am Himmel, unter dem Mond."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Milky Way core is up only briefly, under the Moon."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El núcleo de la Vía Láctea está en el cielo solo un rato, bajo la Luna."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le cœur de la Voie lactée n’est levé que brièvement, sous la Lune."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天の川の中心部が空にあるのはわずかな時間で、月明かりの下です。"
+          }
+        }
+      }
+    },
+    "The Milky Way core is up only briefly.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Milchstraßenzentrum steht nur kurz am Himmel."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Milky Way core is up only briefly."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El núcleo de la Vía Láctea está en el cielo solo un rato."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le cœur de la Voie lactée n’est levé que brièvement."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天の川の中心部が空にあるのはわずかな時間です。"
+          }
+        }
+      }
+    },
+    "The Milky Way core is up, but under the Moon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Milchstraßenzentrum steht am Himmel, aber unter dem Mond."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Milky Way core is up, but under the Moon."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El núcleo de la Vía Láctea está en el cielo, pero bajo la Luna."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le cœur de la Voie lactée est levé, mais sous la Lune."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天の川の中心部は空にありますが、月明かりの下です。"
           }
         }
       }
@@ -65687,6 +65982,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "月、輝面比%1$lldパーセント、%2$@。"
+          }
+        }
+      }
+    },
+    "The Moon, clouds, light from towns and the hours of full darkness become one score. Higher is darker. Where Nyx is not sure, it says so.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Mond, die Wolken, das Licht von Orten und die Stunden voller Dunkelheit werden zu einem Wert. Höher heißt dunkler. Wo Nyx sich nicht sicher ist, sagt es das."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon, clouds, light from towns and the hours of full darkness become one score. Higher is darker. Where Nyx is not sure, it says so."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna, las nubes, la luz de los pueblos y las horas de oscuridad total se convierten en un solo índice. Más alto es más oscuro. Cuando Nyx no está seguro, lo dice."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Lune, les nuages, la lumière des villes et les heures d’obscurité totale forment un seul indice. Plus haut, c’est plus sombre. Quand Nyx n’est pas sûr, il le dit."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月、雲、街の明かり、完全に暗い時間を一つのスコアにまとめます。高いほど暗い空です。確かでないときは、そう伝えます。"
           }
         }
       }
@@ -66905,37 +67235,37 @@
         }
       }
     },
-    "The darkest nights in reach over the next 30, one for each place.": {
+    "The darkest night at each place in reach, over the next 30 nights.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die dunkelsten Nächte in Reichweite in den nächsten 30, eine für jeden Ort."
+            "value": "Die dunkelste Nacht an jedem Ort in Reichweite, in den nächsten 30 Nächten."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The darkest nights in reach over the next 30, one for each place."
+            "value": "The darkest night at each place in reach, over the next 30 nights."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las noches más oscuras a tu alcance en las próximas 30, una por cada lugar."
+            "value": "La noche más oscura de cada lugar a tu alcance, en las próximas 30 noches."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les nuits les plus noires à portée sur les 30 prochaines, une par lieu."
+            "value": "La nuit la plus sombre de chaque lieu à portée, sur les 30 prochaines nuits."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今後30夜のうち、行ける範囲でいちばん暗い夜を場所ごとに一つずつ。"
+            "value": "行ける範囲の各場所で、これから30夜のうちもっとも暗い夜。"
           }
         }
       }
@@ -67360,37 +67690,37 @@
         }
       }
     },
-    "The four parts alone would give %lld.": {
+    "The four parts add up to %lld, but that limit comes first.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die vier Teile allein ergäben %lld."
+            "value": "Die vier Teile ergeben %lld, aber diese Grenze geht vor."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The four parts alone would give %lld."
+            "value": "The four parts add up to %lld, but that limit comes first."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Solo las cuatro partes darían %lld."
+            "value": "Las cuatro partes suman %lld, pero ese límite va primero."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les quatre composantes seules donneraient %lld."
+            "value": "Les quatre composantes font %lld, mais cette limite passe avant."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "4つの要素だけなら%lld点です。"
+            "value": "4つの要素の合計は%lld点ですが、この上限が優先されます。"
           }
         }
       }
@@ -67920,19 +68250,19 @@
         }
       }
     },
-    "The nearest dark sky is %@ %@, as the crow flies.": {
+    "The nearest dark sky is %@ %@, in a straight line.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Der nächste dunkle Himmel liegt %1$@ Richtung %2$@, Luftlinie."
+            "value": "Der nächste dunkle Himmel liegt %1$@ Richtung %2$@, in Luftlinie."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The nearest dark sky is %@ %@, as the crow flies."
+            "value": "The nearest dark sky is %@ %@, in a straight line."
           }
         },
         "es": {
@@ -67944,7 +68274,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le ciel sombre le plus proche est à %1$@, direction %2$@, à vol d’oiseau."
+            "value": "Le ciel sombre le plus proche est à %1$@, direction %2$@, en ligne droite."
           }
         },
         "ja": {
@@ -68270,6 +68600,41 @@
         }
       }
     },
+    "The night you were writing is back, without its photos.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Nacht, die du geschrieben hast, ist wieder da, ohne ihre Fotos."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The night you were writing is back, without its photos."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La noche que estabas escribiendo ha vuelto, sin sus fotos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La nuit que vous écriviez est revenue, sans ses photos."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "書きかけの夜が戻りました（写真は含まれません）。"
+          }
+        }
+      }
+    },
     "The notes and photos are removed from this iPhone.": {
       "extractionState": "manual",
       "localizations": {
@@ -68365,37 +68730,37 @@
         }
       }
     },
-    "The one place of yours that Nyx sends anywhere is a spot you save: only its position, rounded to about %@, for its cloud forecast. You can turn that off below.": {
+    "The number under each night is its darkness score, from 0 to 100, and the dot grows with it. A cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Der einzige Ort von dir, den Nyx irgendwohin sendet, ist ein Platz, den du speicherst: nur seine Position, auf etwa %@ gerundet, für seine Wolkenvorhersage. Du kannst das unten ausschalten."
+            "value": "Die Zahl unter jeder Nacht ist ihr Dunkelheitswert, von 0 bis 100, und der Punkt wächst mit ihm. Eine Wolke markiert bedeckten Himmel. Vergangene Nächte behalten nur einen blassen Punkt. Ein kleiner Strich markiert das Maximum eines Meteorstroms, ein schattierter Mond eine sichtbare Mondfinsternis; beides ändert den Wert nicht."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The one place of yours that Nyx sends anywhere is a spot you save: only its position, rounded to about %@, for its cloud forecast. You can turn that off below."
+            "value": "The number under each night is its darkness score, from 0 to 100, and the dot grows with it. A cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El único lugar tuyo que Nyx envía a otra parte es un sitio que guardes: solo su posición, redondeada a unos %@, para su pronóstico de nubes. Puedes desactivarlo más abajo."
+            "value": "El número bajo cada noche es su índice de oscuridad, de 0 a 100, y el punto crece con él. Una nube indica cielo cubierto. Las noches pasadas conservan solo un punto tenue. Un pequeño trazo marca el máximo de una lluvia de meteoros, y una Luna sombreada, un eclipse de Luna visible; ninguno cambia el índice."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le seul lieu à vous que Nyx envoie où que ce soit est un endroit que vous enregistrez : seulement sa position, arrondie à environ %@, pour sa prévision de nuages. Vous pouvez désactiver cet envoi ci-dessous."
+            "value": "Le nombre sous chaque nuit est son indice d’obscurité, de 0 à 100, et le point grandit avec lui. Un nuage marque un ciel couvert. Les nuits passées ne gardent qu’un point pâle. Un petit trait marque le maximum d’une pluie de météores, une Lune ombrée une éclipse de Lune visible ; ni l’un ni l’autre ne modifie l’indice."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyxがどこかへ送るあなたの場所は、保存したスポットだけです。それも、雲の予報のために約%@に丸めた位置だけです。下でオフにできます。"
+            "value": "各夜の下の数字は0〜100の暗さのスコアで、点はスコアに合わせて大きくなります。雲の印は全天曇りを示します。過ぎた夜は淡い点だけが残ります。小さな流れの印は流星群の極大を、影のある月は見られる月食を示します。どちらもスコアは変えません。"
           }
         }
       }
@@ -68886,6 +69251,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "スコア"
+          }
+        }
+      }
+    },
+    "The score in short": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Wert in Kürze"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The score in short"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El índice en breve"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’indice en bref"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スコアのあらまし"
           }
         }
       }
@@ -73000,101 +73400,6 @@
         }
       }
     },
-    "Turn the screen red at any time, here or from Control Center. Nyx has no account, no ads, no tracking. Your journal never leaves this phone.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Schalte den Bildschirm jederzeit auf Rot, hier oder im Kontrollzentrum. Nyx hat keinen Account, keine Werbung, kein Tracking. Dein Journal verlässt dieses iPad nie."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Schalte den Bildschirm jederzeit auf Rot, hier oder im Kontrollzentrum. Nyx hat keinen Account, keine Werbung, kein Tracking. Dein Journal verlässt dieses iPhone nie."
-                }
-              }
-            }
-          }
-        },
-        "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Turn the screen red at any time, here or from Control Center. Nyx has no account, no ads, no tracking. Your journal never leaves this iPad."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Turn the screen red at any time, here or from Control Center. Nyx has no account, no ads, no tracking. Your journal never leaves this phone."
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Pon la pantalla en rojo cuando quieras, aquí o desde el Centro de control. Nyx no tiene cuentas, anuncios ni rastreo. Tu diario nunca sale de este iPad."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Pon la pantalla en rojo cuando quieras, aquí o desde el Centro de control. Nyx no tiene cuentas, anuncios ni rastreo. Tu diario nunca sale de este teléfono."
-                }
-              }
-            }
-          }
-        },
-        "fr": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Passez l’écran en rouge à tout moment, ici ou depuis le centre de contrôle. Nyx n’a ni compte, ni publicité, ni pistage. Votre journal ne quitte jamais cet iPad."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Passez l’écran en rouge à tout moment, ici ou depuis le centre de contrôle. Nyx n’a ni compte, ni publicité, ni pistage. Votre journal ne quitte jamais cet iPhone."
-                }
-              }
-            }
-          }
-        },
-        "ja": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "ここかコントロールセンターから、いつでも画面を赤くできます。Nyxにはアカウントも広告もトラッキングもありません。ジャーナルがこのiPadの外に出ることはありません。"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "ここかコントロールセンターから、いつでも画面を赤くできます。Nyxにはアカウントも広告もトラッキングもありません。ジャーナルがこのiPhoneの外に出ることはありません。"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, Plan, saved parks and the journal work offline.": {
       "extractionState": "manual",
       "localizations": {
@@ -73546,6 +73851,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "利用不可"
+          }
+        }
+      }
+    },
+    "Unchanged so far: %lld, %@, as when you chose it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bisher unverändert: %1$lld, %2$@, wie als du sie gewählt hast."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unchanged so far: %lld, %@, as when you chose it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin cambios por ahora: %1$lld, %2$@, como cuando la elegiste."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inchangée pour l’instant : %1$lld, %2$@, comme quand vous l’avez choisie."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今のところ変わりません：%1$lld点、%2$@（選んだときと同じ）。"
           }
         }
       }
@@ -81789,41 +82129,6 @@
         }
       }
     },
-    "as the crow flies": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luftlinie"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "as the crow flies"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "en línea recta"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "à vol d’oiseau"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "直線距離"
-          }
-        }
-      }
-    },
     "at %@": {
       "extractionState": "manual",
       "localizations": {
@@ -85405,6 +85710,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@後"
+          }
+        }
+      }
+    },
+    "in a straight line": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "in Luftlinie"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "in a straight line"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "en línea recta"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "en ligne droite"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直線距離で"
           }
         }
       }

@@ -35,6 +35,10 @@ import UIKit
         // One new entry, whatever was there before (not only the first ever).
         ReviewPrompt.noteJournalEntry(old:12,new:13,defaults:defaults) { _ in asks.count+=1 }
         #expect(asks.count==1)
+        // The first and second entries are too soon to ask.
+        ReviewPrompt.noteJournalEntry(old:0,new:1,defaults:defaults) { _ in asks.count+=1 }
+        ReviewPrompt.noteJournalEntry(old:1,new:2,defaults:defaults) { _ in asks.count+=1 }
+        #expect(asks.count==1)
         // A store loading or an import of many is not a moment; nor is a deletion.
         ReviewPrompt.noteJournalEntry(old:0,new:40,defaults:defaults) { _ in asks.count+=1 }
         ReviewPrompt.noteJournalEntry(old:13,new:12,defaults:defaults) { _ in asks.count+=1 }

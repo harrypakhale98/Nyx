@@ -673,7 +673,7 @@ struct RiverTip: Tip {
     var title: Text { Text("Drag along the nights") }
     var message: Text? { Text(Self.message(hollow:hollow)) }
     nonisolated static func message(hollow:String?)->String {
-        Sentences.join([hollow ?? "",String(localized:"Half-filled nights are an early look. A soft glow spans what three forecast models expect.")])
+        Sentences.join([hollow ?? "",String(localized:"Half-filled nights are an early look: a forecast several days ahead, mixed with the usual clouds. The soft glow shows the range of scores from three forecast models.")])
     }
     var image: Image? { Image(systemName:"hand.draw") }
 }

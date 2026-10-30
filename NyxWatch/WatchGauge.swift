@@ -140,7 +140,7 @@ struct WatchGauge: View {
             nightLabel.map { Sentences.end($0) } ?? "",
             String(localized: "\(night.score.value) out of 100. \(night.score.band.label)."),
             night.cloudSentence(),
-            models.map { String(localized: "Forecast models: \($0.lowerBound) to \($0.upperBound).") } ?? "",
+            models.map { String(localized: "Score range across forecast models: \($0.lowerBound) to \($0.upperBound).") } ?? "",
             night.smokeCaveat.map { Sentences.end($0) } ?? "",
             // The Moon drawn inside the dial has no element of its own on the watch, so the dial says it.
             Sentences.end(night.sky.moon.spoken),

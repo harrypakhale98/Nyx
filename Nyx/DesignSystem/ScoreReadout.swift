@@ -71,7 +71,7 @@ struct ScoreReadout: View {
     private var limitLine: String? { Self.limitLine(score,tonight:isTonight) }
     nonisolated static func limitLine(_ score:DarknessScore,tonight:Bool)->String? {
         guard let limit=score.limitSentence(tonight:tonight) else { return nil }
-        return Sentences.join([limit,String(localized:"The four parts alone would give \(score.partsSum).")])
+        return Sentences.join([limit,String(localized:"The four parts add up to \(score.partsSum), but that limit comes first.")])
     }
     var body: some View {
         Button(action:action) {

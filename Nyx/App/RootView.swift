@@ -125,7 +125,7 @@ struct RootView:View {
         // One soft tap at the turn, on every path (the lamp writes the setting under its cover), however
         // many switches are loaded: each visited tab's toolbar and onboarding have one.
         .sensoryFeedback(.impact(flexibility:.soft,intensity:0.7),trigger:nightVision)
-        .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
+        .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.nyxPresentation().environment(\.nyx,palette) }
         .sheet(item:$launch) { launch in ParkSheet(park:launch.park,initialDate:launch.night,whatsUp:launch.whatsUp,commands:commands) }
         .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) } }
         .onAppear { LaunchSignposts.firstFrame() }
@@ -372,7 +372,8 @@ private struct ParkSheet:View {
         .environment(\.nyxTab,layer).environment(commands).environment(\.skyHome,model.home)
         .onAppear { commands.layer(layer,shown:true) }
         .onDisappear { commands.layer(layer,shown:false) }
-        .environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed,boldText:legibility == .bold)).nyxPresentation().nyxAccessibility()
+        // The palette goes outside the presentation's style, which reads it to redden the whole sheet.
+        .nyxPresentation().nyxAccessibility().environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed,boldText:legibility == .bold))
     }
 }
 #Preview("Tab shell") { RootView().environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self,SavedSpot.self],inMemory:true) }

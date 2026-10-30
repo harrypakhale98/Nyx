@@ -77,31 +77,31 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx nutzt deinen Standort auf diesem Gerät, um Parks und Dunkelorte in deiner Nähe zu finden, zu erkennen, wann du in einem US-Nationalpark bist, den Himmel nach geografisch Nord auszurichten und die Nachtsicht ab der Dämmerung dort einzuschalten, wo du bist. Er bleibt auf diesem Gerät, außer du speicherst deinen Standort als Platz; dann wird die auf etwa 11 km (7 Meilen) gerundete Position dieses Platzes für seine Wolkenvorhersage verwendet."
+            "value": "Nyx nutzt deinen Standort auf diesem Gerät, um dunkle Orte in deiner Nähe zu finden, zu erkennen, wann du in einem US-Nationalpark bist, die Himmelskarte nach geografisch Nord auszurichten und die Nachtsicht in der Dämmerung einzuschalten. Dein Standort bleibt auf diesem Gerät. Wenn du deinen Standort als Platz speicherst, wird nur die auf etwa 11 km (7 Meilen) gerundete Position dieses Platzes für seine Wolkenvorhersage verwendet."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, point the sky to true north, and turn night vision on at dusk where you are. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast."
+            "value": "Nyx uses your location on this device to find dark places near you, to notice when you are at a U.S. national park, to turn the star map to true north, and to turn night vision on at dusk. Your location stays on this device. If you save where you stand as a spot, only that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx usa tu ubicación en este dispositivo para encontrar parques y lugares de cielo oscuro cercanos, saber cuándo estás en un parque nacional de EE. UU., orientar el cielo hacia el norte verdadero y activar la visión nocturna al anochecer donde estás. No sale de este dispositivo, salvo que guardes como sitio el lugar donde estás; entonces la posición de ese sitio, redondeada a unos 11 km (7 millas), se usa para su pronóstico de nubes."
+            "value": "Nyx usa tu ubicación en este dispositivo para encontrar lugares oscuros cerca de ti, saber cuándo estás en un parque nacional de EE. UU., orientar el mapa del cielo hacia el norte verdadero y activar la visión nocturna al anochecer. Tu ubicación no sale de este dispositivo. Si guardas como sitio el lugar donde estás, solo la posición de ese sitio, redondeada a unos 11 km (7 millas), se usa para su pronóstico de nubes."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx utilise votre position sur cet appareil pour trouver les parcs et sites de ciel étoilé près de vous, savoir quand vous êtes dans un parc national des États-Unis, orienter le ciel vers le nord géographique et activer la vision nocturne au crépuscule là où vous êtes. Elle reste sur cet appareil, sauf si vous enregistrez l’endroit où vous êtes comme lieu ; la position de ce lieu, arrondie à environ 11 km (7 miles), sert alors à sa prévision de nuages."
+            "value": "Nyx utilise votre position sur cet appareil pour trouver des lieux sombres près de vous, savoir quand vous êtes dans un parc national des États-Unis, orienter la carte du ciel vers le nord géographique et activer la vision nocturne au crépuscule. Votre position reste sur cet appareil. Si vous enregistrez l’endroit où vous êtes comme lieu, seule la position de ce lieu, arrondie à environ 11 km (7 miles), sert à sa prévision de nuages."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyxはこのデバイス上で位置情報を使い、近くの公園や暗い空の場所を探したり、米国の国立公園にいることを確認したり、空を真北に合わせたり、今いる場所の夕暮れにナイトビジョンをオンにしたりします。位置情報はこのデバイスの外に出ません。ただし、今いる場所をスポットとして保存した場合は、その位置を約11 km（約7マイル）に丸めて、雲予報の取得に使います。"
+            "value": "Nyxはこのデバイス上で位置情報を使い、近くの暗い場所を探したり、米国の国立公園にいることを確認したり、星図を真北に合わせたり、夕暮れにナイトビジョンをオンにしたりします。位置情報はこのデバイスの外に出ません。今いる場所をスポットとして保存した場合のみ、その位置を約11 km（約7マイル）に丸めて、雲予報の取得に使います。"
           }
         }
       }

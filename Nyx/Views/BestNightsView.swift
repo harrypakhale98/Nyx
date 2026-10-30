@@ -66,7 +66,7 @@ struct BestNightsView: View {
     /// point is chosen the answer is from the example town, and says so, as Tonight does.
     private var intro:some View {
         VStack(alignment:.leading,spacing:6) {
-            Text("The darkest nights in reach over the next 30, one for each place.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            Text("The darkest night at each place in reach, over the next 30 nights.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             if !model.startChosen { Text("Example: from \(model.originName)").font(.caption.weight(.medium)).foregroundStyle(palette.ink) }
         }
     }

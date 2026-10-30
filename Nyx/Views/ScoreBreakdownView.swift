@@ -48,13 +48,13 @@ struct ScoreBreakdownView: View {
             // The weakest link, said beside the number it sets, before the parts that add up to more.
             if let limit=night.score.limit, limit.cap<partsSum {
                 if case .darkness = limit {} else {
-                    figures(Sentences.join([limit.sentence(tonight:isTonight),String(localized:"The four parts alone would give \(partsSum).")]))
+                    figures(Sentences.join([limit.sentence(tonight:isTonight),String(localized:"The four parts add up to \(partsSum), but that limit comes first.")]))
                 }
             }
             row("Moonlight",points:Double(shown.moon),of:40,fact:moonFact,detail:String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one."))
             row("Clouds",points:shown.cloud.map(Double.init),of:25,fact:Self.cloudFact(night),
                 context:cloudContext,detail:Self.cloudDetail(usualClouds:night.usualCloud != nil,context:!cloudContext.isEmpty))
-            row("Sky glow",points:Double(shown.glow),of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9, estimated."),context:lightContext,dipper:LittleDipper.reading(night),detail:String(localized:"Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))
+            row("Sky glow",points:Double(shown.glow),of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9 (1 is the darkest), estimated."),context:lightContext,dipper:LittleDipper.reading(night),detail:String(localized:"Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))
             row("True darkness",points:Double(shown.length),of:15,fact:night.sky.darkHours>0 ? String(localized:"\(darkness) of true darkness.") : String(localized:"No true darkness."),detail:String(localized:"True darkness: the Sun more than 18° below the horizon. Ten hours earn full credit."))
             if let caption=night.basisCaption(typical:true) { Text(Sentences.join([caption,String(localized:"The score will change as a forecast arrives.")])).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             // What the score leaves out, said once and quietly: smoke switched off, or no smoke forecast reaching the night.
@@ -127,9 +127,9 @@ struct ScoreBreakdownView: View {
             let days=max(1,Int(lead.rounded()))
             // Nothing to ease toward: the forecast is what counts, said once.
             guard night.usualCloud != nil else {
-                return Sentences.join([String(localized:"Early look: a forecast of \(Int(forecast.rounded()))% from \(days) days out, counted as it stands."),night.summitSentence ?? ""])
+                return Sentences.join([String(localized:"Early look: the forecast says \(Int(forecast.rounded()))% cloud, \(days) days ahead. Nyx counts it as it stands."),night.summitSentence ?? ""])
             }
-            return Sentences.join([String(localized:"Early look: a forecast of \(Int(forecast.rounded()))% from \(days) days out, eased toward the usual clouds. Counted as \(Int(counted.rounded()))%."),
+            return Sentences.join([String(localized:"Early look: the forecast says \(Int(forecast.rounded()))% cloud, but it is \(days) days ahead, so Nyx mixes it with the usual clouds for this month and counts \(Int(counted.rounded()))%."),
                                    night.summitSentence ?? ""])
         case .usual:
             // "No cloud forecast yet." or "Cloud forecast unavailable.", as every surface says it.
