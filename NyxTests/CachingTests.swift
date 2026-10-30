@@ -191,7 +191,6 @@ import SwiftUI
                 for (index,tint) in zip(indices,resolved) {
                     #expect(close(tint,oldTint(index,ink:ink),in:environment))
                     #expect(close(SkyTint.star(index,ink:ink),oldTint(index,ink:ink),in:environment))
-                    #expect(close(PanoramaCanvas.tint(index,ink:ink),oldTint(index,ink:ink),in:environment))
                 }
                 #expect(close(SkyTint.planet(ink:ink),Color(red:1,green:0.86,blue:0.66).mix(with:ink,by:0.3),in:environment))
             }

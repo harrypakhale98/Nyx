@@ -402,7 +402,7 @@ struct TonightView: View {
     /// is one the model keeps (`PlanModel.night`), so a step is a sort of memoised nights, not astronomy.
     private func answer(offset:Int,best:[Park],ahead:[Park])->[Night] {
         guard offset>0 else { return best.map { model.night($0) } }
-        return Array(TonightScrub.ranked(ahead.map { model.night($0,on:TonightScrub.evening($0,tonight:model.tonight($0),offset:offset)) }).prefix(5))
+        return Array(NightPlanner.ranked(ahead.map { model.night($0,on:TonightScrub.evening($0,tonight:model.tonight($0),offset:offset)) }).prefix(5))
     }
     private func hero(_ night:Night,others:[Night],offset:Int,ready:Bool)->some View {
         let park=night.park
@@ -843,8 +843,6 @@ nonisolated enum TonightScrub {
     }
     /// The date `offset` nights after a place's tonight, as `PlanModel.nights(_:from:count:)` steps it.
     static func evening(_ park:Park,tonight:Date,offset:Int)->Date { offset==0 ? tonight : park.date(tonight,addingDays:offset) }
-    /// The places' nights best first, by the rule every best night uses (`NightPlanner.better`), as Tonight ranks tonight.
-    static func ranked(_ nights:[Night])->[Night] { NightPlanner.ranked(nights) }
     /// The dial's value for VoiceOver: "Fri, Oct 30: Joshua Tree, 82, Excellent", the score with what it
     /// rests on beyond the forecast ("82, usual clouds", `NightVerdict.scored`); "Tonight: …" tonight.
     static func spokenValue(_ night:Night,tonight:Bool)->String {

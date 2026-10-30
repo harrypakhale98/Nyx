@@ -41,7 +41,6 @@ nonisolated struct TripDay: Hashable, Comparable, Codable, Sendable {
     /// A night before a day off: the evening before one of the device calendar's weekend days.
     /// Friday and Saturday nights where the weekend is Saturday and Sunday; Thursday and Friday
     /// nights where it is Friday and Saturday (`Calendar.isDateInWeekend` reads the region's weekend).
-    var isWeekendNight: Bool { isNightBeforeDayOff() }
     func isNightBeforeDayOff(calendar: Calendar = .current) -> Bool {
         let next=adding(1)
         var gregorian=Calendar(identifier:.gregorian)

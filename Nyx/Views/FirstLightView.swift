@@ -93,8 +93,7 @@ struct FirstLightView: View {
     private func draw(_ sky:SkyProjection.Sky,progress:Double,in context:inout GraphicsContext,size:CGSize) {
         func arrival(_ brightness:Double,_ seed:Double)->Double {
             let start=(1-brightness)*0.75+seed*0.08
-            let t=min(1,max(0,(progress-start)/0.2))
-            return t*t*(3-2*t)
+            return SkyDome.smooth((progress-start)/0.2)
         }
         // Only what can reach the canvas is drawn, as the sky behind every screen does (`RealSky`).
         func shows(_ p:CGPoint,_ margin:Double)->Bool { p.x > -margin && p.x<size.width+margin && p.y > -margin && p.y<size.height+margin }

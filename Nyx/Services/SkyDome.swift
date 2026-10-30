@@ -177,5 +177,6 @@ nonisolated enum SkyDome {
         }
         return stops[stops.count-1].1
     }
-    private static func smooth(_ x: Double) -> Double { let t = min(1, max(0, x)); return t*t*(3-2*t) }
+    /// Smoothstep: 0 below 0, 1 above 1, an S-curve between.
+    static func smooth(_ x: Double) -> Double { let t = min(1, max(0, x)); return t*t*(3-2*t) }
 }

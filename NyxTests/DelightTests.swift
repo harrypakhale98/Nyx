@@ -17,7 +17,7 @@ struct DelightTests {
     // MARK: Days
 
     @Test func tripDays() throws {
-        #expect(friday.weekday==6 && friday.adding(1).weekday==7 && friday.isWeekendNight && !friday.adding(2).isWeekendNight)
+        #expect(friday.weekday==6 && friday.adding(1).weekday==7 && friday.isNightBeforeDayOff() && !friday.adding(2).isNightBeforeDayOff())
         #expect(TripDay(iso:"2026-10-31")?.adding(1)==TripDay(year:2026,month:11,day:1))
         #expect(TripDay(iso:"2026-02-30")==nil && TripDay(iso:"2026-1-05")==nil && TripDay(iso:"tomorrow")==nil)
         #expect(TripDay(iso:"2028-02-29") != nil)
@@ -26,7 +26,7 @@ struct DelightTests {
         #expect(TripPlanner.days(first:friday.adding(-4),last:friday.adding(2),weekendsOnly:true)==[friday,friday.adding(1)])
         #expect(TripPlanner.days(first:friday,last:friday.adding(40),weekendsOnly:false).count==14)
         let weekends=TripPlanner.days(first:friday,last:friday.adding(120),weekendsOnly:true)
-        #expect(weekends.count==14 && weekends.allSatisfy(\.isWeekendNight))
+        #expect(weekends.count==14 && weekends.allSatisfy { $0.isNightBeforeDayOff() })
         #expect(TripPlanner.days(first:friday,last:friday.adding(-1),weekendsOnly:false).isEmpty)
         // A day is the same evening in each park's own zone.
         let samoa=try park("npsa"), acadia=try park("acad")

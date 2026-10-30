@@ -36,7 +36,7 @@ nonisolated enum SkyTextures {
                         halo: excess > 0 ? 0.1*min(1, excess)+0.035*excess : 0, haloWidth: 0.1+0.05*excess,
                         glow: m < 1 ? 0.012+0.03*min(4, excess) : 0, glowWidth: 0.55+0.05*excess,
                         // Faint stars look white to the eye (rods see no colour); bright ones show it.
-                        saturation: 0.4+0.6*smooth((4-m)/4.5))
+                        saturation: 0.4+0.6*SkyDome.smooth((4-m)/4.5))
     }
     /// The quad's full width in degrees for a star of this magnitude.
     static func starSize(magnitude m: Double) -> Double { 2*look(row: row(forMagnitude: m)).radius }
@@ -77,7 +77,7 @@ nonisolated enum SkyTextures {
         image(width: size, height: size) { x, y in
             let dx = (Double(x)+0.5)/Double(size)-0.5, dy = (Double(y)+0.5)/Double(size)-0.5
             let r = sqrt(dx*dx+dy*dy)*2
-            let intensity = (exp(-pow(r/core, 2)) + 0.25*exp(-pow(r/0.5, 2)))*smooth((1-r)/0.3)
+            let intensity = (exp(-pow(r/core, 2)) + 0.25*exp(-pow(r/0.5, 2)))*SkyDome.smooth((1-r)/0.3)
             // Opaque: added as light, and a faint alpha would be un-premultiplied into a bright pixel.
             return (color*min(1, intensity), 1)
         }
@@ -87,7 +87,7 @@ nonisolated enum SkyTextures {
         image(width: size, height: size, dither: true) { x, y in
             let dx = (Double(x)+0.5)/Double(size)-0.5, dy = (Double(y)+0.5)/Double(size)-0.5
             let r = sqrt(dx*dx+dy*dy)*2
-            let intensity = (0.85/(1+pow(r/0.05, 2)) + 0.15*exp(-pow(r/0.45, 2)))*smooth((1-r)/0.35)
+            let intensity = (0.85/(1+pow(r/0.05, 2)) + 0.15*exp(-pow(r/0.45, 2)))*SkyDome.smooth((1-r)/0.35)
             return (SIMD3(repeating: intensity), 1)
         }
     }
@@ -110,7 +110,7 @@ nonisolated enum SkyTextures {
     /// How much a Moon lights the sky: its brightness falls much faster than its lit fraction
     /// (a quarter Moon is about a tenth of a full one), and a Moon low in thick air lights less.
     static func moonGlare(illumination: Double, altitude: Double) -> Double {
-        pow(max(0, min(1, illumination)), 2.3)*smooth((altitude+1)/6)*(0.55+0.45*smooth(altitude/35))
+        pow(max(0, min(1, illumination)), 2.3)*SkyDome.smooth((altitude+1)/6)*(0.55+0.45*SkyDome.smooth(altitude/35))
     }
 
     /// The dome, an equirectangular image: u is the angle from the Sun's azimuth (0 at the Sun,
@@ -161,7 +161,7 @@ nonisolated enum SkyTextures {
         if sunward > 0 {
             let soft = sqrt(a*a+64)-8   // no cusp straight above the Sun
             let spread = exp(-soft/45)*(0.3+0.7*exp(-a*a/700))
-            let deep = smooth((-s-2)/10)   // the glow reddens and flattens as the Sun sinks
+            let deep = SkyDome.smooth((-s-2)/10)   // the glow reddens and flattens as the Sun sinks
             let low = SIMD3(1.0, 0.34-0.12*deep, 0.07-0.03*deep)*1.4*exp(-h/(6-2*deep))
             let mid = SIMD3(1.0, 0.68, 0.32)*0.5*exp(-h/(12-4*deep))
             let high = SIMD3(0.55, 0.65, 0.85)*0.25*exp(-h/28)*(1-deep)
@@ -169,11 +169,11 @@ nonisolated enum SkyTextures {
         }
 
         // The Earth's shadow and the Belt of Venus, opposite the Sun just after sunset.
-        let belt = smooth((s+7)/4)*smooth((3-s)/2)
+        let belt = SkyDome.smooth((s+7)/4)*SkyDome.smooth((3-s)/2)
         if belt > 0 {
             let opposite = exp(-(180-a)/55)
             let top = max(0.5, 1.5-s)
-            let shade = 1-0.35*belt*opposite*(1-smooth((h-top)/2.5))
+            let shade = 1-0.35*belt*opposite*(1-SkyDome.smooth((h-top)/2.5))
             rgb *= shade
             let pink: Double = 0.36*zenith(sunAltitude: s).z*belt*opposite*exp(-pow((h-top-5)/4.5, 2))
             rgb += SIMD3<Double>(1.0, 0.6, 0.68)*pink
@@ -222,7 +222,7 @@ nonisolated enum SkyTextures {
         var heights: [Double] = []
         for i in 0...720 {
             let x = Float(i)/720
-            let n = smooth((Double(fbm(x*7, offset+0.5, octaves: 6, period: 7))-0.28)/0.44)
+            let n = SkyDome.smooth((Double(fbm(x*7, offset+0.5, octaves: 6, period: 7))-0.28)/0.44)
             heights.append(far ? 0.4+3.6*pow(n, 1.3) : 0.15+1.6*pow(n, 1.8))
         }
         return heights
@@ -254,8 +254,6 @@ nonisolated enum SkyTextures {
     }
 
     // MARK: Drawing
-
-    static func smooth(_ x: Double) -> Double { let t = min(1, max(0, x)); return t*t*(3-2*t) }
 
     /// Gradient noise in about 0…1, deterministic, wrapping every `period` cells in x, so the same
     /// Milky Way appears every launch and nothing seams at 360°.

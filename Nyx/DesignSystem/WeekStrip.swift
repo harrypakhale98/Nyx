@@ -43,16 +43,13 @@ struct WeekStrip: View {
     static let ringRadius=5+1.7
     /// The column pitch for a scaled 16 pt: never below 16, never above 1.8× it.
     static func pitch(_ scaled:Double)->Double { min(max(scaled,basePitch),basePitch*1.8) }
-    /// A night's dot radius at the default size: the week's lowest score at 1.6 pt, its highest at
-    /// 5, the rest between by score (`NightMark.radius`, the widgets' and the watch's rule too).
-    static func radius(score:Int,low:Int,high:Int)->Double { NightMark.radius(score:score,low:low,high:high) }
     private func dots(best:Night,pitch:Double)->some View {
         let scores=nights.map(\.score.value), low=scores.min() ?? 0, high=scores.max() ?? 0
         return Canvas { context,size in
             let scale=pitch/WeekStrip.basePitch
             for (index,night) in nights.enumerated() {
                 let center=CGPoint(x:pitch/2+CGFloat(index)*pitch,y:size.height/2)
-                let radius=WeekStrip.radius(score:night.score.value,low:low,high:high)*scale
+                let radius=NightMark.radius(score:night.score.value,low:low,high:high)*scale
                 let mark=NightMark.mark(night,differentiate:access.differentiate)
                 mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent,fillOpacity:palette.markOpacity(score:night.score.value),lineWidth:0.8*scale,stroke:palette.stroke)
                 if night.id==best.id {

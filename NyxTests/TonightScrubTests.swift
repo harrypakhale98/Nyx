@@ -65,8 +65,7 @@ import Testing
     @Test func eachNightLeadsWithItsDarkestPlace() throws {
         let jotr = try park("jotr"), deva = try park("deva"), grba = try park("grba")
         let nights = [try night(jotr, "2026-10-30", score: 64), try night(deva, "2026-10-30", score: 82), try night(grba, "2026-10-30", score: 71)]
-        #expect(TonightScrub.ranked(nights).map(\.park.id) == ["deva", "grba", "jotr"])
-        #expect(TonightScrub.ranked(nights).map(\.park.id) == NightPlanner.ranked(nights).map(\.park.id))
+        #expect(NightPlanner.ranked(nights).map(\.park.id) == ["deva", "grba", "jotr"])
     }
     /// VoiceOver's value: the night, the place, its score and band; beyond the forecast the score says
     /// what it rests on, in the words every list uses (`NightVerdict.scored`).

@@ -58,7 +58,7 @@ import Testing
     /// Peak instants from solar longitude agree with PyEphem's J2000 solar longitude within 15 minutes.
     @Test func meteorPeakFromSolarLongitude() throws {
         let geminids = SkyAlmanac.MeteorShower(code: "GEM", name: "Geminids", start: "12-04", end: "12-20", peakSolarLongitude: 262.2,
-            radiantRA: 112, radiantDec: 33, zhr: 150, velocity: 35)
+            radiantRA: 112, radiantDec: 33, zhr: 150)
         let peak = try #require(almanac.peakDate(of: geminids, near: try date("2026-12-10T00:00:00Z")))
         #expect(abs(peak.timeIntervalSince(try date("2026-12-14T13:41:07Z"))) < 900)
     }
@@ -66,7 +66,7 @@ import Testing
     @Test func geminidsAtJoshuaTree() throws {
         let jotr = try park("jotr")
         let geminids = SkyAlmanac.MeteorShower(code: "GEM", name: "Geminids", start: "12-04", end: "12-20", peakSolarLongitude: 262.2,
-            radiantRA: 112, radiantDec: 33, zhr: 150, velocity: 35)
+            radiantRA: 112, radiantDec: 33, zhr: 150)
         let sky = AstronomyEngine().conditions(for: jotr, on: try date("2026-12-13T20:00:00Z"))
         let night = try #require(almanac.showers([geminids], for: jotr, sky: sky, bortle: 3).first)
         #expect(night.isPeakNight && night.moonDownAtBest)

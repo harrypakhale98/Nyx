@@ -180,7 +180,7 @@ import UIKit
             // Across the ribbon: bright in the middle, soft to nothing at both edges, so a thin
             // line far away stays smooth instead of stepping.
             let u = abs((Double(x)+0.5)/16-1)
-            return (SIMD3(repeating: SkyTextures.smooth(1-u)), 1)
+            return (SIMD3(repeating: SkyDome.smooth(1-u)), 1)
         }) { lineTexture = try? TextureResource(image: image, options: .init(semantic: .color)) }
         if let mesh = try? Self.figureMesh(lore.lines, catalogue: catalogue) { figures.model = ModelComponent(mesh: mesh, materials: []) }
         figures.isEnabled = false
@@ -247,15 +247,15 @@ import UIKit
         for (entity, layer) in stars {
             var level = SkyDome.visibility(layer, sunAltitude: moment.sunAltitude)
             switch layer {
-            case .faint: level *= (1-0.8*Self.smooth(glare/0.45))*(0.35+0.65*dark)
-            case .middle: level *= 1-0.4*Self.smooth(glare/0.7)
+            case .faint: level *= (1-0.8*SkyDome.smooth(glare/0.45))*(0.35+0.65*dark)
+            case .middle: level *= 1-0.4*SkyDome.smooth(glare/0.7)
             default: level *= 1-0.1*glare
             }
             tint(entity, texture: starTexture, level: level*boost, color: Self.ink(palette))
         }
         // The Milky Way: true darkness only, washed out by moonlight in proportion to its glare (a
         // quarter Moon high takes about half of it, a full Moon nearly all) and by the park's glow.
-        let washed = 1-0.97*Self.smooth(glare/0.4)
+        let washed = 1-0.97*SkyDome.smooth(glare/0.4)
         let milkyWayLight = 0.4*SkyDome.visibility(.milkyWay, sunAltitude: moment.sunAltitude)*washed*dark*boost
         tint(milkyWay, texture: milkyWayTexture, level: SRGB.encoded(milkyWayLight), color: Self.ink(palette))
 
@@ -442,7 +442,7 @@ import UIKit
     /// The figures: faint, cool lines that fade in over 0.6 s (at once under Reduce Motion) and
     /// follow twilight as the middle stars do, a little dimmer under a bright Moon.
     private func placeLines(moment: SkyMoment, palette: VisionPalette, glare: Double, clouded: Double, on: Bool, reduceMotion: Bool) {
-        linesLevel = 0.3*SkyDome.visibility(.middle, sunAltitude: moment.sunAltitude)*(1-0.4*Self.smooth(glare/0.7))*(palette.highContrast ? 1.5 : 1)*clouded
+        linesLevel = 0.3*SkyDome.visibility(.middle, sunAltitude: moment.sunAltitude)*(1-0.4*SkyDome.smooth(glare/0.7))*(palette.highContrast ? 1.5 : 1)*clouded
         linesColor = palette.sky(SIMD3(0.62, 0.72, 1))
         if on != linesOn {
             linesOn = on
@@ -455,7 +455,7 @@ import UIKit
                     while !Task.isCancelled {
                         let t = min(1, Date.now.timeIntervalSince(began)/0.6)
                         guard let self else { return }
-                        self.linesFade = start+(goal-start)*Self.smooth(t)
+                        self.linesFade = start+(goal-start)*SkyDome.smooth(t)
                         self.paintLines()
                         if t >= 1 { return }
                         try? await Task.sleep(for: .milliseconds(16))
@@ -478,7 +478,7 @@ import UIKit
             return
         }
         let tenths = min(10, max(3, Int((cloud*10).rounded())))
-        cloudWanted = (tenths, Self.smooth((cloud-SkyDome.cloudLayerFrom)/0.1), palette.skyLinear(SkyClouds.color(light)))
+        cloudWanted = (tenths, SkyDome.smooth((cloud-SkyDome.cloudLayerFrom)/0.1), palette.skyLinear(SkyClouds.color(light)))
         if cloudTextures[tenths] == nil && cloudPending.insert(tenths).inserted {
             Task { [weak self] in
                 let image = await Task.detached(priority: .userInitiated) { SkyClouds.image(tenths: tenths) }.value
@@ -828,7 +828,6 @@ import UIKit
         if activatable { component.systemActions = [.activate] }
         return component
     }
-    static func smooth(_ x: Double) -> Double { SkyTextures.smooth(x) }
     /// The tint over grey sky textures: white, or night vision's red.
     static func ink(_ palette: VisionPalette) -> SIMD3<Double> { palette.sky(SIMD3(1, 1, 1)) }
     static func planetColor(_ id: String) -> SIMD3<Double> {

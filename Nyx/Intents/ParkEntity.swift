@@ -58,10 +58,9 @@ struct ParkEntity:IndexedEntity {
         if park.isCatalogPlace { country=park.countryCode; nationalPark=park.kind == .nationalPark; englishName=park.englishName.map(Park.shortened) ?? "" }
     }
     /// Shared with `SpotlightIndexer`'s items, so the entity and the item describe the park alike.
-    var attributeSet:CSSearchableItemAttributeSet { Self.attributes(name:name,state:state,darkSky:darkSky,bortle:bortle,country:country,nationalPark:nationalPark,englishName:englishName) }
-    static func attributes(name:String,state:String,darkSky:Bool,bortle:Int=0,country:String="",nationalPark:Bool=true,englishName:String="")->CSSearchableItemAttributeSet {
+    var attributeSet:CSSearchableItemAttributeSet {
         let attributes=CSSearchableItemAttributeSet(contentType:.text)
-        let place=locality(state:state,country:country)
+        let place=Self.locality(state:state,country:country)
         attributes.title=name
         attributes.displayName=name
         attributes.contentDescription=String(localized:"Plan a dark-sky night at \(name), \(place).")

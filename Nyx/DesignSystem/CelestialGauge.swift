@@ -382,9 +382,6 @@ struct CelestialGauge: View {
         if abs(value-Double(target))<1.2 { return target }
         return min(100,max(0,Int(value.rounded())))
     }
-    /// The word shows only beside a number of its own band: during a sweep that leaves the band it
-    /// steps away as the number crosses out, and the new word arrives as the number crosses in.
-    nonisolated static func wordFits(_ band:ScoreBand,numeral:Int)->Bool { ScoreBand.band(numeral) == band }
     private func count(key:String?,generation mine:Int) async {
         countedScore=score
         face=Self.face(after:.odometer,score:score); waiting=false; rangeShown=false; counting=true; leavingBands=[]; sweeping=false
