@@ -298,8 +298,14 @@ struct ParkDetailView: View {
         ToolbarItem(placement:.principal) {
             let shows=(titleGone || wide) && fold == nil
             // Capped as iOS caps its own bar titles, on one line, so at accessibility sizes it never runs under the buttons.
-            Text(park.shortName).font(.headline).lineLimit(1).minimumScaleFactor(0.8).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                .opacity(shows ? 1 : 0).accessibilityHidden(!shows)
+            // Out of the bar while hidden, not merely transparent: a see-through title was still found by
+            // the accessibility audit (and so by VoiceOver) over the picker's dark backing. The empty point
+            // keeps the item, so the system title never stands in for it.
+            if shows {
+                Text(park.shortName).font(.headline).lineLimit(1).minimumScaleFactor(0.8).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+            } else {
+                Color.clear.frame(width:1,height:1).accessibilityHidden(true)
+            }
         }
         // Nothing to share until the page has its score (`ScoreGate`).
         ToolbarItem(placement:.topBarTrailing) { ShareNightMenu(night:night).disabled(model.cachesPending) }
