@@ -30,20 +30,21 @@
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<input type="checkbox" id="nv" role="switch" aria-label="Night vision: show this page in red">
 <div class="sky" aria-hidden="true"><div class="band"></div></div>
 <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false"><filter id="nv-red" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.0574 0.1931 0.0195 0 0 0.0483 0.1624 0.0164 0 0 0 0 0 1 0"/></filter></svg>
 
 <header class="site-header">
   <div class="inner">
-    <a class="brand" href="./" aria-label="Nyx, home"><img src="images/nyx-icon-256.png" width="30" height="30" alt="">Nyx</a>
+    <a class="brand" href="./" aria-label="Nyx, home"><img src="images/nyx-icon-96.webp" width="30" height="30" alt="">Nyx</a>
     <nav class="site-nav" aria-label="Site">
       <a href="privacy" aria-current="page">Privacy</a>
       <a href="support">Support</a>
       <a class="opt" href="press/">Press</a>
       <a class="opt" href="case-study">Case study</a>
     </nav>
-    <label class="nv-switch" for="nv"><span class="label-long">Night vision</span><span class="label-short">Red</span><span class="track" aria-hidden="true"></span></label>
+    <a class="get" href="https://apps.apple.com/app/nyx-dark-sky-planner/id6818817800">Get Nyx<span class="visually-hidden"> on the App Store</span></a>
+    <input type="checkbox" id="nv" role="switch" aria-label="Night vision: show this page in red">
+    <label class="nv-switch" for="nv"><span class="label-long">Night vision</span><span class="label-short">Red light</span><span class="track" aria-hidden="true"></span></label>
   </div>
 </header>
 <main id="main">
@@ -53,12 +54,12 @@
     <p class="lead">Nyx has no account, no ads, no tracking. Your journal never leaves your device.</p>
   </header>
   <div class="prose doc">
-  <p class="note">Updated October 26, 2026, for Nyx 2.10, which can turn night vision on at dusk where you are, worked out on your device, and hands your Apple Watch your chosen starting town or park so both turn at the same minute. Nyx still contacts the same four services. This policy covers Nyx for iPhone, iPad, Apple Watch and Apple Vision Pro, and this website.</p>
+  <p class="note">Updated October 26, 2026, for Nyx 2.10. Night vision can now turn on at dusk where you are; Nyx works out the time on your device. Your Apple Watch gets your chosen starting town or park, so both turn red at the same minute. Nyx still contacts the same four services. This policy covers Nyx for iPhone, iPad, Apple Watch and Apple Vision Pro, and this website.</p>
 
   <h2>What the developer receives</h2>
   <p>Nothing. Nyx has no server, account system, analytics, crash-reporting SDK or advertising. The developer never receives your journal, photos, saved parks, location or usage. iOS gives Nyx a daily on-device performance summary (MetricKit); Nyx keeps only the last average screen brightness, to show you, and never sends it anywhere.</p>
 
-  <h2>What stays on your device</h2>
+  <h2>On your device, and what leaves it</h2>
   <ul>
     <li><strong>Journal and photos.</strong> Entries and the photos you choose are stored in the app on your iPhone or iPad. Nyx does not sync them to iCloud. Your device backup settings may include app data. Deleting an entry removes it; deleting the app removes its data, subject to Apple's backups.</li>
     <li><strong>Location.</strong> Only if you choose "Near me", and only while you use the app. Nyx compares straight-line distances to parks on your device, and works out the sky "From home tonight" there too, with no request at all. Once you have allowed it, the same rough position (accurate to about 3 km) is where Plan's best nights and trip planner measure from while Near me is on, lets Nyx notice in the evening or at night that you have reached a park, lets field mode point the sky to true north instead of magnetic north, and, with night vision set to At dusk, lets it turn on at dusk where you are. None of these asks for it again, and Nyx never reads your position in the background. Your coordinates are never sent, unless you save where you stand as a spot; then only that spot's position, rounded to about 11 km (7 miles), is sent for its cloud forecast. Saving where you stand reads your precise location once, keeps it on your device, and sends only the rounded position. Cloud forecasts, park alerts and campgrounds are requested for all 63 US parks together, and forecasts for places around the world by whole regions (below), so none of them reveals which parks are near you; ranger programs are requested only for a park whose page you open. Each can be switched off in Your privacy. You can always choose a starting park instead.</li>
@@ -70,7 +71,7 @@
     <li><strong>Field mode.</strong> While "Where to look" is open, Nyx reads your iPhone's or iPad's motion sensors to turn the sky to where you hold it. Nothing is recorded or sent. Alarms you set there are ordinary alarms on your device, and the night's Live Activity is created on your device without any server.</li>
     <li><strong>Apple Watch.</strong> The watch app makes no network requests. Your iPhone passes it your saved parks, your starting town or park (never your location), the night-vision setting, the cached cloud forecasts and the aurora forecast directly, through Apple's WatchConnectivity between your paired devices. The watch works out the sky itself and keeps its settings on the watch.</li>
     <li><strong>Apple Vision Pro.</strong> The Vision Pro app asks for no permissions: no location, no photos, no notifications. It computes the sky for the park and night you choose on the device itself. Its network requests are the iPhone's, to the same four services: Open-Meteo (api.open-meteo.com) for the cloud forecast at the public coordinates of the 63 US national parks and the cloud layers above Haleakalā's summit, where the score counts only mid and high cloud; Open-Meteo's air-quality service (air-quality-api.open-meteo.com) for smoke and haze at the same coordinates; the National Park Service (developer.nps.gov) for the parks' alerts, all 63 park codes in one request; and NOAA (services.swpc.noaa.gov) for its aurora forecast, one file for the whole world. None carries anything about you; each has its own switch in Your privacy, and what they return is kept on the headset. Apart from those switches' settings, its display settings and the park you last chose, it stores nothing. It knows only the 63 US national parks. It does not use your surroundings or your room's real direction; the sky it shows is computed, not seen.</li>
-    <li><strong>Age range.</strong> Some US states require apps to check the age range of new accounts. Only where iOS reports that this applies to your account, Nyx asks iOS for an age range once each time it starts. iOS shows its own sheet, and may already know the answer. Nyx stores nothing from the answer, sends it nowhere and changes nothing because of it; Nyx has no age-restricted content.</li>
+    <li><strong>Age range.</strong> Nyx has no accounts of its own. Some US states require apps to check the age range of the person using the device. Only where iOS reports that this applies to your Apple Account, Nyx asks iOS for an age range each time it starts. iOS shows its own sheet only if it does not already know the answer. Nyx stores nothing from the answer, sends it nowhere and changes nothing because of it; Nyx has no age-restricted content.</li>
     <li><strong>Links and Maps.</strong> Some links open in Safari, Mail or Maps when you tap them: park pages on nps.gov, campground reservations on Recreation.gov, Globe at Night, Open-Meteo and the Creative Commons licence, a place's Wikidata page or its own official website (only over a secure connection), this website, Nyx on the App Store, an email to the developer, directions in Maps to a viewing spot or to a spot you saved, or a pin in Maps for a dark area Nyx suggests (the dark area itself is worked out on your device from data that comes with the app, with no request). Nyx itself makes no request for them; what those apps and sites receive is governed by Apple's and their own policies.</li>
     <li><strong>On-device AI.</strong> On iPhones and iPads that support Apple's on-device model, optional explanations use only the records shown on screen. If you ask Nyx to suggest a description for a journal photo (iOS 27 with Apple Intelligence), the photo goes to that on-device model only. Nothing is sent to a remote AI service.</li>
     <li><strong>Looking back.</strong> For Tonight's answer, Nyx keeps what it said (the place, the night, the score and the cloud figure) and, the next day, what the weather models said afterwards, so Tonight can show how close it came. Up to 60 nights, on your device only; nothing is sent or fetched for it. "Forget these nights" on Tonight removes them, and turning off cloud forecasts stops it.</li>
@@ -92,7 +93,7 @@
     <li><strong>NOAA's Space Weather Prediction Center</strong> (services.swpc.noaa.gov) for its forecast of geomagnetic activity (the Kp index) for the next three days, which tells Nyx when aurora may reach a place's sky. The request is the same small file for the whole world, asked for at most every three hours; it names no place and contains nothing about you. Like every service, NOAA receives network information such as your IP address. It has its own switch in Your privacy, "Aurora forecast".</li>
   </ul>
   <p>Nyx paces its forecast requests. A forecast is asked for again only once it is a few hours old (when you pull to refresh, an hour at the earliest for clouds), and when a service asks Nyx to wait, it waits, even across a restart. To stay within Open-Meteo's free limits, Nyx counts its forecast requests on your device: the time of each one and what Open-Meteo counts it as. The count is kept for about two days, shown under Your privacy → Advanced, and never sent anywhere. A background refresh asks for nothing when nothing outside the app shows a forecast: no reminders, no Nyx widget, no followed night, no night you are going to and no watch app.</p>
-  <p>Like any website, these services see your IP address and ordinary request information. Open-Meteo states that its logs are not linked to identities and are deleted after 90 days. Their own policies govern their servers: <a href="https://open-meteo.com/en/terms">Open-Meteo</a>, <a href="https://www.nps.gov/aboutus/privacy.htm">National Park Service</a>. You can switch each service off in Nyx under Settings → Your privacy; information already saved stays available, and moon, twilight, calendar and journal keep working offline.</p>
+  <p>Like any website, these services see your IP address and ordinary request information. Open-Meteo states that its logs are not linked to identities and are deleted after 90 days. Their own policies govern their servers: <a href="https://open-meteo.com/en/terms">Open-Meteo</a>, <a href="https://www.nps.gov/aboutus/privacy.htm">National Park Service</a>, <a href="https://www.noaa.gov/protecting-your-privacy">NOAA</a>. You can switch each service off in Nyx under Settings → Your privacy; information already saved stays available, and moon, twilight, calendar and journal keep working offline.</p>
 
   <h2>This website</h2>
   <p>get-nyx.com sets no cookies and runs no scripts, analytics or advertising, and it loads nothing from other sites. It is hosted by Cloudflare, which, like any web host, handles your IP address and ordinary request information to deliver the pages and protect the site, under <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare's privacy policy</a>. If a page fails to load, your browser may send Cloudflare a network error report. The night-vision switch on these pages is not saved anywhere.</p>
@@ -101,7 +102,7 @@
   <p>Nyx collects no personal information from anyone, including children.</p>
 
   <h2>Changes and contact</h2>
-  <p>If this policy changes, the updated version will appear on this page with a new date. Questions: <a href="mailto:harry.pakhale98@gmail.com">harry.pakhale98@gmail.com</a>.</p>
+  <p>Nyx is made by Hardik Pakhale, an independent developer, who is responsible for this policy. If it changes, the updated version will appear on this page with a new date. Questions: <a href="mailto:harry.pakhale98@gmail.com">harry.pakhale98@gmail.com</a>.</p>
   </div>
 </main>
 
@@ -109,16 +110,18 @@
   <div class="wrap">
     <div class="cols">
       <div class="about">
-        <a class="brand" href="./"><img src="images/nyx-icon-256.png" width="30" height="30" alt="">Nyx</a>
-        <p>The darkest nights, wherever you are, with the 63 US national parks at its heart. Made by one independent developer.</p>
+        <a class="brand" href="./"><img src="images/nyx-icon-96.webp" width="30" height="30" alt="">Nyx</a>
+        <p>The darkest nights, wherever you are, with the 63 US national parks as its main focus. Made by Hardik Pakhale, an independent developer.</p>
       </div>
       <div>
         <h2>Pages</h2>
         <ul>
+          <li><a href="https://apps.apple.com/app/nyx-dark-sky-planner/id6818817800">Nyx on the App Store</a></li>
           <li><a href="case-study">Case study</a></li>
           <li><a href="press/">Press kit</a></li>
           <li><a href="privacy">Privacy policy</a></li>
           <li><a href="support">Support</a></li>
+          <li><a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Terms of use</a></li>
         </ul>
       </div>
       <div>
