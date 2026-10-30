@@ -171,7 +171,7 @@ struct OneVoiceTests {
             switch sky.moonInDarkness {
             case .allFree: #expect(note == String(localized: "Moon down")); found.insert("free")
             case .allUp: #expect(note == String(localized: "Dark, Moon up")); found.insert("up")
-            case .risesAt(let rise): #expect(note == String(localized: "Dark until \(jotr.time(rise))")); found.insert("rises")
+            case .risesAt(let rise): #expect(note == String(localized: "Moon-free until \(jotr.time(rise))")); found.insert("rises")
             case .partial(let free): #expect(note == String(localized: "Moon-free for \(free)% of true darkness")); found.insert("partial")
             default: break
             }
