@@ -16,19 +16,27 @@ struct NightDetail: View {
         // Only the plan here: the clock's moment changes every frame of a sweep, and only the
         // written sky below (`SkyNow`) reads it, so nothing else in the window re-evaluates.
         if let plan = model.plan {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 34) {
-                    header(plan)
-                    facts(plan)
-                    // The darkest nights from tonight on: a tap brings one here.
-                    DarkestAhead(park: plan.park)
-                    whatsUp(plan)
-                    SkyNow(plan: plan)
-                    honesty(plan)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 34) {
+                        header(plan)
+                        facts(plan)
+                        // The darkest nights from tonight on: a tap brings one here.
+                        DarkestAhead(park: plan.park).id("ahead")
+                        whatsUp(plan)
+                        SkyNow(plan: plan)
+                        honesty(plan)
+                    }
+                    .padding(.horizontal, 48).padding(.top, 8).padding(.bottom, 120)
+                    .frame(maxWidth: 860, alignment: .leading)
+                    .frame(maxWidth: .infinity)
                 }
-                .padding(.horizontal, 48).padding(.top, 8).padding(.bottom, 120)
-                .frame(maxWidth: 860, alignment: .leading)
-                .frame(maxWidth: .infinity)
+                // DEBUG captures (`-nyx-vision-ahead`): the darkest nights ahead in view at the window's foot.
+                .task(id: plan.park.id) {
+                    guard VisionDebug.isEnabled("vision-ahead") else { return }
+                    try? await Task.sleep(for: .seconds(2))
+                    proxy.scrollTo("ahead", anchor: .bottom)
+                }
             }
             .navigationTitle(Text(plan.park.shortName))
             .background {
