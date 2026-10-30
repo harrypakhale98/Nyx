@@ -216,6 +216,42 @@ import SwiftUI
     }
     /// A fling coasts on by the distance the finger was predicted to travel, at most 120°, and
     /// the sky keeps following the finger (a fling to the left turns toward the right).
+    /// Following the phone: the sky faces where the phone's back points, also straight up (where
+    /// that heading is lost) and looking down; rolling the phone does not turn it; the height
+    /// stays between a little ground and the zenith.
+    @Test func followingFacesWhereThePhonePoints() {
+        for azimuth in stride(from:0.0,to:360,by:45) {
+            for altitude in [-60.0,-10,0,30,59,61,75,89,90] {
+                let facing=SkyFollow.facing(SkyCompass.Pose(azimuth:azimuth,altitude:altitude),near:azimuth)
+                #expect(abs(facing-azimuth)<1e-6,"\(azimuth)° at \(altitude)° up faced \(facing)°")
+            }
+            // Held tipped over, below 60° roll changes nothing.
+            let rolled=SkyFollow.facing(SkyCompass.Pose(azimuth:azimuth,altitude:30,roll:25),near:azimuth)
+            #expect(abs(rolled-azimuth)<1e-6)
+        }
+        // Unwrapped next to the facing it follows, so the words never spin the long way.
+        #expect(abs(SkyFollow.facing(SkyCompass.Pose(azimuth:10,altitude:20),near:350)-370)<1e-6)
+        #expect(abs(SkyFollow.facing(SkyCompass.Pose(azimuth:200,altitude:20),near:560)-560)<1e-6)
+        #expect(SkyFollow.altitude(SkyCompass.Pose(azimuth:0,altitude:-60))==SkyFollow.altitudes.lowerBound)
+        #expect(abs(SkyFollow.altitude(SkyCompass.Pose(azimuth:0,altitude:52))-52)<1e-6)
+        #expect(abs(SkyFollow.altitude(SkyCompass.Pose(azimuth:0,altitude:90))-90)<1e-6)
+    }
+    /// Taking the sky eases from where it was to the phone and arrives exactly.
+    @Test func followingEasesInAndArrives() {
+        #expect(SkyFollow.eased(0)==0)
+        #expect(SkyFollow.eased(SkyFollow.easeDuration/3)>0.3)
+        #expect(SkyFollow.eased(SkyFollow.easeDuration)==1)
+        #expect(SkyFollow.eased(60)==1)
+    }
+    /// A pose near the zenith turns smoothly through 60°, where the screen's top starts to lead.
+    @Test func followingIsContinuousPastSixtyDegrees() {
+        var last=SkyFollow.facing(SkyCompass.Pose(azimuth:120,altitude:40,roll:10),near:120)
+        for altitude in stride(from:40.0,through:90,by:0.5) {
+            let facing=SkyFollow.facing(SkyCompass.Pose(azimuth:120,altitude:altitude,roll:10),near:last)
+            #expect(abs(facing-last)<2,"jumped at \(altitude)°")
+            last=facing
+        }
+    }
     @Test func aFlingCoastsAtMostAThirdOfACircle() {
         #expect(SkyTurn.coastTarget(facing:180,predicted:-100,translation:-60,degreesPerPoint:0.2)==188)
         #expect(SkyTurn.coastTarget(facing:180,predicted:100,translation:60,degreesPerPoint:0.2)==172)
