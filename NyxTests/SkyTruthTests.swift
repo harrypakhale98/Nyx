@@ -84,7 +84,7 @@ struct SkyTruthTests {
             (Self.sky(real, moon: full, rise: .some(nil), set: set, below: 0.6), .setsAt(set),
              "Moon up until \(jotr.time(set)), \(lit) lit.", "Moon up until \(jotr.time(set)).", "Moon down at \(jotr.time(set))"),
             (Self.sky(real, moon: full, rise: set, set: .some(nil), below: 0.4), .risesAt(set),
-             "Moon rises at \(jotr.time(set)), \(lit) lit.", "Moon rises at \(jotr.time(set)).", "Dark until \(jotr.time(set))"),
+             "Moon rises at \(jotr.time(set)), \(lit) lit.", "Moon rises at \(jotr.time(set)).", "Moon-free until \(jotr.time(set))"),
             (Self.sky(real, moon: full, rise: .some(nil), set: .some(nil), below: 0.5), .partial(percentFree: 50),
              "Moon-free for 50% of true darkness.", "Moon-free for 50% of true darkness.", "Moon-free for 50% of true darkness"),
         ]

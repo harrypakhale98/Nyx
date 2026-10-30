@@ -227,7 +227,8 @@ struct NextDarkComplicationView: View {
             case .darkNow: Text("Truly dark now")
             case .begins(let date, true): Text("Moon down \(reference(date))")
             case .begins(let date, false): Text("Dark \(reference(date))")
-            case .moonlit(let from, _) where from > entry.date: Text("Dark \(reference(from))")
+            // Never "Dark in …" for a night the Moon lights all through: that is the Moon-free countdown above.
+            case .moonlit(let from, _) where from > entry.date: Text("Moonlit \(reference(from))")
             // The Moon through true darkness at a glance, in the iPhone's words.
             case .moonlit: Text(entry.park.flatMap { park in entry.sky.map { $0.moonShort(park: park) } } ?? String(localized: "Dark, Moon up"))
             case .none: Text("No true darkness")
@@ -251,7 +252,8 @@ struct NextDarkComplicationView: View {
     private var inline: String {
         guard let park = entry.park else { return String(localized: "Nyx · choose a place") }
         switch entry.moment {
-        case .darkNow(let until, _): return String(localized: "Dark until \(park.wristTime(until))")
+        case .darkNow(let until, true): return String(localized: "Moon-free until \(park.wristTime(until))")
+        case .darkNow(let until, false): return String(localized: "Dark until \(park.wristTime(until))")
         case .begins(let date, true): return String(localized: "Moon down at \(park.wristTime(date))")
         case .begins(let date, false): return String(localized: "Dark at \(park.wristTime(date))")
         case .moonlit(_, let to): return String(localized: "Moonlit until \(park.wristTime(to))")

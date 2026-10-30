@@ -113,7 +113,8 @@ nonisolated enum MoonInDarkness: Sendable, Equatable {
         case .allFree: String(localized: "Moon down")
         case .allUp: String(localized: "Dark, Moon up")
         case .setsAt(let set): String(localized: "Moon down at \(park.time(set))")
-        case .risesAt(let rise): String(localized: "Dark until \(park.time(rise))")
+        // Moon-free, as the watch's next dark counts it: "Dark" alone would end at moonrise here and at dawn elsewhere.
+        case .risesAt(let rise): String(localized: "Moon-free until \(park.time(rise))")
         case .partial(let free): String(localized: "Moon-free for \(free)% of true darkness")
         }
     }
