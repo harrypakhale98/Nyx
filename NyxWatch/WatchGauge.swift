@@ -115,7 +115,9 @@ struct WatchGauge: View {
         for step in 1...240 {
             let t = Double(step)/120, value = NyxMotion.model.value(target: Double(score), time: t)
             while let mark = marks.first, value >= Double(mark) { beats.append((mark, t)); marks.removeFirst() }
-            if value >= Double(score) - 0.5 { beats.append((nil, t)); return beats }
+            // A score of exactly 70 or 90 lands on its milestone: one medium beat, as on the iPhone
+            // (`CelestialGauge.landingPulse`), never the light tap alone.
+            if value >= Double(score) - 0.5 { beats.append((marks.first, t)); return beats }
         }
         beats.append((nil, 2))
         return beats

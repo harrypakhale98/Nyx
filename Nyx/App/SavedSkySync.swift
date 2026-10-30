@@ -318,7 +318,9 @@ import WidgetKit
                     places:all.compactMap { model.park($0) }.filter { $0.isSavedSpot || $0.isCatalogPlace },aurora:model.aurora,
                     // At dusk's place for the wrist: the chosen town or starting park, never where you are
                     // (location stays on this iPhone), so the two turn together except while Near me has found you.
-                    dusk:NightVisionDusk.startingPoint(model),complete:complete)
+                    dusk:NightVisionDusk.startingPoint(model),
+                    // The parks the last park update covers, so the wrist says "Access not checked" for the rest, as here.
+                    checkedParkIDs:Set(model.parks.filter { $0.nps != nil && model.enrichments[$0.id] != nil }.map(\.id)),complete:complete)
         if watch { pushWatchMoons(model) }
     }
     /// The places whose Moons the watch is handed (`WatchMoons.places`); none without a watch with Nyx.

@@ -81,10 +81,6 @@ nonisolated enum AlertRanking {
         if alerts.isEmpty { return String(localized: "No alerts in the last park update. Confirm access before travel.") }
         return String(localized: "No closures in the last park update. Check all park alerts before you go.")
     }
-    /// No park update covers the park yet: the Park Service refusing requests, or nothing fetched.
-    static func unchecked(busy: Bool) -> String {
-        busy ? String(localized: "Park alerts are busy. Check current conditions on nps.gov.") : String(localized: "Access not checked. Confirm closures with the park.")
-    }
 }
 // The closure's own line (`ClosureLine`) is in Sentences.swift, which Apple Watch compiles too.
 extension ParkAlertsCache {

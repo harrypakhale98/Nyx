@@ -94,7 +94,7 @@ nonisolated enum WristTonightAnswer {
     /// where Nyx cannot know the closures, or the iPhone's switches leave closures or smoke out. Only the clouds are the wrist's own: when the iPhone sent them.
     static func dialog(_ night: Night, context: WatchContext?, now: Date, voiceOnly: Bool = false) -> String {
         TonightAnswer(night: night, closure: context?.closures[night.park.id], clouds: clouds(night, context: context, now: now),
-                      smokeNote: context?.smokeNote, unchecked: context?.alertsNote(night.park)).dialog(voiceOnly: voiceOnly)
+                      smokeNote: context?.smokeNote(night.park, night: night), unchecked: context?.alertsNote(night.park)).dialog(voiceOnly: voiceOnly)
     }
     /// What the clouds rest on, honestly: the forecast and when the iPhone sent it, or why there is none.
     static func clouds(_ night: Night, context: WatchContext?, now: Date) -> String {

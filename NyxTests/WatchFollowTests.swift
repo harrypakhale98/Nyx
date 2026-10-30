@@ -112,7 +112,7 @@ import UIKit
         object["alertsOff"] = nil; object["smokeOff"] = nil
         let older = try #require(WatchContext(data: try JSONSerialization.data(withJSONObject: object)))
         #expect(older.tonightNight == nil && !older.spotForecastsOff && older.tonightParkID == "jotr")
-        #expect(!older.alertsOff && !older.smokeOff && older.alertsNote(jotr) == nil && older.smokeNote == nil)
+        #expect(!older.alertsOff && !older.smokeOff && older.alertsNote(jotr) == nil && older.checkedParkIDs == nil)
         #expect(older.stillPicks(jotr, at: evening.addingTimeInterval(3600)) && !older.stillPicks(jotr, at: evening.addingTimeInterval(86400)))
         // A night without a pick is never carried.
         #expect(WatchContext.make(savedParkIDs: [], homeParkID: "deva", nightVision: false, forecasts: [:], tonightNight: night, now: evening).tonightNight == nil)
@@ -122,7 +122,15 @@ import UIKit
         // The iPhone's switches off: its own words, said on the wrist, and they survive the trip.
         let off = try #require(context.stamped(alertsOff: true, smokeOff: true).data.flatMap { WatchContext(data: $0) })
         #expect(off.alertsNote(jotr) == String(localized: "Park alerts are off in Your privacy, so closures are not checked."))
-        #expect(off.smokeNote == String(localized: "Smoke and haze are off in Your privacy, so smoke is not counted."))
+        #expect(off.smokeNote(jotr, night: nil) == String(localized: "Smoke and haze are off in Your privacy, so smoke is not counted."))
+        // Switches on: a park no update covers is "not checked", and a place with no smoke handed over says so, as on the iPhone.
+        let on = WatchContext(sent: evening, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], checkedParkIDs: ["deva"])
+        #expect(on.alertsNote(jotr) == ScoreInputs(alertsOn: true).uncheckedNote(jotr, closure: nil))
+        #expect(on.alertsNote(try park("deva")) == nil && on.smokeNote(jotr, night: nil) == ScoreInputs(smokeKnown: []).smokeNote(jotr, night: nil))
+        // A closure that did not fit leaves its park unchecked rather than silent.
+        let crowded = WatchContext.make(savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], closures: ["deva": String(repeating: "x", count: 200_000)],
+                                        checkedParkIDs: ["deva", "jotr"], now: evening)
+        #expect(crowded.checkedParkIDs == ["jotr"])
         #expect(off.stamped(alertsOff: true).alertsNote(jotr) != nil && WatchContext(sent: evening, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:],
                 closures: ["jotr": "Road closed"], alertsOff: true).alertsNote(jotr) == nil)
     }
