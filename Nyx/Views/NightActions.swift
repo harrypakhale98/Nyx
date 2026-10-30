@@ -88,7 +88,10 @@ struct NightDirections: View {
         case .accessNote:
             AccessNoteLabel(park:park).frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
         case .nothing:
-            EmptyView()
+            // Said rather than left as a blank row under the divider: a road park with no viewing spot listed yet.
+            Text("No viewing spot is listed for this park yet. The park's own site says where night visitors go.")
+                .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                .frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
         case .directions(let spot,let url,let stepFree):
             Button { openURL(url) } label:{
                 // The step-free glyph rides in the text, so it wraps with the words; at accessibility

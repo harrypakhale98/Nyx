@@ -38,7 +38,8 @@ struct StartingPointPanel: View {
                 }
             }
             crowFlies
-            if location.denied || DebugScenario.state=="no-location" { Text("Location is off. Choose your city or the park closest to you.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
+            // Said until a place is chosen; after that the row above already names it.
+            if (location.denied && !model.startChosen) || DebugScenario.state=="no-location" { Text("Location is off. Choose your city or the park closest to you.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
             if let message=location.message { Text(message).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
         }
         // The layouts settle on their first pass; a surrounding animation must not morph one into another.
@@ -46,13 +47,13 @@ struct StartingPointPanel: View {
         // One container, so the accessibility audit can find the row (`startingPoint`).
         .accessibilityElement(children:.contain).accessibilityIdentifier("startingPoint") }
     }
-    /// Read on its own after the radius ("Radius, 200 mi", then "as the crow flies"): visible text
+    /// Read on its own after the radius ("Radius, 200 mi", then "in a straight line"): visible text
     /// is never hidden from VoiceOver, which the accessibility audit checks wherever the panel shows. It keeps the starting point's icon column (the same symbol, hidden, at the same size), so its
     /// words start under "From", not under the pin; at accessibility sizes, where the radius sits at
     /// the leading edge under a wrapped name, it aligns with the radius instead.
     private var crowFlies: some View {
         Label {
-            Text("as the crow flies").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            Text("in a straight line").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:originSymbol).hidden().accessibilityHidden(true) } }
         .font(.subheadline)
     }
@@ -63,10 +64,14 @@ struct StartingPointPanel: View {
     private var dot: some View { Circle().fill(palette.muted).frame(width:dotSize,height:dotSize).accessibilityHidden(true) }
     private func origin(wraps:Bool)->some View {
         Button { choose() } label:{
-            Group {
-                if location.latitude==nil { Label(String(localized:"From \(model.homePlace?.label ?? model.originName)"),systemImage:originSymbol) }
-                else { Label("From your location",systemImage:originSymbol) }
-            }.multilineTextAlignment(.leading).fixedSize(horizontal:!wraps,vertical:true)
+            // A chevron says the line is a choice, not a caption (after denying location, people looked for one).
+            HStack(spacing:6) {
+                Group {
+                    if location.latitude==nil { Label(String(localized:"From \(model.homePlace?.label ?? model.originName)"),systemImage:originSymbol) }
+                    else { Label("From your location",systemImage:originSymbol) }
+                }.multilineTextAlignment(.leading).fixedSize(horizontal:!wraps,vertical:true)
+                Image(systemName:"chevron.up.chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
+            }
         }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a city, town or park to start from")
     }
     /// Near me (or Settings when location is off), always in words: it is the main way into location.
@@ -115,7 +120,7 @@ struct StartingPointSheets: ViewModifier {
                 model.location.clear()
             } }.nyxPresentation().presentationDetents([.large])
         }
-        .sheet(isPresented:$explaining) { PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a city or a park.",action:"Use my location") { explaining=false;model.location.request() }.nyxPresentation() }    }
+        .sheet(isPresented:$explaining) { PermissionExplainer(symbol:"location",title:"Find dark places near you",message:"Nyx uses your location while you use it: to find parks within a straight-line distance, to start from where you are next time, to notice when you are at a U.S. national park, to turn the star map to true north and to turn night vision on at dusk. It stays on this iPhone. You can also choose a city or a park.",action:"Use my location") { explaining=false;model.location.request() }.nyxPresentation() }    }
     /// The explainer only before iOS's first prompt; once answered, Near me just finds you.
     static func nearMe(_ model:PlanModel,explain:()->Void) { if model.location.needsPermission { explain() } else { model.location.request() } }
 }

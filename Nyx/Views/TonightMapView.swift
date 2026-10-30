@@ -403,7 +403,7 @@ struct ParksMapView: View {
     /// What the marks mean, in words beside small drawn examples.
     private func legend(ring:Bool)->some View {
         var items:[(LegendGlyph.Kind,LocalizedStringKey)]=[(.sizes,"Larger and brighter: a darker night"),(.fills,"Filled: forecast. Half: early look. Hollow: usual clouds"),(.closure,"Closure in the last park update")]
-        if ring { items.append((.ring,"Dashed ring: your search radius, as the crow flies")) }
+        if ring { items.append((.ring,"Dashed ring: your search radius, in a straight line")) }
         return VStack(alignment:.leading,spacing:10) {
             ForEach(Array(items.enumerated()),id:\.offset) { _,item in
                 HStack(alignment:.top,spacing:12) {

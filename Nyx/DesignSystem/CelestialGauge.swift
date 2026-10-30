@@ -196,7 +196,7 @@ struct CelestialGauge: View {
             let basis=inputs.basis ?? (inputs.hasForecast ? String(localized:"Includes cloud forecast.") : String(localized:"No full cloud forecast; usual clouds count."))
             let label=String(localized:"Darkness score \(inputs.score) out of 100. \(ScoreBand.band(inputs.score).label). \(basis)")
             guard let range=inputs.range else { return label }
-            return label+" "+String(localized:"Forecast models: \(range.lowerBound) to \(range.upperBound).")
+            return label+" "+String(localized:"Score range across forecast models: \(range.lowerBound) to \(range.upperBound).")
         }+(night.map { " "+$0.spoken } ?? "")
     }
     // MARK: The count-up

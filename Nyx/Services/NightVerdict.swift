@@ -38,17 +38,17 @@ nonisolated enum NightVerdict {
         guard core.peakPossible>=3, !core.neverUp else { return nil }
         if let free=core.moonFree {
             if free.duration<briefCore {
-                let text=String(localized: "Milky Way core only briefly.")
+                let text=String(localized: "The Milky Way core is up only briefly.")
                 return Line(text: text, spoken: text)
             }
             return Line(text: String(localized: "Milky Way core clear of moonlight, \(park.time(free.start)) – \(park.time(free.end))."),
                         spoken: String(localized: "Milky Way core clear of moonlight from \(park.time(free.start)) to \(park.time(free.end))."))
         }
         if let dark=core.dark {
-            let text=dark.duration<3600 ? String(localized: "Milky Way core only briefly, under the Moon.") : String(localized: "Milky Way core up, but under the Moon.")
+            let text=dark.duration<3600 ? String(localized: "The Milky Way core is up only briefly, under the Moon.") : String(localized: "The Milky Way core is up, but under the Moon.")
             return Line(text: text, spoken: text)
         }
-        let text=String(localized: "Milky Way core not up in true darkness.")
+        let text=String(localized: "The Milky Way core is below the horizon during true darkness.")
         return Line(text: text, spoken: text)
     }
     /// A night's score as a line may name it, with what it rests on in the words every list uses

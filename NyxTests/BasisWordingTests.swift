@@ -65,12 +65,12 @@ import Testing
             #expect(!line.contains("eased") && !line.contains(" ease "), "\(line)")
         }
         let fact = ScoreBreakdownView.cloudFact(bare)
-        #expect(fact.hasPrefix("Early look: a forecast of 80% from ") && fact.hasSuffix(" days out, counted as it stands.") && !fact.contains("Counted as"))
+        #expect(fact.hasPrefix("Early look: the forecast says 80% cloud, ") && fact.hasSuffix(" days ahead. Nyx counts it as it stands.") && !fact.contains("Counted as"))
         #expect(FieldView.basisNote(bare.score, usualClouds: false) == bare.basisCaption())
         // With usual clouds, the words are as before.
         #expect(FieldView.basisNote(eased.score, usualClouds: true) == eased.basisCaption() && eased.basisCaption()?.contains("eased toward usual clouds") == true)
-        #expect(ScoreBreakdownView.cloudFact(eased).contains("eased toward the usual clouds") && NightLookup.basis(eased).contains("eased toward usual clouds"))
-        #expect(CalendarView.legend([eased]).hasPrefix("Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds."))
+        #expect(ScoreBreakdownView.cloudFact(eased).contains("mixes it with the usual clouds") && NightLookup.basis(eased).contains("eased toward usual clouds"))
+        #expect(CalendarView.legend([eased]).contains("Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds."))
         #expect(CalendarView.legend([eased, bare]).contains("eased toward the usual clouds, or counted as it stands where those are not known."))
         #expect(UsualCloudsNote.trip([eased, bare]) == "Nights marked \"Early look\" ease the forecast toward each park's usual clouds for the month, or count it as it stands where those are not known.")
         // A stay's unmarked early look with no usual clouds leans on none.

@@ -17,6 +17,8 @@ struct GoingButton: View {
     /// Centred under a centred hero; leading at accessibility sizes, where the hero reads from the edge.
     var alignment=HorizontalAlignment.center
     @State private var explaining=false
+    /// Offered once: after "Continue without it", a later "I'm going" does not ask again (Settings has the switch).
+    @AppStorage("goingRemindersOffered") private var offered=false
     @State private var full=false
     @MotionReduced private var reduceMotion: Bool
     private var store: GoingNights { .shared }
@@ -49,7 +51,7 @@ struct GoingButton: View {
         }
     }
     private func caption(_ going: GoingNight?) -> String {
-        guard let going else { return String(localized:"Nyx keeps watch and tells you if this night gets clearly worse.") }
+        guard let going else { return String(localized:"Nyx checks this night's forecast and tells you if it gets clearly worse.") }
         return notificationsEnabled ? String(localized:"Keeping watch. \(going.chosenScore) when you chose it.")
                                     : String(localized:"\(going.chosenScore) when you chose it. Turn on reminders to hear if it changes.")
     }
@@ -57,7 +59,7 @@ struct GoingButton: View {
         if let going { store.stop(going); Task { await GoingWatch.check(model) }; return }
         guard store.go(night) else { full=true; return }
         Task {
-            if !notificationsEnabled, await UNUserNotificationCenterStatus.undecided() { explaining=true }
+            if !notificationsEnabled, !offered, await UNUserNotificationCenterStatus.undecided() { offered=true; explaining=true }
             await GoingWatch.check(model)
         }
     }
@@ -182,7 +184,10 @@ struct GoingPanel: View {
         case .uncertain:
             if night.basis != .forecast { return String(localized:"Too early to call. The full cloud forecast reaches a night about three days ahead.") }
             return agreement?.sentence(tonight:night.id==model.tonight(night.park)) ?? String(localized:"Too early to call.")
-        case .good: return String(localized:"Looks good so far: \(going.chosenScore) when you chose it.")
+        // Unchanged is only good news for a night that was worth going for: a Poor night that stays Poor is said plainly.
+        case .good:
+            if going.chosenScore >= ScoreBand.good.minimum { return String(localized:"Looks good so far: \(going.chosenScore) when you chose it.") }
+            return String(localized:"Unchanged so far: \(going.chosenScore), \(ScoreBand.band(going.chosenScore).label), as when you chose it.")
         }
     }
     /// Tell someone, and "Not going" in the menu beside it.

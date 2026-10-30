@@ -28,10 +28,11 @@ import UserNotifications
         defaults.set(count,forKey:key)
         if count==3 { ask(defaults) }
     }
-    /// The journal grew by one entry (not a store loading or an import of many). Asks when this
-    /// version has not asked yet; `request` keeps the once-per-version rule.
+    /// The journal grew by one entry (not a store loading or an import of many), from its third on: a
+    /// first night saved on the first evening is too soon to ask about the app. Asks when this version
+    /// has not asked yet; `request` keeps the once-per-version rule.
     static func noteJournalEntry(old:Int,new:Int,defaults:UserDefaults = .standard,ask:@MainActor (UserDefaults)->Void={ request(defaults:$0,delay:journalDelay) }) {
-        guard isJournalMoment(old:old,new:new) else { return }
+        guard isJournalMoment(old:old,new:new), new>=3 else { return }
         ask(defaults)
     }
     nonisolated static func isJournalMoment(old:Int,new:Int)->Bool { new==old+1 }
@@ -118,12 +119,16 @@ struct MomentsWatcher: View {
     private var explainer:some View { RemindersExplainer { granted in notificationsEnabled=granted } }
     /// iOS has not yet asked about notifications.
     nonisolated private static func undecided() async -> Bool { await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .notDetermined }
-    /// Over whatever is open (a park's page in a sheet, say), or as this window's own sheet.
+    /// At once, over whatever is open (a park's page in a sheet, say). A tip's popover gives way first:
+    /// a sheet asked of a window already showing one waited until some later presentation (a widget's
+    /// tap) and arrived out of place.
     private func offer() {
-        if let top=commands?.topController, top.presentingViewController != nil {
-            let host=UIHostingController(rootView:explainer.nyxPresentation().environment(\.nyx,palette))
-            host.sheetPresentationController?.detents=[.medium(),.large()]
-            top.present(host,animated:true)
-        } else { offering=true }
+        guard let top=commands?.topController else { offering=true; return }
+        let host=UIHostingController(rootView:explainer.nyxPresentation().environment(\.nyx,palette))
+        // Three quarters, as the explainer asks of a SwiftUI sheet (`PermissionExplainer`).
+        host.sheetPresentationController?.detents=[.custom { $0.maximumDetentValue*0.75 },.large()]
+        if top.modalPresentationStyle == .popover, let below=top.presentingViewController {
+            top.dismiss(animated:true) { below.present(host,animated:true) }
+        } else { top.present(host,animated:true) }
     }
 }

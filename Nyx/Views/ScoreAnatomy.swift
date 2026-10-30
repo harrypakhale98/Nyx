@@ -45,7 +45,7 @@ struct ScoreAnatomy:View {
                     VStack(alignment:.leading,spacing:6) { ForEach(parts.indices,id:\.self) { legend($0) } }
                 }
             }.frame(maxWidth:320)
-            Text("90 Pristine · 75 Excellent · 60 Good").font(.caption).foregroundStyle(palette.ink).multilineTextAlignment(.center)
+            Text("90 Pristine · 75 Excellent · 60 Good · 40 Fair · lower, Poor").font(.caption).foregroundStyle(palette.ink).multilineTextAlignment(.center)
             Text(example == nil ? "Example night" : "Example night. The ring runs from sunset to sunrise.").font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
         }
         .accessibilityElement(children:.ignore)

@@ -470,9 +470,9 @@ nonisolated struct UsualCloudsNote: Equatable, Sendable {
     /// One place's nights drawn hollow (the calendar's key, the river's tip).
     var hollow: String {
         switch (usual, bare) {
-        case (true, true): String(localized:"Hollow: \(label), so the park's usual clouds, or the Moon and darkness only where those are not known.")
-        case (true, false): String(localized:"Hollow: \(label), so the park's usual clouds.")
-        default: String(localized:"Hollow: \(label), so the Moon and darkness only.")
+        case (true, true): String(localized:"Hollow: \(label). Nyx uses the park's usual clouds, or only the Moon and darkness where those are not known.")
+        case (true, false): String(localized:"Hollow: \(label). Nyx uses the park's usual clouds.")
+        default: String(localized:"Hollow: \(label). Nyx uses only the Moon and darkness.")
         }
     }
     /// The rows' own marks (`basisLabel`), quoted as the language quotes: "No cloud forecast yet",

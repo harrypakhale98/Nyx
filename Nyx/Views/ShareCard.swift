@@ -108,13 +108,13 @@ struct ShareCard:View {
     }
     /// "Forecast models: 70–84"
     nonisolated static func rangeLine(_ range:ClosedRange<Int>)->String {
-        String(localized:"Forecast models: \(range.lowerBound)–\(range.upperBound)")
+        String(localized:"Score range across forecast models: \(range.lowerBound)–\(range.upperBound)")
     }
     /// "Joshua Tree, Fri, Oct 9, darkness score 94 out of 100. Pristine. Forecast models: 88 to 96.
     /// Waxing crescent, 12% lit. Moon-free all night. Cloud forecast included…"
     var summary:String {
         var parts=[String(localized:"\(night.park.shortName), \(night.park.dayLabel(night.id)), darkness score \(night.score.value) out of 100. \(night.score.band.label).")]
-        if let range { parts.append(String(localized:"Forecast models: \(range.lowerBound) to \(range.upperBound).")) }
+        if let range { parts.append(String(localized:"Score range across forecast models: \(range.lowerBound) to \(range.upperBound).")) }
         parts.append(Sentences.end(moonPhrase))
         if let why { parts.append(Sentences.end(why)) }
         parts.append(Sentences.end(basis))

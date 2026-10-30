@@ -42,7 +42,7 @@ import Testing
     /// Winter in the north: the core is not up in true darkness, said plainly rather than left out.
     @Test func coreOutOfSeasonIsSaid() throws {
         let jotr = try park("jotr"), sky = try sky(jotr, "2026-12-13")
-        #expect(verdict(jotr, sky)?.text.contains("Milky Way core not up in true darkness.") == true)
+        #expect(verdict(jotr, sky)?.text.contains("The Milky Way core is below the horizon during true darkness.") == true)
     }
     /// Alaska, where the core never climbs: no core sentence (What's up explains it there), and no
     /// line at all on a night with no true darkness.
@@ -157,8 +157,8 @@ import Testing
     /// four numbers and the dial never seem to disagree; with no binding cap it says nothing.
     @Test func readoutSaysTheSumBeforeTheCap() {
         let capped = DarknessScore(value: 64, moonPoints: 22, cloudPoints: 21, bortlePoints: 15, lengthPoints: 15, limit: .moonlight(64))
-        #expect(ScoreReadout.limitLine(capped, tonight: true) == "Moonlight limits tonight to 64. The four parts alone would give 73.")
-        #expect(ScoreReadout.limitLine(capped, tonight: false) == "Moonlight limits this night to 64. The four parts alone would give 73.")
+        #expect(ScoreReadout.limitLine(capped, tonight: true) == "Moonlight limits tonight to 64. The four parts add up to 73, but that limit comes first.")
+        #expect(ScoreReadout.limitLine(capped, tonight: false) == "Moonlight limits this night to 64. The four parts add up to 73, but that limit comes first.")
         let loose = DarknessScore(value: 73, moonPoints: 22, cloudPoints: 21, bortlePoints: 15, lengthPoints: 15, limit: .moonlight(80))
         #expect(ScoreReadout.limitLine(loose, tonight: true) == nil)
         // The part that holds the score is the one ringed; smoke has no part, and a loose cap marks none.

@@ -224,7 +224,7 @@ final class AccessibilityAuditTests:XCTestCase {
         ("plan","Joshua Tree"),
         // The same menu under the screen's older route name (`-nyx-screen calendar`).
         ("calendar","Joshua Tree"),
-        // My free nights' hero score stops at 150 pt (about three times AX5 body text) so "100" still fits the
+        // Nights I can go: the hero score stops at 150 pt (about three times AX5 body text) so "100" still fits the
         // width; "#" matches a label of digits only. Checked in a system AX5 capture (2026-10-08).
         ("trip","#"),
         // Plan's best nights: the same hero numeral, capped the same way.

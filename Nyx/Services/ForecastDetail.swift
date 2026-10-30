@@ -162,8 +162,8 @@ nonisolated struct ModelAgreement: Sendable, Equatable {
     var word: String {
         switch band {
         case .agree: String(localized:"Models agree")
-        case .roughly: String(localized:"Roughly agree")
-        case .disagree: String(localized:"Models differ")
+        case .roughly: String(localized:"Models roughly agree")
+        case .disagree: String(localized:"Models disagree")
         }
     }
     private var range: String {

@@ -36,7 +36,10 @@ extension ParkDetailView {
             ScoreReadout(score:night.score,agreement:outlook?.agreement,isTonight:isTonight) { showBreakdown() }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
                 // Held with the dial (the zoom in, a forecast still loading), so its parts fill as it counts.
                 .environment(\.nyxRevealHeld,heroHeld)
-                .popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
+                // Offered once the readout itself is on screen, so the tip points at it, not past the fold.
+                .onScrollVisibilityChange(threshold:0.9) { if $0 { readoutSeen=true } }
+                // One tip at a time: the river's own tip, further down, goes first.
+                .popoverTip(DebugScenario.screen == nil && !palette.nightVision && readoutSeen && !RiverTip().shouldDisplay ? ScoreTip() : nil)
             if isTonight { FieldEntry(park:park,night:night).padding(.top,typeSize.isAccessibilitySize ? 4 : 10) }
             KeepThisNightOffer(park:park).padding(.top,4)
         }

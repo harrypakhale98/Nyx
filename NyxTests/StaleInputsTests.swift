@@ -59,18 +59,18 @@ import Testing
         #expect(UsualCloudsNote([bare])?.estimate == "Scores marked Estimate: cloud forecast unavailable. They count the Moon and darkness only.")
         #expect(UsualCloudsNote([tonight, later, bare])?.estimate
                 == "Scores marked Estimate: no cloud forecast yet, or unavailable. They use each park's usual clouds, or the Moon and darkness only where those are not known.")
-        #expect(notYet.hollow == "Hollow: no cloud forecast yet, so the park's usual clouds.")
-        #expect(UsualCloudsNote([bare])?.hollow == "Hollow: cloud forecast unavailable, so the Moon and darkness only.")
+        #expect(notYet.hollow == "Hollow: no cloud forecast yet. Nyx uses the park's usual clouds.")
+        #expect(UsualCloudsNote([bare])?.hollow == "Hollow: cloud forecast unavailable. Nyx uses only the Moon and darkness.")
     }
     /// The calendar's key and the river's tip name only the hollow nights there are.
     @Test func monthKeyAndRiverTipFollowTheirNights() throws {
         let jotr = try park("jotr")
         let tonight = night(jotr), later = night(jotr, daysAhead: 12)
-        #expect(CalendarView.legend([tonight, later]).contains("Hollow: no cloud forecast yet, or unavailable, so the park's usual clouds."))
-        #expect(CalendarView.legend([later]).contains("Hollow: no cloud forecast yet, so the park's usual clouds."))
-        #expect(CalendarView.legend([]).hasPrefix("Solid: full forecast.") && !CalendarView.legend([]).contains("Hollow"))
+        #expect(CalendarView.legend([tonight, later]).contains("Hollow: no cloud forecast yet, or unavailable. Nyx uses the park's usual clouds."))
+        #expect(CalendarView.legend([later]).contains("Hollow: no cloud forecast yet. Nyx uses the park's usual clouds."))
+        #expect(CalendarView.legend([]).hasPrefix("The number under each night is its darkness score") && CalendarView.legend([]).contains("Solid: full forecast.") && !CalendarView.legend([]).contains("Hollow"))
         let tip = RiverTip.message(hollow: UsualCloudsNote([tonight])?.hollow)
-        #expect(tip.hasPrefix("Hollow: cloud forecast unavailable, so the park's usual clouds. Half-filled"))
+        #expect(tip.hasPrefix("Hollow: cloud forecast unavailable. Nyx uses the park's usual clouds. Half-filled"))
         #expect(!RiverTip.message(hollow: nil).contains("Hollow"))
     }
 

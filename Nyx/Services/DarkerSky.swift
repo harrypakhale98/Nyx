@@ -65,9 +65,9 @@ nonisolated enum DarkerSky {
         let rounded=value<15 ? max(1, value.rounded()) : (value/10).rounded()*10
         return String(localized: "about \(SearchRadius.format(rounded, system))")
     }
-    /// "The nearest dark sky is about 140 km northeast, as the crow flies."
+    /// "The nearest dark sky is about 140 km northeast, in a straight line."
     static func headline(_ offer: Offer, system: SearchRadius.System = .init()) -> String {
-        String(localized: "The nearest dark sky is \(distance(offer.area.distanceMeters, system)) \(Compass.name(offer.bearing)), as the crow flies.")
+        String(localized: "The nearest dark sky is \(distance(offer.area.distanceMeters, system)) \(Compass.name(offer.bearing)), in a straight line.")
     }
     /// "Rural sky, Bortle 3, estimated from satellite data."
     static func skyLine(_ offer: Offer) -> String {
@@ -85,6 +85,6 @@ nonisolated enum DarkerSky {
     static var shortCaution: String { String(localized: "Nobody has checked it. See what is there before you go.") }
     /// The record Ask Nyx is given: the same facts, labelled as a light-map estimate with no name or score.
     static func record(_ offer: Offer, from origin: String, system: SearchRadius.System) -> String {
-        String(localized: "Nearest dark area on the satellite light map (no name, no score, not checked on the ground): \(distance(offer.area.distanceMeters, system)) \(Compass.name(offer.bearing)) of \(origin) as the crow flies, Bortle \(offer.area.bortle).")
+        String(localized: "Nearest dark area on the satellite light map (no name, no score, not checked on the ground): \(distance(offer.area.distanceMeters, system)) \(Compass.name(offer.bearing)) of \(origin) in a straight line, Bortle \(offer.area.bortle).")
     }
 }

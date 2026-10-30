@@ -96,7 +96,7 @@ struct DarkerSkyTests {
         #expect(km == String(localized: "about \(SearchRadius.format(40, .kilometers))"))
         #expect(miles == String(localized: "about \(SearchRadius.format(20, .miles))"))
         #expect(DarkerSky.distance(6_000, .kilometers) == String(localized: "about \(SearchRadius.format(6, .kilometers))"))
-        #expect(DarkerSky.headline(offer, system: .kilometers) == "The nearest dark sky is \(km) \(Compass.name(offer.bearing)), as the crow flies.")
+        #expect(DarkerSky.headline(offer, system: .kilometers) == "The nearest dark sky is \(km) \(Compass.name(offer.bearing)), in a straight line.")
         #expect(DarkerSky.skyLine(offer) == "\(BortleScale.name(2)), Bortle 2, estimated from satellite data.")
         #expect(DarkerSky.comparison(offer) == "The darkest place in reach has a Bortle 7 sky.")
         let record = DarkerSky.record(offer, from: "Somewhere", system: .kilometers)

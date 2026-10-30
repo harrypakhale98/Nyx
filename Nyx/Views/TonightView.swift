@@ -63,9 +63,9 @@ struct TonightView: View {
     @State private var skyNight=TonightView.debugNight
     /// The dial's night as the current drag began; nil between drags.
     @State private var dragFrom:Int?
-    /// Whether the current drag on the dial is a scrub: decided on its first movement as the river decides
-    /// (`TimeRiver`, mostly horizontal), so the page still scrolls; reset by the system even when cancelled.
-    @GestureState private var dialDrag:Bool?=nil
+    /// True while a finger scrubs the dial (`DialPan` begins only on a sideways drag, so the page still
+    /// scrolls); nil once it lifts or the system cancels the drag.
+    @State private var dialDrag:Bool?=nil
     /// Bumped once per night the dial steps to: the light tick of a scrub detent.
     @State private var dialDetents=0
     @State private var dialTipDone=false
@@ -273,6 +273,10 @@ struct TonightView: View {
             Button { nearMe() } label:{ Label("Near me",systemImage:"location").frame(minHeight:30) }
                 .secondaryAction()
                 .accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")])
+        } else {
+            // The way back to location, as the starting-point panel offers once a place is chosen.
+            Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").frame(minHeight:30) }
+                .secondaryAction().accessibilityLabel("Turn on location in Settings")
         }
         Button { chooseHome=true } label:{ Label("Choose a starting point",systemImage:"mappin.and.ellipse").frame(minHeight:30) }
             .secondaryAction().accessibilityInputLabels([Text("Choose a starting point"),Text("Choose a city"),Text("Choose a park")])
@@ -450,7 +454,7 @@ struct TonightView: View {
             .environment(\.gaugeAccessibleMax,Self.accessibleDial).frame(height:large ? nil : wide ? 300 : 240)
             .modifier(DepthParallax(depth:0.08))
             .contentShape(Rectangle())
-            .simultaneousGesture(dialScrub,including:ready ? .all : .subviews)
+            .gesture(DialPan(enabled:ready) { dialScrub($0) })
             // VoiceOver steps the nights without the drag: the value is the night, the place and its score.
             .accessibilityValue(TonightScrub.spokenValue(night,tonight:offset==0))
             .accessibilityHint(ready ? Text("Steps through the next two weeks of nights, each with the darkest place in reach.") : Text(verbatim:""))
@@ -470,15 +474,12 @@ struct TonightView: View {
     /// A mostly sideways drag across the dial steps a night every `TonightScrub.pitch` points: toward the
     /// leading edge for later nights, which come in from the trailing edge as pages do. Measured on the
     /// screen, so the dial shifting under the finger (a longer name in the pill) never steps a night.
-    private var dialScrub: some Gesture {
-        DragGesture(minimumDistance:6,coordinateSpace:.global).updating($dialDrag) { drag,state,_ in
-            if state==nil { state=TonightScrub.isHorizontal(drag.translation) }
-        }.onChanged { drag in
-            guard dialDrag ?? TonightScrub.isHorizontal(drag.translation) else { return }
-            let from=dragFrom ?? dialNight
-            if dragFrom==nil { dragFrom=from }
-            chooseNight(TonightScrub.offset(from:from,translation:drag.translation.width,rightToLeft:layoutDirection == .rightToLeft))
-        }
+    private func dialScrub(_ translation:CGSize?) {
+        guard let translation else { dialDrag=nil; return }
+        if dialDrag == nil { dialDrag=true }
+        let from=dragFrom ?? dialNight
+        if dragFrom==nil { dragFrom=from }
+        chooseNight(TonightScrub.offset(from:from,translation:translation.width,rightToLeft:layoutDirection == .rightToLeft))
     }
     /// One step, from VoiceOver, a key or a button; nothing until the places' nights are ready.
     private func stepDial(_ delta:Int) {
@@ -563,7 +564,7 @@ struct TonightView: View {
     /// The other places in reach for the dial's night, each row's week starting from it.
     @ViewBuilder private func more(_ shown:[Night],offset:Int)->some View {
         if shown.count>1, let first=shown.first {
-            if offset>0 { Eyebrow(text:"More skies within reach on \(first.park.dayLabel(first.id))") } else { Eyebrow(text:"More skies within reach") }
+            if offset>0 { Eyebrow(text:"Other dark places in reach on \(first.park.dayLabel(first.id))") } else { Eyebrow(text:"Other dark places in reach") }
             // Rows and hairlines in their own stack, as on Parks: the page's spacing would double each gap.
             VStack(spacing:0) {
                 ForEach(Array(shown.dropFirst()),id:\.park.id) { night in
@@ -751,7 +752,13 @@ struct PermissionExplainer: View {
     let action:LocalizedStringKey
     let proceed:()->Void
     var body: some View {
-        NavigationStack { ScrollView { VStack(spacing:24) { CalmState(symbol:symbol,title:title,message:message);Button(action,action:proceed).secondaryAction();Button("Continue without it") { dismiss() } }.padding(24) }.background(Color.black).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Close") { dismiss() } } } }.presentationDetents([.medium,.large])
+        // The choice stays pinned under the message, so the sheet at half height never shows only Close.
+        NavigationStack { ScrollView { CalmState(symbol:symbol,title:title,message:message).padding(.horizontal,24) }.background(Color.black)
+            .safeAreaInset(edge:.bottom) { VStack(spacing:14) { Button(action,action:proceed).secondaryAction();Button("Continue without it") { dismiss() }.frame(minHeight:44) }.padding(.horizontal,24).padding(.vertical,12).frame(maxWidth:.infinity).background(Color.black) }
+            .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Close") { dismiss() } } } }
+            // Three quarters, not half: on an iPhone SE half the screen held the pinned choice and only the
+            // title above it, so the reason was out of sight.
+            .presentationDetents([.fraction(0.75),.large])
             // A form-sized card on iPad, never a page stretched across the window.
             .presentationSizing(.form)
     }
@@ -850,8 +857,41 @@ nonisolated enum TonightScrub {
         return String(localized:"\(day): \(night.park.shortName), \(NightVerdict.scored(night)), \(night.score.band.label)")
     }
 }
+/// The dial's sideways drag, as a UIKit pan that begins only when the finger moves more across than
+/// up or down. A SwiftUI drag on the dial, even a simultaneous one, kept a swipe that began on it from
+/// scrolling the page (seen on an iPhone SE, where the dial is a third of the first screen).
+/// `changed` gets the translation in the window while dragging, and nil when the drag ends or is cancelled.
+private struct DialPan: UIGestureRecognizerRepresentable {
+    var enabled=true
+    let changed:(CGSize?)->Void
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        func gestureRecognizerShouldBegin(_ recognizer:UIGestureRecognizer)->Bool {
+            guard let pan=recognizer as? UIPanGestureRecognizer else { return true }
+            let velocity=pan.velocity(in:pan.view)
+            return TonightScrub.isHorizontal(CGSize(width:velocity.x,height:velocity.y))
+        }
+    }
+    func makeCoordinator(converter:CoordinateSpaceConverter)->Coordinator { Coordinator() }
+    func makeUIGestureRecognizer(context:Context)->UIPanGestureRecognizer {
+        let recognizer=UIPanGestureRecognizer()
+        recognizer.delegate=context.coordinator
+        recognizer.isEnabled=enabled
+        return recognizer
+    }
+    func updateUIGestureRecognizer(_ recognizer:UIPanGestureRecognizer,context:Context) { recognizer.isEnabled=enabled }
+    func handleUIGestureRecognizerAction(_ recognizer:UIPanGestureRecognizer,context:Context) {
+        switch recognizer.state {
+        case .began,.changed: let moved=recognizer.translation(in:nil); changed(CGSize(width:moved.x,height:moved.y))
+        default: changed(nil)
+        }
+    }
+}
 /// Tonight's dial steps through the nights, which nothing on it shows: said once, and closed by the first step.
 struct DialNightsTip: Tip {
+    /// One donation per launch. The first launch is for the answer itself (the tip would sit over the
+    /// place the score is for), so the dial's hidden gesture is offered from the second launch on.
+    static let launched=Tips.Event(id:"nyx.launched")
+    var rules: [Rule] { #Rule(Self.launched) { $0.donations.count >= 2 } }
     var title: Text { Text("Drag across the dial") }
     var message: Text? { Text("Step through the next two weeks. Each night shows the darkest place in reach.") }
     var image: Image? { Image(systemName:"hand.draw") }

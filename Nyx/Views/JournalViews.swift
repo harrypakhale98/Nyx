@@ -371,9 +371,25 @@ struct JournalThumbnail:View {
     var hasChanges:Bool { !saved && clean.map { $0 != draft } ?? false }
     /// The form as it stands is the starting point: after opening, prefilling, or the date moving to the night just seen.
     func markClean() { clean=draft }
-    init(entry:JournalEntry?=nil) {
-        defer { settled=true; clean=draft }
+    /// A new entry's words, kept on this device whenever Nyx leaves the screen with the editor open, so
+    /// iOS closing Nyx in the background (often, at night, while photos are taken) loses nothing: the
+    /// next new entry opens with them. Photos are not kept; they are still in the photo library.
+    private struct KeptDraft:Codable { var date:Date; var parkID:String; var observedBortle:Int; var notes:String; var kept:Date }
+    private static let keptKey="journalDraft"
+    /// This editor opened with words kept from an earlier one.
+    private(set) var restored=false
+    func keep() {
+        guard let data=try? JSONEncoder().encode(KeptDraft(date:date,parkID:parkID,observedBortle:observedBortle,notes:notes,kept:.now)) else { return }
+        UserDefaults.standard.set(data,forKey:Self.keptKey)
+    }
+    static func forgetKept() { UserDefaults.standard.removeObject(forKey:keptKey) }
+    init(entry:JournalEntry?=nil,restoring:Bool=true) {
+        defer { settled=true; clean=restored ? Draft(date:date,parkID:parkID,observedBortle:observedBortle,notes:"",photos:[],descriptions:[]) : draft }
         if let entry { date=entry.date;parkID=entry.parkID;observedBortle=entry.observedBortle;notes=entry.notes;photos=entry.photos;descriptions=entry.orderedPhotos.map { $0.altText ?? "" } }
+        else if restoring, DebugScenario.screen == nil, let data=UserDefaults.standard.data(forKey:Self.keptKey),
+                let kept=try? JSONDecoder().decode(KeptDraft.self,from:data), kept.kept.timeIntervalSinceNow > -2*86_400, !kept.notes.isEmpty {
+            date=min(kept.date,.now);parkID=kept.parkID;observedBortle=kept.observedBortle;notes=kept.notes;restored=true
+        }
         else if let home=UserDefaults.standard.string(forKey:"homePark") { parkID=home }
         #if DEBUG
         if DebugScenario.state=="error" { error=String(localized:"This night could not be stored. Try again when space is available.") }
@@ -429,6 +445,8 @@ struct JournalThumbnail:View {
     }
     /// Stores the night. The card's thumbnail is scaled off the main thread first.
     func save(context:ModelContext,existing:JournalEntry?) async -> Bool {
+        // A second tap on Save, before the first has finished, stores nothing (it stored the night twice).
+        guard !saving, !saved else { return false }
         error=nil
         saving=true; defer { saving=false }
         let first=photos.first
@@ -442,7 +460,7 @@ struct JournalThumbnail:View {
         }
         entry.thumbnail=thumbnail
         if existing==nil { context.insert(entry) }
-        do { try context.save();saved=true;return true } catch { context.rollback();self.error=String(localized:"This night could not be stored. Try again when space is available.");return false }
+        do { try context.save();saved=true;if existing == nil { Self.forgetKept() };return true } catch { context.rollback();self.error=String(localized:"This night could not be stored. Try again when space is available.");return false }
     }
 }
 struct JournalEditorView:View {
@@ -450,6 +468,7 @@ struct JournalEditorView:View {
     @Environment(PlanModel.self) private var model
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     /// An iPhone in landscape, where the keyboard leaves about a hundred points of form.
     @Environment(\.verticalSizeClass) private var verticalSize
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -483,8 +502,36 @@ struct JournalEditorView:View {
         .onGeometryChange(for:CGFloat.self) { $0.size.width } action:{ bortleRow=$0 }
         .background { ZStack { ForEach(words.indices,id:\.self) { Text(words[$0]) } }.fixedSize().hidden().onGeometryChange(for:CGFloat.self) { $0.size.width } action:{ bortleWord=$0 } }
     }
+    private var notesSection:some View {
+        Section {
+            // While writing, in either orientation, the field keeps a height that fits above the keyboard
+            // and scrolls inside itself; on an iPhone SE in portrait a growing field put its cursor under it.
+            let aboveKeyboard:CGFloat? = writingNotes ? (verticalSize == .compact ? 80 : 140) : nil
+            TextEditor(text:$editor.notes).scrollContentBackground(.hidden)
+                .frame(minHeight:aboveKeyboard ?? 160,maxHeight:aboveKeyboard)
+                .overlay(alignment:.topLeading) {
+                    if editor.notes.isEmpty { Text("What you noticed").foregroundStyle(palette.muted).padding(.top,8).padding(.leading,5).allowsHitTesting(false).accessibilityHidden(true) }
+                }
+                .padding(.horizontal,8).padding(.vertical,4)
+                .nyxCard(radius:NyxMetrics.chipRadius,fill:palette.panel.opacity(0.5))
+                .focused($writingNotes).id(Self.notesID).accessibilityLabel("Observation notes")
+        } header:{ Text("Notes") }.openRows(palette)
+    }
+    /// Nyx leaves the screen with a new night half written: its words are kept (`JournalEditorModel.keep`).
+    private func keepDraft(_ phase:ScenePhase) {
+        if phase != .active, existing == nil, editor.hasChanges, !editor.notes.isEmpty { editor.keep() }
+    }
+    private func discard() {
+        if existing == nil { JournalEditorModel.forgetKept() }
+        dismiss()
+    }
+    /// iOS's compact date picker. Its popover stays bright under night vision (Settings says so); an
+    /// inline calendar kept it red but its day numbers ignore the largest text sizes, which the audit refuses.
+    private var datePicker:some View {
+        DatePicker("Date",selection:$editor.date,in:...Date.now,displayedComponents:.date).environment(\.timeZone,model.park(editor.parkID)?.timeZone ?? .current)
+    }
     private func showNotes(_ proxy:ScrollViewProxy) {
-        guard writingNotes, verticalSize == .compact else { return }
+        guard writingNotes else { return }
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(Self.notesID,anchor:.top) }
     }
     init(existing:JournalEntry?=nil) { self.existing=existing;_editor=State(initialValue:JournalEditorModel(entry:existing)) }
@@ -492,7 +539,7 @@ struct JournalEditorView:View {
     /// the park, the night it began on, the observed-Bortle default and a first line, all editable.
     init(prefill:JournalPrefill,saved:(()->Void)?=nil) {
         existing=nil; self.saved=saved
-        let editor=JournalEditorModel(entry:nil)
+        let editor=JournalEditorModel(entry:nil,restoring:false)
         editor.parkID=prefill.parkID; editor.date=prefill.date; editor.observedBortle=prefill.observedBortle; editor.notes=prefill.notes
         editor.markClean()
         _editor=State(initialValue:editor)
@@ -506,8 +553,11 @@ struct JournalEditorView:View {
             if let error=editor.error {
                 Section { Label(error,systemImage:"exclamationmark.triangle").labelStyle(.caution).fixedSize(horizontal:false,vertical:true).id(Self.errorID) }.openRows(palette)
             }
+            if editor.restored {
+                Section { Text("The night you were writing is back, without its photos.").font(.footnote).foregroundStyle(palette.muted) }.openRows(palette)
+            }
             Section("The night") {
-                DatePicker("Date",selection:$editor.date,in:...Date.now,displayedComponents:.date).environment(\.timeZone,model.park(editor.parkID)?.timeZone ?? .current)
+                datePicker
                 ParkMenuRow(parkID:$editor.parkID)
                 bortleStepper
                 Text("Your estimate on the Bortle scale of sky brightness: 1 is the darkest sky, 9 an inner-city sky.").font(.caption).foregroundStyle(palette.muted)
@@ -518,17 +568,7 @@ struct JournalEditorView:View {
             // third line). Read without the keyboard, they keep their full height, as the form scrolls.
             // A plain heading that stays once words are in, the prompt inside the field, and a hairline
             // edge around it: an open row has no card to show where the words go.
-            Section {
-                let aboveKeyboard=verticalSize == .compact && writingNotes
-                TextEditor(text:$editor.notes).scrollContentBackground(.hidden)
-                    .frame(minHeight:aboveKeyboard ? 80 : 160,maxHeight:aboveKeyboard ? 80 : nil)
-                    .overlay(alignment:.topLeading) {
-                        if editor.notes.isEmpty { Text("What you noticed").foregroundStyle(palette.muted).padding(.top,8).padding(.leading,5).allowsHitTesting(false).accessibilityHidden(true) }
-                    }
-                    .padding(.horizontal,8).padding(.vertical,4)
-                    .nyxCard(radius:NyxMetrics.chipRadius,fill:palette.panel.opacity(0.5))
-                    .focused($writingNotes).id(Self.notesID).accessibilityLabel("Observation notes")
-            } header:{ Text("Notes") }.openRows(palette)
+            notesSection
             Section {
                 ForEach(Array(editor.photos.enumerated()),id:\.offset) { index,data in
                     PhotoDescriptionRow(editor:editor,index:index,data:data)
@@ -559,8 +599,11 @@ struct JournalEditorView:View {
             .toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.cancel) { if editor.hasChanges { confirmDiscard=true } else { dismiss() } } };ToolbarItem(placement:.confirmationAction) { Button(role:.confirm) { Task { if await editor.save(context:context,existing:existing) { saved?(); dismiss() } } }.tint(palette.controlTint).accessibilityLabel("Save").accessibilityInputLabels([Text("Save"),Text("Done")]).disabled(editor.loadingPhotos || editor.saving) } }
             // A swipe down never throws away what was written; Cancel asks first.
             .interactiveDismissDisabled(editor.hasChanges)
+            .onChange(of:scenePhase) { _,phase in keepDraft(phase) }
+            // Kept as it is written too, so iOS ending Nyx while it is on screen loses nothing either.
+            .onChange(of:editor.notes) { keepDraft(.background) }
             .confirmationDialog(existing==nil ? "Discard this night?" : "Discard your changes?",isPresented:$confirmDiscard,titleVisibility:.visible) {
-                Button("Discard",role:.destructive) { dismiss() }
+                Button("Discard",role:.destructive) { discard() }
                 Button("Keep editing",role:.cancel) {}
             }
             // Clearing the picker after a load changes it again; that empty pick loads nothing.
@@ -748,6 +791,10 @@ private struct ParkMenuRow:View {
     @Binding var parkID:String
     private var name:String { model.park(parkID)?.shortName ?? "" }
     var body:some View {
+        if palette.nightVision { PlacePickerOptions(title:model.spots.isEmpty ? "Park" : "Place",selection:$parkID).pickerStyle(.navigationLink) }
+        else { menu }
+    }
+    private var menu:some View {
         Menu {
             PlacePickerOptions(title:"Park",selection:$parkID)
         } label:{

@@ -112,7 +112,7 @@ targets:
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         INFOPLIST_KEY_UIUserInterfaceStyle: Dark
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
-        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, point the sky to true north, and turn night vision on at dusk where you are. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast.
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Nyx uses your location on this device to find dark places near you, to notice when you are at a U.S. national park, to turn the star map to true north, and to turn night vision on at dusk. Your location stays on this device. If you save where you stand as a spot, only that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast.
         # "Where to look by sound" in field mode: AirPods head motion turns the tone with your head (CMHeadphoneMotionManager).
         # Plan's "Add all to Calendar" (the next six months): write-only, so Nyx adds events and never sees the calendar.
         INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription: Nyx adds the dark nights you choose to your calendar. It can add events only; it never sees your calendar.

@@ -27,7 +27,7 @@ struct SettingsView:View {
                     .tint(palette.controlTint).accessibilityInputLabels([Text("Brighter red")])
                 NavigationLink { WholePhoneRedView() } label:{ titled("Red light for the whole iPhone",note:"Menus, the keyboard and other apps stay bright. iOS can turn every screen red.") }
                     .accessibilityInputLabels([Text("Red light for the whole iPhone"),Text("Color filters")])
-            } header:{ heading("In the dark") }.openRows(palette)
+            } header:{ heading("At night") }.openRows(palette)
             Section {
                 Toggle(isOn:Binding(get:{notifications},set:{ value in if value { explainNotifications=true } else { notifications=false;Task { await NotificationScheduler().remove() } } })) {
                     titled("Promising-night reminders",note:"A local reminder when a park, place or spot you save has a night of 90 or higher. Forecasts can change.")
@@ -50,8 +50,8 @@ struct SettingsView:View {
                 NavigationLink("About the data") { AboutDataView() }
             } header:{ heading("Privacy and data") }.openRows(palette)
             Section {
-                NavigationLink { LearnView() } label:{ titled("Learn to look up",note:"Short essays on the darkness score, the Milky Way, meteors and staying safe.") }
-                    .accessibilityInputLabels([Text("Learn to look up")])
+                NavigationLink { LearnView() } label:{ titled("Learn about the night sky",note:"Short essays on the darkness score, the Milky Way, meteors and staying safe.") }
+                    .accessibilityInputLabels([Text("Learn about the night sky"),Text("Learn")])
             } header:{ heading("About the sky") }.openRows(palette)
             Section {
                 if let url=SupportLink.privacyPolicy { Link(destination:url) { ExternalRow(title:"Privacy policy") }.accessibilityHint("Opens the policy in Safari.") }
@@ -120,7 +120,7 @@ struct RemindersExplainer:View {
     @Environment(\.dismiss) private var dismiss
     let decided:(Bool)->Void
     var body:some View {
-        PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Nyx can remind you the evening before a Pristine night, 90 or higher, at a park or place you save or a spot you add: only with a full cloud forecast, up to five days ahead, and at most once a week for each place. It can also mark the peak of a major meteor shower. Reminders are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access.",action:"Enable reminders") {
+        PermissionExplainer(symbol:"bell",title:"A reminder before a very dark night",message:"Nyx can remind you the evening before a night of 90 or higher at a place you save. It does this only with a full cloud forecast, up to five days ahead, and at most once a week for each place. It can also remind you of a major meteor shower. Reminders stay on this iPhone. They are estimates, not promises of clear skies or open roads.",action:"Enable reminders") {
             dismiss()
             Task { decided(await NotificationScheduler().requestAuthorization()) }
         }
@@ -214,8 +214,10 @@ struct PrivacyView:View {
             Section {
                 Text("Nyx has no account, no ads, no tracking. Your journal never leaves this phone.").font(.system(.title3,design:.serif))
                 Text("Saved parks and spots, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data.")
-                // 2.0: saved spots are the one place of the person's own that a request carries.
-                Text("The one place of yours that Nyx sends anywhere is a spot you save: only its position, rounded to about \(SpotForecast.roundingDistance()), for its cloud forecast. You can turn that off below.")
+                Text("Nyx is free, with no purchases and no subscriptions.")
+                // 2.0: saved spots are the one place of the person's own that a request carries; what the
+                // person looks at (a park's programs, a region abroad) is said here too, not only below.
+                Text("Nyx never sends where you are. A spot you save is sent only as its position, rounded to about \(SpotForecast.roundingDistance()), for its cloud forecast; you can turn that off below. Opening a U.S. park's page asks for that park's ranger programs, and places abroad are asked about by whole regions, never one at a time.")
             }.openRows(palette)
             Section("Optional data updates") {
                 Toggle("Cloud forecasts",isOn:$model.weatherEnabled).tint(palette.controlTint)
@@ -225,7 +227,8 @@ struct PrivacyView:View {
                 // The world catalogue: asked for by whole 10° squares, never one place.
                 Text("The parks and dark-sky places beyond the U.S. national parks are never asked about one at a time. The world is divided into squares of 10° of latitude and longitude, and a request carries the public coordinates of every listed place in one square, at most 1,000; squares with only a few places are asked about together. The service can tell which part of the world interests you, a region about the size of a country, but never the place you look at or where you are.").font(.caption).foregroundStyle(palette.muted)
                 // Saved spots: the one request that carries a place the person chose, so it says exactly what it sends.
-                Toggle("Clouds at your saved spots",isOn:$model.spotForecastsEnabled).tint(palette.controlTint).disabled(!model.weatherEnabled)
+                // Shown off while every cloud forecast is off, since nothing is sent; the choice itself is kept for when they return.
+                Toggle("Clouds at your saved spots",isOn:Binding(get:{ model.weatherEnabled && model.spotForecastsEnabled },set:{ model.spotForecastsEnabled=$0 })).tint(palette.controlTint).disabled(!model.weatherEnabled)
                 Text("For each spot you save, Nyx asks api.open-meteo.com for its clouds with the spot's coordinates rounded to 0.1°, about \(SpotForecast.roundingDistance()). The service learns roughly where your spots are, never the exact point and never their names. Spots are asked about in a request of their own, never mixed with the parks. Your current location is sent only if you save it as a spot. With this off, nothing is sent for spots: they keep their last forecast, then use their usual clouds. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
                 Toggle("Smoke and haze",isOn:$model.smokeEnabled).tint(palette.controlTint)
                 Text("Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all \(model.parks.count) U.S. national parks together, up to 50 in each request, using the same viewing-spot coordinates only. Parks and dark-sky places elsewhere are asked about by the same whole squares as their clouds, once you have opened one of their pages. It returns the CAMS aerosol and dust forecast that warns when smoke, dust or haze will hide faint stars. Nothing is asked about smoke at saved spots. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
@@ -238,6 +241,7 @@ struct PrivacyView:View {
             Section("Measured on this iPhone") {
                 Text("iOS reports how Nyx performs, including how bright its screen was, through MetricKit about once a day. Nyx keeps only the last screen brightness, to show here and in About the data. It is never sent anywhere.")
                 if let reading=LuminanceProof.current { Text(reading.sentence) }
+                else { Text("No report from iOS yet. The first usually arrives about a day after you start using Nyx.").foregroundStyle(palette.muted) }
             }.openRows(palette)
             Section {
                 Text("Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, Plan, saved parks and the journal work offline.")
@@ -246,6 +250,7 @@ struct PrivacyView:View {
                 Text("Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded.")
                 Text("Links open only when you tap them, in Safari, Maps, Mail or the App Store: nps.gov pages, Recreation.gov campground reservations, Globe at Night, Open-Meteo and the Creative Commons licence, a place's Wikidata page or official website, get-nyx.com, directions to a viewing spot or a saved spot, an email to the developer, and Nyx's App Store page. Nyx itself sends nothing to those sites.")
                 Text("Adding a night to Calendar opens Calendar's own editor, where you choose and save it. Nyx never reads your calendars.")
+                Text("Crash reports that iOS gives Nyx stay on this iPhone, under Settings › Diagnostics, until you choose to share one.")
             }.openRows(palette)
         }.readableForm().nightForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
     }
@@ -256,6 +261,7 @@ struct AboutDataView:View {
     var body:some View {
         ScrollView { VStack(alignment:.leading,spacing:24) {
             Text("An honest view of the sky").font(.system(.largeTitle,design:.serif))
+            block("The score in short","Four parts add up to 100: moonlight, clouds, sky glow and true darkness. The weakest part can hold the whole night down. The details follow.")
             block("The score","Moonlight contributes 40%, clouds 25%, sky glow (estimated) 20%, and true darkness 15%. Moonlight follows the Moon's phase and its height through true darkness (Krisciunas and Schaefer, 1991), so a low crescent costs less than a high gibbous Moon. The four parts are added, then the weakest link caps the sum: clouds hold a night to 100 minus 0.9 points for each percent of cloud (overcast at most 10, half cloud 55); sky glow holds a Bortle 3 park to 89, Bortle 4 to 84, Bortle 5 to 74, Bortle 6 to 59 and brighter skies to 39, so only Bortle 2 or darker can read Pristine; heavy smoke or haze (aerosol optical depth 0.5 or more) holds a night to 59, and lighter smoke (0.25 to 0.5) to 74. Moonlight caps it as well, at 100 minus 61 times the moonlight to the power of two thirds, so a full Moon high through true darkness holds a night near 40, as a town's sky glow would, and a half Moon up for the evening keeps a night out of Pristine. No true darkness caps a night below 40, and that cap lifts gradually over the first three hours of true darkness. The breakdown names the cap that applies. When scores tie, parks with darker skies in NASA's satellite night lights come first, then longer true darkness.")
             // Shown only after iOS has delivered a real MetricKit report; nothing is estimated in its place.
             if let reading=LuminanceProof.current {
