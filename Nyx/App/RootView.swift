@@ -369,7 +369,7 @@ private struct ParkSheet:View {
     @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     var body:some View {
         NavigationStack {
-            ParkDetailView(park:park,initialDate:initialDate,focusWhatsUp:whatsUp).toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.close) { dismiss() } } }
+            ParkDetailView(park:park,initialDate:initialDate,focusWhatsUp:whatsUp).toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.close) { dismiss() } } }.environment(\.parkInSheet,true)
         }
         .environment(\.nyxTab,layer).environment(commands).environment(\.skyHome,model.home)
         .onAppear { commands.layer(layer,shown:true) }

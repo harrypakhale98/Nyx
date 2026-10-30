@@ -283,6 +283,13 @@ struct ParkDetailView: View {
         .pickerStyle(.segmented)
         .padding(.horizontal,24).padding(.vertical,6)
         .frame(maxWidth:WideLayout.proseWidth)
+        .frame(maxWidth:.infinity)
+        // The page fades out under the picker and the bar above it, so no line reads through the
+        // segments; the soft edge alone left whole lines legible under them in a centred sheet.
+        .background {
+            LinearGradient(stops:[.init(color:.black,location:0),.init(color:.black,location:0.8),.init(color:.clear,location:1)],startPoint:.top,endPoint:.bottom)
+                .padding(.bottom,-18).ignoresSafeArea(edges:.top).allowsHitTesting(false)
+        }
         .accessibilityLabel("Jump to a part of the page")
     }
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
@@ -370,17 +377,24 @@ private final class ChapterTracker { var tops:[ParkChapter:CGFloat]=[:] }
 /// iOS 27: the navigation bar recedes as the park's page scrolls down, so its sky runs edge to edge;
 /// it returns on the way back up. Like the tab bar (`RootView`), it stays in place under VoiceOver,
 /// Switch Control and accessibility sizes, where a bar that moves costs someone their place.
-/// iOS 26 keeps the standard bar.
+/// iOS 26 keeps the standard bar. In a sheet it stays too (`parkInSheet`): there it holds the
+/// close button, and a centred sheet on iPad or iPhone Duo has no sky to run edge to edge.
 private struct SkyFullBleed: ViewModifier {
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @Environment(\.accessibilitySwitchControlEnabled) private var switchControl
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.parkInSheet) private var inSheet
     /// Off in two columns, where the night's column stays put beside the scrolling detail and bars
     /// receding over one column would read as a glitch.
     var enabled=true
     /// Same view either way, so turning VoiceOver on mid-page keeps the page where it is.
     private var recedes:Bool { !voiceOver && !switchControl && !typeSize.isAccessibilitySize && !DebugScenario.isEnabled("ax5") }
     @ViewBuilder func body(content:Content)->some View {
-        if #available(iOS 27.0,*), enabled { content.toolbarMinimizationBehavior(recedes ? .onScrollDown : .never,for:.navigationBar) } else { content }
+        if #available(iOS 27.0,*), enabled, !inSheet { content.toolbarMinimizationBehavior(recedes ? .onScrollDown : .never,for:.navigationBar) } else { content }
     }
+}
+
+extension EnvironmentValues {
+    /// A park's page presented in a sheet with its own close button (`ParkSheet`, the calendar's peek).
+    @Entry var parkInSheet=false
 }
