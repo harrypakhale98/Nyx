@@ -221,12 +221,12 @@ struct JournalView: View {
     private func recapCard(rule:Bool=true)->some View {
         Button { recap=true } label:{
             Panel(rule:rule) { HStack(spacing:14) {
-                Image(systemName:"sparkles").font(.title2.weight(.light)).foregroundStyle(palette.ink).accessibilityHidden(true)
-                VStack(alignment:.leading,spacing:4) {
+                // A label, as the skies count above it is, so the two rows' icons and words line up.
+                Label { VStack(alignment:.leading,spacing:4) {
                     Text("Your year under the stars").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
                     // Written on this iPhone when the system model is available; Nyx's own words otherwise.
                     Text(OnDeviceGuide.speaksYourLanguage ? "Nights out, your darkest sky, the moons you met, and a few words on the season, written on this iPhone." : "Nights out, your darkest sky, and the moons you met.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                }
+                } } icon:{ Image(systemName:"sparkles").foregroundStyle(palette.ink).accessibilityHidden(true) }
                 Spacer(minLength:0)
                 Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
             } }

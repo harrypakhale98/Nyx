@@ -88,6 +88,9 @@ extension ParkPillPicker {
         // The arrow rides at the end of the words, so the name has the whole width and long words stay whole.
         Text("\(Text(park.shortName).font(.system(.title2,design:.serif))) \(Text(Image(systemName:"arrow.up.right")).font(.subheadline))")
             .accessibilityLabel(park.shortName)
+            // Held at the second accessibility size: larger, a long name ("Anza-Borrego Desert State Park")
+            // filled a small screen alone and pushed the score below the tab bar.
+            .dynamicTypeSize(...DynamicTypeSize.accessibility2)
             .multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
             .frame(maxWidth:.infinity).padding(.vertical,14).padding(.horizontal,16)
             .nyxGlass(RoundedRectangle(cornerRadius:22,style:.continuous),role:.pill,id:"pill",in:glass)
