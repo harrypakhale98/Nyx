@@ -23,7 +23,7 @@ extension Place {
         return StartingPlaces.regionName(countryCode:countryCode,region:region)
     }
     /// The line under a place's name: a park's states ("CA · NV"), a spot's region and country.
-    var regionLine: String { isSavedSpot ? spotLocality : region.replacingOccurrences(of:",",with:" · ") }
+    var regionLine: String { isSavedSpot ? spotLocality : statesLine }
     /// The eyebrow over a place's name on its page and in Plan: a park's states and its Dark Sky
     /// status (data, not a slogan); "Your spot · California" for a spot the person saved.
     var placeEyebrow: String {
@@ -31,8 +31,7 @@ extension Place {
             let locality=spotLocality
             return locality.isEmpty ? String(localized:"Your spot") : String(localized:"Your spot · \(locality)")
         }
-        let states=region.replacingOccurrences(of:",",with:" · ")
-        return darkSkyDesignated ? String(localized:"\(states) · International Dark Sky Park") : states
+        return parkEyebrow
     }
     /// The eyebrow above a place's name on its page and its month: a place abroad says what it is and
     /// where ("Dark Sky Reserve · Kerry, Ireland"); a park its states, a spot its own words.

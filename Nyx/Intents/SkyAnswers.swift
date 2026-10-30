@@ -1,7 +1,7 @@
 import Foundation
 
 // The words of "When is it dark tonight?" and "What's up tonight?", one set for every device that
-// answers them: the iPhone's and iPad's intents (TonightIntents.swift) and Vision Pro's. Pure: the
+// answers them: the iPhone's and iPad's intents (TonightIntents.swift), Apple Watch's and Vision Pro's. Pure: the
 // intents find the place, its night and its closure; these say them.
 
 /// The dark window in words, apart from the intent so it can be tested.

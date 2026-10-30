@@ -294,8 +294,9 @@ struct TonightFace: View {
                 gauge.frame(width: side, height: side)
                 // At accessibility sizes the band word leaves the dial for this line.
                 if typeSize.isAccessibilitySize { Text(shown.score.band.label).bandWord(.headline, ink: palette.ink) }
-                if looking { NightGlance(night: shown, isTonight: offset == 0, models: models) } else { NextMoment(night: night, now: now, models: models, wraps: true) }
+                // Directly under the score, as on iPhone and Vision Pro: the one line never to be missed.
                 if let closure { WristClosureLine(text: closure) }
+                if looking { NightGlance(night: shown, isTonight: offset == 0, models: models) } else { NextMoment(night: night, now: now, models: models, wraps: true) }
                 if let smoke = shown.smokeCaveat { SmokeLine(text: smoke, spoken: smoke) }
                 ForEach(cloudLines(shown, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
@@ -316,6 +317,9 @@ struct TonightFace: View {
     /// What sits under the dial: the next moment of tonight, or the night the Crown turned to.
     @ViewBuilder private func words(wraps: Bool, looking: Bool, shown: Night, isTonight: Bool = true) -> some View {
         let lines: Int? = wraps ? nil : 1
+        // A closure stands directly under the score on every surface, whole, so the road or trail it
+        // names is never cut off: it wraps, and the face scrolls where it would leave the gauge too small.
+        if let closure { WristClosureLine(text: closure).layoutPriority(1) }
         if looking {
             NightGlance(night: shown, isTonight: isTonight, models: context?.modelRange(for: shown), wraps: wraps).layoutPriority(1)
         } else {
@@ -326,9 +330,6 @@ struct TonightFace: View {
                     .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: wraps).layoutPriority(1).nonEssential()
             }
         }
-        // A closure stands beside the score on every surface, whole, so the road or trail it names is
-        // never cut off: it wraps, and the face scrolls where it would leave the gauge too small.
-        if let closure { WristClosureLine(text: closure).layoutPriority(1) }
         // Haze or smoke beside the score, as on the iPhone and Vision Pro (`Night.smokeCaveat`): the short
         // words where a line is all there is, the whole sentence for VoiceOver and at the large sizes.
         if let smoke = shown.smokeCaveat, let label = shown.smokeCaveatLabel {
@@ -372,10 +373,12 @@ struct TonightFace: View {
 struct WristClosureLine: View {
     @Environment(\.nyx) private var palette
     let text: String
+    /// Centred under the dial; leading on a page set flush left (the week).
+    var alignment: TextAlignment = .center
     var body: some View {
-        Label { Text(text).foregroundStyle(palette.ink) } icon: { Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(palette.caution) }
+        Label { Text(text).foregroundStyle(palette.ink) } icon: { Image(systemName: ClosureLine.symbol).foregroundStyle(palette.caution) }
             .font(.caption2)
-            .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+            .multilineTextAlignment(alignment).fixedSize(horizontal: false, vertical: true)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(ClosureLine.spoken(text))
     }
@@ -652,6 +655,8 @@ struct WeekPage: View {
                     }
                     .fixedSize(horizontal: false, vertical: true).accessibilityElement(children: .combine)
                 }
+                // The park's closure from the iPhone's last park update, under the week's score, as on every surface.
+                if let closure = store.context?.closures[park.id] { WristClosureLine(text: closure, alignment: .leading).frame(maxWidth: .infinity, alignment: .leading) }
                 Group {
                     // Why Tonight shows this place, where nothing on screen says so: nothing is saved on iPhone.
                     if isHome, let line = WatchSky.caption(store.rule(at: now)) { Text(line) }
@@ -745,20 +750,36 @@ struct ParksList: View {
         .nyxTitle(String(localized: "Parks"))
     }
     private func row(_ park: Park, now: Date, scored: Bool) -> some View {
-        NavigationLink(value: WatchRoute.night(WatchLink(park: park, evening: nil))) {
+        let night = scored ? store.tonight(park, at: now) : nil, closure = scored ? store.context?.closures[park.id] : nil
+        return NavigationLink(value: WatchRoute.night(WatchLink(park: park, evening: nil))) {
             HStack(spacing: 6) {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(park.shortName).font(.system(.body, design: .serif)).lineLimit(2)
-                    Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
+                    Text(park.statesLine).font(.caption2).foregroundStyle(palette.muted)
                 }
                 Spacer(minLength: 2)
                 if store.pinned == park.id { Image(systemName: "pin.fill").font(.caption2).accessibilityLabel("On Tonight") }
-                if scored {
-                    let night = store.tonight(park, at: now)
+                if let night {
+                    // A known closure's mark beside the score, as on the iPhone's rows; its words are on the park's page.
+                    if closure != nil { Image(systemName: ClosureLine.symbol).font(.caption2).foregroundStyle(palette.caution) }
                     Text(night.score.value, format: .number).scoreNumeral(.title3, accent: palette.accent)
-                        .accessibilityLabel("\(night.score.value) out of 100, \(night.score.band.label)")
                 }
             }
+            // A scored row says what the iPhone's and Vision Pro's rows say (`Night.spokenRow`), the closure in full.
+            .modifier(SpokenRow(label: night?.spokenRow(closure: closure, withBasis: true), pinned: store.pinned == park.id))
+        }
+    }
+}
+/// A scored row's VoiceOver words in place of its parts': the row label every device says, then
+/// "On Tonight" when the row's place is pinned there.
+private struct SpokenRow: ViewModifier {
+    let label: String?
+    let pinned: Bool
+    func body(content: Content) -> some View {
+        if let label {
+            content.accessibilityElement(children: .ignore).accessibilityLabel(Text(verbatim: label)).accessibilityValue(pinned ? Text("On Tonight") : Text(verbatim: ""))
+        } else {
+            content
         }
     }
 }
@@ -787,7 +808,7 @@ struct ParkChooser: View {
             HStack(spacing: 6) {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(park.shortName).font(.system(.body, design: .serif))
-                    Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
+                    Text(park.statesLine).font(.caption2).foregroundStyle(palette.muted)
                 }
                 Spacer(minLength: 2)
                 if park.darkSkyDesignated { Image(systemName: "moon.stars").font(.caption2).foregroundStyle(palette.ink).accessibilityLabel("Dark Sky designated") }

@@ -10,14 +10,14 @@ struct TonightProvider:AppIntentTimelineProvider {
     /// The same sample sky as the gallery, so the system's redacted placeholder has the real shape
     /// of the widget rather than the empty state's copy.
     func placeholder(in context:Context)->TonightEntry {
-        var builder=TonightTimeline(snapshot:Self.sample,large:Self.large(context.family))
+        var builder=TonightTimeline(snapshot:SavedSkySnapshot.sample,large:Self.large(context.family))
         return builder.entry(at:.now)
     }
     func snapshot(for configuration:TonightWidgetIntent,in context:Context) async -> TonightEntry {
         let saved=SharedSettings.read()
         var snapshot=saved
         // The widget gallery shows a real sky (Joshua Tree tonight, with its usual clouds), not "save a park".
-        if context.isPreview, snapshot?.parks.isEmpty ?? true, configuration.park == nil { snapshot=Self.sample }
+        if context.isPreview, snapshot?.parks.isEmpty ?? true, configuration.park == nil { snapshot=SavedSkySnapshot.sample }
         var builder=TonightTimeline(snapshot:snapshot,large:Self.large(context.family),pinned:Self.park(configuration.park,snapshot:saved),
                                     unsaved:Self.unsaved(configuration.park,snapshot:saved))
         // The gallery shows tonight; a placed widget shows the night its buttons moved to.
@@ -33,10 +33,6 @@ struct TonightProvider:AppIntentTimelineProvider {
         default: return nil
         }
         return WidgetNightStep.scope(place:configuration.park?.id,family:name)
-    }
-    /// Joshua Tree tonight, with its usual clouds. Nil only if the bundled parks cannot be read.
-    static var sample:SavedSkySnapshot? {
-        (try? ParkData.load().first(where:{ $0.id==Park.defaultID })).map { SavedSkySnapshot(parks:[$0],forecasts:[:]) }
     }
     /// The month's calendar is drawn in the large, extra-large and (iOS 27, iPad) portrait extra-large widgets.
     static func large(_ family:WidgetFamily)->Bool {
@@ -199,14 +195,14 @@ struct TonightControlProvider:AppIntentControlValueProvider {
 #Preview(as:.accessoryInline) { TonightWidget() } timeline:{ TonightEntry(date:.now,night:nil,nightVision:false) }
 #Preview(as:.systemSmall) { MoonWidget() } timeline:{ MoonEntry(date:.now,park:nil,nightVision:false) }
 #Preview(as:.accessoryRectangular) { MoonWidget() } timeline:{
-    MoonEntry(date:.now,park:TonightProvider.sample?.parks.first,nightVision:false)
+    MoonEntry(date:.now,park:SavedSkySnapshot.sample?.parks.first,nightVision:false)
     MoonEntry(date:.now,park:nil,nightVision:false)
 }
 #if DEBUG
 extension TonightProvider {
     /// Joshua Tree tonight with a closure (illustrative words), for the closure mark's previews.
     static var closureSample:TonightEntry {
-        var builder=TonightTimeline(snapshot:sample,large:false)
+        var builder=TonightTimeline(snapshot:SavedSkySnapshot.sample,large:false)
         var entry=builder.entry(at:.now)
         entry.closure="Keys View Road closed at night"
         return entry
@@ -215,7 +211,7 @@ extension TonightProvider {
 extension TonightProvider {
     /// Joshua Tree with its night buttons, moved `offset` nights ahead, for the night buttons' previews.
     static func steppedSample(offset:Int,large:Bool,closure:String?=nil)->TonightEntry {
-        var builder=TonightTimeline(snapshot:sample,large:large)
+        var builder=TonightTimeline(snapshot:SavedSkySnapshot.sample,large:large)
         var entry=builder.entry(at:.now)
         entry.stepScope=WidgetNightStep.scope(place:nil,family:large ? "large" : "medium")
         entry.offset=offset

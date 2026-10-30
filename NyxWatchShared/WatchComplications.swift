@@ -71,10 +71,6 @@ struct WristInk {
 /// Builds complication timelines on the watch from the snapshot the watch app wrote: the same
 /// parks, forecasts and engine as Tonight, so the face and the app never disagree.
 nonisolated enum WatchTimeline {
-    /// Joshua Tree tonight, with its usual clouds: the gallery's sky and the redacted placeholder's shape.
-    static var sample: SavedSkySnapshot? {
-        (try? ParkData.load().first(where: { $0.id == Park.defaultID })).map { SavedSkySnapshot(parks: [$0], forecasts: [:]) }
-    }
     static func sky(_ park: Park, evening: Date, cache: inout [String: SkyConditions]) -> SkyConditions {
         let key = "\(park.id)-\(Int(evening.timeIntervalSince1970))"
         let sky = cache[key] ?? AstronomyEngine().conditions(for: park, on: evening)
@@ -399,11 +395,9 @@ struct WatchComplicationView: View {
         }.foregroundStyle(ink)
     }
     private func summary(_ night: Night) -> String {
-        var text = String(localized: "\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label).")
-        // The closure is spoken in every family, right after the score it stands beside.
-        if let closure = entry.closure { text += " " + ClosureLine.spoken(closure) }
-        if let caption = night.basisCaption() { text += " " + caption }
-        if let smoke = night.smokeSentence() { text += " " + smoke }
+        // The iPhone widget's words (`Night.widgetSummary`): the closure in every family, right after
+        // the score it stands beside, then what the clouds rest on and smoke that holds the score down.
+        var text = night.widgetSummary(closure: entry.closure)
         // In every family, though only the rectangular one has room to show them.
         for note in entry.notes { text += " " + note.spoken }
         if let next = entry.next {
@@ -428,7 +422,7 @@ private struct OldForecastPreview: View {
     var differs = false
     private var entry: WatchSkyEntry {
         var cache: [String: SkyConditions] = [:]
-        let entry = WatchTimeline.entry(at: .now, snapshot: WatchTimeline.sample, look: .red, cache: &cache)
+        let entry = WatchTimeline.entry(at: .now, snapshot: SavedSkySnapshot.sample, look: .red, cache: &cache)
         return WatchSkyEntry(date: entry.date, night: entry.night, next: entry.next, nightVision: false, closure: closure, cloudsOld: old, dataDiffers: differs)
     }
     var body: some View {

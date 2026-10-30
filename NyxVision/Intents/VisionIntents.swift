@@ -58,7 +58,7 @@ struct DarknessIntent: AppIntent {
         // Tonight scored as the planner scores it (`NightPlan`), said in every device's words (`TonightAnswer`).
         let night = NightPlanner.night(park: selected, sky: AstronomyEngine().conditions(for: selected, on: selected.currentNight(at: now)),
                                        forecast: forecast, detail: ForecastDetail.vision(layers: layers, air: air), now: now)
-        let dialog = inputs.answer(night, closure: inputs.closure(selected), forecastsOn: NetworkService.forecasts.isOn()).dialog()
+        let dialog = inputs.answer(night, closure: inputs.closure(selected), forecastsOn: NetworkService.forecasts.isOn()).dialog(voiceOnly: voiceOnly)
         return .result(value: night.score.value, dialog: IntentDialog(stringLiteral: dialog))
     }
 }

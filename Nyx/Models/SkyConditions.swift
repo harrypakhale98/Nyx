@@ -123,6 +123,23 @@ extension SkyConditions {
     nonisolated func moonSentence(park: Park, withLit: Bool = true) -> String? { moonInDarkness.sentence(park: park, moon: moon, withLit: withLit) }
     /// `moonInDarkness` at a glance (`MoonInDarkness.short`).
     nonisolated func moonShort(park: Park) -> String { moonInDarkness.short(park: park) }
+    /// "Sets 8:53 PM · Rises 4:42 AM" in time order, from noon to sunrise (a rise late the next
+    /// morning is not this night's news), or "Up all night" / "Below the horizon all night", on every
+    /// device. Without a rise or set the Moon stays put, so its altitude midway through the night
+    /// decides (the share of darkness it spends down says nothing on a night with no true darkness).
+    nonisolated func moonTimes(park: Park) -> String {
+        let morning = sunrise ?? end
+        var events: [(Date, String)] = []
+        if let rise = moonrise, rise < morning { events.append((rise, String(localized: "Rises \(park.time(rise))"))) }
+        if let set = moonset, set < morning { events.append((set, String(localized: "Sets \(park.time(set))"))) }
+        if events.isEmpty {
+            let start = sunset ?? evening, middle = start.addingTimeInterval(morning.timeIntervalSince(start)/2)
+            // The upper limb on a refracted horizon, as the engine times rises and sets.
+            let below = AstronomyEngine().lunarAltitude(at: middle, park: park) < -0.833
+            return below ? String(localized: "Below the horizon all night") : String(localized: "Up all night")
+        }
+        return events.sorted { $0.0 < $1.0 }.map(\.1).joined(separator: " · ")
+    }
 }
 nonisolated enum ScoreBand: String, Codable, CaseIterable, Sendable {
     case pristine, excellent, good, fair, poor
@@ -235,6 +252,13 @@ nonisolated struct DarknessScore: Sendable {
     }
     /// True when a cloud forecast counts in full. An early look or the usual clouds is not a forecast.
     var hasForecast: Bool { basis == .forecast }
+    /// The weakest link in words, when its cap holds the score below the sum of its parts ("Clouds
+    /// limit tonight to 55."), on every device; nil when nothing does. The iPhone, which shows the
+    /// four parts, adds their sum.
+    func limitSentence(tonight: Bool) -> String? {
+        guard let limit, limit.cap < partsSum else { return nil }
+        return limit.sentence(tonight: tonight)
+    }
 }
 extension SkyConditions {
     /// The spec's wording for tonight; any other night is named as that night.

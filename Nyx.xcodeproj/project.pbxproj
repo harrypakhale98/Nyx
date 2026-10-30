@@ -24,6 +24,7 @@
 		14FCF1328DEA03F88F82A978 /* Sentences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352775EE2B5D179F008BA853 /* Sentences.swift */; };
 		156E6844ECA20351AE3962F3 /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE401E4AEE8751787D4278CB /* MoonDisc.swift */; };
 		19C6A8EF9D8643E2870F40D3 /* Moon.metal in Sources */ = {isa = PBXBuildFile; fileRef = 4FA83F19CA3A305D8FD7A607 /* Moon.metal */; };
+		19FDD28B483DB5F2B299F51A /* SkyAnswers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6A1D094AC6B3704B0028E6 /* SkyAnswers.swift */; };
 		1A51367BE664B66885A39BDC /* WatchMoons.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA48D3966F5664B7063A3801 /* WatchMoons.swift */; };
 		1AD5B0518495515AEB946186 /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30FAB15A78C4224F9A91117 /* Forecast.swift */; };
 		1D536123B0A86756062C2086 /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20EB09DA695F3C836EBD27CA /* SharedSettings.swift */; };
@@ -1028,6 +1029,7 @@
 				14FCF1328DEA03F88F82A978 /* Sentences.swift in Sources */,
 				C1C7DB07418934B05A45534F /* SharedSettings.swift in Sources */,
 				F45CD45037926209454D0983 /* SkyAlmanac.swift in Sources */,
+				19FDD28B483DB5F2B299F51A /* SkyAnswers.swift in Sources */,
 				2A9AF3CA81592E730ABFB714 /* SkyConditions.swift in Sources */,
 				481CB178018855AFAB501E50 /* SkyGrid.swift in Sources */,
 				2E2FC2B190540B614C6DBEDE /* Starfield.swift in Sources */,

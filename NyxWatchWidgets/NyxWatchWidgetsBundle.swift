@@ -29,14 +29,14 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
     /// The gallery's sample sky, so the system's redacted placeholder has the complication's real shape.
     func placeholder(in context: Context) -> WatchSkyEntry {
         var cache: [String: SkyConditions] = [:]
-        return WatchTimeline.entry(at: .now, snapshot: WatchTimeline.sample, look: .red, cache: &cache)
+        return WatchTimeline.entry(at: .now, snapshot: SavedSkySnapshot.sample, look: .red, cache: &cache)
     }
     func snapshot(for configuration: TonightParkIntent, in context: Context) async -> WatchSkyEntry {
         let choice = Self.snapshot(for: configuration, at: .now)
         if choice.unsaved { return WatchSkyEntry(date: .now, night: nil, next: nil, nightVision: WristLook.current.nightVision(park: nil, at: .now), unsaved: true) }
         var snapshot = choice.snapshot
         // The face gallery shows a real sky (Joshua Tree tonight, with its usual clouds), not an empty state.
-        if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = WatchTimeline.sample }
+        if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = SavedSkySnapshot.sample }
         var cache: [String: SkyConditions] = [:]
         return WatchTimeline.entry(at: .now, snapshot: snapshot, look: .current, dataDiffers: WatchSky.dataDiffers, cache: &cache)
     }
@@ -132,11 +132,11 @@ struct MoonComplication: Widget {
 }
 struct MoonProvider: TimelineProvider {
     func placeholder(in context: Context) -> MoonEntry {
-        MoonEntry(date: .now, park: WatchTimeline.sample?.parks.first, moon: MoonNow(at: .now, park: WatchTimeline.sample?.parks.first), nightVision: true)
+        MoonEntry(date: .now, park: SavedSkySnapshot.sample?.parks.first, moon: MoonNow(at: .now, park: SavedSkySnapshot.sample?.parks.first), nightVision: true)
     }
     func getSnapshot(in context: Context, completion: @escaping (MoonEntry) -> Void) {
         var snapshot = WatchSky.faces(at: .now).snapshot
-        if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = WatchTimeline.sample }
+        if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = SavedSkySnapshot.sample }
         completion(WristTimeline.moonEntries(from: .now, snapshot: snapshot, look: .current).first ?? placeholder(in: context))
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<MoonEntry>) -> Void) {
@@ -156,12 +156,12 @@ struct NextDarkComplication: Widget {
 }
 struct NextDarkProvider: TimelineProvider {
     func placeholder(in context: Context) -> NextDarkEntry {
-        let park = WatchTimeline.sample?.parks.first
+        let park = SavedSkySnapshot.sample?.parks.first
         return NextDarkEntry(date: .now, park: park, moment: park.map { DarkMoment.next(at: $0, now: .now) } ?? .none, nightVision: true)
     }
     func getSnapshot(in context: Context, completion: @escaping (NextDarkEntry) -> Void) {
         var snapshot = WatchSky.faces(at: .now).snapshot
-        if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = WatchTimeline.sample }
+        if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = SavedSkySnapshot.sample }
         completion(WristTimeline.nextDarkEntries(from: .now, snapshot: snapshot, look: .current).first ?? placeholder(in: context))
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<NextDarkEntry>) -> Void) {
@@ -232,7 +232,7 @@ struct DuskProvider: RelevanceEntriesProvider {
     }
     func placeholder(context: Context) -> DuskEntry {
         var cache: [String: SkyConditions] = [:]
-        return DuskEntry(entry: WatchTimeline.entry(at: .now, snapshot: WatchTimeline.sample, look: .red, cache: &cache))
+        return DuskEntry(entry: WatchTimeline.entry(at: .now, snapshot: SavedSkySnapshot.sample, look: .red, cache: &cache))
     }
 }
 struct DuskWidget: Widget {
@@ -279,7 +279,7 @@ struct RedLightIntent: SetValueIntent {
 
 #Preview("Tonight • rectangular", as: .accessoryRectangular) { TonightComplication() } timeline: {
     var cache: [String: SkyConditions] = [:]
-    WatchTimeline.entry(at: .now, snapshot: WatchTimeline.sample, look: .red, cache: &cache)
+    WatchTimeline.entry(at: .now, snapshot: SavedSkySnapshot.sample, look: .red, cache: &cache)
 }
 #Preview("Tonight • closure, rectangular", as: .accessoryRectangular) { TonightComplication() } timeline: {
     let entry = closedSample
@@ -292,24 +292,24 @@ struct RedLightIntent: SetValueIntent {
 /// Joshua Tree tonight with an illustrative closure, for the previews.
 private var closedSample: WatchSkyEntry {
     var cache: [String: SkyConditions] = [:]
-    let entry = WatchTimeline.entry(at: .now, snapshot: WatchTimeline.sample, look: .red, cache: &cache)
+    let entry = WatchTimeline.entry(at: .now, snapshot: SavedSkySnapshot.sample, look: .red, cache: &cache)
     return WatchSkyEntry(date: entry.date, night: entry.night, next: entry.next, nightVision: entry.nightVision, closure: "Keys View Road closed at night")
 }
 #Preview("Moon • circular", as: .accessoryCircular) { MoonComplication() } timeline: {
-    MoonEntry(date: .now, park: WatchTimeline.sample?.parks.first, moon: MoonNow(at: .now, park: WatchTimeline.sample?.parks.first), nightVision: false)
+    MoonEntry(date: .now, park: SavedSkySnapshot.sample?.parks.first, moon: MoonNow(at: .now, park: SavedSkySnapshot.sample?.parks.first), nightVision: false)
 }
 #Preview("Moon • rectangular", as: .accessoryRectangular) { MoonComplication() } timeline: {
-    MoonEntry(date: .now, park: WatchTimeline.sample?.parks.first, moon: MoonNow(at: .now, park: WatchTimeline.sample?.parks.first), nightVision: true)
+    MoonEntry(date: .now, park: SavedSkySnapshot.sample?.parks.first, moon: MoonNow(at: .now, park: SavedSkySnapshot.sample?.parks.first), nightVision: true)
     MoonEntry(date: .now, park: nil, moon: MoonNow(at: .now, park: nil), nightVision: false)
 }
 #Preview("Moon • corner", as: .accessoryCorner) { MoonComplication() } timeline: {
-    MoonEntry(date: .now, park: WatchTimeline.sample?.parks.first, moon: MoonNow(at: .now, park: WatchTimeline.sample?.parks.first), nightVision: false)
+    MoonEntry(date: .now, park: SavedSkySnapshot.sample?.parks.first, moon: MoonNow(at: .now, park: SavedSkySnapshot.sample?.parks.first), nightVision: false)
 }
 #Preview("Moon • inline", as: .accessoryInline) { MoonComplication() } timeline: {
-    MoonEntry(date: .now, park: WatchTimeline.sample?.parks.first, moon: MoonNow(at: .now, park: WatchTimeline.sample?.parks.first), nightVision: false)
+    MoonEntry(date: .now, park: SavedSkySnapshot.sample?.parks.first, moon: MoonNow(at: .now, park: SavedSkySnapshot.sample?.parks.first), nightVision: false)
 }
 #Preview("Next dark • every state", as: .accessoryRectangular) { NextDarkComplication() } timeline: {
-    let park = WatchTimeline.sample?.parks.first
+    let park = SavedSkySnapshot.sample?.parks.first
     NextDarkEntry(date: .now, park: park, moment: .begins(.now.addingTimeInterval(4200), moonset: false), nightVision: false)
     NextDarkEntry(date: .now, park: park, moment: .begins(.now.addingTimeInterval(7200), moonset: true), nightVision: true)
     NextDarkEntry(date: .now, park: park, moment: .darkNow(until: .now.addingTimeInterval(9000), moonrise: true), nightVision: true)
@@ -324,11 +324,11 @@ private var closedSample: WatchSkyEntry {
     MoonEntry(date: .now, park: samoa, moon: MoonNow(at: .now, park: samoa), nightVision: false)
 }
 #Preview("Next dark • circular", as: .accessoryCircular) { NextDarkComplication() } timeline: {
-    NextDarkEntry(date: .now, park: WatchTimeline.sample?.parks.first, moment: .begins(.now.addingTimeInterval(7800), moonset: true), nightVision: true)
+    NextDarkEntry(date: .now, park: SavedSkySnapshot.sample?.parks.first, moment: .begins(.now.addingTimeInterval(7800), moonset: true), nightVision: true)
 }
 #Preview("Next dark • corner", as: .accessoryCorner) { NextDarkComplication() } timeline: {
-    NextDarkEntry(date: .now, park: WatchTimeline.sample?.parks.first, moment: .begins(.now.addingTimeInterval(7800), moonset: false), nightVision: false)
+    NextDarkEntry(date: .now, park: SavedSkySnapshot.sample?.parks.first, moment: .begins(.now.addingTimeInterval(7800), moonset: false), nightVision: false)
 }
 #Preview("Next dark • inline", as: .accessoryInline) { NextDarkComplication() } timeline: {
-    NextDarkEntry(date: .now, park: WatchTimeline.sample?.parks.first, moment: .darkNow(until: .now.addingTimeInterval(7800), moonrise: false), nightVision: false)
+    NextDarkEntry(date: .now, park: SavedSkySnapshot.sample?.parks.first, moment: .darkNow(until: .now.addingTimeInterval(7800), moonrise: false), nightVision: false)
 }

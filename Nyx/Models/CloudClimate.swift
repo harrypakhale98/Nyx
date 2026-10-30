@@ -280,6 +280,30 @@ extension Night {
         }
     }
 }
+extension Night {
+    // MARK: One wording on every device
+
+    /// A park row's VoiceOver label on the iPhone, Apple Watch and Vision Pro: "Zion. Darkness score
+    /// 88, Excellent." then haze or smoke that holds the score down ("Haze or smoke.") and any
+    /// closure ("Closure alert: Kolob Canyons Road closed"). `withBasis` says what the clouds rest on
+    /// with the band ("Excellent, early look", smoke included), for a row with no other place to say
+    /// it (the watch, Vision Pro); the iPhone's rows say it a "More content" swipe away.
+    nonisolated func spokenRow(closure: String?, withBasis: Bool = false) -> String {
+        let band = withBasis ? bandWithBasis : score.band.label
+        let main = Sentences.join([String(localized: "\(park.shortName). Darkness score \(score.value), \(band)."), withBasis ? "" : smokeLabel.map(Sentences.end) ?? ""])
+        return Sentences.join([main, closure.map(ClosureLine.spoken) ?? ""])
+    }
+    /// What VoiceOver says for a night on the iPhone's Tonight widget and the watch's complications,
+    /// one wording for both: the place, the score and its band; any closure in full right after the
+    /// score it stands beside (a family that shows only its mark still says it); what the clouds rest
+    /// on, or "Includes cloud forecast."; and smoke that holds the score down. `ahead`: another night
+    /// of the week, said with its date. Each surface adds its own after it.
+    nonisolated func widgetSummary(closure: String?, ahead: Bool = false) -> String {
+        let lead = ahead ? String(localized: "\(park.shortName), \(park.dayLabel(id)): \(score.value) out of 100, \(score.band.label).")
+            : String(localized: "\(park.shortName), \(score.value) out of 100, \(score.band.label).")
+        return Sentences.join([lead, closure.map { Sentences.end(ClosureLine.spoken($0)) } ?? "", cloudSentence(), smokeSentence(tonight: !ahead) ?? ""])
+    }
+}
 extension CloudBasis {
     /// An early look's caption, said one way everywhere (`Night.basisCaption`, field mode): the
     /// forecast eased toward the usual clouds, or, where the place has none for the month
@@ -344,10 +368,6 @@ extension Night {
         case river
         /// The calendar's list: as `river`, then the night's sky event, under its own key.
         case calendar(event: String?)
-        /// The Tonight widget: the park, the score and band, then the short caption or "Includes cloud forecast."
-        case widget
-        /// The Tonight widget moved to another night of the week: as `widget`, with the night's date.
-        case widgetNight
         /// The chart's summary: "Best night: Fri, Oct 9, 94 out of 100, Pristine."
         case chartBest
         /// One night of a stay: "Fri, Oct 9, 94 out of 100, Pristine, usual clouds".
@@ -371,8 +391,6 @@ extension Night {
         let text = spokenText(style)
         switch style {
         case .river, .calendar, .eventNote, .siriBest: return Sentences.join([text, smokeSentence() ?? ""])
-        case .widget: return Sentences.join([text, smokeSentence(tonight: true) ?? ""])
-        case .widgetNight: return Sentences.join([text, smokeSentence() ?? ""])
         case .chartBest, .dayWithBasis, .scoreWithBasis, .tripLine, .stayNote, .snippet: return text
         }
     }
@@ -383,10 +401,6 @@ extension Night {
             return String(localized:"\(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label). \(clouds)")
         case .calendar(let event):
             return String(localized:"\(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label). \(basisCaption(typical:true) ?? String(localized:"Includes cloud forecast."))\(event.map { ". "+$0 } ?? "")")
-        case .widget:
-            return String(localized:"\(park.shortName), \(score.value) out of 100, \(score.band.label). \(basisCaption() ?? String(localized:"Includes cloud forecast."))")
-        case .widgetNight:
-            return String(localized:"\(park.shortName), \(park.dayLabel(id)): \(score.value) out of 100, \(score.band.label). \(basisCaption() ?? String(localized:"Includes cloud forecast."))")
         case .chartBest:
             return String(localized:"Best night: \(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label).")
         case .dayWithBasis:

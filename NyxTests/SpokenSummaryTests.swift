@@ -42,7 +42,7 @@ import Testing
                 let marker=name.map { ". "+$0 } ?? ""
                 #expect(night.spokenSummary(.calendar(event: name)) == String(localized:"\(night.park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption(typical:true) ?? String(localized:"Includes cloud forecast."))\(marker)"))
             }
-            #expect(night.spokenSummary(.widget) == String(localized:"\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption() ?? String(localized:"Includes cloud forecast."))"))
+            #expect(night.widgetSummary(closure: nil) == "\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption() ?? "Includes cloud forecast.")")
             #expect(night.spokenSummary(.chartBest) == String(localized:"Best night: \(night.park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label)."))
             // Siri's card says what the clouds rest on with the band (2.0 design review): "Excellent, usual clouds".
             #expect(night.spokenSummary(.snippet) == String(localized:"\(night.park.shortName) tonight: \(night.score.value) out of 100, \(night.bandWithBasis). \(night.sky.moon.name), \(night.sky.moon.percentLit) percent lit."))

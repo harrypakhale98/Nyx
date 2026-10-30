@@ -70,8 +70,8 @@ struct ScoreReadout: View {
     /// The four parts alone would give 65." The breakdown says the same (`ScoreBreakdownView`).
     private var limitLine: String? { Self.limitLine(score,tonight:isTonight) }
     nonisolated static func limitLine(_ score:DarknessScore,tonight:Bool)->String? {
-        guard let limit=score.limit, limit.cap<score.partsSum else { return nil }
-        return Sentences.join([limit.sentence(tonight:tonight),String(localized:"The four parts alone would give \(score.partsSum).")])
+        guard let limit=score.limitSentence(tonight:tonight) else { return nil }
+        return Sentences.join([limit,String(localized:"The four parts alone would give \(score.partsSum).")])
     }
     var body: some View {
         Button(action:action) {

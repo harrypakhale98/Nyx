@@ -19,9 +19,6 @@ nonisolated struct NightPlan: Sendable {
     let whatsUp: WhatsUp
     let moon: MoonGeometry
     let moonMoment: Date
-    /// The Moon's topocentric altitude at `moonMoment`, its highest of the night: below the
-    /// horizon's −0.833° means it never rises that night.
-    let moonAltitude: Double
     var span: DateInterval { SkyDome.span(for: sky) }
     /// `layers`: the summit's mid and high cloud (`SummitLayerService`), for parks above the inversion;
     /// `air`: the park's aerosol forecast (`ForecastDetailService`, smoke only).
@@ -36,7 +33,6 @@ nonisolated struct NightPlan: Sendable {
         whatsUp = WhatsUp(park: park, sky: sky, isTonight: isTonight, aurora: AuroraForecast.item(aurora, park: park, sky: sky, now: now))
         moonMoment = engine.moonViewTime(for: sky, park: park)
         moon = engine.moonGeometry(for: park, at: moonMoment)
-        moonAltitude = engine.lunarAltitude(at: moonMoment, park: park)
     }
     /// The cloud cover the immersive sky draws at `moment` (0…1), or nil when no forecast hour
     /// reaches it (`SkyDome.cloud`), eased toward the usual clouds by the same weight as the score.
@@ -45,8 +41,6 @@ nonisolated struct NightPlan: Sendable {
         return SkyDome.cloud(at: moment, forecast: forecast, basis: night.basis, usual: night.usualCloud,
                              reference: window.start.addingTimeInterval(window.end.timeIntervalSince(window.start)/2))
     }
-    /// The Moon's line when it neither rises nor sets this night.
-    var moonAllNight: String { moonAltitude > -0.833 ? String(localized: "Up all night") : String(localized: "Down all night") }
 }
 
 /// Where everything is at one moment of a night, for the immersive sky and for the window's

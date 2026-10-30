@@ -96,6 +96,11 @@ nonisolated struct SavedSkySnapshot:Codable,Sendable {
     /// 2 adds the version and the per-park closures (1.1); 3 the carried usual clouds (2.0); 4 when
     /// the closures were fetched. Readers never refuse a version: every field after the parks is optional.
     static let currentVersion=4
+    /// Joshua Tree tonight, with its usual clouds: the widget and complication galleries' sky and the
+    /// redacted placeholder's shape, on iPhone and Apple Watch. Nil only if the bundled parks cannot be read.
+    static var sample:SavedSkySnapshot? {
+        (try? ParkData.load().first(where:{ $0.id==Park.defaultID })).map { SavedSkySnapshot(parks:[$0],forecasts:[:]) }
+    }
     var version=SavedSkySnapshot.currentVersion
     let parks:[Park]
     let forecasts:[String:Forecast]
