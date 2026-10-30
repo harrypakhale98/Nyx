@@ -1,4 +1,5 @@
 import SwiftUI
+import simd
 
 /// "Tonight's sky over <park>": the night's real sky in colour, full screen. Drag sideways to turn
 /// toward any direction (a fling coasts on the shared spring, at most 120°; the direction buttons
@@ -17,6 +18,11 @@ import SwiftUI
 /// 30 minutes." for three seconds. Any touch (a drag, the slider, a direction) completes it at once,
 /// without that sentence. Reduce Motion and Reduce Highlighting Effects draw the sky whole, with
 /// no caption.
+///
+/// "Follow my iPhone" hands the turning to the phone itself (`FieldMotion`, as field mode's "Where to
+/// look"): the sky faces wherever its back points and tilts up to the zenith, with the horizon kept
+/// level. No camera and no new permission; a drag or a direction takes the sky back, which then
+/// settles to its usual height on the shared spring (at once under Reduce Motion).
 struct TonightSkyView: View {
     @Environment(\.nyx) private var palette
     @Environment(\.nyxAccess) private var access
@@ -59,16 +65,38 @@ struct TonightSkyView: View {
     @State private var landedNaturally=false
     /// The turn in flight (a coast or a direction button), so a finger can catch it where it is.
     @State private var turning: SkyTurn.Motion?
+    /// The sky follows the phone. The drawing reads the pose every frame; `facing` and
+    /// `centreAltitude` catch up a few times a second, for the words and VoiceOver.
+    @State private var following: Bool
+    /// The altitude at the view's centre: the panorama's own, or where the phone looks while following.
+    @State private var centreAltitude=SkyFollow.resting
+    /// When the phone took the sky, so the view eases to it on the shared spring instead of
+    /// cutting; nil once there (and from the start under Reduce Motion).
+    @State private var followStart: Date?
+    private var motion: FieldMotion { .shared }
+    /// A fixed pose to follow instead of the sensor (previews and DEBUG captures; the simulator has no compass).
+    private let fixedPose: SkyCompass.Pose?
+    /// The phone's pose while following: the sensor's, or the fixed one.
+    private var livePose: SkyCompass.Pose? { fixedPose ?? motion.pose }
+    /// Only where there is a compass to follow: never on a Mac, nor in the simulator outside DEBUG captures.
+    private var canFollow: Bool { fixedPose != nil || motion.available }
+    /// DEBUG: `-nyx-sky-follow 200` opens following a phone pointed at that azimuth, and
+    /// `-nyx-sky-follow-up 70` that high (30° without it), for captures in the simulator.
+    private static var debugPose: SkyCompass.Pose? {
+        DebugScenario.number("-nyx-sky-follow").map { SkyCompass.Pose(azimuth:$0,altitude:DebugScenario.number("-nyx-sky-follow-up") ?? 30) }
+    }
     private var window: DateInterval { SkyAlmanac.nightWindow(night.sky) }
     /// `previewLanded` opens on the landed sentence, for its preview.
     private let previewLanded: Bool
-    init(night:Night,isTonight:Bool=true,previewLanded:Bool=false) {
+    init(night:Night,isTonight:Bool=true,previewLanded:Bool=false,fixedPose:SkyCompass.Pose?=nil) {
         self.night=night; self.isTonight=isTonight; self.previewLanded=previewLanded
         _facing=State(initialValue:SkyDome.facing(for:night.park))
         _minutes=State(initialValue:Self.defaultMinutes(night.sky))
         let first = !SkyAdaptation.seen.contains(SkyAdaptation.key(parkID:night.park.id,night:night.id))
         _revealing=State(initialValue:first)
         _captionShown=State(initialValue:first || previewLanded)
+        self.fixedPose=fixedPose ?? Self.debugPose
+        _following=State(initialValue:self.fixedPose != nil)
     }
     /// The reveal is a highlight and a motion: neither plays under Reduce Motion or Reduce Highlighting Effects.
     private var revealAllowed: Bool { !reduceMotion && !access.reduceHighlighting }
@@ -84,14 +112,27 @@ struct TonightSkyView: View {
     private var moment: Date { window.start.addingTimeInterval(minutes*60) }
     private var park: Park { night.park }
     /// Beside the column nothing stands over the sky, so names may use its whole height.
-    private var options: PanoramaOptions { PanoramaOptions(facing:facing,bortle:Double(park.bortleEstimate),nightVision:palette.nightVision,labelTop:beside ? 0 : headerBottom) }
-    private func adapted(_ adaptation:Double)->PanoramaOptions { var adapted=options; adapted.adaptation=adaptation; return adapted }
+    private var options: PanoramaOptions { PanoramaOptions(facing:facing,centreAltitude:centreAltitude,bortle:Double(park.bortleEstimate),nightVision:palette.nightVision,labelTop:beside ? 0 : headerBottom) }
+    /// The options drawn at `now`: adapted, and turned to the phone while following.
+    private func drawn(_ adaptation:Double,at now:Date)->PanoramaOptions {
+        var drawn=options; drawn.adaptation=adaptation
+        if following, let pose=livePose {
+            let eased=followStart.map { SkyFollow.eased(now.timeIntervalSince($0)) } ?? 1
+            drawn.facing=facing+(SkyFollow.facing(pose,near:facing)-facing)*eased
+            drawn.centreAltitude=centreAltitude+(SkyFollow.altitude(pose)-centreAltitude)*eased
+        }
+        return drawn
+    }
+    /// Following redraws with the hand, as field mode's compass does: 30 frames a second, 15 in Low
+    /// Power Mode or with Reduce Resources, and still (holding where it was) while the phone is hot.
+    private var followsLive: Bool { following && fixedPose == nil && !PowerState.shared.thermalSerious }
     var body: some View {
         let sky=HorizonSkies.shared.sky(park:park,night:night.id,at:moment)
         let adapting=revealing && revealAllowed
-        // At most 30 frames a second while the stars arrive; paused (nothing redrawn) once they have.
-        TimelineView(.animation(minimumInterval:1/30,paused:!adapting || SkyAdaptation.frozen != nil)) { timeline in
-            TurningPanorama(sky:sky,options:adapted(adapting ? SkyAdaptation.progress(since:revealStart,now:timeline.date) : 1))
+        let interval=followsLive && (PowerState.shared.lowPower || access.reducedResources) ? 1.0/15 : 1.0/30
+        // At most 30 frames a second while the stars arrive or the phone leads; paused (nothing redrawn) otherwise.
+        TimelineView(.animation(minimumInterval:interval,paused:!followsLive && (!adapting || SkyAdaptation.frozen != nil))) { timeline in
+            TurningPanorama(sky:sky,options:drawn(adapting ? SkyAdaptation.progress(since:revealStart,now:timeline.date) : 1,at:timeline.date))
         }
             // Beside the column the sky also runs under the home indicator and the Dynamic Island's side.
             .ignoresSafeArea(edges:beside ? [.top,.bottom,.leading] : .top)
@@ -104,8 +145,8 @@ struct TonightSkyView: View {
             .accessibilityHint("Swipe up or down to turn 45 degrees.")
             .accessibilityAdjustableAction { direction in
                 switch direction {
-                case .increment: completeReveal(); face(facing+45)
-                case .decrement: completeReveal(); face(facing-45)
+                case .increment: completeReveal(); stopFollowing(); face(facing+45)
+                case .decrement: completeReveal(); stopFollowing(); face(facing-45)
                 @unknown default: break
                 }
             }
@@ -114,8 +155,12 @@ struct TonightSkyView: View {
             .onGeometryChange(for:CGSize.self) { CGSize(width:$0.size.width.rounded(),height:$0.size.height.rounded()) } action:{ screen=$0 }
             .statusBarHidden(palette.nightVision)
             .sensoryFeedback(.selection,trigger:Int(minutes/30))
+            // While the phone leads, a light tick at each of the eight compass points it passes.
+            .sensoryFeedback(.selection,trigger:following ? Compass.name(facing) : "")
             .onChange(of:minutes) { completeReveal() }
             .task { await reveal() }
+            .task(id:following) { await catchUp() }
+            .onDisappear { if following && fixedPose == nil { motion.stop() } }
             #if DEBUG
             .task { await debugFling() }
             #endif
@@ -153,6 +198,43 @@ struct TonightSkyView: View {
         withAnimation(.interpolatingSpring(NyxMotion.model,initialVelocity:4)) { facing=target }
     }
     #endif
+    /// While following, the words and VoiceOver's summary catch up with the drawing four times a second.
+    private func catchUp() async {
+        guard following else { return }
+        if fixedPose == nil { motion.start() }
+        // The drawing eases from where the sky was; the words wait until it is there.
+        if followStart != nil {
+            try? await Task.sleep(for:.seconds(SkyFollow.easeDuration))
+            followStart=nil
+        }
+        while !Task.isCancelled, following {
+            if let pose=livePose { hold(pose) }
+            try? await Task.sleep(for:.milliseconds(250))
+        }
+    }
+    /// The state set to where the phone points (`eased` of the way there), without animation.
+    private func hold(_ pose:SkyCompass.Pose,eased:Double=1) {
+        var still=Transaction(); still.disablesAnimations=true
+        withTransaction(still) {
+            facing+=(SkyFollow.facing(pose,near:facing)-facing)*eased
+            centreAltitude+=(SkyFollow.altitude(pose)-centreAltitude)*eased
+        }
+    }
+    /// "Follow my iPhone" turned on or off.
+    private func follow(_ on:Bool) {
+        completeReveal()
+        if on { turning=nil; followStart=reduceMotion || fixedPose != nil ? nil : .now; following=true } else { stopFollowing() }
+    }
+    /// The sky stays where the phone left it, then settles back to its usual height.
+    private func stopFollowing() {
+        guard following else { return }
+        // Mid-ease, the sky stays where the ease had brought it.
+        if let pose=livePose { hold(pose,eased:followStart.map { SkyFollow.eased(Date.now.timeIntervalSince($0)) } ?? 1) }
+        followStart=nil
+        following=false
+        if fixedPose == nil { motion.stop() }
+        if reduceMotion { centreAltitude=SkyFollow.resting } else { withAnimation(NyxMotion.spring) { centreAltitude=SkyFollow.resting } }
+    }
     /// A touch completes the reveal at once: the whole sky, and the caption fades.
     private func completeReveal() {
         guard revealing || captionShown else { return }
@@ -239,6 +321,7 @@ struct TonightSkyView: View {
                 }
                 .font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true)
                 directionGrid
+                followRows
             } else {
                 HStack(alignment:.firstTextBaseline) {
                     Text(park.time(moment)).font(.system(.title2,design:.serif)).monospacedDigit().foregroundStyle(palette.ink)
@@ -259,8 +342,30 @@ struct TonightSkyView: View {
                         VStack(alignment:.leading,spacing:8) { directions }
                     }
                 }
+                followRows
             }
             Text("Drawn for an estimated Bortle \(park.bortleEstimate) sky. Clouds are not shown; the score covers them.").font(.caption2).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+        }
+    }
+    /// "Follow my iPhone", styled as the directions (it chooses which way you face too), and while
+    /// it is on, which north the directions use and, when the compass is unsure, how to steady it:
+    /// field mode's words.
+    @ViewBuilder private var followRows: some View {
+        if canFollow {
+            Toggle(isOn:Binding(get:{ following },set:{ follow($0) })) {
+                Label("Follow my iPhone",systemImage:"location.north.line")
+            }
+            .toggleStyle(.button)
+            .buttonStyle(.bordered).buttonBorderShape(.capsule).font(.footnote.weight(.medium))
+            .tint(following ? palette.ink : palette.muted)
+            .overlay { if following { Capsule().strokeBorder(palette.ink.opacity(palette.highContrast ? 1 : 0.7),lineWidth:palette.stroke).allowsHitTesting(false) } }
+            if following && fixedPose == nil {
+                VStack(alignment:.leading,spacing:4) {
+                    Text(motion.trueNorth ? String(localized:"Directions use true north.") : String(localized:"Directions use magnetic north, which can differ from true north by several degrees."))
+                    if motion.needsCalibration { Text("Move your iPhone in a slow figure eight to steady the compass.") }
+                }
+                .font(.caption2).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            }
         }
     }
     @ViewBuilder private var directions: some View {
@@ -299,6 +404,7 @@ struct TonightSkyView: View {
     /// A direction button: the shortest way round on the shared spring, or at once under Reduce Motion.
     /// A turn already in flight starts from where the sky is on screen, not from its old target.
     private func turn(toward azimuth:Double) {
+        stopFollowing()
         let from=turning?.position(at:.now) ?? facing
         let target=SkyTurn.shortestTurn(from:from,to:azimuth)
         guard !reduceMotion, abs(target-from)>0.01 else { face(target); return }
@@ -312,6 +418,8 @@ struct TonightSkyView: View {
         DragGesture(minimumDistance:4).updating($dragging) { _,state,_ in state=true }.onChanged { drag in
             completeReveal()
             if dragFrom == nil {
+                // A finger takes the sky back from the phone, where the phone left it.
+                stopFollowing()
                 if let turning { face(turning.position(at:.now)) }
                 dragFrom=facing
             }
@@ -330,13 +438,43 @@ struct TonightSkyView: View {
         }
     }
 }
-/// The sky drawn at an animatable facing, so a coast or a turn interpolates the drawing itself
-/// frame by frame instead of cutting to the new direction.
+/// The sky drawn at an animatable facing and height, so a coast, a turn or the settle after
+/// following interpolates the drawing itself frame by frame instead of cutting to the new view.
 private struct TurningPanorama: View, Animatable {
     let sky: HorizonSky
     var options: PanoramaOptions
-    var animatableData: Double { get { options.facing } set { options.facing=newValue } }
+    var animatableData: AnimatablePair<Double,Double> {
+        get { AnimatablePair(options.facing,options.centreAltitude) }
+        set { options.facing=newValue.first; options.centreAltitude=newValue.second }
+    }
     var body: some View { PanoramaCanvas(sky:sky,options:options) }
+}
+/// The full-screen sky following the phone: which way it faces and how high it looks.
+nonisolated enum SkyFollow {
+    /// The view's centre altitude when the phone is not leading (the panorama's own).
+    static let resting=40.0
+    /// How high the centre follows: from a little below the horizon (a few degrees of ground) to the zenith.
+    static let altitudes = -10.0...90.0
+    /// Where the phone faces, unwrapped to lie nearest `facing` so the words and a later turn never
+    /// spin the long way round. Up to 60° it is the heading of the phone's back; above that the
+    /// back's heading is lost in the zenith, so the screen's top, tipped back past it, takes over
+    /// by degrees (it points away from the way you face once you look straight up). Below the
+    /// horizon, the same by the screen's top. Roll leaves it alone until then.
+    static func facing(_ pose:SkyCompass.Pose,near facing:Double)->Double {
+        let altitude=pose.altitude
+        let weight=max(0,(abs(altitude)-60)/30)*(altitude<0 ? -1 : 1)
+        let toward=pose.look-pose.up*weight
+        let azimuth=simd_length(SIMD2(toward.x,toward.y))>1e-6 ? SkyCompass.altitudeAzimuth(SIMD3(toward.x,toward.y,0)).azimuth : pose.azimuth
+        return SkyTurn.shortestTurn(from:facing,to:azimuth)
+    }
+    /// Seconds the view takes to reach the phone once it leads: the shared spring's settling time.
+    static let easeDuration=NyxMotion.model.settlingDuration
+    /// How far the view has eased to the phone `elapsed` seconds after it took the sky, 0…1.
+    static func eased(_ elapsed:Double)->Double {
+        elapsed>=easeDuration ? 1 : max(0,NyxMotion.model.value(target:1.0,initialVelocity:0,time:max(0,elapsed)))
+    }
+    /// How high the phone looks, within `altitudes`.
+    static func altitude(_ pose:SkyCompass.Pose)->Double { min(altitudes.upperBound,max(altitudes.lowerBound,pose.altitude)) }
 }
 /// How the full-screen sky turns: a fling's coast and a direction button's shortest way round.
 nonisolated enum SkyTurn {
@@ -569,6 +707,18 @@ enum EssayFigure {
 #Preview("Sky over the park • landscape • AX5",traits:.landscapeLeft) {
     let m=PlanModel()
     if let p=m.home { TonightSkyView(night:m.night(p)).environment(m).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
+}
+#Preview("Sky over the park • following, looking up") {
+    let m=PlanModel()
+    if let p=m.home { TonightSkyView(night:m.night(p),fixedPose:SkyCompass.Pose(azimuth:180,altitude:70)).environment(m).preferredColorScheme(.dark) }
+}
+#Preview("Sky over the park • following, at the zenith • AX5") {
+    let m=PlanModel()
+    if let p=m.home { TonightSkyView(night:m.night(p),fixedPose:SkyCompass.Pose(azimuth:180,altitude:90)).environment(m).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
+}
+#Preview("Sky over the park • following • night vision") {
+    let m=PlanModel()
+    if let p=m.home { TonightSkyView(night:m.night(p),fixedPose:SkyCompass.Pose(azimuth:135,altitude:35)).environment(m).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).preferredColorScheme(.dark) }
 }
 #Preview("Sky window") {
     let m=PlanModel()
