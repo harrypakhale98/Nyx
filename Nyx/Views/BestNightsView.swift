@@ -23,11 +23,11 @@ struct BestNightsView: View {
         guard !model.catalogIsReady, let from=model.reachOrigin else { return false }
         return !USOutline.contains(latitude:from.latitude,longitude:from.longitude)
     }
-    /// Ranked again when the places in reach, the radius, the day or the data change.
+    /// Ranked again when the places in reach, the radius, the night (`today` moves at each sunrise turnover) or the data change.
     private var key:String {
         guard !loading else { return "loading" }
         let places=model.placesInReach().places
-        return "\(TonightReach.key(places))-\(Int(model.radiusMeters))-\(model.dataRevision)-\(Int(Calendar.current.startOfDay(for:model.today).timeIntervalSince1970))"
+        return "\(TonightReach.key(places))-\(Int(model.radiusMeters))-\(model.dataRevision)-\(Int(model.today.timeIntervalSince1970))"
     }
     var body: some View {
         ScrollView {

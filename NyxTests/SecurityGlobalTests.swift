@@ -338,6 +338,26 @@ struct SecurityGlobalTests {
         #expect((0..<7).filter { thursday.adding($0).isNightBeforeDayOff(calendar: satSun) } == [1, 2])
         #expect(TripPlanner.days(first: thursday, last: thursday.adding(6), weekendsOnly: true, calendar: friSat) == [thursday, thursday.adding(1)])
     }
+    @Test func searchDropsNameJoiners() {
+        // "サン・ディエゴ" is most often typed without its middle dot; both spellings find it.
+        #expect(Park.folded("サン・ディエゴ") == Park.folded("サンディエゴ"))
+        #expect(StartingPlaces.normalized("サン・ディエゴ") == StartingPlaces.normalized("サンディエゴ"))
+        #expect(StartingPlaces.normalized("ラ＝ロシェル") == StartingPlaces.normalized("ラロシェル"))
+    }
+    @Test func aroundRoundsOnThePlacesClock() throws {
+        let nepal=try #require(TestData.catalog().first { $0.timeZoneID == "Asia/Kathmandu" })
+        // 15:42 UTC is 21:27 in Kathmandu (UTC+5:45): around 21:30 there, never 21:25.
+        let moment=try Date("2026-11-01T15:42:00Z", strategy: .iso8601), expected=try Date("2026-11-01T15:45:00Z", strategy: .iso8601)
+        #expect(WhatsUp.around(moment, park: nepal) == nepal.time(expected))
+    }
+    @Test func monthNamesAreGregorianOnAnyDeviceCalendar() throws {
+        // Grids and usual clouds count Gregorian months; a Hebrew-calendar device still reads "November".
+        let jotr=try park("jotr"), night=try date("2026-11-15 21:00", park: jotr)
+        var gregorian=Calendar(identifier: .gregorian); gregorian.locale = .current
+        let november=gregorian.standaloneMonthSymbols[10]
+        #expect(jotr.monthName(night).localizedCaseInsensitiveContains(november) || november.localizedCaseInsensitiveContains(jotr.monthName(night)))
+        #expect(jotr.monthLabel(night).contains("2026"))
+    }
     @Test func journalYearsAreGregorianWhereTheNightWasSpent() throws {
         // New Year's Eve in Hawaiʻi is already 2026 in UTC, still 2025 at the park.
         let honolulu=try #require(TimeZone(identifier: "Pacific/Honolulu"))

@@ -4,21 +4,22 @@ import UniformTypeIdentifiers
 
 // MARK: Dark weekends
 
-/// The long view for one place: around each of the next six new moons, the weekend (a Friday and
-/// the Saturday after it) whose better night scores highest. Far ahead a score rests on the
-/// place's usual clouds for the month and says so (`Night.basisLabels`); the Moon and the hours of
-/// true darkness are exact. For deciding which weekends to ask off and book, months ahead.
+/// The long view for one place: around each of the next six new moons, the weekend (the two nights
+/// before the region's days off: Friday and Saturday where the weekend is Saturday and Sunday,
+/// Thursday and Friday where it is Friday and Saturday) whose better night scores highest. Far ahead
+/// a score rests on the place's usual clouds for the month and says so (`Night.basisLabels`); the
+/// Moon and the hours of true darkness are exact. For deciding which weekends to ask off and book, months ahead.
 nonisolated enum DarkWeekends {
     struct Weekend: Sendable, Identifiable {
-        var id: Date { friday.id }
+        var id: Date { firstNight.id }
         let newMoon: Date
-        let friday: Night
-        let saturday: Night
+        let firstNight: Night
+        let secondNight: Night
         /// The weekend's better night, the one the row leads with.
-        var best: Night { NightPlanner.better(saturday,friday) ? saturday : friday }
+        var best: Night { NightPlanner.better(secondNight,firstNight) ? secondNight : firstNight }
     }
     static let lunations=6
-    /// A weekend counts for a new moon when its Friday falls within this many days either side.
+    /// A weekend counts for a new moon when its first night falls within this many days either side.
     static let reach=4
     /// The next `count` new moons from `now`.
     static func newMoons(after now: Date, count: Int=lunations) -> [Date] {
@@ -26,31 +27,38 @@ nonisolated enum DarkWeekends {
         for _ in 0..<count { let next=MoonWeek.newMoon(after:from); moons.append(next); from=next.addingTimeInterval(86400) }
         return moons
     }
-    /// The Fridays (as the park's evenings) within `reach` days of a new moon.
-    static func fridays(around newMoon: Date, park: Park) -> [Date] {
+    /// The weekends' first nights (as the park's evenings) within `reach` days of a new moon: the night
+    /// before the first day off, by the device calendar's weekend (`TripDay`). Where the weekend is one
+    /// day (Sunday alone), the night before that one leads, so the pair still holds the free night.
+    static func firstNights(around newMoon: Date, park: Park, calendar: Calendar = .current) -> [Date] {
         let evening=park.evening(newMoon)
-        return (-reach...reach).map { park.date(evening,addingDays:$0) }.filter { park.calendar.component(.weekday,from:$0)==6 }
+        func beforeDayOff(_ evening: Date) -> Bool {
+            let day=park.calendar.dateComponents([.year,.month,.day],from:evening)
+            return TripDay(year:day.year ?? 2000,month:day.month ?? 1,day:day.day ?? 1).isNightBeforeDayOff(calendar:calendar)
+        }
+        return (-reach...reach).map { park.date(evening,addingDays:$0) }.filter { beforeDayOff($0) && !beforeDayOff(park.date($0,addingDays:-1)) }
+            .map { beforeDayOff(park.date($0,addingDays:1)) ? $0 : park.date($0,addingDays:-1) }
     }
     /// The best weekend around each new moon still ahead. `night` scores a park's evening as every
     /// screen does; `closure` counts against a night as wherever a best night is chosen.
-    static func plan(park: Park, newMoons: [Date], tonight: Date, closure: String?, night: (Date) -> Night) -> [Weekend] {
+    static func plan(park: Park, newMoons: [Date], tonight: Date, closure: String?, calendar: Calendar = .current, night: (Date) -> Night) -> [Weekend] {
         let closures=closure.map { [park.id:$0] } ?? [:]
         return newMoons.compactMap { moon in
-            let weekends=fridays(around:moon,park:park).filter { $0>=tonight }.map { friday in
-                Weekend(newMoon:moon,friday:night(friday),saturday:night(park.date(friday,addingDays:1)))
+            let weekends=firstNights(around:moon,park:park,calendar:calendar).filter { $0>=tonight }.map { first in
+                Weekend(newMoon:moon,firstNight:night(first),secondNight:night(park.date(first,addingDays:1)))
             }
             return weekends.min { NightPlanner.better($0.best,$1.best,closures:closures) }
         }
     }
     /// "New moon Mar 11" in the place's calendar.
     static func newMoonLine(_ weekend: Weekend) -> String {
-        var format=Date.FormatStyle.dateTime.month(.abbreviated).day(); format.timeZone=weekend.friday.park.timeZone
+        var format=Date.FormatStyle.dateTime.month(.abbreviated).day(); format.timeZone=weekend.firstNight.park.timeZone
         return String(localized:"New moon \(weekend.newMoon.formatted(format))")
     }
     /// What VoiceOver hears for a row.
     static func spoken(_ weekend: Weekend) -> String {
-        let park=weekend.friday.park
-        return Sentences.join([String(localized:"\(park.dayLabel(weekend.friday.id)) and \(park.dayLabel(weekend.saturday.id)): \(weekend.friday.score.value) and \(weekend.saturday.score.value)."),
+        let park=weekend.firstNight.park
+        return Sentences.join([String(localized:"\(park.dayLabel(weekend.firstNight.id)) and \(park.dayLabel(weekend.secondNight.id)): \(weekend.firstNight.score.value) and \(weekend.secondNight.score.value)."),
                                Sentences.end(newMoonLine(weekend))]+weekend.best.basisLabels.map(Sentences.end))
     }
 }
