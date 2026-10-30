@@ -30,20 +30,21 @@
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<input type="checkbox" id="nv" role="switch" aria-label="Night vision: show this page in red">
 <div class="sky" aria-hidden="true"><div class="band"></div></div>
 <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false"><filter id="nv-red" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.0574 0.1931 0.0195 0 0 0.0483 0.1624 0.0164 0 0 0 0 0 1 0"/></filter></svg>
 
 <header class="site-header">
   <div class="inner">
-    <a class="brand" href="./" aria-label="Nyx, home"><img src="images/nyx-icon-256.png" width="30" height="30" alt="">Nyx</a>
+    <a class="brand" href="./" aria-label="Nyx, home"><img src="images/nyx-icon-96.webp" width="30" height="30" alt="">Nyx</a>
     <nav class="site-nav" aria-label="Site">
       <a href="privacy">Privacy</a>
       <a href="support">Support</a>
       <a class="opt" href="press/">Press</a>
       <a class="opt" href="case-study" aria-current="page">Case study</a>
     </nav>
-    <label class="nv-switch" for="nv"><span class="label-long">Night vision</span><span class="label-short">Red</span><span class="track" aria-hidden="true"></span></label>
+    <a class="get" href="https://apps.apple.com/app/nyx-dark-sky-planner/id6818817800">Get Nyx<span class="visually-hidden"> on the App Store</span></a>
+    <input type="checkbox" id="nv" role="switch" aria-label="Night vision: show this page in red">
+    <label class="nv-switch" for="nv"><span class="label-long">Night vision</span><span class="label-short">Red light</span><span class="track" aria-hidden="true"></span></label>
   </div>
 </header>
 <main id="main">
@@ -88,7 +89,7 @@
   <h2>Red light, measured</h2>
   <p>Eyes take twenty to thirty minutes to adapt to the dark, and a white screen undoes it in a second. Nyx is dark by default, and its night-vision mode turns every surface red, native controls included. Red at low brightness is easy to make unreadable, so the palette was tuned against WCAG contrast rather than by eye:</p>
   <ul class="swatches">
-    <li class="on-black">Red text on black<br><strong>6.2 : 1</strong></li>
+    <li class="on-black">Red text on black<br><strong>6.9 : 1</strong></li>
     <li class="on-panel">Red text on a red panel<br><strong>5.6 : 1</strong>, secondary 5.3 : 1</li>
     <li class="on-ink">Starlight on indigo<br><strong>16.7 : 1</strong>, secondary 8.9 : 1</li>
     <li class="on-amber">Black on amber<br><strong>11.9 : 1</strong></li>
@@ -110,7 +111,7 @@
   <h2>What was left out, and why</h2>
   <ul>
     <li><strong>A camera sky overlay.</strong> It would light up the screen and ask for the camera. "Where to look" turns a drawn sky with the phone's motion sensors instead.</li>
-    <li><strong>Driving times.</strong> Routing would mean a new service that learns where you are. The radius is a straight line, and it says "as the crow flies".</li>
+    <li><strong>Driving times.</strong> Routing would mean a new service that learns where you are. The radius is a straight line, and it says "in a straight line".</li>
     <li><strong>Aurora in the score.</strong> NOAA's three-day Kp forecast (the fourth public service, one file for the whole world) says how active the sky may be, not where aurora will show on a given night. What's up says "Aurora possible" when it usually reaches a place at that level, with the caveat that forecasts a day out often miss; the score leaves it out.</li>
     <li><strong>Accounts, sync and analytics.</strong> None. The journal stays on the device and can be exported as a file you keep.</li>
     <li><strong>A cloud AI.</strong> Ask Nyx appears only where Apple's on-device model is available, and reasons only over the records Nyx hands it.</li>
@@ -131,16 +132,18 @@
   <div class="wrap">
     <div class="cols">
       <div class="about">
-        <a class="brand" href="./"><img src="images/nyx-icon-256.png" width="30" height="30" alt="">Nyx</a>
-        <p>The darkest nights, wherever you are, with the 63 US national parks at its heart. Made by one independent developer.</p>
+        <a class="brand" href="./"><img src="images/nyx-icon-96.webp" width="30" height="30" alt="">Nyx</a>
+        <p>The darkest nights, wherever you are, with the 63 US national parks as its main focus. Made by Hardik Pakhale, an independent developer.</p>
       </div>
       <div>
         <h2>Pages</h2>
         <ul>
+          <li><a href="https://apps.apple.com/app/nyx-dark-sky-planner/id6818817800">Nyx on the App Store</a></li>
           <li><a href="case-study">Case study</a></li>
           <li><a href="press/">Press kit</a></li>
           <li><a href="privacy">Privacy policy</a></li>
           <li><a href="support">Support</a></li>
+          <li><a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Terms of use</a></li>
         </ul>
       </div>
       <div>
