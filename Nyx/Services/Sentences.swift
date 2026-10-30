@@ -48,9 +48,9 @@ nonisolated enum ClosureLine {
         guard let closure=closure?.trimmingCharacters(in: .whitespacesAndNewlines), !closure.isEmpty else { return body }
         return Sentences.join([Sentences.end(spoken(closure)), body])
     }
-    /// "94 · Closure alert", for one short line with no room for the closure's own words, which a
-    /// longer line, the spoken label and a tap give.
-    static func inline(score: Int) -> String { String(localized: "\(score) · \(String(localized: "Closure alert"))") }
+    /// "94 · Keys View Road closed at night", for one short line: the park's own words, cut by the line
+    /// if they must be, never a bare "Closure alert", which reads as the whole park closed when a road is.
+    static func inline(score: Int, closure: String) -> String { String(localized: "\(score) · \(closure)") }
     /// Where the Park Service has no alerts Nyx cannot know the closures, and says so rather than let
     /// silence read as "nothing is closed": a place abroad points to its own site, a saved spot to
     /// local checks. Nil for a national park.

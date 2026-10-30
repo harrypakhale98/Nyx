@@ -333,11 +333,12 @@ struct TonightWidgetView:View {
                 .frame(maxWidth:.infinity,alignment:.leading)
         }
     }
-    /// "⚠ Closure alert", drawn as the closure line is: where the closure's own words do not fit (the
-    /// small widget and the Lock Screen), the mark that sends someone to the park's page before they drive.
+    /// The closure in one line, drawn as the closure line is, where its words do not fit whole (the small
+    /// widget and the Lock Screen): the park's own words cut by the line ("⚠ Keys View Road closed…"),
+    /// never a bare "Closure alert", which read as the whole park closed when only a road was.
     @ViewBuilder private func closureMark(_ font:Font)->some View {
-        if entry.closure != nil {
-            Label { Text("Closure alert").foregroundStyle(ink).lineLimit(1).minimumScaleFactor(0.75) } icon:{ Image(systemName:"exclamationmark.triangle.fill").foregroundStyle(caution).accessibilityHidden(true) }
+        if let closure=entry.closure {
+            Label { Text(closure).foregroundStyle(ink).lineLimit(1).minimumScaleFactor(0.85) } icon:{ Image(systemName:"exclamationmark.triangle.fill").foregroundStyle(caution).accessibilityHidden(true) }
                 .font(font.weight(.medium)).widgetAccentable()
         }
     }
