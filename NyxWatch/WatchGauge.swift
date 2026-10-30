@@ -136,11 +136,10 @@ struct WatchGauge: View {
     /// whose time it is where the park's clock is not the watch's. Never the Moon or a closure:
     /// each has its own element.
     private func spoken(ring: NightRing?) -> String {
-        let basis = night.basisCaption() ?? (night.score.hasForecast ? String(localized: "Includes cloud forecast.") : String(localized: "No full cloud forecast; usual clouds count."))
         return Sentences.join([
             nightLabel.map { Sentences.end($0) } ?? "",
             String(localized: "\(night.score.value) out of 100. \(night.score.band.label)."),
-            basis,
+            night.cloudSentence(),
             models.map { String(localized: "Forecast models: \($0.lowerBound) to \($0.upperBound).") } ?? "",
             night.smokeCaveat.map { Sentences.end($0) } ?? "",
             // The Moon drawn inside the dial has no element of its own on the watch, so the dial says it.

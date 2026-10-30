@@ -2,12 +2,16 @@ import AppIntents
 import SwiftUI
 import WidgetKit
 
-/// Siri and Shortcuts on the wrist: tonight's score where Tonight shows it, the dark-adaptation
-/// clock, and night vision. Each answers from what is already on the watch; none touches the network.
+/// Siri and Shortcuts on the wrist: tonight's score where Tonight shows it, when it is dark and
+/// what's up there, the dark-adaptation clock, and night vision. Each answers from what is already
+/// on the watch; none touches the network.
 struct NyxWatchShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: WristTonightIntent(), phrases: ["How dark is it tonight in \(.applicationName)", "What's tonight's darkness score in \(.applicationName)"],
                     shortTitle: "Tonight's sky", systemImageName: "moon.stars")
+        // The iPhone's phrases, names and symbols for the park Tonight shows; the wrist has no park to name.
+        AppShortcut(intent: WristDarkTonightIntent(), phrases: ["When is it dark tonight in \(.applicationName)"], shortTitle: "True darkness", systemImageName: "moon.haze")
+        AppShortcut(intent: WristWhatsUpIntent(), phrases: ["What's up tonight in \(.applicationName)"], shortTitle: "What's up", systemImageName: "sparkles")
         AppShortcut(intent: StartAdaptationIntent(), phrases: ["Start dark adaptation in \(.applicationName)", "Adapt my eyes to the dark with \(.applicationName)"],
                     shortTitle: "Dark adaptation", systemImageName: "eye")
         // The iPhone's phrases and name; "Red light on" stays as one more way to ask for it.
@@ -24,29 +28,73 @@ struct WristTonightIntent: AppIntent {
     static let description = IntentDescription("The darkness score tonight at the park Nyx follows on the wrist, from the last forecast your phone sent.")
     init() {}
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        .result(dialog: IntentDialog(stringLiteral: WristTonightAnswer.dialog(now: .now)))
+        .result(dialog: IntentDialog(stringLiteral: WristTonightAnswer.dialog(now: .now, voiceOnly: voiceOnly)))
+    }
+}
+
+/// "When is it dark tonight in Nyx?" on the wrist: true darkness, start to end, at the park Tonight
+/// shows, in the park's own time, or plainly that there is none at this latitude, in the iPhone's
+/// words (`DarkWindowAnswer`). A closure is said first.
+struct WristDarkTonightIntent: AppIntent {
+    static let title: LocalizedStringResource = "When true darkness falls tonight"
+    static let description = IntentDescription("Says when true darkness begins and ends tonight at the park Nyx follows on the wrist, in the park's own time, worked out on this watch.")
+    init() {}
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let now = Date.now
+        guard let featured = WristTonightAnswer.featured(now: now) else { return .result(dialog: IntentDialog(stringLiteral: WristTonightAnswer.noPlace)) }
+        let park = featured.night.park
+        let dialog = DarkWindowAnswer.dialog(park: park, sky: featured.night.sky, closure: featured.context?.closures[park.id], voiceOnly: voiceOnly)
+        return .result(dialog: IntentDialog(stringLiteral: dialog))
+    }
+}
+
+/// "What's up tonight in Nyx?" on the wrist: the first three things in What's up at the park Tonight
+/// shows, in the iPhone's words (`WhatsUpAnswer`), with aurora from the Kp forecast the iPhone last sent.
+struct WristWhatsUpIntent: AppIntent {
+    static let title: LocalizedStringResource = "What's up tonight"
+    static let description = IntentDescription("Names what is worth seeing tonight at the park Nyx follows on the wrist: the Milky Way core, bright planets, a meteor shower or an eclipse, with times in the park's own time.")
+    init() {}
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let now = Date.now
+        guard let featured = WristTonightAnswer.featured(now: now) else { return .result(dialog: IntentDialog(stringLiteral: WristTonightAnswer.noPlace)) }
+        let park = featured.night.park, sky = featured.night.sky, context = featured.context
+        let whatsUp = WhatsUp(park: park, sky: sky, isTonight: true, aurora: AuroraForecast.item(context?.aurora, park: park, sky: sky, now: now))
+        let dialog = WhatsUpAnswer.dialog(whatsUp, park: park, closure: context?.closures[park.id], voiceOnly: voiceOnly)
+        return .result(dialog: IntentDialog(stringLiteral: dialog))
+    }
+}
+
+private extension AppIntent {
+    /// watchOS 27: Siri answers with no screen in view, so the answer keeps only what matters.
+    nonisolated var voiceOnly: Bool {
+        if #available(watchOS 27.0, *) { return systemContext.isVoiceOnly }
+        return false
     }
 }
 
 /// The spoken answer apart from the intent: the same park and night as Tonight (`WatchStore.featured`).
 nonisolated enum WristTonightAnswer {
-    static func dialog(now: Date) -> String {
+    static func dialog(now: Date, voiceOnly: Bool = false) -> String {
+        guard let featured = featured(now: now) else { return noPlace }
+        return dialog(featured.night, context: featured.context, now: now, voiceOnly: voiceOnly)
+    }
+    /// Tonight's night at the park Tonight shows (kept on the watch, else the darkest saved park, else
+    /// the iPhone's starting park), with the context the iPhone last sent; nil before any place is chosen.
+    static func featured(now: Date) -> (night: Night, context: WatchContext?)? {
         let context = WatchSky.readContext()
         let parks = (try? ParkData.load()) ?? []
         let nights = WatchSky.candidates(in: parks, context: context, pinned: WatchSky.pinnedPark, now: now).map { park in
             WatchSky.night(park, evening: park.currentNight(at: now), forecast: context?.cloudForecasts[park.id], detail: context?.forecastDetails[park.id], now: now,
                            climate: context?.climate ?? .shared)
         }
-        guard let night = NightPlanner.best(nights) else {
-            return String(localized: "No place chosen yet. Save one in Nyx on iPhone, or choose one in Nyx on this watch.")
-        }
-        return dialog(night, context: context, now: now)
+        return NightPlanner.best(nights).map { ($0, context) }
     }
+    static var noPlace: String { String(localized: "No place chosen yet. Save one in Nyx on iPhone, or choose one in Nyx on this watch.") }
     /// The iPhone's answer (`TonightAnswer`): a closure first, smoke that holds the score down, and
     /// where Nyx cannot know the closures, or the iPhone's switches leave closures or smoke out. Only the clouds are the wrist's own: when the iPhone sent them.
-    static func dialog(_ night: Night, context: WatchContext?, now: Date) -> String {
+    static func dialog(_ night: Night, context: WatchContext?, now: Date, voiceOnly: Bool = false) -> String {
         TonightAnswer(night: night, closure: context?.closures[night.park.id], clouds: clouds(night, context: context, now: now),
-                      smokeNote: context?.smokeNote, unchecked: context?.alertsNote(night.park)).dialog()
+                      smokeNote: context?.smokeNote, unchecked: context?.alertsNote(night.park)).dialog(voiceOnly: voiceOnly)
     }
     /// What the clouds rest on, honestly: the forecast and when the iPhone sent it, or why there is none.
     static func clouds(_ night: Night, context: WatchContext?, now: Date) -> String {

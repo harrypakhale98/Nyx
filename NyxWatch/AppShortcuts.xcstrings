@@ -164,6 +164,98 @@
           }
         }
       }
+    },
+    "What's up tonight in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Was ist heute Nacht am Himmel laut ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "What's up tonight in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Qué hay en el cielo esta noche según ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Qu’y a-t-il dans le ciel ce soir dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で今夜の空に何が見える",
+              "${applicationName}で今夜の空を教えて"
+            ]
+          }
+        }
+      }
+    },
+    "When is it dark tonight in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Wann wird es heute Nacht dunkel laut ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "When is it dark tonight in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Cuándo oscurece esta noche según ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Quand fait-il nuit noire ce soir dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で今夜はいつ暗くなる",
+              "${applicationName}で今夜暗くなる時間を教えて"
+            ]
+          }
+        }
+      }
     }
   },
   "version": "1.0"

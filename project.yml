@@ -304,6 +304,9 @@ targets:
         group: Shared
       - path: Nyx/Services/WhatsUp.swift
         group: Shared
+      # The words of "When is it dark tonight?" and "What's up tonight?", as on iPhone and Vision Pro.
+      - path: Nyx/Intents/SkyAnswers.swift
+        group: Shared
       # Tonight's binocular sights in What's up, from the same bundled list as the iPhone.
       - path: Nyx/Services/DeepSky.swift
         group: Shared

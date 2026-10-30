@@ -2788,41 +2788,6 @@
         }
       }
     },
-    "%@, %@: %lld out of 100, %@. %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@: %lld von 100, %@. %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@: %lld out of 100, %@. %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@: %lld de 100, %@. %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@ : %lld sur 100, %@. %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@、%2$@：100点中%3$lld点、%4$@。%5$@"
-          }
-        }
-      }
-    },
     "%@, %@: %lld, %@": {
       "extractionState": "manual",
       "localizations": {
@@ -39751,6 +39716,41 @@
         }
       }
     },
+    "Names what is worth seeing tonight at the park Nyx follows on the wrist: the Milky Way core, bright planets, a meteor shower or an eclipse, with times in the park's own time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nennt, was heute Nacht in dem Park sehenswert ist, dem Nyx am Handgelenk folgt: das Milchstraßenzentrum, helle Planeten, einen Meteorstrom oder eine Finsternis, mit Zeiten in der Ortszeit des Parks."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Names what is worth seeing tonight at the park Nyx follows on the wrist: the Milky Way core, bright planets, a meteor shower or an eclipse, with times in the park's own time."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombra lo que vale la pena ver esta noche en el parque que Nyx sigue en la muñeca: el núcleo de la Vía Láctea, los planetas brillantes, una lluvia de meteoros o un eclipse, con horas del propio parque."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indique ce qui vaut le coup d’œil ce soir dans le parc que Nyx suit au poignet: le cœur de la Voie lactée, les planètes brillantes, une pluie de météores ou une éclipse, avec les heures du parc."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxが手首で追っている公園で今夜見る価値のあるものを挙げます。天の川の中心部、明るい惑星、流星群、食など。時刻は公園の現地時間です。"
+          }
+        }
+      }
+    },
     "National Park Service, retrieved October 5, 2026. Conditions change; check with the park.": {
       "extractionState": "manual",
       "localizations": {
@@ -57220,6 +57220,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "公園や暗い空の場所で今夜、完全な暗さがいつ始まりいつ終わるかを、その場所の現地時間で伝えます。計算はこのデバイスで行います。公園を空欄にすると、出発地の公園を使います。"
+          }
+        }
+      }
+    },
+    "Says when true darkness begins and ends tonight at the park Nyx follows on the wrist, in the park's own time, worked out on this watch.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sagt, wann die echte Dunkelheit heute Nacht in dem Park beginnt und endet, dem Nyx am Handgelenk folgt, in der Ortszeit des Parks, berechnet auf dieser Uhr."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Says when true darkness begins and ends tonight at the park Nyx follows on the wrist, in the park's own time, worked out on this watch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dice cuándo empieza y termina la oscuridad total esta noche en el parque que Nyx sigue en la muñeca, con la hora del parque, calculado en este reloj."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indique quand l’obscurité totale commence et finit ce soir dans le parc que Nyx suit au poignet, à l’heure du parc, calculé sur cette montre."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxが手首で追っている公園で今夜、完全な暗さがいつ始まりいつ終わるかを、公園の現地時間で伝えます。計算はこのウォッチで行います。"
           }
         }
       }

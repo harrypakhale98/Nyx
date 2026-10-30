@@ -61,8 +61,7 @@ struct NightDetail: View {
         return VStack(alignment: .leading, spacing: 10) {
             // The iPhone's eyebrow (states and Dark Sky status: data, not a slogan), and the night's date under it.
             VStack(alignment: .leading, spacing: 4) {
-                let states = park.region.replacingOccurrences(of: ",", with: " · ")
-                VisionEyebrow(text: park.darkSkyDesignated ? "\(states) · \(String(localized: "International Dark Sky Park"))" : "\(states)", meta: true)
+                VisionEyebrow(verbatim: park.parkEyebrow, meta: true)
                 Text(park.dayLabel(plan.sky.evening)).font(.subheadline).foregroundStyle(palette.muted)
             }
             Text(plan.score.value, format: .number)
@@ -89,7 +88,7 @@ struct NightDetail: View {
                 Label(smoke, systemImage: "smoke").font(.callout).foregroundStyle(palette.ink).fixedSize(horizontal: false, vertical: true)
             }
             // The weakest link, when it holds the score below its parts ("Clouds limit tonight to 55.").
-            if let limit = limitLine(plan) {
+            if let limit = plan.score.limitSentence(tonight: model.nightOffset == 0) {
                 Text(limit).font(.callout).foregroundStyle(palette.ink).fixedSize(horizontal: false, vertical: true)
             }
             // What the clouds rest on, in the iPhone's words.
@@ -104,12 +103,6 @@ struct NightDetail: View {
         .frame(maxWidth: 380, alignment: .leading)
         // A new score rolls in on the shared spring; under Reduce Motion it cross-fades.
         .animation(NyxMotion.spring(reduced: reduceMotion), value: plan.score.value)
-    }
-    /// The binding cap, when the four parts add up to more than the score.
-    private func limitLine(_ plan: NightPlan) -> String? {
-        let score = plan.score
-        guard let limit = score.limit else { return nil }
-        return limit.cap < score.partsSum ? limit.sentence(tonight: model.nightOffset == 0) : nil
     }
     private func moon(_ plan: NightPlan) -> some View {
         // One figure for the eye and VoiceOver: the night's, as the list, the Moon volume and the
@@ -145,14 +138,8 @@ struct NightDetail: View {
         } else { SkyConditions.noDarknessMessage(tonight: model.nightOffset == 0) }
         // The reader's own units ("6 hr, 40 min", "6 Std., 40 Min."), as the iPhone writes a span.
         let hours = sky.darkHours > 0 ? Duration.seconds(sky.darkHours*3600).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated)) : nil
-        let moonLine: String = switch (sky.moonrise, sky.moonset) {
-        case let (rise?, set?): rise < set ? String(localized: "Rises \(park.time(rise)), sets \(park.time(set))") : String(localized: "Sets \(park.time(set)), rises \(park.time(rise))")
-        case let (rise?, nil): String(localized: "Rises \(park.time(rise))")
-        case let (nil, set?): String(localized: "Sets \(park.time(set))")
-        // Neither rises nor sets: the Moon's height at its highest says which (moonBelowFraction
-        // is 0 when there is no true darkness to measure it against).
-        default: plan.moonAllNight
-        }
+        // The rise and set before sunrise in time order, or that the Moon stays up or down, as on iPhone.
+        let moonLine = sky.moonTimes(park: park)
         // Three columns side by side; stacked at accessibility sizes, where columns would clip.
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14)) : AnyLayout(HStackLayout(alignment: .top, spacing: 14))
         // Without true darkness there is nothing for the Moon to stay out of, so say that instead.

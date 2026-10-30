@@ -76,6 +76,12 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     var isCatalogPlace: Bool { id.hasPrefix(Self.catalogPrefix) }
     /// South of the equator the Milky Way's core rides high and the Moon is seen turned over.
     var southern: Bool { latitude < 0 }
+    /// A park's states as one line under its name, on every device: "CA · NV". The iPhone's
+    /// `regionLine` words a saved spot its own way.
+    var statesLine: String { region.replacingOccurrences(of: ",", with: " · ") }
+    /// The eyebrow over a park's name, on every device: its states and its Dark Sky status (data,
+    /// not a slogan), "UT · International Dark Sky Park".
+    var parkEyebrow: String { darkSkyDesignated ? String(localized: "\(statesLine) · International Dark Sky Park") : statesLine }
     nonisolated struct Access: Codable, Hashable, Sendable {
         let note: String
         /// False when the night sky here needs a boat or a plane from the road network you drove on.

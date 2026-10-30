@@ -157,7 +157,7 @@ import WidgetKit
         // Tonight's summary is unchanged by the buttons.
         entry.offset = 0
         let tonight = try #require(entry.night)
-        #expect(TonightWidgetView.summary(tonight, entry: entry, family: .systemMedium).hasPrefix(tonight.spokenSummary(.widget)))
+        #expect(TonightWidgetView.summary(tonight, entry: entry, family: .systemMedium).hasPrefix(tonight.widgetSummary(closure: nil)))
         // A closure is still said whole, after the score.
         entry.offset = 4
         entry.closure = "Keys View Road closed at night"

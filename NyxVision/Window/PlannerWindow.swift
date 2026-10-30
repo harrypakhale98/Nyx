@@ -235,7 +235,7 @@ struct ParkRow: View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(park.shortName).font(.system(.body, design: .serif))
-                Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption).foregroundStyle(palette.muted)
+                Text(park.statesLine).font(.caption).foregroundStyle(palette.muted)
                 if let closure {
                     VisionCaution(text: Text(closure)).font(.caption).padding(.top, 2)
                 }
@@ -251,8 +251,10 @@ struct ParkRow: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text(park.name))
-        .accessibilityValue(night.map { Text(verbatim: Sentences.join([Sentences.end($0.scoreWithBasis)]+notes)) } ?? Text("Computing"))
+        // The row's words on every device (`Night.spokenRow`), with what the clouds rest on; the notes
+        // carry the closure, or that closures or smoke are not counted.
+        .accessibilityLabel(night.map { Text(verbatim: Sentences.join([$0.spokenRow(closure: nil, withBasis: true)]+notes)) } ?? Text(park.name))
+        .accessibilityValue(night == nil ? Text("Computing") : Text(verbatim: ""))
     }
 }
 

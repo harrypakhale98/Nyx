@@ -422,6 +422,41 @@
         }
       }
     },
+    "%@ · International Dark Sky Park": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · International Dark Sky Park"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · International Dark Sky Park"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · International Dark Sky Park"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · International Dark Sky Park"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · International Dark Sky Park"
+          }
+        }
+      }
+    },
     "%@ – %@": {
       "extractionState": "manual",
       "localizations": {
@@ -558,6 +593,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@、%@：%@。"
+          }
+        }
+      }
+    },
+    "%@, %@: %lld out of 100, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %lld von 100, %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %lld out of 100, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %lld de 100, %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@ : %lld sur 100, %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%2$@：100点中%3$lld点、%4$@。"
+          }
+        }
+      }
+    },
+    "%@, %lld out of 100, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld von 100, %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld out of 100, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld de 100, %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld sur 100, %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、100点中%2$lld点、%3$@。"
           }
         }
       }
@@ -803,6 +908,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@、平年の雲量"
+          }
+        }
+      }
+    },
+    "%@. Darkness score %lld, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@. Dunkelheitswert %2$lld, %3$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Darkness score %lld, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@. Índice de oscuridad %2$lld, noche %3$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@. Indice d’obscurité %2$lld, nuit %3$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@。暗さスコア%2$lld、%3$@。"
           }
         }
       }
@@ -2238,6 +2378,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "地平線の下"
+          }
+        }
+      }
+    },
+    "Below the horizon all night": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die ganze Nacht unter dem Horizont"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Below the horizon all night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bajo el horizonte toda la noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sous l’horizon toute la nuit"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一晩中地平線の下"
           }
         }
       }
@@ -3918,41 +4093,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "完了"
-          }
-        }
-      }
-    },
-    "Down all night": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die ganze Nacht unten"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Down all night"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Oculta toda la noche"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couchée toute la nuit"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一晩中地平線の下"
           }
         }
       }
@@ -10572,41 +10712,6 @@
         }
       }
     },
-    "Rises %@, sets %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aufgang %@, Untergang %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rises %@, sets %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sale %@, se pone %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lever %@, coucher %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@に昇り、%2$@に沈む"
-          }
-        }
-      }
-    },
     "Rises after darkness": {
       "extractionState": "manual",
       "localizations": {
@@ -11128,41 +11233,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@に沈む"
-          }
-        }
-      }
-    },
-    "Sets %@, rises %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Untergang %@, Aufgang %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sets %@, rises %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Se pone %@, sale %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Coucher %@, lever %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@に沈み、%2$@に昇る"
           }
         }
       }

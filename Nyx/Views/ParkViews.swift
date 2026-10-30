@@ -114,14 +114,8 @@ struct ParkRow: View {
             .accessibilityElement(children:.ignore)
             // Short, so a list of 63 parks is quick to swipe through: the name, the score, the band and
             // any closure. The rest is a "More content" swipe away (the closure first there too).
-            .accessibilityLabel(ParkRow.spokenLabel(night:night,closure:closure))
+            .accessibilityLabel(night.spokenRow(closure:closure))
             .modifier(ParkRowContent(items:ParkRow.moreContent(night:night,closure:closure,week:week,stepFree:stepFree)))
-    }
-    /// "Zion. Darkness score 88, Excellent. Closure alert: Kolob Canyons Road closed."
-    static func spokenLabel(night:Night,closure:String?)->String {
-        // Smoke or haze that holds the score down is said with it ("Haze or smoke.").
-        let main=Sentences.join([String(localized:"\(night.park.shortName). Darkness score \(night.score.value), \(night.score.band.label)."),night.smokeLabel.map(Sentences.end) ?? ""])
-        return closure.map { main+" "+ClosureLine.spoken($0) } ?? main
     }
     /// The row's custom content, most important first.
     static func moreContent(night:Night,closure:String?,week:[Night],stepFree:Bool)->[ParkRowContent.Item] {

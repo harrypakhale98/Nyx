@@ -110,23 +110,8 @@ nonisolated struct HomeSky: Sendable {
     var moonPhase: String {
         String(localized: "\(sky.moon.name), \(Percent.text(sky.moon.percentLit)) lit")
     }
-    /// "Sets 8:53 PM · Rises 4:42 AM" in time order, from noon to sunrise (a rise late the next
-    /// morning is not tonight's news), or "Up all night" / "Below the horizon all night". Without a
-    /// rise or set the Moon stays put, so its altitude midway through the night decides (the share of
-    /// darkness it spends down says nothing on a night with no true darkness).
-    var moonTimes: String {
-        let morning=sky.sunrise ?? sky.end
-        var events: [(Date, String)] = []
-        if let rise=sky.moonrise, rise<morning { events.append((rise, String(localized: "Rises \(place.time(rise))"))) }
-        if let set=sky.moonset, set<morning { events.append((set, String(localized: "Sets \(place.time(set))"))) }
-        if events.isEmpty {
-            let evening=sky.sunset ?? sky.evening, middle=evening.addingTimeInterval(morning.timeIntervalSince(evening)/2)
-            // The upper limb on a refracted horizon, as the engine times rises and sets.
-            let below=AstronomyEngine().lunarAltitude(at: middle, park: place) < -0.833
-            return below ? String(localized: "Below the horizon all night") : String(localized: "Up all night")
-        }
-        return events.sorted { $0.0<$1.0 }.map(\.1).joined(separator: " · ")
-    }
+    /// The Moon's rise and set tonight, or that it stays up or down (`SkyConditions.moonTimes`).
+    var moonTimes: String { sky.moonTimes(park: place) }
     /// "8:05 PM – 5:10 AM", or the no-darkness sentence the parks use.
     var darkness: String {
         if let start=sky.darkStart, let end=sky.darkEnd, end>start { return String(localized: "\(place.time(start)) – \(place.time(end))") }

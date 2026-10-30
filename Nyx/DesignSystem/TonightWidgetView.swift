@@ -219,10 +219,12 @@ struct TonightWidgetView:View {
     @ViewBuilder private var content:some View {
         if let night=entry.night {
             if family == .accessoryInline {
-                // Above the clock: "☾ 94 Joshua Tree", tonight's phase as the symbol; a closure takes
-                // the symbol's place ("⚠ 94 Joshua Tree"), and the spoken summary names it.
-                Label { Text(verbatim:"\(night.score.value) \(night.park.shortName)") } icon:{ Image(systemName:entry.closure == nil ? night.sky.moon.symbolName(southern:night.park.latitude<0) : "exclamationmark.triangle.fill") }
-                    .summarized(summary(night))
+                // Above the clock: "☾ 94 Joshua Tree", tonight's phase as the symbol, or the warning sign in
+                // its place when the park has a closure: this widget can follow any place, so the name stays,
+                // and the spoken summary says the closure in full.
+                Label { Text(verbatim:"\(night.score.value) \(night.park.shortName)") } icon:{
+                    Image(systemName:entry.closure == nil ? night.sky.moon.symbolName(southern:night.park.latitude<0) : ClosureLine.symbol)
+                }.summarized(summary(night))
             } else if family == .accessoryCircular {
                 // The Lock Screen ring echoes the app's celestial gauge.
                 // The Moon in the ring's opening is tonight's actual phase, or the warning glyph when
@@ -712,14 +714,8 @@ struct TonightWidgetView:View {
     static func summary(_ night:Night,entry:TonightEntry,family:WidgetFamily)->String {
         // Another night of the week, moved to with the night buttons: its date, then its Moon.
         let ahead=entry.night.map { $0.id != night.id } ?? false
-        var tonight=night.spokenSummary(ahead ? .widgetNight : .widget)
-        if let closure=entry.closure {
-            // The words of `Night.spokenSummary`, with the closure between the score and the rest.
-            let lead=ahead ? String(localized:"\(night.park.shortName), \(night.park.dayLabel(night.id)): \(night.score.value) out of 100, \(night.score.band.label).")
-                : String(localized:"\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label).")
-            tonight=Sentences.join([lead,Sentences.end(ClosureLine.spoken(closure)),night.basisCaption() ?? String(localized:"Includes cloud forecast."),
-                                    night.smokeSentence(tonight:!ahead) ?? ""])
-        }
+        // The watch's complications say the same words (`Night.widgetSummary`).
+        var tonight=night.widgetSummary(closure:entry.closure,ahead:ahead)
         var portraitXL=false
         if #available(iOS 27.0,*) { portraitXL = family == .systemExtraLargePortrait }
         if family == .systemLarge || family == .systemExtraLarge || portraitXL, let month=entry.month, let best=month.best, let top=month.nights.compactMap({ $0 }).first(where:{ $0.id==best }) {

@@ -16,7 +16,7 @@ import Testing
     /// Every surface's words for one night, in one list.
     func surfaces(_ night: Night) -> [String] {
         [night.basisCaption(typical: true) ?? "", night.spokenSummary(.calendar(event: nil)), night.spokenSummary(.river),
-         night.spokenSummary(.widget), TonightAnswer(night: night).dialog(voiceOnly: false), ShareCard(night: night).summary]
+         night.widgetSummary(closure: nil), TonightAnswer(night: night).dialog(voiceOnly: false), ShareCard(night: night).summary]
     }
 
     @Test func missingWithinTheHorizonIsUnavailableEverywhere() throws {
@@ -86,15 +86,15 @@ import Testing
         let smoky = night(jotr, forecast: forecast, detail: ForecastDetail(air: air))
         #expect(smoky.score.limit == .smoke(59) && smoky.smokeLabel == "Heavy smoke or haze")
         #expect(smoky.bandWithBasis == "\(smoky.score.band.label), haze or smoke")
-        for words in [smoky.spokenSummary(.river), smoky.spokenSummary(.calendar(event: nil)), smoky.spokenSummary(.widgetNight)] {
+        for words in [smoky.spokenSummary(.river), smoky.spokenSummary(.calendar(event: nil)), smoky.widgetSummary(closure: nil, ahead: true)] {
             #expect(words.contains("Smoke or haze limits this night to 59."), "\(words)")
         }
-        for words in [smoky.spokenSummary(.widget), TonightAnswer(night: smoky).dialog(voiceOnly: false), TonightAnswer(night: smoky).dialog(voiceOnly: true)] {
+        for words in [smoky.widgetSummary(closure: nil), TonightAnswer(night: smoky).dialog(voiceOnly: false), TonightAnswer(night: smoky).dialog(voiceOnly: true)] {
             #expect(words.contains("Smoke or haze limits tonight to 59."), "\(words)")
         }
         #expect(smoky.spokenSummary(.scoreWithBasis).hasSuffix("haze or smoke"))
         #expect(ShareCard(night: smoky).basis.hasSuffix("· Heavy smoke or haze"))
-        #expect(ParkRow.spokenLabel(night: smoky, closure: nil).contains("Heavy smoke or haze."))
+        #expect(smoky.spokenRow(closure:nil).contains("Heavy smoke or haze."))
         #expect(WeekAcrossParks.spoken(smoky, isBest: false).contains("Heavy smoke or haze"))
         // A night smoke does not hold down says nothing about smoke.
         let clear = night(jotr, forecast: forecast)
