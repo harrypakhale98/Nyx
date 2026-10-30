@@ -112,6 +112,10 @@ struct PlannerWindow: View {
         .modifier(VisionHandoff(park: model.park, night: model.park.map { model.night(for: $0) }))
         // Siri or Shortcuts asked for a park, or to stand under its sky: answered once this window is active.
         .task(id: Asked(request: model.intentRequest?.id, active: scenePhase == .active)) { await answerIntent() }
+        // A request to stand under the sky that came mid-transition waits for it to end.
+        .onChange(of: skyBusy) { _, busy in
+            if !busy, model.intentRequest != nil { Task { await answerIntent() } }
+        }
         .onChange(of: scenePhase) { _, phase in
             count(phase != .background)
             // The window holds every control for the sky. With the last one closed, it would leave
@@ -143,9 +147,11 @@ struct PlannerWindow: View {
     }
     private struct Asked: Hashable { let request: UUID?; let active: Bool }
     /// Opens the asked-for park on tonight, and its sky when asked. The first planner window to be
-    /// active takes the request, so a second window never opens the sky twice.
+    /// active takes the request, so a second window never opens the sky twice. While the sky is
+    /// opening or closing it cannot open again yet, so the request is kept until that ends.
     private func answerIntent() async {
         guard scenePhase == .active, let request = model.intentRequest else { return }
+        if request.sky, skyBusy { return }
         model.intentRequest = nil
         model.openTonight(request.parkID)
         if request.sky, !model.immersiveOpen { await toggleSky() }

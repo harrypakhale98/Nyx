@@ -12063,37 +12063,37 @@
         }
       }
     },
-    "Appears in the Smart Stack at dusk on Good nights or better, and at your saved parks.": {
+    "Appears in the Smart Stack at dusk on Good nights or better, and at your saved places.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Erscheint in der Abenddämmerung im intelligenten Stapel, in Nächten ab „Gut“ und bei deinen gespeicherten Parks."
+            "value": "Erscheint in der Abenddämmerung im intelligenten Stapel, in Nächten ab „Gut“ und bei deinen gespeicherten Orten."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Appears in the Smart Stack at dusk on Good nights or better, and at your saved parks."
+            "value": "Appears in the Smart Stack at dusk on Good nights or better, and at your saved places."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aparece en la Pila inteligente al anochecer en noches Buenas o mejores, y en tus parques guardados."
+            "value": "Aparece en la Pila inteligente al anochecer en noches Buenas o mejores, y en tus lugares guardados."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apparaît dans la Pile intelligente au crépuscule les nuits Bonnes ou meilleures, et à vos parcs enregistrés."
+            "value": "Apparaît dans la Pile intelligente au crépuscule les nuits Bonnes ou meilleures, et à vos lieux enregistrés."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "「好条件」以上の夜と保存した公園で、夕暮れにスマートスタックに表示されます。"
+            "value": "「好条件」以上の夜と保存した場所で、夕暮れにスマートスタックに表示されます。"
           }
         }
       }
@@ -26132,37 +26132,37 @@
         }
       }
     },
-    "Finds the best night ahead at a park or dark-sky place, or across your saved parks, using Nyx's on-device darkness score. A closure in the last park update counts against a park. Clouds count only where a cached forecast reaches.": {
+    "Finds the best night ahead at a park or dark-sky place, or across your saved places, using Nyx's on-device darkness score. A closure in the last park update counts against a park. Clouds count only where a cached forecast reaches.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Findet die beste kommende Nacht in einem Park oder Dunkelort oder unter deinen gespeicherten Parks, mit dem auf dem Gerät berechneten Dunkelheitswert von Nyx. Eine Sperrung im letzten Park-Update zählt gegen einen Park. Wolken zählen nur, soweit eine gespeicherte Vorhersage reicht."
+            "value": "Findet die beste kommende Nacht in einem Park oder Dunkelort oder unter deinen gespeicherten Orten, mit dem auf dem Gerät berechneten Dunkelheitswert von Nyx. Eine Sperrung im letzten Park-Update zählt gegen einen Park. Wolken zählen nur, soweit eine gespeicherte Vorhersage reicht."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Finds the best night ahead at a park or dark-sky place, or across your saved parks, using Nyx's on-device darkness score. A closure in the last park update counts against a park. Clouds count only where a cached forecast reaches."
+            "value": "Finds the best night ahead at a park or dark-sky place, or across your saved places, using Nyx's on-device darkness score. A closure in the last park update counts against a park. Clouds count only where a cached forecast reaches."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Encuentra la mejor noche próxima en un parque o lugar de cielo oscuro, o entre tus parques guardados, con el índice de oscuridad que Nyx calcula en el dispositivo. Un cierre en la última actualización del parque cuenta en contra de ese parque. Las nubes solo cuentan hasta donde llega un pronóstico guardado."
+            "value": "Encuentra la mejor noche próxima en un parque o lugar de cielo oscuro, o entre tus lugares guardados, con el índice de oscuridad que Nyx calcula en el dispositivo. Un cierre en la última actualización del parque cuenta en contra de ese parque. Las nubes solo cuentan hasta donde llega un pronóstico guardado."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trouve la meilleure nuit à venir dans un parc ou un site de ciel étoilé, ou parmi vos parcs enregistrés, avec l’indice d’obscurité que Nyx calcule sur l’appareil. Une fermeture dans la dernière mise à jour du parc compte contre ce parc. Les nuages ne comptent que là où une prévision en cache existe."
+            "value": "Trouve la meilleure nuit à venir dans un parc ou un site de ciel étoilé, ou parmi vos lieux enregistrés, avec l’indice d’obscurité que Nyx calcule sur l’appareil. Une fermeture dans la dernière mise à jour du parc compte contre ce parc. Les nuages ne comptent que là où une prévision en cache existe."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyxがデバイス上で計算する暗さスコアを使って、公園や暗い空の場所、または保存した公園の中から、この先いちばんよい夜を探します。最新の公園情報に閉鎖があると、その公園は不利になります。雲は、保存済みの予報が届く範囲でだけ計算に入ります。"
+            "value": "Nyxがデバイス上で計算する暗さスコアを使って、公園や暗い空の場所、または保存した場所の中から、この先いちばんよい夜を探します。最新の公園情報に閉鎖があると、その公園は不利になります。雲は、保存済みの予報が届く範囲でだけ計算に入ります。"
           }
         }
       }
@@ -33227,37 +33227,37 @@
         }
       }
     },
-    "Leave empty for the darkest of your saved parks tonight.": {
+    "Leave empty for the darkest of your saved places tonight.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leer lassen für den heute Nacht dunkelsten deiner gespeicherten Parks."
+            "value": "Leer lassen für den heute Nacht dunkelsten deiner gespeicherten Orte."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leave empty for the darkest of your saved parks tonight."
+            "value": "Leave empty for the darkest of your saved places tonight."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Déjalo vacío para el más oscuro de tus parques guardados esta noche."
+            "value": "Déjalo vacío para el más oscuro de tus lugares guardados esta noche."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laissez vide pour le plus sombre de vos parcs enregistrés ce soir."
+            "value": "Laissez vide pour le plus sombre de vos lieux enregistrés ce soir."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "空欄にすると、保存した公園のうち今夜いちばん暗い公園を使います。"
+            "value": "空欄にすると、保存した場所のうち今夜いちばん暗い場所を使います。"
           }
         }
       }
@@ -33367,37 +33367,37 @@
         }
       }
     },
-    "Leave empty for your first saved park.": {
+    "Leave empty for your first saved place.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leer lassen für deinen ersten gespeicherten Park."
+            "value": "Leer lassen für deinen ersten gespeicherten Ort."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leave empty for your first saved park."
+            "value": "Leave empty for your first saved place."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Déjalo vacío para tu primer parque guardado."
+            "value": "Déjalo vacío para tu primer lugar guardado."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laissez vide pour votre premier parc enregistré."
+            "value": "Laissez vide pour votre premier lieu enregistré."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "空欄にすると、最初に保存した公園を使います。"
+            "value": "空欄にすると、最初に保存した場所を使います。"
           }
         }
       }
@@ -33437,37 +33437,37 @@
         }
       }
     },
-    "Leave empty to compare your saved parks.": {
+    "Leave empty to compare your saved places.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leer lassen, um deine gespeicherten Parks zu vergleichen."
+            "value": "Leer lassen, um deine gespeicherten Orte zu vergleichen."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leave empty to compare your saved parks."
+            "value": "Leave empty to compare your saved places."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Déjalo vacío para comparar tus parques guardados."
+            "value": "Déjalo vacío para comparar tus lugares guardados."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laissez vide pour comparer vos parcs enregistrés."
+            "value": "Laissez vide pour comparer vos lieux enregistrés."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "空欄にすると、保存した公園を比較します。"
+            "value": "空欄にすると、保存した場所を比較します。"
           }
         }
       }
@@ -43386,37 +43386,37 @@
         }
       }
     },
-    "No saved parks yet. Parks you save in Nyx appear here.": {
+    "No saved places yet. Places you save in Nyx appear here.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Noch keine gespeicherten Parks. Parks, die du in Nyx speicherst, erscheinen hier."
+            "value": "Noch keine gespeicherten Orte. Orte, die du in Nyx speicherst, erscheinen hier."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No saved parks yet. Parks you save in Nyx appear here."
+            "value": "No saved places yet. Places you save in Nyx appear here."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aún no hay parques guardados. Los parques que guardes en Nyx aparecen aquí."
+            "value": "Aún no hay lugares guardados. Los lugares que guardes en Nyx aparecen aquí."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucun parc enregistré pour l’instant. Les parcs que vous enregistrez dans Nyx apparaissent ici."
+            "value": "Aucun lieu enregistré pour l’instant. Les lieux que vous enregistrez dans Nyx apparaissent ici."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "保存した公園はまだありません。Nyxで保存した公園がここに表示されます。"
+            "value": "保存した場所はまだありません。Nyxで保存した場所がここに表示されます。"
           }
         }
       }
@@ -46394,7 +46394,7 @@
         }
       }
     },
-    "Nyx on iPhone sends your saved parks and cloud forecasts. Until then, scores use each park's usual clouds.": {
+    "Nyx on iPhone sends your saved places and cloud forecasts. Until then, scores use each place's usual clouds.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -46403,13 +46403,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx auf dem iPad sendet deine gespeicherten Parks und Wolkenvorhersagen. Bis dahin nutzen die Werte die übliche Bewölkung jedes Parks."
+                  "value": "Nyx auf dem iPad sendet deine gespeicherten Orte und Wolkenvorhersagen. Bis dahin nutzen die Werte die übliche Bewölkung jedes Orts."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx auf dem iPhone sendet deine gespeicherten Parks und Wolkenvorhersagen. Bis dahin nutzen die Werte die übliche Bewölkung jedes Parks."
+                  "value": "Nyx auf dem iPhone sendet deine gespeicherten Orte und Wolkenvorhersagen. Bis dahin nutzen die Werte die übliche Bewölkung jedes Orts."
                 }
               }
             }
@@ -46421,13 +46421,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx on iPad sends your saved parks and cloud forecasts. Until then, scores use each park's usual clouds."
+                  "value": "Nyx on iPad sends your saved places and cloud forecasts. Until then, scores use each place's usual clouds."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx on iPhone sends your saved parks and cloud forecasts. Until then, scores use each park's usual clouds."
+                  "value": "Nyx on iPhone sends your saved places and cloud forecasts. Until then, scores use each place's usual clouds."
                 }
               }
             }
@@ -46439,13 +46439,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx en el iPad envía tus parques guardados y los pronósticos de nubes. Mientras tanto, los índices usan la nubosidad habitual de cada parque."
+                  "value": "Nyx en el iPad envía tus lugares guardados y los pronósticos de nubes. Mientras tanto, los índices usan la nubosidad habitual de cada lugar."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx en el iPhone envía tus parques guardados y los pronósticos de nubes. Mientras tanto, los índices usan la nubosidad habitual de cada parque."
+                  "value": "Nyx en el iPhone envía tus lugares guardados y los pronósticos de nubes. Mientras tanto, los índices usan la nubosidad habitual de cada lugar."
                 }
               }
             }
@@ -46457,13 +46457,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx sur l’iPad envoie vos parcs enregistrés et les prévisions de nuages. En attendant, les indices utilisent la nébulosité habituelle de chaque parc."
+                  "value": "Nyx sur l’iPad envoie vos lieux enregistrés et les prévisions de nuages. En attendant, les indices utilisent la nébulosité habituelle de chaque lieu."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx sur l’iPhone envoie vos parcs enregistrés et les prévisions de nuages. En attendant, les indices utilisent la nébulosité habituelle de chaque parc."
+                  "value": "Nyx sur l’iPhone envoie vos lieux enregistrés et les prévisions de nuages. En attendant, les indices utilisent la nébulosité habituelle de chaque lieu."
                 }
               }
             }
@@ -46475,13 +46475,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "iPadのNyxが、保存した公園と雲予報を送ります。それまでは、各公園の平年の雲量でスコアを出します。"
+                  "value": "iPadのNyxが、保存した場所と雲予報を送ります。それまでは、各場所の平年の雲量でスコアを出します。"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "iPhoneのNyxが、保存した公園と雲予報を送ります。それまでは、各公園の平年の雲量でスコアを出します。"
+                  "value": "iPhoneのNyxが、保存した場所と雲予報を送ります。それまでは、各場所の平年の雲量でスコアを出します。"
                 }
               }
             }
@@ -57074,41 +57074,6 @@
         }
       }
     },
-    "Saved parks": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gespeicherte Parks"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved parks"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parques guardados"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parcs enregistrés"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存した公園"
-          }
-        }
-      }
-    },
     "Saved parks and spots, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data.": {
       "extractionState": "manual",
       "localizations": {
@@ -57235,6 +57200,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存した公園のみ"
+          }
+        }
+      }
+    },
+    "Saved places": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gespeicherte Orte"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved places"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lugares guardados"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lieux enregistrés"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存した場所"
           }
         }
       }
@@ -59872,37 +59872,37 @@
         }
       }
     },
-    "Shows one park's night, or the darkest of your saved parks. Saved parks carry their cloud forecast.": {
+    "Shows one place's night, or the darkest of your saved places. Saved places carry their cloud forecast.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zeigt die Nacht eines Parks oder den dunkelsten deiner gespeicherten Parks. Gespeicherte Parks bringen ihre Wolkenvorhersage mit."
+            "value": "Zeigt die Nacht eines Orts oder den dunkelsten deiner gespeicherten Orte. Gespeicherte Orte bringen ihre Wolkenvorhersage mit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Shows one park's night, or the darkest of your saved parks. Saved parks carry their cloud forecast."
+            "value": "Shows one place's night, or the darkest of your saved places. Saved places carry their cloud forecast."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Muestra la noche de un parque, o la más oscura de tus parques guardados. Los parques guardados incluyen su pronóstico de nubes."
+            "value": "Muestra la noche de un lugar, o la más oscura de tus lugares guardados. Los lugares guardados incluyen su pronóstico de nubes."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Affiche la nuit d’un parc, ou la plus noire de vos parcs enregistrés. Les parcs enregistrés emportent leur prévision de nuages."
+            "value": "Affiche la nuit d’un lieu, ou la plus noire de vos lieux enregistrés. Les lieux enregistrés emportent leur prévision de nuages."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "一つの公園の夜か、保存した公園のうちいちばん暗い公園の夜を表示します。保存した公園には雲予報が含まれます。"
+            "value": "一つの場所の夜か、保存した場所のうちいちばん暗い場所の夜を表示します。保存した場所には雲予報が含まれます。"
           }
         }
       }
@@ -71695,37 +71695,37 @@
         }
       }
     },
-    "Tonight's Moon: its phase, how much is lit, and when it rises or sets at a park.": {
+    "Tonight's Moon: its phase, how much is lit, and when it rises or sets at a place.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Der Mond heute Nacht: seine Phase, wie viel beleuchtet ist und wann er in einem Park auf- oder untergeht."
+            "value": "Der Mond heute Nacht: seine Phase, wie viel beleuchtet ist und wann er an einem Ort auf- oder untergeht."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tonight's Moon: its phase, how much is lit, and when it rises or sets at a park."
+            "value": "Tonight's Moon: its phase, how much is lit, and when it rises or sets at a place."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La Luna de esta noche: su fase, cuánto está iluminada y cuándo sale o se pone en un parque."
+            "value": "La Luna de esta noche: su fase, cuánto está iluminada y cuándo sale o se pone en un lugar."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La Lune de ce soir : sa phase, sa part éclairée, et son lever ou son coucher dans un parc."
+            "value": "La Lune de ce soir : sa phase, sa part éclairée, et son lever ou son coucher en un lieu."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今夜の月：月の形、輝面比、そして公園で月が昇る、または沈む時刻。"
+            "value": "今夜の月：月の形、輝面比、そしてその場所で月が昇る、または沈む時刻。"
           }
         }
       }

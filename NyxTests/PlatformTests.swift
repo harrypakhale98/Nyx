@@ -94,20 +94,25 @@ import Testing
         let planner = NightPlanner(forecasts: [:])
         let tonight = saved.map { planner.night($0, on: $0.currentNight(at: now), now: now) }
         let order = WidgetSelection.ordered(tonight).map(\.park.id)
-        #expect(WidgetSelection.pick(tonight, defaults: defaults)?.park.id == order[0])
+        let medium = WidgetNightStep.scope(place: nil, family: "medium"), large = WidgetNightStep.scope(place: nil, family: "large")
+        #expect(WidgetSelection.pick(tonight, scope: medium, defaults: defaults)?.park.id == order[0])
         var seen: [String] = []
         for _ in 0..<3 {
-            WidgetSelection.cycle(snapshot: snapshot, now: now, defaults: defaults)
-            seen.append(try #require(WidgetSelection.pick(tonight, defaults: defaults)).park.id)
+            WidgetSelection.cycle(snapshot: snapshot, scope: medium, now: now, defaults: defaults)
+            seen.append(try #require(WidgetSelection.pick(tonight, scope: medium, defaults: defaults)).park.id)
         }
         #expect(seen == [order[1], order[2], order[0]])
         #expect(WidgetSelection.position(of: try #require(tonight.first { $0.park.id == order[2] }), in: tonight) == 3)
+        // Each size keeps its own choice; a size without the button (no scope) stays on the darkest.
+        WidgetSelection.cycle(snapshot: snapshot, scope: medium, now: now, defaults: defaults)
+        #expect(WidgetSelection.pick(tonight, scope: medium, defaults: defaults)?.park.id == order[1])
+        #expect(WidgetSelection.pick(tonight, scope: large, defaults: defaults)?.park.id == order[0])
+        #expect(WidgetSelection.pick(tonight, scope: nil, defaults: defaults)?.park.id == order[0])
         // The next day the choice lapses: tomorrow's nights do not match the chosen night.
-        WidgetSelection.cycle(snapshot: snapshot, now: now, defaults: defaults)
         let tomorrow = saved.map { planner.night($0, on: $0.date($0.currentNight(at: now), addingDays: 1), now: now) }
-        #expect(WidgetSelection.pick(tomorrow, defaults: defaults)?.park.id == WidgetSelection.ordered(tomorrow).first?.park.id)
+        #expect(WidgetSelection.pick(tomorrow, scope: medium, defaults: defaults)?.park.id == WidgetSelection.ordered(tomorrow).first?.park.id)
         // One saved park: nothing to cycle, and no stale choice is kept.
-        WidgetSelection.cycle(snapshot: SavedSkySnapshot(parks: [saved[0]], forecasts: [:]), now: now, defaults: defaults)
+        WidgetSelection.cycle(snapshot: SavedSkySnapshot(parks: [saved[0]], forecasts: [:]), scope: medium, now: now, defaults: defaults)
         #expect(defaults.dictionary(forKey: WidgetSelection.key) == nil)
     }
 
@@ -256,6 +261,13 @@ import Testing
         // The Tonight control before any park is saved: no park, which opens the Tonight tab.
         ParkOpenRequest.post(parkID: nil, now: now, defaults: defaults)
         #expect(ParkOpenRequest.take(now: now.addingTimeInterval(1), defaults: defaults) == ParkOpenRequest.Pending(parkID: nil))
+        // The best-night card's night ahead travels with the park, as the park's own day.
+        let grca = try park("grca"), night = grca.date(grca.currentNight(at: now), addingDays: 3)
+        let open = OpenParkNightIntent(park: grca, night: night)
+        ParkOpenRequest.post(parkID: open.parkID, night: open.night, now: now, defaults: defaults)
+        let taken = try #require(ParkOpenRequest.take(now: now.addingTimeInterval(1), defaults: defaults))
+        #expect(taken == ParkOpenRequest.Pending(parkID: "grca", night: grca.isoDay(night)))
+        #expect(taken.night.flatMap(TripDay.init(iso:)) != nil)
     }
 
     // MARK: Ask Nyx's tools

@@ -193,7 +193,7 @@ struct GoingPanel: View {
     /// Tell someone, and "Not going" in the menu beside it.
     private func actions(_ going: GoingNight, _ night: Night, closure: String?) -> some View {
         HStack(spacing:10) {
-            ShareLink(item:TellSomeone.message(night:night,spot:MapsHandOff.spot(for:night.park)?.spot,closure:closure)) {
+            ShareLink(item:TellSomeone.message(night:night,spot:MapsLink.spot(for:night.park)?.spot,closure:closure)) {
                 Label("Tell someone",systemImage:"person.wave.2").font(.subheadline).frame(minHeight:44)
             }
             .secondaryAction().accessibilityHint("Shares where you will be and when you expect to be back. You choose who it goes to.")

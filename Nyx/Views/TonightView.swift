@@ -108,16 +108,19 @@ struct TonightView: View {
         ScrollViewReader { proxy in
         ScrollView {
             if wide, !loading, !empty, let park=best.first, let night=shown.first {
+                OnFold { folded in
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                     FoldColumns(narrow:.trailing,narrowMax:500,spacing:NyxMetrics.columnGap) {
-                        VStack(spacing:26) { GoingPanel(hero:offset==0 ? park : nil); hero(night,others:Array(shown.dropFirst()),offset:offset,ready:ready); if offset==0 { farther(than:park,shortlist:widerList) }; darkArea(all); ahead(night.park,held:offset>0 ? night.id : nil) }.frame(maxWidth:.infinity)
+                        // On a fold the week's grid stays in the first column, so no night sits on the crease.
+                        VStack(spacing:26) { GoingPanel(hero:offset==0 ? park : nil); hero(night,others:Array(shown.dropFirst()),offset:offset,ready:ready); if offset==0 { farther(than:park,shortlist:widerList) }; darkArea(all); ahead(night.park,held:offset>0 ? night.id : nil); if folded { weekAcross } }.frame(maxWidth:.infinity)
                         VStack(alignment:.leading,spacing:22) { StartingPointPanel(rule:false,choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID); more(shown,offset:offset); fromHome(hero:park); LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
-                    weekAcross
+                    if !folded { weekAcross }
                 }.padding(NyxMetrics.pagePadding).readableColumn(WideLayout.twoColumnMaximum)
+                }
             } else {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
@@ -182,9 +185,10 @@ struct TonightView: View {
             .tabRootToolbar()
             // ⌘R's note says a forecast's time as the pull does, in the answer's own time.
             .environment(\.refreshTimeZone,best.first?.timeZone)
-            // The pill and the rows open the night the dial shows: tonight, or the night it was stepped to.
+            // The pill and the rows open the night the dial showed when tapped: tonight, or the night it was
+            // stepped to (in the route, so a refresh behind the pushed page never moves it back to tonight).
             .navigationDestination(for:ZoomRoute.self) { route in
-                let night=offset==0 ? nil : TonightScrub.evening(route.park,tonight:model.tonight(route.park),offset:offset)
+                let night=route.offset==0 ? nil : TonightScrub.evening(route.park,tonight:model.tonight(route.park),offset:route.offset)
                 ParkDetailView(park:route.park,initialDate:night).modifier(ParkTransition(sourceID:route.source,namespace:zoom)).onAppear { ReviewPrompt.noteNightViewed(score:model.night(route.park,on:night).score.value) }
             }
             .modifier(StartingPointSheets(choosing:$chooseHome,explaining:$explainLocation))
@@ -423,7 +427,7 @@ struct TonightView: View {
         return VStack(spacing:10) {
             if !large { context }
             // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`), scored for the dial's night.
-            ParkPillPicker(park:park,others:others.map(\.park),score:{ scores[$0.id] ?? model.night($0).score.value },zoom:zoom,night:later ? park.dayLabel(night.id) : nil)
+            ParkPillPicker(park:park,others:others.map(\.park),score:{ scores[$0.id] ?? model.night($0).score.value },zoom:zoom,night:later ? park.dayLabel(night.id) : nil,offset:offset)
             let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis)
             dial(night,basis:night.basisCaption(),range:range,offset:offset,ready:ready)
             // A closure is the one line here that must never be lost in the sky: straight under the score,
@@ -569,7 +573,7 @@ struct TonightView: View {
             VStack(spacing:0) {
                 ForEach(Array(shown.dropFirst()),id:\.park.id) { night in
                     let park=night.park
-                    NavigationLink(value:ZoomRoute.row(park)) { ParkRow(night:night,closure:model.closure(park),week:model.nights(park,from:TonightScrub.evening(park,tonight:model.tonight(park),offset:offset),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.row(park).source,in:zoom).parkRowActions(park) { saveFailed=true };Divider().overlay(palette.line)
+                    NavigationLink(value:ZoomRoute.row(park,offset:offset)) { ParkRow(night:night,closure:model.closure(park),week:model.nights(park,from:TonightScrub.evening(park,tonight:model.tonight(park),offset:offset),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.row(park).source,in:zoom).parkRowActions(park) { saveFailed=true };Divider().overlay(palette.line)
                 }
             }
             // Only worth saying when a row actually reads "Estimate", in the rows' own words, as on Parks.

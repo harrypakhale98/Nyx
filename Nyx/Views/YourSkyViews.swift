@@ -212,8 +212,11 @@ struct ConstellationCard: View {
             .accessibilityElement(children:.ignore).accessibilityLabel(layout.summary())
     }
 }
+extension ConstellationLayout {
+    /// Changes whenever a star moves, brightens or changes night, so a share image is redrawn after an edit.
+    var signature: String { stars.map { "\($0.id)\($0.night.date.timeIntervalSince1970),\($0.point.x),\($0.point.y),\($0.brightness)" }.joined(separator:"|") }
+}
 struct ConstellationShareButton: View {
-    @Environment(\.nyx) private var palette
     @Environment(PlanModel.self) private var model
     @Environment(\.displayScale) private var displayScale
     let layout: ConstellationLayout
@@ -229,11 +232,12 @@ struct ConstellationShareButton: View {
             if let image { ShareLink(item:image,preview:SharePreview(title,image:image)) { Label("Share",systemImage:"square.and.arrow.up").labelStyle(.iconOnly).frame(minWidth:44,minHeight:44,alignment:.trailing) }.accessibilityLabel("Share your constellation") }
             else { ProgressView().frame(minWidth:44,minHeight:44).accessibilityLabel("Preparing your constellation to share") }
         }
-        .task(id:"\(layout.stars.count)-\(palette.nightVision)") {
-            // The card is drawn once, off screen: the land must be there first.
+        .task(id:layout.signature) {
+            // The card is drawn once, off screen: the land must be there first. It is sent in starlight,
+            // as a night's card is, whatever the screen's palette.
             await WorldLandStore.shared.load()
-            let card=ConstellationCard(layout:layout,title:title).environment(\.nyx,palette).environment(model)
-            let renderer=ImageRenderer(content:card.modifier(NightVisionFilter(enabled:palette.nightVision)))
+            let card=ConstellationCard(layout:layout,title:title).environment(\.nyx,NyxPalette(nightVision:false,highContrast:false)).environment(model)
+            let renderer=ImageRenderer(content:card)
             renderer.scale=max(2,displayScale)
             image=renderer.uiImage.map { Image(uiImage:$0) }
         }
@@ -396,7 +400,6 @@ struct RecapCard: View {
     }
 }
 struct RecapShareButton: View {
-    @Environment(\.nyx) private var palette
     @Environment(PlanModel.self) private var model
     @Environment(\.displayScale) private var displayScale
     let recap: YearRecap
@@ -407,10 +410,10 @@ struct RecapShareButton: View {
             if let image { ShareLink(item:image,preview:SharePreview(String(localized:"My year under the stars, \(String(recap.year))"),image:image)) { Label("Share your year",systemImage:"square.and.arrow.up") } }
             else { ProgressView().accessibilityLabel("Preparing your year to share") }
         }.secondaryAction()
-        .task(id:"\(recap.year)-\(recap.nights)-\(palette.nightVision)") {
+        .task(id:"\(recap.year)-\(recap.nights)-\(recap.darkest?.parkID ?? "")-\(recap.darkest?.bortle ?? 0)-\(recap.parkNames.joined())-\(layout.signature)") {
             await WorldLandStore.shared.load()
-            let card=RecapCard(recap:recap,layout:layout).environment(\.nyx,palette).environment(model)
-            let renderer=ImageRenderer(content:card.modifier(NightVisionFilter(enabled:palette.nightVision)))
+            let card=RecapCard(recap:recap,layout:layout).environment(\.nyx,NyxPalette(nightVision:false,highContrast:false)).environment(model)
+            let renderer=ImageRenderer(content:card)
             renderer.scale=max(2,displayScale)
             image=renderer.uiImage.map { Image(uiImage:$0) }
         }

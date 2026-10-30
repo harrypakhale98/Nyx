@@ -102,7 +102,7 @@ struct VisionCaution: View {
     let text: Text
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
-            Image(systemName: "exclamationmark.triangle").foregroundStyle(palette.nightVision ? palette.ink : NyxPalette.cautionColor).accessibilityHidden(true)
+            Image(systemName: "exclamationmark.triangle").symbolVariant(.fill).foregroundStyle(palette.nightVision ? palette.ink : NyxPalette.cautionColor).accessibilityHidden(true)
             text.foregroundStyle(palette.ink).fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .combine)

@@ -525,6 +525,11 @@ nonisolated enum ForecastReuse {
         let age=now.timeIntervalSince(updated)
         return age>=normal || (force && age>=forced)
     }
+    /// Clouds are also due when stamped well after `now`: kept while the device clock ran ahead, their
+    /// age says nothing, and `Forecast.replaces` lets the fresh answer take their place.
+    static func cloudsDue(_ updated: Date?, now: Date, force: Bool) -> Bool {
+        due(updated, now: now, force: force, normal: clouds, forced: cloudsForced) || updated.map { $0 > now.addingTimeInterval(Forecast.futureSlack) } == true
+    }
     /// After a request the service answered with nothing usable for a place (a refusal of the request
     /// itself, `HTTPStatusError.refusesRequest`, or an answer Nyx cannot read, such as a renamed field), that place is asked again an hour later, or ten
     /// minutes later when pulled to refresh: never on every refresh, however often the screens ask.
@@ -863,7 +868,7 @@ actor WeatherService: WeatherProviding {
             load(park.id)
             let cached=memory[park.id]
             if let cached { result[park.id]=cached }
-            if network && ForecastReuse.due(cached?.updated, now: now, force: force, normal: ForecastReuse.clouds, forced: ForecastReuse.cloudsForced) { due.append(park) }
+            if network && ForecastReuse.cloudsDue(cached?.updated, now: now, force: force) { due.append(park) }
         }
         // The service asked Nyx to wait: the cached forecasts, and say so.
         if !due.isEmpty && !backoff.allows(Self.host, now: now) { held=true; due=[] }
@@ -928,7 +933,7 @@ actor WeatherService: WeatherProviding {
             attempted.formUnion(running.attempted)
         }
         let now=clock()
-        var due=spots.filter { !attempted.contains($0.id) && ForecastReuse.due(memory[$0.id]?.updated, now: now, force: force, normal: ForecastReuse.clouds, forced: ForecastReuse.cloudsForced) }
+        var due=spots.filter { !attempted.contains($0.id) && ForecastReuse.cloudsDue(memory[$0.id]?.updated, now: now, force: force) }
         if !due.isEmpty && !backoff.allows(Self.host, now: now) { held=true; due=[] }
         if !due.isEmpty {
             let task=Task {
@@ -960,7 +965,7 @@ actor WeatherService: WeatherProviding {
             for place in request { load(place.id) }
             guard network, !request.isEmpty, request.count <= CatalogForecast.maxPointsPerRequest else { continue }
             let newest=request.compactMap { memory[$0.id]?.updated }.max()
-            if ForecastReuse.due(newest, now: now, force: force, normal: ForecastReuse.clouds, forced: ForecastReuse.cloudsForced) { due.append(request) }
+            if ForecastReuse.cloudsDue(newest, now: now, force: force) { due.append(request) }
         }
         for request in due {
             guard backoff.allows(Self.host, now: clock()) else { break }
@@ -1008,7 +1013,8 @@ actor WeatherService: WeatherProviding {
     }
     private func keep(_ fetched: [String: Forecast]) {
         var kept: [String: Forecast]=[:]
-        for (id, forecast) in fetched where memory[id].map({ $0.updated < forecast.updated }) ?? true {
+        let now=clock()
+        for (id, forecast) in fetched where Forecast.replaces(forecast, memory[id], now: now) {
             memory[id]=forecast; kept[id]=forecast
             if persist { CacheDirectory.write(forecast, name: SpotForecast.cacheName(id)) }
         }

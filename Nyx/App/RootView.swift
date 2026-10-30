@@ -151,7 +151,7 @@ struct RootView:View {
                 withAnimation(NyxMotion.launch,completionCriteria:.logicallyComplete) { revealed=true } completion:{ launchSettled=true }
                 // The dial starts its count as the tabs finish arriving (about nine tenths there), so the
                 // launch and the score read as one motion rather than two in a row.
-                Task { try? await Task.sleep(for:.seconds(NyxMotion.launchHandoff)); launchSettled=true }
+                Task { try? await Task.sleep(for:.seconds(NyxMotion.launchSettle)); launchSettled=true }
             }
             openRequestedField(); openRequestedPark()
             // Every park's week, worked out off the main thread once the first frame is up, so Parks opens ready.
@@ -317,7 +317,9 @@ struct RootView:View {
     /// or the Tonight tab when the Tonight control was tapped before any park was saved.
     private func openRequestedPark() {
         guard DebugScenario.screen == nil, let request=ParkOpenRequest.take() else { return }
-        if let id=request.parkID { withPlace(id) { open($0) } } else { commands.tab = .tonight }
+        guard let id=request.parkID else { commands.tab = .tonight; return }
+        // A night the best-night card named opens as a widget's link to that night does.
+        if let day=request.night.flatMap(TripDay.init(iso:)) { handle(.parkNight(park:id,day:day)) } else { withPlace(id) { open($0) } }
     }
     /// Every route from outside (links, widgets, reminders, Spotlight, Handoff, Siri) finds its place
     /// here: at once when it is known; a place abroad named on a cold launch, before the world catalogue

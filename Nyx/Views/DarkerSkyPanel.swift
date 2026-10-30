@@ -52,7 +52,7 @@ struct DarkerSkyPanel: View {
                 .buttonStyle(.borderless).foregroundStyle(palette.ink)
                 .accessibilityHint("Gives it nights and a score. You can then add it to your widgets, Apple Watch and reminders.")
         }
-        if let url=MapsHandOff.pin(latitude:coordinate.latitude,longitude:coordinate.longitude,label:SkyGrid.DarkArea.title) {
+        if let url=MapsLink.pin(latitude:coordinate.latitude,longitude:coordinate.longitude,label:SkyGrid.DarkArea.title) {
             Button { openURL(url) } label:{ Label("Show in Maps",systemImage:"map").font(.footnote.weight(.medium)).frame(minHeight:44) }
                 .buttonStyle(.borderless).foregroundStyle(palette.ink)
                 .accessibilityHint("Opens Apple Maps at this point, without directions. Nyx sends nothing.")

@@ -87,10 +87,11 @@ nonisolated struct ReminderLedger:Sendable {
     private var defaults:UserDefaults { suite.flatMap { UserDefaults(suiteName:$0) } ?? .standard }
     var ids:Set<String> { Set(defaults.stringArray(forKey:"issuedReminders") ?? []) }
     func record(_ issued:Set<String>,now:Date) {
-        // Forget nights that ended more than two days ago; their IDs can never be planned again.
+        // Forget nights once they are past the spacing that one park's reminders keep (`spacing`): their IDs
+        // can never be planned again, and until then they still hold their park.
         let kept=issued.filter { id in
             guard let stamp=id.split(separator:"-").last.flatMap({ Double($0) }) else { return false }
-            return stamp>now.timeIntervalSince1970-3*86400
+            return stamp>now.timeIntervalSince1970-Double(NotificationScheduler.spacing+1)*86400
         }
         defaults.set(Array(kept).sorted(),forKey:"issuedReminders")
     }

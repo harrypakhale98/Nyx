@@ -32,7 +32,7 @@ struct AddNightToCalendar: View {
 /// Apple Maps, opened at the person's tap with driving directions (`maps://?daddr=…&dirflg=d`,
 /// through `openURL`). Nyx sends nothing and uses no MapKit; Maps takes it from there. The one
 /// builder for every "Directions" in the app: the viewing-spot rows and the river panel.
-nonisolated enum MapsHandOff {
+nonisolated enum MapsLink {
     static func directions(latitude:Double,longitude:Double)->URL? {
         var components=URLComponents()
         components.scheme="maps"
@@ -80,7 +80,7 @@ struct NightDirections: View {
     }
     static func offer(for park:Park,access:AccessData = .shared)->Offer {
         guard park.drivable else { return .accessNote }
-        guard let choice=MapsHandOff.spot(for:park,access:access), let url=MapsHandOff.directions(choice.spot) else { return .nothing }
+        guard let choice=MapsLink.spot(for:park,access:access), let url=MapsLink.directions(choice.spot) else { return .nothing }
         return .directions(spot:choice.spot.name,url:url,stepFree:choice.stepFree)
     }
     var body: some View {
@@ -111,7 +111,7 @@ struct NightDirections: View {
                     .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
             }
             .buttonStyle(.borderless).foregroundStyle(palette.ink)
-            .accessibilityLabel(MapsHandOff.spokenLabel(spot:spot,park:park.shortName,stepFree:stepFree))
+            .accessibilityLabel(MapsLink.spokenLabel(spot:spot,park:park.shortName,stepFree:stepFree))
             .accessibilityHint("Opens Apple Maps with driving directions. Nyx sends nothing.")
             .accessibilityInputLabels([Text("Directions"),Text("Maps")])
         }

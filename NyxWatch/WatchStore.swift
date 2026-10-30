@@ -109,6 +109,8 @@ import WidgetKit
         let stored = WatchSky.palette
         if stored != palette { palette = stored }
         if let clock = adaptation, clock.isStale(at: .now) { stopAdaptation() }
+        // A face's last Tonight complication removed: stop asking the iPhone for its place.
+        Task { if await WatchSky.refreshFacePlaces() { tellIPhoneIfNeeded() } }
     }
     /// Starts the clock at once, then schedules the reminders (asking for permission the first
     /// time) and returns the answer, so the screen knows whether to tap the wrist itself.

@@ -1577,6 +1577,111 @@
         }
       }
     },
+    "About %@ of the sky this hour": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etwa %@ des Himmels in dieser Stunde"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %@ of the sky this hour"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca del %@ del cielo en esta hora"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Environ %@ du ciel à cette heure"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この時間は空の約%@"
+          }
+        }
+      }
+    },
+    "About %@ of the sky, an early look counted as it stands": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etwa %@ des Himmels, eine erste Einschätzung, unverändert gezählt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %@ of the sky, an early look counted as it stands"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca del %@ del cielo, una vista anticipada contada tal cual"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Environ %@ du ciel, une tendance comptée telle quelle"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空の約%@。そのまま計算した早めの見通し"
+          }
+        }
+      }
+    },
+    "About %@ of the sky, an early look eased toward usual clouds": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etwa %@ des Himmels, eine erste Einschätzung, an die übliche Bewölkung angenähert"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %@ of the sky, an early look eased toward usual clouds"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca del %@ del cielo, una vista anticipada ajustada hacia la nubosidad habitual"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Environ %@ du ciel, une tendance rapprochée de la nébulosité habituelle"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空の約%@。平年の雲量に寄せた早めの見通し"
+          }
+        }
+      }
+    },
     "About %lld in 10 %@ nights here are mostly clear.": {
       "extractionState": "manual",
       "localizations": {
@@ -1608,111 +1713,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "ここでは%2$@の夜の10回に約%1$lld回は、おおむね晴れます。"
-          }
-        }
-      }
-    },
-    "About %lld%% of the sky this hour": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Etwa %lld %% des Himmels in dieser Stunde"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "About %lld%% of the sky this hour"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cerca del %lld%% del cielo en esta hora"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Environ %lld %% du ciel à cette heure"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "この時間は空の約%lld%%"
-          }
-        }
-      }
-    },
-    "About %lld%% of the sky, an early look counted as it stands": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Etwa %lld %% des Himmels, eine erste Einschätzung, unverändert gezählt"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "About %lld%% of the sky, an early look counted as it stands"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cerca del %lld%% del cielo, una vista anticipada contada tal cual"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Environ %lld %% du ciel, une tendance comptée telle quelle"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "空の約%lld%%。そのまま計算した早めの見通し"
-          }
-        }
-      }
-    },
-    "About %lld%% of the sky, an early look eased toward usual clouds": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Etwa %lld %% des Himmels, eine erste Einschätzung, an die übliche Bewölkung angenähert"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "About %lld%% of the sky, an early look eased toward usual clouds"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cerca del %lld%% del cielo, una vista anticipada ajustada hacia la nubosidad habitual"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Environ %lld %% du ciel, une tendance rapprochée de la nébulosité habituelle"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "空の約%lld%%。平年の雲量に寄せた早めの見通し"
           }
         }
       }
@@ -4797,37 +4797,37 @@
         }
       }
     },
-    "Forecast clouds about %lld%% of the sky": {
+    "Forecast clouds about %@ of the sky": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vorhergesagte Wolken auf etwa %lld %% des Himmels"
+            "value": "Vorhergesagte Wolken auf etwa %@ des Himmels"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forecast clouds about %lld%% of the sky"
+            "value": "Forecast clouds about %@ of the sky"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nubes pronosticadas en cerca del %lld%% del cielo"
+            "value": "Nubes pronosticadas en cerca del %@ del cielo"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nuages prévus sur environ %lld %% du ciel"
+            "value": "Nuages prévus sur environ %@ du ciel"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "予報される雲は空の約%lld%%"
+            "value": "予報される雲は空の約%@"
           }
         }
       }
@@ -6722,37 +6722,37 @@
         }
       }
     },
-    "Models differ": {
+    "Models disagree": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Modelle uneinig"
+            "value": "Modelle weichen ab"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Models differ"
+            "value": "Models disagree"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Modelos difieren"
+            "value": "Los modelos discrepan"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Modèles divergents"
+            "value": "Les modèles divergent"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "モデルに差"
+            "value": "モデルが不一致"
           }
         }
       }
@@ -6823,6 +6823,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "モデルが一致していません：雲量%@。明日もう一度確認してください。"
+          }
+        }
+      }
+    },
+    "Models roughly agree": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelle sind sich etwa einig"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models roughly agree"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los modelos casi coinciden"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les modèles concordent à peu près"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "モデルはほぼ一致"
           }
         }
       }
@@ -7453,41 +7488,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "月が出ている、輝面比%lld%%"
-          }
-        }
-      }
-    },
-    "Moon, %@, %lld percent lit": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mond, %@, zu %lld Prozent beleuchtet"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon, %@, %lld percent lit"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna, %@, %lld por ciento iluminada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lune, %@, éclairée à %lld pour cent"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月、%1$@、輝面比%2$lldパーセント"
           }
         }
       }
@@ -10988,41 +10988,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@に%2$@から昇り、夜明けまでには十分に高くなります。"
-          }
-        }
-      }
-    },
-    "Roughly agree": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Etwa einig"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Roughly agree"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Casi coinciden"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Concordent à peu près"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ほぼ一致"
           }
         }
       }

@@ -74,11 +74,9 @@ extension VisionModel {
     }
     /// Asks while the window is open: at once, then every half hour (each park only once its
     /// forecast is six hours old, smoke twelve, alerts six, so in practice every six hours).
+    /// One loop however many windows are open (`keep`).
     func keepForecastsFresh() async {
-        while !Task.isCancelled {
-            await refreshForecasts()
-            try? await Task.sleep(for: .seconds(1800))
-        }
+        await keep("forecasts", every: .seconds(1800)) { await refreshForecasts() }
     }
     /// The newest forecast on this headset, for Your privacy.
     var lastForecast: Date? { forecasts.values.map(\.updated).max() }

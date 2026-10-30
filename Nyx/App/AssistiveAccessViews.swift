@@ -65,7 +65,7 @@ struct AssistiveHome: View {
     var body: some View {
         List {
             NavigationLink { AssistiveTonight() } label:{ Label("Tonight",systemImage:"moon.stars") }
-            NavigationLink { AssistiveSaved() } label:{ Label("Saved parks",systemImage:"star") }
+            NavigationLink { AssistiveSaved() } label:{ Label("Saved places",systemImage:"star") }
             // Night vision, shared with the full app, widgets, the Live Activity and the watch. Reads
             // the palette, so what the switch says is what the screen shows.
             Toggle(isOn:Binding(get:{ palette.nightVision },set:{ NightVisionMode.turnedByHand(); nightVision=$0 })) { Label("Red light",systemImage:"flashlight.on.circle") }
@@ -132,12 +132,12 @@ struct AssistiveSaved: View {
             VStack(spacing: 28) {
                 let parks=saved.compactMap { model.park($0.parkID) }
                 if parks.isEmpty {
-                    Text("No saved parks yet. Parks you save in Nyx appear here.").font(.title2).frame(maxWidth: .infinity, alignment: .leading)
+                    Text("No saved places yet. Places you save in Nyx appear here.").font(.title2).frame(maxWidth: .infinity, alignment: .leading)
                 }
                 ForEach(parks) { park in AssistiveParkCard(park: park, reminder: false) }
             }.padding(20)
         }
-        .navigationTitle("Saved parks")
+        .navigationTitle("Saved places")
         .assistiveAccessNavigationIcon(systemImage: "star")
         .task { await model.refresh(saved.compactMap { model.park($0.parkID) }) }
     }

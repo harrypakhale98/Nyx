@@ -18,11 +18,16 @@ nonisolated struct Forecast: Codable, Sendable {
         return HourlyWindow.mean(times:times,values:clouds,from:start,to:end,valid:0...100)
     }
     /// Whether `fresh` should replace `kept`: only a forecast made later. A slower refresh that
-    /// finishes after a newer one never puts its older forecast back.
-    static func replaces(_ fresh: Forecast?, _ kept: Forecast?) -> Bool {
+    /// finishes after a newer one never puts its older forecast back. Given `now`, a kept forecast
+    /// stamped well after it (saved while the device clock ran ahead) gives way too, or no forecast
+    /// could replace it until the clock caught up.
+    static func replaces(_ fresh: Forecast?, _ kept: Forecast?, now: Date? = nil) -> Bool {
         guard let fresh else { return false }
-        return kept.map { fresh.updated > $0.updated } ?? true
+        guard let kept else { return true }
+        return fresh.updated > kept.updated || now.map { kept.updated > $0.addingTimeInterval(futureSlack) && fresh.updated <= $0.addingTimeInterval(futureSlack) } == true
     }
+    /// How far after the present a forecast's stamp may lie before it is taken as a clock that ran ahead.
+    static let futureSlack: TimeInterval = 3600
     /// The hourly values whose half hour either side overlaps `start`…`end`, with their timestamps.
     func hours(from start: Date, to end: Date) -> [(time: Date, cloud: Double)] {
         zip(times,clouds).compactMap { t,c in

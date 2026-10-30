@@ -13,7 +13,7 @@ import WidgetKit
 /// Tonight's pick or the starting park on iPhone, `WatchSky.choice`) or one place.
 struct TonightComplication: Widget {
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: "NyxTonight", intent: TonightParkIntent.self, provider: TonightComplicationProvider()) { entry in WatchComplicationView(entry: entry) }
+        AppIntentConfiguration(kind: WatchSky.tonightKind, intent: TonightParkIntent.self, provider: TonightComplicationProvider()) { entry in WatchComplicationView(entry: entry) }
             .configurationDisplayName("Tonight's sky")
             .description("The darkness score, the Moon and the next moment of the night.")
             .supportedFamilies([.accessoryCircular, .accessoryRectangular, .accessoryCorner, .accessoryInline])
@@ -242,7 +242,7 @@ struct DuskWidget: Widget {
             WatchComplicationView(previewFamily: .accessoryRectangular, entry: entry.entry, clockTimes: true)
         }
         .configurationDisplayName("Dark night ahead")
-        .description("Appears in the Smart Stack at dusk on Good nights or better, and at your saved parks.")
+        .description("Appears in the Smart Stack at dusk on Good nights or better, and at your saved places.")
     }
 }
 

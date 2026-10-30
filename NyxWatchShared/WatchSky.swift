@@ -108,6 +108,18 @@ nonisolated enum WatchSky {
         get { defaults.stringArray(forKey: facesKey) ?? [] }
         set { defaults.set(newValue, forKey: facesKey) }
     }
+    /// The Tonight complication's kind.
+    static let tonightKind = "NyxTonight"
+    /// `facePlaces` is noted only as a Tonight complication's timeline is built, so removing the last
+    /// one would leave its place asked for. As Nyx opens: none left clears it; otherwise their
+    /// timelines look again and note what remains. True when the places changed.
+    static func refreshFacePlaces() async -> Bool {
+        guard let faces = try? await WidgetCenter.shared.currentConfigurations() else { return false }
+        if faces.contains(where: { $0.kind == tonightKind }) { WidgetCenter.shared.reloadTimelines(ofKind: tonightKind); return false }
+        guard !facePlaces.isEmpty else { return false }
+        facePlaces = []
+        return true
+    }
     static let toldKey = "watchToldPlaces", toldAtKey = "watchToldAt"
     /// The places last told to the iPhone and when it answered (`WatchStore.tellIPhoneIfNeeded`).
     static var told: (places: [String], at: Date)? {

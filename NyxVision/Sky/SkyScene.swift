@@ -299,7 +299,7 @@ import UIKit
         // VoiceOver's swipe up and down move the clock half an hour, as a drag across the sky does.
         domeAccess.systemActions = [.increment, .decrement]
         domeAccess.label = LocalizedStringResource(stringLiteral: String(localized: "Sky over \(park.shortName) at \(park.time(moment.date))"))
-        domeAccess.value = LocalizedStringResource(stringLiteral: Self.summary(moment, cloud: cloud))
+        domeAccess.value = LocalizedStringResource(stringLiteral: Self.summary(moment, moon: plan.sky.moon, cloud: cloud))
         dome.components.set(domeAccess)
 
         placeMoon(plan: plan, moment: moment, facing: facing, palette: palette, light: light)
@@ -386,8 +386,8 @@ import UIKit
             moonTexture = texture
         }
         tint(moon, texture: moonTexture, level: 1, color: Self.ink(palette))
-        let percent = Int((moment.moonIllumination*100).rounded())
-        moon.components.set(Self.access(String(localized: "Moon, \(plan.sky.moon.name), \(percent) percent lit"), moment.moon.place))
+        // The night's phase in the words VoiceOver hears for the Moon on every device, as the window gives it.
+        moon.components.set(Self.access(moment.moon.name, Sentences.join([Sentences.end(plan.sky.moon.spoken), Sentences.end(moment.moon.place)])))
     }
 
     private func placePlanets(moment: SkyMoment, facing: Double, palette: VisionPalette) {
@@ -545,7 +545,7 @@ import UIKit
         card.isEnabled = true
         var detail = body.place
         if body.kind == .planet { detail += " · " + WhatsUp.brightness(body.magnitude) }
-        if body.kind == .moon { detail += " · " + String(localized: "\(Percent.text(Int((moment.moonIllumination*100).rounded()))) lit") }
+        if body.kind == .moon { detail += " · " + plan.sky.moon.litText }
         if body.kind == .core { detail += " · " + (coreWashed ? String(localized: "washed out by moonlight") : String(localized: "the bright center of our galaxy")) }
         label(card, SkyLabel(title: body.name, detail: detail, style: .card, palette: palette, typeSize: typeSize), key: "card\(body.id)\(detail)\(palette.nightVision)",
               altitude: body.altitude-(body.kind == .moon ? 1.65 : 1.05), azimuth: body.azimuth, facing: facing, throttle: moving, hangs: true)
@@ -839,10 +839,12 @@ import UIKit
         default: SIMD3(1, 1, 0.94)
         }
     }
-    static func summary(_ moment: SkyMoment, cloud: Double? = nil) -> String {
+    /// The sky at the clock's moment in words. The Moon's figure is the night's (`moon`), the one the
+    /// window, the Moon volume and the iPhone give, so one night never reads two percentages.
+    static func summary(_ moment: SkyMoment, moon: MoonPhase, cloud: Double? = nil) -> String {
         var parts = [moment.twilight]
-        if let cloud { parts.append(String(localized: "Forecast clouds about \(Int((cloud*100).rounded()))% of the sky")) }
-        parts.append(moment.moon.up ? String(localized: "Moon \(moment.moon.place), \(Percent.text(Int((moment.moonIllumination*100).rounded()))) lit") : String(localized: "Moon below the horizon"))
+        if let cloud { parts.append(String(localized: "Forecast clouds about \(Percent.text(Int((cloud*100).rounded()))) of the sky")) }
+        parts.append(moment.moon.up ? String(localized: "Moon \(moment.moon.place), \(Percent.text(moon.percentLit)) lit") : String(localized: "Moon below the horizon"))
         // "Jupiter 32° up in the southeast": one localized phrase, so a language can order it its own way.
         parts += moment.visiblePlanets.map { String(localized: "\($0.name) \($0.place)", comment: "A body in the sky and where it is: Jupiter 32° up in the southeast") }
         if moment.coreShown { parts.append(String(localized: "\(moment.core.name) \(moment.core.place)", comment: "A body in the sky and where it is: Jupiter 32° up in the southeast")) }
