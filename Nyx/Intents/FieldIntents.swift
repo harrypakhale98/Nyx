@@ -80,12 +80,15 @@ struct StargazingFocusFilter: SetFocusFilterIntent {
         if offerField { return LocalizedStringResource("Field mode offered") }
         return LocalizedStringResource("Nothing changes yet")
     }
-    func perform() async throws -> some IntentResult {
+    // The app's hook for the watch is read on the main actor, as for the Siri switch.
+    @MainActor func perform() async throws -> some IntentResult {
         StargazingFocus.apply(nightVision:nightVision,offerField:offerField)
         WidgetCenter.shared.reloadAllTimelines()
         ControlCenter.shared.reloadAllControls()
-        // A followed night's Live Activity takes the new colours too, even with Nyx in the background.
-        await FieldActivities.refresh(nightVision:SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey))
+        // A followed night's Live Activity and a watch on Match iPhone take the new colours too, even
+        // with Nyx in the background (the app's hook when it is running, as for the control).
+        let on=SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey)
+        if let changed=NightVisionFollowers.changed { await changed(on) } else { await FieldActivities.refresh(nightVision:on) }
         return .result()
     }
 }

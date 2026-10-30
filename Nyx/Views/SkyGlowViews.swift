@@ -297,7 +297,7 @@ struct CoordinateActions: View {
         } label:{ Label("Copy coordinates",systemImage:"doc.on.doc").font(.footnote.weight(.medium)).frame(minHeight:44) }
             .buttonStyle(.borderless).foregroundStyle(palette.ink)
             .accessibilityHint(copyHint)
-        if let url=MapsHandOff.directions(latitude:latitude,longitude:longitude) {
+        if let url=MapsLink.directions(latitude:latitude,longitude:longitude) {
             Button { openURL(url) } label:{ Label("Directions in Maps",systemImage:"arrow.triangle.turn.up.right.diamond").font(.footnote.weight(.medium)).frame(minHeight:44) }
                 .buttonStyle(.borderless).foregroundStyle(palette.ink)
                 .accessibilityHint("Opens Apple Maps with driving directions. Nyx sends nothing.")

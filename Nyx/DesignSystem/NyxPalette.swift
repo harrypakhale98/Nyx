@@ -182,7 +182,7 @@ enum NyxMotion {
     static let launch=Animation.spring(response:0.9,dampingFraction:0.9)
     /// When the launch spring is about nine tenths of the way in (0.55 s): the moment the held
     /// score is let go, so its count overlaps the arrival instead of waiting out the spring's tail.
-    nonisolated static let launchHandoff=0.55
+    nonisolated static let launchSettle=0.55
     /// A line drawing itself or words arriving: critically damped, so a pen never overshoots its star.
     static let trace=Animation.spring(response:1.4,dampingFraction:1)
     static let arrival=Animation.spring(response:1.6,dampingFraction:1)

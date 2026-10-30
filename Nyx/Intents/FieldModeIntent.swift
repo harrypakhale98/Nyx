@@ -33,18 +33,22 @@ nonisolated enum FieldModeRequest {
     }
 }
 /// A park asked for by an intent and stored for the app to read (`FieldModeRequest`, `ParkOpenRequest`):
-/// the park's id, empty for the default, and when it was asked.
+/// the park's id, empty for the default, the night when one was named, and when it was asked.
 nonisolated struct PendingPark: Equatable {
     let parkID: String?
-    static func store(_ parkID: String?, key: String, now: Date, defaults: UserDefaults) {
-        defaults.set(["park": parkID ?? "", "at": now.timeIntervalSince1970], forKey: key)
+    /// The night as the park's own day, YYYY-MM-DD (`Park.isoDay`); nil for tonight.
+    var night: String?=nil
+    static func store(_ parkID: String?, night: String?=nil, key: String, now: Date, defaults: UserDefaults) {
+        var request: [String: Any]=["park": parkID ?? "", "at": now.timeIntervalSince1970]
+        if let night { request["night"]=night }
+        defaults.set(request, forKey: key)
     }
     /// The request under `key`, once, if it was made within the last minute.
     static func take(key: String, now: Date, defaults: UserDefaults) -> PendingPark? {
         guard let request=defaults.dictionary(forKey: key) else { return nil }
         defaults.removeObject(forKey: key)
         guard let at=request["at"] as? Double, abs(now.timeIntervalSince1970-at)<60 else { return nil }
-        let park=request["park"] as? String
-        return PendingPark(parkID: park?.isEmpty == false ? park : nil)
+        let park=request["park"] as? String, night=request["night"] as? String
+        return PendingPark(parkID: park?.isEmpty == false ? park : nil, night: night?.isEmpty == false ? night : nil)
     }
 }

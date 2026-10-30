@@ -25,6 +25,9 @@ struct TonightEntry:TimelineEntry {
     /// This widget's setting and size (`WidgetNightStep.scope`), where it offers previous and next
     /// night (medium and large); nil elsewhere, and the face stays on tonight.
     var stepScope:String?=nil
+    /// Which "next saved place" choice this widget's button moves (`TonightTimeline.selectionScope`);
+    /// nil where there is none to move (the gallery).
+    var selectionScope:String?=nil
     /// The night on the face: tonight, or the night of the week the buttons moved to.
     var shown:Night? { offset>0 && offset<week.count ? week[offset] : night }
     /// The night on the face carries a soft plate in the week's column or the month's cell, tonight
@@ -52,6 +55,17 @@ struct TonightTimeline {
     var stepScope:String?=nil
     /// Where the widgets keep each one's night (the App Group; a test's own suite).
     var stepDefaults:UserDefaults=SharedSettings.defaults
+    /// The widget gallery's preview, which keeps no choice of its own.
+    var preview=false
+    /// Which "next saved place" choice a widget that follows the saved places reads (`WidgetSelection`):
+    /// one per size that draws the button. Medium and large are told by their night buttons' scope,
+    /// the extra large sizes by `large` without one. Nil for the small and Lock Screen widgets, which
+    /// have no button and always show the darkest.
+    var selectionScope:String? {
+        guard pinned == nil, !preview else { return nil }
+        if let stepScope { return stepScope }
+        return large ? WidgetNightStep.scope(place:nil,family:"extraLarge") : nil
+    }
     private var skies:[String:SkyConditions]=[:]
     private var months:[String:NightPlanner.Month]=[:]
     /// Built once: the snapshot's forecasts and the usual clouds it carries.
@@ -72,7 +86,7 @@ struct TonightTimeline {
         let parks=pinned.map { [$0] } ?? snapshot?.parks ?? []
         let tonight=parks.map { night($0,$0.currentNight(at:date),at:date) }
         // A widget set to one park shows that park; otherwise the darkest saved park (or the one "next" moved to).
-        let shown=pinned == nil ? WidgetSelection.pick(tonight) : tonight.first
+        let shown=pinned == nil ? WidgetSelection.pick(tonight,scope:selectionScope,defaults:stepDefaults) : tonight.first
         let week=shown.map { first in (0..<WidgetNightStep.nights).map { night(first.park,first.park.date(first.id,addingDays:$0),at:date) } } ?? []
         // The night the buttons moved to, read for each entry: one past the shown place's sunrise is tonight again.
         let offset=stepScope.flatMap { scope in shown.map { WidgetNightStep.offset(scope:scope,park:$0.park.id,tonight:$0.id,defaults:stepDefaults) } } ?? 0
@@ -88,7 +102,8 @@ struct TonightTimeline {
         return TonightEntry(date:date,night:shown,nightVision:SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey),week:week,month:month,
                             position:pinned == nil ? shown.map { WidgetSelection.position(of:$0,in:tonight) } ?? 0 : 0,savedCount:pinned == nil ? parks.count : 0,
                             relevance:TimelineEntryRelevance(score:relevance.score,duration:relevance.duration),
-                            closure:shown.flatMap { snapshot?.closures[$0.park.id] },offset:offset,stepScope:shown == nil ? nil : stepScope)
+                            closure:shown.flatMap { snapshot?.closures[$0.park.id] },offset:offset,stepScope:shown == nil ? nil : stepScope,
+                            selectionScope:shown == nil ? nil : selectionScope)
     }
     /// When each park the widget can show moves on to its next night (`Park.nightTurnovers`).
     func turnovers(from start:Date,to end:Date)->[Date] {
@@ -306,7 +321,7 @@ struct TonightWidgetView:View {
     /// only where it fits (medium and large, outside accessibility sizes); a tap anywhere else opens the park.
     @ViewBuilder private func cycleButton(_ night:Night)->some View {
         if entry.savedCount>1, entry.position>0 {
-            Button(intent:CycleWidgetParkIntent()) {
+            Button(intent:CycleWidgetParkIntent(scope:entry.selectionScope)) {
                 HStack(spacing:3) {
                     Text("\(entry.position) of \(entry.savedCount)").monospacedDigit()
                     Image(systemName:"chevron.forward").fontWeight(.semibold)

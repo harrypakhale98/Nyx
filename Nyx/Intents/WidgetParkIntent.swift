@@ -8,11 +8,17 @@ struct CycleWidgetParkIntent: AppIntent {
     static let title: LocalizedStringResource="Show the next saved place"
     static let description=IntentDescription("Moves the Tonight's sky widget to your next saved place, in order of tonight's score. Tomorrow it returns to your darkest place.")
     static let isDiscoverable=false
+    /// The widget's size (`TonightTimeline.selectionScope`): each size keeps its own choice. Nil in
+    /// the gallery, or on a face drawn before sizes had their own, which only redraws.
+    @Parameter(title:"Widget") var scope:String?
     init() {}
+    init(scope:String?) { self.scope=scope }
     func perform() async throws -> some IntentResult {
-        WidgetSelection.cycle(snapshot:SharedSettings.read(),now:.now)
-        // A new place starts on its own tonight.
-        WidgetNightStep.clearSaved()
+        if let scope {
+            WidgetSelection.cycle(snapshot:SharedSettings.read(),scope:scope,now:.now)
+            // A new place starts on its own tonight.
+            WidgetNightStep.clearSaved(scope:scope)
+        }
         WidgetCenter.shared.reloadTimelines(ofKind:WidgetSelection.kind)
         return .result()
     }
@@ -20,7 +26,9 @@ struct CycleWidgetParkIntent: AppIntent {
 
 /// Which saved park the Tonight widget shows. By default the darkest tonight; a tap on "next"
 /// holds another park until that park's night turns over at sunrise, so the widget never keeps
-/// showing a choice from yesterday.
+/// showing a choice from yesterday. Kept per widget size (`TonightTimeline.selectionScope`), so a
+/// tap on one size never moves another, and the sizes without the button (small, Lock Screen)
+/// always show the darkest.
 nonisolated enum WidgetSelection {
     static let kind="TonightWidget"
     /// The Tonight control's kind (`TonightControl`), reloaded whenever the snapshot changes.
@@ -28,24 +36,31 @@ nonisolated enum WidgetSelection {
     static let key="widgetPark"
     /// The order the button walks: tonight's best first, as `NightPlanner` ranks nights.
     static func ordered(_ nights:[Night])->[Night] { NightPlanner.ranked(nights) }
-    /// The chosen park while its chosen night is still tonight; otherwise the best.
-    static func pick(_ nights:[Night],defaults:UserDefaults = SharedSettings.defaults)->Night? {
+    /// The park this size chose while its chosen night is still tonight; otherwise the best. No
+    /// scope (a size without the button) is always the best.
+    static func pick(_ nights:[Night],scope:String?,defaults:UserDefaults = SharedSettings.defaults)->Night? {
         let order=ordered(nights)
-        guard let choice=defaults.dictionary(forKey:key), let id=choice["park"] as? String, let stamp=choice["night"] as? Double,
+        guard let scope, let choice=defaults.dictionary(forKey:key)?[scope] as? [String:Any], let id=choice["park"] as? String, let stamp=choice["night"] as? Double,
               let chosen=order.first(where:{ $0.park.id==id && $0.id.timeIntervalSince1970==stamp }) else { return order.first }
         return chosen
     }
     /// Position of the shown park among the saved ones, 1-based, for "2 of 3".
     static func position(of night:Night,in nights:[Night])->Int { (ordered(nights).firstIndex { $0.park.id==night.park.id } ?? 0)+1 }
-    /// Moves to the next park; after the last, back to the best.
-    static func cycle(snapshot:SavedSkySnapshot?,now:Date,defaults:UserDefaults = SharedSettings.defaults) {
-        guard let snapshot, snapshot.parks.count>1 else { defaults.removeObject(forKey:key); return }
-        let planner=snapshot.planner
-        let tonight=snapshot.parks.map { planner.night($0,on:$0.currentNight(at:now),now:now) }
-        let order=ordered(tonight)
-        guard let shown=pick(tonight,defaults:defaults), let index=order.firstIndex(where:{ $0.park.id==shown.park.id }) else { return }
-        let next=order[(index+1)%order.count]
-        defaults.set(["park":next.park.id,"night":next.id.timeIntervalSince1970],forKey:key)
+    /// Moves this size to the next park; after the last, back to the best.
+    static func cycle(snapshot:SavedSkySnapshot?,scope:String,now:Date,defaults:UserDefaults = SharedSettings.defaults) {
+        // Only per-size choices are kept; the one choice from before sizes had their own goes.
+        var all=(defaults.dictionary(forKey:key) ?? [:]).filter { $0.value is [String:Any] }
+        if let snapshot, snapshot.parks.count>1 {
+            let planner=snapshot.planner
+            let tonight=snapshot.parks.map { planner.night($0,on:$0.currentNight(at:now),now:now) }
+            let order=ordered(tonight)
+            guard let shown=pick(tonight,scope:scope,defaults:defaults), let index=order.firstIndex(where:{ $0.park.id==shown.park.id }) else { return }
+            let next=order[(index+1)%order.count]
+            all[scope]=["park":next.park.id,"night":next.id.timeIntervalSince1970]
+        } else {
+            all[scope]=nil
+        }
+        if all.isEmpty { defaults.removeObject(forKey:key) } else { defaults.set(all,forKey:key) }
     }
 }
 
@@ -101,10 +116,11 @@ nonisolated enum WidgetNightStep {
         all[scope]=target == 0 ? nil : ["park":park,"tonight":tonight.timeIntervalSince1970,"offset":target]
         if all.isEmpty { defaults.removeObject(forKey:key) } else { defaults.set(all,forKey:key) }
     }
-    /// The widgets that follow the darkest saved place: back to tonight when "next saved place" moves them.
-    static func clearSaved(defaults:UserDefaults = SharedSettings.defaults) {
+    /// The widgets that follow the darkest saved place (one size, or all): back to tonight when
+    /// "next saved place" moves them.
+    static func clearSaved(scope:String?=nil,defaults:UserDefaults = SharedSettings.defaults) {
         guard let all=defaults.dictionary(forKey:key) else { return }
-        let kept=all.filter { !$0.key.hasPrefix("saved|") }
+        let kept=all.filter { entry in scope.map { entry.key != $0 } ?? !entry.key.hasPrefix("saved|") }
         if kept.isEmpty { defaults.removeObject(forKey:key) } else { defaults.set(kept,forKey:key) }
     }
 }

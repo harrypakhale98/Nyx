@@ -176,15 +176,31 @@ struct OpenParkIntent:OpenIntent {
         return .result()
     }
 }
+/// The best-night card's "Open in Nyx": the park on the night the card names, as a widget moved to
+/// a night ahead opens it (`DeepLink.parkNight`). Not offered in Shortcuts, where "Open park" opens tonight.
+struct OpenParkNightIntent:AppIntent {
+    static let title:LocalizedStringResource="Open park"
+    static let isDiscoverable=false
+    static let supportedModes:IntentModes = .foreground
+    @Parameter(title:"Park") var parkID:String
+    /// The night as the park's own day, YYYY-MM-DD (`Park.isoDay`).
+    @Parameter(title:"Night") var night:String
+    init() {}
+    init(park:Park,night:Date) { self.parkID=park.id; self.night=park.isoDay(night) }
+    func perform() async throws -> some IntentResult {
+        ParkOpenRequest.post(parkID:parkID,night:night)
+        return .result()
+    }
+}
 /// A park to open, handed from an intent to the app's root view. Stored as well as posted, because
 /// a cold launch may run the intent before any view is listening; stored in the App Group's
 /// defaults, as `FieldModeRequest` is, so it reaches the app from whichever process ran the intent.
 nonisolated enum ParkOpenRequest {
     static let key="parkOpenRequest"
     static let notification=Notification.Name("NyxParkOpenRequest")
-    /// `parkID` nil asks for the Tonight tab.
-    static func post(parkID:String?,now:Date = .now,defaults:UserDefaults = SharedSettings.defaults) {
-        PendingPark.store(parkID,key:key,now:now,defaults:defaults)
+    /// `parkID` nil asks for the Tonight tab; `night` (YYYY-MM-DD, the park's day) a night ahead there.
+    static func post(parkID:String?,night:String?=nil,now:Date = .now,defaults:UserDefaults = SharedSettings.defaults) {
+        PendingPark.store(parkID,night:night,key:key,now:now,defaults:defaults)
         NotificationCenter.default.post(name:notification,object:nil)
     }
     /// The pending request, once, if it was made within the last minute. `parkID` is nil for Tonight.
@@ -200,8 +216,8 @@ nonisolated enum ParkOpenRequest {
 /// parks tonight (the behaviour before the setting existed, so widgets already placed keep it).
 struct TonightWidgetIntent:WidgetConfigurationIntent {
     static let title:LocalizedStringResource="Tonight's sky"
-    static let description=IntentDescription("Shows one park's night, or the darkest of your saved parks. Saved parks carry their cloud forecast.")
-    @Parameter(title:"Park",description:"Leave empty for the darkest of your saved parks tonight.") var park:ParkEntity?
+    static let description=IntentDescription("Shows one place's night, or the darkest of your saved places. Saved places carry their cloud forecast.")
+    @Parameter(title:"Place",description:"Leave empty for the darkest of your saved places tonight.") var park:ParkEntity?
     init() {}
     init(park:ParkEntity?) { self.park=park }
 }
@@ -209,15 +225,15 @@ struct TonightWidgetIntent:WidgetConfigurationIntent {
 /// with none saved, the phase alone (the same everywhere).
 struct MoonWidgetIntent:WidgetConfigurationIntent {
     static let title:LocalizedStringResource="The Moon"
-    static let description=IntentDescription("Tonight's Moon: its phase, how much is lit, and when it rises or sets at a park.")
-    @Parameter(title:"Park",description:"Leave empty for your first saved park.") var park:ParkEntity?
+    static let description=IntentDescription("Tonight's Moon: its phase, how much is lit, and when it rises or sets at a place.")
+    @Parameter(title:"Place",description:"Leave empty for your first saved place.") var park:ParkEntity?
     init() {}
     init(park:ParkEntity?) { self.park=park }
 }
 /// The Tonight control's setting, as the widget's.
 struct TonightControlIntent:ControlConfigurationIntent {
     static let title:LocalizedStringResource="Tonight's score"
-    @Parameter(title:"Park",description:"Leave empty for the darkest of your saved parks tonight.") var park:ParkEntity?
+    @Parameter(title:"Place",description:"Leave empty for the darkest of your saved places tonight.") var park:ParkEntity?
     init() {}
     init(park:ParkEntity?) { self.park=park }
 }

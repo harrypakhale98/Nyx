@@ -230,6 +230,15 @@ struct FoldSource: ViewModifier {
     }
 }
 
+/// Whether this scrolling page has a fold down its width (`foldSource`), as `FoldColumns` meets, for content
+/// that should sit on one side of it rather than run across it; false everywhere but iPhone Duo's inner
+/// display, half open or flat, with the hinge upright.
+struct OnFold<Content: View>: View {
+    @Environment(\.pageFold) private var pageFold
+    @ViewBuilder var content: (Bool) -> Content
+    var body: some View { content(pageFold?.dividesWidth == true) }
+}
+
 /// `ColumnSplit` fed by its page's `foldSource`: two columns (the content's two views) that meet at the
 /// fold. The page's fold is moved into the columns' own coordinates by their leading edge in the page,
 /// in whole points, which a vertical scroll never changes.

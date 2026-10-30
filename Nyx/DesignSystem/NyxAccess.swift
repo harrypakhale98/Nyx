@@ -78,9 +78,12 @@ nonisolated struct ZoomRoute: Hashable, Sendable {
     let park: Park
     /// The transition source's id, unique on the page.
     let source: String
-    static func pill(_ park: Park) -> ZoomRoute { ZoomRoute(park: park, source: "pill.\(park.id)") }
-    static func pillList(_ park: Park) -> ZoomRoute { ZoomRoute(park: park, source: "pill-list.\(park.id)") }
-    static func row(_ park: Park) -> ZoomRoute { ZoomRoute(park: park, source: "row.\(park.id)") }
+    /// Nights after tonight the link was tapped on (Tonight's dial stepped on), carried in the route so the
+    /// pushed page keeps that night even if Tonight's answer is worked out again behind it.
+    var offset = 0
+    static func pill(_ park: Park, offset: Int = 0) -> ZoomRoute { ZoomRoute(park: park, source: "pill.\(park.id)", offset: offset) }
+    static func pillList(_ park: Park, offset: Int = 0) -> ZoomRoute { ZoomRoute(park: park, source: "pill-list.\(park.id)", offset: offset) }
+    static func row(_ park: Park, offset: Int = 0) -> ZoomRoute { ZoomRoute(park: park, source: "row.\(park.id)", offset: offset) }
 }
 struct ParkTransition: ViewModifier {
     @Environment(\.nyxAccess) private var access

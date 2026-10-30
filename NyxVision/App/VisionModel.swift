@@ -368,9 +368,24 @@ nonisolated struct SkyMoment: Sendable {
     /// While a window is in use: the clock checked at once and every minute, so a night turning
     /// over at the chosen park's sunrise reaches the window within the minute.
     func keepClock() async {
+        await keep("clock", every: .seconds(60)) { tick() }
+    }
+    /// The loops `keep` is running now, by name.
+    @ObservationIgnored private var keeping: Set<String> = []
+    /// Runs `step` at once and then every `interval`, once however many scenes ask: every planner
+    /// window and the Moon volume ask while active, the first runs the loop and the others wait.
+    /// When the running scene goes inactive, a waiting one takes over within a minute.
+    func keep(_ name: String, every interval: Duration, _ step: () async -> Void) async {
         while !Task.isCancelled {
-            tick()
-            try? await Task.sleep(for: .seconds(60))
+            if keeping.insert(name).inserted {
+                defer { keeping.remove(name) }
+                while !Task.isCancelled {
+                    await step()
+                    try? await Task.sleep(for: interval)
+                }
+            } else {
+                try? await Task.sleep(for: .seconds(60))
+            }
         }
     }
 

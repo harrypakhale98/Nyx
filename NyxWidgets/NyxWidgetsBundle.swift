@@ -21,7 +21,7 @@ struct TonightProvider:AppIntentTimelineProvider {
         var builder=TonightTimeline(snapshot:snapshot,large:Self.large(context.family),pinned:Self.park(configuration.park,snapshot:saved),
                                     unsaved:Self.unsaved(configuration.park,snapshot:saved))
         // The gallery shows tonight; a placed widget shows the night its buttons moved to.
-        if !context.isPreview { builder.stepScope=Self.stepScope(configuration,family:context.family) }
+        if !context.isPreview { builder.stepScope=Self.stepScope(configuration,family:context.family) } else { builder.preview=true }
         return builder.entry(at:.now)
     }
     /// Previous and next night on the medium and large widgets, kept per setting and size; nil elsewhere.

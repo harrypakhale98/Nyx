@@ -742,7 +742,7 @@ import Observation
     /// assignment, so the kept nights are let go once.
     func takeForecasts(_ fresh:[String:Forecast]) {
         var updated=forecasts, changed=false
-        for (id,forecast) in fresh where (!id.hasPrefix(SavedSpots.prefix) || spotIndex[id] != nil) && Forecast.replaces(forecast,updated[id]) {
+        for (id,forecast) in fresh where (!id.hasPrefix(SavedSpots.prefix) || spotIndex[id] != nil) && Forecast.replaces(forecast,updated[id],now:present) {
             updated[id]=forecast; changed=true
         }
         if changed { forecasts=updated }
@@ -854,6 +854,12 @@ import Observation
         let summits=self.parks.filter { $0.aboveInversion == true }
         if network, !detailWanted, !summits.isEmpty { _=await detailService.details(for:summits,weather:true,smoke:false,force:force) }
         takeDetails(await detailService.details(for:self.parks,weather:network && detailWanted,smoke:smokeEnabled && live && detailWanted,force:force))
+        // Smoke kept from a page opened in an earlier session still caps the score, so those parks' smoke is
+        // kept current page or no page: an old smoke forecast must not hold the night down after the smoke has gone.
+        let keptSmoke=self.parks.filter { details[$0.id]?.air != nil }
+        if smokeEnabled, live, !detailWanted, !keptSmoke.isEmpty {
+            takeDetails(await detailService.details(for:keptSmoke,weather:false,smoke:true,force:force))
+        }
         // Smoke at catalogue places: the same whole tiles as their clouds, on the parks' terms (the
         // switch, and asked for only once a page has been opened); what is kept counts offline too.
         if smokeEnabled, !catalogRequests.isEmpty {

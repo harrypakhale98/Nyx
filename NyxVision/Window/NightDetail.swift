@@ -227,7 +227,8 @@ private struct SkyNow: View {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
                     Text(body.name).font(.body.weight(.medium))
                     Text(body.place).foregroundStyle(palette.muted)
-                    if body.kind == .moon { Text("\(Percent.text(Int((moment.moonIllumination*100).rounded()))) lit").foregroundStyle(palette.muted) }
+                    // The night's figure, as the Moon above gives it, so the window reads one percentage.
+                    if body.kind == .moon { Text(plan.sky.moon.litText).foregroundStyle(palette.muted) }
                     if body.kind == .planet { Text(WhatsUp.brightness(body.magnitude)).foregroundStyle(palette.muted) }
                 }
                 .accessibilityElement(children: .combine)
@@ -240,9 +241,9 @@ private struct SkyNow: View {
         let cloud = plan.cloud(at: moment.date)
         // An early look where the place has no usual clouds draws the hour as forecast (`SkyDome.cloud`).
         let value: String = if let cloud {
-            !plan.night.basis.isEarlyLook ? String(localized: "About \(Int((cloud*100).rounded()))% of the sky this hour")
-                : plan.night.usualCloud == nil ? String(localized: "About \(Int((cloud*100).rounded()))% of the sky, an early look counted as it stands")
-                : String(localized: "About \(Int((cloud*100).rounded()))% of the sky, an early look eased toward usual clouds")
+            !plan.night.basis.isEarlyLook ? String(localized: "About \(Percent.text(Int((cloud*100).rounded()))) of the sky this hour")
+                : plan.night.usualCloud == nil ? String(localized: "About \(Percent.text(Int((cloud*100).rounded()))) of the sky, an early look counted as it stands")
+                : String(localized: "About \(Percent.text(Int((cloud*100).rounded()))) of the sky, an early look eased toward usual clouds")
         } else if plan.night.basis == .usual {
             plan.beyondForecast ? String(localized: "None drawn: no cloud forecast reaches this night") : String(localized: "None drawn: cloud forecast unavailable")
         } else {

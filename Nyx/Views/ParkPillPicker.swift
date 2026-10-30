@@ -17,6 +17,8 @@ struct ParkPillPicker: View {
     let zoom: Namespace.ID
     /// The night the scores are for when it is not tonight ("Fri, Oct 30": Tonight's dial stepped on).
     var night: String?=nil
+    /// Nights after tonight that `night` is, carried by the links (`ZoomRoute.offset`).
+    var offset=0
     /// `-nyx-pill-open` (DEBUG captures) opens it.
     @State private var open=DebugScenario.isEnabled("pill-open")
     @Namespace private var glass
@@ -42,7 +44,7 @@ struct ParkPillPicker: View {
                 VStack(spacing:0) {
                     ForEach(Array(others.enumerated()),id:\.element.id) { index,other in
                         if index>0 { Divider().overlay(palette.line) }
-                        NavigationLink(value:ZoomRoute.pillList(other)) {
+                        NavigationLink(value:ZoomRoute.pillList(other,offset:offset)) {
                             // At accessibility sizes the name takes the whole line and the score goes under it:
                             // beside a fixed score column, "Grand Canyon" broke inside a word on an iPhone SE.
                             let row=typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment:.leading,spacing:4)) : AnyLayout(HStackLayout(spacing:10))
@@ -70,7 +72,7 @@ struct ParkPillPicker: View {
 }
 extension ParkPillPicker {
     private var pill: some View {
-        NavigationLink(value:ZoomRoute.pill(park)) {
+        NavigationLink(value:ZoomRoute.pill(park,offset:offset)) {
             // A capsule while the name fits on one line; a long name ("Black Canyon of the Gunnison")
             // wraps on the rounded rectangle instead, even at default sizes, so the capsule never becomes an egg.
             if large { wrappedPill } else { ViewThatFits(in:.horizontal) { capsulePill; wrappedPill } }

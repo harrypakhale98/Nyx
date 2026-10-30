@@ -793,7 +793,7 @@ struct ParkChooser: View {
             Section {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Choose a place").font(.system(.title3, design: .serif))
-                    Text("Nyx on iPhone sends your saved parks and cloud forecasts. Until then, scores use each park's usual clouds.").font(.caption2).foregroundStyle(palette.muted)
+                    Text("Nyx on iPhone sends your saved places and cloud forecasts. Until then, scores use each place's usual clouds.").font(.caption2).foregroundStyle(palette.muted)
                 }.listRowBackground(Color.clear)
                 // Nothing has come from the iPhone yet: ask for it here rather than wait.
                 if store.context == nil { AskIPhoneRow(source: .unsynced).listRowBackground(Color.clear) }

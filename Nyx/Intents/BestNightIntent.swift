@@ -7,8 +7,8 @@ import SwiftUI
 /// Answers with a short dialog and an interactive snippet (iOS 26).
 struct FindBestNightIntent: AppIntent {
     static let title: LocalizedStringResource="Find the best night"
-    static let description=IntentDescription("Finds the best night ahead at a park or dark-sky place, or across your saved parks, using Nyx's on-device darkness score. A closure in the last park update counts against a park. Clouds count only where a cached forecast reaches.")
-    @Parameter(title:"Park",description:"Leave empty to compare your saved parks.") var park: ParkEntity?
+    static let description=IntentDescription("Finds the best night ahead at a park or dark-sky place, or across your saved places, using Nyx's on-device darkness score. A closure in the last park update counts against a park. Clouds count only where a cached forecast reaches.")
+    @Parameter(title:"Place",description:"Leave empty to compare your saved places.") var park: ParkEntity?
     // 30 by default, the app's best-night reach (`NightPlanner.horizon`; App Intents wants a literal), so
     // "Find the best night at Joshua Tree" names the night the park's page and Tonight name.
     @Parameter(title:"Nights",description:"How many nights ahead to look, up to 30.",default:30,inclusiveRange:(1,30)) var nights: Int
@@ -20,9 +20,15 @@ struct FindBestNightIntent: AppIntent {
     /// Returns the moment the best night's true darkness begins (sunset where there is none), so a
     /// shortcut can put it in a calendar or a reminder.
     func perform() async throws -> some IntentResult & ReturnsValue<Date> & ProvidesDialog & ShowsSnippetIntent {
-        // The chosen place, else the saved parks.
-        let sky=try await IntentSky.load(park.map { [$0.id] })
-        guard !sky.parks.isEmpty else { throw park == nil ? NyxIntentError.noParks : NyxIntentError.parkNotFound }
+        // The chosen place, else the saved parks, else the starting park, as the other questions
+        // without a park answer (`IntentPark`, which reads the night under way on the main actor).
+        var sky=try await IntentSky.load(park.map { [$0.id] })
+        if park == nil, sky.parks.isEmpty {
+            let shared=sky.shared
+            let home=try await MainActor.run { try IntentPark.resolve(nil,snapshot:shared) }
+            sky=IntentSky(shared:shared,parks:[home])
+        }
+        guard !sky.parks.isEmpty else { throw NyxIntentError.parkNotFound }
         let now=Date.now, day=start.map { TripDay($0) }
         guard let answer=BestNightSearch.answer(parks:sky.parks,planner:sky.planner,day:day,nights:nights,now:now,closures:sky.closures) else { throw NyxIntentError.noNights }
         BestNightBrowse.reset()
@@ -198,7 +204,8 @@ struct BestNightSnippetView: View {
                     Button(intent:NextBestNightIntent(count:total)) { Label("Next best",systemImage:"arrow.forward") }
                         .accessibilityInputLabels([Text("Next best"),Text("Next")])
                 }
-                Button(intent:OpenParkIntent(target:ParkEntity(night.park))) { Label("Open in Nyx",systemImage:"arrow.up.forward.app") }
+                // The park on the night the card names, not tonight.
+                Button(intent:OpenParkNightIntent(park:night.park,night:night.id)) { Label("Open in Nyx",systemImage:"arrow.up.forward.app") }
             }
             .buttonStyle(.bordered).tint(palette.ink).font(.subheadline)
             if let following {

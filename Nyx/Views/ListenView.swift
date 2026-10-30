@@ -13,12 +13,15 @@ struct NightListenView: View {
     @State private var showsTranscript: Bool?
     private var listener: NightListener { .shared }
     private var sound: NightSonification { NightSonification(park:night.park,sky:night.sky) }
+    /// This night is the one playing: its transcript brightens.
     private var playing: Bool { listener.current.map { $0.park.id==night.park.id && $0.window.start==SkyAlmanac.nightWindow(night.sky).start } ?? false }
+    /// Any night is playing (the river may have moved on since): the button stops it.
+    private var sounding: Bool { listener.current != nil }
     var body: some View {
         VStack(alignment:.leading,spacing:12) {
-            Button { if playing { listener.stop() } else { listener.play(sound); showsTranscript=true } } label:{
-                Label(playing ? String(localized:"Stop listening") : isTonight ? String(localized:"Listen to tonight") : String(localized:"Listen to this night"),
-                      systemImage:playing ? "stop.fill" : "waveform")
+            Button { if sounding { listener.stop() } else { listener.play(sound); showsTranscript=true } } label:{
+                Label(sounding ? String(localized:"Stop listening") : isTonight ? String(localized:"Listen to tonight") : String(localized:"Listen to this night"),
+                      systemImage:sounding ? "stop.fill" : "waveform")
                     .font(.subheadline.weight(.medium))
             }
             .buttonStyle(.capsuleAction)
@@ -30,7 +33,7 @@ struct NightListenView: View {
             }.tint(palette.muted)
             if MoonHaptics.enabled { FeelTonightView(night:night,isTonight:isTonight,expanded:expanded).padding(.top,8) }
         }
-        .onDisappear { if playing { listener.stop() } }
+        .onDisappear { if sounding { listener.stop() } }
     }
     private var transcript: some View {
         let sound=sound
@@ -63,7 +66,8 @@ struct FeelTonightView: View {
     @State private var showsMoments: Bool?
     private var feeler: NightFeeler { .shared }
     private var touch: NightTouch { NightTouch(NightSonification(park:night.park,sky:night.sky)) }
-    private var playing: Bool { feeler.current.map { $0.park == night.park.id && $0.start == SkyAlmanac.nightWindow(night.sky).start } ?? false }
+    /// Any night is being felt (the river may have moved on since): the button stops it.
+    private var playing: Bool { feeler.current != nil }
     var body: some View {
         VStack(alignment:.leading,spacing:12) {
             Button { if playing { feeler.stop() } else { feeler.play(touch,park:night.park.id,start:SkyAlmanac.nightWindow(night.sky).start) } } label:{

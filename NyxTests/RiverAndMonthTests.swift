@@ -103,21 +103,21 @@ import SwiftUI
     @Test func directionsPreferAStepFreeSpot() throws {
         // The park's first spot is undocumented; a later one is step-free.
         let meve=try park("meve")
-        let choice=try #require(MapsHandOff.spot(for:meve))
+        let choice=try #require(MapsLink.spot(for:meve))
         #expect(choice.spot.name=="Far View Lodge" && choice.stepFree == .yes)
         // Partly step-free first, step-free later: the step-free one.
-        #expect(try MapsHandOff.spot(for:park("shen"))?.spot.name=="Skyland Amphitheater")
+        #expect(try MapsLink.spot(for:park("shen"))?.spot.name=="Skyland Amphitheater")
         // Only partly step-free spots: the first of them, said as such.
-        let jotr=try #require(try MapsHandOff.spot(for:park("jotr")))
+        let jotr=try #require(try MapsLink.spot(for:park("jotr")))
         #expect(jotr.spot.name=="Cap Rock" && jotr.stepFree == .partial)
-        let url=try #require(MapsHandOff.directions(choice.spot))
+        let url=try #require(MapsLink.directions(choice.spot))
         #expect(url.scheme=="maps" && url.absoluteString.contains("daddr=\(choice.spot.latitude),\(choice.spot.longitude)") && url.absoluteString.contains("dirflg=d"))
     }
     @Test func directionsSayTheSpotTheParkAndMaps() {
-        #expect(MapsHandOff.spokenLabel(spot:"Far View Lodge",park:"Mesa Verde",stepFree:.yes)=="Directions to Far View Lodge, step-free, Mesa Verde, in Maps")
-        #expect(MapsHandOff.spokenLabel(spot:"Cap Rock",park:"Joshua Tree",stepFree:.partial)=="Directions to Cap Rock, partly step-free, Joshua Tree, in Maps")
-        #expect(MapsHandOff.spokenLabel(spot:"Seawall",park:"Acadia",stepFree:nil)=="Directions to Seawall, Acadia, in Maps")
-        #expect(MapsHandOff.spokenLabel(spot:"Seawall",park:"Acadia",stepFree:.no)=="Directions to Seawall, Acadia, in Maps")
+        #expect(MapsLink.spokenLabel(spot:"Far View Lodge",park:"Mesa Verde",stepFree:.yes)=="Directions to Far View Lodge, step-free, Mesa Verde, in Maps")
+        #expect(MapsLink.spokenLabel(spot:"Cap Rock",park:"Joshua Tree",stepFree:.partial)=="Directions to Cap Rock, partly step-free, Joshua Tree, in Maps")
+        #expect(MapsLink.spokenLabel(spot:"Seawall",park:"Acadia",stepFree:nil)=="Directions to Seawall, Acadia, in Maps")
+        #expect(MapsLink.spokenLabel(spot:"Seawall",park:"Acadia",stepFree:.no)=="Directions to Seawall, Acadia, in Maps")
     }
     @Test func roadlessParksShowTheirAccessNoteInstead() throws {
         let drto=try park("drto")

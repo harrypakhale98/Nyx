@@ -391,9 +391,11 @@ import WidgetKit
         return ranges
     }
     private func publish(_ model:PlanModel,_ parks:[Park]) async {
-        // The watch's places too (its kept place, the starting park…), so it is handed the same Moon.
+        // The watch's places too (its kept place, the starting park…), so it is handed the same Moon,
+        // and the places widgets are set to (`widgetIDs`), so one set to an unsaved park shows it too.
         var drawnFor=Set<String>()
-        let moonsDrawn=await renderWidgetMoons(model,(parks+watchMoonPlaces(model)).filter { drawnFor.insert($0.id).inserted })
+        let widgetParks=(widgetIDs ?? []).compactMap { model.park($0) }
+        let moonsDrawn=await renderWidgetMoons(model,(parks+watchMoonPlaces(model)+widgetParks).filter { drawnFor.insert($0.id).inserted })
         // Taken as the snapshot is built (before its write suspends), so a change that lands during
         // the write still differs from `published` and is republished when this run ends.
         let data=followedData(model)
@@ -448,7 +450,7 @@ import WidgetKit
                 if (try? png.write(to:url,options:.atomic)) != nil { drawn=true }
             }
         }
-        // Forget pictures of nights that have passed or parks no longer saved.
+        // Forget pictures of nights that have passed or places nothing shows any longer.
         if let folder=SharedSettings.moonImageURL(park:"x",night:.now)?.deletingLastPathComponent(),
            let files=try? FileManager.default.contentsOfDirectory(atPath:folder.path) {
             for file in files where file.hasPrefix("moon-") && !keep.contains(file) { try? FileManager.default.removeItem(at:folder.appendingPathComponent(file)) }
