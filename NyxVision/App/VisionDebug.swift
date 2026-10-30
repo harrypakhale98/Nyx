@@ -9,7 +9,7 @@ import Foundation
 /// (the sky opens at its everyday 0.6 instead of fully), `-nyx-vision-moon` (opens the Moon
 /// volume; add `-nyx-vision-moon-only` to close the planner behind it, for screenshots of the Moon alone), `-nyx-vision-credits` (the credits sheet), `-nyx-vision-no-lines` (figures off),
 /// `-nyx-vision-widget-shots` (renders the widget's faces to PNGs in the app's tmp folder),
-/// `-nyx-vision-privacy` (the Your privacy sheet), `-nyx-vision-night 6`, `-nyx-vision-clouds 60`.
+/// `-nyx-vision-privacy` (the Your privacy sheet), `-nyx-vision-ahead` (the window scrolled to the darkest nights ahead), `-nyx-vision-night 6`, `-nyx-vision-clouds 60`.
 /// A pinned date never makes a network request.
 /// Named stars take `-nyx-vision-body star.Vega`.
 enum VisionDebug {
