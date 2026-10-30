@@ -23,24 +23,34 @@ import Testing
     }
     @Test func weekendsAreFridaysNearTheNewMoon() throws {
         let jotr = try park("jotr"), moon = try #require(DarkWeekends.newMoons(after: start, count: 1).first)
-        let fridays = DarkWeekends.fridays(around: moon, park: jotr)
+        var satSun = Calendar(identifier: .gregorian); satSun.locale = Locale(identifier: "en_US")
+        let fridays = DarkWeekends.firstNights(around: moon, park: jotr, calendar: satSun)
         #expect(!fridays.isEmpty)
         #expect(fridays.allSatisfy { jotr.calendar.component(.weekday, from: $0) == 6 })
         #expect(fridays.allSatisfy { abs($0.timeIntervalSince(jotr.evening(moon))) <= Double(DarkWeekends.reach)*86400+3600 })
     }
+    @Test func weekendsFollowTheRegionsDaysOff() throws {
+        // Where the weekend is Friday and Saturday, its nights are Thursday and Friday.
+        let jotr = try park("jotr"), moon = try #require(DarkWeekends.newMoons(after: start, count: 1).first)
+        var friSat = Calendar(identifier: .gregorian); friSat.locale = Locale(identifier: "he_IL")
+        let thursdays = DarkWeekends.firstNights(around: moon, park: jotr, calendar: friSat)
+        #expect(!thursdays.isEmpty)
+        #expect(thursdays.allSatisfy { jotr.calendar.component(.weekday, from: $0) == 5 })
+    }
     @Test func planPicksTheBestWeekendAndSkipsPastOnes() throws {
         let jotr = try park("jotr"), moons = DarkWeekends.newMoons(after: start, count: 2)
+        var satSun = Calendar(identifier: .gregorian); satSun.locale = Locale(identifier: "en_US")
         // Scores rise through the days, so the later weekend near a moon wins when there are two.
         let first = jotr.evening(start)
         let score = { (evening: Date) in 50+Int((evening.timeIntervalSince(first)/86400).rounded()) % 40 }
-        let plan = DarkWeekends.plan(park: jotr, newMoons: moons, tonight: first, closure: nil) { night(jotr, $0, score: score($0)) }
+        let plan = DarkWeekends.plan(park: jotr, newMoons: moons, tonight: first, closure: nil, calendar: satSun) { night(jotr, $0, score: score($0)) }
         #expect(plan.count == moons.count)
         for weekend in plan {
-            #expect(jotr.calendar.component(.weekday, from: weekend.friday.id) == 6)
-            #expect(weekend.saturday.id == jotr.date(weekend.friday.id, addingDays: 1))
-            #expect(weekend.friday.id >= first)
+            #expect(jotr.calendar.component(.weekday, from: weekend.firstNight.id) == 6)
+            #expect(weekend.secondNight.id == jotr.date(weekend.firstNight.id, addingDays: 1))
+            #expect(weekend.firstNight.id >= first)
             // The weekend whose better night scores highest of those around its new moon.
-            let rivals = DarkWeekends.fridays(around: weekend.newMoon, park: jotr).filter { $0 >= first }
+            let rivals = DarkWeekends.firstNights(around: weekend.newMoon, park: jotr, calendar: satSun).filter { $0 >= first }
             #expect(weekend.best.score.value == rivals.map { max(score($0), score(jotr.date($0, addingDays: 1))) }.max())
         }
         #expect(DarkWeekends.spoken(plan[0]).contains("New moon"))

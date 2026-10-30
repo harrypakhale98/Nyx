@@ -120,9 +120,7 @@ nonisolated struct CloudClimate: Decodable, Sendable {
     /// The plain line beside a night that has no cloud forecast; nil without data.
     func sentence(_ park: Park, on evening: Date) -> String? {
         guard let typical = typical(park, on: evening) else { return nil }
-        var format = Date.FormatStyle().month(.wide)
-        format.timeZone = park.timeZone
-        return typical.sentence(monthName: evening.formatted(format))
+        return typical.sentence(monthName: park.monthName(evening))
     }
 }
 
@@ -154,10 +152,8 @@ extension Night {
     /// iPhone handed over says it on the watch and in widgets as it does on the iPhone.
     nonisolated var typicalClouds: String? {
         guard basis == .usual, let cloud = usualCloud, let clear = usualClear else { return nil }
-        var format = Date.FormatStyle().month(.wide)
-        format.timeZone = park.timeZone
         return CloudClimate.Typical(month: park.calendar.component(.month, from: id), cloud: cloud, clear: clear, estimated: usualEstimated)
-            .sentence(monthName: id.formatted(format))
+            .sentence(monthName: park.monthName(id))
     }
     /// A caption followed by the month's typical clouds, for a night without a forecast.
     nonisolated func withTypicalClouds(_ caption: String) -> String { typicalClouds.map { Sentences.join([caption, $0]) } ?? caption }
@@ -271,11 +267,9 @@ extension Night {
         case .forecast: return nil
         case .blended: return basis.earlyLookCaption(usualClouds: usualCloud != nil)
         case .usual:
-            var format = Date.FormatStyle().month(.wide)
-            format.timeZone = park.timeZone
             // Never "Arches's": the park follows the month rather than taking a possessive.
             let line = Sentences.join([noForecastSentence ?? "", usualCloud == nil ? String(localized: "This score counts the Moon and darkness only.")
-                : String(localized: "This score uses the usual \(id.formatted(format)) clouds at \(park.shortName).")])
+                : String(localized: "This score uses the usual \(park.monthName(id)) clouds at \(park.shortName).")])
             return typical ? withTypicalClouds(line) : line
         }
     }
@@ -400,7 +394,7 @@ extension Night {
             let clouds=basisCaption(typical:true) ?? String(localized:"Includes cloud forecast.")
             return String(localized:"\(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label). \(clouds)")
         case .calendar(let event):
-            return String(localized:"\(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label). \(basisCaption(typical:true) ?? String(localized:"Includes cloud forecast."))\(event.map { ". "+$0 } ?? "")")
+            return Sentences.join([String(localized:"\(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label). \(basisCaption(typical:true) ?? String(localized:"Includes cloud forecast."))"),event.map(Sentences.end) ?? ""])
         case .chartBest:
             return String(localized:"Best night: \(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label).")
         case .dayWithBasis:

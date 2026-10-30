@@ -128,8 +128,12 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
         return terms
     }
     private static let foldedTerms = Mutex<[String: [String]]>([:])
+    /// Marks that join the parts of one name, dropped rather than read as a space so a name is found
+    /// typed with or without them: "サン・ディエゴ" as "サンディエゴ", "ラ＝ロシェル", Catalan "l·l".
+    nonisolated static let joiners: Set<Unicode.Scalar> = ["・", "･", "゠", "＝", "·"]
     nonisolated static func folded(_ text: String) -> String {
-        transliterated(text.replacingOccurrences(of: "ʻ", with: "").replacingOccurrences(of: "'", with: "")
+        transliterated(String(String.UnicodeScalarView(text.unicodeScalars.filter { !joiners.contains($0) }))
+            .replacingOccurrences(of: "ʻ", with: "").replacingOccurrences(of: "'", with: "")
             .replacingOccurrences(of: "&", with: " and "))
             .folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: nil)
             .components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }.joined(separator: " ")
@@ -251,10 +255,14 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
         format.timeZone = timeZone
         return date.formatted(format)
     }
+    /// "November 2026", a month grid's title: Gregorian like the grid, whatever calendar the device uses.
     func monthLabel(_ date: Date) -> String {
-        var format = Date.FormatStyle.dateTime.month(.wide).year()
-        format.timeZone = timeZone
-        return date.formatted(format)
+        date.formatted(Date.FormatStyle(calendar: calendar, timeZone: timeZone).month(.wide).year())
+    }
+    /// "November": the month a night's usual clouds and month grids count in (Gregorian, in the
+    /// place's zone), in the reader's language, whatever calendar the device uses.
+    func monthName(_ date: Date) -> String {
+        date.formatted(Date.FormatStyle(calendar: calendar, timeZone: timeZone).month(.wide))
     }
     func isoDay(_ date: Date) -> String {
         let parts = calendar.dateComponents([.year, .month, .day], from: date)

@@ -560,8 +560,7 @@ struct CalendarView: View {
     }
     /// "Oct 1 – 17": the first and last nights folded away, in the park's calendar and the reader's language.
     nonisolated static func span(_ first:Date,_ last:Date,park:Park)->String {
-        var format=Date.IntervalFormatStyle().month(.abbreviated).day()
-        format.timeZone=park.timeZone
+        let format=Date.IntervalFormatStyle(calendar:park.calendar,timeZone:park.timeZone).month(.abbreviated).day()
         return (first..<max(first,last)).formatted(format)
     }
     /// A night the journal can keep: tonight or one before it, while the journal is open.
@@ -734,8 +733,8 @@ struct CalendarView: View {
     }
     /// What Voice Control accepts for a night: its day number, or weekday and day ("Tap 17", "Tap Friday 17").
     static func spokenNames(_ night:Night)->[Text] {
-        var format=Date.FormatStyle.dateTime.weekday(.wide).day()
-        format.timeZone=night.park.timeZone
+        // In the park's (Gregorian) calendar, like the grid's day numbers.
+        let format=Date.FormatStyle(calendar:night.park.calendar,timeZone:night.park.timeZone).weekday(.wide).day()
         return [Text(night.park.calendar.component(.day,from:night.id),format:.number),Text(verbatim:night.id.formatted(format))]
     }
     private func monthEvents(_ nights:[Night],park:Park)->[Date:String] {

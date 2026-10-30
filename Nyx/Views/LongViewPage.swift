@@ -37,7 +37,7 @@ struct LongViewPage: View {
                     }
                 } }
                 if let weekends, !weekends.isEmpty {
-                    let nights=weekends.flatMap { [$0.friday,$0.saturday] }
+                    let nights=weekends.flatMap { [$0.firstNight,$0.secondNight] }
                     Button { if CalendarWriter.undecided { explaining=true } else { addAll(nights) } } label:{
                         Label("Add all to Calendar",systemImage:"calendar.badge.plus").font(.subheadline).frame(minHeight:44)
                     }
@@ -102,11 +102,11 @@ struct LongViewPage: View {
         let best=weekend.best
         // The usual clouds go unsaid on a row: the page says it once above. A row the forecast reaches says so.
         let words=VStack(alignment:.leading,spacing:4) {
-            Text("\(park.dayLabel(weekend.friday.id)) – \(park.dayLabel(weekend.saturday.id))").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
+            Text("\(park.dayLabel(weekend.firstNight.id)) – \(park.dayLabel(weekend.secondNight.id))").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
             Text(verbatim:([DarkWeekends.newMoonLine(weekend)]+(best.basis == .usual ? [] : best.basisLabels)).joined(separator:" · ")).font(.subheadline).foregroundStyle(palette.muted)
         }.fixedSize(horizontal:false,vertical:true)
         let scores=HStack(alignment:.firstTextBaseline,spacing:6) {
-            Text("\(weekend.friday.score.value) · \(weekend.saturday.score.value)").scoreNumeral(.title3,accent:palette.accent)
+            Text("\(weekend.firstNight.score.value) · \(weekend.secondNight.score.value)").scoreNumeral(.title3,accent:palette.accent)
         }
         return NavigationLink { ParkDetailView(park:park,initialDate:best.id) } label:{
             Group {

@@ -39,8 +39,9 @@ import Testing
             let clouds=night.basisCaption(typical:true) ?? String(localized:"Includes cloud forecast.")
             #expect(night.spokenSummary(.river) == String(localized:"\(night.park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(clouds)"))
             for name in [nil, "Lunar eclipse"] as [String?] {
-                let marker=name.map { ". "+$0 } ?? ""
-                #expect(night.spokenSummary(.calendar(event: name)) == String(localized:"\(night.park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption(typical:true) ?? String(localized:"Includes cloud forecast."))\(marker)"))
+                // The event is its own sentence after the caption's full stop: never "forecast.. Lunar eclipse".
+                #expect(night.spokenSummary(.calendar(event: name)) == Sentences.join([String(localized:"\(night.park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(clouds)"), name.map(Sentences.end) ?? ""]))
+                #expect(!night.spokenSummary(.calendar(event: name)).contains(".."))
             }
             #expect(night.widgetSummary(closure: nil) == "\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption() ?? "Includes cloud forecast.")")
             #expect(night.spokenSummary(.chartBest) == String(localized:"Best night: \(night.park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label)."))

@@ -433,7 +433,7 @@ nonisolated enum StartingPlaces {
         private static let options:String.CompareOptions=[.caseInsensitive,.diacriticInsensitive,.widthInsensitive]
         private static func foldUnicode(_ text: String) -> String {
             var kept=String.UnicodeScalarView()
-            for scalar in text.unicodeScalars where !apostrophes.contains(scalar) {
+            for scalar in text.unicodeScalars where !apostrophes.contains(scalar) && !Park.joiners.contains(scalar) {
                 if scalar=="&" { kept.append(contentsOf:" and ".unicodeScalars) } else { kept.append(scalar) }
             }
             let letters=CharacterSet.alphanumerics

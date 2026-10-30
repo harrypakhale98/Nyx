@@ -84,7 +84,7 @@ struct JournalView: View {
             .alert("Unable to delete",isPresented:$saveError) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }
             // The package gathered on disk is cleared once the exporter has copied it, or was cancelled.
             .fileExporter(isPresented:Binding(get:{ exporting != nil },set:{ if !$0 { exporting=nil } }),document:exporting,contentTypes:[.nyxJournal],
-                          defaultFilename:String(localized:"Nyx Journal \(Date.now.formatted(.iso8601.year().month().day()))")) { result in
+                          defaultFilename:String(localized:"Nyx Journal \(Date.now.formatted(Date.ISO8601FormatStyle(timeZone:.current).year().month().day()))")) { result in
                 let done=staged;staged=nil
                 Task.detached(priority:.utility) { JournalExport.clear(done) }
                 if case .failure=result { exportFailed=true }

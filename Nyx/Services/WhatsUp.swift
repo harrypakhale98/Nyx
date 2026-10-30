@@ -471,9 +471,11 @@ nonisolated struct WhatsUp: Sendable {
         return Item(id: "deepsky", kind: .deepSky, title: title, detail: detail, spoken: "\(title). \(detail)")
     }
 
-    /// A time rounded to ten minutes, for moments that are only ever "around".
+    /// A time rounded to ten minutes on the park's clock, for moments that are only ever "around"
+    /// (9:20 in Kathmandu, never 9:25, though its clock is 5:45 from UTC).
     static func around(_ date: Date, park: Park) -> String {
-        park.time(Date(timeIntervalSince1970: (date.timeIntervalSince1970/600).rounded()*600))
+        let offset=TimeInterval(park.timeZone.secondsFromGMT(for:date))
+        return park.time(Date(timeIntervalSince1970: ((date.timeIntervalSince1970+offset)/600).rounded()*600-offset))
     }
 }
 

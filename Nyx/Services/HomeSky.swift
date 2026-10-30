@@ -121,16 +121,12 @@ nonisolated struct HomeSky: Sendable {
     /// "Usual clouds for November", the cloud row's title; nil without the grid's clouds.
     var usualCloudsTitle: String? {
         guard usualClouds != nil else { return nil }
-        var format=Date.FormatStyle().month(.wide)
-        format.timeZone=place.timeZone
-        return String(localized: "Usual clouds for \(sky.evening.formatted(format))")
+        return String(localized: "Usual clouds for \(place.monthName(sky.evening))")
     }
     /// "About 8 in 10 November nights here are mostly clear." (an estimate from the grid).
     var usualCloudsLine: String? {
         guard let usualClouds else { return nil }
-        var format=Date.FormatStyle().month(.wide)
-        format.timeZone=place.timeZone
-        return usualClouds.sentence(monthName: sky.evening.formatted(format))
+        return usualClouds.sentence(monthName: place.monthName(sky.evening))
     }
     /// The sky grid's class: "Bortle 4"; nil unless the light comes from the grid.
     var skyClass: String? {
