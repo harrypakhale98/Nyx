@@ -25,19 +25,14 @@ nonisolated struct ScoreInputs: Sendable, Equatable {
     /// Why smoke is not in the night's score; nil when it is (`Night.aerosol`). A forecast that ends
     /// before the night (beyond its few days, or a cache left from a week offline) is said too, never
     /// passed off as clear air. Without the night (not scored yet), only whether any forecast is here.
-    func smokeNote(_ park: Park, night: Night?) -> String? {
-        if !smokeOn { return String(localized: "Smoke and haze are off in Your privacy, so smoke is not counted.") }
-        guard smokeKnown.contains(park.id) else { return String(localized: "No smoke forecast on this device yet, so smoke is not counted.") }
-        guard let night, night.aerosol == nil else { return nil }
-        return String(localized: "No smoke forecast on this device reaches this night, so smoke is not counted.")
-    }
+    func smokeNote(_ park: Park, night: Night?) -> String? { MissingInput.smoke(on: smokeOn, known: smokeKnown.contains(park.id), counted: night.map { $0.aerosol != nil }) }
     /// The line under the score when no closure stands beside it: what the last park update lists,
     /// or why there is none to read (switched off, no key, not fetched yet, or busy).
     func accessNote(_ park: Park) -> String? {
         if let code = park.nps, let listed = alerts?.alerts[code] { return AlertRanking.closure(listed) == nil ? AlertRanking.summary(listed, park: park) : nil }
-        if alertsBusy { return AlertRanking.unchecked(busy: true) }
-        if !alertsOn { return String(localized: "Park alerts are off in Your privacy, so closures are not checked.") }
-        return AlertRanking.unchecked(busy: false)
+        if alertsBusy { return MissingInput.unchecked(busy: true) }
+        if !alertsOn { return MissingInput.alertsOff }
+        return MissingInput.unchecked(busy: false)
     }
     /// Why a national park's closures are not known, when no closure stands beside its score and no
     /// park update covers it: park alerts off, the Park Service busy, or not checked yet. Nil when the
@@ -65,9 +60,9 @@ nonisolated struct ScoreInputs: Sendable, Equatable {
     /// by park id; when smoke is here but reaches none of them, that is said too.
     func listNote(_ parks: [Park], nights: [String: Night] = [:]) -> String? {
         var parts: [String] = []
-        if !smokeOn { parts.append(String(localized: "Smoke and haze are off in Your privacy, so smoke is not counted.")) }
-        else if !parks.contains(where: { smokeKnown.contains($0.id) }) { parts.append(String(localized: "No smoke forecast on this device yet, so smoke is not counted.")) }
-        else if !nights.isEmpty, !parks.contains(where: { nights[$0.id]?.aerosol != nil }) { parts.append(String(localized: "No smoke forecast on this device reaches this night, so smoke is not counted.")) }
+        if !smokeOn { parts.append(MissingInput.smokeOff) }
+        else if !parks.contains(where: { smokeKnown.contains($0.id) }) { parts.append(MissingInput.noSmokeYet) }
+        else if !nights.isEmpty, !parks.contains(where: { nights[$0.id]?.aerosol != nil }) { parts.append(MissingInput.smokeShort) }
         if let first = parks.first(where: unchecked) { accessNote(first).map { parts.append($0) } }
         return parts.isEmpty ? nil : Sentences.join(parts)
     }

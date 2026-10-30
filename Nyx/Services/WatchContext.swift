@@ -68,6 +68,11 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// `smokeNote`), rather than let silence read as "nothing closed". False from an older iPhone.
     let alertsOff: Bool
     let smokeOff: Bool
+    /// The national parks the iPhone's last park update covers, so the wrist says "Access not
+    /// checked" for the others as the iPhone does (`ScoreInputs.uncheckedNote`). A park whose closure
+    /// did not fit is left out, so the wrist asks to confirm rather than show no closure. Nil from an
+    /// older iPhone, which said only whether its park alerts were off.
+    let checkedParkIDs: [String]?
     /// The places this watch asked the iPhone to follow (the one kept on Tonight and those its
     /// complications are set to), which the iPhone now carries clouds for. Empty from an older iPhone.
     let watchParkIDs: [String]
@@ -101,7 +106,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// Only what travels; the expanded forecasts above are rebuilt on arrival.
     enum CodingKeys: String, CodingKey {
         case version, sent, sequence, savedParkIDs, homeParkID, nightVision, brighterRed, forecasts, details, closures, ranges, places, usualClouds, tonightParkID, watchParkIDs, droppedParkIDs, dataVersion, aurora
-        case tonightNight, spotForecastsOff, dusk, alertsOff, smokeOff
+        case tonightNight, spotForecastsOff, dusk, alertsOff, smokeOff, checkedParkIDs
     }
     /// What was sent; the expanded forecasts follow from it.
     static func == (a: WatchContext, b: WatchContext) -> Bool {
@@ -110,16 +115,16 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             && a.ranges == b.ranges && a.places == b.places && a.usualClouds == b.usualClouds
             && a.tonightParkID == b.tonightParkID && a.watchParkIDs == b.watchParkIDs && a.droppedParkIDs == b.droppedParkIDs && a.dataVersion == b.dataVersion
             && a.aurora == b.aurora && a.tonightNight == b.tonightNight && a.spotForecastsOff == b.spotForecastsOff && a.dusk == b.dusk
-            && a.alertsOff == b.alertsOff && a.smokeOff == b.smokeOff
+            && a.alertsOff == b.alertsOff && a.smokeOff == b.smokeOff && a.checkedParkIDs == b.checkedParkIDs
     }
 
     init(sent: Date, savedParkIDs: [String], homeParkID: String, nightVision: Bool, brighterRed: Bool = false, forecasts: [String: CompactForecast],
          details: [String: CompactDetail] = [:], closures: [String: String] = [:], ranges: [String: [String: [Int]]] = [:], places: [Place] = [],
          usualClouds: [String: CloudClimate.Months] = [:], tonightParkID: String? = nil, watchParkIDs: [String] = [], droppedParkIDs: [String] = [],
          dataVersion: String? = WatchContext.bundledData, sequence: Int64? = nil, aurora: AuroraOutlook? = nil, tonightNight: String? = nil, spotForecastsOff: Bool = false,
-         dusk: [Double]? = nil, alertsOff: Bool = false, smokeOff: Bool = false) {
+         dusk: [Double]? = nil, alertsOff: Bool = false, smokeOff: Bool = false, checkedParkIDs: [String]? = nil) {
         self.version = Self.currentVersion
-        self.alertsOff = alertsOff; self.smokeOff = smokeOff
+        self.alertsOff = alertsOff; self.smokeOff = smokeOff; self.checkedParkIDs = checkedParkIDs
         self.dusk = dusk.flatMap(Self.duskPoint)
         self.tonightNight = tonightParkID == nil ? nil : tonightNight; self.spotForecastsOff = spotForecastsOff
         self.aurora = aurora
@@ -152,13 +157,15 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
                      details: [String: ForecastDetail] = [:], closures: [String: String] = [:], aboveInversion: Set<String> = [],
                      ranges: [String: [String: ClosedRange<Int>]] = [:], places: [Place] = [], climate: CloudClimate = .shared,
                      tonightParkID: String? = nil, tonightNight: String? = nil, watchParkIDs: [String] = [], aurora: AuroraOutlook? = nil,
-                     spotForecastsOff: Bool = false, dusk: [Double]? = nil, alertsOff: Bool = false, smokeOff: Bool = false, now: Date = .now) -> WatchContext {
+                     spotForecastsOff: Bool = false, dusk: [Double]? = nil, alertsOff: Bool = false, smokeOff: Bool = false,
+                     checkedParkIDs: Set<String>? = nil, now: Date = .now) -> WatchContext {
         var compact: [String: CompactForecast] = [:], compactDetails: [String: CompactDetail] = [:], sentClosures: [String: String] = [:]
         var sentRanges: [String: [String: [Int]]] = [:]
         let ids = followed(saved: savedParkIDs, home: homeParkID, tonight: tonightParkID, watch: watchParkIDs)
         let from = now.addingTimeInterval(-24*3600)
         // Park IDs and the envelope are small; each forecast is measured on its own.
         var used = 2_000 + (ids+watchParkIDs).reduce(0) { $0 + $1.utf8.count + 4 } + (tonightParkID?.utf8.count ?? 0) + (tonightNight?.utf8.count ?? 0)
+            + (checkedParkIDs ?? []).reduce(0) { $0 + $1.utf8.count + 3 }
         // A value that cannot be encoded never fits.
         func size(_ value: some Encodable, _ id: String) -> Int { ((try? JSONEncoder().encode(value))?.count ?? byteBudget) + id.utf8.count + 4 }
         func fits(_ value: some Encodable, _ id: String) -> Bool { room(size(value, id)) }
@@ -219,7 +226,8 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         return WatchContext(sent: now, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: compact,
                             details: compactDetails, closures: sentClosures, ranges: sentRanges, places: sentPlaces, usualClouds: sentUsual,
                             tonightParkID: tonightParkID, watchParkIDs: watchParkIDs, droppedParkIDs: ids.filter(dropped.contains), aurora: sentAurora,
-                            tonightNight: tonightNight, spotForecastsOff: spotForecastsOff, dusk: dusk, alertsOff: alertsOff, smokeOff: smokeOff)
+                            tonightNight: tonightNight, spotForecastsOff: spotForecastsOff, dusk: dusk, alertsOff: alertsOff, smokeOff: smokeOff,
+                            checkedParkIDs: checkedParkIDs.map { $0.filter { closures[$0] == nil || sentClosures[$0] != nil }.sorted() })
     }
     /// The places the watch is handed, in the order their clouds are packed, once each: the saved
     /// places, the starting park, the iPhone's Tonight answer, then the places the watch asked for.
@@ -270,14 +278,20 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         guard let decoded = try? JSONDecoder().decode(WatchContext.self, from: data), decoded.version >= Self.minimumVersion else { return nil }
         self = decoded
     }
-    /// "Park alerts are off in Your privacy, so closures are not checked." for a national park with
-    /// no closure handed over while the iPhone's park alerts are off (`ScoreInputs.accessNote`).
+    /// Why a national park's closures are not known on the wrist when none stands beside its score, in
+    /// the iPhone's words (`ScoreInputs.uncheckedNote`): its park alerts off, or no park update covering
+    /// the park (`checkedParkIDs`; an older iPhone says only the first).
     func alertsNote(_ park: Park) -> String? {
-        guard alertsOff, park.nps != nil, closures[park.id] == nil else { return nil }
-        return String(localized: "Park alerts are off in Your privacy, so closures are not checked.")
+        guard park.nps != nil, closures[park.id] == nil else { return nil }
+        if alertsOff { return MissingInput.alertsOff }
+        guard let checkedParkIDs, !checkedParkIDs.contains(park.id) else { return nil }
+        return MissingInput.unchecked(busy: false)
     }
-    /// The iPhone's words while its smoke switch is off (`ScoreInputs.smokeNote`).
-    var smokeNote: String? { smokeOff ? String(localized: "Smoke and haze are off in Your privacy, so smoke is not counted.") : nil }
+    /// Why smoke is not in the wrist's score for the night, in the iPhone's words (`ScoreInputs.smokeNote`):
+    /// the iPhone's switch off, or no smoke forecast handed over for the place or reaching the night.
+    func smokeNote(_ park: Park, night: Night?) -> String? {
+        MissingInput.smoke(on: !smokeOff, known: details[park.id]?.air != nil, counted: night.map { $0.aerosol != nil })
+    }
     /// The same context stamped at another moment, with no sequence, for comparing what it says rather than when.
     func sent(at date: Date) -> WatchContext { stamped(sent: date, sequence: nil) }
     /// The same context as the hand-over numbered `sequence`.
@@ -286,7 +300,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         WatchContext(sent: date, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: forecasts, details: details,
                      closures: closures, ranges: ranges, places: places, usualClouds: usualClouds, tonightParkID: tonightParkID, watchParkIDs: watchParkIDs,
                      droppedParkIDs: droppedParkIDs, dataVersion: dataVersion, sequence: sequence, aurora: aurora, tonightNight: tonightNight, spotForecastsOff: spotForecastsOff,
-                     dusk: dusk, alertsOff: alertsOff, smokeOff: smokeOff)
+                     dusk: dusk, alertsOff: alertsOff, smokeOff: smokeOff, checkedParkIDs: checkedParkIDs)
     }
     /// The number for the next hand-over: one past the last, or the clock in milliseconds when that
     /// is higher. A clock set back never lowers it, and a reinstall that forgot the last number still
@@ -388,6 +402,7 @@ nonisolated extension WatchContext {
         // Absent from an iPhone up to 2.10: nothing is said about the switches, as before.
         alertsOff = (try? container.decodeIfPresent(Bool.self, forKey: .alertsOff)) ?? false
         smokeOff = (try? container.decodeIfPresent(Bool.self, forKey: .smokeOff)) ?? false
+        checkedParkIDs = try? container.decodeIfPresent([String].self, forKey: .checkedParkIDs)
         watchParkIDs = (try? container.decodeIfPresent([String].self, forKey: .watchParkIDs)) ?? []
         // Absent before 2.4 or with the forecast off; a malformed one costs only the aurora item.
         aurora = (try? container.decodeIfPresent(AuroraOutlook.self, forKey: .aurora)) ?? nil

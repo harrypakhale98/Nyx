@@ -3852,37 +3852,37 @@
         }
       }
     },
-    "Darkest of the next 30 nights": {
+    "Darkest of the next %lld nights": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die dunkelsten der nächsten 30 Nächte"
+            "value": "Die dunkelsten der nächsten %lld Nächte"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Darkest of the next 30 nights"
+            "value": "Darkest of the next %lld nights"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las noches más oscuras de las próximas 30"
+            "value": "Las noches más oscuras de las próximas %lld"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les plus noires des 30 prochaines nuits"
+            "value": "Les plus noires des %lld prochaines nuits"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この先30夜でいちばん暗い夜"
+            "value": "この先%lld夜でいちばん暗い夜"
           }
         }
       }
@@ -9102,37 +9102,37 @@
         }
       }
     },
-    "No true darkness in the next 30 nights at this latitude.": {
+    "No true darkness in the next %lld nights at this latitude.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "In den nächsten 30 Nächten keine echte Dunkelheit auf dieser Breite."
+            "value": "In den nächsten %lld Nächten keine echte Dunkelheit auf dieser Breite."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No true darkness in the next 30 nights at this latitude."
+            "value": "No true darkness in the next %lld nights at this latitude."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "En las próximas 30 noches no hay oscuridad total a esta latitud."
+            "value": "En las próximas %lld noches no hay oscuridad total a esta latitud."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pas d’obscurité totale dans les 30 prochaines nuits à cette latitude."
+            "value": "Pas d’obscurité totale dans les %lld prochaines nuits à cette latitude."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この緯度では、この先30夜は完全に暗くなりません。"
+            "value": "この緯度では、この先%lld夜は完全に暗くなりません。"
           }
         }
       }

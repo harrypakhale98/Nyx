@@ -9,7 +9,7 @@ extension PlanModel {
     }
     func alertSummary(_ park:Park)->String {
         // The same words Vision Pro says beside its scores (`AlertRanking.summary`).
-        guard let data=enrichments[park.id] else { return AlertRanking.unchecked(busy:alertsBusy) }
+        guard let data=enrichments[park.id] else { return MissingInput.unchecked(busy:alertsBusy) }
         return AlertRanking.summary(data.alerts,park:park)
     }
     /// Where a place's access stands for Ask Nyx, in Nyx's own fixed words only. A closure is a flag

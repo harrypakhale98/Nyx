@@ -61,6 +61,28 @@ nonisolated enum ClosureLine {
     }
 }
 
+/// What a score leaves out and why, one set of words on every device: the iPhone and Vision Pro
+/// (`ScoreInputs`) and the watch (`WatchContext`), so silence never reads as "nothing closed" or
+/// "clear air" on one of them.
+nonisolated enum MissingInput {
+    static var alertsOff: String { String(localized: "Park alerts are off in Your privacy, so closures are not checked.") }
+    /// No park update covers the park yet: the Park Service refusing requests, or nothing fetched.
+    static func unchecked(busy: Bool) -> String {
+        busy ? String(localized: "Park alerts are busy. Check current conditions on nps.gov.") : String(localized: "Access not checked. Confirm closures with the park.")
+    }
+    static var smokeOff: String { String(localized: "Smoke and haze are off in Your privacy, so smoke is not counted.") }
+    static var noSmokeYet: String { String(localized: "No smoke forecast on this device yet, so smoke is not counted.") }
+    static var smokeShort: String { String(localized: "No smoke forecast on this device reaches this night, so smoke is not counted.") }
+    /// Why smoke is not in a night's score; nil when it is. `counted`: whether the night's score
+    /// counts an aerosol forecast (`Night.aerosol`), nil without the night. A forecast that ends
+    /// before the night is said too, never passed off as clear air.
+    static func smoke(on: Bool, known: Bool, counted: Bool?) -> String? {
+        if !on { return smokeOff }
+        guard known else { return noSmokeYet }
+        return counted == false ? smokeShort : nil
+    }
+}
+
 /// The sky's state by the Sun's altitude, one set of words on every device (Tonight's sky on iPhone
 /// and iPad, Vision Pro's sky): "Twilight", "Late twilight", "Nearly dark", "True darkness".
 nonisolated enum SkyPhase {
