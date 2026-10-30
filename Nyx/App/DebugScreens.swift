@@ -16,7 +16,8 @@ struct DebugScreen: View {
         switch screen {
         // Keyed by the place: a catalogue place named by `-nyx-park` arrives once the catalogue is read
         // (the first park stands in until then), and its page must be its own, asking for its own tile.
-        case "detail": if let park=model.home { ParkDetailView(park:park).id(park.id) }
+        // `-nyx-night 2026-11-02`: the page opens on that night, with the real clock and forecast.
+        case "detail": if let park=model.home { ParkDetailView(park:park,initialDate:DebugScenario.text("-nyx-night").flatMap(TripDay.init(iso:)).map { $0.evening(in:park) }).id(park.id) }
         // Saved spot captures: the save sheet (`-nyx-state coordinates` for typed coordinates) and a saved spot's page.
         case "save-spot": NavigationStack { SaveSpotView(source: DebugScenario.state == "coordinates" ? .coordinates : .here) }
         case "spot":
