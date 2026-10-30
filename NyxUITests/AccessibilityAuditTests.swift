@@ -77,6 +77,16 @@ final class AccessibilityAuditTests:XCTestCase {
         XCTAssertTrue(failures.isEmpty,"Accessibility audit issues:\n"+failures.joined(separator:"\n"))
     }
 
+    /// `NYX_AUDIT_LANGUAGE` ("de", "ja"…) runs a pass in that language and its region's formats, as the
+    /// app ships it: words grow, dates and times change shape, and clipping shows where English fits.
+    /// In German and Japanese (2026-10-30) its "Text clipped" findings over-report: every one checked on
+    /// screen (Learn titles, hyphenated names, the closure line, short Japanese labels) was drawn in full,
+    /// and lines under the tab bar's fade are reported for contrast. Check a finding on screen before acting.
+    private static var language:[String] {
+        guard let code=ProcessInfo.processInfo.environment["NYX_AUDIT_LANGUAGE"], !code.isEmpty else { return [] }
+        let region=["de":"DE","es":"ES","fr":"FR","ja":"JP"][code] ?? "US"
+        return ["-AppleLanguages","(\(code))","-AppleLocale","\(code)_\(region)"]
+    }
     private func audit(state:String,screens:[String],extra:[String]=[],pass:String="default") throws {
         var failures:[String]=[]
         for spec in screens {
@@ -89,7 +99,7 @@ final class AccessibilityAuditTests:XCTestCase {
             // The editor opens on the starting park, which the simulator keeps from earlier runs: pin the longest
             // park name, so the row is audited at its widest every time.
             let pinned=screen=="editor" ? ["-homePark","blca"] : []
-            app.launchArguments=["-nyx-screen",screen,"-nyx-state",fixture,"-nyx-reduce-motion"]+palette+pinned+extra
+            app.launchArguments=["-nyx-screen",screen,"-nyx-state",fixture,"-nyx-reduce-motion"]+palette+pinned+extra+Self.language
             app.launch()
             _=app.wait(for:.runningForeground,timeout:30)
             sleep(2)
