@@ -184,6 +184,9 @@ struct ParkNightView: View {
             }
         }
         .fullScreenCover(isPresented: $darkMode) { DarkAdaptationView(park: park) }
+        // A presentation's scroll indicator follows the view that presents it, not the cover's own
+        // setting: hidden while the red cover is up, as the root hides it under red light.
+        .scrollIndicators(darkMode || palette.nightVision ? .never : .automatic)
     }
 }
 

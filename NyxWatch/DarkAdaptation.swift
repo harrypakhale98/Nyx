@@ -46,6 +46,10 @@ struct DarkAdaptationView: View {
                 }
                 .sheet(isPresented: $showsInfo) { AdaptationInfo().environment(\.nyx, palette).modifier(WatchDebug.TypeSize()) }
         }
+        // The scroll indicator is system chrome outside the red filter: a white bar at night. A
+        // presentation's indicator follows the view that presents it, so this one hides the info
+        // sheet's, and the page that opens this cover hides the cover's (`ParkNightView`).
+        .scrollIndicators(.never)
         .foregroundStyle(palette.ink)
         .tint(palette.ink)
         .environment(\.nyx, palette)
@@ -85,8 +89,6 @@ struct DarkAdaptationView: View {
                 // At large text sizes the page scrolls; this keeps its end clear of the button.
                 .padding(.bottom, 30)
             }
-            // The scroll indicator is system chrome outside the red filter: a white bar at night.
-            .scrollIndicators(.never)
             // The height between the top bar and the bottom bar: the scroll view's frame sits inside both.
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { room = $0 }
             // Without permission for reminders, the taps come from the screen while it is up.
@@ -233,7 +235,6 @@ private struct AdaptationInfo: View {
                 .font(.footnote).fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .scrollIndicators(.never)
             .modifier(WatchDebug.ScrollEnd())
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -242,6 +243,8 @@ private struct AdaptationInfo: View {
             }
             .containerBackground(Color.black, for: .navigation)
         }
+        // No white scroll indicator on the red screen (set again for any sheet this one presents).
+        .scrollIndicators(.never)
         .foregroundStyle(palette.ink)
         .tint(palette.ink)
         .modifier(NightVisionFilter(enabled: true, red: palette.red))
