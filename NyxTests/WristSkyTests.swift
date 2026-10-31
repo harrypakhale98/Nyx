@@ -151,6 +151,10 @@ struct WristSkyTests {
         let fresh = CloudSource.of(context: context, park: jotr, now: updated.addingTimeInterval(35*3600))
         #expect(fresh == .fresh(updated) && !fresh.isStale)
         #expect(fresh.line(for: jotr)?.hasPrefix("Clouds from") == true)
+        // The park's clock, as every wrist time: its zone named only on a watch that keeps another.
+        let denver = try #require(TimeZone(identifier: "America/Denver")), zone = jotr.timeZone.shortName(at: updated)
+        #expect(fresh.line(for: jotr, device: denver)?.hasSuffix(zone) == true)
+        #expect(fresh.line(for: jotr, device: jotr.timeZone)?.contains(zone) == false)
         let expired = CloudSource.of(context: context, park: jotr, now: updated.addingTimeInterval(36*3600))
         #expect(expired == .expired(updated) && expired.isStale)
         // The catalog names the device the person holds: iPad on iPad, iPhone elsewhere.

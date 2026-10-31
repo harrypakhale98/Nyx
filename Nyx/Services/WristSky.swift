@@ -225,7 +225,7 @@ extension Park {
     /// Whether the park's clock reads differently from this device's at `date`: its times are park-local.
     nonisolated func keepsOtherTime(at date: Date) -> Bool { timeZone.keepsOtherTime(at: date) }
     /// A park-local time, with the park's short zone where its clock is not this device's ("4:52 AM MST").
-    nonisolated func zonedTime(_ date: Date) -> String { timeZone.clockTime(date, zoned: keepsOtherTime(at: date)) }
+    nonisolated func zonedTime(_ date: Date, device: TimeZone = .current) -> String { timeZone.clockTime(date, zoned: timeZone.keepsOtherTime(at: date, device: device)) }
     /// "Times in Mountain Time." where the park's clock is not this device's, for what VoiceOver hears.
     nonisolated func spokenZone(at date: Date) -> String? { timeZone.spokenZone(at: date) }
 }
@@ -356,11 +356,14 @@ nonisolated enum CloudSource: Equatable, Sendable {
         }
     }
     /// One short line for the watch, or nil when another line already says it (before any sync).
-    func line(for park: Park) -> String? {
+    /// `device`: the watch's clock.
+    func line(for park: Park, device: TimeZone = .current) -> String? {
         switch self {
         case .unsynced: return nil
         case .fresh(let updated):
+            // The park's clock, as every wrist time, with its zone where that is not this watch's ("Sat 2:09 AM CST").
             var format = Date.FormatStyle.dateTime.weekday(.abbreviated).hour().minute()
+            if park.timeZone.keepsOtherTime(at: updated, device: device) { format = format.timeZone(.specificName(.short)) }
             format.timeZone = park.timeZone
             return String(localized: "Clouds from \(updated.formatted(format))")
         case .expired, .missing(followed: true): return String(localized: "No recent forecast. Open Nyx on iPhone to refresh.")

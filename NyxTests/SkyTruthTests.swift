@@ -117,6 +117,18 @@ struct SkyTruthTests {
         #expect(TripPlanner.reason(up).hasPrefix("Dark, Moon up, \(real.moon.litText), "))
         #expect(!TripPlanner.reason(free).contains(free.sky.moon.litText))
     }
+    /// A reminder's moonset is the park's time, with the park's zone only where the iPhone keeps another
+    /// clock: unchanged on the park's own clock.
+    @Test func reminderTimesNameTheZoneOnAnotherClock() throws {
+        let jotr = try park("jotr"), real = try moonlitNight(jotr)
+        let set = try #require(real.darkStart).addingTimeInterval(7200)
+        let night = NightPlanner.night(park: jotr, sky: Self.sky(real, moon: MoonPhase(fraction: 0.5), rise: .some(nil), set: set, below: 0.6), forecast: nil, detail: nil, now: real.evening)
+        let denver = try #require(TimeZone(identifier: "America/Denver"))
+        #expect(NotificationScheduler.reason(night, device: jotr.timeZone) == "Moon down at \(jotr.time(set))")
+        #expect(NotificationScheduler.reason(night, device: denver) == "Moon down at \(jotr.timeZone.clockTime(set, zoned: true))")
+        #expect(NotificationScheduler.body(night, device: denver).contains(jotr.timeZone.shortName(at: set)))
+        #expect(jotr.zonedTime(set, device: jotr.timeZone) == jotr.time(set))
+    }
 
     // MARK: One window, one best night
 

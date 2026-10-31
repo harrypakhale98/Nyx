@@ -313,10 +313,11 @@ nonisolated struct WhatsUp: Sendable {
         default: return String(localized: "\(-days) nights after the peak")
         }
     }
-    /// "before dawn" when the best moment is within two hours of true darkness ending; otherwise a time.
-    static func whenPhrase(_ date: Date, sky: SkyConditions, park: Park) -> String {
+    /// "before dawn" when the best moment is within two hours of true darkness ending; otherwise a time,
+    /// rounded to ten minutes, in `clock`'s words (the park's time by default).
+    static func whenPhrase(_ date: Date, sky: SkyConditions, park: Park, clock: ((Date) -> String)? = nil) -> String {
         if let end=sky.darkEnd, end.timeIntervalSince(date)<2*3600 { return String(localized: "before dawn") }
-        return String(localized: "around \(around(date, park: park))")
+        return String(localized: "around \(clock.map { $0(rounded(date, park: park)) } ?? around(date, park: park))")
     }
     /// A shower's row. `homeObserver`: the sky a home's rate is for (`HomeSky.showerItem`), which
     /// replaces the park's observer line, leaves out the published rate and a poor return's
@@ -484,9 +485,11 @@ nonisolated struct WhatsUp: Sendable {
 
     /// A time rounded to ten minutes on the park's clock, for moments that are only ever "around"
     /// (9:20 in Kathmandu, never 9:25, though its clock is 5:45 from UTC).
-    static func around(_ date: Date, park: Park) -> String {
+    static func around(_ date: Date, park: Park) -> String { park.time(rounded(date, park: park)) }
+    /// `date` to the nearest ten minutes of the park's clock.
+    static func rounded(_ date: Date, park: Park) -> Date {
         let offset=TimeInterval(park.timeZone.secondsFromGMT(for:date))
-        return park.time(Date(timeIntervalSince1970: ((date.timeIntervalSince1970+offset)/600).rounded()*600-offset))
+        return Date(timeIntervalSince1970: ((date.timeIntervalSince1970+offset)/600).rounded()*600-offset)
     }
 }
 

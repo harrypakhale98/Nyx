@@ -145,6 +145,19 @@ import Testing
         #expect(scheduler.showerPlans(nights: [jotr, deva], now: now, delivered: [], closures: ["deva": "Badwater Road closed"]).map(\.parkID) == ["jotr"])
         #expect(scheduler.showerPlans(nights: [jotr, deva], now: now, delivered: []).count == 1)
     }
+    /// The shower's best time is the park's, with its zone where the iPhone keeps another clock.
+    @Test func showerReminderNamesTheZoneOnAnotherClock() throws {
+        let (now, jotr, _) = try showerNights()
+        let scheduler = NotificationScheduler(center: StubNotifications(), ledger: ReminderLedger(suite: "nyx-ledger-test-\(UUID().uuidString)"))
+        let moment = try #require(WhatsUp.Events(park: jotr.park, sky: jotr.sky).reminderShower?.best)
+        let zone = jotr.park.timeZone.shortName(at: moment)
+        let home = try #require(scheduler.showerPlans(nights: [jotr], now: now, delivered: [], device: jotr.park.timeZone).first?.body)
+        let denver = try #require(TimeZone(identifier: "America/Denver"))
+        let away = try #require(scheduler.showerPlans(nights: [jotr], now: now, delivered: [], device: denver).first?.body)
+        #expect(!home.contains(zone))
+        #expect(away == home || away.contains(zone))
+        #expect(home.contains("before dawn") || away.contains(zone))
+    }
     /// Death Valley's shower reminder was delivered at 16:00; a closure there since makes Joshua Tree
     /// the open pick, but that night already had its reminder: no second one.
     @Test func deliveredShowerReminderIsNotRepeatedElsewhere() throws {

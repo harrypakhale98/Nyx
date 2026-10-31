@@ -205,8 +205,8 @@ nonisolated struct NotificationScheduler {
     /// which VoiceOver reads as "slash". A place the Park Service does not run has no park alerts to
     /// check: it says "closures and access" instead. With a closure in the last park update, the
     /// closure comes first in the app's words (`ClosureLine`) and stands in for the advice.
-    static func body(_ night:Night,models:ModelAgreement?=nil,closure:String?=nil)->String {
-        let why=reason(night,models:models)
+    static func body(_ night:Night,models:ModelAgreement?=nil,closure:String?=nil,device:TimeZone = .current)->String {
+        let why=reason(night,models:models,device:device)
         if let closure=closure?.trimmingCharacters(in:.whitespacesAndNewlines), !closure.isEmpty {
             return ClosureLine.first(String(localized:"\(night.score.value) out of 100. \(why)."),closure:closure)
         }
@@ -215,18 +215,21 @@ nonisolated struct NotificationScheduler {
     }
     /// One thing that is true of this night and makes it dark, the most telling first; with it,
     /// when true, that all three forecast models are clear ("Moon down; all three
-    /// forecast models clear").
-    static func reason(_ night:Night,models:ModelAgreement?=nil)->String {
-        let moon=moonReason(night)
+    /// forecast models clear"). A time is the park's, with its short zone where `device`'s clock is
+    /// another ("Moon down at 11:40 PM MST"), as on the watch and the widgets.
+    static func reason(_ night:Night,models:ModelAgreement?=nil,device:TimeZone = .current)->String {
+        let moon=moonReason(night,device:device)
         guard modelsClear(models) else { return moon ?? cloudReason(night) }
         guard let moon else { return String(localized:"All three forecast models clear") }
         return String(localized:"\(moon); all three forecast models clear")
     }
     /// The Moon's part, when it is the reason (out of the way for all of true darkness, or from a
     /// moonset inside it), in the words every glance uses (`MoonInDarkness.short`); nil when it is not.
-    private static func moonReason(_ night:Night)->String? {
+    private static func moonReason(_ night:Night,device:TimeZone)->String? {
         switch night.sky.moonInDarkness {
-        case .allFree, .negligible, .setsAt: night.sky.moonShort(park:night.park)
+        // `MoonInDarkness.short`'s words, with the zone where the clocks differ.
+        case .setsAt(let set): String(localized:"Moon down at \(night.park.zonedTime(set,device:device))")
+        case .allFree, .negligible: night.sky.moonShort(park:night.park)
         case .noDarkness, .allUp, .risesAt, .partial: nil
         }
     }
@@ -242,7 +245,7 @@ nonisolated struct NotificationScheduler {
     /// is mostly cloud. Fires at 16:00 park time that day, or in a minute when that has passed, as long
     /// as true darkness has not begun. A closed park's says the closure first. A night whose shower
     /// reminder was delivered gets no other, whichever park would now be picked (a closure since).
-    func showerPlans(nights:[Night],now:Date,delivered:Set<String>,closures:[String:String]=[:],table:SkyEvents = .shared)->[NightReminder] {
+    func showerPlans(nights:[Night],now:Date,delivered:Set<String>,closures:[String:String]=[:],table:SkyEvents = .shared,device:TimeZone = .current)->[NightReminder] {
         var best:[String:(night:Night,shower:SkyAlmanac.ShowerNight)]=[:]
         let told=Self.showerDays(delivered,nights:nights)
         for night in nights where night.sky.darkHours>0 && (night.cloudCover ?? 0)<70 {
@@ -262,7 +265,7 @@ nonisolated struct NotificationScheduler {
             let identifier=Self.showerIdentifier(park:park,night:night.id)
             guard fire<darkStart, !delivered.contains(identifier) else { return nil }
             return NightReminder(id:identifier,parkID:park.id,title:String(localized:"\(shower.shower.localizedName) at \(park.shortName) tonight"),
-                body:ClosureLine.first(String(localized:"\(WhatsUp.rateText(shower.hourlyRate).sentenceStart) \(WhatsUp.whenPhrase(moment,sky:night.sky,park:park)), Moon down. A rough guide. Check clouds and closures before you go."),closure:closures[park.id]),
+                body:ClosureLine.first(String(localized:"\(WhatsUp.rateText(shower.hourlyRate).sentenceStart) \(WhatsUp.whenPhrase(moment,sky:night.sky,park:park) { park.zonedTime($0,device:device) }), Moon down. A rough guide. Check clouds and closures before you go."),closure:closures[park.id]),
                 fireDate:fire,timeZone:park.timeZone,night:park.isoDay(night.id),whatsUp:true)
         }
     }
