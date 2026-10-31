@@ -736,13 +736,19 @@ import Observation
         }
     }
     /// The person's own key from Your privacy, else the key every install shares.
-    var npsKey: String { NPSKeyStore().key ?? Self.sharedNPSKey }
+    var npsKey: String { ownNPSKey() ?? Self.sharedNPSKey }
+    /// Reads the person's own key, from the Keychain each time (a test hands its own).
+    @ObservationIgnored var ownNPSKey: () -> String? = { NPSKeyStore().key }
     static var sharedNPSKey: String { Bundle.main.object(forInfoDictionaryKey:"NPS_API_KEY") as? String ?? "" }
     /// A key of the person's own was saved or removed: the wait the last key earned is lifted and
     /// alerts are asked for again at once with the new one.
     func npsKeyChanged() async {
         if npsKeyRefused { npsKeyRefused=false }
-        if alertsRefusal != nil { alertsRefusal=nil }
+        if alertsRefusal != nil {
+            alertsRefusal=nil
+            // Apple Watch stops naming the refused key too: the refresh below pushes only a change.
+            if DebugScenario.screen == nil { savedSync.pushWatch(self) }
+        }
         await parkStore.keyChanged(to:npsKey)
         await refreshParkUpdates([],force:true)
     }
@@ -921,13 +927,17 @@ import Observation
     /// `alertPages`: one in a background refresh, where time is short (`SavedSkySync`).
     func refreshParkUpdates(_ parks:[Park],force:Bool=false,programs:Bool=false,alertPages:Int=ParkStore.alertPages) async {
         let live=DebugScenario.screen == nil || DebugScenario.state == "live"
-        let own=NPSKeyStore().key
+        let own=ownNPSKey()
         let network=npsEnabled && live, key=own ?? Self.sharedNPSKey
         await hydration?.value
         let update=await parkStore.alerts(for:self.parks,key:key,network:network,force:force,pages:alertPages)
-        // A key saved or removed while this caller waited: what it brought is labelled, and programs
-        // asked for, by the caller holding the key now (`npsKeyChanged`), never by this one.
-        guard (NPSKeyStore().key ?? Self.sharedNPSKey) == key else { return }
+        // A key saved or removed while this caller waited: what it brought is labelled by the caller
+        // holding the key now (`npsKeyChanged`), never by this one. That caller asks for no programs,
+        // so an open page's are asked again here, with the new key (its alerts request is joined).
+        guard npsKey == key else {
+            if programs, !Task.isCancelled { await refreshParkUpdates(parks,force:force,programs:true,alertPages:alertPages) }
+            return
+        }
         apply(update)
         // Under the key field, and in the access line wherever alerts are shown.
         let refusedOwn=own != nil && update.keyRefused

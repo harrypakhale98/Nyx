@@ -90,6 +90,29 @@ actor CancelledFirstHTTP: HTTPTransport {
     func release() { held?.resume(); held=nil }
 }
 
+/// Holds the alerts request made with the key "old" until `release()`, and answers it as a refusal
+/// of that key; answers any other key at once. Records the key each programs request carried.
+actor KeySwapParks: ParkProviding {
+    static let stale=ParkAlertsCache(updated: Date(timeIntervalSince1970: 1_000_000), alerts: [:])
+    static let fresh=ParkAlertsCache(updated: Date(timeIntervalSince1970: 2_000_000), alerts: [:])
+    private(set) var alertKeys: [String]=[]
+    private(set) var programKeys: [String]=[]
+    private var held: CheckedContinuation<Void, Never>?
+    func alerts(for parks: [Park], key: String, network: Bool, force: Bool, pages: Int) async -> AlertsUpdate {
+        alertKeys.append(key)
+        guard key == "old" else { return AlertsUpdate(cache: Self.fresh, busy: false) }
+        await withCheckedContinuation { held=$0 }
+        return AlertsUpdate(cache: Self.stale, busy: true, keyRefused: true)
+    }
+    func programs(for park: Park, key: String, network: Bool, force: Bool) async -> ProgramsCache? {
+        programKeys.append(key)
+        return ProgramsCache(updated: Self.fresh.updated, programs: [])
+    }
+    func hydrate(_ parks: [Park]) async -> AlertsUpdate { AlertsUpdate(cache: nil, busy: false) }
+    func seed(_ cached: ParkAlertsCache?) async {}
+    func release() { held?.resume(); held=nil }
+}
+
 /// Collects what a service hands on (`observe`), so a test can wait for a delivery.
 final class Deliveries<Value: Sendable>: Sendable {
     private let state=Mutex<[Value]>([])
@@ -573,6 +596,26 @@ struct DataServiceDeliveryTests {
         let closed=ParkAlertsCache(updated: .now, alerts: ["jotr": [ParkAlert(id: "c", title: "Keys View Road closed", description: "", category: "Park Closure")]])
         #expect(ScoreInputs(alerts: closed).accessNote(jotr) == nil)
         #expect(ScoreInputs(alerts: closed, alertsBusy: true, alertsRefusal: .own).accessNote(jotr) == MissingInput.refusal(.own, cached: true))
+    }
+    /// A key saved or removed while a park page's alerts request is out: the old key's answer is not
+    /// applied (nor its refusal named), and the page's programs are asked for with the new key.
+    @MainActor @Test(.timeLimit(.minutes(1))) func aPageOpenAcrossAKeyChangeAsksWithTheNewKey() async throws {
+        let jotr=try park("jotr")
+        let store=KeySwapParks()
+        let model=PlanModel(weather: WeatherService(transport: StubHTTP([:]), persist: false), parkStore: store,
+                            detail: ForecastDetailService(transport: StubHTTP([:]), persist: false), defaults: isolatedDefaults())
+        var own: String?="old"
+        model.ownNPSKey={ own }
+        let page=Task { await model.refreshParkUpdates([jotr], programs: true) }
+        while await store.alertKeys.isEmpty { try await Task.sleep(for: .milliseconds(5)) }
+        own="new"
+        await model.npsKeyChanged()
+        await store.release()
+        await page.value
+        #expect(model.alertsUpdated == KeySwapParks.fresh.updated)
+        #expect(model.alertsRefusal == nil && !model.npsKeyRefused && !model.alertsBusy)
+        #expect(await store.programKeys == ["new"])
+        #expect(model.programsAsked.contains(jotr.id))
     }
     /// Fresh alerts are not called busy because another request (programs) made the Park Service's host wait.
     @Test func anotherRequestsRefusalLeavesFreshAlertsCalm() async throws {
