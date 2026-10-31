@@ -201,11 +201,13 @@ nonisolated enum WatchTimeline {
 /// there the two long names give way to the short ones the inline complication already uses
 /// ("Dark in 1 hr, 10 min", "Dawn in 5 min"); the app keeps the full words. The moments are named as
 /// the iPhone's field mode and Live Activity name them (`FieldNight`): Sunset, True darkness,
-/// Moonrise, Moonset, Dawn twilight, Sunrise.
-func countdownText(_ milestone: NightMilestone, now: Date? = nil) -> Text {
-    let reference = now.map { Text(verbatim: inDuration(until: milestone.date, from: $0)) }
+/// Moonrise, Moonset, Dawn twilight, Sunrise. `short` and `width` are the app's narrower forms, for
+/// a line that would otherwise cut the duration (`Countdown`).
+func countdownText(_ milestone: NightMilestone, now: Date? = nil, short: Bool = false,
+                   width: Duration.UnitsFormatStyle.UnitWidth = .abbreviated) -> Text {
+    let reference = now.map { Text(verbatim: inDuration(until: milestone.date, from: $0, width: width)) }
         ?? Text(.currentDate, format: .reference(to: milestone.date, allowedFields: [.hour, .minute]))
-    let compact = now == nil
+    let compact = now == nil || short
     return switch milestone.kind {
     case .sunset: Text("Sunset \(reference)")
     case .darkStart: compact ? Text("Dark \(reference)") : Text("True darkness \(reference)")
@@ -216,10 +218,12 @@ func countdownText(_ milestone: NightMilestone, now: Date? = nil) -> Text {
     }
 }
 
-/// "in 42 min", rounded up to the minute so it never reads "in 0 min" before the moment.
-func inDuration(until date: Date, from now: Date) -> String {
+/// "in 42 min", rounded up to the minute so it never reads "in 0 min" before the moment. Narrow
+/// units ("2h 46min") hold together, so a line that has to wrap never splits the duration.
+func inDuration(until date: Date, from now: Date, width: Duration.UnitsFormatStyle.UnitWidth = .abbreviated) -> String {
     let minutes = max(1, Int((date.timeIntervalSince(now)/60).rounded(.up)))
-    let span = Duration.seconds(minutes*60).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated, maximumUnitCount: 2))
+    var span = Duration.seconds(minutes*60).formatted(.units(allowed: [.hours, .minutes], width: width, maximumUnitCount: 2))
+    if width == .narrow { span = span.replacingOccurrences(of: " ", with: "\u{00A0}") }
     return String(localized: "in \(span)")
 }
 

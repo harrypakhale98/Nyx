@@ -477,7 +477,7 @@ struct NightGlance: View {
                 let message = SkyConditions.noDarknessMessage(tonight: isTonight)
                 ViewThatFits(in: .horizontal) {
                     Text(message)
-                    Text("No true darkness").accessibilityLabel(message)
+                    Text("No true darkness").minimumScaleFactor(0.8).accessibilityLabel(message)
                 }
                 .font(.footnote).lineLimit(1)
             }
@@ -499,6 +499,35 @@ func cloudLines(_ night: Night, context: WatchContext?, now: Date) -> [String] {
     if let line = source.line(for: night.park) { lines.append(line) }
     if let line = context?.dataNote { lines.append(line) }
     return lines
+}
+
+/// "Dawn twilight in 5 hr, 4 min", whole: the full name where it fits on one line, then the
+/// complications' short name ("Dawn in 5 hr, 4 min"), then narrow units ("Dawn in 5h 4m"), set
+/// down to 70% where that keeps one line (as the shrink it replaces meant to: a shrinking line was
+/// cut instead), and only then wrapped onto a second line: the duration is never cut ("en 5 h y 4…"
+/// read as five hours four). `wraps`: the whole line, wrapped (the large sizes). VoiceOver hears
+/// the full words whichever shows. The callers set it in the serif subheadline.
+struct Countdown: View {
+    let next: NightMilestone
+    let now: Date
+    var wraps = false
+    /// The serif subheadline's size, for the smaller steps (sizes ViewThatFits can measure, which a shrink is not).
+    @ScaledMetric(relativeTo: .subheadline) private var size: CGFloat = 15
+    var body: some View {
+        let full = countdownText(next, now: now)
+        if wraps { full }
+        else {
+            let narrow = countdownText(next, now: now, short: true, width: .narrow)
+            ViewThatFits(in: .horizontal) {
+                full.lineLimit(1)
+                countdownText(next, now: now, short: true).lineLimit(1).accessibilityLabel(full)
+                narrow.lineLimit(1).accessibilityLabel(full)
+                narrow.font(.system(size: size*0.85, design: .serif)).lineLimit(1).accessibilityLabel(full)
+                narrow.font(.system(size: size*0.7, design: .serif)).lineLimit(1).accessibilityLabel(full)
+                narrow.lineLimit(2).accessibilityLabel(full)
+            }
+        }
+    }
 }
 
 /// The next moment of the night and how long until it, rewritten by the screen's minute timeline.
@@ -528,14 +557,15 @@ struct NextMoment: View {
                             ViewThatFits(in: .horizontal) {
                                 Text(message).font(.caption2)
                                 eyebrow(String(localized: "No true darkness")).accessibilityLabel(message)
+                                // Without the letterspacing, for the longer languages ("KEINE ECHTE DUNKELH…" on 40 mm).
+                                eyebrow(String(localized: "No true darkness"), spaced: false).accessibilityLabel(message)
                             }
                             .foregroundStyle(palette.ink).lineLimit(1)
                         }
                     } else if let state = nowLine {
                         eyebrow(state).lineLimit(limit)
                     }
-                    countdownText(next, now: now).font(.system(.subheadline, design: .serif)).foregroundStyle(palette.ink)
-                        .lineLimit(limit).minimumScaleFactor(0.7)
+                    Countdown(next: next, now: now, wraps: limit == nil).font(.system(.subheadline, design: .serif)).foregroundStyle(palette.ink)
                     Group {
                         // Park time, with its zone where the park's clock is not the watch's ("at 4:52 AM MST").
                         let time = night.park.zonedTime(next.date)
@@ -582,9 +612,9 @@ struct NextMoment: View {
         .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .combine)
     }
-    /// The state over the countdown, set as an eyebrow (solid at accessibility sizes).
-    private func eyebrow(_ text: String) -> some View {
-        let spaced = Lettering.spaced && !typeSize.isAccessibilitySize
+    /// The state over the countdown, set as an eyebrow (solid at accessibility sizes, or where `spaced` is false).
+    private func eyebrow(_ text: String, spaced: Bool = true) -> some View {
+        let spaced = spaced && Lettering.spaced && !typeSize.isAccessibilitySize
         return Text(text).font(.caption2.weight(.semibold)).textCase(spaced ? .uppercase : nil).tracking(spaced ? 1 : 0).foregroundStyle(palette.ink)
             .minimumScaleFactor(0.8)
     }

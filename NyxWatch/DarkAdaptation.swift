@@ -126,8 +126,7 @@ private struct NextInDark: View {
     let now: Date
     var body: some View {
         VStack(spacing: 0) {
-            countdownText(next, now: now).font(.system(.subheadline, design: .serif))
-                .lineLimit(typeSize.isAccessibilitySize ? nil : 1).minimumScaleFactor(0.7)
+            Countdown(next: next, now: now, wraps: typeSize.isAccessibilitySize).font(.system(.subheadline, design: .serif))
             Text("at \(night.park.zonedTime(next.date))").font(.caption2).foregroundStyle(palette.muted).nonEssential()
         }
         .fixedSize(horizontal: false, vertical: true)
