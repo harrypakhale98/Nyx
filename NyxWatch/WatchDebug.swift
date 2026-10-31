@@ -207,7 +207,7 @@ private struct ComplicationReview: View {
         let entry = WatchSkyEntry(date: .now, night: night, next: NightMilestone.next(after: .now, in: night.sky), nightVision: red, closure: store.context?.closures[park.id],
                                   cloudsOld: WatchTimeline.cloudsOld(park, forecast: store.context?.cloudForecasts[park.id], detail: store.context?.forecastDetails[park.id], at: .now),
                                   dataDiffers: store.context?.dataDiffers ?? false)
-        let moon = MoonEntry(date: .now, park: park, moon: MoonNow(at: .now, park: park), nightVision: red)
+        let moon = MoonEntry(date: .now, park: park, moon: MoonNow(at: .now, park: park, night: park.currentNight(at: .now)), nightVision: red)
         let dark = NextDarkEntry(date: .now, park: park, moment: DarkMoment.next(at: park, now: .now), nightVision: red)
         // Countdowns are drawn for this moment: a live `.currentDate` reference inside an app scroll view
         // never finished its first layout on the watchOS 27 simulator (the widget extension counts down live).
