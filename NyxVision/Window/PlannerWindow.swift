@@ -230,30 +230,38 @@ struct ParkList: View {
 /// A park and its night: the score, and under it the band, or "Early look" / "Estimate" when the
 /// night has no full cloud forecast (the iPhone's compact words); under the name, the park's
 /// closure, as in the iPhone's Parks list. VoiceOver hears the closure, or that closures or smoke
-/// are not counted (`ScoreInputs.spoken`), after the score.
+/// are not counted (`ScoreInputs.spoken`), after the score. At accessibility sizes the closure takes
+/// the row's whole width under the name and score, rather than a word to a line beside the score.
 struct ParkRow: View {
     @Environment(\.visionPalette) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
     let park: Park
     let night: Night?
     var closure: String?
     var notes: [String] = []
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(park.shortName).font(.system(.body, design: .serif))
-                Text(park.statesLine).font(.caption).foregroundStyle(palette.muted)
-                if let closure {
-                    VisionCaution(text: Text(closure)).font(.caption).padding(.top, 2)
+        let wide = typeSize.isAccessibilitySize
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(park.shortName).font(.system(.body, design: .serif))
+                    Text(park.statesLine).font(.caption).foregroundStyle(palette.muted)
+                    if let closure, !wide {
+                        VisionCaution(text: Text(closure)).font(.caption).padding(.top, 2)
+                    }
+                }
+                Spacer(minLength: 8)
+                if let night {
+                    VStack(alignment: .trailing, spacing: 0) {
+                        Text(night.score.value, format: .number).scoreNumeral(.title2, accent: palette.accent)
+                        Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted)
+                    }
+                } else {
+                    ProgressView().controlSize(.small)
                 }
             }
-            Spacer(minLength: 8)
-            if let night {
-                VStack(alignment: .trailing, spacing: 0) {
-                    Text(night.score.value, format: .number).scoreNumeral(.title2, accent: palette.accent)
-                    Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted)
-                }
-            } else {
-                ProgressView().controlSize(.small)
+            if let closure, wide {
+                VisionCaution(text: Text(closure)).font(.caption)
             }
         }
         .accessibilityElement(children: .combine)
