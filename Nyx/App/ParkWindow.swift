@@ -89,15 +89,18 @@ struct OpenParkWindowButton: View {
         }
     }
 }
-/// The park on screen in a window's current tab, for ⌘⇧N. A park's page reports itself while it is
-/// visible; another tab's page never answers for this one.
+/// The park on screen in a window's current tab, for ⌘⇧N, with the night it shows (nil for tonight),
+/// so the new window opens where the reader is. A park's page reports itself while it is visible;
+/// another tab's page never answers for this one.
 struct ReportsVisiblePark: ViewModifier {
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.nyxTab) private var tab
     let parkID: String
+    var night: Date?=nil
     func body(content:Content)->some View {
         content
-            .onAppear { commands?.show(park:parkID,tab:tab) }
+            .onAppear { commands?.show(park:parkID,night:night,tab:tab) }
+            .onChange(of:night) { _,night in commands?.show(park:parkID,night:night,tab:tab) }
             .onDisappear { commands?.hide(park:parkID,tab:tab) }
     }
 }

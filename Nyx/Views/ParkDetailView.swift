@@ -231,7 +231,7 @@ struct ParkDetailView: View {
             .onChange(of:night.id) { _,id in nightChanged?(id) }
             // DEBUG captures (`-nyx-inspector`): the breakdown open beside the page where it has room.
             .task { if DebugScenario.isEnabled("inspector") { try? await Task.sleep(for:.seconds(1)); if inspectorRoom { inspector=true } } }
-            .modifier(ReportsVisiblePark(parkID:park.id))
+            .modifier(ReportsVisiblePark(parkID:park.id,night:isTonight ? nil : night.id))
             .fullScreenCover(isPresented:$showsSky) { TonightSkyView(night:night,isTonight:isTonight).nyxPresentation().environment(\.nyx,palette).modifier(DebugTypeSize()) }
             .parkSaveAlert(isPresented:$persistenceError,journalUnavailable:model.journalUnavailable)
             // Again whenever the river moves on (left open past sunrise, or a night chosen beyond it), or the
@@ -324,9 +324,9 @@ struct ParkDetailView: View {
         if multipleWindows, commands?.parkWindow != true {
             // A window of its own is a convenience: the first to overflow when a side bar runs short.
             if #available(iOS 27.0,*) {
-                ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:selected).labelStyle(.iconOnly).help("Open in New Window") }.visibilityPriority(.low)
+                ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:isTonight ? nil : night.id).labelStyle(.iconOnly).help("Open in New Window") }.visibilityPriority(.low)
             } else {
-                ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:selected).labelStyle(.iconOnly).help("Open in New Window") }
+                ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:isTonight ? nil : night.id).labelStyle(.iconOnly).help("Open in New Window") }
             }
         }
         // Save ends the row on every release: iOS 27 pins it at the trailing edge, so iOS 26 declares it last.

@@ -40,6 +40,9 @@ nonisolated enum AppTab: Int, CaseIterable, Hashable, Sendable {
     private(set) var visibleParks:[Int:String]=[:]
     /// The park on screen in this window's current tab, if any.
     var visiblePark:String? { visibleParks[current] }
+    /// The night that page shows, when it is not tonight (a new window opens on it).
+    private(set) var visibleNights:[Int:Date]=[:]
+    var visibleNight:Date? { visiblePark == nil ? nil : visibleNights[current] }
     /// Park pages presented over this window (from a link or a reminder), the top one last. Each is
     /// a layer with a tab number of its own (`newLayer`), so while one is up the keys reach its page
     /// and never the tab's page under it.
@@ -52,8 +55,8 @@ nonisolated enum AppTab: Int, CaseIterable, Hashable, Sendable {
     /// A layer's number: past every tab's, and never the same twice.
     static func newLayer()->Int { nextLayer+=1; return nextLayer }
     private static var nextLayer=100
-    func show(park id:String,tab:Int?) { if let tab { visibleParks[tab]=id } }
-    func hide(park id:String,tab:Int?) { if let tab, visibleParks[tab]==id { visibleParks[tab]=nil } }
+    func show(park id:String,night:Date?=nil,tab:Int?) { if let tab { visibleParks[tab]=id; visibleNights[tab]=night } }
+    func hide(park id:String,tab:Int?) { if let tab, visibleParks[tab]==id { visibleParks[tab]=nil; visibleNights[tab]=nil } }
     /// A park's month asked of this window's Plan tab (a `nyx://calendar` link, "Show in Plan",
     /// a park dropped on Plan). Per window, so a request in one iPad window never moves another's Plan.
     var calendarRequest:CalendarRequest?
@@ -208,7 +211,7 @@ struct NyxCommands: Commands {
         }
         // The park on screen, beside the one you are reading: ⌘⇧N, as "Open in New Window" on its row.
         CommandGroup(after:.newItem) {
-            Button("Open Park in New Window") { if let id=scene?.visiblePark { openWindow(value:ParkWindow(parkID:id)) } }
+            Button("Open Park in New Window") { if let id=scene?.visiblePark { openWindow(value:ParkWindow(parkID:id,night:scene?.visibleNight)) } }
                 .keyboardShortcut("n",modifiers:[.command,.shift])
                 .disabled(!multipleWindows || tabless || menu?.park == nil)
         }

@@ -168,6 +168,23 @@ import UniformTypeIdentifiers
         window.show(park:"deva",tab:0)
         #expect(window.parkWindow && window.visiblePark=="deva")
     }
+    /// ⌘⇧N opens the night on screen: a page on a later night reports it, tonight reports none,
+    /// and the night leaves with its page.
+    @MainActor @Test func eachTabReportsItsNightForANewWindow() {
+        let commands=SceneCommands()
+        commands.tab = .parks
+        let later=Date(timeIntervalSince1970:1_800_000_000)
+        commands.show(park:"jotr",night:later,tab:1)
+        #expect(commands.visiblePark=="jotr" && commands.visibleNight==later)
+        commands.show(park:"jotr",tab:1)
+        #expect(commands.visibleNight==nil)
+        commands.show(park:"jotr",night:later,tab:1)
+        commands.hide(park:"jotr",tab:1)
+        #expect(commands.visiblePark==nil && commands.visibleNight==nil)
+        // Another tab's night never answers for this one.
+        commands.show(park:"deva",night:later,tab:0)
+        #expect(commands.visibleNight==nil)
+    }
 
     // MARK: Layout
 
