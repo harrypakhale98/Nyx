@@ -84,13 +84,17 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
     }
     /// "94 · Pristine", or "94 · Pristine as of Wed" when the score is old. Park time. A score worked
     /// out in the small hours of the night's own day names its time instead ("as of 1:10 AM"), as
-    /// naming the weekday would name today.
+    /// naming the weekday would name today. The time has its own key: languages word "as of" a
+    /// time and a weekday apart (Spanish "datos del vie." but "datos: 1:10 a.m.").
     /// `short`: the band's one word in place of its whole line ("Good" for "Good, early look, haze or
     /// smoke"), for a face where the whole line would be cut.
     func scoreLine(_ state: ContentState, locale: Locale = .current, short: Bool = false) -> String {
         let band=short ? ScoreBand.band(score(state)).label : band(state)
         guard let day=scoreDay(state) else { return "\(score(state)) · \(band)" }
-        if sameParkDay(day) { return String(localized: "\(score(state)) · \(band) as of \(day.formatted(time(locale)))") }
+        if sameParkDay(day) {
+            return String(localized: "field.scoreLine.asOfTime", defaultValue: "\(score(state)) · \(band) as of \(day.formatted(time(locale)))",
+                          comment: "Live Activity score line for a score worked out earlier the same day; the last value is a clock time (1:10 AM), not a weekday.")
+        }
         return String(localized: "\(score(state)) · \(band) as of \(day.formatted(weekday(.abbreviated,locale)))")
     }
     /// What a state's face shows of its night, for deciding whether a refresh changes anything:
@@ -101,7 +105,10 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
     func spokenScore(_ state: ContentState, locale: Locale = .current) -> String {
         guard let day=scoreDay(state) else { return String(localized: "Darkness score \(score(state)), \(band(state)).") }
         // Closed here, not in the catalog: a time that ends in "p.m." takes no second period.
-        if sameParkDay(day) { return Sentences.end(String(localized: "Darkness score \(score(state)), \(band(state)), as of \(day.formatted(time(locale)))")) }
+        if sameParkDay(day) {
+            return Sentences.end(String(localized: "field.spokenScore.asOfTime", defaultValue: "Darkness score \(score(state)), \(band(state)), as of \(day.formatted(time(locale)))",
+                                        comment: "Spoken Live Activity score for a score worked out earlier the same day; the last value is a clock time (1:10 AM), not a weekday. No final period."))
+        }
         return Sentences.end(String(localized: "Darkness score \(score(state)), \(band(state)), as of \(day.formatted(weekday(.wide,locale)))"))
     }
     /// Whether a moment falls on the park's calendar day of the night's dusk.

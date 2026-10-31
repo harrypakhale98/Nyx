@@ -7176,7 +7176,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld · %@ à %@"
+            "value": "%1$lld · %2$@ (%3$@)"
           }
         },
         "ja": {
@@ -85940,6 +85940,78 @@
           "stringUnit": {
             "state": "translated",
             "value": "1時間に1個未満"
+          }
+        }
+      }
+    },
+    "field.scoreLine.asOfTime": {
+      "comment": "Live Activity score line for a score worked out earlier the same day; the last value is a clock time (1:10 AM), not a weekday.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld · %2$@, Stand %3$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld · %@ as of %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld · %2$@ · datos: %3$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld · %2$@ (%3$@)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld · %2$@（%3$@時点）"
+          }
+        }
+      }
+    },
+    "field.spokenScore.asOfTime": {
+      "comment": "Spoken Live Activity score for a score worked out earlier the same day; the last value is a clock time (1:10 AM), not a weekday. No final period.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkelheitswert %1$lld, %2$@, Stand %3$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness score %lld, %@, as of %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Índice de oscuridad %1$lld, noche %2$@, hora de los datos: %3$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indice d’obscurité %1$lld, nuit %2$@, selon les données de %3$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暗さスコア%1$lld、%2$@（%3$@時点）"
           }
         }
       }
