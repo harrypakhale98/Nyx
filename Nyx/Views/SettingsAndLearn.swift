@@ -381,12 +381,23 @@ struct NPSKeyField: View {
             }.padding(.top,6)
         } label:{ Text("Use your own park service key").frame(minHeight:44,alignment:.leading) }
         .tint(palette.ink)
+        // The refusal arrives later, with the request the new key made: heard as well as seen.
+        .onChange(of:model.npsKeyRefused) { _,refused in
+            if refused { Self.announce(String(localized:"The Park Service did not accept this key. Remove it to use the shared key again.")) }
+        }
     }
     private func save() {
-        guard NPSKeyStore.plausible(draft) else { message=String(localized:"That does not look like a National Park Service key. Keys are about 40 letters and numbers."); return }
+        guard NPSKeyStore.plausible(draft) else { say(String(localized:"That does not look like a National Park Service key. Keys are about 40 letters and numbers.")); return }
         if NPSKeyStore().save(draft) {
             draft=""; saved=true; message=nil
+            Self.announce(String(localized:"Using your own key."))
             Task { await model.npsKeyChanged() }
-        } else { message=String(localized:"The key could not be saved. Try again.") }
+        } else { say(String(localized:"The key could not be saved. Try again.")) }
     }
+    /// Shows the caution under the field and says it to VoiceOver, which would not otherwise hear it.
+    private func say(_ text:String) {
+        message=text
+        Self.announce(text)
+    }
+    private static func announce(_ text:String) { AccessibilityNotification.Announcement(text).post() }
 }
