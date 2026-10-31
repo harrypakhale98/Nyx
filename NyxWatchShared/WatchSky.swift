@@ -231,23 +231,6 @@ nonisolated struct WatchLink: Hashable, Sendable {
     }
 }
 
-extension Park {
-    /// Whether the park's clock reads differently from this watch's at `date`: its times are park-local.
-    nonisolated func keepsOtherTime(at date: Date) -> Bool { timeZone.secondsFromGMT(for: date) != TimeZone.current.secondsFromGMT(for: date) }
-    /// A park-local time, carrying the park's short zone ("4:52 AM MST") where its clock is not
-    /// this watch's: one glance cannot hold "Times in Mountain Standard Time" without costing the dial.
-    nonisolated func wristTime(_ date: Date) -> String {
-        guard keepsOtherTime(at: date) else { return time(date) }
-        var format = Date.FormatStyle.dateTime.hour().minute().timeZone(.specificName(.short))
-        format.timeZone = timeZone
-        return date.formatted(format)
-    }
-    /// "Times in Mountain Time." where the park's clock is not this watch's, for what VoiceOver hears.
-    nonisolated func spokenZone(at date: Date) -> String? {
-        keepsOtherTime(at: date) ? String(localized: "\(String(localized: "Times in \(timeZoneName)")).") : nil
-    }
-}
-
 extension NyxPalette {
     /// The quietest text level on the watch (past milestones), by the one rule every surface reads
     /// (`NyxPalette.faintOpacity`): in red, or under Increase Contrast, it is muted, so it holds 4.5:1

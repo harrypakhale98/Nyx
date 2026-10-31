@@ -130,19 +130,17 @@ struct MoonComplicationView: View {
         .widgetURL(entry.park.flatMap { WatchLink(park: $0, evening: $0.currentNight(at: entry.date)).url })
     }
     /// The iPhone Moon widget's words (`MoonRectangleText`): "34% lit · up now", then "Sets 11:40 PM ·
-    /// Joshua Tree" in park time, with the park's zone where its clock is not this watch's.
-    private var text: MoonRectangleText { MoonRectangleText(moon: entry.moon, park: entry.park) { $0.wristTime($1) } }
+    /// Joshua Tree" in park time, with the park's zone where its clock is not this watch's, and
+    /// VoiceOver told whose time it is.
+    private var text: MoonRectangleText { MoonRectangleText(moon: entry.moon, park: entry.park, device: .current) }
     /// "34% · rises 11:40 PM" in park time. `zoned`: with the park's zone where its clock is not this
     /// watch's (the inline line has room for it; the corner's short curve does not).
     private func line(zoned: Bool) -> String {
         guard let park = entry.park, let next = entry.moon.next else { return text.lit }
-        return text.glance(time: zoned ? park.wristTime(next.date) : park.time(next.date))
+        return text.glance(time: zoned ? park.zonedTime(next.date) : park.time(next.date))
     }
     /// The iPhone widget's summary, with whose time it is where the park's clock is not this watch's.
-    private var summary: String {
-        guard let park = entry.park, let next = entry.moon.next, let zone = park.spokenZone(at: next.date) else { return text.spoken }
-        return text.spoken + " " + zone
-    }
+    private var summary: String { text.spoken }
 }
 
 struct NextDarkComplicationView: View {
@@ -238,10 +236,10 @@ struct NextDarkComplicationView: View {
     private var detail: String {
         guard let park = entry.park else { return String(localized: "Choose a place in Nyx on Apple Watch.") }
         switch entry.moment {
-        case .darkNow(let until, true): return String(localized: "Until moonrise at \(park.wristTime(until))")
-        case .darkNow(let until, false): return String(localized: "Until dawn twilight at \(park.wristTime(until))")
-        case .begins(let date, true): return String(localized: "Moonset at \(park.wristTime(date))")
-        case .begins(let date, false): return String(localized: "At \(park.wristTime(date))")
+        case .darkNow(let until, true): return String(localized: "Until moonrise at \(park.zonedTime(until))")
+        case .darkNow(let until, false): return String(localized: "Until dawn twilight at \(park.zonedTime(until))")
+        case .begins(let date, true): return String(localized: "Moonset at \(park.zonedTime(date))")
+        case .begins(let date, false): return String(localized: "At \(park.zonedTime(date))")
         // The iPhone's sentence for the Moon in true darkness; how much is lit is the Moon complication's.
         case .moonlit: return entry.sky?.moonSentence(park: park, withLit: false) ?? Sentences.end(String(localized: "Moon up all through true darkness"))
         case .none: return String(localized: "The Sun stays too high at this latitude.")
@@ -252,11 +250,11 @@ struct NextDarkComplicationView: View {
     private var inline: String {
         guard let park = entry.park else { return String(localized: "Nyx · choose a place") }
         switch entry.moment {
-        case .darkNow(let until, true): return String(localized: "Moon-free until \(park.wristTime(until))")
-        case .darkNow(let until, false): return String(localized: "Dark until \(park.wristTime(until))")
-        case .begins(let date, true): return String(localized: "Moon down at \(park.wristTime(date))")
-        case .begins(let date, false): return String(localized: "Dark at \(park.wristTime(date))")
-        case .moonlit(_, let to): return String(localized: "Moonlit until \(park.wristTime(to))")
+        case .darkNow(let until, true): return String(localized: "Moon-free until \(park.zonedTime(until))")
+        case .darkNow(let until, false): return String(localized: "Dark until \(park.zonedTime(until))")
+        case .begins(let date, true): return String(localized: "Moon down at \(park.zonedTime(date))")
+        case .begins(let date, false): return String(localized: "Dark at \(park.zonedTime(date))")
+        case .moonlit(_, let to): return String(localized: "Moonlit until \(park.zonedTime(to))")
         case .none: return String(localized: "No true darkness")
         }
     }

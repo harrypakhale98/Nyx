@@ -93,6 +93,8 @@ struct FieldActivityReview: View {
                 }.frame(height: 110)
             }.padding(24)
         }.defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(LinearGradient(colors: [Color(red: 0.05, green: 0.06, blue: 0.14), .black], startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+        // The moved nights keep a stand-in zone; the faces name the park's own.
+        .environment(\.fieldParkZone, base.timeZone)
     }
     /// A followed night after its forecast moved: a lower score worked out three days before dusk
     /// (the face names its day), in starlight and in red, and the closure lifted since it was followed.

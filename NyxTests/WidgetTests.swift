@@ -49,6 +49,23 @@ import WidgetKit
         }
     }
 
+    /// On a device whose clock is not the park's, the Moon's time carries the park's short zone (as
+    /// the watch writes it), and VoiceOver hears the park's time, then whose time it is.
+    @Test func moonWordsMarkTheParkZoneOnAnotherClock() throws {
+        let jotr = try park("jotr"), denver = try #require(TimeZone(identifier: "America/Denver")), en = Locale(identifier: "en_US")
+        let moon = MoonNow(at: now, park: jotr), next = try #require(moon.next)
+        let plain = MoonRectangleText(moon: moon, park: jotr, locale: en)
+        #expect(MoonRectangleText(moon: moon, park: jotr, locale: en, device: jotr.timeZone) == plain)
+        let away = MoonRectangleText(moon: moon, park: jotr, locale: en, device: denver)
+        let zoned = jotr.timeZone.clockTime(next.date, zoned: true, locale: en)
+        #expect(zoned == jotr.time(next.date)+" PDT")
+        #expect(away.shortEvent == (next.rises ? "Rises \(zoned)" : "Sets \(zoned)"))
+        #expect(away.event == (next.rises ? "Rises \(zoned) · Joshua Tree" : "Sets \(zoned) · Joshua Tree"))
+        #expect(away.spoken == plain.spoken+" Times in \(jotr.timeZoneName).")
+        #expect(away.zoned && !plain.zoned)
+        #expect(jotr.zonedTime(next.date) == jotr.timeZone.clockTime(next.date, zoned: jotr.keepsOtherTime(at: next.date)))
+    }
+
     @Test func moonRectangleFollowsTheReadersPercentAndSaysNoEventItCannotKnow() throws {
         let gaar = try park("gaar")
         let moon = MoonNow(at: now, park: nil)

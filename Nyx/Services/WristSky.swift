@@ -190,6 +190,43 @@ nonisolated struct MoonNow: Sendable {
     }
 }
 
+/// A place's clock times on a device that may keep another clock: one rule for the watch's faces,
+/// the iPhone's Moon widget and the field Live Activity. Times stay the place's own; where its clock
+/// reads differently from this device's, a time carries the place's short zone ("4:52 AM MST"),
+/// since one glance cannot hold "Times in Mountain Standard Time", and VoiceOver hears whose time it is.
+extension TimeZone {
+    /// Whether this zone's clock reads differently from `device`'s at `date`.
+    nonisolated func keepsOtherTime(at date: Date, device: TimeZone = .current) -> Bool { secondsFromGMT(for: date) != device.secondsFromGMT(for: date) }
+    /// "4:52 AM" in this zone; "4:52 AM MST" with `zoned`.
+    nonisolated func clockTime(_ date: Date, zoned: Bool, locale: Locale = .autoupdatingCurrent) -> String {
+        var format = Date.FormatStyle.dateTime.hour().minute().locale(locale)
+        if zoned { format = format.timeZone(.specificName(.short)) }
+        format.timeZone = self
+        return date.formatted(format)
+    }
+    /// The zone's short name at `date` alone: "MST", or "GMT-7" where the language has no letters for it.
+    nonisolated func shortName(at date: Date, locale: Locale = .autoupdatingCurrent) -> String {
+        var format = Date.FormatStyle(locale: locale).timeZone(.specificName(.short))
+        format.timeZone = self
+        return date.formatted(format)
+    }
+    /// "Times in Mountain Time." where this zone's clock is not `device`'s at `date`, for what VoiceOver hears.
+    nonisolated func spokenZone(at date: Date, device: TimeZone = .current) -> String? { keepsOtherTime(at: date, device: device) ? timesNote : nil }
+    /// "Times in Mountain Time."
+    nonisolated var timesNote: String {
+        let name = localizedName(for: .generic, locale: .current) ?? identifier
+        return String(localized: "\(String(localized: "Times in \(name)")).")
+    }
+}
+extension Park {
+    /// Whether the park's clock reads differently from this device's at `date`: its times are park-local.
+    nonisolated func keepsOtherTime(at date: Date) -> Bool { timeZone.keepsOtherTime(at: date) }
+    /// A park-local time, with the park's short zone where its clock is not this device's ("4:52 AM MST").
+    nonisolated func zonedTime(_ date: Date) -> String { timeZone.clockTime(date, zoned: keepsOtherTime(at: date)) }
+    /// "Times in Mountain Time." where the park's clock is not this device's, for what VoiceOver hears.
+    nonisolated func spokenZone(at date: Date) -> String? { timeZone.spokenZone(at: date) }
+}
+
 /// The Moon in words, one builder for the iPhone's Moon widget and the watch's Moon complication:
 /// the phase, how much is lit in the reader's own percent style ("42 %" where that is the custom),
 /// whether it is up, and the next moonrise or moonset in the park's time, with the park's name
@@ -205,13 +242,18 @@ nonisolated struct MoonRectangleText: Equatable, Sendable {
     let event: String?
     /// "Rises 8:12 PM"
     let shortEvent: String?
-    /// For VoiceOver: "Waxing crescent, 23 percent lit. The Moon is up. Moonset at 11:40 PM, Joshua Tree."
+    /// The event's time carries the park's zone (`device`'s clock is another): a face short of room
+    /// drops the park's name before it cuts the zone.
+    let zoned: Bool
+    /// For VoiceOver: "Waxing crescent, 23 percent lit. The Moon is up. Moonset at 11:40 PM, Joshua Tree.",
+    /// then "Times in Pacific Time." where the park's clock is not the device's (`device`).
     let spoken: String
     private let percent: String
     private let rises: Bool?
-    /// `time` writes the event's clock time: the park's, by default; the watch adds the park's zone
-    /// where its clock is not the watch's. VoiceOver hears the park's time, without a zone.
-    init(moon: MoonNow, park: Park?, locale: Locale = .current, time: ((Park, Date) -> String)? = nil) {
+    /// `device`: the clock of the device showing the words. Where the park's clock reads differently
+    /// at the event, its time carries the park's short zone ("Rises 8:12 PM PDT", `TimeZone.clockTime`)
+    /// and VoiceOver hears the park's time, then whose time it is. Nil writes the park's time alone.
+    init(moon: MoonNow, park: Park?, locale: Locale = .current, device: TimeZone? = nil) {
         phase=moon.phase.name
         percent=moon.phase.percentLit.formatted(.percent.locale(locale))
         lit=String(localized: "\(percent) lit")
@@ -222,13 +264,16 @@ nonisolated struct MoonRectangleText: Equatable, Sendable {
         }
         var spoken=Sentences.end(moon.phase.spoken)
         if let up=moon.isUp { spoken+=" "+(up ? String(localized: "The Moon is up.") : String(localized: "The Moon is down.")) }
-        guard let park, let next=moon.next else { event=nil; shortEvent=nil; rises=nil; self.spoken=spoken; return }
-        let clock=time?(park, next.date) ?? park.time(next.date)
+        guard let park, let next=moon.next else { event=nil; shortEvent=nil; rises=nil; zoned=false; self.spoken=spoken; return }
+        let zoned=device.map { park.timeZone.keepsOtherTime(at: next.date, device: $0) } ?? false
+        self.zoned=zoned
+        let clock=zoned ? park.timeZone.clockTime(next.date, zoned: true, locale: locale) : park.time(next.date)
         rises=next.rises
         event=next.rises ? String(localized: "Rises \(clock) · \(park.shortName)") : String(localized: "Sets \(clock) · \(park.shortName)")
         shortEvent=next.rises ? String(localized: "Rises \(clock)") : String(localized: "Sets \(clock)")
         let at=park.time(next.date)
-        self.spoken=spoken+" "+(next.rises ? String(localized: "Moonrise at \(at), \(park.shortName).") : String(localized: "Moonset at \(at), \(park.shortName)."))
+        let zone=device.flatMap { park.timeZone.spokenZone(at: next.date, device: $0) }.map { " "+$0 } ?? ""
+        self.spoken=spoken+" "+(next.rises ? String(localized: "Moonrise at \(at), \(park.shortName).") : String(localized: "Moonset at \(at), \(park.shortName)."))+zone
     }
     /// One short line for a face with room for little else: "23% · rises 11:40 PM" at `time`, or
     /// how much is lit alone without a next rise or set.

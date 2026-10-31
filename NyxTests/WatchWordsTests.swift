@@ -92,9 +92,11 @@ struct WatchWordsTests {
         let at = jotr.time(next.date)
         #expect(text.spoken == "\(moon.phase.spoken). The Moon is \(up ? "up" : "down"). \(next.rises ? "Moonrise" : "Moonset") at \(at), Joshua Tree.")
         #expect(text.glance(time: at) == "\(moon.phase.percentLit)% · \(next.rises ? "rises" : "sets") \(at)")
-        // A watch writes the park's zone into the visible time; VoiceOver keeps the park's time.
-        let zoned = MoonRectangleText(moon: moon, park: jotr, locale: Locale(identifier: "en_US")) { _, _ in "8:12 PM PDT" }
-        #expect(zoned.shortEvent == (next.rises ? "Rises 8:12 PM PDT" : "Sets 8:12 PM PDT") && zoned.spoken == text.spoken)
+        // A device on another clock writes the park's zone into the visible time; VoiceOver keeps the
+        // park's time and then hears whose time it is.
+        let eastern = try #require(TimeZone(identifier: "America/New_York"))
+        let zoned = MoonRectangleText(moon: moon, park: jotr, locale: Locale(identifier: "en_US"), device: eastern)
+        #expect(zoned.shortEvent == (next.rises ? "Rises \(at) PDT" : "Sets \(at) PDT") && zoned.spoken.hasPrefix(text.spoken+" "))
         // Without a park: the phase and its light, no up or down, no event.
         let anywhere = MoonRectangleText(moon: MoonNow(at: now, park: nil), park: nil, locale: Locale(identifier: "en_US"))
         #expect(anywhere.litNow == anywhere.lit && anywhere.event == nil && anywhere.glance(time: at) == anywhere.lit)

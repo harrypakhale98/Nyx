@@ -469,7 +469,7 @@ struct NightGlance: View {
             }
             if let start = night.sky.darkStart, let end = night.sky.darkEnd, night.sky.darkHours > 0 {
                 // Park time: the zone rides on the last time where the park's clock is not the watch's.
-                Text("Dark \(night.park.time(start)) to \(night.park.wristTime(end))").font(.system(.subheadline, design: .serif)).lineLimit(lines).minimumScaleFactor(shrink)
+                Text("Dark \(night.park.time(start)) to \(night.park.zonedTime(end))").font(.system(.subheadline, design: .serif)).lineLimit(lines).minimumScaleFactor(shrink)
             } else if wraps {
                 Text(SkyConditions.noDarknessMessage(tonight: isTonight)).font(.footnote)
             } else {
@@ -538,7 +538,7 @@ struct NextMoment: View {
                         .lineLimit(limit).minimumScaleFactor(0.7)
                     Group {
                         // Park time, with its zone where the park's clock is not the watch's ("at 4:52 AM MST").
-                        let time = night.park.wristTime(next.date)
+                        let time = night.park.zonedTime(next.date)
                         let at = Text("at \(time)")
                         if cloudsUnknown, let basis = night.basisLabel {
                             // Whole or not at all, as the models' range below (it was cut to "no cloud

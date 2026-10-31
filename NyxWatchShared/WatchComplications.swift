@@ -288,8 +288,8 @@ struct WatchComplicationView: View {
         // A closure outranks it.
         Group {
             if let closure = entry.closure { Text("\(Image(systemName: ClosureLine.symbol)) \(ClosureLine.inline(score: night.score.value, closure: closure))") }
-            // The park's clock, with its zone where it is not this watch's (`wristTime`).
-            else if let next = entry.next { Text("\(night.score.value) · \(next.shortTitle) at \(night.park.wristTime(next.date))") }
+            // The park's clock, with its zone where it is not this watch's (`zonedTime`).
+            else if let next = entry.next { Text("\(night.score.value) · \(next.shortTitle) at \(night.park.zonedTime(next.date))") }
             else { Text("\(night.score.value) \(night.score.band.label) · \(night.park.shortName)") }
         }.foregroundStyle(ink)
     }
@@ -356,7 +356,7 @@ struct WatchComplicationView: View {
             }
             if showsNext, let next = entry.next {
                 Group {
-                    if clockTimes { Text("\(next.title) at \(night.park.wristTime(next.date))") } else { countdownText(next) }
+                    if clockTimes { Text("\(next.title) at \(night.park.zonedTime(next.date))") } else { countdownText(next) }
                 }.font(.caption2).lineLimit(1).minimumScaleFactor(0.8)
             }
         }

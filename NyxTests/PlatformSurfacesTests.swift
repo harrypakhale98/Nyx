@@ -112,6 +112,26 @@ import Testing
         let small=ImageRenderer(content: FieldActivitySmallView(attributes: attributes, state: state, isStale: true).frame(width: 170, height: 84))
         #expect(small.uiImage != nil)
     }
+    /// The faces keep park time. On an iPhone whose clock is elsewhere (Denver, for Joshua Tree),
+    /// they name the park's short zone once beside its name ("· PST") and VoiceOver hears whose time
+    /// it is; on the park's own clock nothing changes.
+    @Test func fieldFacesNameTheParkZoneOnlyOnAnotherClock() throws {
+        let jotr=try park("jotr"), sky=try self.sky(jotr, "2026-12-13")
+        let denver=try #require(TimeZone(identifier: "America/Denver"))
+        let attributes=FieldActivityAttributes(night: FieldNight(park: jotr, sky: sky), score: 94, band: "Pristine")
+        #expect(!jotr.timeZone.keepsOtherTime(at: attributes.dusk, device: jotr.timeZone) && jotr.timeZone.keepsOtherTime(at: attributes.dusk, device: denver))
+        #expect(jotr.timeZone.shortName(at: attributes.dusk, locale: Locale(identifier: "en_US")) == "PST")
+        #expect(jotr.timeZone.shortName(at: attributes.dusk, locale: Locale(identifier: "de_DE")) == "GMT-8")
+        // Named only where the clock differs from this device's.
+        #expect((attributes.namedZone(nil) != nil) == jotr.timeZone.keepsOtherTime(at: attributes.dusk))
+        #expect(jotr.timeZone.timesNote == "Times in \(jotr.timeZoneName).")
+        #expect(jotr.timeZone.spokenZone(at: attributes.dusk, device: denver) == jotr.timeZone.timesNote)
+        #expect(jotr.timeZone.spokenZone(at: attributes.dusk, device: jotr.timeZone) == nil)
+        // The faces draw with the zone named.
+        let face=FieldActivityLockView(attributes: attributes, state: attributes.state(at: attributes.dusk, nightVision: false), isStale: true)
+            .environment(\.fieldParkZone, denver).frame(width: 360).background(Color.black)
+        #expect(ImageRenderer(content: face).uiImage != nil)
+    }
     @Test func tabStripShowsAFollowedNightFromThreeHoursBeforeSunsetUntilDawn() throws {
         let jotr=try park("jotr"), sky=try self.sky(jotr, "2026-12-13")
         let attributes=FieldActivityAttributes(night: FieldNight(park: jotr, sky: sky), score: 94, band: "Pristine")

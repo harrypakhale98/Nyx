@@ -41,8 +41,9 @@ struct MoonWidgetView: View {
     private var nightVision: Bool { look.nightVision }
     private var ink: Color { tinted ? .white : look.ink }
     private var muted: Color { tinted ? ink.opacity(0.62) : look.muted }
-    /// The Moon's words, shared with the watch's Moon complication (`MoonRectangleText`).
-    private var text: MoonRectangleText { MoonRectangleText(moon: entry.moon, park: entry.park) }
+    /// The Moon's words, shared with the watch's Moon complication (`MoonRectangleText`): park time,
+    /// with the park's zone where its clock is not this iPhone's.
+    private var text: MoonRectangleText { MoonRectangleText(moon: entry.moon, park: entry.park, device: .current) }
     /// How much is lit, in the reader's own percent style ("42 %" where that is the custom).
     private var percent: String { Percent.text(entry.moon.phase.percentLit) }
     private var southern: Bool { (entry.park?.latitude ?? 1)<0 }
@@ -93,7 +94,13 @@ struct MoonWidgetView: View {
                 disc.frame(width: 58, height: 58).frame(maxWidth: .infinity, alignment: .center).padding(.vertical, 2)
                 Text(entry.moon.phase.name).font(.system(.subheadline, design: .serif)).lineLimit(1).minimumScaleFactor(0.75)
                 Text(text.litNow).font(.caption2).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8).contentTransition(reduceMotion ? .opacity : .numericText())
-                if let event=text.event { Text(event).font(.caption2).lineLimit(1).minimumScaleFactor(0.75) }
+                if let event=text.event, let short=text.shortEvent, text.zoned {
+                    // With the park's zone the line is longer: the park's name goes before the time is cut.
+                    ViewThatFits(in: .horizontal) {
+                        Text(event).lineLimit(1)
+                        Text(short).lineLimit(1).minimumScaleFactor(0.75)
+                    }.font(.caption2)
+                } else if let event=text.event { Text(event).font(.caption2).lineLimit(1).minimumScaleFactor(0.75) }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .dynamicTypeSize(.small ... .xLarge)
