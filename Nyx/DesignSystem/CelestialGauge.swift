@@ -763,25 +763,41 @@ private struct CountFrames: View, Equatable {
     nonisolated static func ==(a:CountFrames,b:CountFrames)->Bool { a.start==b.start }
     var body: some View {
         Color.clear
-            .onAppear { tick(.now); link.start { tick(.now) } }
+            .onAppear { tick(.now); link.start(until:start.addingTimeInterval(Self.longest)) { tick(.now) } }
             .onDisappear { link.stop() }
     }
+    /// No count runs longer than a perfect score's, plus the grace in which a late frame lands it.
+    nonisolated static let longest=CelestialGauge.duration(score:100)+CelestialGauge.landingGrace+0.5
 }
-/// One display link, running from `start` until `stop`. While added, the link holds this object, so it
-/// lives exactly as long as the frames are wanted.
-@MainActor private final class FrameLink: NSObject {
+/// One display link, running from `start` until `stop`, or by itself until its deadline passes or this
+/// object goes (a view torn down without `onDisappear`): the link holds only a weak `FrameTarget`, so
+/// the view's state owns this object and the link never keeps it, or 120 Hz frames, alive.
+@MainActor private final class FrameLink {
     private var link: CADisplayLink?
     private var frame: (()->Void)?
-    func start(_ frame: @escaping ()->Void) {
+    private var until=Date.distantPast
+    func start(until:Date,_ frame: @escaping ()->Void) {
         stop()
-        self.frame=frame
-        let link=CADisplayLink(target:self,selector:#selector(step))
+        self.frame=frame; self.until=until
+        let link=CADisplayLink(target:FrameTarget(self),selector:#selector(FrameTarget.step))
         link.preferredFrameRateRange=CAFrameRateRange(minimum:30,maximum:120,preferred:120)
         link.add(to:.main,forMode:.common)
         self.link=link
     }
     func stop() { link?.invalidate(); link=nil; frame=nil }
-    @objc private func step(_ link: CADisplayLink) { frame?() }
+    fileprivate func step() {
+        guard Date.now<until else { stop(); return }
+        frame?()
+    }
+}
+/// The display link's target: hands each frame to its `FrameLink` while that lives, and ends the link once it is gone.
+@MainActor private final class FrameTarget: NSObject {
+    private weak var owner: FrameLink?
+    init(_ owner: FrameLink) { self.owner=owner }
+    @objc func step(_ link: CADisplayLink) {
+        guard let owner else { link.invalidate(); return }
+        owner.step()
+    }
 }
 /// The score reveals seen this session, by `key`: in memory only, empty at every launch. A key is
 /// added only when a count-up lands in front of the person, never when it is held or cut short.
