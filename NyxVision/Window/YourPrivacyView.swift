@@ -42,6 +42,7 @@ struct YourPrivacyView: View {
                         .accessibilityHint(Text("Shows when aurora may reach a park, in What's up"))
                     Text("Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours. The request names no place and nothing about you. The service receives network information such as your IP address.")
                         .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                    Text(auroraStatus).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                     Toggle("Park alerts", isOn: $model.alertsOn)
                         .accessibilityHint(Text("Shows park closures beside every score"))
                     Text("Alerts for all \(model.parks.count) U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks interest you. Your coordinates are never sent. The service receives network information such as your IP address.")
@@ -75,6 +76,11 @@ struct YourPrivacyView: View {
     private var smokeStatus: String {
         guard let last = model.lastSmoke else { return String(localized: "No smoke forecast on this device yet.") }
         return String(localized: "Last smoke forecast: \(last.formatted(date: .abbreviated, time: .shortened)).")
+    }
+    /// When this headset last received NOAA's aurora forecast.
+    private var auroraStatus: String {
+        guard let last = model.aurora?.updated else { return String(localized: "No aurora forecast on this device yet.") }
+        return String(localized: "Last aurora forecast: \(last.formatted(date: .abbreviated, time: .shortened)).")
     }
     /// When the last park update arrived; without a key built in, that none is asked for.
     private var alertsStatus: String {

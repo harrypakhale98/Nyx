@@ -5777,6 +5777,41 @@
         }
       }
     },
+    "Last aurora forecast: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Polarlichtvorhersage: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last aurora forecast: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Último pronóstico de auroras: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière prévision d’aurores : %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最新のオーロラ予報：%@。"
+          }
+        }
+      }
+    },
     "Last forecast: %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -8643,6 +8678,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "公園の最新情報にアラートはありません。出かける前に、公園に入れるか確認してください。"
+          }
+        }
+      }
+    },
+    "No aurora forecast on this device yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Polarlichtvorhersage auf diesem Gerät."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No aurora forecast on this device yet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todavía no hay pronóstico de auroras en este dispositivo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de prévision d’aurores sur cet appareil."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このデバイスにはまだオーロラ予報がありません。"
           }
         }
       }
