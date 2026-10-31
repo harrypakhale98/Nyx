@@ -72,6 +72,10 @@ struct DarkAdaptationView: View {
     /// The ring's side: 112 pt where it fits, else what the room under the words leaves, counting the
     /// open bottom of the ring (about a fifth of its side, below "minutes") as free to sit over the bar.
     nonisolated static func ring(room: CGFloat, words: CGFloat) -> CGFloat { min(112, max(80, (room-words-4)/0.82)) }
+    /// Whether the words leave too little room for even the smallest ring above the button (the
+    /// accessibility sizes on 40 mm, where Start sat over "minutes"): then the ring comes first, sized
+    /// to the room alone, and the words follow below it.
+    nonisolated static func ringFirst(room: CGFloat, words: CGFloat) -> Bool { words+4+80*0.82 > room }
     private var content: some View {
         // Minutes counted from the moment the clock started, not from the wall clock's minute.
         TimelineView(.periodic(from: store.adaptation?.start ?? .now, by: 60)) { timeline in
@@ -82,7 +86,10 @@ struct DarkAdaptationView: View {
             ScrollView {
                 // Words above the ring, and the ring as large as the room left above the bottom bar's button
                 // (112 pt where it fits): on a 40 mm watch two lines of words pushed a 112 pt ring's "minutes" under it.
+                // Where even the smallest ring would not fit under the words, it leads, and they scroll below it.
+                let first = Self.ringFirst(room: room, words: words)
                 VStack(spacing: 4) {
+                    if first { AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: 0)) }
                     Group {
                         if let next {
                             NextInDark(night: night, next: next, now: now)
@@ -91,7 +98,10 @@ struct DarkAdaptationView: View {
                         }
                     }
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { words = $0 }
-                    AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: words))
+                    // Below the ring, the words start past the bottom bar (about 40 pt below the room) and
+                    // its button, never under it: on 49 mm the room reaches further below the ring.
+                    .padding(.top, first ? max(0, room+40-Self.ring(room: room, words: 0)-4) : 0)
+                    if !first { AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: words)) }
                 }
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
