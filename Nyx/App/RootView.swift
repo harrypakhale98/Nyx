@@ -293,6 +293,8 @@ struct RootView:View {
         forward {
             if let id=request.parkID { withPlace(id,show); return }
             let last=SharedSettings.defaults.string(forKey:FieldModeRequest.lastParkKey)
+            // "Tonight" as of now first, as `withPlace` does for a named place.
+            model.tick()
             Task { if let park=await model.usualFieldPlace(lastUsed:last) { show(park) } }
         }
     }
