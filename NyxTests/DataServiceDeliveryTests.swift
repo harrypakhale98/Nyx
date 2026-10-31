@@ -516,7 +516,8 @@ struct DataServiceDeliveryTests {
         #expect(await http.count("/api/v1/alerts") == 3)
     }
     /// Campgrounds NPS refused, or answered unreadably, are not asked for on every park page: again an
-    /// hour later. One record that cannot be read costs only itself, never the other campgrounds.
+    /// hour later. An odd field costs only itself, and one record that cannot be read costs only
+    /// itself, never the other campgrounds.
     @Test func campgroundsWaitAfterARefusalAndKeepReadableRecords() async throws {
         let jotr=try park("jotr")
         let clock=BudgetClock(Self.monday)
@@ -531,9 +532,12 @@ struct DataServiceDeliveryTests {
         #expect(await store.campgrounds(for: [jotr], key: "k", network: true, force: false) == nil)
         #expect(await http.count("/api/v1/campgrounds") == 2)
         clock.advance(3601)
-        await http.set("/api/v1/campgrounds", .body("{\"total\":\"2\",\"data\":[{\"name\":\"Jumbo Rocks\",\"parkCode\":\"jotr\",\"campsites\":{\"totalSites\":124}},{\"name\":\"Indian Cove\",\"parkCode\":\"jotr\"}]}"))
+        // A count as a number is read; a field of the wrong type costs only that field; something that is
+        // not a record costs only itself.
+        await http.set("/api/v1/campgrounds", .body("{\"total\":\"3\",\"data\":[{\"name\":\"Jumbo Rocks\",\"parkCode\":\"jotr\",\"campsites\":{\"totalSites\":124},\"url\":7},\"not a record\",{\"name\":\"Indian Cove\",\"parkCode\":\"jotr\",\"accessibility\":[]}]}"))
         let kept=await store.campgrounds(for: [jotr], key: "k", network: true, force: false)
-        #expect(kept?.campgrounds["jotr"]?.map(\.name) == ["Indian Cove"])
+        #expect(kept?.campgrounds["jotr"]?.map(\.name).sorted() == ["Indian Cove", "Jumbo Rocks"])
+        #expect(kept?.campgrounds["jotr"]?.first { $0.name == "Jumbo Rocks" }?.totalSites == 124)
         #expect(await http.count("/api/v1/campgrounds") == 3)
     }
     /// A caller still holding a key the person has since replaced asks NPS for nothing: no programs,

@@ -62,9 +62,10 @@ nonisolated struct Campground: Codable, Hashable, Sendable, Identifiable {
         return (cut.range(of: " ", options: .backwards).map { String(cut[..<$0.lowerBound]) } ?? String(cut)) + "…"
     }
 
-    /// One page of `/api/v1/campgrounds`. Numbers arrive as strings ("62"); missing or odd values
-    /// become nil rather than failing the page. Records without a name or park code are skipped, and
-    /// a record that still cannot be read costs only itself, never the page.
+    /// One page of `/api/v1/campgrounds`. Numbers arrive as strings ("62"), now and then as numbers;
+    /// missing or odd values become nil, field by field, rather than failing the record or the page.
+    /// Records without a name or park code are skipped, and one that is not a record at all costs
+    /// only itself.
     struct Page: Sendable {
         let campgrounds: [Campground]
         let total: Int?
@@ -80,10 +81,28 @@ nonisolated struct Campground: Codable, Hashable, Sendable, Identifiable {
             let reservationUrl: String?
             let numberOfSitesReservable: String?
             let numberOfSitesFirstComeFirstServe: String?
-            let campsites: Sites?
-            let accessibility: Access?
-            struct Sites: Decodable { let totalSites: String? }
-            struct Access: Decodable { let wheelchairAccess: String?; let adaInfo: String? }
+            let totalSites: String?
+            let wheelchairAccess: String?
+            let adaInfo: String?
+            enum CodingKeys: String, CodingKey {
+                case id, name, parkCode, description, url, reservationUrl, numberOfSitesReservable, numberOfSitesFirstComeFirstServe, campsites, accessibility
+                case totalSites, wheelchairAccess, adaInfo
+            }
+            init(from decoder: any Decoder) throws {
+                let c = try decoder.container(keyedBy: CodingKeys.self)
+                func text(_ c: KeyedDecodingContainer<CodingKeys>, _ key: CodingKeys) -> String? { try? c.decodeIfPresent(String.self, forKey: key) }
+                // A count as "62" or 62.
+                func count(_ c: KeyedDecodingContainer<CodingKeys>, _ key: CodingKeys) -> String? {
+                    text(c, key) ?? (try? c.decodeIfPresent(Int.self, forKey: key)).map { String($0) }
+                }
+                id = text(c, .id); name = text(c, .name); parkCode = text(c, .parkCode); description = text(c, .description)
+                url = text(c, .url); reservationUrl = text(c, .reservationUrl)
+                numberOfSitesReservable = count(c, .numberOfSitesReservable); numberOfSitesFirstComeFirstServe = count(c, .numberOfSitesFirstComeFirstServe)
+                let sites = try? c.nestedContainer(keyedBy: CodingKeys.self, forKey: .campsites)
+                totalSites = sites.flatMap { count($0, .totalSites) }
+                let access = try? c.nestedContainer(keyedBy: CodingKeys.self, forKey: .accessibility)
+                wheelchairAccess = access.flatMap { text($0, .wheelchairAccess) }; adaInfo = access.flatMap { text($0, .adaInfo) }
+            }
         }
         struct Response: Decodable {
             let data: [Lenient<Record>]; let total: String?
@@ -103,7 +122,7 @@ nonisolated struct Campground: Codable, Hashable, Sendable, Identifiable {
             return Campground(id: r.id ?? "\(code)-\(name)", name: name, parkCode: code, summary: firstSentence(r.description ?? ""),
                               reservationURL: allowed(r.reservationUrl), pageURL: allowed(r.url),
                               reservableSites: number(r.numberOfSitesReservable), firstComeSites: number(r.numberOfSitesFirstComeFirstServe),
-                              totalSites: number(r.campsites?.totalSites), wheelchairAccess: note(r.accessibility?.wheelchairAccess), adaNote: note(r.accessibility?.adaInfo))
+                              totalSites: number(r.totalSites), wheelchairAccess: note(r.wheelchairAccess), adaNote: note(r.adaInfo))
         }
         return Page(campgrounds: campgrounds, total: response.total.flatMap { Int($0) }, count: response.data.count)
     }
