@@ -208,7 +208,7 @@ struct NightDetail: View {
     private func honesty(_ plan: NightPlan) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(VisionModel.honesty(plan))
-            Text("Times are park-local. Moonrise and moonset are good to within a few minutes, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true.")
+            Text("Times are park-local. Moonrise and moonset are good to within a few minutes, except where the Moon only skims the horizon in the far north. Planets are good to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true.")
         }
         .font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
     }

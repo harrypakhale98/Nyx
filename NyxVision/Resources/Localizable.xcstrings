@@ -14632,37 +14632,37 @@
         }
       }
     },
-    "Times are park-local. Moonrise and moonset are good to within a few minutes, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true.": {
+    "Times are park-local. Moonrise and moonset are good to within a few minutes, except where the Moon only skims the horizon in the far north. Planets are good to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die Zeiten sind Ortszeit des Parks. Mondaufgang und Monduntergang sind auf wenige Minuten genau, Planeten auf etwa ein Grad. Am Himmel ist der Mond größer gezeichnet, als er ist, damit seine Phase erkennbar ist; sein Ort stimmt."
+            "value": "Die Zeiten sind Ortszeit des Parks. Mondaufgang und Monduntergang sind auf wenige Minuten genau, außer wo der Mond im hohen Norden nur knapp am Horizont entlangstreift. Planeten sind auf etwa ein Grad genau. Am Himmel ist der Mond größer gezeichnet, als er ist, damit seine Phase erkennbar ist; sein Ort stimmt."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Times are park-local. Moonrise and moonset are good to within a few minutes, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true."
+            "value": "Times are park-local. Moonrise and moonset are good to within a few minutes, except where the Moon only skims the horizon in the far north. Planets are good to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las horas son las locales del parque. La salida y la puesta de la Luna tienen un margen de pocos minutos; los planetas, de un grado. En el cielo, la Luna se dibuja más grande de lo real para que se lea su fase; su posición es la verdadera."
+            "value": "Las horas son las locales del parque. La salida y la puesta de la Luna tienen un margen de pocos minutos, salvo donde la Luna apenas roza el horizonte en el extremo norte. Los planetas tienen un margen de alrededor de un grado. En el cielo, la Luna se dibuja más grande de lo real para que se lea su fase; su posición es la verdadera."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les heures sont celles du parc. Le lever et le coucher de la Lune sont précis à quelques minutes près, les planètes à environ un degré. Dans le ciel, la Lune est dessinée plus grande que nature pour que sa phase se lise ; sa position est exacte."
+            "value": "Les heures sont celles du parc. Le lever et le coucher de la Lune sont précis à quelques minutes près, sauf là où la Lune ne fait que frôler l’horizon dans le Grand Nord. Les planètes le sont à environ un degré. Dans le ciel, la Lune est dessinée plus grande que nature pour que sa phase se lise ; sa position est exacte."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "時刻は公園の現地時間です。月の出と月の入りの誤差は数分以内、惑星の位置の誤差は約1度です。空の中の月は、満ち欠けがわかるように実際より大きく描いていますが、位置は正確です。"
+            "value": "時刻は公園の現地時間です。月の出と月の入りの誤差は数分以内です。ただし、北の高緯度で月が地平線をかすめるだけのときは除きます。惑星の位置の誤差は約1度です。空の中の月は、満ち欠けがわかるように実際より大きく描いていますが、位置は正確です。"
           }
         }
       }
