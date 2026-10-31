@@ -33,10 +33,11 @@ struct FieldActivityLockView: View {
     private var colors: FieldActivityColors { FieldActivityColors(nightVision:state.nightVision,contrast:contrast) }
     /// Two lines of the score's caption: as much as the score line may take beside the park's name.
     @ScaledMetric(relativeTo:.caption) private var scoreLines=34.0
-    /// What the park's name and zone keep however long the score line: the score is laid out first
-    /// and the name truncates, but never to less than a word or two. Not scaled: at large sizes the
-    /// score keeps its room and the name gives way.
-    private let nameRoom=120.0
+    /// What the park's name keeps however long the score line: the score is laid out first and the
+    /// name truncates, but never to less than a word or two. The zone mark beside it is extra, and the
+    /// floor grows with the text up to `nameRoomMax`, past which the score's two lines need the room.
+    @ScaledMetric(relativeTo:.caption) private var nameRoom=80.0
+    private let nameRoomMax=104.0
     /// "Heading out": followed ahead, before true darkness. Sunset, true darkness and the closure.
     private var heading: Bool { state.heading == true && !isStale && !state.finished }
     var body: some View {
@@ -46,10 +47,10 @@ struct FieldActivityLockView: View {
                 Image(systemName:"moon.stars").accessibilityHidden(true)
                 // The zone stays beside the name, which truncates before the score gives way.
                 HStack(spacing:6) {
-                    Text(heading ? String(localized:"Tonight at \(attributes.parkName)") : attributes.parkName).lineLimit(1).minimumScaleFactor(0.75)
+                    name
                     if !state.finished { FieldZoneMark(attributes:attributes,parkZone:parkZone,at:zoneMoment(mark)) }
                 }
-                .frame(minWidth:nameRoom,alignment:.leading).layoutPriority(1)
+                .layoutPriority(1)
                 Spacer(minLength:8)
                 // The night's latest score; its day when it is old, so the face is never surer than Nyx.
                 // Always shown: laid out before the name. Two lines where the band carries its basis
@@ -73,8 +74,15 @@ struct FieldActivityLockView: View {
                     Label { Text(mark.title).lineLimit(1).minimumScaleFactor(0.75) } icon:{ Image(systemName:mark.symbol).accessibilityHidden(true) }
                         .font(.system(.headline,design:.serif)).foregroundStyle(colors.ink)
                     Spacer(minLength:8)
-                    FieldActivityTimer(target:mark.date).font(.system(.title2,design:.serif)).monospacedDigit()
-                        .foregroundStyle(colors.accent).multilineTextAlignment(.trailing).frame(maxWidth:130,alignment:.trailing)
+                    // One line, laid out before the milestone's name: hours and minutes in words where they
+                    // fit ("2 hr, 10 min"), then narrower ("2h 10m"), then minutes alone.
+                    ViewThatFits(in:.horizontal) {
+                        FieldActivityTimer(target:mark.date)
+                        FieldActivityTimer(target:mark.date,style:.narrow)
+                        FieldActivityTimer(target:mark.date,style:.minutes).minimumScaleFactor(0.8)
+                    }
+                    .lineLimit(1).font(.system(.title2,design:.serif)).monospacedDigit()
+                    .foregroundStyle(colors.accent).frame(maxWidth:130,alignment:.trailing).layoutPriority(1)
                 }
             } else {
                 // Past the last mark: only sunrise is left to say.
@@ -111,6 +119,16 @@ struct FieldActivityLockView: View {
         .accessibilityElement(children:.combine)
         .accessibilityValue(state.finished ? Text(verbatim:"") : attributes.spokenNote(parkZone))
         .environment(\.timeZone,attributes.timeZone)
+    }
+    /// "Tonight at Zion" before arrival where it fits whole, else the park's name alone, which
+    /// truncates when it must but keeps its floor. VoiceOver hears the whole line either way.
+    private var name: some View {
+        let full=heading ? String(localized:"Tonight at \(attributes.parkName)") : attributes.parkName
+        return ViewThatFits(in:.horizontal) {
+            Text(full).fixedSize()
+            if heading { Text(attributes.parkName).fixedSize() }
+            Text(attributes.parkName).lineLimit(1).minimumScaleFactor(0.75).frame(minWidth:min(nameRoom,nameRoomMax),alignment:.leading)
+        }.accessibilityLabel(full)
     }
     /// The clock time the zone mark names its zone for (the zone's short name can change in the
     /// night): sunset before arrival, sunrise once stale, else the moment counted down to.
