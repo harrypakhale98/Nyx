@@ -71,7 +71,7 @@ struct PlanView: View {
         let menu=Menu { control } label:{
             HStack(spacing:8) { Text(Self.name(shown)).multilineTextAlignment(.leading); Image(systemName:"chevron.up.chevron.down").font(.footnote.weight(.semibold)).accessibilityHidden(true) }
                 .foregroundStyle(palette.ink).padding(.horizontal,18).padding(.vertical,10)
-                .nyxGlass(RoundedRectangle(cornerRadius:24,style:.continuous),role:.pill)
+                .nyxGlass(RoundedRectangle(cornerRadius:24,style:.continuous),role:.bar)
         }
         .accessibilityLabel("Plan").accessibilityValue(Text(Self.name(shown)))
         return FittingPicker {

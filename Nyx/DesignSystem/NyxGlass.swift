@@ -10,6 +10,9 @@ struct NyxGlass<S: Shape>: ViewModifier {
         /// The park pill, its list and the Ask Nyx bar: tinted more, so a name keeps its contrast over a
         /// bright stretch of the Milky Way, and interactive, so it answers the finger.
         case pill
+        /// A control in a bar the page scrolls under (Plan's mode menu at large text sizes): tinted nearly
+        /// solid, so the words passing beneath are veiled rather than read through the glass.
+        case bar
     }
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
@@ -33,6 +36,7 @@ struct NyxGlass<S: Shape>: ViewModifier {
         switch role {
         case .control: .regular.tint(palette.panel.opacity(0.35))
         case .pill: .regular.tint(palette.panel.opacity(0.5)).interactive()
+        case .bar: .regular.tint(palette.panel.opacity(0.85)).interactive()
         }
     }
 }
