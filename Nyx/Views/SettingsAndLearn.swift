@@ -87,8 +87,9 @@ struct SettingsView:View {
             if let name=place.name { return Text("No dusk or dawn at \(name) today, so night vision stays as you set it.") }
             return Text("No dusk or dawn where you are today, so night vision stays as you set it.")
         }
-        if let name=place.name { return Text("Red from dusk to dawn at \(name). Turned by hand, it holds until the next dusk or dawn.") }
-        return Text("Red from dusk to dawn where you are. Turned by hand, it holds until the next dusk or dawn.")
+        // Only while Nyx is open: widgets and Control Center catch up the next time it is.
+        if let name=place.name { return Text("Red from dusk to dawn at \(name) while Nyx is open. Turned by hand, it holds until the next dusk or dawn.") }
+        return Text("Red from dusk to dawn where you are while Nyx is open. Turned by hand, it holds until the next dusk or dawn.")
     }
     /// A section's heading, as `Eyebrow` sets one on a page: serif, sentence case, starlight.
     private func heading(_ text:LocalizedStringKey)->some View { Eyebrow(text:text).textCase(nil).padding(.top,8) }

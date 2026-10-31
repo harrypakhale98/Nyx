@@ -54109,72 +54109,72 @@
         }
       }
     },
-    "Red from dusk to dawn at %@. Turned by hand, it holds until the next dusk or dawn.": {
+    "Red from dusk to dawn at %@ while Nyx is open. Turned by hand, it holds until the next dusk or dawn.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rot von der Abend- bis zur Morgendämmerung in %@. Von Hand umgeschaltet, bleibt es bis zur nächsten Dämmerung so."
+            "value": "Rot von der Abend- bis zur Morgendämmerung in %@, solange Nyx geöffnet ist. Von Hand umgeschaltet, bleibt es bis zur nächsten Dämmerung so."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Red from dusk to dawn at %@. Turned by hand, it holds until the next dusk or dawn."
+            "value": "Red from dusk to dawn at %@ while Nyx is open. Turned by hand, it holds until the next dusk or dawn."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Roja del anochecer al alba en %@. Si la cambias a mano, se mantiene hasta el próximo anochecer o alba."
+            "value": "Roja del anochecer al alba en %@ mientras usas Nyx. Si la cambias a mano, se mantiene hasta el próximo anochecer o alba."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rouge du crépuscule à l’aube à %@. Changée à la main, elle reste ainsi jusqu’au prochain crépuscule ou à la prochaine aube."
+            "value": "Rouge du crépuscule à l’aube à %@ pendant que vous utilisez Nyx. Changée à la main, elle reste ainsi jusqu’au prochain crépuscule ou à la prochaine aube."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@で夕暮れから夜明けまで赤くなります。手動で切り替えると、次の夕暮れか夜明けまでそのままです。"
+            "value": "Nyxを開いている間、%@で夕暮れから夜明けまで赤くなります。手動で切り替えると、次の夕暮れか夜明けまでそのままです。"
           }
         }
       }
     },
-    "Red from dusk to dawn where you are. Turned by hand, it holds until the next dusk or dawn.": {
+    "Red from dusk to dawn where you are while Nyx is open. Turned by hand, it holds until the next dusk or dawn.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rot von der Abend- bis zur Morgendämmerung, wo du bist. Von Hand umgeschaltet, bleibt es bis zur nächsten Dämmerung so."
+            "value": "Rot von der Abend- bis zur Morgendämmerung, wo du bist, solange Nyx geöffnet ist. Von Hand umgeschaltet, bleibt es bis zur nächsten Dämmerung so."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Red from dusk to dawn where you are. Turned by hand, it holds until the next dusk or dawn."
+            "value": "Red from dusk to dawn where you are while Nyx is open. Turned by hand, it holds until the next dusk or dawn."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Roja del anochecer al alba donde estás. Si la cambias a mano, se mantiene hasta el próximo anochecer o alba."
+            "value": "Roja del anochecer al alba donde estás mientras usas Nyx. Si la cambias a mano, se mantiene hasta el próximo anochecer o alba."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rouge du crépuscule à l’aube là où vous êtes. Changée à la main, elle reste ainsi jusqu’au prochain crépuscule ou à la prochaine aube."
+            "value": "Rouge du crépuscule à l’aube là où vous êtes, pendant que vous utilisez Nyx. Changée à la main, elle reste ainsi jusqu’au prochain crépuscule ou à la prochaine aube."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "現在地で夕暮れから夜明けまで赤くなります。手動で切り替えると、次の夕暮れか夜明けまでそのままです。"
+            "value": "Nyxを開いている間、現在地で夕暮れから夜明けまで赤くなります。手動で切り替えると、次の夕暮れか夜明けまでそのままです。"
           }
         }
       }
