@@ -301,7 +301,8 @@ struct TonightFace: View {
                 if let closure { WristClosureLine(text: closure) }
                 if looking { NightGlance(night: shown, isTonight: offset == 0, models: models) } else { NextMoment(night: night, now: now, models: models, wraps: true) }
                 if let smoke = shown.smokeCaveat { SmokeLine(text: smoke, spoken: smoke) }
-                ForEach(cloudLines(shown, context: context, now: now), id: \.self) {
+                // A later night's glance already names what its clouds rest on.
+                ForEach(cloudLines(shown, context: context, now: now, labelShown: looking && offset != 0), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
                 }
                 // Where no closure stands under the score, why none may be known, in the iPhone's words.
@@ -491,11 +492,13 @@ struct NightGlance: View {
 }
 
 /// Where the clouds came from and how old they are, after any line saying the score has none.
-func cloudLines(_ night: Night, context: WatchContext?, now: Date) -> [String] {
+/// `labelShown`: the night's basis label is already on screen (`NightGlance`), so its short note,
+/// the same words, is not said again.
+func cloudLines(_ night: Night, context: WatchContext?, now: Date, labelShown: Bool = false) -> [String] {
     let source = WatchSky.cloudSource(night.park, context: context, now: now)
     // A forecast the iPhone could refresh says so plainly, never "no forecast for this night".
     var lines: [String] = []
-    if let note = WatchSky.forecastNote(night, context: context, short: source.explainsItself) { lines.append(note) }
+    if !(labelShown && source.explainsItself), let note = WatchSky.forecastNote(night, context: context, short: source.explainsItself) { lines.append(note) }
     if let line = source.line(for: night.park) { lines.append(line) }
     if let line = context?.dataNote { lines.append(line) }
     return lines
