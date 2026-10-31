@@ -260,6 +260,8 @@ private struct ComplicationReview: View {
                 WatchComplicationView(previewFamily: .accessoryRectangular, entry: WatchSkyEntry(date: .now, night: nil, next: nil, nightVision: red)).frame(height: 50)
                 NextDarkComplicationView(previewFamily: .accessoryRectangular, entry: NextDarkEntry(date: .now, park: nil, moment: .none, nightVision: red), now: .now).frame(height: 50)
             }
+            // The title's margins, so no caption sits flush against the screen's edge on 40 mm.
+            .scenePadding(.horizontal)
         }
         .navigationTitle("Complications")
     }
