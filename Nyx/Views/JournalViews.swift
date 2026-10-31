@@ -424,15 +424,21 @@ struct JournalThumbnail:View {
         photos.remove(at:index)
         suggestions=Dictionary(uniqueKeysWithValues:suggestions.compactMap { $0.key<index ? ($0.key,$0.value) : $0.key>index ? ($0.key-1,$0.value) : nil })
         unsuggested=Set(unsuggested.compactMap { $0<index ? $0 : $0>index ? $0-1 : nil })
+        suggesting=Set(suggesting.compactMap { $0<index ? $0 : $0>index ? $0-1 : nil })
     }
     /// Asks the on-device model for a draft; it waits beside the field until used or dismissed.
-    func suggest(_ index:Int) async {
+    /// A photo removed before it while the model answers moves the request with it: the answer goes
+    /// to the photo it was asked about, wherever it now is, and is dropped only when that photo is gone.
+    /// `describe`: the describer (tests pass their own).
+    func suggest(_ index:Int,describe:(Data) async -> String? = { await PhotoDescriber.suggest($0) }) async {
         guard photos.indices.contains(index), !suggesting.contains(index) else { return }
-        suggesting.insert(index); defer { suggesting.remove(index) }
+        suggesting.insert(index)
         let data=photos[index]
         unsuggested.remove(index)
-        let line=await PhotoDescriber.suggest(data)
-        guard photos.indices.contains(index), photos[index]==data else { return }
+        let line=await describe(data)
+        // `removePhoto` keeps `suggesting` in step, so the request is still where its photo now is.
+        guard let index=suggesting.sorted().first(where:{ photos.indices.contains($0) && photos[$0]==data }) else { return }
+        suggesting.remove(index)
         if let line { suggestions[index]=line }
         else {
             unsuggested.insert(index)

@@ -73,6 +73,30 @@ private func jpeg(_ color: UIColor) throws -> Data {
         await editor.load([])
         #expect(editor.error == "This photo is too large. Choose a smaller image." && !editor.loadingPhotos && editor.photos.isEmpty)
     }
+    /// A photo removed while a description is being suggested for a later one: the spinner and the
+    /// answer move with that photo; an answer for a photo removed meanwhile is dropped.
+    @Test func aSuggestionFollowsItsPhoto() async {
+        let editor=JournalEditorModel(restoring:false)
+        editor.photos=[Data([1]),Data([2]),Data([3])]
+        editor.suggestions=[2:"Third"]
+        editor.unsuggested=[0]
+        let gate=SuggestionGate()
+        let asking=Task { await editor.suggest(1) { _ in await gate.answer() } }
+        while !gate.waiting { await Task.yield() }
+        #expect(editor.suggesting == [1])
+        editor.removePhoto(at:0)
+        #expect(editor.suggesting == [0] && editor.suggestions == [1:"Third"] && editor.unsuggested.isEmpty)
+        gate.release("A dark ridge")
+        await asking.value
+        #expect(editor.suggesting.isEmpty && editor.suggestions == [0:"A dark ridge",1:"Third"])
+        // The photo itself removed while asked about: nothing lands on another photo.
+        let again=Task { await editor.suggest(1) { _ in await gate.answer() } }
+        while !gate.waiting { await Task.yield() }
+        editor.removePhoto(at:1)
+        gate.release("Gone")
+        await again.value
+        #expect(editor.suggesting.isEmpty && editor.suggestions == [0:"A dark ridge"] && editor.photos == [Data([2])])
+    }
 
     // MARK: Moon by touch
 
@@ -150,4 +174,11 @@ private func jpeg(_ color: UIColor) throws -> Data {
         #expect(!OnDeviceGuide.reflectionGrounded("You counted 40 meteors at Great Basin.", facts: facts, notes: ["Cold and clear."]))
         #expect(!OnDeviceGuide.reflectionGrounded("What a year!", facts: facts, notes: []))
     }
+}
+/// Holds a suggested description until the test lets it through.
+@MainActor private final class SuggestionGate {
+    private var held: CheckedContinuation<String?, Never>?
+    var waiting: Bool { held != nil }
+    func answer() async -> String? { await withCheckedContinuation { held=$0 } }
+    func release(_ line: String?) { held?.resume(returning: line); held=nil }
 }
