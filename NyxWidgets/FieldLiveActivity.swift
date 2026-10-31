@@ -26,7 +26,7 @@ struct FieldLiveActivity: Widget {
                         .dynamicIsland(verticalPlacement:.belowIfTooWide)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    FieldActivityCountdown(attributes:context.attributes,state:context.state,isStale:context.isStale,font:.system(.title3,design:.serif),maxWidth:110,compact:false)
+                    FieldActivityExpandedCountdown(attributes:context.attributes,state:context.state,isStale:context.isStale)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(alignment:.leading,spacing:6) {

@@ -33,6 +33,10 @@ struct FieldActivityLockView: View {
     private var colors: FieldActivityColors { FieldActivityColors(nightVision:state.nightVision,contrast:contrast) }
     /// Two lines of the score's caption: as much as the score line may take beside the park's name.
     @ScaledMetric(relativeTo:.caption) private var scoreLines=34.0
+    /// What the park's name and zone keep however long the score line: the score is laid out first
+    /// and the name truncates, but never to less than a word or two. Not scaled: at large sizes the
+    /// score keeps its room and the name gives way.
+    private let nameRoom=120.0
     /// "Heading out": followed ahead, before true darkness. Sunset, true darkness and the closure.
     private var heading: Bool { state.heading == true && !isStale && !state.finished }
     var body: some View {
@@ -40,20 +44,24 @@ struct FieldActivityLockView: View {
         VStack(alignment:.leading,spacing:heading ? 8 : 10) {
             HStack(spacing:6) {
                 Image(systemName:"moon.stars").accessibilityHidden(true)
-                Text(heading ? String(localized:"Tonight at \(attributes.parkName)") : attributes.parkName).lineLimit(1).minimumScaleFactor(0.75).layoutPriority(1)
-                if !state.finished { FieldZoneMark(attributes:attributes,parkZone:parkZone) }
+                // The zone stays beside the name, which truncates before the score gives way.
+                HStack(spacing:6) {
+                    Text(heading ? String(localized:"Tonight at \(attributes.parkName)") : attributes.parkName).lineLimit(1).minimumScaleFactor(0.75)
+                    if !state.finished { FieldZoneMark(attributes:attributes,parkZone:parkZone,at:zoneMoment(mark)) }
+                }
+                .frame(minWidth:nameRoom,alignment:.leading).layoutPriority(1)
                 Spacer(minLength:8)
                 // The night's latest score; its day when it is old, so the face is never surer than Nyx.
-                // Two lines where the band carries its basis ("Excellent, usual clouds"): wrapped, never
-                // cut. A line that needs more ("Gut, frühe Vorschau, Dunst oder Rauch") gives way to the
-                // band's one word; VoiceOver still hears the whole line.
+                // Always shown: laid out before the name. Two lines where the band carries its basis
+                // ("Excellent, usual clouds"): wrapped, never cut. A line that needs more ("Gut, frühe
+                // Vorschau, Dunst oder Rauch") gives way to the band's one word; VoiceOver still hears the whole line.
                 ViewThatFits(in:.vertical) {
                     Text(attributes.scoreLine(state)).fixedSize(horizontal:false,vertical:true)
                     Text(attributes.scoreLine(state,short:true)).fixedSize(horizontal:false,vertical:true)
                     Text(attributes.scoreLine(state,short:true)).lineLimit(2).minimumScaleFactor(0.8)
                 }
                 .frame(maxHeight:scoreLines)
-                .monospacedDigit().multilineTextAlignment(.trailing)
+                .monospacedDigit().multilineTextAlignment(.trailing).layoutPriority(2)
                 .accessibilityElement(children:.ignore).accessibilityLabel(attributes.spokenScore(state))
             }.font(.caption.weight(.medium)).foregroundStyle(colors.muted)
             if state.finished {
@@ -104,6 +112,12 @@ struct FieldActivityLockView: View {
         .accessibilityValue(state.finished ? Text(verbatim:"") : attributes.spokenNote(parkZone))
         .environment(\.timeZone,attributes.timeZone)
     }
+    /// The clock time the zone mark names its zone for (the zone's short name can change in the
+    /// night): sunset before arrival, sunrise once stale, else the moment counted down to.
+    private func zoneMoment(_ mark:FieldActivityAttributes.Milestone?)->Date {
+        if heading { return attributes.dusk }
+        return isStale ? attributes.dawn : mark?.date ?? attributes.dawn
+    }
     private func laterMark(_ item:FieldActivityAttributes.Milestone)->some View {
         HStack(spacing:4) { Text(item.title); Text(item.date,style:.time).monospacedDigit() }.fixedSize()
     }
@@ -143,16 +157,24 @@ struct FieldActivitySchedule: View {
 struct FieldZoneMark: View {
     let attributes: FieldActivityAttributes
     let parkZone: TimeZone?
+    /// The clock time it stands beside: the zone's short name then ("MST", or "MDT" before the clocks change).
+    var at: Date?=nil
+    /// "· PST" after a name; "PST" alone under a time.
+    var dot=true
     var body: some View {
-        if let zone=attributes.namedZone(parkZone) { Text(verbatim:"· \(zone.shortName(at:attributes.dusk))").fixedSize().accessibilityHidden(true) }
+        if let zone=attributes.namedZone(parkZone) {
+            let name=zone.shortName(at:at ?? attributes.dusk)
+            Text(verbatim:dot ? "· \(name)" : name).fixedSize().accessibilityHidden(true)
+        }
     }
 }
 extension FieldActivityAttributes {
     /// The zone the faces name: the park's (`parkZone` where set, else the attributes'), when its clock
-    /// is not this iPhone's at dusk; nil when it is.
-    func namedZone(_ parkZone:TimeZone?)->TimeZone? {
+    /// is not `device`'s at any time the faces give (dusk, a milestone, dawn), so a night on which
+    /// one of the two clocks changes still says whose its later times are; nil when they agree all night.
+    func namedZone(_ parkZone:TimeZone?,device:TimeZone = .current)->TimeZone? {
         let zone=parkZone ?? timeZone
-        return zone.keepsOtherTime(at:dusk) ? zone : nil
+        return ([dusk,dawn]+milestones.map(\.date)).contains { zone.keepsOtherTime(at:$0,device:device) } ? zone : nil
     }
     /// "Times in Pacific Time." where the faces name the park's zone; empty otherwise.
     func spokenNote(_ parkZone:TimeZone?)->Text { Text(verbatim:namedZone(parkZone)?.timesNote ?? "") }
@@ -204,7 +226,7 @@ struct FieldActivitySmallView: View {
             // The park's zone where a clock time stands for the countdown (sunrise, once stale).
             HStack(spacing:4) {
                 Text(attributes.parkName).lineLimit(1)
-                if mark.milestone == nil && !state.finished { FieldZoneMark(attributes:attributes,parkZone:parkZone) }
+                if mark.milestone == nil && !state.finished { FieldZoneMark(attributes:attributes,parkZone:parkZone,at:attributes.dawn) }
             }.font(.caption2).foregroundStyle(colors.muted)
         }
         .frame(maxWidth:.infinity,alignment:.leading)
@@ -296,6 +318,28 @@ struct FieldActivityCountdown: View {
         if let mark=attributes.shown(state,isStale:isStale) { FieldActivityTimer(target:mark.date,style:style) }
         else if !state.finished { Text(attributes.dawn,style:.time) }
         else { Text("Dawn") }
+    }
+}
+/// The expanded Dynamic Island's countdown. Where it gives sunrise's clock time instead (stale, or
+/// only sunrise left), the park's zone sits under it when that clock is not this iPhone's, and
+/// VoiceOver hears whose time it is.
+struct FieldActivityExpandedCountdown: View {
+    let attributes: FieldActivityAttributes
+    let state: FieldActivityAttributes.ContentState
+    let isStale: Bool
+    @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.fieldParkZone) private var parkZone
+    var body: some View {
+        let clock=attributes.shown(state,isStale:isStale) == nil && !state.finished
+        VStack(alignment:.trailing,spacing:2) {
+            FieldActivityCountdown(attributes:attributes,state:state,isStale:isStale,font:.system(.title3,design:.serif),maxWidth:110,compact:false)
+            if clock {
+                FieldZoneMark(attributes:attributes,parkZone:parkZone,at:attributes.dawn,dot:false)
+                    .font(.caption2).foregroundStyle(FieldActivityColors(nightVision:state.nightVision,contrast:contrast).muted)
+            }
+        }
+        .accessibilityElement(children:.combine)
+        .accessibilityValue(clock ? attributes.spokenNote(parkZone) : Text(verbatim:""))
     }
 }
 @available(iOS 27.0, *)

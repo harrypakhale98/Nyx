@@ -123,7 +123,7 @@ import Testing
         #expect(jotr.timeZone.shortName(at: attributes.dusk, locale: Locale(identifier: "en_US")) == "PST")
         #expect(jotr.timeZone.shortName(at: attributes.dusk, locale: Locale(identifier: "de_DE")) == "GMT-8")
         // Named only where the clock differs from this device's.
-        #expect((attributes.namedZone(nil) != nil) == jotr.timeZone.keepsOtherTime(at: attributes.dusk))
+        #expect(attributes.namedZone(nil, device: denver) == jotr.timeZone && attributes.namedZone(nil, device: jotr.timeZone) == nil)
         #expect(jotr.timeZone.timesNote == "Times in \(jotr.timeZoneName).")
         #expect(jotr.timeZone.spokenZone(at: attributes.dusk, device: denver) == jotr.timeZone.timesNote)
         #expect(jotr.timeZone.spokenZone(at: attributes.dusk, device: jotr.timeZone) == nil)
@@ -131,6 +131,16 @@ import Testing
         let face=FieldActivityLockView(attributes: attributes, state: attributes.state(at: attributes.dusk, nightVision: false), isStale: true)
             .environment(\.fieldParkZone, denver).frame(width: 360).background(Color.black)
         #expect(ImageRenderer(content: face).uiImage != nil)
+    }
+    /// The night the clocks fall back in Los Angeles (2026-11-01, 2 AM), Grand Canyon keeps MST: the
+    /// two clocks agree at dusk and differ by sunrise, so the faces still name the park's zone.
+    @Test func fieldFacesNameTheZoneOnTheNightTheClocksChange() throws {
+        let grca=try park("grca"), sky=try self.sky(grca, "2026-10-31")
+        let la=try #require(TimeZone(identifier: "America/Los_Angeles"))
+        let attributes=FieldActivityAttributes(night: FieldNight(park: grca, sky: sky), score: 80, band: "Excellent")
+        #expect(!grca.timeZone.keepsOtherTime(at: attributes.dusk, device: la) && grca.timeZone.keepsOtherTime(at: attributes.dawn, device: la))
+        #expect(attributes.namedZone(nil, device: la) == grca.timeZone)
+        #expect(attributes.namedZone(nil, device: grca.timeZone) == nil)
     }
     @Test func tabStripShowsAFollowedNightFromThreeHoursBeforeSunsetUntilDawn() throws {
         let jotr=try park("jotr"), sky=try self.sky(jotr, "2026-12-13")
