@@ -130,8 +130,9 @@ import Observation
     /// When Tonight's candidates were last refreshed, for a refresh on return.
     @ObservationIgnored private(set) var lastRefresh: Date?
     /// The parks' forecast was due but held back: the service asked Nyx to wait, or this iPhone's
-    /// request budget was spent (`ForecastRequest`). Read by a refresh's closing line.
-    @ObservationIgnored private(set) var forecastsHeldBack=false
+    /// request budget was spent (`ForecastRequest`). Read by a refresh's closing line and by Tonight,
+    /// which then says so rather than "offline".
+    private(set) var forecastsHeldBack=false
     /// Where the settings below are kept: the app's own defaults (tests pass a suite of their own, and
     /// a debug route a scratch one, `DebugScenario.plannerDefaults`, so a capture never touches them).
     @ObservationIgnored let defaults: UserDefaults
@@ -856,7 +857,8 @@ import Observation
         }
         // Switched off, the air-quality host's cached data is dropped rather than merely not refreshed.
         if !smokeEnabled { await detailService.forgetAir() }
-        forecastsHeldBack=network ? await weather.heldBack() : false
+        let held=network ? await weather.heldBack() : false
+        if held != forecastsHeldBack { forecastsHeldBack=held }
         // A summit above the inversion (Haleakalā) is scored from its mid and high cloud, which come
         // with forecast detail: asked for with the clouds from the first refresh, page or no page, so
         // Tonight never waits for a park page to score it. Every copy of Nyx asks for that one public

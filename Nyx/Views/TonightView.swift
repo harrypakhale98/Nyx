@@ -115,7 +115,7 @@ struct TonightView: View {
                     FoldColumns(narrow:.trailing,narrowMax:500,spacing:NyxMetrics.columnGap) {
                         // On a fold the week's grid stays in the first column, so no night sits on the crease.
                         VStack(spacing:26) { GoingPanel(hero:offset==0 ? park : nil); hero(night,others:Array(shown.dropFirst()),offset:offset,ready:ready); if offset==0 { farther(than:park,shortlist:widerList) }; darkArea(all); ahead(night.park,held:offset>0 ? night.id : nil); if folded { weekAcross } }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(rule:false,choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID); more(shown,offset:offset); fromHome(hero:park); LookingBackPanel(); extras }.frame(maxWidth:.infinity,alignment:.leading)
+                        VStack(alignment:.leading,spacing:22) { StartingPointPanel(rule:false,choose:{ chooseHome=true },nearMe:nearMe).id(Self.startID); more(shown,offset:offset); fromHome(hero:park); LookingBackPanel(); extras(hero:park) }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
                     if !folded { weekAcross }
@@ -141,7 +141,7 @@ struct TonightView: View {
                         fromHome(hero:park)
                         LookingBackPanel()
                     }
-                    extras
+                    extras(hero:best.first)
                 }.padding(24).readableColumn()
             }
         }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
@@ -599,8 +599,16 @@ struct TonightView: View {
         let nights=model.nights(dark.place,from:model.tonight(dark.place),count:NightPlanner.horizon)
         return LightsOut.Target(place:dark.place,meters:dark.meters,homeClass:home.bortle,homeKnown:home.known,best:NightPlanner.best(nights))
     }
-    @ViewBuilder private var extras: some View {
-        if DebugScenario.state=="error" || DebugScenario.state=="offline" || (model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
+    /// Forecasts older than they should be: offline, or (online) held back because the service asked
+    /// Nyx to wait or this iPhone's request budget is spent, said as a refresh says it, in the
+    /// answer's own time. `-nyx-state held` (DEBUG) shows the held-back line.
+    @ViewBuilder private func extras(hero:Park?)->some View {
+        let stale=model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }
+        if DebugScenario.state=="error" || DebugScenario.state=="offline" || (stale && !model.forecastsHeldBack) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
+        else if stale || DebugScenario.state=="held" {
+            let newest=model.parks.compactMap { model.forecasts[$0.id]?.updated }.max()
+            Panel { Label(RefreshOutcome.paused(newest).line(in:hero?.timeZone ?? .current),systemImage:"pause.circle").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+        }
     }
     /// One quiet line under the hero, never more, the most significant first: a lunar eclipse the
     /// best park can see within the next three nights, then a major meteor shower's peak worth the
