@@ -28,8 +28,14 @@ enum Essay: String,CaseIterable,Identifiable {
         case .bortle,.etiquette,.access: return nil
         }
     }
-    /// A closing paragraph that lists sources ("Sources: …", "Fuentes: …"), drawn as a footnote.
-    static func isSources(_ paragraph:String)->Bool { paragraph.hasPrefix(String(localized:"Sources")+":") }
+    /// A closing paragraph that lists sources ("Sources: …", "Fuentes: …"), drawn as a footnote. The
+    /// punctuation after the word is the language's own: French sets a no-break space before the colon
+    /// ("Sources\u{00A0}: …"), Japanese a full-width one ("出典：…").
+    static func isSources(_ paragraph:String,word:String = String(localized:"Sources"))->Bool {
+        guard paragraph.hasPrefix(word) else { return false }
+        let rest=paragraph.dropFirst(word.count).drop { $0.isWhitespace }
+        return rest.first == ":" || rest.first == "："
+    }
     /// The catalog's `essay.<name>` in the reader's language; until the catalog holds it, the
     /// bundled English source, so a new essay never shows its key.
     static func text(_ name:String,bundle:Bundle = .main)->String {

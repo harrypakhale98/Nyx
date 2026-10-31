@@ -129,6 +129,23 @@ struct CityLightTests {
         #expect(!text.contains("La página de cada parque"))
         #expect(try spanish("Sources")=="Fuentes")
     }
+    /// Every bundled language finds its one sources paragraph, whatever its punctuation before the
+    /// list: "Sources\u{00A0}:" in French, "出典：" in Japanese.
+    @Test @MainActor func everyLanguageFindsTheSources() throws {
+        let languages=Bundle.main.localizations.filter { $0 != "Base" }
+        #expect(Set(["en","es","de","fr","ja"]).isSubset(of:Set(languages)))
+        for language in languages {
+            let path=try #require(Bundle.main.path(forResource:language,ofType:"lproj"),"\(language)")
+            let bundle=try #require(Bundle(path:path))
+            let word=bundle.localizedString(forKey:"Sources",value:nil,table:nil)
+            let paragraphs=Essay.text("darkness",bundle:bundle).components(separatedBy:"\n\n")
+            #expect(paragraphs.filter { Essay.isSources($0,word:word) }.count==1,"\(language)")
+            #expect(paragraphs.last.map { Essay.isSources($0,word:word) }==true,"\(language)")
+        }
+        #expect(Essay.isSources("Sources\u{202F}: A",word:"Sources"))
+        #expect(Essay.isSources("出典：A",word:"出典"))
+        #expect(!Essay.isSources("Sources of light pollution are many.",word:"Sources"))
+    }
 
     // MARK: The figure's width
 
