@@ -113,6 +113,21 @@ struct OpenMeteoBudgetTests {
         #expect(await http.urls.count == 2)
         #expect(later.strikes(Self.host) == 0 && HostBackoff(file: file, now: clock.now).retryAfter(Self.host) == nil)
     }
+    /// Once the wait is over, a request that fails on its way (offline) is no longer said to be paused.
+    @Test func anOfflineRequestAfterTheWaitIsNotPaused() async throws {
+        let parks=Array(try parks().prefix(3))
+        let clock=BudgetClock(Self.midnight.addingTimeInterval(10*3600)), http=OpenMeteoEcho()
+        await http.refuse(HTTPStatusError(status: 429))
+        let service=WeatherService(transport: http, persist: false, backoff: HostBackoff(file: nil, random: { 0 }), clock: { clock.now })
+        _=await service.forecasts(for: parks, network: true, force: true)
+        _=await service.forecasts(for: parks, network: true, force: true)
+        #expect(await service.heldBack())
+        await http.refuse(URLError(.notConnectedToInternet))
+        clock.advance(3601)
+        _=await service.forecasts(for: parks, network: true, force: true)
+        #expect(await http.urls.count == 2)
+        #expect(await service.heldBack() == false)
+    }
     /// The server's Retry-After is honoured as given (seconds or an HTTP date), never shortened.
     @Test func retryAfterIsHonoured() async throws {
         let now=Self.midnight

@@ -830,7 +830,8 @@ actor WeatherService: WeatherProviding {
     private(set) var spotWaiting=0
     /// Catalogue tile requests under way, by their members; a caller asking for the same tile waits for it.
     private var catalogFlight: [String: Task<[String: Forecast], Never>] = [:]
-    /// The parks' or spots' forecast was due and held back (`heldBack()`).
+    /// The parks' or spots' forecast was due and held back (`heldBack()`); cleared once a request is
+    /// sent again, whatever it brings, so one that fails offline is said as offline, not paused.
     private var held=false
     /// Where the spots' switch is read; tests use their own suite.
     private let suite: String?
@@ -997,7 +998,7 @@ actor WeatherService: WeatherProviding {
             guard let url=SpotForecast.url(for: chunk) else { continue }
             let data: Data
             do { data=try await ForecastRequest.get(url, transport: transport, constrained: true, backoff: backoff, ledger: ledger, caps: budget.essential, clock: clock) } catch {
-                if error is ForecastRequest.HeldBack { held=true }
+                held=error is ForecastRequest.HeldBack
                 break
             }
             held=false
@@ -1052,6 +1053,7 @@ actor WeatherService: WeatherProviding {
                 if curated { held=true }
                 return nil
             }
+            if curated { held=false }
             return []
         }
         if curated { held=false }
