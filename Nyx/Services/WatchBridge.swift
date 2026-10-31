@@ -53,7 +53,8 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
     /// place-local night Tonight's answer was picked for (`PlanModel.tonightPickNight`).
     func push(savedParkIDs: [String], homeParkID: String, tonightParkID: String? = nil, tonightNight: String? = nil, watchParkIDs: [String] = [], forecasts: [String: Forecast],
               details: [String: ForecastDetail], closures: [String: String], aboveInversion: Set<String>, ranges: [String: [String: ClosedRange<Int>]]?, places: [Place] = [],
-              aurora: AuroraOutlook? = nil, dusk: [Double]? = nil, checkedParkIDs: Set<String>? = nil, complete: (@MainActor @Sendable () -> Void)? = nil) {
+              aurora: AuroraOutlook? = nil, dusk: [Double]? = nil, checkedParkIDs: Set<String>? = nil, alertsRefusal: MissingInput.KeyRefusal? = nil,
+              complete: (@MainActor @Sendable () -> Void)? = nil) {
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
         // No watch with Nyx paired: nothing is worked out for one, and `complete` hands over once there
@@ -69,7 +70,8 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
                                         details: details, closures: closures, aboveInversion: aboveInversion, ranges: ranges ?? [:], places: places,
                                         tonightParkID: tonightParkID, tonightNight: tonightNight, watchParkIDs: watchParkIDs, aurora: aurora,
                                         spotForecastsOff: !SpotForecast.isOn(), dusk: dusk,
-                                        alertsOff: !NetworkService.alerts.isOn(), smokeOff: !NetworkService.smoke.isOn(), checkedParkIDs: checkedParkIDs)
+                                        alertsOff: !NetworkService.alerts.isOn(), smokeOff: !NetworkService.smoke.isOn(), checkedParkIDs: checkedParkIDs,
+                                        alertsRefusal: alertsRefusal)
         lock.withLock { latest = context; self.complete = ranges == nil ? complete : nil }
         if session.activationState == .activated { send(session) } else { activate() }
     }

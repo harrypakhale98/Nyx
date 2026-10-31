@@ -135,6 +135,27 @@ import UIKit
                 closures: ["jotr": "Road closed"], alertsOff: true).alertsNote(jotr) == nil)
     }
 
+    /// A key the Park Service refused is named on the wrist where it would say "Access not checked",
+    /// in the iPhone's words; a context from an older iPhone, or with a name this watch does not know,
+    /// still reads, and says "Access not checked" as before.
+    @Test func aRefusedKeyIsNamedOnTheWrist() throws {
+        let jotr = try park("jotr")
+        let evening = try #require(ISO8601DateFormatter().date(from: "2026-10-08T03:00:00Z"))
+        let context = WatchContext.make(savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], checkedParkIDs: ["deva"], alertsRefusal: .shared, now: evening)
+        let sent = try #require(context.data.flatMap { WatchContext(data: $0) })
+        #expect(sent.alertsRefusal == .shared && sent == context)
+        #expect(sent.alertsNote(jotr) == ScoreInputs(alertsBusy: true, alertsRefusal: .shared).uncheckedNote(jotr, closure: nil))
+        let deva = try park("deva")
+        #expect(sent.alertsNote(jotr) == MissingInput.refusal(.shared, cached: false) && sent.alertsNote(deva) == nil)
+        let bytes = try #require(context.data)
+        var object = try #require(try JSONSerialization.jsonObject(with: bytes) as? [String: Any])
+        for name: Any? in [nil, "someday"] {
+            object["alertsRefusal"] = name
+            let older = try #require(WatchContext(data: try JSONSerialization.data(withJSONObject: object)))
+            #expect(older.alertsRefusal == nil && older.alertsNote(jotr) == MissingInput.unchecked(busy: false))
+        }
+    }
+
     /// The first-launch chooser's pick stands in only until the iPhone names Tonight's places: parks
     /// saved there, or Tonight's pick there. A context naming only its starting park does not.
     @Test func theChoosersPickGivesWayOnlyToTonightsPlaces() throws {

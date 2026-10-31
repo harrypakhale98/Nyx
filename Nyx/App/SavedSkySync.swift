@@ -328,7 +328,9 @@ import WidgetKit
                     // (location stays on this iPhone), so the two turn together except while Near me has found you.
                     dusk:NightVisionDusk.startingPoint(model),
                     // The parks the last park update covers, so the wrist says "Access not checked" for the rest, as here.
-                    checkedParkIDs:Set(model.parks.filter { $0.nps != nil && model.enrichments[$0.id] != nil }.map(\.id)),complete:complete)
+                    checkedParkIDs:Set(model.parks.filter { $0.nps != nil && model.enrichments[$0.id] != nil }.map(\.id)),
+                    // A key the Park Service refused is named there too, rather than "Access not checked".
+                    alertsRefusal:model.alertsRefusal,complete:complete)
         if watch { pushWatchMoons(model) }
     }
     /// The places whose Moons the watch is handed (`WatchMoons.places`); none without a watch with Nyx.
