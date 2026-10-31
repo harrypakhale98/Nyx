@@ -5,7 +5,7 @@ import WidgetKit
 /// Nyx in Assistive Access: one answer, in large type, with nothing to learn. Three choices:
 /// "Tonight" (the darkest park within reach of the chosen starting point), "Saved parks" and the
 /// "Red light" switch, which is the same night vision as the full app's.
-/// Each park is one card: its name, one word for the night ("Excellent night"), the Moon as it
+/// Each park is one card: its name, the night in one phrase ("An excellent night for stars"), the Moon as it
 /// will look, when true darkness begins, and a closure if the park reported one. No river,
 /// calendar, journal or Ask Nyx. The same `PlanModel` and journal store as the full app; system
 /// controls take Assistive Access's own large style by themselves.
@@ -151,6 +151,8 @@ struct AssistiveParkCard: View {
     @Query private var saved: [SavedPark]
     @AppStorage("notificationsEnabled") private var reminders=false
     @State private var explains=false
+    /// A save that could not be stored: "Saved places unavailable", as everywhere else (`parkSaveAlert`).
+    @State private var saveFailed=false
     let park: Park
     /// Offers "Remind me" (Tonight's park), which saves the park and turns on reminders.
     var reminder: Bool
@@ -179,19 +181,36 @@ struct AssistiveParkCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .sheet(isPresented: $explains) { RemindersExplainer { granted in reminders=granted }.nyxPresentation() }
+        .parkSaveAlert(isPresented: $saveFailed, journalUnavailable: model.journalUnavailable)
     }
-    /// "Excellent night", or "Excellent night, clouds not known yet" without a cloud forecast.
+    /// "An excellent night for stars", or "An excellent night for stars, clouds not known yet" without a
+    /// cloud forecast.
     static func word(_ night: Night) -> String {
-        let word=String(localized: "\(night.score.band.label) night")
+        let word=sentence(night.score.band)
         return night.score.hasForecast ? word : Phrase.clauses([word, String(localized: "clouds not known yet")])
+    }
+    /// The night's band in a whole phrase, one per band: "Good night" alone reads as a farewell, and
+    /// so do "Gute Nacht", "Bonne nuit" and "Buenas noches".
+    static func sentence(_ band: ScoreBand) -> String {
+        switch band {
+        case .pristine: String(localized: "A pristine night for stars")
+        case .excellent: String(localized: "An excellent night for stars")
+        case .good: String(localized: "A good night for stars")
+        case .fair: String(localized: "A fair night for stars")
+        case .poor: String(localized: "A poor night for stars")
+        }
     }
     /// "Dark from 8:40 PM", or the plain words for a night without true darkness.
     static func darkLine(_ night: Night) -> String {
         guard let start=night.sky.darkStart, night.sky.darkHours>0 else { return SkyConditions.noDarknessMessage(tonight: true) }
         return String(localized: "Dark from \(night.park.time(start))")
     }
+    /// Saves the park, then asks about reminders; a save that could not be stored is undone and said.
     private func remind() {
-        if !isSaved { context.insert(SavedPark(parkID: park.id)); try? context.save() }
+        if !isSaved {
+            context.insert(SavedPark(parkID: park.id))
+            do { try context.save() } catch { context.rollback(); saveFailed=true; return }
+        }
         if !reminders { explains=true }
     }
 }

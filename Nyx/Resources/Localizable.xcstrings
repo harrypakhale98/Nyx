@@ -1191,41 +1191,6 @@
         }
       }
     },
-    "%@ night": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@e Nacht"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ night"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Noche %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nuit %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@の夜"
-          }
-        }
-      }
-    },
     "%@ night at %@, %@": {
       "extractionState": "manual",
       "localizations": {
@@ -8402,6 +8367,76 @@
         }
       }
     },
+    "A fair night for stars": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine mäßige Nacht für Sterne"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A fair night for stars"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una noche regular para ver estrellas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une nuit passable pour observer les étoiles"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星を見るのにまずまずの夜"
+          }
+        }
+      }
+    },
+    "A good night for stars": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine günstige Nacht für Sterne"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A good night for stars"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una noche favorable para ver estrellas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une nuit favorable pour observer les étoiles"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星を見るのに好条件の夜"
+          }
+        }
+      }
+    },
     "A lighter red for brighter surroundings or tired eyes. Increase Contrast turns it on too.": {
       "extractionState": "manual",
       "localizations": {
@@ -8853,6 +8888,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "最新の公園のお知らせに閉鎖がある場所は、順位が下がります。スコアは変わりません。"
+          }
+        }
+      }
+    },
+    "A poor night for stars": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine schlechte Nacht für Sterne"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A poor night for stars"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una mala noche para ver estrellas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une nuit médiocre pour observer les étoiles"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星を見るには不向きな夜"
+          }
+        }
+      }
+    },
+    "A pristine night for stars": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine makellose Nacht für Sterne"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A pristine night for stars"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una noche prístina para ver estrellas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une nuit immaculée pour observer les étoiles"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星を見るのに極上の夜"
           }
         }
       }
@@ -11709,6 +11814,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "雲の早めの見通しです。"
+          }
+        }
+      }
+    },
+    "An excellent night for stars": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine sehr gute Nacht für Sterne"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An excellent night for stars"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una noche excelente para ver estrellas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une excellente nuit pour observer les étoiles"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星を見るのに上々の夜"
           }
         }
       }
@@ -48165,41 +48305,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "Open Nyx to choose a place.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Öffne Nyx, um einen Ort zu wählen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open Nyx to choose a place."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abre Nyx para elegir un lugar."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ouvrez Nyx pour choisir un lieu."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyxを開いて場所を選んでください。"
           }
         }
       }

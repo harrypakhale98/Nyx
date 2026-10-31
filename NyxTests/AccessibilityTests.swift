@@ -200,9 +200,12 @@ import Accessibility
 
     @Test func assistiveCardSaysOneWordAndOneTime() throws {
         let jotr=try park("jotr"), tonight=try night(jotr,"2026-10-10")
-        #expect(AssistiveParkCard.word(tonight)=="\(tonight.score.band.label) night")
+        #expect(AssistiveParkCard.word(tonight)==AssistiveParkCard.sentence(tonight.score.band))
         let estimate=try night(jotr,"2026-10-10",forecast:false)
-        #expect(AssistiveParkCard.word(estimate).hasSuffix(", clouds not known yet"))
+        #expect(AssistiveParkCard.word(estimate)==AssistiveParkCard.sentence(estimate.score.band)+", clouds not known yet")
+        // Never a farewell: no band reads as "Good night".
+        for band in ScoreBand.allCases { #expect(AssistiveParkCard.sentence(band).hasSuffix(" night for stars") && !AssistiveParkCard.sentence(band).hasPrefix("Good night")) }
+        #expect(AssistiveParkCard.sentence(.good)=="A good night for stars")
         let dark=try #require(tonight.sky.darkStart)
         #expect(AssistiveParkCard.darkLine(tonight)=="Dark from \(jotr.time(dark))")
         // Midsummer in Denali: no true darkness, said plainly.
