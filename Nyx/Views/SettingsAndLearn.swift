@@ -374,26 +374,30 @@ struct NPSKeyField: View {
     /// `-nyx-nps-key-refused` (DEBUG): a saved key the Park Service refused, for screenshots.
     @State private var saved=NPSKeyStore().key != nil || DebugScenario.isEnabled("nps-key-refused")
     @State private var message:String?
+    /// Where VoiceOver goes once the control it was on is gone: the field after a key is removed,
+    /// the line saying the key is in use after one is saved.
+    @AccessibilityFocusState private var focus:KeyFocus?
+    private enum KeyFocus: Hashable { case field, inUse }
     var body: some View {
         DisclosureGroup(isExpanded:$expanded) {
             VStack(alignment:.leading,spacing:10) {
                 Text("Park alerts use a key every copy of Nyx shares, limited to 1,000 requests an hour. If alerts are often busy, you can use a free key of your own from the National Park Service. It stays in this device's Keychain and is sent only to developer.nps.gov.")
                     .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 if saved {
-                    Label("Using your own key.",systemImage:"key").font(.subheadline)
+                    Label("Using your own key.",systemImage:"key").font(.subheadline).accessibilityFocused($focus,equals:.inUse)
                     if model.npsKeyRefused || DebugScenario.isEnabled("nps-key-refused") {
                         Label("The Park Service did not accept this key. Remove it to use the shared key again.",systemImage:"exclamationmark.triangle").labelStyle(.caution).font(.caption).fixedSize(horizontal:false,vertical:true)
                     }
                     Button("Remove my key",role:.destructive) {
                         NPSKeyStore().remove(); saved=false; message=nil
-                        // The button goes with the key: said, as saving one is.
-                        Self.announce(String(localized:"Using the shared key again."))
+                        // The button goes with the key: focus moves to the field that takes its place, and it is said.
+                        moveFocus(to:.field,saying:String(localized:"Using the shared key again."))
                         Task { await model.npsKeyChanged() }
                     }.frame(minHeight:44)
                 } else {
                     // Monospaced once typed, so a key's characters can be told apart; the prompt in the body face, so it fits whole.
                     SecureField("Your National Park Service key",text:$draft).textContentType(.password).autocorrectionDisabled().textInputAutocapitalization(.never).font(draft.isEmpty ? .body : .body.monospaced())
-                        .submitLabel(.done).onSubmit(save)
+                        .submitLabel(.done).onSubmit(save).accessibilityFocused($focus,equals:.field)
                     Button("Use this key",action:save).disabled(draft.isEmpty).frame(minHeight:44)
                 }
                 if let message { Label(message,systemImage:"exclamationmark.triangle").labelStyle(.caution).font(.caption).fixedSize(horizontal:false,vertical:true) }
@@ -409,7 +413,7 @@ struct NPSKeyField: View {
         guard NPSKeyStore.plausible(draft) else { say(String(localized:"That does not look like a National Park Service key. Keys are about 40 letters and numbers.")); return }
         if NPSKeyStore().save(draft) {
             draft=""; saved=true; message=nil
-            Self.announce(String(localized:"Using your own key."))
+            moveFocus(to:.inUse,saying:String(localized:"Using your own key."))
             Task { await model.npsKeyChanged() }
         } else { say(String(localized:"The key could not be saved. Try again.")) }
     }
@@ -419,4 +423,13 @@ struct NPSKeyField: View {
         Self.announce(text)
     }
     private static func announce(_ text:String) { AccessibilityNotification.Announcement(text).post() }
+    /// Once the new control is on screen (a moment after the update that adds it), VoiceOver focus
+    /// moves to it, then the change is said ahead of its label, so the line is not cut off by the move.
+    private func moveFocus(to target:KeyFocus,saying text:String) {
+        Task { @MainActor in
+            try? await Task.sleep(for:.milliseconds(150))
+            focus=target
+            NightListener.announce(text,priority:.high)
+        }
+    }
 }
