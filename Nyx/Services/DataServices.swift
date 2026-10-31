@@ -423,8 +423,8 @@ nonisolated protocol ParkProviding: Sendable {
     /// Called with a park's id and its programs whenever a programs request is kept, as it lands
     /// (`StoreObserver`), whether or not its page still waits for it.
     func observePrograms(_ handler: @escaping @Sendable ((String, ProgramsCache)) async -> Void)
-    /// The person saved or removed a key of their own (`NPSKeyField`).
-    func keyChanged() async
+    /// The person saved or removed a key of their own (`NPSKeyField`); `key` is the one in use now.
+    func keyChanged(to key: String) async
 }
 extension ParkProviding {
     /// A provider that never fetches (a test double) has nothing to hand on.
@@ -435,7 +435,7 @@ extension ParkProviding {
     /// A provider without campgrounds (a test double) has none to show.
     nonisolated func campgrounds(for parks: [Park], key: String, network: Bool, force: Bool) async -> CampgroundsCache? { nil }
     /// A provider that never fetches (a test double) holds nothing for a key.
-    nonisolated func keyChanged() async {}
+    nonisolated func keyChanged(to key: String) async {}
 }
 /// NOAA's Kp forecast (`AuroraOutlook`) from the Space Weather Prediction Center: one small global
 /// file (about 7 KB), asked for whole, so the request names no place and nothing about anyone. Fresh
@@ -538,9 +538,13 @@ actor ParkStore: ParkProviding {
     private var refused=false
     /// That refusal was of the key itself (401, 403).
     private var keyRefused=false
-    /// A key was saved or removed since the last alerts request (`keyChanged`): the next one goes
-    /// at once, even within ten minutes of the last success.
-    private var newKey=false
+    /// The key in use since the person last saved or removed one (`keyChanged`). A caller still
+    /// holding the key it replaced (read before the change) sends nothing with it, and what a request
+    /// with that key brings back sets no wait and no refusal.
+    private var currentKey: String?
+    /// `currentKey`, until a request with it goes: that one goes at once, even within ten minutes of
+    /// the last success.
+    private var newKey: String?
     private var programCache: [String: ProgramsCache] = [:]
     private var programsLoaded=Set<String>()
     private var programTasks: [String: Task<Void, Never>] = [:]
@@ -566,9 +570,9 @@ actor ParkStore: ParkProviding {
     /// new key waiting (nor the other way round): the wait the last key earned is lifted, its
     /// refusal forgotten, and the next request goes at once. Async, as the protocol declares it, so
     /// it is this method (not the protocol's default) that answers.
-    func keyChanged() async {
+    func keyChanged(to key: String) async {
         backoff.succeeded(Self.host)
-        refused=false; keyRefused=false; newKey=true
+        refused=false; keyRefused=false; currentKey=key; newKey=key
         programsTried=[:]
     }
     /// The shared file, or (once, after an update from a version that kept one file per park)
@@ -606,15 +610,19 @@ actor ParkStore: ParkProviding {
         // set was whole is followed by this caller's own. The task clears itself before it finishes,
         // so a waiter never sees a request that has already ended. A cancelled caller stops waiting
         // and returns what is cached. After an alerts request, only its own refusal is busy.
-        // One sent with the key just replaced is followed by one with the new key.
+        // One sent with the key just replaced is followed by one with the new key, sent by a caller
+        // holding the new key; a caller still holding the old one sends nothing.
         while let running=alertsTask {
-            let outcome=await wait(for: running.task)
-            guard (outcome == .partial && running.pages<pages) || newKey else { return update(busy: refused) }
+            guard let outcome=await wait(for: running.task) else { return update(busy: refused) }
+            guard (outcome == .partial && running.pages<pages) || newKey == key else { return update(busy: refused) }
         }
+        // A cancelled caller sends nothing either, so it never spends the new key's request.
+        guard !superseded(key), !Task.isCancelled else { return update(busy: refused) }
+        let replacing=newKey == key
         // Fresh alerts are not busy because another request (programs, say) made the host wait.
-        guard newKey || Self.stale(alertCache?.updated, maxAge: 6*3600, force: force, now: clock()) else { return update(busy: refused) }
+        guard replacing || Self.stale(alertCache?.updated, maxAge: 6*3600, force: force, now: clock()) else { return update(busy: refused) }
         guard backoff.allows(Self.host, now: clock()) else { return update(busy: true) }
-        newKey=false
+        if replacing { newKey=nil }
         let codes=Array(Set(parks.compactMap(\.nps))).sorted(), ids=parks.map(\.id)
         let task=Task { () -> AlertsFetch in
             let outcome=await self.fetchAlerts(codes: codes, parkIDs: ids, key: key, pages: pages)
@@ -625,6 +633,8 @@ actor ParkStore: ParkProviding {
         _=await wait(for: task)
         return update(busy: refused)
     }
+    /// A key the person has since replaced (`keyChanged`).
+    private func superseded(_ key: String) -> Bool { currentKey.map { $0 != key } ?? false }
     /// Waits for the alerts request; nil when the caller was cancelled first. The request is
     /// cancelled too once nobody is waiting for it.
     private func wait(for task: Task<AlertsFetch, Never>) async -> AlertsFetch? {
@@ -727,7 +737,8 @@ actor ParkStore: ParkProviding {
             backoff.succeeded(Self.host)
             return (data, nil)
         } catch {
-            if Backoff.constrained(error) { return (nil, nil) }
+            // Low Data Mode holding it back is no refusal; nor is an answer to a key since replaced.
+            if Backoff.constrained(error) || superseded(key) { return (nil, nil) }
             backoff.record(error, host: Self.host, now: clock())
             return (nil, error as? HTTPStatusError)
         }

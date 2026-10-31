@@ -53,6 +53,27 @@ final class PagedEvents: HTTPTransport {
     }
 }
 
+/// Holds the first request until `release()` and then refuses it with `first`; later requests get
+/// empty alerts at once. Records the NPS key each request carried.
+actor KeyedGateHTTP: HTTPTransport {
+    private(set) var keys: [String]=[]
+    private var held: CheckedContinuation<Void, Never>?
+    private var gate=true
+    private let first: Int
+    init(first status: Int) { first=status }
+    func get(_ url: URL) async throws -> Data { try await get(url, headers: [:], constrained: true) }
+    func get(_ url: URL, headers: [String: String], constrained: Bool) async throws -> Data {
+        keys.append(headers["X-Api-Key"] ?? "")
+        if gate {
+            gate=false
+            await withCheckedContinuation { held=$0 }
+            throw HTTPStatusError(status: first)
+        }
+        return Data("{\"data\":[]}".utf8)
+    }
+    func release() { held?.resume(); held=nil }
+}
+
 /// Collects what a service hands on (`observe`), so a test can wait for a delivery.
 final class Deliveries<Value: Sendable>: Sendable {
     private let state=Mutex<[Value]>([])
@@ -342,7 +363,7 @@ struct DataServiceDeliveryTests {
         clock.advance(601)
         #expect(await store.alerts(for: [jotr], key: "shared", network: true, force: true).busy)
         #expect(await http.urls.count == 2)
-        await store.keyChanged()
+        await store.keyChanged(to: "mine")
         let mine=await store.alerts(for: [jotr], key: "mine", network: true, force: true)
         #expect(!mine.busy && !mine.keyRefused && mine.cache?.updated == clock.now)
         #expect(await http.urls.count == 3)
@@ -350,9 +371,32 @@ struct DataServiceDeliveryTests {
         clock.advance(60)
         _=await store.alerts(for: [jotr], key: "mine", network: true, force: true)
         #expect(await http.urls.count == 3)
-        await store.keyChanged()
+        await store.keyChanged(to: "shared")
         _=await store.alerts(for: [jotr], key: "shared", network: true, force: false)
         #expect(await http.urls.count == 4)
+    }
+    /// A key saved while a request with the old one is out: a caller with the new key that is
+    /// cancelled returns at once and sends nothing; a caller still holding the old key sends
+    /// nothing; exactly one request follows, with the new key; and the old key's 429 sets no wait.
+    @Test(.timeLimit(.minutes(1))) func aKeyChangeMidRequestSendsTheNewKeyOnce() async throws {
+        let jotr=try park("jotr")
+        let http=KeyedGateHTTP(first: 429)
+        let store=ParkStore(transport: http, persist: false)
+        let old=Task { await store.alerts(for: [jotr], key: "old", network: true, force: true) }
+        while await http.keys.isEmpty { try? await Task.sleep(for: .milliseconds(5)) }
+        await store.keyChanged(to: "new")
+        let live=Task { await store.alerts(for: [jotr], key: "new", network: true, force: true) }
+        let cancelled=Task { await store.alerts(for: [jotr], key: "new", network: true, force: true) }
+        cancelled.cancel()
+        _=await cancelled.value
+        #expect(await http.keys == ["old"])
+        let late=Task { await store.alerts(for: [jotr], key: "old", network: true, force: true) }
+        await http.release()
+        let fresh=await live.value
+        _=await (old.value, late.value)
+        _=await store.alerts(for: [jotr], key: "old", network: true, force: true)
+        #expect(await http.keys == ["old", "new"])
+        #expect(!fresh.busy && fresh.cache?.alerts["jotr"] == [])
     }
     /// A key NPS does not accept (401, 403) is told apart from a busy service, until alerts succeed.
     @Test func aRefusedKeyIsToldApart() async throws {
@@ -368,10 +412,10 @@ struct DataServiceDeliveryTests {
         let quota=await store.alerts(for: [jotr], key: "mine", network: true, force: true)
         #expect(quota.busy && !quota.keyRefused)
         await http.set("/api/v1/alerts", .status(401))
-        await store.keyChanged()
+        await store.keyChanged(to: "other")
         #expect(await store.alerts(for: [jotr], key: "other", network: true, force: true).keyRefused)
         await http.set("/api/v1/alerts", .body("{\"data\":[]}"))
-        await store.keyChanged()
+        await store.keyChanged(to: "fixed")
         let accepted=await store.alerts(for: [jotr], key: "fixed", network: true, force: true)
         #expect(!accepted.busy && !accepted.keyRefused)
     }

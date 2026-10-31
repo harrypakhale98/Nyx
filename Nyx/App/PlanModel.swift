@@ -723,7 +723,7 @@ import Observation
     /// alerts are asked for again at once with the new one.
     func npsKeyChanged() async {
         if npsKeyRefused { npsKeyRefused=false }
-        await parkStore.keyChanged()
+        await parkStore.keyChanged(to:npsKey)
         await refreshParkUpdates([],force:true)
     }
     /// Reads every cache once, in the services, and shows what they hold where nothing newer is.
