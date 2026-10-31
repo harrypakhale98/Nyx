@@ -855,7 +855,8 @@ actor ParkStore: ParkProviding {
         }
         let programs=events.filter { Self.isNightSky(title: $0.title, tags: $0.tags ?? []) }.flatMap { event in
             (event.dates ?? event.datestart.map { [$0] } ?? []).filter { $0 >= today }.map { day in RangerProgram(id: event.id+day, title: event.title, date: day, description: Self.plain(event.description),
-                time: event.times?.first.flatMap { RangerProgram.timeRange(start: $0.timestart, end: $0.timeend) }, location: RangerProgram.place(event.location)) }
+                time: event.times?.first.flatMap { RangerProgram.timeRange(start: $0.timestart, end: $0.timeend) }, location: RangerProgram.place(event.location),
+                timeStart: event.times?.first?.timestart, timeEnd: event.times?.first?.timeend) }
         }.sorted { $0.date<$1.date }
         let fresh=ProgramsCache(updated: clock(), programs: programs)
         programCache[park.id]=fresh; programsTried[park.id]=nil

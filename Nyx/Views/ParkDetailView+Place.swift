@@ -70,7 +70,7 @@ private struct ProgramCard: View {
     var body: some View {
         VStack(alignment:.leading,spacing:6) {
             Text(program.title).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true).accessibilityAddTraits(.isHeader)
-            Label([park.programDate(program.date),program.time].compactMap { $0 }.joined(separator:" · "),systemImage:"calendar").font(.footnote).foregroundStyle(palette.ink)
+            Label([park.programDate(program.date),program.localTime(park)].compactMap { $0 }.joined(separator:" · "),systemImage:"calendar").font(.footnote).foregroundStyle(palette.ink)
             if let location=program.location { Label(location,systemImage:"mappin.and.ellipse").font(.footnote).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
             ClampedText(text:program.description,lines:3)
             TranslateButton(text:[program.title,program.description].joined(separator:"\n\n"))

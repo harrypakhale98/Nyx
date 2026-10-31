@@ -179,7 +179,37 @@ import SwiftUI
         // A cache written before times existed still reads.
         let old=Data(#"{"id":"a","title":"Night sky","date":"2026-10-09","description":"Look up."}"#.utf8)
         let program=try JSONDecoder().decode(RangerProgram.self,from:old)
-        #expect(program.time==nil && program.location==nil)
+        #expect(program.time==nil && program.location==nil && program.timeStart==nil)
+        #expect(program.localTime(try park("jotr"))==nil)
+    }
+    /// NPS writes "07:00 PM" in every language; the card says it in the reader's own format, in the park's zone.
+    @Test func programTimesFollowTheReadersLocale() throws {
+        let jotr=try park("jotr")
+        let program={ (start:String?,end:String?) in RangerProgram(id:"a",title:"Night sky",date:"2026-11-07",description:"",
+            time:RangerProgram.timeRange(start:start,end:end),timeStart:start,timeEnd:end) }
+        let evening=program("07:00 PM","08:30 PM")
+        let en=try #require(evening.localTime(jotr,locale:Locale(identifier:"en_US")))
+        #expect(en.contains("7:00") && en.contains("8:30") && en.contains("PM") && !en.contains("07:00"))
+        let de=try #require(evening.localTime(jotr,locale:Locale(identifier:"de_DE")))
+        #expect(de.contains("19:00") && de.contains("20:30") && !de.contains("PM"))
+        let ja=try #require(evening.localTime(jotr,locale:Locale(identifier:"ja_JP")))
+        #expect(ja.contains("19:00") && ja.contains("20:30") && !ja.contains("PM"))
+        // The same start and end, or no end: the start alone.
+        #expect(program("07:00 PM","07:00 PM").localTime(jotr,locale:Locale(identifier:"de_DE"))=="19:00")
+        #expect(program("07:00 PM",nil).localTime(jotr,locale:Locale(identifier:"de_DE"))=="19:00")
+        #expect(program("07:00 PM"," ").localTime(jotr,locale:Locale(identifier:"ja_JP"))=="19:00")
+        // Past midnight, the end still reads as a time.
+        #expect(program("10:00 PM","12:30 AM").localTime(jotr,locale:Locale(identifier:"de_DE"))?.contains("00:30") == true)
+        // Not a time NPS writes that way: its own wording, never a made-up time.
+        #expect(program("Sunset","08:30 PM").localTime(jotr,locale:Locale(identifier:"de_DE"))=="Sunset – 08:30 PM")
+        #expect(program("07:00 PM","late").localTime(jotr,locale:Locale(identifier:"de_DE"))=="07:00 PM – late")
+        #expect(program(nil,"08:30 PM").localTime(jotr)==nil)
+        // A cache from before the parts were kept: its joined wording is read again.
+        let cached=RangerProgram(id:"b",title:"Night sky",date:"2026-11-07",description:"",time:"07:00 PM – 08:30 PM")
+        #expect(cached.localTime(jotr,locale:Locale(identifier:"de_DE"))?.contains("20:30") == true)
+        // Kept parts survive the cache.
+        let decoded=try JSONDecoder().decode(RangerProgram.self,from:JSONEncoder().encode(evening))
+        #expect(decoded == evening && decoded.timeStart=="07:00 PM")
     }
 
     // MARK: What's up order

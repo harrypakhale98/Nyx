@@ -317,18 +317,47 @@ nonisolated struct RangerProgram: Codable, Identifiable, Sendable, Equatable {
     let title: String
     let date: String
     let description: String
-    /// NPS's own wording of the time ("7:00 PM – 8:30 PM"), park-local; nil in older caches.
+    /// NPS's own wording of the time ("07:00 PM – 08:30 PM"), park-local; nil in older caches.
     var time: String?=nil
     /// Where it meets, as NPS lists it.
     var location: String?=nil
+    /// NPS's start and end as it writes them ("07:00 PM"), kept so the time is shown in the
+    /// reader's own format whenever it is read; nil in caches written before they were kept.
+    var timeStart: String?=nil
+    var timeEnd: String?=nil
     /// "7:00 PM – 8:30 PM", or the start alone; nil when NPS gives neither.
     static func timeRange(start: String?, end: String?) -> String? {
-        let start=start?.trimmingCharacters(in: .whitespacesAndNewlines), end=end?.trimmingCharacters(in: .whitespacesAndNewlines)
-        switch (start?.isEmpty == false ? start : nil, end?.isEmpty == false ? end : nil) {
+        switch (clean(start), clean(end)) {
         case (let a?, let b?): return a==b ? a : "\(a) – \(b)"
         case (let a?, nil): return a
         default: return nil
         }
+    }
+    private static func clean(_ text: String?) -> String? {
+        guard let text=text?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else { return nil }
+        return text
+    }
+    /// The time in `park`'s zone and the reader's own format ("19:00–20:30" in German): NPS writes
+    /// "07:00 PM" in every language. NPS's own wording when either time cannot be read. A cache
+    /// from before the parts were kept has only the joined wording, which is split again.
+    func localTime(_ park: Park, locale: Locale = .current) -> String? {
+        let parts=timeStart != nil || timeEnd != nil ? [timeStart, timeEnd] : (time?.components(separatedBy: " – ") ?? []).map { Optional($0) }
+        let start=Self.clean(parts.first ?? nil), end=Self.clean(parts.count>1 ? parts[1] : nil)
+        let raw=Self.timeRange(start: start, end: end)
+        guard let start, let from=Self.clock(start, on: date, park: park) else { return raw }
+        var format=Date.FormatStyle.dateTime.hour().minute().locale(locale)
+        format.timeZone=park.timeZone
+        guard let end, end != start else { return from.formatted(format) }
+        guard let to=Self.clock(end, on: date, park: park) else { return raw }
+        return String(localized: "\(from.formatted(format)) – \(to.formatted(format))")
+    }
+    /// "07:00 PM" on the program's day ("yyyy-MM-dd") in the park's zone; nil when it is not a time
+    /// written that way.
+    static func clock(_ time: String, on day: String, park: Park) -> Date? {
+        let parse=DateFormatter()
+        parse.locale=Locale(identifier: "en_US_POSIX"); parse.timeZone=park.timeZone
+        parse.dateFormat="yyyy-MM-dd hh:mm a"
+        return parse.date(from: "\(day) \(time)")
     }
     static func place(_ text: String?) -> String? {
         guard let text=text?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else { return nil }
