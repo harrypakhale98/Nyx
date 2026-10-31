@@ -225,15 +225,18 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
         format.timeZone = timeZone
         return date.formatted(format)
     }
-    func weekdayInitial(_ date: Date) -> String {
-        var format = Date.FormatStyle.dateTime.weekday(.narrow)
-        format.timeZone = timeZone
-        return date.formatted(format)
+    /// A night's own labels ("Sat, Oct 31", "S", "Saturday, October 31") count in the Gregorian
+    /// calendar, as the month grids and `monthLabel` beside them do, in the reader's language. A device
+    /// set to the Hebrew calendar would otherwise put "Sat, 20 Heshvan" over an October grid. A journal
+    /// entry's `dateLabel` keeps the person's own calendar.
+    private func nightStyle(_ locale: Locale) -> Date.FormatStyle {
+        Date.FormatStyle(locale: locale, calendar: calendar, timeZone: timeZone)
     }
-    func dayLabel(_ date: Date) -> String {
-        var format = Date.FormatStyle.dateTime.weekday(.abbreviated).month(.abbreviated).day()
-        format.timeZone = timeZone
-        return date.formatted(format)
+    func weekdayInitial(_ date: Date, locale: Locale = .autoupdatingCurrent) -> String {
+        date.formatted(nightStyle(locale).weekday(.narrow))
+    }
+    func dayLabel(_ date: Date, locale: Locale = .autoupdatingCurrent) -> String {
+        date.formatted(nightStyle(locale).weekday(.abbreviated).month(.abbreviated).day())
     }
     func dateLabel(_ date: Date) -> String {
         var format = Date.FormatStyle.dateTime.month(.wide).day().year()
@@ -241,12 +244,10 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
         return date.formatted(format)
     }
     /// NPS event days arrive as "yyyy-MM-dd"; show them as park-local dates.
-    func programDate(_ day: String) -> String {
+    func programDate(_ day: String, locale: Locale = .autoupdatingCurrent) -> String {
         let parts = day.split(separator: "-").compactMap { Int($0) }
         guard parts.count == 3, let date = calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2], hour: 12)) else { return day }
-        var format = Date.FormatStyle.dateTime.weekday(.wide).month(.wide).day()
-        format.timeZone = timeZone
-        return date.formatted(format)
+        return date.formatted(nightStyle(locale).weekday(.wide).month(.wide).day())
     }
     /// "Pacific Time" rather than "America/Los_Angeles".
     var timeZoneName: String { timeZone.localizedName(for: .generic, locale: .current) ?? timeZoneID }

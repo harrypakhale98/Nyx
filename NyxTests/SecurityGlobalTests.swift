@@ -358,6 +358,19 @@ struct SecurityGlobalTests {
         #expect(jotr.monthName(night).localizedCaseInsensitiveContains(november) || november.localizedCaseInsensitiveContains(jotr.monthName(night)))
         #expect(jotr.monthLabel(night).contains("2026"))
     }
+    @Test func nightLabelsMatchTheGregorianGrid() throws {
+        // Beside an October grid a night reads "Sat, Oct 31", never "Sat, 20 Heshvan"; a journal entry's
+        // date keeps the person's own calendar.
+        let jotr=try park("jotr"), night=try date("2026-10-31 21:00", park: jotr)
+        let hebrew=Locale(identifier: "en_US@calendar=hebrew")
+        var theirs=Date.FormatStyle(locale: hebrew, calendar: Calendar(identifier: .hebrew), timeZone: jotr.timeZone).month(.abbreviated).day()
+        theirs.timeZone=jotr.timeZone
+        #expect(night.formatted(theirs).contains("Heshvan"))
+        #expect(jotr.dayLabel(night, locale: hebrew) == "Sat, Oct 31")
+        #expect(jotr.weekdayInitial(night, locale: hebrew) == "S")
+        #expect(jotr.programDate("2026-10-31", locale: hebrew) == "Saturday, October 31")
+        #expect(jotr.dayLabel(night, locale: Locale(identifier: "ja_JP@calendar=japanese")).contains("10月31日"))
+    }
     @Test func journalYearsAreGregorianWhereTheNightWasSpent() throws {
         // New Year's Eve in Hawaiʻi is already 2026 in UTC, still 2025 at the park.
         let honolulu=try #require(TimeZone(identifier: "Pacific/Honolulu"))
