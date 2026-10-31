@@ -112,4 +112,20 @@ struct WatchWordsTests {
             #expect(source.explainsItself, "\(source)")
         }
     }
+
+    // MARK: Translations
+
+    /// The compact dawn is shorter than the full one wherever the full one is long (German
+    /// "Morgendämmerung" took two lines on a 40 mm watch), and the place line ends as a sentence.
+    @Test func compactWordsStayShortAndEndAsSentences() throws {
+        for language in ["de", "es", "fr", "ja"] {
+            let bundle = try #require(Bundle.main.path(forResource: language, ofType: "lproj").flatMap(Bundle.init(path:)), "\(language)")
+            let compact = bundle.localizedString(forKey: "Dawn %@", value: nil, table: nil)
+            let full = bundle.localizedString(forKey: "Dawn twilight %@", value: nil, table: nil)
+            #expect(compact.count <= full.count, "\(language): \(compact)")
+            if language == "de" { #expect(compact == "Morgengrauen %@") }
+            let place = bundle.localizedString(forKey: "Choose a place in Nyx.", value: nil, table: nil)
+            #expect(place.hasSuffix(language == "ja" ? "。" : "."), "\(language): \(place)")
+        }
+    }
 }
