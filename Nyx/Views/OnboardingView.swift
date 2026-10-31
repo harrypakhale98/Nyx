@@ -32,6 +32,14 @@ struct OnboardingView:View {
         "Red light keeps your eyes used to the dark. Turn it on here or from Control Center. Nyx has no account, no ads, no tracking. Your journal never leaves this phone.",
     ]}
     var body:some View {
+        // The size offered, read from a reader that takes it whatever the page holds: measured from the
+        // page itself, a first pass that sized it to its content swung the layout (side by side, short)
+        // and with it the size, back and forth ("Geometry action is cycling between duplicate values").
+        GeometryReader { _ in content.frame(maxWidth:.infinity,maxHeight:.infinity) }
+            .onGeometryChange(for:CGSize.self) { $0.size } action:{ size=$0 }
+            .readingFold($fold)
+    }
+    private var content:some View {
         VStack(spacing:0) {
             // Tracking trails the X, so the wordmark is inset by one tracking step to sit on centre.
             if !compactHeight && !short {
@@ -82,8 +90,6 @@ struct OnboardingView:View {
                 VStack(spacing:20) { dots;proceed }.frame(maxWidth:.infinity).padding(.leading,wordsInset).padding(.bottom,28)
             }
         }.background(NightBackground(score:page==1 ? 94 : nil)).foregroundStyle(palette.ink)
-        .onGeometryChange(for:CGSize.self) { $0.size } action:{ size=$0 }
-        .readingFold($fold)
     }
     private func words(_ index:Int)->some View {
         VStack(spacing:beside ? 16 : gap(index)) {
