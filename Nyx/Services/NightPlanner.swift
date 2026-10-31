@@ -36,7 +36,7 @@ nonisolated struct NightPlanner: Sendable {
     /// issue, as any forecast (an older one eases toward the usual clouds); with none covering a night
     /// within their seven days (not asked for yet, or failed), the usual clouds alone. Past those days
     /// (`pastLayers`) no cloud is counted at all: the usual clouds are total cloud too, so the score is
-    /// the Moon and darkness only, and a best night is never picked from it (`better(_:_:closures:)`).
+    /// the Moon and darkness only, and such a night is ranked after every night that counts clouds (`better`).
     /// **Smoke.** The aerosol forecast's average over the window, whenever it covers it (it can
     /// only lower a score, so its age never hides it); kept on the night (`aerosol`) so the
     /// outlook's smoke words always describe the smoke the score used. **Ties.** The three models'
@@ -56,7 +56,7 @@ nonisolated struct NightPlanner: Sendable {
                 predicted = 100*(1-(1-mid/100)*(1-high/100)); issued = layers.updated; upper = true
             }
             // Past the layers' days the usual (total) clouds would stand in for them: none are counted.
-            if predicted == nil, pastLayers(window, now: now) { typical = nil }
+            if predicted == nil, pastLayers(window, layers: detail?.layers, now: now) { typical = nil }
         }
         let usual = typical?.cloud
         let middle = window.start.addingTimeInterval(window.end.timeIntervalSince(window.start)/2)
@@ -88,20 +88,29 @@ nonisolated struct NightPlanner: Sendable {
         utc.timeZone = TimeZone(identifier: "UTC") ?? .gmt
         return window.end > utc.startOfDay(for: now).addingTimeInterval(Double(layerDays)*86400)
     }
+    /// The same, or past the last hour of recent layers (`HourlySeries.usable`). Layers asked for on
+    /// the UTC day before end a day short of what today's would reach, so until they are asked for
+    /// again the last night they miss is past them too, never scored on the total cloud they set aside.
+    static func pastLayers(_ window: (start: Date, end: Date), layers: HourlySeries?, now: Date) -> Bool {
+        if pastLayers(window, now: now) { return true }
+        guard let layers, layers.usable(now: now), let last = layers.times.last else { return false }
+        return window.end.timeIntervalSince1970 > last+1800
+    }
     /// True when a night scored on the usual clouds simply lies beyond what a cloud forecast
     /// reaches: past the forecast's last hour, or so far ahead of a recent forecast (or, with none
     /// recent, of `now`) that it counts for nothing (`CloudBasis.forecastWeight` is 0, ten days
     /// out). False when a forecast should have reached the night but could not be read or is too
     /// old, which the captions call "Cloud forecast unavailable". One rule for iPhone, iPad and Vision Pro.
     /// A summit above the inversion reads its layers (`detail`), never its total cloud: a night past the
-    /// seven days they would reach from now is "not yet"; a nearer one with them unknown, "unavailable".
+    /// seven days they would reach from now, or past recent layers' last hour, is "not yet"; a nearer
+    /// one with them unknown, "unavailable".
     static func beyondForecast(_ night: Night, forecast: Forecast?, detail: ForecastDetail? = nil, now: Date) -> Bool {
         guard night.basis == .usual else { return false }
         let window = night.sky.cloudWindow
         var forecast = forecast
         if night.park.aboveInversion == true {
-            // Past the days a layer forecast asked for now reaches, none can reach the night yet.
-            if pastLayers(window, now: now) { return true }
+            // Past the days a layer forecast asked for now reaches (or past recent layers), none can reach the night yet.
+            if pastLayers(window, layers: detail?.layers, now: now) { return true }
             guard let upper = detail?.layers?.upperCloud else { return false }
             forecast = upper
         }
@@ -141,8 +150,11 @@ nonisolated struct NightPlanner: Sendable {
     /// page's "Darker on…", Tonight's capsule, Best nights, the river's "Best night", With the lights
     /// out, Siri and Vision Pro's nights ahead. A whole lunar cycle, so the next new Moon is always in it.
     static let horizon = 30
-    /// Best first, by score. Every night's score already counts clouds (forecast, early look or
-    /// the park's usual clouds), so scores compare directly. Ties, which are common near new moon,
+    /// Best first, by score, after one rule: a night that counts no clouds at all (no forecast and no
+    /// usual clouds it can use: "Moon and darkness only") comes after every night that counts them.
+    /// Such a night can read 97 on any moonless night, so it is never named over a night whose sky is
+    /// known (`countsCloudsFirst`). Every other night's score already counts clouds (forecast, early
+    /// look or the park's usual clouds), so scores compare directly. Ties, which are common near new moon,
     /// go to the darker measured sky (Black Marble glow, `glowRank`), then the higher sum of parts
     /// beneath a cap (a park's usual clouds can hold a whole month at one score, and the new Moon
     /// must still outrank a gibbous one), then the longer true darkness, then the forecast models
@@ -154,6 +166,7 @@ nonisolated struct NightPlanner: Sendable {
     /// ("within half a point") is not transitive, so a sort could name a different best night
     /// for the same nights given in another order.
     static func better(_ a: Night, _ b: Night) -> Bool {
+        if let first = countsCloudsFirst(a, b) { return first }
         if a.score.value != b.score.value { return a.score.value > b.score.value }
         let ga = glowRank(a.park.id), gb = glowRank(b.park.id)
         if ga != gb { return ga < gb }
@@ -169,6 +182,12 @@ nonisolated struct NightPlanner: Sendable {
     }
     /// `value` rounded to the nearest multiple of `step`, as a count of steps: two values tie
     /// exactly when they share a step. Infinity stays infinite.
+    /// Whether `a` goes first because it counts clouds and `b` does not (or the reverse); nil when both
+    /// or neither count them. First in both `better`s, so no closure or score lifts such a night past one.
+    static func countsCloudsFirst(_ a: Night, _ b: Night) -> Bool? {
+        let ca = a.score.cloudPoints != nil, cb = b.score.cloudPoints != nil
+        return ca == cb ? nil : ca
+    }
     static func tieGrid(_ value: Double, _ step: Double) -> Double { value.isFinite ? (value/step).rounded() : value }
     static func certainty(_ basis: CloudBasis) -> Double {
         switch basis { case .forecast: 1; case .blended(let w, _): w; case .usual: 0 }
@@ -179,15 +198,14 @@ nonisolated struct NightPlanner: Sendable {
     /// reminder announces), so every such surface picks the same night; the score shown never changes. A
     /// closed road beats a slightly darker sky every time. What claims the darkest (Tonight's answer,
     /// the map's darkest, the watch, the Tonight control, Ask Nyx's parks nearby) ranks the sky alone
-    /// with `better(_:_:)` and shows the closure beside the score.
+    /// with `better(_:_:)` and shows the closure beside the score. Both put a night that counts no
+    /// clouds after every night that counts them (`countsCloudsFirst`).
     static let closurePenalty = 10
     /// `better`, with each closed park's nights `closurePenalty` points down (`closures`: park id →
-    /// closure, as the app words it), and every night that counts no clouds at all (no forecast and no
-    /// usual clouds: "Moon and darkness only") after every night that counts them. Such a night can
-    /// read 97 on any moonless night, so it is never recommended over a night whose sky is known.
+    /// closure, as the app words it), after the same cloud rule, so a closure never lifts a night that
+    /// counts no clouds over a closed park's night that counts them.
     static func better(_ a: Night, _ b: Night, closures: [String: String]) -> Bool {
-        let ca = a.score.cloudPoints != nil, cb = b.score.cloudPoints != nil
-        if ca != cb { return ca }
+        if let first = countsCloudsFirst(a, b) { return first }
         let va = a.score.value-(closures[a.park.id] == nil ? 0 : closurePenalty), vb = b.score.value-(closures[b.park.id] == nil ? 0 : closurePenalty)
         if va != vb { return va > vb }
         return better(a, b)
