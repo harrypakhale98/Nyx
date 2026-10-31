@@ -376,7 +376,8 @@ struct WatchComplicationView: View {
             default:
                 VStack(alignment: .leading, spacing: 2) {
                     Label("Nyx", systemImage: "moon.stars").font(.headline)
-                    Text("Open Nyx to choose a place.").font(.caption2).foregroundStyle(muted)
+                    // The words VoiceOver reads after "Nyx", and the Wrist complication's own.
+                    Text("Choose a place in Nyx on Apple Watch.").font(.caption2).foregroundStyle(muted)
                 }.frame(maxWidth: .infinity, alignment: .leading)
             }
         }.foregroundStyle(ink)
