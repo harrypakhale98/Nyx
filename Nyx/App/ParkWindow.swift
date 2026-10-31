@@ -59,8 +59,11 @@ struct ParkWindowRoot: View {
         .scrollEdgeEffectStyle(.soft,for:.all)
         // A spot's page in its own window resolves the spot through the model, which this scene keeps fed.
         .background(SavedSpotsFeed(fed:$spotsFed))
-        // Nyx coming forward in this window (the main one out of sight behind it) catches up as it would there.
+        // Nyx coming forward in this window (the main one out of sight behind it) catches up as it would there,
+        // and a Save or a spot changed here reaches the widgets, the watch and reminders, as from the main window:
+        // after a relaunch this window can be the only one connected.
         .activeUpkeep(saved:saved,spots:spots)
+        .savedUpkeep(saved:saved,spots:spots)
         .modifier(BringsMainWindowForRequests())
         .environment(commands).focusedSceneValue(commands)
         .background(WindowSceneReader(commands:commands).frame(width:0,height:0).accessibilityHidden(true))

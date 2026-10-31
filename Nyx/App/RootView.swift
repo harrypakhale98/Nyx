@@ -16,8 +16,6 @@ struct RootView:View {
     @AppStorage("onboardingComplete") private var onboarded=false
     @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
-    /// Night vision At dusk (`NightVisionDusk`): followed while this window is active, never in the background.
-    @AppStorage(NightVisionMode.atDuskKey,store:SharedSettings.defaults) private var atDusk=false
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     /// This window's tab and keyboard commands (each iPad window has its own).
     @State private var commands=SceneCommands()
@@ -188,18 +186,12 @@ struct RootView:View {
             openRequestedField(); openRequestedPark()
         } }
         // "Tonight", the saved parks (and so reminders) and the night's Live Activity catch up whenever Nyx
-        // comes forward, in whichever window: a park's own window in front of this one does the same.
+        // comes forward, in whichever window: a park's own window in front of this one does the same. While
+        // Nyx is on screen one window keeps "tonight" honest through sunrise and follows At dusk.
         .activeUpkeep(saved:saved,spots:spots,publish:launchPublished)
         .onDisappear { NotificationRouter.shared.disconnect(routerID) }
         .onReceive(NotificationCenter.default.publisher(for:FieldModeRequest.notification)) { _ in openRequestedField() }
         .onReceive(NotificationCenter.default.publisher(for:ParkOpenRequest.notification)) { _ in openRequestedPark() }
-        // At dusk: looked at again whenever the choice, the switch, the starting point or the window's
-        // state changes, then at each dusk and dawn while Nyx is open.
-        .task(id:DuskWatch(atDusk:atDusk,on:nightVision,active:scenePhase == .active,place:NightVisionDusk.place(model).map { [$0.park.latitude,$0.park.longitude] })) { await followDusk() }
-        .task {
-            // Keep "tonight" honest on a screen left open through sunrise.
-            while !Task.isCancelled { try? await Task.sleep(for:.seconds(300)); model.tick() }
-        }
         .onChange(of:palette.nightVision) { _,_ in model.savedSync.palette=palette }
         .onChange(of:nightVision) { _,on in
             // Keep the Control Center toggle and widgets in step with the switch, wherever it was flipped
@@ -271,22 +263,6 @@ struct RootView:View {
             commands.lampTarget=nil; lampOrigin=nil
         }
     }
-    /// What At dusk's watch depends on: a change to any of these looks at the Sun again.
-    private struct DuskWatch:Equatable { let atDusk:Bool; let on:Bool; let active:Bool; let place:[Double]? }
-    /// At dusk while this window is active: the switch is set now, then again at the next dusk or
-    /// dawn (at most 15 minutes apart, so a changed clock or time zone catches up). The palette turns
-    /// on the root's crossfade on the shared spring, with the soft tap, as Control Center's does;
-    /// VoiceOver hears it, since nothing on screen was touched. Captures leave the switch alone.
-    private func followDusk() async {
-        guard atDusk, scenePhase == .active, DebugScenario.screen == nil else { return }
-        while !Task.isCancelled {
-            guard let result=NightVisionDusk.apply(model) else { return }
-            // Writing the switch changes this task's id, which starts it again and cancels this one.
-            if result.changed { NightVisionLamp.announce(result.plan.on) }
-            let wait=min(900,max(1,(result.plan.next?.timeIntervalSinceNow ?? 900)+1))
-            try? await Task.sleep(for:.seconds(wait))
-        }
-    }
     /// What a link, a reminder, Siri or Control Center asks of this window is shown in it. When the window
     /// is out of sight (a park's own window full screen in front of it on iPad), it is brought forward
     /// first and the request waits for it, so nothing opens unseen.
@@ -355,6 +331,9 @@ struct RootView:View {
     /// is read, once it is (`PlanModel.place(named:)`). An id Nyx does not know opens nothing, never another place.
     private func withPlace(_ id:String?,_ act:@escaping (Park)->Void) {
         guard let id else { return }
+        // "Tonight" as of now first: a request handled as Nyx comes forward, right after a night turned
+        // over, may arrive before the window's upkeep has looked at the clock (`ActiveUpkeep`).
+        model.tick()
         if let park=model.park(id) { act(park); return }
         guard model.awaitsCatalog(id) else { return }
         Task { if let park=await model.place(named:id) { act(park) } }

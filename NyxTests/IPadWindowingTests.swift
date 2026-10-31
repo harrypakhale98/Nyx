@@ -168,12 +168,10 @@ import UniformTypeIdentifiers
         window.show(park:"deva",tab:0)
         #expect(window.parkWindow && window.visiblePark=="deva")
     }
-    /// ⌘⇧N opens the night on screen: a page on a later night reports it, tonight reports none,
-    /// and the night leaves with its page.
     /// Nyx's upkeep runs once each time it comes forward, from whichever window that is: a second
     /// window active beside the first adds nothing, and the same window reporting again adds nothing.
     @MainActor @Test func upkeepRunsOncePerComingForward() {
-        var windows=ActiveWindows()
+        let windows=ActiveWindows()
         let main=UUID(), park=UUID()
         let steps=[windows.update(main,active:true),windows.update(main,active:true),windows.update(park,active:true),
                    windows.update(main,active:false),windows.update(park,active:false),
@@ -181,6 +179,25 @@ import UniformTypeIdentifiers
                    windows.update(park,active:true)]
         #expect(steps==[true,false,false,false,false,true])
     }
+    /// One active window at a time ticks "tonight" and follows At dusk: the first to become active, then
+    /// the next when it leaves, so a park's window restored alone keeps both, and two side by side never double.
+    @MainActor @Test func oneActiveWindowKeepsTheNight() {
+        let windows=ActiveWindows()
+        let main=UUID(), park=UUID()
+        #expect(windows.keeper==nil)
+        _=windows.update(park,active:true)
+        #expect(windows.keeper==park)
+        _=windows.update(main,active:true)
+        #expect(windows.keeper==park)
+        _=windows.update(park,active:false)
+        #expect(windows.keeper==main)
+        _=windows.update(park,active:true)
+        #expect(windows.keeper==main)
+        _=windows.update(main,active:false); _=windows.update(park,active:false)
+        #expect(windows.keeper==nil)
+    }
+    /// ⌘⇧N opens the night on screen: a page on a later night reports it, tonight reports none,
+    /// and the night leaves with its page.
     @MainActor @Test func eachTabReportsItsNightForANewWindow() {
         let commands=SceneCommands()
         commands.tab = .parks
