@@ -645,10 +645,20 @@ struct CalendarView: View {
     }
     /// Why the park's best night is not in the ringed stretch, when it is not: the stretch keeps to
     /// nights a forecast reaches, or it is five nights in a row, which one fine night alone can outscore.
+    /// A moon stretch counts moonlight alone, while a score also counts what the night's clouds are
+    /// known to be, the hours of true darkness and when the Moon is up.
     nonisolated static func apart(best:Night,from stretch:Stretch)->String? {
-        guard case .best=stretch.kind, !stretch.nights.contains(where:{ $0.id==best.id }) else { return nil }
-        return best.basis == .usual ? String(localized:"The stretch keeps to forecast nights; the best night lies beyond.")
-            : String(localized:"The stretch is the best five nights in a row; one night alone scores higher.")
+        guard !stretch.nights.contains(where:{ $0.id==best.id }) else { return nil }
+        switch stretch.kind {
+        case .best:
+            return best.basis == .usual ? String(localized:"The stretch keeps to forecast nights; the best night lies beyond.")
+                : String(localized:"The stretch is the best five nights in a row; one night alone scores higher.")
+        case .moon:
+            guard !stretch.nights.isEmpty else { return nil }
+            if best.basis != .usual { return String(localized:"The ring marks the least moonlight past the forecasts; the best night is one a forecast reaches.") }
+            return best.score.cloudPoints == nil ? String(localized:"The ring marks the least moonlight; the score also counts the hours of true darkness and when the Moon is up.")
+                : String(localized:"The ring marks the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up.")
+        }
     }
     /// How the ring was chosen, for the key: five nights in a row by score while forecasts reach them,
     /// else the least moonlight. Nil when the panel already says the stretch lies beyond the month.

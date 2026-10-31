@@ -69500,6 +69500,111 @@
         }
       }
     },
+    "The ring marks the least moonlight past the forecasts; the best night is one a forecast reaches.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jenseits der Vorhersagen markiert der Ring das wenigste Mondlicht; die beste Nacht ist eine, die eine Vorhersage erreicht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The ring marks the least moonlight past the forecasts; the best night is one a forecast reaches."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más allá de los pronósticos, el anillo marca la menor luz de luna; la mejor noche es una que alcanza un pronóstico."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au-delà des prévisions, l’anneau marque le moins de clair de lune ; la meilleure nuit est une nuit qu’une prévision atteint."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報の範囲より先では、リングは月明かりの最も少ない夜を示します。いちばんよい夜は予報の届く夜です。"
+          }
+        }
+      }
+    },
+    "The ring marks the least moonlight; the score also counts the hours of true darkness and when the Moon is up.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Ring markiert das wenigste Mondlicht; der Wert zählt auch die Stunden echter Dunkelheit und wann der Mond am Himmel steht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The ring marks the least moonlight; the score also counts the hours of true darkness and when the Moon is up."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El anillo marca la menor luz de luna; el índice también cuenta las horas de oscuridad total y cuándo está la Luna en el cielo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’anneau marque le moins de clair de lune ; l’indice compte aussi les heures d’obscurité totale et le moment où la Lune est levée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リングは月明かりの最も少ない夜を示します。スコアには、完全に暗い時間の長さと月が出ている時間帯も含まれます。"
+          }
+        }
+      }
+    },
+    "The ring marks the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Ring markiert das wenigste Mondlicht; der Wert zählt auch die übliche Bewölkung, die Stunden echter Dunkelheit und wann der Mond am Himmel steht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The ring marks the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El anillo marca la menor luz de luna; el índice también cuenta las nubes habituales, las horas de oscuridad total y cuándo está la Luna en el cielo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’anneau marque le moins de clair de lune ; l’indice compte aussi la nébulosité habituelle, les heures d’obscurité totale et le moment où la Lune est levée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リングは月明かりの最も少ない夜を示します。スコアには、平年の雲量、完全に暗い時間の長さ、月が出ている時間帯も含まれます。"
+          }
+        }
+      }
+    },
     "The route": {
       "extractionState": "manual",
       "localizations": {
