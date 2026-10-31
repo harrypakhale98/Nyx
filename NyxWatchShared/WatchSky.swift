@@ -53,6 +53,13 @@ nonisolated enum WatchSky {
         get { defaults.string(forKey: parkKey).flatMap { $0.isEmpty ? nil : $0 } }
         set { defaults.set(newValue ?? "", forKey: parkKey) }
     }
+    static let provisionalKey = "watchParkProvisional"
+    /// Whether `pinnedPark` was picked in the first-launch chooser, before the iPhone had said
+    /// anything: it holds only until a context names Tonight's places (`WatchContext.answersTonight`).
+    static var pinIsProvisional: Bool {
+        get { defaults.bool(forKey: provisionalKey) }
+        set { defaults.set(newValue, forKey: provisionalKey) }
+    }
     /// Why Tonight on the wrist weighs the places it does (`choice`).
     enum Rule: Sendable, Equatable {
         /// A place kept on Tonight from the watch.

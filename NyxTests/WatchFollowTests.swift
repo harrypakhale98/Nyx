@@ -135,6 +135,16 @@ import UIKit
                 closures: ["jotr": "Road closed"], alertsOff: true).alertsNote(jotr) == nil)
     }
 
+    /// The first-launch chooser's pick stands in only until the iPhone names Tonight's places: parks
+    /// saved there, or Tonight's pick there. A context naming only its starting park does not.
+    @Test func theChoosersPickGivesWayOnlyToTonightsPlaces() throws {
+        let evening = try #require(ISO8601DateFormatter().date(from: "2026-10-08T03:00:00Z"))
+        let start = WatchContext(sent: evening, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:])
+        #expect(!start.answersTonight)
+        #expect(WatchContext(sent: evening, savedParkIDs: ["deva"], homeParkID: "jotr", nightVision: false, forecasts: [:]).answersTonight)
+        #expect(WatchContext(sent: evening, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], tonightParkID: "deva").answersTonight)
+    }
+
     /// A spot or world place travels with its usual clouds or not at all: without them the wrist
     /// would score its nights past the forecast with no clouds, clearer than the iPhone's.
     @Test func aPlaceNeverTravelsWithoutItsUsualClouds() throws {

@@ -278,6 +278,10 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         guard let decoded = try? JSONDecoder().decode(WatchContext.self, from: data), decoded.version >= Self.minimumVersion else { return nil }
         self = decoded
     }
+    /// Whether this context names Tonight's places itself: parks saved on iPhone, or Tonight's pick
+    /// there. A place picked on the watch before any such context (the first-launch chooser) only
+    /// stood in for it, and gives way to it (`WatchStore.apply`).
+    var answersTonight: Bool { !savedParkIDs.isEmpty || tonightParkID != nil }
     /// Why a national park's closures are not known on the wrist when none stands beside its score, in
     /// the iPhone's words (`ScoreInputs.uncheckedNote`): its park alerts off, or no park update covering
     /// the park (`checkedParkIDs`; an older iPhone says only the first).

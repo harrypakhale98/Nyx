@@ -873,7 +873,8 @@ struct ParkChooser: View {
         .nyxTitle("Nyx")
     }
     private func row(_ park: Park) -> some View {
-        Button { store.pin(park) } label: {
+        // Until the iPhone names Tonight's places: a pick here gives way to them (`WatchStore.apply`).
+        Button { store.pin(park, provisional: true) } label: {
             HStack(spacing: 6) {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(park.shortName).font(.system(.body, design: .serif))

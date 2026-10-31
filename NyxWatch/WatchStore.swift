@@ -61,8 +61,11 @@ import WidgetKit
         guard WatchContext.isNewer(context, than: previous) else { return }
         self.context = context
         WatchSky.save(context)
+        // The chooser's pick stood in until the iPhone named Tonight's places; a place kept on purpose stays.
+        let released = pinned != nil && WatchSky.pinIsProvisional && context.answersTonight
+        if released { keep(nil) }
         // The faces read the context too, so they reload when what it says changed, not only when it was sent again.
-        publish(force: previous?.sent(at: .distantPast) != context.sent(at: .distantPast))
+        publish(force: released || previous?.sent(at: .distantPast) != context.sent(at: .distantPast))
     }
     /// A newer set of Moon pictures replaces the stored one whole, less any night already over, so
     /// the watch keeps one small file that never grows.
@@ -135,12 +138,19 @@ import WidgetKit
     }
     /// Which rule Tonight follows (`WatchSky.choice`), for its caption.
     func rule(at now: Date) -> WatchSky.Rule? { WatchSky.choice(in: parks, context: context, pinned: pinned, now: now).rule }
-    func pin(_ park: Park?) {
+    /// `provisional`: picked in the first-launch chooser, so it gives way to the first context that
+    /// names Tonight's places (`apply`). A place kept from its own page stays until let go.
+    func pin(_ park: Park?, provisional: Bool = false) {
+        WatchSky.pinIsProvisional = park != nil && provisional
         guard park?.id != pinned else { return }
-        pinned = park?.id
-        WatchSky.pinnedPark = park?.id
+        keep(park?.id)
         publish()
         tellIPhone()
+    }
+    private func keep(_ id: String?) {
+        pinned = id
+        WatchSky.pinnedPark = id
+        if id == nil { WatchSky.pinIsProvisional = false }
     }
     /// A newly kept place has clouds only once the iPhone follows it: when it can be reached, it is
     /// told at once, quietly, as "Update from iPhone" would tell it. Otherwise it is told the next
