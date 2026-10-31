@@ -507,8 +507,8 @@ func cloudLines(_ night: Night, context: WatchContext?, now: Date, labelShown: B
 /// "Dawn twilight in 5 hr, 4 min", whole: the full name where it fits on one line, then the
 /// complications' short name ("Dawn in 5 hr, 4 min"), then narrow units ("Dawn in 5h 4m"), set
 /// down to 70% where that keeps one line (as the shrink it replaces meant to: a shrinking line was
-/// cut instead), and only then wrapped onto a second line: the duration is never cut ("en 5 h y 4…"
-/// read as five hours four). `wraps`: the whole line, wrapped (the large sizes). VoiceOver hears
+/// cut instead), and only then wrapped, onto a third line where two do not hold it (German or French
+/// at the largest standard size): the duration is never cut ("en 5 h y 4…" read as five hours four). `wraps`: the whole line, wrapped (the large sizes). VoiceOver hears
 /// the full words whichever shows. The callers set it in the serif subheadline.
 struct Countdown: View {
     let next: NightMilestone
@@ -527,7 +527,7 @@ struct Countdown: View {
                 narrow.lineLimit(1).accessibilityLabel(full)
                 narrow.font(.system(size: size*0.85, design: .serif)).lineLimit(1).accessibilityLabel(full)
                 narrow.font(.system(size: size*0.7, design: .serif)).lineLimit(1).accessibilityLabel(full)
-                narrow.lineLimit(2).accessibilityLabel(full)
+                narrow.lineLimit(3).accessibilityLabel(full)
             }
         }
     }

@@ -82,7 +82,8 @@ struct DarkAdaptationView: View {
     /// Whether the words leave too little room for an 80 pt ring above the button (French or German
     /// on 40 mm, the large sizes). At the accessibility sizes the ring then comes first, sized to the
     /// room alone, and the words follow below it. At the standard sizes the next moment stays on the
-    /// first screen: its clock time gives way (VoiceOver keeps it), then the ring, down to 64 pt.
+    /// first screen: its clock time gives way (VoiceOver keeps it), then the ring, down to 64 pt; where
+    /// even that does not fit (a three-line countdown), the ring starts past the button, never under it.
     nonisolated static func crowded(room: CGFloat, words: CGFloat) -> Bool { words+4+80*0.82 > room }
     private var content: some View {
         // Minutes counted from the moment the clock started, not from the wall clock's minute.
@@ -122,7 +123,11 @@ struct DarkAdaptationView: View {
                         // Below the ring, the words start past the bottom bar (about 40 pt below the room) and
                         // its button, never under it: on 49 mm the room reaches further below the ring.
                         .padding(.top, first ? max(0, room+40-Self.ring(room: room, words: 0)-4) : 0)
-                        if !first { AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: words, floor: 64)) }
+                        if !first {
+                            let below = (room-words-4)/0.82 < 64
+                            AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: below ? 0 : words, floor: 64))
+                                .padding(.top, below ? max(0, room+40-words-4) : 0)
+                        }
                     }
                 }
                 .multilineTextAlignment(.center)
