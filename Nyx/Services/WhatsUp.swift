@@ -169,11 +169,18 @@ nonisolated struct WhatsUp: Sendable {
         if sky.darkHours==0 { return item(String(localized: "No true darkness"), AstronomyEngine().milkyWayGuidance(for: sky, park: park)) }
         guard let dark=core.dark else {
             if core.highestAltitude>=SkyAlmanac.coreMinimumAltitude, let start=sky.darkStart, let end=sky.darkEnd {
+                // `sets` and `rises` are its 10° crossings, said as such: a core still a few degrees up in
+                // true darkness is "too low" there (as the verdict says), and sets or rises only when it
+                // is below the horizon all through it.
+                let low=coreAboveHorizon(in: DateInterval(start: start, end: max(start, end)), park: park, almanac: almanac)
+                let minimum=Int(SkyAlmanac.coreMinimumAltitude), hidden=String(localized: "Lower than that, haze and terrain usually hide it.")
                 if let sets=core.sets, sets<=start.addingTimeInterval(60) {
-                    return item(String(localized: "Sets before darkness"), String(localized: "The bright center sets at \(park.time(sets)), before true darkness begins at \(park.time(start))."))
+                    return item(low ? String(localized: "Too low in darkness") : String(localized: "Sets before darkness"),
+                                Sentences.join([String(localized: "The bright center sinks below \(minimum)° at \(park.time(sets)), before true darkness begins at \(park.time(start))."), hidden]))
                 }
                 if let rises=core.rises, rises>=end.addingTimeInterval(-60) {
-                    return item(String(localized: "Rises after darkness"), String(localized: "The bright center rises at \(park.time(rises)), after true darkness ends at \(park.time(end))."))
+                    return item(low ? String(localized: "Too low in darkness") : String(localized: "Rises after darkness"),
+                                Sentences.join([String(localized: "The bright center climbs past \(minimum)° at \(park.time(rises)), after true darkness ends at \(park.time(end))."), hidden]))
                 }
             }
             return item(String(localized: "Out of the night sky"), String(localized: "The bright center is near the Sun this season. The Milky Way's fainter band still crosses dark skies."))
@@ -190,6 +197,11 @@ nonisolated struct WhatsUp: Sendable {
         if let terrain=terrainSentence(dark: dark, park: park, almanac: almanac) { detail=Sentences.join([detail, terrain]) }
         let spokenRange=String(localized: "up in true darkness from \(park.time(dark.start)) to \(park.time(dark.end))")
         return Item(id: "core", kind: .core, title: title, value: range, detail: detail, spoken: "\(title): \(spokenRange). \(detail)", timed: true)
+    }
+    /// Whether the core clears 0° at any time in `dark`: a core under its 10° but above the horizon is
+    /// "too low", never set or not yet risen.
+    static func coreAboveHorizon(in dark: DateInterval, park: Park, almanac: SkyAlmanac = SkyAlmanac()) -> Bool {
+        almanac.highest(ra: SkyAlmanac.coreRA, dec: SkyAlmanac.coreDec, park: park, in: dark).altitude>0
     }
     /// When the real terrain at the park's main viewing spot (`Horizon.Table.main`) changes when the
     /// core can be seen: it must stand a degree above the skyline as well as 10° up. Said only when

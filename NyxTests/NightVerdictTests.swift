@@ -55,6 +55,28 @@ import Testing
         let text = try #require(NightVerdict.coreSentence(core, sky: sky, park: deva)?.text)
         #expect(text == "The Milky Way core is too low during true darkness.")
     }
+    /// What's up says the same as the verdict on those nights: the time it gives is the core's drop
+    /// below 10° (Death Valley 7:12 PM, while it really sets after 8 PM), never called its set.
+    @Test func whatsUpNamesTheTenDegreeCrossing() throws {
+        for (id, day) in [("deva", "2026-10-30"), ("glac", "2026-09-25")] {
+            let place = try park(id), sky = try sky(place, day)
+            let core = SkyAlmanac().core(for: place, sky: sky)
+            try #require(core.dark == nil && NightVerdict.coreAboveHorizon(sky: sky, park: place), "\(id)")
+            let item = WhatsUp.coreItem(core, park: place, sky: sky)
+            #expect(item.value == "Too low in darkness", "\(id)")
+            #expect(item.detail.hasPrefix("The bright center sinks below 10° at ") && item.detail.contains(", before true darkness begins at "), "\(item.detail)")
+            #expect(!item.detail.contains(" sets ") && !item.spoken.contains("Sets before"), "\(item.spoken)")
+        }
+        // Across a year, "Sets"/"Rises" are said only of a core below the horizon all through true darkness.
+        let deva = try park("deva")
+        for offset in stride(from: 0, to: 365, by: 2) {
+            let evening = deva.date(deva.evening(try #require(try? Date("2026-01-01T20:00:00Z", strategy: .iso8601))), addingDays: offset)
+            let sky = engine.conditions(for: deva, on: evening)
+            let item = WhatsUp.coreItem(SkyAlmanac().core(for: deva, sky: sky), park: deva, sky: sky)
+            if item.value == "Sets before darkness" || item.value == "Rises after darkness" { #expect(!NightVerdict.coreAboveHorizon(sky: sky, park: deva), "\(evening)") }
+            #expect(!item.detail.contains("center sets at") && !item.detail.contains("center rises at"), "\(item.detail)")
+        }
+    }
     /// Alaska, where the core never climbs: no core sentence (What's up explains it there), and no
     /// line at all on a night with no true darkness.
     /// A night beyond the forecast is never named beside tonight's as if both were forecasts.

@@ -57,8 +57,7 @@ nonisolated enum NightVerdict {
     /// Whether the core clears 0° at any time in true darkness.
     static func coreAboveHorizon(sky: SkyConditions, park: Park) -> Bool {
         guard let start=sky.darkStart, let end=sky.darkEnd else { return false }
-        let almanac=SkyAlmanac()
-        return almanac.highest(ra: SkyAlmanac.coreRA, dec: SkyAlmanac.coreDec, park: park, in: DateInterval(start: start, end: max(start, end))).altitude>0
+        return WhatsUp.coreAboveHorizon(in: DateInterval(start: start, end: max(start, end)), park: park)
     }
     /// A night's score as a line may name it, with what it rests on in the words every list uses
     /// (`DarknessScore.withBasis`): "82" on a full forecast, "82, early look", "82, usual clouds" (or
