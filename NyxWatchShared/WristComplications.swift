@@ -44,8 +44,10 @@ nonisolated enum WristTimeline {
         moments.formUnion(WatchTimeline.paletteMoments(from: now, snapshot: snapshot, look: look))
         return ([now] + moments.sorted()).map { date in
             let followed = park(at: date, snapshot: snapshot, cache: &cache, scored: &scored)
-            return MoonEntry(date: date, park: followed, moon: MoonNow(at: date, park: followed, events: followed.flatMap { events[$0.id] }),
-                             nightVision: look.nightVision(park: followed, at: date))
+            // The night's lit fraction, as the iPhone's Moon widget and Tonight give it; it turns over at
+            // the park's sunrise (`followMoments`). Up or down and the next rise or set stay live.
+            let moon = MoonNow(at: date, park: followed, events: followed.flatMap { events[$0.id] }, night: followed.map { $0.currentNight(at: date) })
+            return MoonEntry(date: date, park: followed, moon: moon, nightVision: look.nightVision(park: followed, at: date))
         }
     }
     /// Now, at each moment the answer changes at any park the face may follow (true darkness,
