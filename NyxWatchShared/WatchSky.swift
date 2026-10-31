@@ -186,7 +186,10 @@ nonisolated enum WatchSky {
     static func forecastNote(_ night: Night, context: WatchContext?, short: Bool = false, labelShown: Bool = false) -> String? {
         guard let label = night.basisLabel else { return nil }
         if short { return label }
-        return Sentences.join([night.basisCaption(opening: !labelShown) ?? "", unsyncedNote(night, context: context) ?? ""])
+        // A night that counts no clouds is named so in the label on screen (`Night.standaloneBasisLabel`):
+        // the line says why instead ("No cloud forecast yet."), never the same words twice.
+        let caption = labelShown && label != night.standaloneBasisLabel ? night.noForecastSentence : night.basisCaption(opening: !labelShown)
+        return Sentences.join([caption ?? "", unsyncedNote(night, context: context) ?? ""])
     }
     /// Before the iPhone has sent anything, a night a forecast should reach says where its clouds
     /// come from; one beyond every forecast's reach needs no such line.

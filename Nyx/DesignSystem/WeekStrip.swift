@@ -46,7 +46,7 @@ struct WeekStrip: View {
     /// The column pitch for a scaled 16 pt: never below 16, never above 1.8× it.
     static func pitch(_ scaled:Double)->Double { min(max(scaled,basePitch),basePitch*1.8) }
     private func dots(ringed:Night?,pitch:Double)->some View {
-        let scores=nights.map(\.score.value), low=scores.min() ?? 0, high=scores.max() ?? 0
+        let (low,high)=NightMark.range(nights)
         return Canvas { context,size in
             let scale=pitch/WeekStrip.basePitch
             for (index,night) in nights.enumerated() {

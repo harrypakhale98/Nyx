@@ -511,7 +511,7 @@ struct TonightWidgetView:View {
     /// `WeekBest.ringed`), early looks are half-filled and nights without a cloud forecast hollow.
     private func weekStrip(_ week:[Night])->some View {
         let best=WeekBest.ringed(week)?.id
-        let scores=week.map(\.score.value), low=scores.min() ?? 0, high=scores.max() ?? 0
+        let (low,high)=NightMark.range(week)
         return VStack(alignment:.leading,spacing:6) {
             HStack(spacing:0) {
                 // With night buttons, they lead the row and the week's columns say the rest.

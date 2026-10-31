@@ -170,6 +170,13 @@ extension Night {
         case .usual: beyondForecast ? String(localized: "No cloud forecast yet") : String(localized: "Cloud forecast unavailable")
         }
     }
+    /// `basisLabel` where it stands alone under a score, with no band beside it to say more (the watch's
+    /// night and week rows): "Moon and darkness only" for a night that counts no clouds, since "No cloud
+    /// forecast yet" alone under a 97 would read as a clear sky. The legends and notes that quote a
+    /// night's label keep `basisLabel`.
+    nonisolated var standaloneBasisLabel: String? {
+        basis == .usual && score.cloudPoints == nil ? String(localized: "Moon and darkness only") : basisLabel
+    }
     /// `basisLabel` as a sentence, for a night on the usual clouds: "No cloud forecast yet." or
     /// "Cloud forecast unavailable."; nil otherwise.
     nonisolated var noForecastSentence: String? {
@@ -467,7 +474,7 @@ nonisolated struct UsualCloudsNote: Equatable, Sendable {
     /// Under a list of places' scores (Tonight, Parks, the map).
     var estimate: String {
         switch (usual, bare) {
-        case (true, true): String(localized:"Scores marked Estimate: \(label). They use each park's usual clouds, or the Moon and darkness only where those are not known.")
+        case (true, true): String(localized:"Scores marked Estimate: \(label). They use each park's usual clouds, or the Moon and darkness only where those cannot be used.")
         case (true, false): String(localized:"Scores marked Estimate: \(label). They use each park's usual clouds.")
         default: String(localized:"Scores marked Estimate: \(label). They count the Moon and darkness only.")
         }
@@ -475,7 +482,7 @@ nonisolated struct UsualCloudsNote: Equatable, Sendable {
     /// One place's nights drawn hollow (the calendar's key, the river's tip).
     var hollow: String {
         switch (usual, bare) {
-        case (true, true): String(localized:"Hollow: \(label). Nyx uses the park's usual clouds, or only the Moon and darkness where those are not known.")
+        case (true, true): String(localized:"Hollow: \(label). Nyx uses the park's usual clouds, or only the Moon and darkness where those cannot be used.")
         case (true, false): String(localized:"Hollow: \(label). Nyx uses the park's usual clouds.")
         default: String(localized:"Hollow: \(label). Nyx uses only the Moon and darkness.")
         }
@@ -494,7 +501,7 @@ nonisolated struct UsualCloudsNote: Equatable, Sendable {
     /// Under a list whose rows name each night's mark (the trip planner's stays).
     var marked: String {
         switch (usual, bare) {
-        case (true, true): String(localized:"Nights marked \(marks) count each park's usual clouds for the month, or the Moon and darkness only where those are not known.")
+        case (true, true): String(localized:"Nights marked \(marks) count each park's usual clouds for the month, or the Moon and darkness only where those cannot be used.")
         case (true, false): String(localized:"Nights marked \(marks) count each park's usual clouds for the month.")
         default: String(localized:"Nights marked \(marks) count the Moon and darkness only.")
         }

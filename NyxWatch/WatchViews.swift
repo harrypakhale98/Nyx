@@ -483,8 +483,9 @@ struct NightGlance: View {
                 .font(.footnote).lineLimit(1)
             }
             if isTonight { Text("Turn the Crown to look ahead").font(.caption2).foregroundStyle(palette.muted).lineLimit(lines).minimumScaleFactor(shrink).nonEssential() }
-            // An early look is named as the iPhone names it, never "no forecast" (`Night.basisLabel`).
-            else if let basis = night.basisLabel { Text(basis).font(.caption2).foregroundStyle(palette.muted).lineLimit(lines).minimumScaleFactor(shrink).nonEssential() }
+            // An early look is named as the iPhone names it, never "no forecast", and a night that counts
+            // no clouds says so (`Night.standaloneBasisLabel`).
+            else if let basis = night.standaloneBasisLabel { Text(basis).font(.caption2).foregroundStyle(palette.muted).lineLimit(lines).minimumScaleFactor(shrink).nonEssential() }
         }
         .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .combine)
@@ -717,7 +718,8 @@ struct WeekPage: View {
         // The best by the iPhone's tie-breaks is named in the words of every surface (`WeekBest`), and
         // ringed unless every night scores the same ("Best this week: every night").
         let best = NightPlanner.best(nights), ringed = WeekBest.ringed(nights)
-        let scores = nights.map(\.score.value), low = scores.min() ?? 0, high = scores.max() ?? 0
+        // Sized as the iPhone sizes a week: a night that counts no clouds never sets the range (`NightMark.range`).
+        let (low, high) = NightMark.range(nights)
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
                 WatchEyebrow(text: "Next 7 nights")
@@ -728,7 +730,7 @@ struct WeekPage: View {
                         VStack(alignment: .leading, spacing: 0) {
                             // Clear of the scroll indicator at the trailing edge.
                             HStack { Text(park.dayLabel(night.id)); Spacer(); Text(night.score.value, format: .number).foregroundStyle(palette.accent) }.padding(.trailing, 8)
-                            if let basis = night.basisLabel { Text(basis).font(.caption2).foregroundStyle(palette.muted) }
+                            if let basis = night.standaloneBasisLabel { Text(basis).font(.caption2).foregroundStyle(palette.muted) }
                         }
                         .font(.footnote).fixedSize(horizontal: false, vertical: true)
                         .accessibilityElement(children: .ignore).accessibilityLabel(label(night))
@@ -780,8 +782,13 @@ struct WeekPage: View {
     private var legend: String? {
         // The ring is named only where one is drawn.
         let ring = WeekBest.ringed(nights) != nil
-        let marks = ring ? String(localized: "Solid: forecast. Half-filled: an early look. Hollow: usual clouds. The ring marks the week's best night.")
-                         : String(localized: "Solid: forecast. Half-filled: an early look. Hollow: usual clouds.")
+        // A night that counts no clouds is drawn hollow too, and named where the week has one.
+        let marks = switch (ring, nights.contains { $0.basis == .usual && $0.score.cloudPoints == nil }) {
+        case (true, false): String(localized: "Solid: forecast. Half-filled: an early look. Hollow: usual clouds. The ring marks the week's best night.")
+        case (false, false): String(localized: "Solid: forecast. Half-filled: an early look. Hollow: usual clouds.")
+        case (true, true): String(localized: "Solid: forecast. Half-filled: an early look. Hollow: usual clouds, or the Moon and darkness only. The ring marks the week's best night.")
+        case (false, true): String(localized: "Solid: forecast. Half-filled: an early look. Hollow: usual clouds, or the Moon and darkness only.")
+        }
         if nights.contains(where: { $0.basis.fill != .full }) { return differentiate ? Sentences.join([NightMark.legend, marks]) : marks }
         guard differentiate else { return nil }
         return ring ? String(localized: "\(NightMark.legend) The ring marks the week's best night.") : NightMark.legend
@@ -805,7 +812,7 @@ struct WeekPage: View {
     }
     private func label(_ night: Night) -> String {
         let base = String(localized: "\(park.dayLabel(night.id)), \(night.score.value), \(night.score.band.label)")
-        return ([base]+night.basisLabels).joined(separator: ", ")
+        return ([base]+[night.standaloneBasisLabel, night.smokeLabel].compactMap { $0 }).joined(separator: ", ")
     }
 }
 

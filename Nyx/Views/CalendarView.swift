@@ -142,7 +142,7 @@ struct CalendarView: View {
     @SceneStorage("planPark") private var parkID=""
     @Query(sort:\SavedPark.savedAt,order:.reverse) private var saved:[SavedPark]
     /// The key to the marks, open while the person reads it.
-    @State private var legendShown=false
+    @State private var legendShown=DebugScenario.isEnabled("legend")
     @State private var monthOffset=0
     @State private var chosen:Night?
     @State private var peeking=false
@@ -257,6 +257,8 @@ struct CalendarView: View {
                 }.padding(.horizontal,24).padding(.top,short ? 16 : 24).padding(.bottom,24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
             } else if waiting { ConstellationLoader().frame(maxWidth:.infinity).padding(.top,80) }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park,veil:0.45))
+            // `-nyx-legend` (DEBUG): the key open, at the foot of the page, for review captures.
+            .defaultScrollAnchor(DebugScenario.isEnabled("legend") ? .bottom : nil)
             .background { Color.clear.ignoresSafeArea().onGeometryChange(for:Double.self) { $0.size.height } action:{ screenHeight=$0 } }
             // The bar (Plan's picker) as wide as the month under it, so their edges line up.
             .safeAreaBar(edge:.top,spacing:0) { if let bar { bar.readableColumn(wide ? 760 : WideLayout.readableWidth) } }

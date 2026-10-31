@@ -11223,37 +11223,37 @@
         }
       }
     },
-    "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks are near you. Nothing is asked about any other place. Ranger programs are requested only for a park whose page you open. Campgrounds for all %lld parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address.": {
+    "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, so it never reveals which parks are near you. It is sent at most every six hours, or when you pull to refresh, but never within ten minutes of the last one. Nothing is asked about any other place. Ranger programs are requested only for a park whose page you open. Campgrounds for all %lld parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die Hinweise für alle %1$lld US-Nationalparks kommen in einer einzigen Anfrage an developer.nps.gov, höchstens alle sechs Stunden, sodass sie nie verrät, welche Parks in deiner Nähe liegen. Zu keinem anderen Ort wird etwas abgefragt. Ranger-Programme werden nur für einen Park abgefragt, dessen Seite du öffnest. Campingplätze für alle %2$lld Parks kommen in einer einzigen Anfrage, höchstens einmal pro Woche, sobald zum ersten Mal „Übernachten“ bei einem Park erscheint; sie nennt jeden Park und nichts über dich. Deine Koordinaten werden nie gesendet. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+            "value": "Die Hinweise für alle %1$lld US-Nationalparks kommen in einer einzigen Anfrage an developer.nps.gov, sodass sie nie verrät, welche Parks in deiner Nähe liegen. Sie wird höchstens alle sechs Stunden gesendet oder wenn du zum Aktualisieren nach unten ziehst, aber nie innerhalb von zehn Minuten nach der letzten. Zu keinem anderen Ort wird etwas abgefragt. Ranger-Programme werden nur für einen Park abgefragt, dessen Seite du öffnest. Campingplätze für alle %2$lld Parks kommen in einer einzigen Anfrage, höchstens einmal pro Woche, sobald zum ersten Mal „Übernachten“ bei einem Park erscheint; sie nennt jeden Park und nichts über dich. Deine Koordinaten werden nie gesendet. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks are near you. Nothing is asked about any other place. Ranger programs are requested only for a park whose page you open. Campgrounds for all %lld parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address."
+            "value": "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, so it never reveals which parks are near you. It is sent at most every six hours, or when you pull to refresh, but never within ten minutes of the last one. Nothing is asked about any other place. Ranger programs are requested only for a park whose page you open. Campgrounds for all %lld parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las alertas de los %lld parques nacionales de EE. UU. llegan en una sola solicitud a developer.nps.gov, como máximo cada seis horas, así que nunca revela qué parques tienes cerca. No se pregunta por ningún otro lugar. Los programas de guardaparques se solicitan solo para el parque cuya página abres. Los campamentos de los %lld parques llegan en una sola solicitud, como máximo una vez por semana, la primera vez que aparece Dónde quedarse en un parque; nombra todos los parques y nada sobre ti. Tus coordenadas nunca se envían. El servicio recibe información de red, como tu dirección IP."
+            "value": "Las alertas de los %lld parques nacionales de EE. UU. llegan en una sola solicitud a developer.nps.gov, así que nunca revela qué parques tienes cerca. Se envía como máximo cada seis horas, o cuando deslizas hacia abajo para actualizar, pero nunca antes de diez minutos desde la anterior. No se pregunta por ningún otro lugar. Los programas de guardaparques se solicitan solo para el parque cuya página abres. Los campamentos de los %lld parques llegan en una sola solicitud, como máximo una vez por semana, la primera vez que aparece Dónde quedarse en un parque; nombra todos los parques y nada sobre ti. Tus coordenadas nunca se envían. El servicio recibe información de red, como tu dirección IP."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les alertes des %lld parcs nationaux des États-Unis arrivent en une seule requête à developer.nps.gov, toutes les six heures au plus, si bien qu’elle ne révèle jamais quels parcs sont près de vous. Rien n’est demandé sur aucun autre lieu. Les programmes des rangers ne sont demandés que pour un parc dont vous ouvrez la page. Les campings des %lld parcs arrivent en une seule requête, une fois par semaine au plus, la première fois que la section Où dormir d’un parc s’affiche ; elle nomme tous les parcs et rien sur vous. Vos coordonnées ne sont jamais envoyées. Le service reçoit des informations réseau, comme votre adresse IP."
+            "value": "Les alertes des %lld parcs nationaux des États-Unis arrivent en une seule requête à developer.nps.gov, si bien qu’elle ne révèle jamais quels parcs sont près de vous. Elle est envoyée toutes les six heures au plus, ou quand vous tirez vers le bas pour actualiser, mais jamais moins de dix minutes après la précédente. Rien n’est demandé sur aucun autre lieu. Les programmes des rangers ne sont demandés que pour un parc dont vous ouvrez la page. Les campings des %lld parcs arrivent en une seule requête, une fois par semaine au plus, la première fois que la section Où dormir d’un parc s’affiche ; elle nomme tous les parcs et rien sur vous. Vos coordonnées ne sont jamais envoyées. Le service reçoit des informations réseau, comme votre adresse IP."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "米国の全%lldか所の国立公園のアラートは、developer.nps.govへの1回のリクエストでまとめて取得します。頻度は最大で6時間ごとなので、近くにある公園がどれかは伝わりません。ほかの場所について問い合わせることはありません。レンジャープログラムは、ページを開いた公園の分だけを取得します。全%lldか所の公園のキャンプ場は、公園の「泊まる場所」を初めて表示したときに、最大で週1回、1回のリクエストでまとめて取得します。リクエストに含まれるのはすべての公園名だけで、あなたについての情報は含まれません。座標が送信されることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
+            "value": "米国の全%lldか所の国立公園のアラートは、developer.nps.govへの1回のリクエストでまとめて取得するので、近くにある公園がどれかは伝わりません。リクエストは最大で6時間ごと、または下に引っ張って更新したときに送りますが、前回から10分以内に送ることはありません。ほかの場所について問い合わせることはありません。レンジャープログラムは、ページを開いた公園の分だけを取得します。全%lldか所の公園のキャンプ場は、公園の「泊まる場所」を初めて表示したときに、最大で週1回、1回のリクエストでまとめて取得します。リクエストに含まれるのはすべての公園名だけで、あなたについての情報は含まれません。座標が送信されることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
           }
         }
       }
@@ -30297,37 +30297,37 @@
         }
       }
     },
-    "Hollow: %@. Nyx uses the park's usual clouds, or only the Moon and darkness where those are not known.": {
+    "Hollow: %@. Nyx uses the park's usual clouds, or only the Moon and darkness where those cannot be used.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leer: %@. Nyx nutzt die übliche Bewölkung des Parks oder, wo sie nicht bekannt ist, nur den Mond und die Dunkelheit."
+            "value": "Leer: %@. Nyx nutzt die übliche Bewölkung des Parks oder, wo sie nicht nutzbar ist, nur den Mond und die Dunkelheit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hollow: %@. Nyx uses the park's usual clouds, or only the Moon and darkness where those are not known."
+            "value": "Hollow: %@. Nyx uses the park's usual clouds, or only the Moon and darkness where those cannot be used."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sin relleno: %@. Nyx usa la nubosidad habitual del parque, o solo la Luna y la oscuridad donde no se conoce."
+            "value": "Sin relleno: %@. Nyx usa la nubosidad habitual del parque, o solo la Luna y la oscuridad donde no se puede usar."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vide : %@. Nyx utilise la nébulosité habituelle du parc, ou seulement la Lune et l’obscurité là où elle n’est pas connue."
+            "value": "Vide : %@. Nyx utilise la nébulosité habituelle du parc, ou seulement la Lune et l’obscurité là où elle n’est pas utilisable."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "白抜き：%@。Nyxは公園の平年の雲量を使い、それがわからない場所では月と暗さだけを使っています。"
+            "value": "白抜き：%@。Nyxは公園の平年の雲量を使い、それを使えない場所では月と暗さだけを使っています。"
           }
         }
       }
@@ -36986,6 +36986,41 @@
         }
       }
     },
+    "Moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur Mond und Dunkelheit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon and darkness only"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo Luna y oscuridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune et obscurité seules"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月と暗さのみ"
+          }
+        }
+      }
+    },
     "Moon and twilight": {
       "extractionState": "manual",
       "localizations": {
@@ -41561,37 +41596,37 @@
         }
       }
     },
-    "Nights marked %@ count each park's usual clouds for the month, or the Moon and darkness only where those are not known.": {
+    "Nights marked %@ count each park's usual clouds for the month, or the Moon and darkness only where those cannot be used.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nächte mit %@ rechnen mit der üblichen Bewölkung des Parks in diesem Monat oder nur mit Mond und Dunkelheit, wo diese unbekannt ist."
+            "value": "Nächte mit %@ rechnen mit der üblichen Bewölkung des Parks in diesem Monat oder nur mit Mond und Dunkelheit, wo diese nicht nutzbar ist."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nights marked %@ count each park's usual clouds for the month, or the Moon and darkness only where those are not known."
+            "value": "Nights marked %@ count each park's usual clouds for the month, or the Moon and darkness only where those cannot be used."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las noches marcadas %@ cuentan la nubosidad habitual de cada parque en ese mes, o solo la Luna y la oscuridad donde no se conoce."
+            "value": "Las noches marcadas %@ cuentan la nubosidad habitual de cada parque en ese mes, o solo la Luna y la oscuridad donde no se puede usar."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les nuits marquées %@ comptent la nébulosité habituelle du mois pour chaque parc, ou seulement la Lune et l’obscurité là où elle n’est pas connue."
+            "value": "Les nuits marquées %@ comptent la nébulosité habituelle du mois pour chaque parc, ou seulement la Lune et l’obscurité là où elle n’est pas utilisable."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@と表示された夜は、各公園のその月の平年の雲量で計算しています。平年の雲量がわからない場所では、月と暗さだけで計算しています。"
+            "value": "%@と表示された夜は、各公園のその月の平年の雲量で計算しています。平年の雲量を使えない場所では、月と暗さだけで計算しています。"
           }
         }
       }
@@ -45369,37 +45404,37 @@
         }
       }
     },
-    "Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours. The request names no place and nothing about you. The service receives network information such as your IP address.": {
+    "Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours, or every hour when you pull to refresh. The request names no place and nothing about you. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx fragt services.swpc.noaa.gov, das Space Weather Prediction Center der US-Behörde NOAA, nach seiner Vorhersage der geomagnetischen Aktivität (des Kp-Index) für die nächsten drei Tage: eine Datei für die ganze Welt, höchstens alle drei Stunden. Die Anfrage nennt keinen Ort und nichts über dich. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+            "value": "Nyx fragt services.swpc.noaa.gov, das Space Weather Prediction Center der US-Behörde NOAA, nach seiner Vorhersage der geomagnetischen Aktivität (des Kp-Index) für die nächsten drei Tage: eine Datei für die ganze Welt, höchstens alle drei Stunden oder stündlich, wenn du zum Aktualisieren nach unten ziehst. Die Anfrage nennt keinen Ort und nichts über dich. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours. The request names no place and nothing about you. The service receives network information such as your IP address."
+            "value": "Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours, or every hour when you pull to refresh. The request names no place and nothing about you. The service receives network information such as your IP address."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx pide a services.swpc.noaa.gov, el Space Weather Prediction Center de la NOAA de EE. UU., su pronóstico de actividad geomagnética (el índice Kp) para los próximos tres días: un solo archivo para todo el mundo, como máximo cada tres horas. La solicitud no nombra ningún lugar ni nada sobre ti. El servicio recibe información de red, como tu dirección IP."
+            "value": "Nyx pide a services.swpc.noaa.gov, el Space Weather Prediction Center de la NOAA de EE. UU., su pronóstico de actividad geomagnética (el índice Kp) para los próximos tres días: un solo archivo para todo el mundo, como máximo cada tres horas, o cada hora cuando deslizas hacia abajo para actualizar. La solicitud no nombra ningún lugar ni nada sobre ti. El servicio recibe información de red, como tu dirección IP."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx demande à services.swpc.noaa.gov, le Space Weather Prediction Center de la NOAA américaine, sa prévision de l’activité géomagnétique (l’indice Kp) pour les trois prochains jours : un seul fichier pour le monde entier, au plus toutes les trois heures. La requête ne nomme aucun lieu et rien sur vous. Le service reçoit des informations réseau, comme votre adresse IP."
+            "value": "Nyx demande à services.swpc.noaa.gov, le Space Weather Prediction Center de la NOAA américaine, sa prévision de l’activité géomagnétique (l’indice Kp) pour les trois prochains jours : un seul fichier pour le monde entier, au plus toutes les trois heures, ou toutes les heures quand vous tirez vers le bas pour actualiser. La requête ne nomme aucun lieu et rien sur vous. Le service reçoit des informations réseau, comme votre adresse IP."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyxは、米国NOAAのSpace Weather Prediction Center（services.swpc.noaa.gov）に、この先3日間の地磁気活動（Kp指数）の予報を問い合わせます。世界全体で1つのファイルを、最短でも3時間おきに取得します。リクエストには場所もあなたに関する情報も含まれません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
+            "value": "Nyxは、米国NOAAのSpace Weather Prediction Center（services.swpc.noaa.gov）に、この先3日間の地磁気活動（Kp指数）の予報を問い合わせます。世界全体で1つのファイルを、最短でも3時間おき（下に引っ張って更新したときは1時間おき）に取得します。リクエストには場所もあなたに関する情報も含まれません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
           }
         }
       }
@@ -49009,37 +49044,37 @@
       },
       "extractionState": "manual"
     },
-    "Open-Meteo forecasts cover up to 16 days. The U.S. national parks are asked for together, up to 50 in each request, and each request carries only the public coordinates of each park's main viewing spot; parks and dark-sky places elsewhere are asked for by whole regions, and saved spots in a request of their own. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone. Where a place has no usual clouds for the month, an early look counts the forecast as it stands, and past ten days the score counts the Moon and darkness only. Where usual clouds are known, an old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here.": {
+    "Open-Meteo forecasts cover up to 16 days. The U.S. national parks are asked for together, up to 50 in each request, and each request carries only public coordinates for each park (its main viewing spot, or a visitor center or the park itself where no spot is named); parks and dark-sky places elsewhere are asked for by whole regions, and saved spots in a request of their own. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone, except at Haleakalā (below). Where a place has no usual clouds for the month, an early look counts the forecast as it stands, and past ten days the score counts the Moon and darkness only. Where usual clouds are known, an old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Past the seven days that forecast covers, Haleakalā's score counts the Moon and darkness only: its usual clouds are mostly the low cloud below the summit. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die Vorhersagen von Open-Meteo reichen bis zu 16 Tage weit. Die US-Nationalparks werden gemeinsam abgefragt, bis zu 50 pro Anfrage, und jede Anfrage enthält nur die öffentlichen Koordinaten des wichtigsten Beobachtungsplatzes jedes Parks; Parks und Dunkelorte anderswo werden nach ganzen Regionen abgefragt und gespeicherte Plätze in einer eigenen Anfrage. Die Wolken werden über die gesamte Phase echter Dunkelheit gemittelt; in Nächten ohne sie von Sonnenuntergang bis Sonnenaufgang oder, unter der Mitternachtssonne, über die vier Stunden um den tiefsten Sonnenstand. Eine Vorhersage zählt voll bis etwa drei Tage vor einer Nacht. Von dort bis zu zehn Tagen wird sie an die übliche Bewölkung des Parks im jeweiligen Monat angenähert, und diese Nächte sind als erste Einschätzung markiert; nach zehn Tagen oder ohne Vorhersage zählt allein die übliche Bewölkung. Wo für einen Ort keine übliche Bewölkung für den Monat bekannt ist, zählt eine erste Einschätzung die Vorhersage unverändert, und nach zehn Tagen berücksichtigt der Wert nur Mond und Dunkelheit. Wo die übliche Bewölkung bekannt ist, wird eine alte Vorhersage nie verworfen; sie zählt nur weniger, sodass eine Nacht offline nie klarer wirken kann, als ihre Wolken erlauben. Eine Vorhersage, die eine Nacht nicht vollständig abdeckt, wird nicht verwendet. Am Haleakalā, dessen Gipfel über der Passatinversion liegt, zählt der Wert mittelhohe und hohe Wolken, wenn diese Vorhersage verfügbar ist. Die Daten von Open-Meteo stehen unter CC BY 4.0. Nyx verändert sie: Die Wolken jeder Nacht werden über deren echte Dunkelheit gemittelt und an die übliche Bewölkung angenähert, wie hier beschrieben."
+            "value": "Die Vorhersagen von Open-Meteo reichen bis zu 16 Tage weit. Die US-Nationalparks werden gemeinsam abgefragt, bis zu 50 pro Anfrage, und jede Anfrage enthält nur öffentliche Koordinaten jedes Parks (seinen wichtigsten Beobachtungsplatz oder, wo keiner genannt ist, ein Besucherzentrum oder den Park selbst); Parks und Dunkelorte anderswo werden nach ganzen Regionen abgefragt und gespeicherte Plätze in einer eigenen Anfrage. Die Wolken werden über die gesamte Phase echter Dunkelheit gemittelt; in Nächten ohne sie von Sonnenuntergang bis Sonnenaufgang oder, unter der Mitternachtssonne, über die vier Stunden um den tiefsten Sonnenstand. Eine Vorhersage zählt voll bis etwa drei Tage vor einer Nacht. Von dort bis zu zehn Tagen wird sie an die übliche Bewölkung des Parks im jeweiligen Monat angenähert, und diese Nächte sind als erste Einschätzung markiert; nach zehn Tagen oder ohne Vorhersage zählt allein die übliche Bewölkung, außer am Haleakalā (siehe unten). Wo für einen Ort keine übliche Bewölkung für den Monat bekannt ist, zählt eine erste Einschätzung die Vorhersage unverändert, und nach zehn Tagen berücksichtigt der Wert nur Mond und Dunkelheit. Wo die übliche Bewölkung bekannt ist, wird eine alte Vorhersage nie verworfen; sie zählt nur weniger, sodass eine Nacht offline nie klarer wirken kann, als ihre Wolken erlauben. Eine Vorhersage, die eine Nacht nicht vollständig abdeckt, wird nicht verwendet. Am Haleakalā, dessen Gipfel über der Passatinversion liegt, zählt der Wert mittelhohe und hohe Wolken, wenn diese Vorhersage verfügbar ist. Nach den sieben Tagen, die diese Vorhersage abdeckt, berücksichtigt der Wert am Haleakalā nur Mond und Dunkelheit: Seine übliche Bewölkung ist vor allem die tiefe Wolkendecke unterhalb des Gipfels. Die Daten von Open-Meteo stehen unter CC BY 4.0. Nyx verändert sie: Die Wolken jeder Nacht werden über deren echte Dunkelheit gemittelt und an die übliche Bewölkung angenähert, wie hier beschrieben."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open-Meteo forecasts cover up to 16 days. The U.S. national parks are asked for together, up to 50 in each request, and each request carries only the public coordinates of each park's main viewing spot; parks and dark-sky places elsewhere are asked for by whole regions, and saved spots in a request of their own. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone. Where a place has no usual clouds for the month, an early look counts the forecast as it stands, and past ten days the score counts the Moon and darkness only. Where usual clouds are known, an old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here."
+            "value": "Open-Meteo forecasts cover up to 16 days. The U.S. national parks are asked for together, up to 50 in each request, and each request carries only public coordinates for each park (its main viewing spot, or a visitor center or the park itself where no spot is named); parks and dark-sky places elsewhere are asked for by whole regions, and saved spots in a request of their own. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone, except at Haleakalā (below). Where a place has no usual clouds for the month, an early look counts the forecast as it stands, and past ten days the score counts the Moon and darkness only. Where usual clouds are known, an old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Past the seven days that forecast covers, Haleakalā's score counts the Moon and darkness only: its usual clouds are mostly the low cloud below the summit. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los pronósticos de Open-Meteo cubren hasta 16 días. Se pide por los parques nacionales de EE. UU. juntos, hasta 50 en cada solicitud, y cada solicitud lleva solo las coordenadas públicas del punto de observación principal de cada parque; los parques y lugares de cielo oscuro de otros países se piden por regiones completas, y los sitios guardados en una solicitud aparte. Las nubes se promedian sobre todo el periodo de oscuridad total; en noches sin ella, de la puesta a la salida del sol, o en las cuatro horas alrededor del punto más bajo del Sol bajo el sol de medianoche. Un pronóstico cuenta por completo hasta unos tres días antes de una noche. De ahí hasta diez días se ajusta hacia la nubosidad habitual del parque en ese mes, y esas noches se marcan como vista anticipada; pasados diez días, o sin pronóstico, cuenta solo la nubosidad habitual. Donde no se conoce la nubosidad habitual de un lugar para el mes, una vista anticipada cuenta el pronóstico tal cual y, pasados diez días, el índice solo cuenta la Luna y la oscuridad. Donde se conoce la nubosidad habitual, un pronóstico viejo nunca se descarta; simplemente cuenta menos, así que quedarte sin conexión no puede hacer que una noche se vea más despejada de lo que permiten sus nubes. Un pronóstico con cobertura incompleta de una noche no se usa. En Haleakalā, cuya cumbre está por encima de la inversión de los vientos alisios, el índice cuenta las nubes medias y altas cuando ese pronóstico está disponible. Los datos de Open-Meteo tienen licencia CC BY 4.0. Nyx los modifica: las nubes de cada noche se promedian sobre la oscuridad total de esa noche y se ajustan hacia la nubosidad habitual, como se describe aquí."
+            "value": "Los pronósticos de Open-Meteo cubren hasta 16 días. Se pide por los parques nacionales de EE. UU. juntos, hasta 50 en cada solicitud, y cada solicitud lleva solo coordenadas públicas de cada parque (su punto de observación principal o, donde no se indica ninguno, un centro de visitantes o el propio parque); los parques y lugares de cielo oscuro de otros países se piden por regiones completas, y los sitios guardados en una solicitud aparte. Las nubes se promedian sobre todo el periodo de oscuridad total; en noches sin ella, de la puesta a la salida del sol, o en las cuatro horas alrededor del punto más bajo del Sol bajo el sol de medianoche. Un pronóstico cuenta por completo hasta unos tres días antes de una noche. De ahí hasta diez días se ajusta hacia la nubosidad habitual del parque en ese mes, y esas noches se marcan como vista anticipada; pasados diez días, o sin pronóstico, cuenta solo la nubosidad habitual, salvo en Haleakalā (más abajo). Donde no se conoce la nubosidad habitual de un lugar para el mes, una vista anticipada cuenta el pronóstico tal cual y, pasados diez días, el índice solo cuenta la Luna y la oscuridad. Donde se conoce la nubosidad habitual, un pronóstico viejo nunca se descarta; simplemente cuenta menos, así que quedarte sin conexión no puede hacer que una noche se vea más despejada de lo que permiten sus nubes. Un pronóstico con cobertura incompleta de una noche no se usa. En Haleakalā, cuya cumbre está por encima de la inversión de los vientos alisios, el índice cuenta las nubes medias y altas cuando ese pronóstico está disponible. Pasados los siete días que cubre ese pronóstico, el índice de Haleakalā solo cuenta la Luna y la oscuridad: su nubosidad habitual es sobre todo la nube baja que queda por debajo de la cumbre. Los datos de Open-Meteo tienen licencia CC BY 4.0. Nyx los modifica: las nubes de cada noche se promedian sobre la oscuridad total de esa noche y se ajustan hacia la nubosidad habitual, como se describe aquí."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les prévisions d’Open-Meteo couvrent jusqu’à 16 jours. Les parcs nationaux des États-Unis sont demandés ensemble, jusqu’à 50 par requête, et chaque requête ne contient que les coordonnées publiques du principal point d’observation de chaque parc ; les parcs et sites de ciel étoilé d’ailleurs sont demandés par régions entières, et les lieux enregistrés dans une requête à part. Les nuages sont moyennés sur toute la période d’obscurité totale ; les nuits qui n’en ont pas, du coucher au lever du soleil, ou sur les quatre heures autour du point le plus bas du Soleil sous le soleil de minuit. Une prévision compte pleinement jusqu’à environ trois jours avant une nuit. De là jusqu’à dix jours, elle est rapprochée de la nébulosité habituelle du parc pour le mois, et ces nuits sont marquées comme tendance ; au-delà de dix jours, ou sans prévision, seule la nébulosité habituelle compte. Là où la nébulosité habituelle d’un lieu pour le mois n’est pas connue, une tendance compte la prévision telle quelle, et au-delà de dix jours l’indice ne compte que la Lune et l’obscurité. Là où la nébulosité habituelle est connue, une ancienne prévision n’est jamais abandonnée ; elle compte simplement moins, si bien que passer hors ligne ne peut pas rendre une nuit plus dégagée que ses nuages ne le permettent. Une prévision qui ne couvre pas entièrement une nuit n’est pas utilisée. À Haleakalā, dont le sommet domine l’inversion des alizés, l’indice compte les nuages moyens et hauts quand cette prévision est disponible. Les données d’Open-Meteo sont sous licence CC BY 4.0. Nyx les modifie : les nuages de chaque nuit sont moyennés sur l’obscurité totale de cette nuit et rapprochés de la nébulosité habituelle, comme décrit ici."
+            "value": "Les prévisions d’Open-Meteo couvrent jusqu’à 16 jours. Les parcs nationaux des États-Unis sont demandés ensemble, jusqu’à 50 par requête, et chaque requête ne contient que des coordonnées publiques pour chaque parc (son principal point d’observation ou, à défaut, un centre d’accueil ou le parc lui-même) ; les parcs et sites de ciel étoilé d’ailleurs sont demandés par régions entières, et les lieux enregistrés dans une requête à part. Les nuages sont moyennés sur toute la période d’obscurité totale ; les nuits qui n’en ont pas, du coucher au lever du soleil, ou sur les quatre heures autour du point le plus bas du Soleil sous le soleil de minuit. Une prévision compte pleinement jusqu’à environ trois jours avant une nuit. De là jusqu’à dix jours, elle est rapprochée de la nébulosité habituelle du parc pour le mois, et ces nuits sont marquées comme tendance ; au-delà de dix jours, ou sans prévision, seule la nébulosité habituelle compte, sauf à Haleakalā (voir plus bas). Là où la nébulosité habituelle d’un lieu pour le mois n’est pas connue, une tendance compte la prévision telle quelle, et au-delà de dix jours l’indice ne compte que la Lune et l’obscurité. Là où la nébulosité habituelle est connue, une ancienne prévision n’est jamais abandonnée ; elle compte simplement moins, si bien que passer hors ligne ne peut pas rendre une nuit plus dégagée que ses nuages ne le permettent. Une prévision qui ne couvre pas entièrement une nuit n’est pas utilisée. À Haleakalā, dont le sommet domine l’inversion des alizés, l’indice compte les nuages moyens et hauts quand cette prévision est disponible. Au-delà des sept jours couverts par cette prévision, l’indice d’Haleakalā ne compte que la Lune et l’obscurité : sa nébulosité habituelle est surtout faite des nuages bas sous le sommet. Les données d’Open-Meteo sont sous licence CC BY 4.0. Nyx les modifie : les nuages de chaque nuit sont moyennés sur l’obscurité totale de cette nuit et rapprochés de la nébulosité habituelle, comme décrit ici."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open-Meteoの予報は最大16日先までをカバーします。米国の国立公園はまとめて問い合わせ、1回のリクエストには最大50か所を含めます。各リクエストに含まれるのは、各公園の主な観察スポットの公開された座標だけです。ほかの地域の公園や暗い空の場所は地域単位でまとめて、保存したスポットは別のリクエストで問い合わせます。雲量は完全に暗い時間全体で平均します。完全に暗い時間がない夜は日の入りから日の出まで、白夜のときは太陽が最も低くなる時刻の前後4時間で平均します。予報は、その夜の約3日前まではそのまま使います。そこから10日前までは公園のその月の平年の雲量に寄せ、これらの夜には早めの見通しと表示します。10日より先、または予報がない場合は、平年の雲量だけを使います。その月の平年の雲量がわからない場所では、早めの見通しは予報をそのまま計算し、10日より先は月と暗さだけで計算します。平年の雲量がわかっている場所では、古い予報を捨てることはありません。影響を小さくして使うだけです。そのため、オフラインになっても、実際の雲より晴れているように見えることはありません。夜の一部しかカバーしていない予報は使いません。山頂が貿易風逆転層より上にあるHaleakalāでは、中層雲と上層雲の予報がある場合は、それを計算に入れます。Open-MeteoのデータはCC BY 4.0でライセンスされています。Nyxはこれに手を加えています。ここで説明しているように、各夜の雲量をその夜の完全に暗い時間で平均し、平年の雲量に寄せています。"
+            "value": "Open-Meteoの予報は最大16日先までをカバーします。米国の国立公園はまとめて問い合わせ、1回のリクエストには最大50か所を含めます。各リクエストに含まれるのは、各公園の公開された座標（主な観察スポット、観察スポットがない場合はビジターセンターか公園そのもの）だけです。ほかの地域の公園や暗い空の場所は地域単位でまとめて、保存したスポットは別のリクエストで問い合わせます。雲量は完全に暗い時間全体で平均します。完全に暗い時間がない夜は日の入りから日の出まで、白夜のときは太陽が最も低くなる時刻の前後4時間で平均します。予報は、その夜の約3日前まではそのまま使います。そこから10日前までは公園のその月の平年の雲量に寄せ、これらの夜には早めの見通しと表示します。10日より先、または予報がない場合は、平年の雲量だけを使います（Haleakalāは例外で、後述します）。その月の平年の雲量がわからない場所では、早めの見通しは予報をそのまま計算し、10日より先は月と暗さだけで計算します。平年の雲量がわかっている場所では、古い予報を捨てることはありません。影響を小さくして使うだけです。そのため、オフラインになっても、実際の雲より晴れているように見えることはありません。夜の一部しかカバーしていない予報は使いません。山頂が貿易風逆転層より上にあるHaleakalāでは、中層雲と上層雲の予報がある場合は、それを計算に入れます。その予報がカバーする7日間より先は、Haleakalāのスコアは月と暗さだけで計算します。この場所の平年の雲量は、ほとんどが山頂より下にある低い雲だからです。Open-MeteoのデータはCC BY 4.0でライセンスされています。Nyxはこれに手を加えています。ここで説明しているように、各夜の雲量をその夜の完全に暗い時間で平均し、平年の雲量に寄せています。"
           }
         }
       }
@@ -55374,37 +55409,37 @@
         }
       }
     },
-    "Requests go to api.open-meteo.com for all %lld U.S. national parks together, up to 50 in each request: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind, visibility, the chance of rain, the weather (such as fog or thunderstorms) and water vapour. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.": {
+    "Requests go to api.open-meteo.com for all %lld U.S. national parks together, up to 50 in each request: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind, visibility, the chance of rain, the weather (such as fog or thunderstorms) and water vapour. They use only public coordinates for each park (its main viewing spot, or a visitor center or the park itself where no spot is named), so they never reveal your location or which parks are near you. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Anfragen gehen an api.open-meteo.com, für alle %lld US-Nationalparks gemeinsam, bis zu 50 pro Anfrage: Wolken, drei Vorhersagemodelle zum Vergleich, Wolkenschichten, Temperatur, Taupunkt, Wind, Sichtweite, Regenwahrscheinlichkeit, das Wetter (etwa Nebel oder Gewitter) und Wasserdampf. Sie nutzen nur die Koordinaten des wichtigsten Beobachtungsplatzes jedes Parks und verraten daher nie deinen Standort oder welche Parks in deiner Nähe liegen. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+            "value": "Anfragen gehen an api.open-meteo.com, für alle %lld US-Nationalparks gemeinsam, bis zu 50 pro Anfrage: Wolken, drei Vorhersagemodelle zum Vergleich, Wolkenschichten, Temperatur, Taupunkt, Wind, Sichtweite, Regenwahrscheinlichkeit, das Wetter (etwa Nebel oder Gewitter) und Wasserdampf. Sie nutzen nur öffentliche Koordinaten jedes Parks (seinen wichtigsten Beobachtungsplatz oder, wo keiner genannt ist, ein Besucherzentrum oder den Park selbst) und verraten daher nie deinen Standort oder welche Parks in deiner Nähe liegen. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Requests go to api.open-meteo.com for all %lld U.S. national parks together, up to 50 in each request: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind, visibility, the chance of rain, the weather (such as fog or thunderstorms) and water vapour. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address."
+            "value": "Requests go to api.open-meteo.com for all %lld U.S. national parks together, up to 50 in each request: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind, visibility, the chance of rain, the weather (such as fog or thunderstorms) and water vapour. They use only public coordinates for each park (its main viewing spot, or a visitor center or the park itself where no spot is named), so they never reveal your location or which parks are near you. The service receives network information such as your IP address."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las solicitudes van a api.open-meteo.com para los %lld parques nacionales de EE. UU. juntos, hasta 50 en cada solicitud: nubes, tres modelos de pronóstico para comparar, capas de nubes, temperatura, punto de rocío, viento, visibilidad, probabilidad de lluvia, el tiempo (como niebla o tormentas eléctricas) y vapor de agua. Solo usan las coordenadas del punto de observación principal de cada parque, así que nunca revelan tu ubicación ni qué parques tienes cerca. El servicio recibe información de red, como tu dirección IP."
+            "value": "Las solicitudes van a api.open-meteo.com para los %lld parques nacionales de EE. UU. juntos, hasta 50 en cada solicitud: nubes, tres modelos de pronóstico para comparar, capas de nubes, temperatura, punto de rocío, viento, visibilidad, probabilidad de lluvia, el tiempo (como niebla o tormentas eléctricas) y vapor de agua. Solo usan coordenadas públicas de cada parque (su punto de observación principal o, donde no se indica ninguno, un centro de visitantes o el propio parque), así que nunca revelan tu ubicación ni qué parques tienes cerca. El servicio recibe información de red, como tu dirección IP."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les requêtes vont à api.open-meteo.com pour les %lld parcs nationaux des États-Unis ensemble, jusqu’à 50 par requête : nuages, trois modèles de prévision à comparer, couches nuageuses, température, point de rosée, vent, visibilité, risque de pluie, temps (comme le brouillard ou les orages) et vapeur d’eau. Elles n’utilisent que les coordonnées du principal point d’observation de chaque parc, et ne révèlent donc jamais votre position ni les parcs proches de vous. Le service reçoit des informations réseau, comme votre adresse IP."
+            "value": "Les requêtes vont à api.open-meteo.com pour les %lld parcs nationaux des États-Unis ensemble, jusqu’à 50 par requête : nuages, trois modèles de prévision à comparer, couches nuageuses, température, point de rosée, vent, visibilité, risque de pluie, temps (comme le brouillard ou les orages) et vapeur d’eau. Elles n’utilisent que des coordonnées publiques pour chaque parc (son principal point d’observation ou, à défaut, un centre d’accueil ou le parc lui-même), et ne révèlent donc jamais votre position ni les parcs proches de vous. Le service reçoit des informations réseau, comme votre adresse IP."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "リクエストは、api.open-meteo.comに米国の全%lldか所の国立公園についてまとめて送ります。1回のリクエストには最大50か所を含めます。内容は、雲量、比較用の3つの予報モデル、雲の層、気温、露点、風、視程、降水確率、天気（霧や雷雨など）、水蒸気量です。使うのは各公園の主な観察スポットの座標だけなので、あなたの位置や、近くにある公園がどれかが伝わることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
+            "value": "リクエストは、api.open-meteo.comに米国の全%lldか所の国立公園についてまとめて送ります。1回のリクエストには最大50か所を含めます。内容は、雲量、比較用の3つの予報モデル、雲の層、気温、露点、風、視程、降水確率、天気（霧や雷雨など）、水蒸気量です。使うのは各公園の公開された座標（主な観察スポット、観察スポットがない場合はビジターセンターか公園そのもの）だけなので、あなたの位置や、近くにある公園がどれかが伝わることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
           }
         }
       }
@@ -57939,37 +57974,37 @@
         }
       }
     },
-    "Scores marked Estimate: %@. They use each park's usual clouds, or the Moon and darkness only where those are not known.": {
+    "Scores marked Estimate: %@. They use each park's usual clouds, or the Moon and darkness only where those cannot be used.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mit „Schätzung“ markierte Werte: %@. Sie nutzen die übliche Bewölkung jedes Parks oder nur Mond und Dunkelheit, wo diese unbekannt ist."
+            "value": "Mit „Schätzung“ markierte Werte: %@. Sie nutzen die übliche Bewölkung jedes Parks oder nur Mond und Dunkelheit, wo diese nicht nutzbar ist."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scores marked Estimate: %@. They use each park's usual clouds, or the Moon and darkness only where those are not known."
+            "value": "Scores marked Estimate: %@. They use each park's usual clouds, or the Moon and darkness only where those cannot be used."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Índices marcados como Estimación: %@. Usan la nubosidad habitual de cada parque, o solo la Luna y la oscuridad donde no se conoce."
+            "value": "Índices marcados como Estimación: %@. Usan la nubosidad habitual de cada parque, o solo la Luna y la oscuridad donde no se puede usar."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Indices marqués Estimation : %@. Ils utilisent la nébulosité habituelle de chaque parc, ou seulement la Lune et l’obscurité là où elle est inconnue."
+            "value": "Indices marqués Estimation : %@. Ils utilisent la nébulosité habituelle de chaque parc, ou seulement la Lune et l’obscurité là où elle n’est pas utilisable."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "「推定」のスコア：%@。各公園の平年の雲量を使い、それが分からない場所では月と暗さだけで計算しています。"
+            "value": "「推定」のスコア：%@。各公園の平年の雲量を使い、それを使えない場所では月と暗さだけで計算しています。"
           }
         }
       }
@@ -61688,6 +61723,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "太陽の時刻にはNOAAの近似式を使っています。月の出と月の入りは、Meeus方式の低精度の位置計算によります。米国海軍天文台と照合すると、差は数分以内です。アラスカ、ハワイ、アメリカ領サモア、ヴァージン諸島で確認した公園では1分以内、中緯度の公園では4分未満です。北の高緯度で月が地平線をかすめるだけのときは、短い月の入りと月の出の時刻がずれたり、表示されなかったりすることがあります。日の出、日の入り、薄明は1分以内で一致します。月の輝面比は、平均29.53日の周期を月の計算上の位置で補正したもので、おおよその値です。地形や大気の状態によって、実際に見える出入りの時刻はずれることがあります。月はNASAの月面カラーマップをもとに、実際の太陽の方向から照らし、その夜に最も高くなるときにその公園から見える傾きで描いています。月の画像：NASA Scientific Visualization Studio（CGI Moon Kit）、LRO LROCおよびLOLAチーム。"
+          }
+        }
+      }
+    },
+    "Solid: forecast. Half-filled: an early look. Hollow: usual clouds, or the Moon and darkness only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gefüllt: Vorhersage. Halb gefüllt: erste Einschätzung. Leer: übliche Bewölkung oder nur Mond und Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solid: forecast. Half-filled: an early look. Hollow: usual clouds, or the Moon and darkness only."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relleno: pronóstico. Medio relleno: vista anticipada. Sin relleno: nubosidad habitual, o solo la Luna y la oscuridad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plein : prévision. À moitié plein : tendance. Vide : nébulosité habituelle, ou seulement la Lune et l’obscurité."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "塗りつぶし：予報。半分塗り：早めの見通し。白抜き：平年の雲量、または月と暗さだけ。"
+          }
+        }
+      }
+    },
+    "Solid: forecast. Half-filled: an early look. Hollow: usual clouds, or the Moon and darkness only. The ring marks the week's best night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gefüllt: Vorhersage. Halb gefüllt: erste Einschätzung. Leer: übliche Bewölkung oder nur Mond und Dunkelheit. Der Ring markiert die beste Nacht der Woche."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solid: forecast. Half-filled: an early look. Hollow: usual clouds, or the Moon and darkness only. The ring marks the week's best night."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relleno: pronóstico. Medio relleno: vista anticipada. Sin relleno: nubosidad habitual, o solo la Luna y la oscuridad. El anillo marca la mejor noche de la semana."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plein : prévision. À moitié plein : tendance. Vide : nébulosité habituelle, ou seulement la Lune et l’obscurité. L’anneau marque la meilleure nuit de la semaine."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "塗りつぶし：予報。半分塗り：早めの見通し。白抜き：平年の雲量、または月と暗さだけ。リングはその週でいちばんよい夜を示します。"
           }
         }
       }

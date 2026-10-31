@@ -147,7 +147,7 @@ import Testing
         #expect(UsualCloudsNote.trip([notYet]) == "Nights marked \"No cloud forecast yet\" count each park's usual clouds for the month.")
         #expect(UsualCloudsNote.trip([bare]) == "Nights marked \"Cloud forecast unavailable\" count the Moon and darkness only.")
         #expect(UsualCloudsNote.trip([unavailable, notYet, bare, early, full])
-                == "Nights marked \"No cloud forecast yet\" or \"Cloud forecast unavailable\" count each park's usual clouds for the month, or the Moon and darkness only where those are not known. Nights marked \"Early look\" ease the forecast toward each park's usual clouds for the month.")
+                == "Nights marked \"No cloud forecast yet\" or \"Cloud forecast unavailable\" count each park's usual clouds for the month, or the Moon and darkness only where those cannot be used. Nights marked \"Early look\" ease the forecast toward each park's usual clouds for the month.")
         // A stay led by a forecast night whose other nights lean on the usual clouds: no mark named, the lean said.
         let lean = "In a stay of several nights, nights the forecast does not fully reach lean on each park's usual clouds for the month."
         #expect(UsualCloudsNote.trip([full], unmarked: [early]) == lean)

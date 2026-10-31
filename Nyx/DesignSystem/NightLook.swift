@@ -138,6 +138,14 @@ nonisolated enum NightMark: Equatable, Sendable {
         let unit=high>low ? 1.6+3.4*Double(min(high,max(low,score))-low)/Double(high-low) : 3.3
         return unit*(largest/5)
     }
+    /// The range a week's dots are sized across: the scores of its nights that count clouds, so a
+    /// night that counts none ("Moon and darkness only", which can read 97 on any moonless night) never
+    /// dwarfs the nights whose sky is known; `radius` clamps it into the range. Every night's when none count clouds.
+    static func range(_ nights:[Night])->(low:Int,high:Int) {
+        let counted=nights.filter { $0.score.cloudPoints != nil }
+        let scores=(counted.isEmpty ? nights : counted).map(\.score.value)
+        return (scores.min() ?? 0,scores.max() ?? 0)
+    }
 }
 /// A mark's outline as a shape filling its frame (the dot's radius is half the frame), or only the
 /// part below its centre: an early look's fill, reaching past a star's points as `draw` clips it.

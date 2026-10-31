@@ -58,7 +58,7 @@ import Testing
         #expect(notYet.estimate.localizedCaseInsensitiveContains(try #require(later.basisLabel)))
         #expect(UsualCloudsNote([bare])?.estimate == "Scores marked Estimate: cloud forecast unavailable. They count the Moon and darkness only.")
         #expect(UsualCloudsNote([tonight, later, bare])?.estimate
-                == "Scores marked Estimate: no cloud forecast yet, or unavailable. They use each park's usual clouds, or the Moon and darkness only where those are not known.")
+                == "Scores marked Estimate: no cloud forecast yet, or unavailable. They use each park's usual clouds, or the Moon and darkness only where those cannot be used.")
         #expect(notYet.hollow == "Hollow: no cloud forecast yet. Nyx uses the park's usual clouds.")
         #expect(UsualCloudsNote([bare])?.hollow == "Hollow: cloud forecast unavailable. Nyx uses only the Moon and darkness.")
     }
