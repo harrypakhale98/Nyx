@@ -39,8 +39,9 @@ nonisolated struct HourlySeries: Codable, Sendable, Equatable {
     let updated: Date
     let times: [Double]
     let values: [String: [Double?]]
-    /// Forecasts older than `Forecast.recentFor` are not described, as with clouds.
-    func usable(now: Date) -> Bool { now.timeIntervalSince(updated)<Forecast.recentFor }
+    /// Forecasts older than `Forecast.recentFor` are not described, as with clouds, nor one stamped
+    /// well after `now` (`Forecast.ahead`), whose age is unknown.
+    func usable(now: Date) -> Bool { now.timeIntervalSince(updated)<Forecast.recentFor && !Forecast.ahead(updated, of: now) }
     func samples(_ key: String, from start: Date, to end: Date, valid: ClosedRange<Double>, timing: HourlyWindow.Timing = .instant) -> [(value: Double, weight: Double)]? {
         guard let series=values[key] else { return nil }
         return HourlyWindow.samples(times:times,values:series,from:start,to:end,valid:valid,timing:timing)
@@ -76,10 +77,12 @@ nonisolated struct ForecastDetail: Codable, Sendable, Equatable {
     static let airRequired=["aerosol_optical_depth"]
     /// This detail with each of `fresh`'s parts that is newer (by `updated`) or missing here: what
     /// a service hands on can land out of order, and an older part must never replace a newer one.
-    func newer(_ fresh: ForecastDetail) -> ForecastDetail {
+    /// Given `now`, a part stamped well after it (`Forecast.ahead`) gives way to one made in the present.
+    func newer(_ fresh: ForecastDetail, now: Date? = nil) -> ForecastDetail {
         func pick(_ kept: HourlySeries?, _ other: HourlySeries?) -> HourlySeries? {
             guard let other else { return kept }
-            return kept.map { $0.updated>other.updated ? $0 : other } ?? other
+            guard let kept, kept.updated>other.updated else { return other }
+            return Forecast.newer(other.updated, than: kept.updated, now: now) ? other : kept
         }
         return ForecastDetail(models: pick(models, fresh.models), layers: pick(layers, fresh.layers), air: pick(air, fresh.air))
     }

@@ -50,7 +50,7 @@ extension VisionModel {
         if alertsBusy != update.busy { alertsBusy = update.busy }
         let refusal: MissingInput.KeyRefusal? = update.keyRefused ? .shared : nil
         if alertsRefusal != refusal { alertsRefusal = refusal }
-        if let cache = update.cache, cache.updated > (alerts?.updated ?? .distantPast) { alerts = cache }
+        if let cache = update.cache, Forecast.newer(cache.updated, than: alerts?.updated, now: .now) { alerts = cache }
     }
     /// Takes in forecasts, summit layers and smoke newer than those held; true when anything changed
     /// (and so the night, the list and the nights ahead are being rescored). Only ever newer: a
@@ -58,17 +58,17 @@ extension VisionModel {
     @discardableResult func merge(_ fresh: [String: Forecast], layers: [String: HourlySeries], smoke air: [String: HourlySeries] = [:]) -> Bool {
         var merged = forecasts, changed = false
         for park in parks {
-            guard let forecast = fresh[park.id], forecast.updated > (merged[park.id]?.updated ?? .distantPast) else { continue }
+            guard let forecast = fresh[park.id], Forecast.replaces(forecast, merged[park.id], now: .now) else { continue }
             merged[park.id] = forecast; changed = true
         }
         if changed { forecasts = merged }
         var mergedLayers = summitLayers, layersChanged = false
-        for (id, series) in layers where series.updated > (mergedLayers[id]?.updated ?? .distantPast) {
+        for (id, series) in layers where Forecast.newer(series.updated, than: mergedLayers[id]?.updated, now: .now) {
             mergedLayers[id] = series; layersChanged = true
         }
         if layersChanged { summitLayers = mergedLayers }
         var mergedSmoke = smoke, smokeChanged = false
-        for (id, series) in air where series.updated > (mergedSmoke[id]?.updated ?? .distantPast) {
+        for (id, series) in air where Forecast.newer(series.updated, than: mergedSmoke[id]?.updated, now: .now) {
             mergedSmoke[id] = series; smokeChanged = true
         }
         if smokeChanged { smoke = mergedSmoke }

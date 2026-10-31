@@ -520,15 +520,15 @@ nonisolated enum ForecastReuse {
     static let detailForced: TimeInterval=3*3600
     static let airForced: TimeInterval=12*3600
     /// Due when older than `normal`, or with `force` older than `forced`; always when there is none.
+    /// Also due when stamped well after `now` (`Forecast.ahead`): kept while the device clock ran ahead,
+    /// its age says nothing, and `Forecast.newer` lets the fresh answer take its place.
     static func due(_ updated: Date?, now: Date, force: Bool, normal: TimeInterval, forced: TimeInterval) -> Bool {
         guard let updated else { return true }
         let age=now.timeIntervalSince(updated)
-        return age>=normal || (force && age>=forced)
+        return age>=normal || (force && age>=forced) || Forecast.ahead(updated, of: now)
     }
-    /// Clouds are also due when stamped well after `now`: kept while the device clock ran ahead, their
-    /// age says nothing, and `Forecast.replaces` lets the fresh answer take their place.
     static func cloudsDue(_ updated: Date?, now: Date, force: Bool) -> Bool {
-        due(updated, now: now, force: force, normal: clouds, forced: cloudsForced) || updated.map { $0 > now.addingTimeInterval(Forecast.futureSlack) } == true
+        due(updated, now: now, force: force, normal: clouds, forced: cloudsForced)
     }
     /// After a request the service answered with nothing usable for a place (a refusal of the request
     /// itself, `HTTPStatusError.refusesRequest`, or an answer Nyx cannot read, such as a renamed field), that place is asked again an hour later, or ten
@@ -1119,7 +1119,9 @@ actor SummitLayerService {
         }
         if network {
             let now=clock()
-            let due=summits.filter { park in !attempted.contains(park.id) && (memory[park.id].map { now.timeIntervalSince($0.updated) } ?? .infinity) >= Self.freshFor }
+            let due=summits.filter { park in
+                !attempted.contains(park.id) && ForecastReuse.due(memory[park.id]?.updated, now: now, force: false, normal: Self.freshFor, forced: Self.freshFor)
+            }
             if !due.isEmpty, backoff.allows(WeatherService.host, now: now) {
                 let task=Task {
                     self.keep(await self.fetch(due))
@@ -1143,7 +1145,8 @@ actor SummitLayerService {
         memory[id]=cached
     }
     private func keep(_ fetched: [(String, HourlySeries)]) {
-        for (id, series) in fetched where memory[id].map({ $0.updated < series.updated }) ?? true {
+        let now=clock()
+        for (id, series) in fetched where Forecast.newer(series.updated, than: memory[id]?.updated, now: now) {
             memory[id]=series
             if persist { CacheDirectory.write(series, name: "summit-\(id)") }
         }

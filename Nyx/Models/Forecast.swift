@@ -23,11 +23,20 @@ nonisolated struct Forecast: Codable, Sendable {
     /// could replace it until the clock caught up.
     static func replaces(_ fresh: Forecast?, _ kept: Forecast?, now: Date? = nil) -> Bool {
         guard let fresh else { return false }
-        guard let kept else { return true }
-        return fresh.updated > kept.updated || now.map { kept.updated > $0.addingTimeInterval(futureSlack) && fresh.updated <= $0.addingTimeInterval(futureSlack) } == true
+        return newer(fresh.updated, than: kept?.updated, now: now)
     }
     /// How far after the present a forecast's stamp may lie before it is taken as a clock that ran ahead.
     static let futureSlack: TimeInterval = 3600
+    /// A stamp well after `now` (`futureSlack`): kept while the device clock ran ahead, so its age says
+    /// nothing. Every cache treats it as due and not recent, whatever it holds (clouds, detail, smoke,
+    /// summit layers, aurora, park alerts, programs, campgrounds).
+    static func ahead(_ updated: Date, of now: Date) -> Bool { updated > now.addingTimeInterval(futureSlack) }
+    /// Whether something made at `fresh` replaces what was made at `kept` (the rule of `replaces`, for
+    /// any cache): only a later one, or, given `now`, one made in the present over one stamped `ahead`.
+    static func newer(_ fresh: Date, than kept: Date?, now: Date? = nil) -> Bool {
+        guard let kept else { return true }
+        return fresh > kept || now.map { ahead(kept, of: $0) && !ahead(fresh, of: $0) } == true
+    }
     /// The hourly values whose half hour either side overlaps `start`…`end`, with their timestamps.
     func hours(from start: Date, to end: Date) -> [(time: Date, cloud: Double)] {
         zip(times,clouds).compactMap { t,c in

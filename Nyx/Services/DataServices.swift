@@ -477,7 +477,7 @@ actor AuroraService {
         let current=cached()
         let age=current.map { clock().timeIntervalSince($0.updated) } ?? .infinity
         guard network, age>=Self.freshFor || (force && age>=Self.forcedAfter), backoff.allows(Self.host, now: clock()),
-              attempted.map({ clock().timeIntervalSince($0)>=Self.forcedAfter }) ?? true else { return current }
+              attempted.map({ clock().timeIntervalSince($0)>=Self.forcedAfter || Forecast.ahead($0, of: clock()) }) ?? true else { return current }
         if let running { return await running.value ?? current }
         var parts=URLComponents(); parts.scheme="https"; parts.host=Self.host; parts.path=Self.path
         guard let url=parts.url else { return current }
@@ -711,11 +711,11 @@ actor ParkStore: ParkProviding {
         if persist { CacheDirectory.write(fresh, name: "campgrounds") }
     }
     /// A part is due once it is older than `maxAge`; even a forced refresh waits ten minutes
-    /// since that part's last success.
+    /// since that part's last success. One stamped well after `now` (`Forecast.ahead`) is due.
     static func stale(_ updated: Date?, maxAge: TimeInterval, force: Bool, now: Date) -> Bool {
         guard let updated else { return true }
         let age=now.timeIntervalSince(updated)
-        return age>=maxAge || (force && age>=600)
+        return age>=maxAge || (force && age>=600) || Forecast.ahead(updated, of: now)
     }
     /// After a request NPS answered with nothing usable, the same request waits an hour, or ten
     /// minutes when pulled to refresh.

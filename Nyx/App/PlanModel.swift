@@ -766,7 +766,7 @@ import Observation
     func takeDetails(_ fresh:[String:ForecastDetail]) {
         var updated=details, changed=false
         for (id,detail) in fresh {
-            let merged=updated[id].map { $0.newer(detail) } ?? detail
+            let merged=updated[id].map { $0.newer(detail,now:present) } ?? detail
             if updated[id] != merged { updated[id]=merged; changed=true }
         }
         if changed { details=updated }
@@ -799,7 +799,7 @@ import Observation
     }
     /// A park's programs as fetched, when newer than those here.
     func takePrograms(_ id:String,_ fresh:ProgramsCache) {
-        guard programs[id].map({ $0.updated<fresh.updated }) ?? true, let park=park(id) else { return }
+        guard Forecast.newer(fresh.updated,than:programs[id]?.updated,now:present), let park=park(id) else { return }
         programs[id]=fresh
         rebuild(park)
     }

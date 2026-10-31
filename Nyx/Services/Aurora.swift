@@ -47,7 +47,8 @@ nonisolated struct AuroraOutlook: Codable, Sendable, Equatable {
         if !text.hasSuffix("Z") { text += "Z" }
         return try? Date(text, strategy: .iso8601)
     }
-    func usable(now: Date) -> Bool { now.timeIntervalSince(updated) < Self.maximumAge }
+    /// Within a day, and not stamped well after `now` (`Forecast.ahead`), whose age is unknown.
+    func usable(now: Date) -> Bool { now.timeIntervalSince(updated) < Self.maximumAge && !Forecast.ahead(updated, of: now) }
     /// The highest Kp across a window, observed, estimated or forecast; nil unless the periods
     /// cover the whole window (a night past the forecast's end gets no figure).
     func highest(in window: DateInterval) -> (kp: Double, predicted: Bool)? {

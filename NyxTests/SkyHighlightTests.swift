@@ -223,6 +223,23 @@ struct AuroraForecastTests {
         let forgotten=await service.cached()
         #expect(forgotten == nil)
     }
+    /// A copy kept while the device clock ran ahead is not used, and is asked for again at once when
+    /// the clock comes back; the fresh answer takes its place.
+    @Test func aForecastStampedAheadIsAskedForAgain() async throws {
+        let http=KpStubHTTP(body: """
+        [{"time_tag":"2026-10-15T00:00:00","kp":3,"observed":"predicted"}]
+        """)
+        let now=Date(timeIntervalSince1970: t0)
+        let clock=KpClock(now.addingTimeInterval(2*86400))
+        let service=AuroraService(transport: http, persist: false, clock: { clock.now })
+        _=try #require(await service.outlook(network: true))
+        clock.now=now
+        #expect(await service.cached() == nil)
+        let fresh=try #require(await service.outlook(network: true))
+        #expect(fresh.updated == now && fresh.usable(now: now))
+        #expect(await http.count == 2)
+        #expect(AuroraOutlook(updated: now.addingTimeInterval(2*86400), periods: fresh.periods).usable(now: now) == false)
+    }
     /// Switched off and on again within the hour: the forecast is asked for at once, not an hour later.
     @Test func switchingBackOnAsksAtOnce() async throws {
         let http=KpStubHTTP(body: """
