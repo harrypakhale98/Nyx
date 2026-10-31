@@ -238,14 +238,14 @@ private struct ComplicationReview: View {
                     Group {
                         Text(mode == .fullColor ? "Full color" : "Tinted").font(.caption2).foregroundStyle(.gray)
                         HStack(spacing: 8) {
-                            WatchComplicationView(previewFamily: .accessoryCircular, entry: entry).frame(width: 50, height: 50)
-                            MoonComplicationView(previewFamily: .accessoryCircular, entry: moon).frame(width: 50, height: 50)
-                            NextDarkComplicationView(previewFamily: .accessoryCircular, entry: dark, now: .now).frame(width: 50, height: 50)
+                            WatchComplicationView(previewFamily: .accessoryCircular, entry: entry).frame(maxWidth: 50, maxHeight: 50).aspectRatio(1, contentMode: .fit)
+                            MoonComplicationView(previewFamily: .accessoryCircular, entry: moon).frame(maxWidth: 50, maxHeight: 50).aspectRatio(1, contentMode: .fit)
+                            NextDarkComplicationView(previewFamily: .accessoryCircular, entry: dark, now: .now).frame(maxWidth: 50, maxHeight: 50).aspectRatio(1, contentMode: .fit)
                         }
                         HStack(spacing: 8) {
-                            WatchComplicationView(previewFamily: .accessoryCorner, entry: entry).frame(width: 50, height: 50)
-                            MoonComplicationView(previewFamily: .accessoryCorner, entry: moon).frame(width: 50, height: 50)
-                            NextDarkComplicationView(previewFamily: .accessoryCorner, entry: dark, now: .now).frame(width: 50, height: 50)
+                            WatchComplicationView(previewFamily: .accessoryCorner, entry: entry).frame(maxWidth: 50, maxHeight: 50).aspectRatio(1, contentMode: .fit)
+                            MoonComplicationView(previewFamily: .accessoryCorner, entry: moon).frame(maxWidth: 50, maxHeight: 50).aspectRatio(1, contentMode: .fit)
+                            NextDarkComplicationView(previewFamily: .accessoryCorner, entry: dark, now: .now).frame(maxWidth: 50, maxHeight: 50).aspectRatio(1, contentMode: .fit)
                         }
                         WatchComplicationView(previewFamily: .accessoryRectangular, entry: entry, clockTimes: true).frame(height: 60)
                         MoonComplicationView(previewFamily: .accessoryRectangular, entry: moon).frame(height: 60)
@@ -260,8 +260,9 @@ private struct ComplicationReview: View {
                 WatchComplicationView(previewFamily: .accessoryRectangular, entry: WatchSkyEntry(date: .now, night: nil, next: nil, nightVision: red)).frame(height: 50)
                 NextDarkComplicationView(previewFamily: .accessoryRectangular, entry: NextDarkEntry(date: .now, park: nil, moment: .none, nightVision: red), now: .now).frame(height: 50)
             }
-            // The title's margins, so no caption sits flush against the screen's edge on 40 mm.
-            .scenePadding(.horizontal)
+            // About the title's margin, so no caption sits flush against the screen's edge on 40 mm
+            // (the circles give a little there, rather than push the page wider than the screen).
+            .padding(.horizontal, 8)
         }
         .navigationTitle("Complications")
     }
