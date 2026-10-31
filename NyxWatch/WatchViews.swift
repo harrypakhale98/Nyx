@@ -453,8 +453,16 @@ struct NightGlance: View {
             if let start = night.sky.darkStart, let end = night.sky.darkEnd, night.sky.darkHours > 0 {
                 // Park time: the zone rides on the last time where the park's clock is not the watch's.
                 Text("Dark \(night.park.time(start)) to \(night.park.wristTime(end))").font(.system(.subheadline, design: .serif)).lineLimit(lines).minimumScaleFactor(shrink)
+            } else if wraps {
+                Text(SkyConditions.noDarknessMessage(tonight: isTonight)).font(.footnote)
             } else {
-                Text(SkyConditions.noDarknessMessage(tonight: isTonight)).font(.footnote).lineLimit(lines).minimumScaleFactor(shrink)
+                // One line on the fixed face: the sentence where it fits, else its first words, never cut.
+                let message = SkyConditions.noDarknessMessage(tonight: isTonight)
+                ViewThatFits(in: .horizontal) {
+                    Text(message)
+                    Text("No true darkness").accessibilityLabel(message)
+                }
+                .font(.footnote).lineLimit(1)
             }
             if isTonight { Text("Turn the Crown to look ahead").font(.caption2).foregroundStyle(palette.muted).lineLimit(lines).minimumScaleFactor(shrink).nonEssential() }
             // An early look is named as the iPhone names it, never "no forecast" (`Night.basisLabel`).
@@ -493,10 +501,21 @@ struct NextMoment: View {
             if let next = NightMilestone.next(after: now, in: night.sky) {
                 VStack(spacing: 0) {
                     // At the site the first question is "is it dark yet": answer it before the countdown.
-                    if let state = nowLine {
-                        let spaced = Lettering.spaced && !typeSize.isAccessibilitySize
-                        Text(state).font(.caption2.weight(.semibold)).textCase(spaced ? .uppercase : nil).tracking(spaced ? 1 : 0).foregroundStyle(palette.ink)
-                            .lineLimit(limit).minimumScaleFactor(0.8)
+                    // Where the Sun never sinks far enough (Denali in June), the answer is that it will
+                    // not be, said whether or not a moment is still to come: the sentence where it has
+                    // the room, else its first words on the one line the state would take.
+                    if night.sky.darkHours == 0 {
+                        let message = SkyConditions.noDarknessMessage(tonight: true)
+                        if limit == nil { Text(message).font(.caption2).foregroundStyle(palette.ink) }
+                        else {
+                            ViewThatFits(in: .horizontal) {
+                                Text(message).font(.caption2)
+                                eyebrow(String(localized: "No true darkness")).accessibilityLabel(message)
+                            }
+                            .foregroundStyle(palette.ink).lineLimit(1)
+                        }
+                    } else if let state = nowLine {
+                        eyebrow(state).lineLimit(limit)
                     }
                     countdownText(next, now: now).font(.system(.subheadline, design: .serif)).foregroundStyle(palette.ink)
                         .lineLimit(limit).minimumScaleFactor(0.7)
@@ -545,6 +564,12 @@ struct NextMoment: View {
         }
         .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .combine)
+    }
+    /// The state over the countdown, set as an eyebrow (solid at accessibility sizes).
+    private func eyebrow(_ text: String) -> some View {
+        let spaced = Lettering.spaced && !typeSize.isAccessibilitySize
+        return Text(text).font(.caption2.weight(.semibold)).textCase(spaced ? .uppercase : nil).tracking(spaced ? 1 : 0).foregroundStyle(palette.ink)
+            .minimumScaleFactor(0.8)
     }
     /// "Truly dark now" only with the Moon out of the way, as the next-dark complication says it
     /// (`DarkMoment`); under the Moon, the iPhone's words for true darkness with the Moon up.
