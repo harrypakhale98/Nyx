@@ -185,19 +185,32 @@ struct KeepThisNightButton: View {
 /// is in the journal or the next night begins. `-nyx-keep-night` shows it in DEBUG captures.
 struct KeepThisNightOffer: View {
     @Environment(PlanModel.self) private var model
-    @Environment(\.nyx) private var palette
-    @Query private var entries: [JournalEntry]
     let park: Park
-    init(park: Park) {
-        self.park=park
-        let id=park.id
-        _entries=Query(filter:#Predicate<JournalEntry> { $0.parkID == id })
+    var body: some View {
+        // The journal is asked about the last night begun only, again when it changes.
+        LastNightOffer(park:park,last:park.lastNightBegun(at:model.present))
+    }
+}
+private struct LastNightOffer: View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.nyx) private var palette
+    /// At most one of the park's entries on that day, by the park's calendar: enough to know the night
+    /// is kept, without holding every entry of the park and its photos. Updated as entries are saved.
+    @Query private var kept: [JournalEntry]
+    let park: Park
+    let last: Date
+    init(park: Park, last: Date) {
+        self.park=park; self.last=last
+        let id=park.id, start=park.calendar.startOfDay(for:last)
+        let end=park.calendar.date(byAdding:.day,value:1,to:start) ?? start.addingTimeInterval(86_400)
+        var descriptor=FetchDescriptor<JournalEntry>(predicate:#Predicate { $0.parkID == id && $0.date >= start && $0.date < end })
+        descriptor.fetchLimit=1
+        _kept=Query(descriptor)
     }
     private var night: Night? {
         let now=model.present
-        let last=park.lastNightBegun(at:now)
         let candidate=model.night(park,on:last)
-        let journaled=entries.contains { park.calendar.isDate($0.date,inSameDayAs:last) }
+        let journaled=kept.first != nil
         if DebugScenario.isEnabled("keep-night") { return journaled ? nil : candidate }
         return KeepThisNight.offersMorningAfter(fieldNight:KeepThisNight.fieldNight(park:park),lastNightBegun:last,
             nightIsOver:FieldNight.isOver(candidate.sky,at:now),journaled:journaled,calendar:park.calendar) ? candidate : nil
