@@ -323,7 +323,8 @@ struct TonightFace: View {
         if looking {
             NightGlance(night: shown, isTonight: isTonight, models: context?.modelRange(for: shown), wraps: wraps).layoutPriority(1)
         } else {
-            // "No cloud forecast" or the models' range rides on the clock-time line, so neither costs the gauge anything.
+            // "No cloud forecast" or the models' range rides on the clock-time line where it fits whole,
+            // else takes the time's place, so neither costs the gauge a line (the track has no rim mark for either).
             NextMoment(night: night, now: now, cloudsUnknown: night.basis == .usual, models: context?.modelRange(for: shown), wraps: wraps).layoutPriority(1)
             if NightMilestone.next(after: now, in: night.sky) == nil, let note = WatchSky.forecastNote(night, context: context, short: true) {
                 Text(note).font(.caption2).foregroundStyle(palette.faint).lineLimit(lines).minimumScaleFactor(0.8)
@@ -426,22 +427,25 @@ struct NightGlance: View {
             } else if let models {
                 // The models' range rides on the day's line where it fits whole ("SAT, OCT 10 · MODELS
                 // 73–89", letterspaced, then without the letterspacing, then "models" in lower case);
-                // where it does not, the day stands alone and the hairline on the dial's rim carries
-                // the range, so a ranged night never costs the dial a line (or its band word). Never
-                // shrunk or cut: a cut range would show a wrong number. The dial speaks it, so
-                // VoiceOver hears only the day here.
+                // where it does not, it takes a line of its own under the day: the night's track has no
+                // rim mark for it. Never shrunk or cut: a cut range would show a wrong number. The
+                // dial speaks it, so VoiceOver hears only the day here.
                 let range = Text("Models \(models.lowerBound)–\(models.upperBound)")
                 ViewThatFits(in: .horizontal) {
                     Text("\(day.foregroundStyle(palette.ink)) · \(range.foregroundStyle(palette.muted))")
-                        .font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0)
+                        .font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).accessibilityLabel(day)
                     Text("\(day.foregroundStyle(palette.ink)) · \(range.foregroundStyle(palette.muted))")
-                        .font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil)
+                        .font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).accessibilityLabel(day)
                     // Narrower still: the range in lower case and regular weight, the iPhone river's "models 73–89".
                     let upper = (isTonight ? String(localized: "Tonight") : night.park.dayLabel(night.id)).uppercased(with: locale)
                     Text("\(Text(verbatim: upper).font(eyebrow).foregroundStyle(palette.ink)) · \(Text("models \(models.lowerBound)–\(models.upperBound)").font(.caption2).foregroundStyle(palette.muted))")
-                    day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.ink)
+                        .accessibilityLabel(day)
+                    VStack(spacing: 0) {
+                        day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.ink)
+                        range.font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true)
+                    }
                 }
-                .lineLimit(1).accessibilityLabel(day)
+                .lineLimit(1)
             } else {
                 let spaced = Lettering.spaced && !typeSize.isAccessibilitySize
                 day.font(eyebrow).textCase(spaced ? .uppercase : nil).tracking(spaced ? 1 : 0).foregroundStyle(palette.ink)
@@ -500,24 +504,37 @@ struct NextMoment: View {
                         // Park time, with its zone where the park's clock is not the watch's ("at 4:52 AM MST").
                         let time = night.park.wristTime(next.date)
                         let at = Text("at \(time)")
-                        if cloudsUnknown {
+                        if cloudsUnknown, let basis = night.basisLabel {
                             // Whole or not at all, as the models' range below (it was cut to "no cloud
-                            // forec…" on 40 mm): where it does not fit, the time stands alone and the
-                            // dial's dashed rim says the clouds are not forecast. VoiceOver hears it all.
-                            // The iPhone's two words for it (`Night.basisLabel`): not yet beyond the forecast's reach, unavailable within it.
+                            // forec…" on 40 mm). Where the two do not share the line, the words take the
+                            // time's place: the night's track has no rim mark for them, a line of their own
+                            // left a 40 mm dial too small to read, and the countdown above already says
+                            // when (the Milestones page gives the clock time). VoiceOver hears it all.
+                            // The iPhone's two words for it (`Night.basisLabel`): not yet beyond the forecast's
+                            // reach, unavailable within it; "Usual clouds" where neither fits.
                             let full = night.beyondForecast ? Text("at \(time) · no cloud forecast yet") : Text("at \(time) · cloud forecast unavailable")
                             if typeSize.isAccessibilitySize || wraps { full }
-                            else { ViewThatFits(in: .horizontal) { full; at.minimumScaleFactor(0.8) }.accessibilityLabel(full) }
+                            else {
+                                ViewThatFits(in: .horizontal) {
+                                    full
+                                    Text(basis).accessibilityLabel(full)
+                                    Text("Usual clouds").minimumScaleFactor(0.8).accessibilityLabel(full)
+                                }
+                            }
                         }
                         else if let models {
                             // The range shares the line only whole, never shrunk or cut (a cut "models
-                            // 59–8…" would show a wrong number): where it does not fit, the time stands
-                            // alone and the hairline on the dial's rim carries the range. At accessibility
-                            // sizes the line wraps instead. The dial speaks the range; VoiceOver hears
-                            // only the time here.
+                            // 59–8…" would show a wrong number): where it does not fit, it takes the time's
+                            // place, as the words above do. At accessibility sizes the line wraps instead.
+                            // The dial speaks the range; VoiceOver hears only the time here.
                             let full = Text("at \(time) · models \(models.lowerBound)–\(models.upperBound)")
                             if typeSize.isAccessibilitySize { full.accessibilityLabel(at) }
-                            else { ViewThatFits(in: .horizontal) { full; at.minimumScaleFactor(0.8) }.accessibilityLabel(at) }
+                            else {
+                                ViewThatFits(in: .horizontal) {
+                                    full.accessibilityLabel(at)
+                                    Text("Models \(models.lowerBound)–\(models.upperBound)").accessibilityLabel(at)
+                                }
+                            }
                         } else { at.minimumScaleFactor(0.8) }
                     }
                     .font(.caption2).foregroundStyle(palette.muted).lineLimit(limit).nonEssential()
