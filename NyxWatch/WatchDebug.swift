@@ -3,7 +3,7 @@ import WidgetKit
 
 /// Screenshot routes for the watch, DEBUG only (Release always starts on Tonight):
 /// `-nyx-watch-screen tonight | milestones | whatsup | week | dark | parks | chooser | credits | complications`
-/// `-nyx-watch-state synced | unsynced | polar | samoa | closure | expired | models`, `-nyx-watch-palette automatic | red | phone | standard`,
+/// `-nyx-watch-state synced | unsynced | polar | samoa | closure | alertsoff | unchecked | expired | models`, `-nyx-watch-palette automatic | red | phone | standard`,
 /// `-nyx-watch-night 0…6` (Tonight turned to that night with the Crown), `-nyx-watch-adaptation <minutes>`
 /// (the adaptation clock started that long ago), `-nyx-watch-info` (the dark-adaptation info sheet), `-nyx-watch-aod` (Always-On, which the simulator cannot show),
 /// `-nyx-watch-face` (with `complications`: the full-colour renders alone, unlabelled, for the store frame).
@@ -127,6 +127,13 @@ enum WatchDebug {
                                       closures: ["jotr": "Keys View Road closed for repairs through November"])
             // Kept on Joshua Tree, so Tonight shows the closure beside its score (unpinned, Tonight led with the best saved park).
             store.debugSet(context: closed, pinned: "jotr")
+        case "alertsoff", "unchecked":
+            // Why no closure stands beside the score (`WatchContext.alertsNote`), for review: park alerts
+            // off in Your privacy, or a park update that covered Death Valley but not Joshua Tree.
+            let off = argument("-nyx-watch-state") == "alertsoff"
+            let context = WatchContext(sent: .now, savedParkIDs: synced.savedParkIDs, homeParkID: "jotr", nightVision: true, forecasts: [:],
+                                       alertsOff: off, checkedParkIDs: off ? nil : ["deva"])
+            store.debugSet(context: context, pinned: "jotr")
         case "models":
             // The forecast models' range, for review: the iPhone's own "disagree" forecast fixture
             // (`DebugForecasts`, a different spread each night), its ranges worked out by the
