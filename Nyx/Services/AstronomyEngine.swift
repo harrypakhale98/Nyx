@@ -50,6 +50,9 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
             + 0.045758*sinD(2*d-m)+0.041024*sinD(mp-m)-0.034718*sinD(d)-0.030465*sinD(m+mp)
         return moonPhase(moonLongitude:moon,t:t)
     }
+    /// A night's Moon, as every surface names it ("71% lit"): its phase at 10 PM on the evening of
+    /// `night` in the park's clock, so one night has one figure however late it is read.
+    func moonPhase(night: Date, park: Park) -> MoonPhase { moonPhase(at: park.evening(night).addingTimeInterval(10*3600)) }
     /// The phase from the Moon's longitude (degrees) at `t` (Julian centuries from J2000), so a
     /// caller that already has the Moon's position (`lunarPosition`) does not work it out twice.
     private func moonPhase(moonLongitude moon: Double, t: Double) -> MoonPhase {
@@ -101,7 +104,7 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
         let lowestSun = sunAlwaysUp ? lowestSolarMoment(start: start, end: end, park: park) : nil
         return SkyConditions(evening: start, end: end, sunset: sunset, sunrise: sunrise,
             civilDusk: civil.down.first, nauticalDusk: nautical.down.first, darkStart: darkStart, darkEnd: darkEnd,
-            state: state, moon: moonPhase(at: start.addingTimeInterval(10*3600)),
+            state: state, moon: moonPhase(night: start, park: park),
             moonrise: moon.up.first, moonset: moon.down.first, moonBelowFraction: min(1,max(0,below)), darkHours: hours, moonlight: light, lowestSun: lowestSun)
     }
 

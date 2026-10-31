@@ -9,7 +9,7 @@ struct MoonEntry: TimelineEntry {
     let moon: MoonNow
     /// The park whose rise and set times are shown; nil shows the phase alone.
     let park: Park?
-    /// The park's night at `date`, for the app's picture of that night's Moon.
+    /// The park's night at `date`, for the app's picture of that night's Moon and its lit fraction.
     let night: Date?
     let nightVision: Bool
     /// Set to a place no longer saved (`TonightProvider.unsaved`): its name, or "" when the setting
@@ -17,8 +17,11 @@ struct MoonEntry: TimelineEntry {
     let unsaved: String?
     init(date: Date, park: Park?, nightVision: Bool, unsaved: String?=nil) {
         self.date=date; self.park=park; self.nightVision=nightVision; self.unsaved=unsaved
-        moon=MoonNow(at: date, park: park)
-        night=park.map { $0.currentNight(at: date) }
+        let night=park.map { $0.currentNight(at: date) }
+        // Tonight's Moon: the night's lit fraction, as the Tonight widget shows it, so two widgets
+        // never give tonight's Moon two figures; up or down and the next rise or set stay live.
+        moon=MoonNow(at: date, park: park, night: night)
+        self.night=night
     }
     /// The system's redacted placeholder: the Moon at Joshua Tree from the bundled parks, never the
     /// App Group's snapshot (0.8 MB, decoded synchronously, for a shape drawn redacted).

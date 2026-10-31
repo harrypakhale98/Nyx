@@ -66,6 +66,21 @@ import WidgetKit
         #expect(jotr.zonedTime(next.date) == jotr.timeZone.clockTime(next.date, zoned: jotr.keepsOtherTime(at: next.date)))
     }
 
+    /// The Moon widget gives tonight's Moon the figure the Tonight widget gives it (the night's), while
+    /// up or down and the next rise or set stay live; without a place, the phase right now.
+    @Test func moonWidgetShowsTheNightsLightAsTheTonightWidgetDoes() throws {
+        let jotr = try park("jotr"), engine = AstronomyEngine()
+        for step in 0..<12 {
+            let date = now.addingTimeInterval(Double(step)*5*3600)
+            let entry = MoonEntry(date: date, park: jotr, nightVision: false)
+            let night = try #require(entry.night)
+            #expect(entry.moon.phase.percentLit == engine.conditions(for: jotr, on: night).moon.percentLit, "\(step)")
+            let live = MoonNow(at: date, park: jotr)
+            #expect(entry.moon.isUp == live.isUp && entry.moon.next == live.next, "\(step)")
+        }
+        #expect(MoonEntry(date: now, park: nil, nightVision: false).moon.phase.percentLit == engine.moonPhase(at: now).percentLit)
+    }
+
     @Test func moonRectangleFollowsTheReadersPercentAndSaysNoEventItCannotKnow() throws {
         let gaar = try park("gaar")
         let moon = MoonNow(at: now, park: nil)

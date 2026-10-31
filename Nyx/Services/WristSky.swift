@@ -181,9 +181,12 @@ nonisolated struct MoonNow: Sendable {
         }
         .sorted { $0.date < $1.date }
     }
-    init(at now: Date, park: Park?, events: [Event]? = nil) {
+    /// `night`: the phase is the park's night's (`AstronomyEngine.moonPhase(night:park:)`), the figure
+    /// the Tonight widget and the app show for it, while up or down and the next rise or set stay
+    /// live. Otherwise, and without a park, the phase right now.
+    init(at now: Date, park: Park?, events: [Event]? = nil, night: Date? = nil) {
         let engine = AstronomyEngine()
-        phase = engine.moonPhase(at: now)
+        phase = park.flatMap { park in night.map { engine.moonPhase(night: $0, park: park) } } ?? engine.moonPhase(at: now)
         guard let park else { isUp = nil; next = nil; return }
         isUp = engine.lunarAltitude(at: now, park: park) + 0.833 > 0
         next = (events ?? Self.events(at: park, around: now)).first { $0.date > now }
