@@ -326,6 +326,55 @@ struct DataServiceDeliveryTests {
         clock.advance(601)
         #expect(await store.alerts(for: [jotr], key: "k", network: true, force: true).busy == false)
     }
+    /// The shared key's quota spent holds the host for an hour or more; a key of the person's own
+    /// (saved or removed) has its own quota, so the hold is lifted and alerts are asked for at once,
+    /// even within ten minutes of the last success.
+    @Test func aNewKeyLiftsTheHold() async throws {
+        let jotr=try park("jotr")
+        let clock=BudgetClock(Self.monday)
+        let http=PathHTTP(["/api/v1/alerts": .body("{\"data\":[]}")])
+        let store=ParkStore(transport: http, persist: false, clock: { clock.now })
+        #expect(await store.alerts(for: [jotr], key: "shared", network: true, force: true).busy == false)
+        clock.advance(601)
+        await http.set("/api/v1/alerts", .status(429))
+        #expect(await store.alerts(for: [jotr], key: "shared", network: true, force: true).busy)
+        await http.set("/api/v1/alerts", .body("{\"data\":[]}"))
+        clock.advance(601)
+        #expect(await store.alerts(for: [jotr], key: "shared", network: true, force: true).busy)
+        #expect(await http.urls.count == 2)
+        await store.keyChanged()
+        let mine=await store.alerts(for: [jotr], key: "mine", network: true, force: true)
+        #expect(!mine.busy && !mine.keyRefused && mine.cache?.updated == clock.now)
+        #expect(await http.urls.count == 3)
+        // Within ten minutes of that success: a forced refresh waits, a key removed does not.
+        clock.advance(60)
+        _=await store.alerts(for: [jotr], key: "mine", network: true, force: true)
+        #expect(await http.urls.count == 3)
+        await store.keyChanged()
+        _=await store.alerts(for: [jotr], key: "shared", network: true, force: false)
+        #expect(await http.urls.count == 4)
+    }
+    /// A key NPS does not accept (401, 403) is told apart from a busy service, until alerts succeed.
+    @Test func aRefusedKeyIsToldApart() async throws {
+        let jotr=try park("jotr")
+        let clock=BudgetClock(Self.monday)
+        let http=PathHTTP(["/api/v1/alerts": .status(403)])
+        let store=ParkStore(transport: http, persist: false, clock: { clock.now })
+        let refused=await store.alerts(for: [jotr], key: "mine", network: true, force: true)
+        #expect(refused.busy && refused.keyRefused)
+        #expect(await store.hydrate([jotr]).keyRefused)
+        await http.set("/api/v1/alerts", .status(429))
+        clock.advance(601)
+        let quota=await store.alerts(for: [jotr], key: "mine", network: true, force: true)
+        #expect(quota.busy && !quota.keyRefused)
+        await http.set("/api/v1/alerts", .status(401))
+        await store.keyChanged()
+        #expect(await store.alerts(for: [jotr], key: "other", network: true, force: true).keyRefused)
+        await http.set("/api/v1/alerts", .body("{\"data\":[]}"))
+        await store.keyChanged()
+        let accepted=await store.alerts(for: [jotr], key: "fixed", network: true, force: true)
+        #expect(!accepted.busy && !accepted.keyRefused)
+    }
     /// Fresh alerts are not called busy because another request (programs) made the Park Service's host wait.
     @Test func anotherRequestsRefusalLeavesFreshAlertsCalm() async throws {
         let jotr=try park("jotr")

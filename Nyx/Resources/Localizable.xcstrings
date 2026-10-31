@@ -66301,6 +66301,41 @@
         }
       }
     },
+    "The Park Service did not accept this key. Remove it to use the shared key again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der National Park Service hat diesen Schlüssel nicht angenommen. Entferne ihn, um wieder den gemeinsamen Schlüssel zu nutzen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Park Service did not accept this key. Remove it to use the shared key again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El National Park Service no aceptó esta clave. Quítala para volver a usar la clave compartida."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le National Park Service n’a pas accepté cette clé. Supprimez-la pour revenir à la clé partagée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National Park Serviceがこのキーを受け付けませんでした。削除すると共有キーに戻ります。"
+          }
+        }
+      }
+    },
     "The Sun is 18° below the horizon: %@ of true darkness, until %@.": {
       "extractionState": "manual",
       "localizations": {

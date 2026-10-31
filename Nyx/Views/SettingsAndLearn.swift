@@ -355,7 +355,8 @@ struct NPSKeyField: View {
     /// `-nyx-advanced` (DEBUG) opens it for screenshots.
     @State private var expanded=DebugScenario.isEnabled("advanced")
     @State private var draft=""
-    @State private var saved=NPSKeyStore().key != nil
+    /// `-nyx-nps-key-refused` (DEBUG): a saved key the Park Service refused, for screenshots.
+    @State private var saved=NPSKeyStore().key != nil || DebugScenario.isEnabled("nps-key-refused")
     @State private var message:String?
     var body: some View {
         DisclosureGroup(isExpanded:$expanded) {
@@ -364,7 +365,13 @@ struct NPSKeyField: View {
                     .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 if saved {
                     Label("Using your own key.",systemImage:"key").font(.subheadline)
-                    Button("Remove my key",role:.destructive) { NPSKeyStore().remove(); saved=false; message=nil }.frame(minHeight:44)
+                    if model.npsKeyRefused || DebugScenario.isEnabled("nps-key-refused") {
+                        Label("The Park Service did not accept this key. Remove it to use the shared key again.",systemImage:"exclamationmark.triangle").labelStyle(.caution).font(.caption).fixedSize(horizontal:false,vertical:true)
+                    }
+                    Button("Remove my key",role:.destructive) {
+                        NPSKeyStore().remove(); saved=false; message=nil
+                        Task { await model.npsKeyChanged() }
+                    }.frame(minHeight:44)
                 } else {
                     SecureField("Your National Park Service key",text:$draft).textContentType(.password).autocorrectionDisabled().textInputAutocapitalization(.never).font(.body.monospaced())
                         .submitLabel(.done).onSubmit(save)
@@ -379,7 +386,7 @@ struct NPSKeyField: View {
         guard NPSKeyStore.plausible(draft) else { message=String(localized:"That does not look like a National Park Service key. Keys are about 40 letters and numbers."); return }
         if NPSKeyStore().save(draft) {
             draft=""; saved=true; message=nil
-            Task { await model.refreshParkUpdates([],force:true) }
+            Task { await model.npsKeyChanged() }
         } else { message=String(localized:"The key could not be saved. Try again.") }
     }
 }

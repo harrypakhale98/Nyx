@@ -107,6 +107,8 @@ import Observation
     var importingJournal:URL?
     /// NPS is refusing requests right now (the shared key's quota, or a struggling service).
     var alertsBusy=false
+    /// The Park Service did not accept the person's own key on the last alerts request (`NPSKeyField`).
+    var npsKeyRefused=false
     /// The last forecast detail request was held back by Low Data Mode.
     var detailPausedForLowData=false
     /// Forecast detail (models, layers, smoke) is fetched only once a park's page has been opened
@@ -714,7 +716,15 @@ import Observation
         }
     }
     /// The person's own key from Your privacy, else the key every install shares.
-    var npsKey: String { NPSKeyStore().key ?? Bundle.main.object(forInfoDictionaryKey:"NPS_API_KEY") as? String ?? "" }
+    var npsKey: String { NPSKeyStore().key ?? Self.sharedNPSKey }
+    static var sharedNPSKey: String { Bundle.main.object(forInfoDictionaryKey:"NPS_API_KEY") as? String ?? "" }
+    /// A key of the person's own was saved or removed: the wait the last key earned is lifted and
+    /// alerts are asked for again at once with the new one.
+    func npsKeyChanged() async {
+        if npsKeyRefused { npsKeyRefused=false }
+        await parkStore.keyChanged()
+        await refreshParkUpdates([],force:true)
+    }
     /// Reads every cache once, in the services, and shows what they hold where nothing newer is.
     func hydrate() async {
         let interval=LaunchSignposts.begin("Hydrate caches")
@@ -889,9 +899,14 @@ import Observation
     /// `alertPages`: one in a background refresh, where time is short (`SavedSkySync`).
     func refreshParkUpdates(_ parks:[Park],force:Bool=false,programs:Bool=false,alertPages:Int=ParkStore.alertPages) async {
         let live=DebugScenario.screen == nil || DebugScenario.state == "live"
-        let network=npsEnabled && live, key=npsKey
+        let own=NPSKeyStore().key
+        let network=npsEnabled && live, key=own ?? Self.sharedNPSKey
         await hydration?.value
-        apply(await parkStore.alerts(for:self.parks,key:key,network:network,force:force,pages:alertPages))
+        let update=await parkStore.alerts(for:self.parks,key:key,network:network,force:force,pages:alertPages)
+        apply(update)
+        // Said under the key field only; the shared key refused is the busy line everywhere else.
+        let refusedOwn=own != nil && update.keyRefused
+        if npsKeyRefused != refusedOwn { npsKeyRefused=refusedOwn }
         guard programs else { return }
         for park in parks {
             if Task.isCancelled { return }
