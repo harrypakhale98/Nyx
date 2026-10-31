@@ -203,12 +203,15 @@ final class NyxUITests:XCTestCase {
     }
     /// iPad: the park beside the list keeps its bar (Save, Share), as it does in its own window
     /// or a sheet. The breakdown's inspector once took the page's bar items into its own column.
-    func testParkBesideTheListHasItsBar() {
-        guard UIDevice.current.userInterfaceIdiom == .pad else { return }
+    func testParkBesideTheListHasItsBar() throws {
+        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad,"iPad only")
         continueAfterFailure=false
         let app=XCUIApplication()
         app.launchArguments=["-nyx-screen","parks","-nyx-state","no-forecast","-nyx-reduce-motion"]
         app.launch()
+        // The list stands beside the park from 860 points (`ParksTab.split`): an iPad mini in portrait pushes it.
+        XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout:20))
+        try XCTSkipIf(app.windows.firstMatch.frame.width<860,"The list is not beside the park in a window this narrow")
         let river=app.descendants(matching:.any)["Thirty-night darkness timeline"].firstMatch
         XCTAssertTrue(river.waitForExistence(timeout:20),"No park beside the list")
         let save=app.buttons.matching(NSPredicate(format:"label IN %@",["Save park","Remove from saved parks"])).firstMatch
@@ -298,9 +301,12 @@ final class NyxUITests:XCTestCase {
     }
     /// iPad: a park row lifted from Parks and held over Plan's row in the sidebar opens Plan, whose
     /// screen takes the drop (that park's month), as the Journal does for a night.
-    func testAParkHeldOverPlanOpensIt() { parkHeld(over:"Plan") }
-    private func parkHeld(over target:String) {
-        guard UIDevice.current.userInterfaceIdiom == .pad else { return }
+    /// On iPadOS 27.2 a tab item spring-loads with SwiftUI's default (`.automatic`) as well, so this
+    /// passes with or without `springLoadingBehavior(.enabled)`: it guards the behavior people see, not
+    /// the modifier, which stays for releases whose default differs (no iPadOS 26 runtime here to check).
+    func testAParkHeldOverPlanOpensIt() throws { try parkHeld(over:"Plan") }
+    private func parkHeld(over target:String) throws {
+        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad,"iPad only")
         continueAfterFailure=false
         // Portrait: the tabs stand at the top of the window, the list beside the park below them.
         XCUIDevice.shared.orientation = .portrait
