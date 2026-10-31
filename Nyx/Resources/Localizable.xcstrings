@@ -65356,6 +65356,41 @@
         }
       }
     },
+    "The Milky Way core is too low during true darkness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Milchstraßenzentrum steht während der echten Dunkelheit zu tief."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Milky Way core is too low during true darkness."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El núcleo de la Vía Láctea está demasiado bajo durante la oscuridad total."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le cœur de la Voie lactée est trop bas pendant l’obscurité totale."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間、天の川の中心部は低すぎます。"
+          }
+        }
+      }
+    },
     "The Milky Way core is up at %@": {
       "extractionState": "manual",
       "localizations": {

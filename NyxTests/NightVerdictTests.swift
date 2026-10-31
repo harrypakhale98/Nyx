@@ -43,6 +43,17 @@ import Testing
     @Test func coreOutOfSeasonIsSaid() throws {
         let jotr = try park("jotr"), sky = try sky(jotr, "2026-12-13")
         #expect(verdict(jotr, sky)?.text.contains("The Milky Way core is below the horizon during true darkness.") == true)
+        #expect(!NightVerdict.coreAboveHorizon(sky: sky, park: jotr))
+    }
+    /// Death Valley on Oct 30, 2026: the core is still a few degrees up as true darkness begins, under
+    /// the 10° it needs to count as up. Said as too low, never as below the horizon.
+    @Test func lowCoreIsSaidAsTooLow() throws {
+        let deva = try park("deva"), sky = try sky(deva, "2026-10-30")
+        let core = SkyAlmanac().core(for: deva, sky: sky)
+        #expect(core.dark == nil)
+        #expect(NightVerdict.coreAboveHorizon(sky: sky, park: deva))
+        let text = try #require(NightVerdict.coreSentence(core, sky: sky, park: deva)?.text)
+        #expect(text == "The Milky Way core is too low during true darkness.")
     }
     /// Alaska, where the core never climbs: no core sentence (What's up explains it there), and no
     /// line at all on a night with no true darkness.

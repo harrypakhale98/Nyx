@@ -48,8 +48,17 @@ nonisolated enum NightVerdict {
             let text=dark.duration<3600 ? String(localized: "The Milky Way core is up only briefly, under the Moon.") : String(localized: "The Milky Way core is up, but under the Moon.")
             return Line(text: text, spoken: text)
         }
-        let text=String(localized: "The Milky Way core is below the horizon during true darkness.")
+        // Not 10° up (`SkyAlmanac.coreMinimumAltitude`) at any time in true darkness: "below the horizon"
+        // only when it truly is, never for a core skimming a few degrees up in the haze.
+        let text=coreAboveHorizon(sky: sky, park: park) ? String(localized: "The Milky Way core is too low during true darkness.")
+            : String(localized: "The Milky Way core is below the horizon during true darkness.")
         return Line(text: text, spoken: text)
+    }
+    /// Whether the core clears 0° at any time in true darkness.
+    static func coreAboveHorizon(sky: SkyConditions, park: Park) -> Bool {
+        guard let start=sky.darkStart, let end=sky.darkEnd else { return false }
+        let almanac=SkyAlmanac()
+        return almanac.highest(ra: SkyAlmanac.coreRA, dec: SkyAlmanac.coreDec, park: park, in: DateInterval(start: start, end: max(start, end))).altitude>0
     }
     /// A night's score as a line may name it, with what it rests on in the words every list uses
     /// (`DarknessScore.withBasis`): "82" on a full forecast, "82, early look", "82, usual clouds" (or
