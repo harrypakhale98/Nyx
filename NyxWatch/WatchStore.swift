@@ -62,7 +62,7 @@ import WidgetKit
         self.context = context
         WatchSky.save(context)
         // The chooser's pick stood in until the iPhone named Tonight's places; a place kept on purpose stays.
-        let released = pinned != nil && WatchSky.pinIsProvisional && context.answersTonight
+        let released = context.releasesPin(pinned, provisional: WatchSky.pinIsProvisional)
         if released { keep(nil) }
         // The faces read the context too, so they reload when what it says changed, not only when it was sent again.
         publish(force: released || previous?.sent(at: .distantPast) != context.sent(at: .distantPast))

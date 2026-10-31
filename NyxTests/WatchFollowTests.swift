@@ -145,6 +145,19 @@ import UIKit
         #expect(WatchContext(sent: evening, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], tonightParkID: "deva").answersTonight)
     }
 
+    /// A newly applied context lets go of the chooser's pick once it names Tonight's places, never of
+    /// a place kept from its own page, and never before (`WatchStore.apply`).
+    @Test func onlyTheChoosersPickIsReleased() throws {
+        let evening = try #require(ISO8601DateFormatter().date(from: "2026-10-08T03:00:00Z"))
+        let start = WatchContext(sent: evening, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:])
+        let saved = WatchContext(sent: evening, savedParkIDs: ["deva"], homeParkID: "jotr", nightVision: false, forecasts: [:])
+        let picked = WatchContext(sent: evening, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], tonightParkID: "deva")
+        #expect(saved.releasesPin("grba", provisional: true) && picked.releasesPin("grba", provisional: true))
+        #expect(!start.releasesPin("grba", provisional: true))
+        #expect(!saved.releasesPin("grba", provisional: false) && !picked.releasesPin("grba", provisional: false))
+        #expect(!saved.releasesPin(nil, provisional: true))
+    }
+
     /// A spot or world place travels with its usual clouds or not at all: without them the wrist
     /// would score its nights past the forecast with no clouds, clearer than the iPhone's.
     @Test func aPlaceNeverTravelsWithoutItsUsualClouds() throws {

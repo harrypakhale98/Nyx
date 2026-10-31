@@ -282,6 +282,10 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// there. A place picked on the watch before any such context (the first-launch chooser) only
     /// stood in for it, and gives way to it (`WatchStore.apply`).
     var answersTonight: Bool { !savedParkIDs.isEmpty || tonightParkID != nil }
+    /// Whether this context, newly applied, lets go of the place kept on the wrist: only a chooser's
+    /// pick (`provisional`), and only once this context names Tonight's places. A place kept from
+    /// its own page stays until let go.
+    func releasesPin(_ pinned: String?, provisional: Bool) -> Bool { pinned != nil && provisional && answersTonight }
     /// Why a national park's closures are not known on the wrist when none stands beside its score, in
     /// the iPhone's words (`ScoreInputs.uncheckedNote`): its park alerts off, or no park update covering
     /// the park (`checkedParkIDs`; an older iPhone says only the first).
