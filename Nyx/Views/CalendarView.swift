@@ -709,7 +709,7 @@ struct CalendarView: View {
     /// The chosen night beside the month: its breakdown, and the ways into that night (the park's
     /// page here or in a window of its own, and Calendar for nights still ahead).
     private func aside(_ night:Night)->some View {
-        NightInspector(night:night,isTonight:night.id==model.tonight(night.park),close:nil) {
+        NightInspector(night:night,isTonight:night.id==model.tonight(night.park)) {
             VStack(alignment:.leading,spacing:12) {
                 GoingButton(night:night,alignment:.leading)
                 Button { chosen=night;peeking=true } label:{ Label("Open this night",systemImage:"arrow.up.right") }.secondaryAction()

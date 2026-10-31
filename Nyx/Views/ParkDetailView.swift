@@ -218,9 +218,10 @@ struct ParkDetailView: View {
             .navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
             .modifier(SkyFullBleed(enabled:!wide))
             .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night,isTonight:isTonight) }.nyxPresentation().presentationDetents([.large]) }
-            // Wide iPad: the breakdown stays beside the page and follows the river's night.
-            // The close button only while it is open: iOS 27 lends a closed inspector's toolbar to the page's bar.
-            .inspector(isPresented:$inspector) { NightInspector(night:night,isTonight:isTonight,close:inspector ? { inspector=false } : nil) }
+            // Wide iPad: the breakdown stays beside the page and follows the river's night. It closes from the
+            // page's own bar (`toolbar`): in the Parks split view with the list hidden, the only place a 13-inch
+            // iPad has room for it there, the inspector's own bar items were dropped.
+            .inspector(isPresented:$inspector) { NightInspector(night:night,isTonight:isTonight) }
             // The page's bar items below the inspector, not above it: declared inside, in the Parks split view
             // they went to the inspector's column and the park's bar stood empty (no Save, Share or Jump to).
             .toolbar { toolbar }
@@ -327,6 +328,14 @@ struct ParkDetailView: View {
                 ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:isTonight ? nil : night.id).labelStyle(.iconOnly).help("Open in New Window") }.visibilityPriority(.low)
             } else {
                 ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:isTonight ? nil : night.id).labelStyle(.iconOnly).help("Open in New Window") }
+            }
+        }
+        // The breakdown beside the page, while it is open, as Plan's toggle hides the one beside the month.
+        if inspector {
+            ToolbarItem(placement:.topBarTrailing) {
+                Button { withAnimation(reduceMotion ? nil : NyxMotion.spring) { inspector=false } } label:{ Label("Hide the breakdown",systemImage:"sidebar.trailing") }
+                    .help("Hide the breakdown")
+                    .accessibilityInputLabels([Text("Close breakdown"),Text("Breakdown"),Text("Score breakdown")])
             }
         }
         // Save ends the row on every release: iOS 27 pins it at the trailing edge, so iOS 26 declares it last.
