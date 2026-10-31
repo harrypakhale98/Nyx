@@ -10,9 +10,14 @@ struct DarkAdaptationView: View {
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.legibilityWeight) private var legibility
     let park: Park
+    /// Opened by Siri, the Action button or the control with the clock running and the reminders'
+    /// permission undecided: Nyx's line about the wrist taps comes up first, and Continue schedules them.
+    var explainsFirst = false
     @State private var showsInfo = WatchDebug.showsInfo
     /// The first Start's line before the system asks to tap the wrist.
     @State private var explaining = false
+    /// Whether the line has come up for `explainsFirst`, so it comes up once.
+    @State private var explained = false
     @State private var permission: UNAuthorizationStatus?
     /// The page's room between its bars, and the words' height above the ring: the ring takes what is left.
     @State private var room: CGFloat = 200
@@ -41,7 +46,8 @@ struct DarkAdaptationView: View {
                     }
                 }
                 .alert("Nyx will ask to tap your wrist at 25 and 30 minutes.", isPresented: $explaining) {
-                    Button("Continue") { start() }
+                    // From a request the clock already runs: Continue adds its reminders.
+                    Button("Continue") { if store.adaptation == nil { start() } else { Task { permission = await store.remindAdaptation() } } }
                     Button("Cancel", role: .cancel) {}
                 }
                 .sheet(isPresented: $showsInfo) { AdaptationInfo().environment(\.nyx, palette).modifier(WatchDebug.TypeSize()) }
@@ -58,7 +64,10 @@ struct DarkAdaptationView: View {
         .modifier(WatchDebug.TypeSize())
         .task { permission = await AdaptationReminders.status() }
         .onChange(of: store.reminderStatus) { _, status in if let status { permission = status } }
-        .onAppear { store.reloadSettings() }
+        .onAppear {
+            store.reloadSettings()
+            if explainsFirst, !explained, store.adaptation != nil { explained = true; explaining = true }
+        }
     }
     /// The ring's side: 112 pt where it fits, else what the room under the words leaves, counting the
     /// open bottom of the ring (about a fifth of its side, below "minutes") as free to sit over the bar.

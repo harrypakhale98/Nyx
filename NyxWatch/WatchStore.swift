@@ -118,10 +118,19 @@ import WidgetKit
     /// Starts the clock at once, then schedules the reminders (asking for permission the first
     /// time) and returns the answer, so the screen knows whether to tap the wrist itself.
     @discardableResult func startAdaptation(at now: Date = .now) async -> UNAuthorizationStatus {
-        let clock = AdaptationClock(start: now)
-        adaptation = clock
+        startClock(at: now)
+        return await remindAdaptation()
+    }
+    /// Starts the clock alone: the reminders wait until Nyx has said why the system will ask
+    /// (a start from Siri or the control the first time, `AdaptationRequests`).
+    func startClock(at now: Date = .now) {
+        adaptation = AdaptationClock(start: now)
         WatchSky.adaptationStart = now
-        let status = await AdaptationReminders.schedule(clock, now: now)
+    }
+    /// Schedules the running clock's reminders, asking for permission the first time, and returns the answer.
+    @discardableResult func remindAdaptation() async -> UNAuthorizationStatus {
+        guard let clock = adaptation else { return await AdaptationReminders.status() }
+        let status = await AdaptationReminders.schedule(clock, now: .now)
         reminderStatus = status
         return status
     }

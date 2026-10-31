@@ -9,6 +9,7 @@ import WidgetKit
 /// `-nyx-watch-face` (with `complications`: the full-colour renders alone, unlabelled, for the store frame).
 /// `-nyx-watch-ask asking | asked | resending | unreachable | locked`: "Update from iPhone" as if just answered (with `expired` or `unsynced`).
 /// `-nyx-watch-shift <hours>`: the app's minute moved that far ahead, to review moments of the night by day.
+/// `-nyx-watch-request open | explain`: the red cover as Siri or the control opens it, asking the system nothing.
 /// `-nyx-watch-type large | xLarge | xxLarge` (or `-nyx-watch-xxxl`, `-nyx-watch-ax`): a text size the simulator cannot set.
 /// States change who is followed, never a score: every night is computed by the real engine.
 enum WatchDebug {
@@ -43,6 +44,16 @@ enum WatchDebug {
         return .milliseconds(argument("-nyx-watch-hold").flatMap(Double.init).map { Int($0*1000) } ?? 120)
         #else
         return .milliseconds(120)
+        #endif
+    }
+    /// `-nyx-watch-request open | explain`: the red cover as Siri, the Action button or the control
+    /// opens it (`AdaptationRequests`), without asking the system for anything; `explain` with Nyx's
+    /// line about the wrist taps up, as the first request shows it. Nil in Release.
+    static var request: String? {
+        #if DEBUG
+        return argument("-nyx-watch-request")
+        #else
+        return nil
         #endif
     }
     /// `-nyx-watch-info` (with `-nyx-watch-screen dark`): the dark-adaptation info sheet open.
