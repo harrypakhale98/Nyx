@@ -591,14 +591,14 @@ struct NextMoment: View {
                         else if let models {
                             // The range shares the line only whole, never shrunk or cut (a cut "models
                             // 59–8…" would show a wrong number): where it does not fit, it takes the time's
-                            // place, as the words above do. At accessibility sizes the line wraps instead.
-                            // The dial speaks the range; VoiceOver hears only the time here.
+                            // place, as the words above do. Where the face wraps (the large sizes) the line
+                            // wraps instead. VoiceOver hears the whole line, whichever shows.
                             let full = Text("at \(time) · models \(models.lowerBound)–\(models.upperBound)")
-                            if typeSize.isAccessibilitySize { full.accessibilityLabel(at) }
+                            if typeSize.isAccessibilitySize || wraps { full }
                             else {
                                 ViewThatFits(in: .horizontal) {
-                                    full.accessibilityLabel(at)
-                                    Text("Models \(models.lowerBound)–\(models.upperBound)").accessibilityLabel(at)
+                                    full
+                                    Text("Models \(models.lowerBound)–\(models.upperBound)").accessibilityLabel(full)
                                 }
                             }
                         } else { at.minimumScaleFactor(0.8) }
