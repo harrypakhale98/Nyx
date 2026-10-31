@@ -342,8 +342,8 @@ struct AboutDataLink:View {
 /// counts them as (`CallLedger`, kept on this iPhone and never sent). Quiet and closed by default.
 struct ForecastRequestsToday: View {
     @Environment(\.nyx) private var palette
-    /// `-nyx-advanced` (DEBUG) opens it for screenshots.
-    @State private var expanded=DebugScenario.isEnabled("advanced")
+    /// `-nyx-advanced` (DEBUG), or the Advanced route (`-nyx-screen nps-key`), opens it for screenshots and audits.
+    @State private var expanded=DebugScenario.isEnabled("advanced") || DebugScenario.screen == "nps-key"
     var body: some View {
         DisclosureGroup(isExpanded:$expanded) {
             // Read when shown: the ledger is a small file's worth of entries.
@@ -363,8 +363,8 @@ struct ForecastRequestsToday: View {
 struct NPSKeyField: View {
     @Environment(\.nyx) private var palette
     @Environment(PlanModel.self) private var model
-    /// `-nyx-advanced` (DEBUG) opens it for screenshots.
-    @State private var expanded=DebugScenario.isEnabled("advanced")
+    /// `-nyx-advanced` (DEBUG), or its own route (`-nyx-screen nps-key`), opens it for screenshots and audits.
+    @State private var expanded=DebugScenario.isEnabled("advanced") || DebugScenario.screen == "nps-key"
     @State private var draft=""
     /// `-nyx-nps-key-refused` (DEBUG): a saved key the Park Service refused, for screenshots.
     @State private var saved=NPSKeyStore().key != nil || DebugScenario.isEnabled("nps-key-refused")
@@ -381,6 +381,8 @@ struct NPSKeyField: View {
                     }
                     Button("Remove my key",role:.destructive) {
                         NPSKeyStore().remove(); saved=false; message=nil
+                        // The button goes with the key: said, as saving one is.
+                        Self.announce(String(localized:"Using the shared key again."))
                         Task { await model.npsKeyChanged() }
                     }.frame(minHeight:44)
                 } else {

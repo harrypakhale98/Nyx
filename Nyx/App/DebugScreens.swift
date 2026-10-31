@@ -34,8 +34,9 @@ struct DebugScreen: View {
         case "learn": LearnView()
         case "places": StartingPointPicker(nearMe:nil) { _ in }
         case "privacy": PrivacyView()
-        // Your privacy → Advanced on its own, opened (`-nyx-advanced`).
-        case "nps-key": Form { Section { NPSKeyField() } header:{ Text("Advanced") } }.readableForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
+        // Your privacy → Advanced on its own, both rows opened (`-nyx-nps-key-refused` for a refused key of one's own).
+        case "nps-key": Form { Section { NPSKeyField(); ForecastRequestsToday() } header:{ Eyebrow(text:"Advanced") }.openRows(palette) }
+            .readableForm().nightForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
         case "data": AboutDataView()
         // "The next six months" for the starting park (`-nyx-park` for another), for audits and captures.
         case "long-view": if let park=model.home { NavigationStack { LongViewPage(park:park) } }

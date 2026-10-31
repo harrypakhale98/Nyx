@@ -8,6 +8,7 @@ import AppIntents
 ///
 /// Run one screen: `TEST_RUNNER_NYX_AUDIT_SCREENS=river xcodebuild test -only-testing:NyxUITests/AccessibilityAuditTests ...`
 /// A screen may name its fixture state after a colon (`ask:answered`); the palette still follows the pass.
+/// After a plus, launch flags of its own (`nps-key+nps-key-refused` adds `-nyx-nps-key-refused`).
 @MainActor
 final class AccessibilityAuditTests:XCTestCase {
     private var screens:[String] {
@@ -16,7 +17,7 @@ final class AccessibilityAuditTests:XCTestCase {
                 "onboarding","settings","privacy","data","article","share","river","skyarc","whatsup",
                 "field","field-compass","alarm-explainer","light","lights-out","long-view","listen","accessibility","trip","constellation","recap","icons","first-light","sky","ask:answered",
                 "assistive","assistive-tonight","assistive-saved","save-spot","spot","places","credits","location-explainer","notification-explainer",
-                "diagnostics","stay","from-home","loader","nps-key"]
+                "diagnostics","stay","from-home","loader","nps-key","nps-key+nps-key-refused"]
         // Not "live-activity": that DEBUG page redraws Lock Screen and Dynamic Island faces outside the
         // system containers that host, scale and tint them, so its findings do not transfer. Reviewed by screenshot.
     }
@@ -26,7 +27,8 @@ final class AccessibilityAuditTests:XCTestCase {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
         // Learn since 2026-10-13: its cards broke titles mid-word at AX5 on a wide iPad, which only this pass would see.
         // "going" (Tonight led by a kept night, `GoingPanel`) since 2026-10-22.
-        return ["tonight","going","parks","parks-map","detail","plan","best","journal","settings","field","river","editor","learn"]
+        // Your privacy → Advanced (the key field, then a refused key of one's own) since 2026-10-31.
+        return ["tonight","going","parks","parks-map","detail","plan","best","journal","settings","field","river","editor","learn","nps-key","nps-key+nps-key-refused"]
     }
 
     func testEveryScreenPassesTheAudit() throws { try audit(state:"offline",screens:screens) }
@@ -91,7 +93,10 @@ final class AccessibilityAuditTests:XCTestCase {
     }
     private func audit(state:String,screens:[String],extra:[String]=[],pass:String="default") throws {
         var failures:[String]=[]
-        for spec in screens {
+        for listed in screens {
+            // "nps-key+nps-key-refused": the screen with launch flags of its own.
+            let flagged=listed.split(separator:"+").map(String.init)
+            let spec=flagged.first ?? listed, own=flagged.dropFirst().map { "-nyx-"+$0 }
             // "ask:answered" opens a screen in its own fixture state; night vision then comes from its flag.
             let parts=spec.split(separator:":",maxSplits:1).map(String.init)
             let screen=parts.first ?? spec
@@ -101,7 +106,7 @@ final class AccessibilityAuditTests:XCTestCase {
             // The editor opens on the starting park, which the simulator keeps from earlier runs: pin the longest
             // park name, so the row is audited at its widest every time.
             let pinned=screen=="editor" ? ["-homePark","blca"] : []
-            app.launchArguments=["-nyx-screen",screen,"-nyx-state",fixture,"-nyx-reduce-motion"]+palette+pinned+extra+Self.language
+            app.launchArguments=["-nyx-screen",screen,"-nyx-state",fixture,"-nyx-reduce-motion"]+palette+pinned+own+extra+Self.language
             app.launch()
             _=app.wait(for:.runningForeground,timeout:30)
             sleep(2)
