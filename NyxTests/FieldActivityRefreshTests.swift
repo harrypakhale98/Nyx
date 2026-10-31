@@ -233,3 +233,28 @@ import Testing
         #expect(!FieldActivities.holds(attributes))
     }
 }
+
+/// The Lock Screen countdown is a system timer; VoiceOver hears it in words through a system format
+/// on the current date, in whole minutes with a part minute rounded up, which the system steps
+/// forward on its own.
+@MainActor struct FieldActivityTimerTests {
+    let now=Date(timeIntervalSince1970: 1_800_000_000)
+    func spoken(_ left: TimeInterval) -> String {
+        String(FieldActivityTimer.spoken(now.addingTimeInterval(left)).locale(Locale(identifier: "en_US")).format(now).characters)
+    }
+
+    @Test func spokenInWordsRoundedUp() {
+        #expect(spoken(22*60+39) == "23 minutes")
+        #expect(spoken(22*60) == "22 minutes")
+        #expect(spoken(130*60) == "2 hours, 10 minutes" && spoken(130*60+1) == "2 hours, 11 minutes")
+        // The moment has come: never a negative, never a minute that is not left.
+        #expect(spoken(0) == "0 minutes" && spoken(-90) == "0 minutes")
+    }
+
+    /// Each next change the format names is later than now, so the words keep up between updates.
+    @Test func spokenStepsForward() throws {
+        let style=FieldActivityTimer.spoken(now.addingTimeInterval(35*60+30))
+        let next=try #require(style.discreteInput(after: now))
+        #expect(next>now && next<=now.addingTimeInterval(60))
+    }
+}

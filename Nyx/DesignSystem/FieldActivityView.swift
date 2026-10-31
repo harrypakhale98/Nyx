@@ -74,15 +74,10 @@ struct FieldActivityLockView: View {
                     Label { Text(mark.title).lineLimit(1).minimumScaleFactor(0.75) } icon:{ Image(systemName:mark.symbol).accessibilityHidden(true) }
                         .font(.system(.headline,design:.serif)).foregroundStyle(colors.ink)
                     Spacer(minLength:8)
-                    // One line, laid out before the milestone's name: hours and minutes in words where they
-                    // fit ("2 hr, 10 min"), then narrower ("2h 10m"), then minutes alone.
-                    ViewThatFits(in:.horizontal) {
-                        FieldActivityTimer(target:mark.date)
-                        FieldActivityTimer(target:mark.date,style:.narrow)
-                        FieldActivityTimer(target:mark.date,style:.minutes).minimumScaleFactor(0.8)
-                    }
-                    .lineLimit(1).font(.system(.title2,design:.serif)).monospacedDigit()
-                    .foregroundStyle(colors.accent).frame(maxWidth:130,alignment:.trailing).layoutPriority(1)
+                    // One line, laid out before the milestone's name ("34:36", "2:10:33").
+                    FieldActivityTimer(target:mark.date)
+                        .lineLimit(1).minimumScaleFactor(0.8).font(.system(.title2,design:.serif)).monospacedDigit().multilineTextAlignment(.trailing)
+                        .foregroundStyle(colors.accent).frame(maxWidth:130,alignment:.trailing).layoutPriority(1)
                 }
             } else {
                 // Past the last mark: only sunrise is left to say.
@@ -307,10 +302,9 @@ struct FieldActivitySymbol: View {
     }
 }
 /// The countdown to the shown milestone; sunrise's clock time when only that is left or once
-/// stale. In the compact island on iOS 27 it follows the system's width: hours and minutes when
-/// there is room, minutes alone ("91m") when the island is narrowed. iOS 26 caps the width, so
-/// its compact island counts in the narrow style ("1h 31m"), which fits the cap whole where "1 hr,
-/// 31 min" would be cut; the expanded island and the Lock Screen keep the abbreviated words.
+/// stale. In the compact island on iOS 27 it follows the system's width: hours when there is
+/// room ("1:31:12"), minutes alone ("91:12") when the island is narrowed. iOS 26 caps the
+/// compact island's width, which "1:31:12" fits at the caption size.
 struct FieldActivityCountdown: View {
     let attributes: FieldActivityAttributes
     let state: FieldActivityAttributes.ContentState
@@ -327,15 +321,15 @@ struct FieldActivityCountdown: View {
             if compact, #available(iOS 27.0, *) {
                 FieldActivityAdaptiveCountdown(attributes:attributes,state:state,isStale:isStale)
             } else {
-                face(compact ? .narrow : .abbreviated).frame(maxWidth:maxWidth,alignment:.trailing)
+                face().frame(maxWidth:maxWidth,alignment:.trailing)
             }
         }
         .monospacedDigit().lineLimit(1).minimumScaleFactor(0.8).multilineTextAlignment(.trailing)
         .font(font).foregroundStyle(colors.accent)
         .environment(\.timeZone,attributes.timeZone)
     }
-    @ViewBuilder fileprivate func face(_ style:FieldActivityTimer.Style)->some View {
-        if let mark=attributes.shown(state,isStale:isStale) { FieldActivityTimer(target:mark.date,style:style) }
+    @ViewBuilder fileprivate func face(showsHours:Bool=true)->some View {
+        if let mark=attributes.shown(state,isStale:isStale) { FieldActivityTimer(target:mark.date,showsHours:showsHours) }
         else if !state.finished { Text(attributes.dawn,style:.time) }
         else { Text("Dawn") }
     }
@@ -369,26 +363,29 @@ private struct FieldActivityAdaptiveCountdown: View {
     let state: FieldActivityAttributes.ContentState
     let isStale: Bool
     var body: some View {
-        FieldActivityCountdown(attributes:attributes,state:state,isStale:isStale).face(limited ? .minutes : .narrow)
+        FieldActivityCountdown(attributes:attributes,state:state,isStale:isStale).face(showsHours:!limited)
     }
 }
 
-/// The countdown on the Lock Screen and in the Dynamic Island: hours and minutes, rounded up
-/// ("23 min", "1 hr, 31 min"), updated by the system from a time source, so it keeps counting
-/// between the app's updates and never reads as a clock time. No seconds: a widget cannot switch
-/// to them in the last two minutes without an update, so it keeps minute precision to the end.
+/// The countdown on the Lock Screen and in the Dynamic Island: a system timer to the moment
+/// ("34:36", "2:10:33"), which the system advances by itself between the app's updates and stops at
+/// zero. VoiceOver hears it in words, in whole minutes with a part minute rounded up ("22:39" is
+/// "23 minutes", "2 hours, 11 minutes"). Only the system's own timers and formats: another process
+/// draws these faces and cannot read a format style of Nyx's, and the one hours-and-minutes format
+/// that reads in short words (`Date.ComponentsFormatStyle` over `dateRange(endingAt:)`) moves the
+/// range's fixed end, so the system never redraws it.
 struct FieldActivityTimer: View {
-    enum Style { case abbreviated, narrow, minutes }
     let target: Date
-    var style: Style = .abbreviated
+    /// False in the narrowed island: minutes alone ("91:12").
+    var showsHours = true
     var body: some View {
-        // From now to the target, counted in whole minutes; the 59 s rounds a part minute up ("22:39" reads "23 min").
-        let range=TimeDataSource<Range<Date>>.dateRange(endingAt:target.addingTimeInterval(59))
-        switch style {
-        case .abbreviated: Text(range,format:.components(style:.abbreviated,fields:[.hour,.minute]))
-        case .narrow: Text(range,format:.components(style:.narrow,fields:[.hour,.minute]))
-        case .minutes: Text(range,format:.components(style:.narrow,fields:[.minute]))
-        }
+        // The start only bounds the count: no moment is counted down to from two days ahead.
+        Text(timerInterval:target.addingTimeInterval(-2*24*3600)...target,countsDown:true,showsHours:showsHours)
+            .accessibilityLabel(Text(.currentDate,format:Self.spoken(target)))
+    }
+    /// "35 minutes", "2 hours, 11 minutes": the time left in words, a part minute rounded up.
+    static func spoken(_ target:Date)->SystemFormatStyle.DateOffset {
+        .offset(to:target.addingTimeInterval(59),allowedFields:[.hour,.minute],sign:.never)
     }
 }
 // MARK: Field alarms
