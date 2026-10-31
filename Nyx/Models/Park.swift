@@ -267,10 +267,9 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     }
     /// "Pacific Time" rather than "America/Los_Angeles".
     var timeZoneName: String { timeZone.localizedName(for: .generic, locale: .current) ?? timeZoneID }
-    func timestamp(_ date: Date) -> String {
-        var format = Date.FormatStyle.dateTime.month(.abbreviated).day().hour().minute()
-        format.timeZone = timeZone
-        return date.formatted(format)
+    /// "Oct 31, 7:26 PM" in park time, counted like the night labels beside it (`nightStyle`).
+    func timestamp(_ date: Date, locale: Locale = .autoupdatingCurrent) -> String {
+        date.formatted(nightStyle(locale).month(.abbreviated).day().hour().minute())
     }
     /// "November 2026", a month grid's title: Gregorian like the grid, whatever calendar the device uses.
     func monthLabel(_ date: Date) -> String {

@@ -374,6 +374,8 @@ struct SecurityGlobalTests {
         #expect(TimeRiver.loupeDate(night, locale: hebrew, timeZone: jotr.timeZone) == "Sat 31")
         #expect(TimeRiver.tickDate(night, locale: hebrew, timeZone: jotr.timeZone) == "Oct 31")
         #expect(night.formatted(jotr.nightStyle(hebrew).day()) == "31")
+        // So does "Forecast as of", beside them.
+        #expect(jotr.timestamp(night, locale: hebrew).hasPrefix("Oct 31") && !jotr.timestamp(night, locale: hebrew).contains("Heshvan"))
         #expect(jotr.dayLabel(night, locale: Locale(identifier: "ja_JP@calendar=japanese")).contains("10月31日"))
     }
     @Test func journalYearsAreGregorianWhereTheNightWasSpent() throws {
