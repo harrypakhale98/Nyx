@@ -114,6 +114,9 @@ import Observation
     var npsKeyRefused=false
     /// Whose key the Park Service did not accept on the last alerts request, named where alerts are shown.
     var alertsRefusal:MissingInput.KeyRefusal?
+    /// Parks whose programs request has ended in this session, kept or not: until then their page says
+    /// programs are not checked yet, never that they could not be (`ParkDetailView.programsPanel`).
+    var programsAsked=Set<String>()
     /// The last forecast detail request was held back by Low Data Mode.
     var detailPausedForLowData=false
     /// Forecast detail (models, layers, smoke) is fetched only once a park's page has been opened
@@ -922,25 +925,40 @@ import Observation
         let network=npsEnabled && live, key=own ?? Self.sharedNPSKey
         await hydration?.value
         let update=await parkStore.alerts(for:self.parks,key:key,network:network,force:force,pages:alertPages)
+        // A key saved or removed while this caller waited: what it brought is labelled, and programs
+        // asked for, by the caller holding the key now (`npsKeyChanged`), never by this one.
+        guard (NPSKeyStore().key ?? Self.sharedNPSKey) == key else { return }
         apply(update)
         // Under the key field, and in the access line wherever alerts are shown.
         let refusedOwn=own != nil && update.keyRefused
         if npsKeyRefused != refusedOwn { npsKeyRefused=refusedOwn }
-        // `-nyx-nps-key-refused` (DEBUG), with `-nyx-alerts-busy`: the refused line, for screenshots.
-        let refusal:MissingInput.KeyRefusal?=update.keyRefused ? (own != nil ? .own : .shared) : DebugScenario.isEnabled("nps-key-refused") ? .own : nil
-        if alertsRefusal != refusal { alertsRefusal=refusal }
+        // `-nyx-nps-key-refused` (DEBUG), with `-nyx-alerts-busy`: the refused line, for screenshots;
+        // `-nyx-shared-key-refused` the shared key's.
+        let debugRefusal:MissingInput.KeyRefusal?=DebugScenario.isEnabled("shared-key-refused") ? .shared : DebugScenario.isEnabled("nps-key-refused") ? .own : nil
+        let refusal:MissingInput.KeyRefusal?=update.keyRefused ? (own != nil ? .own : .shared) : debugRefusal
+        if alertsRefusal != refusal {
+            alertsRefusal=refusal
+            // Apple Watch names the refusal too (`WatchContext.alertsRefusal`).
+            if DebugScenario.screen == nil { savedSync.pushWatch(self) }
+        }
         guard programs else { return }
         for park in parks {
             if Task.isCancelled { return }
-            if let fresh=await parkStore.programs(for:park,key:key,network:network,force:force), fresh != self.programs[park.id] { takePrograms(park.id,fresh) }
+            let fresh=await parkStore.programs(for:park,key:key,network:network,force:force)
+            if let fresh, fresh != self.programs[park.id] { takePrograms(park.id,fresh) }
+            // A caller that stopped waiting has not heard how it ended: the page still says "not checked yet".
+            if Task.isCancelled { return }
+            programsAsked.insert(park.id)
         }
     }
     private func apply(_ update:AlertsUpdate) {
         // `-nyx-alerts-busy` (DEBUG): the busy state for screenshots.
         let busy=update.busy || DebugScenario.isEnabled("alerts-busy")
         if alertsBusy != busy { alertsBusy=busy }
-        guard update.cache != alertsCache else { return }
-        alertsCache=update.cache
+        // `-nyx-no-alerts` (DEBUG): no park update on this device, so a page's alerts panel says why.
+        let cache=DebugScenario.isEnabled("no-alerts") ? nil : update.cache
+        guard cache != alertsCache else { return }
+        alertsCache=cache
         for park in parks { rebuild(park) }
         dataRevision+=1
         // A new closure reaches the widget and the watch too.
