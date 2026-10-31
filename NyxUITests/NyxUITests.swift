@@ -217,9 +217,10 @@ final class NyxUITests:XCTestCase {
         XCTAssertTrue(save.isHittable,"Save is not reachable")
     }
     /// iPad: a search typed in Parks survives a rotation, which on iPad mini trades the stack for
-    /// the list beside the park (two lists, one search).
-    func testParksSearchSurvivesRotation() {
-        guard UIDevice.current.userInterfaceIdiom == .pad else { return }
+    /// the list beside the park (two lists, one search). Where both orientations show the list beside
+    /// the park (13-inch), one list carries it and the test reports itself skipped once it has run.
+    func testParksSearchSurvivesRotation() throws {
+        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad,"iPad only")
         continueAfterFailure=false
         XCUIDevice.shared.orientation = .portrait
         defer { XCUIDevice.shared.orientation = .portrait }
@@ -228,18 +229,56 @@ final class NyxUITests:XCTestCase {
         app.launch()
         let field=app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout:20),"No search in Parks")
+        let splitBefore=parkBesideTheList(app)
         field.tap()
         field.typeText("Zion")
         XCTAssertTrue(app.staticTexts["Zion"].waitForExistence(timeout:5),"The search found nothing")
         XCUIDevice.shared.orientation = .landscapeLeft
         let kept=NSPredicate { _,_ in (app.searchFields.firstMatch.value as? String) == "Zion" }
         XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:kept,object:nil)],timeout:10),.completed,"The search was lost in the turn")
+        try XCTSkipIf(splitBefore == parkBesideTheList(app),"Both orientations show the same Parks layout on this iPad")
+    }
+    /// iPad: the Parks list keeps its place in a rotation that trades the stack for the list beside
+    /// the park (iPad mini): the row at its top stays in view. Skipped once run where nothing is traded.
+    func testParksListKeepsItsPlaceInATurn() throws {
+        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad,"iPad only")
+        continueAfterFailure=false
+        XCUIDevice.shared.orientation = .portrait
+        defer { XCUIDevice.shared.orientation = .portrait }
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","parks","-nyx-state","no-forecast","-nyx-reduce-motion"]
+        app.launch()
+        let field=app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout:20),"No search in Parks")
+        let splitBefore=parkBesideTheList(app)
+        // A few screens down the list, whatever its sort.
+        let rows=app.buttons.matching(NSPredicate(format:"label CONTAINS %@","Darkness score"))
+        XCTAssertTrue(rows.firstMatch.waitForExistence(timeout:10),"No parks in the list")
+        let firstLabel=rows.firstMatch.label
+        // Short drags up the list (below its search field), too quick to lift a row for drag and drop.
+        let origin=app.coordinate(withNormalizedOffset:.zero)
+        let from=origin.withOffset(CGVector(dx:field.frame.midX,dy:app.frame.height*0.75)), to=origin.withOffset(CGVector(dx:field.frame.midX,dy:app.frame.height*0.35))
+        for _ in 0..<4 { from.press(forDuration:0.05,thenDragTo:to,withVelocity:.fast,thenHoldForDuration:0.3) }
+        // The row now at the top of the list's column.
+        func flat(_ node:XCUIElementSnapshot)->[XCUIElementSnapshot] { [node]+node.children.flatMap(flat) }
+        let below=field.frame.maxY+20, column=field.frame
+        let top=flat(try app.snapshot()).filter { $0.elementType == .button && $0.label.contains("Darkness score") && $0.frame.minY>=below && $0.frame.minX>=column.minX-60 && $0.frame.maxX<=column.maxX+60 }.min { $0.frame.minY<$1.frame.minY }
+        let label=try XCTUnwrap(top?.label,"No row in view after scrolling")
+        XCTAssertNotEqual(label,firstLabel,"The list did not scroll")
+        XCUIDevice.shared.orientation = .landscapeLeft
+        let hittable=NSPredicate(format:"exists == true AND hittable == true")
+        XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:hittable,object:app.buttons[label].firstMatch)],timeout:10),.completed,"The list lost its place in the turn (\(label))")
+        try XCTSkipIf(splitBefore == parkBesideTheList(app),"Both orientations show the same Parks layout on this iPad")
+    }
+    /// Whether Parks shows a park beside its list (the park's river is on screen).
+    private func parkBesideTheList(_ app:XCUIApplication)->Bool {
+        app.descendants(matching:.any)["Thirty-night darkness timeline"].firstMatch.waitForExistence(timeout:5)
     }
     /// iPad: a night lifted from the month and held over the Journal's row in the sidebar opens
     /// the Journal, whose screen takes the drop ("Record a night" for that night). On iPhone a long
     /// press stays the night's menu alone.
-    func testANightHeldOverTheJournalOpensIt() {
-        guard UIDevice.current.userInterfaceIdiom == .pad else { return }
+    func testANightHeldOverTheJournalOpensIt() throws {
+        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad,"iPad only")
         continueAfterFailure=false
         // Landscape, where the sidebar stands beside the month rather than over it.
         XCUIDevice.shared.orientation = .landscapeLeft

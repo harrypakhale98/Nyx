@@ -32,6 +32,11 @@ struct ParksView: View {
     var narrowing: Binding<ParksNarrowing>?=nil
     @State private var ownNarrowing=ParksNarrowing()
     private var state:Binding<ParksNarrowing> { narrowing ?? $ownNarrowing }
+    /// Where the list is scrolled, by the park row at its top: the tab's too, so the stack that replaces
+    /// the split (or the split the stack) opens at the same park.
+    var position: Binding<ScrollPosition>?=nil
+    @State private var ownPosition=ScrollPosition(idType:String.self)
+    private var scroll:Binding<ScrollPosition> { position ?? $ownPosition }
     private var search:String { state.wrappedValue.search }
     private var darkOnly:Bool { state.wrappedValue.darkOnly }
     private var stepFreeOnly:Bool { state.wrappedValue.stepFreeOnly }
@@ -139,6 +144,12 @@ struct ParksView: View {
         }
         // On an iPhone in landscape the keyboard hides all but the first result: a drag down puts it away.
         .scrollDismissesKeyboard(.interactively)
+        .scrollPosition(scroll,anchor:.top)
+        // Scrolled back to the top, the list is kept at its top, not at its first park (which would hide what
+        // is above it). Only the person's scroll: a list just built, still at zero, keeps the park it was handed.
+        .onScrollGeometryChange(for:Bool.self) { $0.contentOffset.y+$0.contentInsets.top<=1 } action:{ _,top in
+            if top, scroll.wrappedValue.isPositionedByUser, scroll.wrappedValue.viewID != nil { scroll.wrappedValue.scrollTo(edge:.top) }
+        }
         .background(NightBackground(veil:0.45)).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
             .modifier(SystemSearch(text:state.search,focused:$searchFocused,prompt:searchPrompt,enabled:!typeSize.isAccessibilitySize))
     }
@@ -205,7 +216,7 @@ struct ParksView: View {
     @ViewBuilder private func abroadSections(own:CountryGroup?,others:[CountryGroup])->some View {
         if let own {
             Eyebrow(text:"\(own.name)")
-            LazyVStack(spacing:0) { ForEach(own.places) { p in worldRow(p) } }
+            LazyVStack(spacing:0) { ForEach(own.places) { p in worldRow(p) } }.scrollTargetLayout()
         }
         if !others.isEmpty {
             Eyebrow(text:"Around the world")
@@ -225,6 +236,8 @@ struct ParksView: View {
                 ForEach(shown.filter { p in !(showsSavedSection && saved.contains { $0.parkID==p.id }) }) { p in link(p); Divider().overlay(palette.line) }
                 if savedOnly { ForEach(savedWorld) { p in worldRow(p) } }
             }
+            // The rows the list's position is kept by (`position`).
+            .scrollTargetLayout()
         }
         if fromUS, !found.isEmpty { foundSection(found,heading:true) }
         // From a US starting point the world waits behind one row, so the list reads as it always has.
