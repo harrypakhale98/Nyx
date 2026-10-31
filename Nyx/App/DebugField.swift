@@ -87,7 +87,7 @@ struct FieldActivityReview: View {
                 }
                 island {
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack { Label { Text(FieldActivityMark(attributes: attributes, state: state, isStale: false).title) } icon: { FieldActivitySymbol(attributes: attributes, state: state, isStale: false) }.font(.system(.subheadline, design: .serif)); Spacer(); FieldActivityCountdown(attributes: attributes, state: state, isStale: false, font: .system(.title3, design: .serif), maxWidth: 90) }
+                        HStack { Label { Text(FieldActivityMark(attributes: attributes, state: state, isStale: false).title) } icon: { FieldActivitySymbol(attributes: attributes, state: state, isStale: false) }.font(.system(.subheadline, design: .serif)); Spacer(); FieldActivityCountdown(attributes: attributes, state: state, isStale: false, font: .system(.title3, design: .serif), maxWidth: 90, compact: false) }
                         FieldNightLine(attributes: attributes, colors: FieldActivityColors(nightVision: false)).frame(height: 14)
                     }.padding(16)
                 }.frame(height: 110)
