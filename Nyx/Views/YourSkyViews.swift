@@ -3,11 +3,12 @@ import Accessibility
 
 /// The nights a constellation already holds, so a night just recorded can arrive as a star while
 /// everything else stays still. In memory only: `known` is seeded with every star the first time
-/// the journal is read after launch (by the watcher behind the tabs, or the constellation itself),
-/// so a cold launch never animates old stars. A star arrives only when exactly one night is new
-/// (`ReviewPrompt.isJournalMoment`); an import of many, a store loading or a deletion change
-/// `known` silently. The arrival waits in `pending` until the constellation is in front of the
-/// person: a night kept from field mode arrives on the next Journal visit, not unseen behind the tabs.
+/// the constellation reads the journal after launch, so a cold launch never animates old stars. A
+/// star arrives only when exactly one night is new (`ReviewPrompt.isJournalMoment`); an import of
+/// many, a store loading or a deletion change `known` silently. The arrival waits in `pending`
+/// until the constellation is in front of the person: a night kept from field mode, or before the
+/// Journal was first opened, arrives on the next Journal visit (`expect`, from the watcher behind
+/// the tabs), not unseen behind them.
 @MainActor enum ConstellationArrivals {
     static var known: Set<String>?
     static var pending: String?
@@ -26,6 +27,11 @@ import Accessibility
         known=step.known
         if let arriving=step.arriving { pending=arriving }
         else if let waiting=pending, !ids.contains(waiting) { pending=nil }
+    }
+    /// A night just recorded, seen by the watcher behind the tabs: it waits to arrive, unless the
+    /// constellation already holds it (it saw the night itself, and may have drawn it).
+    static func expect(_ id: String) {
+        if known?.contains(id) != true { pending=id }
     }
     /// The star to arrive among `ids`, if any, without changing anything (read while drawing).
     static func waiting(in ids: Set<String>) -> String? {

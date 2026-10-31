@@ -44,6 +44,19 @@ import UIKit
         ConstellationArrivals.note(["a","b","c"])
         #expect(ConstellationArrivals.pending==nil)
     }
+    /// A night the watcher behind the tabs saw recorded arrives on the first Journal visit, even when
+    /// the constellation has not read the journal since launch; one it already holds never arrives again.
+    @Test func aNightSeenBehindTheTabsArrivesOnTheFirstVisit() {
+        let known=ConstellationArrivals.known, pending=ConstellationArrivals.pending
+        defer { ConstellationArrivals.known=known; ConstellationArrivals.pending=pending }
+        ConstellationArrivals.known=nil; ConstellationArrivals.pending=nil
+        ConstellationArrivals.expect("c")
+        ConstellationArrivals.note(["a","b","c"])
+        #expect(ConstellationArrivals.waiting(in:["a","b","c"])=="c")
+        ConstellationArrivals.landed("c")
+        ConstellationArrivals.expect("c")
+        #expect(ConstellationArrivals.pending==nil && ConstellationArrivals.waiting(in:["a","b","c"])==nil)
+    }
     @Test func figuresDrawAgainOnlyWhenTheyGrow() {
         let now=SkyMapDrawIns.Signature(figures:3,edges:7)
         #expect(now.grows(from:nil))

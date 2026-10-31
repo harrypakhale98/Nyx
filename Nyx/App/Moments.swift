@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Combine
 import StoreKit
 import UserNotifications
 
@@ -87,8 +88,12 @@ import UserNotifications
 struct MomentsWatcher: View {
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.nyx) private var palette
+    @Environment(\.modelContext) private var context
     @Query private var saved:[SavedPark]
-    @Query private var journal:[JournalEntry]
+    /// The journal's entries by identifier only, read again after every save. Never the entries
+    /// themselves: each holds its card's thumbnail, and a query of them all kept every one in
+    /// memory behind the tabs for as long as Nyx ran.
+    @State private var journal:Set<PersistentIdentifier>?
     @AppStorage("notificationsEnabled") private var notificationsEnabled=false
     @AppStorage("reminderOfferShown") private var offerShown=false
     @State private var offering=false
@@ -109,12 +114,25 @@ struct MomentsWatcher: View {
                     offer()
                 }
             }
-            .onChange(of:journal.count) { old,new in ReviewPrompt.noteJournalEntry(old:old,new:new) }
-            // Seeds the constellation's known stars at launch and catches a night recorded while the
-            // Journal is not in view, so it arrives as a star on the next visit.
-            .onAppear { ConstellationArrivals.note(Set(journal.map(\.id.uuidString))) }
-            .onChange(of:Set(journal.map(\.id.uuidString))) { _,ids in ConstellationArrivals.note(ids) }
+            .onAppear { readJournal() }
+            // Any context's save, heard on the main thread.
+            .onReceive(NotificationCenter.default.publisher(for:ModelContext.didSave).receive(on:DispatchQueue.main)) { _ in readJournal() }
             .sheet(isPresented:$offering) { explainer.nyxPresentation() }
+    }
+    /// After a save: a journal grown by one may ask for a rating, and its night waits to arrive as a
+    /// star, so one recorded while the Journal is not in view arrives on the next visit. The new
+    /// entry alone is read, in a context of its own that lets it go.
+    private func readJournal() {
+        guard let ids=try? context.fetchIdentifiers(FetchDescriptor<JournalEntry>()) else { return }
+        let now=Set(ids)
+        guard let old=journal else { journal=now; return }
+        guard now != old else { return }
+        journal=now
+        ReviewPrompt.noteJournalEntry(old:old.count,new:now.count)
+        let added=now.subtracting(old)
+        guard ReviewPrompt.isJournalMoment(old:old.count,new:now.count), added.count==1, let id=added.first,
+              let entry=ModelContext(context.container).model(for:id) as? JournalEntry else { return }
+        ConstellationArrivals.expect(entry.id.uuidString)
     }
     private var explainer:some View { RemindersExplainer { granted in notificationsEnabled=granted } }
     /// iOS has not yet asked about notifications.
