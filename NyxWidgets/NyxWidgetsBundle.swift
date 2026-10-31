@@ -108,6 +108,8 @@ struct MoonProvider:AppIntentTimelineProvider {
     func placeholder(in context:Context)->MoonEntry { .placeholder() }
     func snapshot(for configuration:MoonWidgetIntent,in context:Context) async -> MoonEntry {
         let snapshot=SharedSettings.read()
+        // The gallery on a fresh install, with no place set or saved: the Moon at Joshua Tree, with its rise or set.
+        if context.isPreview, configuration.park == nil, snapshot?.parks.isEmpty ?? true { return .placeholder() }
         return MoonEntry(date:.now,park:Self.park(configuration.park,snapshot:snapshot),nightVision:SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey),
                          unsaved:TonightProvider.unsaved(configuration.park,snapshot:snapshot))
     }
@@ -125,7 +127,8 @@ struct MoonProvider:AppIntentTimelineProvider {
         let dates=Set([now]+(0..<24).map { hour.addingTimeInterval(Double($0)*3600) }+events.map { $0.addingTimeInterval(1) }).sorted()
         return Timeline(entries:dates.map { MoonEntry(date:$0,park:park,nightVision:vision) },policy:.after(end))
     }
-    /// The chosen park, else the first saved park, else Joshua Tree in the gallery's preview.
+    /// The chosen park, else the first saved park; with neither, the gallery's preview shows Joshua
+    /// Tree (`snapshot`) and a placed widget the phase alone.
     static func park(_ entity:ParkEntity?,snapshot:SavedSkySnapshot?)->Park? {
         if let entity { return ParkLibrary.place(entity.id,snapshot:snapshot) }
         return snapshot?.parks.first
