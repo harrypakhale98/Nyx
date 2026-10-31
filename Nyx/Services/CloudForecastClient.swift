@@ -686,8 +686,9 @@ nonisolated enum ForecastPoints {
     /// The kept files that describe one park's point: clouds, smoke and cloud layers, summit layers.
     static let prefixes=["weather-", "detail-", "summit-"]
     /// Parks whose point moved before points were kept: their forecasts from earlier versions are
-    /// dropped once. Great Basin's first spot was corrected on 2026-10-15 (it sat on Wheeler Peak's flank).
-    static let movedBeforeLedger: Set<String>=["grba"]
+    /// dropped once. Great Basin's first spot was corrected on 2026-10-15 (it sat on Wheeler Peak's flank);
+    /// Denali and Kenai Fjords moved from their centres to visitor centres (`Park.forecastSite`) on 2026-10-31.
+    static let movedBeforeLedger: Set<String>=["dena", "grba", "kefj"]
     /// A move smaller than this keeps the forecast (Open-Meteo answers on a grid of about 1 to 11 km).
     static let tolerance=100.0
     private static let once: Void = { reconcile(parks: (try? ParkData.load()) ?? [], folders: [CacheDirectory.url, CacheDirectory.legacyFolder]) }()
@@ -724,10 +725,12 @@ nonisolated enum ForecastPoints {
 }
 extension Park {
     /// Where the forecast is asked for: the park's first named viewing spot (where people actually
-    /// stand under the sky, often far higher or lower than the park's centre point), else the park's
-    /// own coordinates. Open-Meteo corrects for the terrain height at the point it is given.
+    /// stand under the sky, often far higher or lower than the park's centre point), else its
+    /// forecast-only point (`forecastSite`, a visitor centre where the centre is wilderness), else the
+    /// park's own coordinates. Open-Meteo corrects for the terrain height at the point it is given.
+    /// Moving a point drops the forecasts kept for the old one (`ForecastPoints.reconcile`).
     nonisolated var forecastPoint: (latitude: Double, longitude: Double) {
-        viewingSpots.first.map { ($0.latitude, $0.longitude) } ?? (latitude, longitude)
+        viewingSpots.first.map { ($0.latitude, $0.longitude) } ?? forecastSite.map { ($0.latitude, $0.longitude) } ?? (latitude, longitude)
     }
 }
 /// Open-Meteo answers one coordinate with an object and several with an array, in request order.

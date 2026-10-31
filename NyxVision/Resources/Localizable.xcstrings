@@ -10817,37 +10817,37 @@
         }
       }
     },
-    "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.": {
+    "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld parks together, up to 50 in each request, using only the same public coordinates as the cloud forecasts. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Anfragen gehen an air-quality-api.open-meteo.com, den Luftqualitätsdienst desselben Anbieters, für alle %lld Parks gemeinsam, bis zu 50 pro Anfrage, nur mit denselben Koordinaten der Beobachtungsplätze. Er liefert die CAMS-Aerosolvorhersage, die warnt, wenn Rauch oder Dunst schwache Sterne verbergen werden. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+            "value": "Anfragen gehen an air-quality-api.open-meteo.com, den Luftqualitätsdienst desselben Anbieters, für alle %lld Parks gemeinsam, bis zu 50 pro Anfrage, nur mit denselben öffentlichen Koordinaten wie die Wolkenvorhersagen. Er liefert die CAMS-Aerosolvorhersage, die warnt, wenn Rauch oder Dunst schwache Sterne verbergen werden. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address."
+            "value": "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld parks together, up to 50 in each request, using only the same public coordinates as the cloud forecasts. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las solicitudes van a air-quality-api.open-meteo.com, el servicio de calidad del aire del mismo proveedor, para los %lld parques juntos, hasta 50 en cada solicitud y solo con las mismas coordenadas de los puntos de observación. Devuelve el pronóstico de aerosoles de CAMS, que avisa cuando el humo o la bruma ocultarán las estrellas débiles. El servicio recibe información de red, como tu dirección IP."
+            "value": "Las solicitudes van a air-quality-api.open-meteo.com, el servicio de calidad del aire del mismo proveedor, para los %lld parques juntos, hasta 50 en cada solicitud y solo con las mismas coordenadas públicas que los pronósticos de nubes. Devuelve el pronóstico de aerosoles de CAMS, que avisa cuando el humo o la bruma ocultarán las estrellas débiles. El servicio recibe información de red, como tu dirección IP."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les requêtes vont à air-quality-api.open-meteo.com, le service de qualité de l’air du même fournisseur, pour les %lld parcs ensemble, jusqu’à 50 par requête, avec uniquement les mêmes coordonnées de points d’observation. Il renvoie la prévision d’aérosols CAMS, qui avertit quand la fumée ou la brume masqueront les étoiles faibles. Le service reçoit des informations réseau, comme votre adresse IP."
+            "value": "Les requêtes vont à air-quality-api.open-meteo.com, le service de qualité de l’air du même fournisseur, pour les %lld parcs ensemble, jusqu’à 50 par requête, avec uniquement les mêmes coordonnées publiques que les prévisions de nuages. Il renvoie la prévision d’aérosols CAMS, qui avertit quand la fumée ou la brume masqueront les étoiles faibles. Le service reçoit des informations réseau, comme votre adresse IP."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "リクエストは、同じ提供元の大気質サービスであるair-quality-api.open-meteo.comに、全%lldか所の公園についてまとめて送ります。1回のリクエストには最大50か所を含め、同じ観察スポットの座標だけを使います。返ってくるのはCAMSのエアロゾル予報で、煙やもやが暗い星を隠しそうなときに注意を表示します。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
+            "value": "リクエストは、同じ提供元の大気質サービスであるair-quality-api.open-meteo.comに、全%lldか所の公園についてまとめて送ります。1回のリクエストには最大50か所を含め、雲の予報と同じ公開座標だけを使います。返ってくるのはCAMSのエアロゾル予報で、煙やもやが暗い星を隠しそうなときに注意を表示します。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
           }
         }
       }

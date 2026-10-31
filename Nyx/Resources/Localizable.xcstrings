@@ -55374,37 +55374,37 @@
         }
       }
     },
-    "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld U.S. national parks together, up to 50 in each request, using the same viewing-spot coordinates only. Parks and dark-sky places elsewhere are asked about by the same whole squares as their clouds, once you have opened one of their pages. It returns the CAMS aerosol and dust forecast that warns when smoke, dust or haze will hide faint stars. Nothing is asked about smoke at saved spots. The service receives network information such as your IP address.": {
+    "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld U.S. national parks together, up to 50 in each request, using only the same public coordinates as the cloud forecasts. Parks and dark-sky places elsewhere are asked about by the same whole squares as their clouds, once you have opened one of their pages. It returns the CAMS aerosol and dust forecast that warns when smoke, dust or haze will hide faint stars. Nothing is asked about smoke at saved spots. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Anfragen gehen an air-quality-api.open-meteo.com, den Luftqualitätsdienst desselben Anbieters, für alle %lld US-Nationalparks gemeinsam, bis zu 50 pro Anfrage, nur mit denselben Koordinaten der Beobachtungsplätze. Parks und Dunkelorte anderswo werden nach denselben ganzen Feldern wie ihre Wolken abgefragt, sobald du die Seite eines solchen Ortes geöffnet hast. Zurück kommt die CAMS-Vorhersage für Aerosole und Staub, die warnt, wenn Rauch, Staub oder Dunst schwache Sterne verbergen werden. Für gespeicherte Plätze wird kein Rauch abgefragt. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+            "value": "Anfragen gehen an air-quality-api.open-meteo.com, den Luftqualitätsdienst desselben Anbieters, für alle %lld US-Nationalparks gemeinsam, bis zu 50 pro Anfrage, nur mit denselben öffentlichen Koordinaten wie die Wolkenvorhersagen. Parks und Dunkelorte anderswo werden nach denselben ganzen Feldern wie ihre Wolken abgefragt, sobald du die Seite eines solchen Ortes geöffnet hast. Zurück kommt die CAMS-Vorhersage für Aerosole und Staub, die warnt, wenn Rauch, Staub oder Dunst schwache Sterne verbergen werden. Für gespeicherte Plätze wird kein Rauch abgefragt. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld U.S. national parks together, up to 50 in each request, using the same viewing-spot coordinates only. Parks and dark-sky places elsewhere are asked about by the same whole squares as their clouds, once you have opened one of their pages. It returns the CAMS aerosol and dust forecast that warns when smoke, dust or haze will hide faint stars. Nothing is asked about smoke at saved spots. The service receives network information such as your IP address."
+            "value": "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld U.S. national parks together, up to 50 in each request, using only the same public coordinates as the cloud forecasts. Parks and dark-sky places elsewhere are asked about by the same whole squares as their clouds, once you have opened one of their pages. It returns the CAMS aerosol and dust forecast that warns when smoke, dust or haze will hide faint stars. Nothing is asked about smoke at saved spots. The service receives network information such as your IP address."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las solicitudes van a air-quality-api.open-meteo.com, el servicio de calidad del aire del mismo proveedor, para los %lld parques nacionales de EE. UU. juntos, hasta 50 en cada solicitud y solo con las mismas coordenadas de los puntos de observación. Los demás parques y lugares de cielo oscuro se piden por los mismos cuadrados completos que sus nubes, una vez que abres la página de uno de ellos. Devuelve el pronóstico de aerosoles y polvo de CAMS, que avisa cuando el humo, el polvo o la bruma ocultarán las estrellas débiles. No se pregunta por el humo en los sitios guardados. El servicio recibe información de red, como tu dirección IP."
+            "value": "Las solicitudes van a air-quality-api.open-meteo.com, el servicio de calidad del aire del mismo proveedor, para los %lld parques nacionales de EE. UU. juntos, hasta 50 en cada solicitud y solo con las mismas coordenadas públicas que los pronósticos de nubes. Los demás parques y lugares de cielo oscuro se piden por los mismos cuadrados completos que sus nubes, una vez que abres la página de uno de ellos. Devuelve el pronóstico de aerosoles y polvo de CAMS, que avisa cuando el humo, el polvo o la bruma ocultarán las estrellas débiles. No se pregunta por el humo en los sitios guardados. El servicio recibe información de red, como tu dirección IP."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les requêtes vont à air-quality-api.open-meteo.com, le service de qualité de l’air du même fournisseur, pour les %lld parcs nationaux des États-Unis ensemble, jusqu’à 50 par requête, avec uniquement les mêmes coordonnées de points d’observation. Les autres parcs et sites de ciel étoilé sont demandés par les mêmes carrés entiers que leurs nuages, dès que vous avez ouvert la page de l’un d’eux. Le service renvoie la prévision d’aérosols et de poussière CAMS, qui avertit quand la fumée, la poussière ou la brume masqueront les étoiles faibles. Rien n’est demandé sur la fumée pour les endroits enregistrés. Le service reçoit des informations réseau, comme votre adresse IP."
+            "value": "Les requêtes vont à air-quality-api.open-meteo.com, le service de qualité de l’air du même fournisseur, pour les %lld parcs nationaux des États-Unis ensemble, jusqu’à 50 par requête, avec uniquement les mêmes coordonnées publiques que les prévisions de nuages. Les autres parcs et sites de ciel étoilé sont demandés par les mêmes carrés entiers que leurs nuages, dès que vous avez ouvert la page de l’un d’eux. Le service renvoie la prévision d’aérosols et de poussière CAMS, qui avertit quand la fumée, la poussière ou la brume masqueront les étoiles faibles. Rien n’est demandé sur la fumée pour les endroits enregistrés. Le service reçoit des informations réseau, comme votre adresse IP."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "リクエストは、同じ提供元の大気質サービスであるair-quality-api.open-meteo.comに、米国の全%lldか所の国立公園についてまとめて送ります。1回のリクエストには最大50か所を含め、同じ観察スポットの座標だけを使います。ほかの公園や暗い空の場所は、そのいずれかのページを開いたあと、雲と同じ区画ごとにまとめて問い合わせます。返ってくるのはCAMSのエアロゾルと砂じんの予報で、煙や砂じん、もやが暗い星を隠しそうなときに注意を表示します。保存したスポットの煙について問い合わせることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
+            "value": "リクエストは、同じ提供元の大気質サービスであるair-quality-api.open-meteo.comに、米国の全%lldか所の国立公園についてまとめて送ります。1回のリクエストには最大50か所を含め、雲の予報と同じ公開座標だけを使います。ほかの公園や暗い空の場所は、そのいずれかのページを開いたあと、雲と同じ区画ごとにまとめて問い合わせます。返ってくるのはCAMSのエアロゾルと砂じんの予報で、煙や砂じん、もやが暗い星を隠しそうなときに注意を表示します。保存したスポットの煙について問い合わせることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
           }
         }
       }

@@ -457,6 +457,12 @@
     "sourceURL": "https://www.nps.gov/dena/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
     "viewingSpots": [],
+    "forecastSite": {
+      "name": "Denali Visitor Center",
+      "latitude": 63.73091,
+      "longitude": -148.91713,
+      "sourceURL": "https://www.nps.gov/dena/planyourvisit/the-denali-visitor-center.htm"
+    },
     "access": {
       "note": "One road entrance. In summer, private cars may drive only to Savage River, Mile 15 of the park road.",
       "road": true,
@@ -1042,6 +1048,12 @@
     "sourceURL": "https://www.nps.gov/kefj/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
     "viewingSpots": [],
+    "forecastSite": {
+      "name": "Exit Glacier Nature Center",
+      "latitude": 60.18833,
+      "longitude": -149.63165,
+      "sourceURL": "https://www.nps.gov/kefj/planyourvisit/visitorcenters.htm"
+    },
     "access": {
       "note": "Exit Glacier is reached by road from Seward. The fjords themselves are seen by boat or plane.",
       "road": true,

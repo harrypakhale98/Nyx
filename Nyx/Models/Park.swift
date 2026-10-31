@@ -33,6 +33,10 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     /// True for a viewing summit above the trade-wind inversion (Haleakalā): low cloud there lies
     /// below the observer, so the score counts mid and high cloud when the layer forecast has them.
     var aboveInversion: Bool?
+    /// Where the cloud forecast is asked for when no viewing spot is named, from an NPS page: a park
+    /// whose centre lies in wilderness far from where visitors stand (Denali's entrance, Exit Glacier).
+    /// Never listed as a viewing spot; astronomy and the usual clouds stay at the park's centre.
+    var forecastSite: ForecastSite? = nil
     /// The place's own website (a catalogue place's official site, Wikidata P856), for the line that
     /// asks people to check closures there. HTTPS only: a site offered only over plain HTTP is not
     /// linked. Nil for the curated parks, whose closures come from the NPS.
@@ -294,6 +298,13 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     }
 }
 
+/// A point the cloud forecast is asked for that is not a viewing spot (`Place.forecastSite`).
+nonisolated struct ForecastSite: Codable, Hashable, Sendable {
+    let name: String
+    let latitude: Double
+    let longitude: Double
+    let sourceURL: String
+}
 nonisolated struct ViewingSpot: Codable, Hashable, Sendable {
     let name: String
     let latitude: Double
@@ -380,7 +391,7 @@ nonisolated struct RangerProgram: Codable, Identifiable, Sendable, Equatable {
 nonisolated extension Place {
     fileprivate enum CodingKeys: String, CodingKey {
         case id, nps, name, countryCode, region, kind, curated, latitude, longitude, timeZoneID, darkSkyDesignated,
-             bortleEstimate, description, sourceURL, sourceNote, viewingSpots, access, aboveInversion, website
+             bortleEstimate, description, sourceURL, sourceNote, viewingSpots, access, aboveInversion, forecastSite, website
         case englishName, englishRegion, localShortName
         // 1.4.1 and earlier: kept so a shared snapshot written by an older build still reads.
         case apiCode, state, hemisphere
@@ -406,6 +417,8 @@ nonisolated extension Place {
         viewingSpots = try c.decode([ViewingSpot].self, forKey: .viewingSpots)
         access = try c.decodeIfPresent(Access.self, forKey: .access)
         aboveInversion = try c.decodeIfPresent(Bool.self, forKey: .aboveInversion)
+        // An unreadable point is no point: the forecast falls back to the park's own coordinates.
+        forecastSite = (try? c.decodeIfPresent(ForecastSite.self, forKey: .forecastSite)) ?? nil
         website = Self.website((try? c.decodeIfPresent(String.self, forKey: .website)) ?? nil)
         englishName = try c.decodeIfPresent(String.self, forKey: .englishName)
         englishRegion = try c.decodeIfPresent(String.self, forKey: .englishRegion)
@@ -425,7 +438,8 @@ nonisolated extension Place {
         try c.encode(bortleEstimate, forKey: .bortleEstimate); try c.encode(description, forKey: .description)
         try c.encode(sourceURL, forKey: .sourceURL); try c.encode(sourceNote, forKey: .sourceNote)
         try c.encode(viewingSpots, forKey: .viewingSpots); try c.encodeIfPresent(access, forKey: .access)
-        try c.encodeIfPresent(aboveInversion, forKey: .aboveInversion); try c.encodeIfPresent(website?.absoluteString, forKey: .website)
+        try c.encodeIfPresent(aboveInversion, forKey: .aboveInversion); try c.encodeIfPresent(forecastSite, forKey: .forecastSite)
+        try c.encodeIfPresent(website?.absoluteString, forKey: .website)
         try c.encodeIfPresent(englishName, forKey: .englishName); try c.encodeIfPresent(englishRegion, forKey: .englishRegion)
         try c.encodeIfPresent(localShortName, forKey: .localShortName)
         // Written for a release or two so a build from before 2.0, installed again, still reads the shared snapshot.
@@ -565,7 +579,7 @@ nonisolated extension Place {
         return Place(id: id, nps: nps, name: local?.name ?? name, countryCode: countryCode, region: area ?? region, kind: kind, curated: curated,
                      latitude: latitude, longitude: longitude, timeZoneID: timeZoneID, darkSkyDesignated: darkSkyDesignated,
                      bortleEstimate: bortleEstimate, description: description, sourceURL: sourceURL, sourceNote: sourceNote,
-                     viewingSpots: viewingSpots, access: access, aboveInversion: aboveInversion, website: website,
+                     viewingSpots: viewingSpots, access: access, aboveInversion: aboveInversion, forecastSite: forecastSite, website: website,
                      englishName: local == nil ? nil : name, englishRegion: area == nil ? nil : region, localShortName: local?.short ?? localShortName)
     }
 }

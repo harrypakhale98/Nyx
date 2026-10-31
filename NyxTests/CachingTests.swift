@@ -239,7 +239,7 @@ struct ForecastPointsTests {
         let parks=try ParkData.load(), dir=try folder(), old=try folder()
         try keep(["weather-grba","detail-grba","summit-grba","weather-jotr","detail-jotr","alerts"],in:dir)
         try keep(["weather-grba"],in:old)
-        #expect(ForecastPoints.reconcile(parks:parks,folders:[dir,old])==["grba"])
+        #expect(ForecastPoints.reconcile(parks:parks,folders:[dir,old])==["dena","grba","kefj"])
         #expect(!kept("weather-grba",in:dir) && !kept("detail-grba",in:dir) && !kept("summit-grba",in:dir) && !kept("weather-grba",in:old))
         #expect(kept("weather-jotr",in:dir) && kept("detail-jotr",in:dir) && kept("alerts",in:dir))
         #expect(kept("points",in:dir))

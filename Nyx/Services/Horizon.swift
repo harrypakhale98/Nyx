@@ -39,8 +39,9 @@ nonisolated struct Horizon: Sendable, Equatable {
         }
         func spot(_ name: String, park id: String) -> Horizon? { places[id]?.spots?[name].map(Self.horizon) }
         func park(_ id: String) -> Horizon? { places[id]?.park.map(Self.horizon) }
-        /// The horizon at the park's main viewing spot (`Park.forecastPoint`, its first spot) with
-        /// the spot's name, else at the park's own point with no name; nil where neither has one.
+        /// The horizon at the park's main viewing spot (its first, where `Park.forecastPoint` asks for
+        /// clouds) with the spot's name, else at the park's own point with no name, never at a
+        /// forecast-only point (`Park.forecastSite`); nil where neither has one.
         func main(_ park: Park) -> (horizon: Horizon, spot: String?)? {
             if let first = park.viewingSpots.first { return spot(first.name, park: park.id).map { ($0, first.name) } }
             return self.park(park.id).map { ($0, nil) }

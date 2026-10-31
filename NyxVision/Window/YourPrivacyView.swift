@@ -36,7 +36,7 @@ struct YourPrivacyView: View {
                         Text(status).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                         Toggle("Smoke and haze", isOn: $model.smokeOn)
                             .accessibilityHint(Text("Counts forecast smoke and haze in every score"))
-                        Text("Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all \(model.parks.count) parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.")
+                        Text("Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all \(model.parks.count) parks together, up to 50 in each request, using only the same public coordinates as the cloud forecasts. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.")
                             .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                         Text(smokeStatus).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                         Toggle("Aurora forecast", isOn: $model.auroraOn)
