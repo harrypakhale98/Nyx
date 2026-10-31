@@ -48,7 +48,9 @@ struct ScoreBreakdownView: View {
             // The weakest link, said beside the number it sets, before the parts that add up to more.
             // In the readout's words (`ScoreReadout.limitLine`), by one rule on every surface.
             if let limit=ScoreReadout.limitLine(night.score,tonight:isTonight) { figures(limit) }
-            row("Moonlight",points:Double(shown.moon),of:40,fact:moonFact,detail:String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one."))
+            // With no true darkness the score counts the Moon by its phase alone (`ScoreEngine.score`).
+            row("Moonlight",points:Double(shown.moon),of:40,fact:moonFact,detail:night.sky.darkHours>0 ? String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one.")
+                : String(localized:"With no true darkness, the Moon counts by how much of it is lit."))
             row("Clouds",points:shown.cloud.map(Double.init),of:25,fact:Self.cloudFact(night),
                 context:cloudContext,detail:Self.cloudDetail(usualClouds:night.usualCloud != nil,context:!cloudContext.isEmpty,hours:night.sky.cloudHours))
             row("Sky glow",points:Double(shown.glow),of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9 (1 is the darkest), estimated."),context:lightContext,dipper:LittleDipper.reading(night),detail:String(localized:"Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))

@@ -78515,6 +78515,41 @@
         }
       }
     },
+    "With no true darkness, the Moon counts by how much of it is lit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne echte Dunkelheit zählt der Mond danach, wie viel von ihm beleuchtet ist."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With no true darkness, the Moon counts by how much of it is lit."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin oscuridad total, la Luna cuenta según qué parte de ella está iluminada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans obscurité totale, la Lune compte selon la part éclairée de son disque."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間がない夜は、月が照らされている割合で数えます。"
+          }
+        }
+      }
+    },
     "With no true darkness, the hourly forecast is averaged from sunset to sunrise.": {
       "extractionState": "manual",
       "localizations": {
