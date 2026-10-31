@@ -41,8 +41,9 @@ nonisolated enum NightVerdict {
                 let text=String(localized: "The Milky Way core is up only briefly.")
                 return Line(text: text, spoken: text)
             }
-            return Line(text: String(localized: "Milky Way core clear of moonlight, \(park.time(free.start)) – \(park.time(free.end))."),
-                        spoken: String(localized: "Milky Way core clear of moonlight from \(park.time(free.start)) to \(park.time(free.end))."))
+            // Closed here, not in the catalog: a time that ends in "p.m." takes no second period.
+            return Line(text: Sentences.end(String(localized: "Milky Way core clear of moonlight, \(park.time(free.start)) – \(park.time(free.end))")),
+                        spoken: Sentences.end(String(localized: "Milky Way core clear of moonlight from \(park.time(free.start)) to \(park.time(free.end))")))
         }
         if let dark=core.dark {
             let text=dark.duration<3600 ? String(localized: "The Milky Way core is up only briefly, under the Moon.") : String(localized: "The Milky Way core is up, but under the Moon.")

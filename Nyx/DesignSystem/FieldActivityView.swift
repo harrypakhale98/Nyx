@@ -190,7 +190,9 @@ struct FieldActivityUpdated: View {
     let state: FieldActivityAttributes.ContentState
     var body: some View {
         if let updated=state.updated {
-            Text("Updated \(Text(updated,format:Self.format(updated,dusk:attributes.dusk,zone:attributes.timeZone))). Open Nyx to refresh.")
+            // The time closes its own sentence: "9:04 p.m." takes no second period.
+            Text(Sentences.join([Sentences.end(String(localized:"Updated \(updated.formatted(Self.format(updated,dusk:attributes.dusk,zone:attributes.timeZone)))")),
+                                 String(localized:"Open Nyx to refresh.")]))
         } else { Text("Open Nyx to refresh.") }
     }
     /// The time alone on the night's own day, else the weekday too ("Wed 3:12 PM"), in park time.

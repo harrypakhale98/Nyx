@@ -75,12 +75,12 @@ nonisolated struct TonightMap: Sendable {
     var summary: String {
         guard let best=darkest.first else { return String(localized:"No parks to show.") }
         let closed=marks.filter { $0.closure != nil }.count
-        var line=String(localized:"Map of \(marks.count) places by tonight's score. Darkest: \(best.name), \(best.score), \(best.band.label).")
+        var lines=[String(localized:"Map of \(marks.count) places by tonight's score. Darkest: \(best.name), \(best.score), \(best.band.label).")]
         // The darkest place's closure is said with it, as beside every score.
-        if let closure=best.closure { line+=" "+String(localized:"Closure: \(closure)")+"." }
-        if closed>0 { line+=" "+String(localized:"\(closed) parks have a closure.") }
-        if inView>marks.count { line+=" "+String(localized:"Showing \(marks.count) of \(inView) places in view, the darkest where they crowd together.") }
-        return line
+        if let closure=best.closure { lines.append(Sentences.end(String(localized:"Closure: \(closure)"))) }
+        if closed>0 { lines.append(String(localized:"\(closed) parks have a closure.")) }
+        if inView>marks.count { lines.append(String(localized:"Showing \(marks.count) of \(inView) places in view, the darkest where they crowd together.")) }
+        return Sentences.join(lines)
     }
     /// The night cell's curve, so a 95 reads clearly larger than a 70.
     static func radius(score: Int) -> Double { 1.5+8*pow(Double(min(100,max(0,score)))/100,1.5) }

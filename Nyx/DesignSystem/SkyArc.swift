@@ -236,13 +236,10 @@ struct SkyArc: View {
     }
     private var spokenSummary:String { Phrase.sentences(crossings) }
     /// The whole element's label: the night's day, its crossings, the Milky Way core and the clock.
+    /// Joined as sentences, so a date ("Sa. 31. Okt.") or time ("9:04 p.m.") that ends one takes no second period.
     private var spokenLabel:String {
-        let park=night.park, sky=night.sky
-        // Every crossing there: the one sentence, as translated.
-        if let sunset=sky.sunset, let rise=sky.moonrise, let set=sky.moonset {
-            return String(localized:"Sun and Moon paths for \(park.dayLabel(night.id)). Sunset \(park.time(sunset)). \(darkness) Moonrise \(park.time(rise)), moonset \(park.time(set)). \(core.map { $0.spoken+" " } ?? "")Times in \(park.timeZoneName).")
-        }
-        return Phrase.sentences([String(localized:"Sun and Moon paths for \(park.dayLabel(night.id))."),Phrase.sentences(crossings),core?.spoken ?? "",Phrase.ended(String(localized:"Times in \(park.timeZoneName)"))])
+        let park=night.park
+        return Phrase.sentences([String(localized:"Sun and Moon paths for \(park.dayLabel(night.id))"),Phrase.sentences(crossings),core?.spoken ?? "",Phrase.ended(String(localized:"Times in \(park.timeZoneName)"))])
     }
     /// Where the finger rests: a hairline through the arc and the time and sky beside it, for anyone
     /// who explores by touch with some sight. VoiceOver hears the same line when the finger rests.

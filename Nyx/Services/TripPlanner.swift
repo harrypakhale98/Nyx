@@ -251,7 +251,7 @@ nonisolated enum TripPlanner {
         else if let usual=night.usualCloud { parts.append(night.beyondForecast ? String(localized:"no cloud forecast yet, usually \(Int(usual.rounded()))% cloud") : String(localized:"cloud forecast unavailable, usually \(Int(usual.rounded()))% cloud")) }
         else { parts.append(night.beyondForecast ? String(localized:"no cloud forecast yet") : String(localized:"cloud forecast unavailable")) }
         parts.append(String(localized:"Bortle \(night.park.bortleEstimate)"))
-        return parts.joined(separator:", ")
+        return Phrase.clauses(parts)
     }
     /// The plan as plain text for Messages or Notes: one line a night, the best night, and the caveats.
     static func shareText(_ plan: TripPlan, distance: (Double) -> String) -> String {
@@ -304,7 +304,7 @@ nonisolated struct CalendarDraft: Sendable, Equatable {
         end=max(start.addingTimeInterval(3600),sky.darkEnd ?? sky.sunrise ?? sky.cloudWindow.end)
         timeZone=park.timeZone
         location=park.name
-        var lines=[night.spokenSummary(.eventNote),TripPlanner.reason(night)+"."]
+        var lines=[night.spokenSummary(.eventNote),Sentences.end(TripPlanner.reason(night))]
         if sky.darkHours==0 { lines.append(SkyConditions.noDarknessMessage(tonight:false)) }
         if let closure { lines.append(String(localized:"The last park update listed a closure: \(closure)")) }
         lines.append(String(localized:"Scores are estimates. Check closures and the forecast before you go."))

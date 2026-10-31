@@ -77,7 +77,8 @@ struct NightCell: View {
         .animation(reduceMotion ? nil : NyxMotion.spring.delay(ringDelay),value:ringDrawn)
     }
     private var spoken:String {
-        if isPast { return [night.park.dayLabel(night.id),String(localized:"Past night")].joined(separator:". ") }
+        // As sentences, so a date that ends in a period ("Sa. 31. Okt.") takes no second one.
+        if isPast { return Phrase.sentences([night.park.dayLabel(night.id),String(localized:"Past night")]) }
         var parts=[isTonight ? String(localized:"Tonight, \(night.park.dayLabel(night.id))") : night.park.dayLabel(night.id),
                    String(localized:"\(night.score.value), \(night.score.band.label)")]
         parts+=night.basisLabels
@@ -368,7 +369,7 @@ struct CalendarView: View {
                 DisclosureGroup {
                     VStack(alignment:.leading,spacing:12) { ForEach(past) { night in
                         Text(park.dayLabel(night.id)).font(.body).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                            .accessibilityLabel("\(park.dayLabel(night.id)). Past night")
+                            .accessibilityLabel(Phrase.sentences([park.dayLabel(night.id),String(localized:"Past night")]))
                             .contextMenu { recordItem(night,tonight:data.tonight) }
                             .modifier(RecordableNight(night:night,enabled:recordable(night,tonight:data.tonight)) { record(night,tonight:data.tonight) })
                     } }.padding(.top,10)

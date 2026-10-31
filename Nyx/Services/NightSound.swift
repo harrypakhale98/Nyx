@@ -68,8 +68,10 @@ nonisolated struct NightSonification: Sendable {
         }
         self.cues=cues
         let seconds=Int(duration.rounded())
-        let base=String(localized:"\(park.shortName), \(park.dayLabel(sky.evening)). \(seconds) seconds of sound, from \(park.time(window.start)) to \(park.time(window.end)).")
-        opening=sky.darkHours==0 ? base+" "+SkyConditions.noDarknessMessage(tonight:false) : base
+        // Each sentence closed on its own: a date ("Sa. 31. Okt.") or time ("9:04 p.m.") that ends one takes no second period.
+        let base=Sentences.join([Sentences.end(Phrase.clauses([park.shortName,park.dayLabel(sky.evening)])),
+                                 Sentences.end(String(localized:"\(seconds) seconds of sound, from \(park.time(window.start)) to \(park.time(window.end))"))])
+        opening=sky.darkHours==0 ? Sentences.join([base,SkyConditions.noDarknessMessage(tonight:false)]) : base
     }
 
     /// 0 at sunset (the Sun's upper edge on the horizon) to 1 at astronomical twilight's end.

@@ -38,6 +38,25 @@ struct SentencesTests {
         #expect(Sentences.end("月の輝面比82%", language: "ja") == "月の輝面比82%。")
         #expect(Sentences.end("82% lit", language: "en") == "82% lit.")
     }
+    /// A time or date that ends in its own period ("9:04 p.m." in Latin American Spanish, "Sa. 31. Okt."
+    /// in German) closes the sentence itself, never "p.m..".
+    @Test func timesAndDatesThatEndInAPeriodTakeNoSecond() throws {
+        let jotr=try park("jotr"), night=try date("2026-10-31 21:04", park: jotr)
+        var time=Date.FormatStyle(date: .omitted, time: .shortened, locale: Locale(identifier: "es_US"))
+        time.timeZone=jotr.timeZone
+        let late=night.formatted(time)
+        #expect(late.hasSuffix("."))
+        #expect(Sentences.end("Datos de las \(late)", language: "es") == "Datos de las \(late)")
+        let day=jotr.dayLabel(night, locale: Locale(identifier: "de_DE"))
+        #expect(day == "Sa. 31. Okt.")
+        #expect(Sentences.end("Mein Plan für die Nacht: Joshua Tree, \(day)", language: "de").hasSuffix("Okt."))
+        #expect(Phrase.sentences([day, "Vergangene Nacht"]) == "Sa. 31. Okt. Vergangene Nacht")
+        // The Listen and Feel openings are two sentences, each closed once.
+        let sky=AstronomyEngine().conditions(for: jotr, on: jotr.evening(night))
+        let sound=NightSonification(park: jotr, sky: sky)
+        #expect(sound.opening.hasPrefix("Joshua Tree, \(jotr.dayLabel(sky.evening)). 12 seconds of sound, from "))
+        #expect(sound.opening.hasSuffix(".") && !sound.opening.contains(".."))
+    }
 
     /// A quieter thing in the sky with its gloss: a full stop and a space in English, "。" and no
     /// space in Japanese.

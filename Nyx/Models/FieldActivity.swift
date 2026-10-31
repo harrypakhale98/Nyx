@@ -100,8 +100,9 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
     /// "…, as of 1:10 AM." on the night's own day.
     func spokenScore(_ state: ContentState, locale: Locale = .current) -> String {
         guard let day=scoreDay(state) else { return String(localized: "Darkness score \(score(state)), \(band(state)).") }
-        if sameParkDay(day) { return String(localized: "Darkness score \(score(state)), \(band(state)), as of \(day.formatted(time(locale))).") }
-        return String(localized: "Darkness score \(score(state)), \(band(state)), as of \(day.formatted(weekday(.wide,locale))).")
+        // Closed here, not in the catalog: a time that ends in "p.m." takes no second period.
+        if sameParkDay(day) { return Sentences.end(String(localized: "Darkness score \(score(state)), \(band(state)), as of \(day.formatted(time(locale)))")) }
+        return Sentences.end(String(localized: "Darkness score \(score(state)), \(band(state)), as of \(day.formatted(weekday(.wide,locale)))"))
     }
     /// Whether a moment falls on the park's calendar day of the night's dusk.
     private func sameParkDay(_ date: Date) -> Bool {

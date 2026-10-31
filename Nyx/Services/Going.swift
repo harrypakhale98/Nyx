@@ -159,9 +159,10 @@ nonisolated enum OfflineReady {
     static func line(park: Park, forecast: Date?, alerts: Date?, parkServicePlace: Bool, forecastsOn: Bool = true, now: Date = .now) -> String {
         guard forecastsOn else { return String(localized:"Cloud forecasts are off in Your privacy, so this night rests on the Moon, the darkness and the usual clouds.") }
         guard let forecast else { return String(localized:"No cloud forecast is saved for this night yet. Open Nyx with a signal before you go.") }
-        let kept=parkServicePlace && alerts != nil
-            ? String(localized:"Saved on this iPhone for offline use: the forecast from \(park.timestamp(forecast)), park alerts from \(park.timestamp(alerts ?? forecast)).")
-            : String(localized:"Saved on this iPhone for offline use: the forecast from \(park.timestamp(forecast)).")
+        // Closed as a sentence here, not in the catalog: a time that ends in "p.m." takes no second period.
+        let kept=Sentences.end(parkServicePlace && alerts != nil
+            ? String(localized:"Saved on this iPhone for offline use: the forecast from \(park.timestamp(forecast)), park alerts from \(park.timestamp(alerts ?? forecast))")
+            : String(localized:"Saved on this iPhone for offline use: the forecast from \(park.timestamp(forecast))"))
         return now.timeIntervalSince(forecast)>stale ? Sentences.join([kept,String(localized:"Refresh before you lose signal.")]) : kept
     }
 }
@@ -182,13 +183,14 @@ nonisolated enum TellSomeone {
         let park=night.park, sky=night.sky
         let place=spot?.name ?? park.shortName
         let latitude=spot?.latitude ?? park.latitude, longitude=spot?.longitude ?? park.longitude
-        var lines=[String(localized:"My plan for the night: \(park.shortName), \(park.dayLabel(night.id)).")]
+        // Lines that end with a date or time are closed here: "Sa. 31. Okt." and "9:04 p.m." take no second period.
+        var lines=[Sentences.end(String(localized:"My plan for the night: \(park.shortName), \(park.dayLabel(night.id))"))]
         let coordinates=String(format:"%.5f, %.5f",latitude,longitude)
         lines.append(Sentences.join([String(localized:"Where: \(place) (\(coordinates))."),mapsLink(latitude:latitude,longitude:longitude,label:place)?.absoluteString ?? ""]))
         if let sunset=sky.sunset, let start=sky.darkStart, let end=sky.darkEnd {
-            lines.append(String(localized:"Sunset \(park.time(sunset)); true darkness from \(park.time(start)) to \(park.time(end))."))
+            lines.append(Sentences.end(String(localized:"Sunset \(park.time(sunset)); true darkness from \(park.time(start)) to \(park.time(end))")))
         }
-        if let sunrise=sky.sunrise { lines.append(String(localized:"I expect to be back by sunrise, \(park.time(sunrise)).")) }
+        if let sunrise=sky.sunrise { lines.append(Sentences.end(String(localized:"I expect to be back by sunrise, \(park.time(sunrise))"))) }
         if let closure { lines.append(Sentences.end(ClosureLine.spoken(closure))) }
         lines.append(park.countryCode=="US" ? String(localized:"In an emergency there, call 911.") : String(localized:"In an emergency there, call the local emergency number."))
         lines.append(Sentences.end(String(localized:"Times in \(park.timeZoneName)")))

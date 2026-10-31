@@ -36,7 +36,7 @@ import Foundation
             let closure=model.closure(park)
             if GoingCheck.announces(going,night:night) {
                 // Park time, as every time in the reminder, with its zone where this iPhone keeps another clock.
-                let body=Sentences.join([GoingCheck.summary(going,night:night,alternative:alternative(model,night:night)),String(localized:"As of \(park.zonedTime(now)).")])
+                let body=Sentences.join([GoingCheck.summary(going,night:night,alternative:alternative(model,night:night)),Sentences.end(String(localized:"As of \(park.zonedTime(now))"))])
                 let alert=NightReminder(id:"\(prefix)fall-\(going.id)-\(night.score.value)",parkID:park.id,
                                         title:String(localized:"\(park.dayLabel(night.id)) at \(park.shortName) has changed"),
                                         body:ClosureLine.first(body,closure:closure),fireDate:now.addingTimeInterval(5),timeZone:park.timeZone,night:park.isoDay(night.id))

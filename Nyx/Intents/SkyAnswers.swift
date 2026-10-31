@@ -46,7 +46,8 @@ nonisolated enum WhatsUpAnswer {
     static let limit=3
     static func dialog(_ whatsUp: WhatsUp, park: Park, closure: String?, voiceOnly: Bool, device: TimeZone = .current) -> String {
         let lines=whatsUp.items.prefix(limit).map { line($0,core:whatsUp.coreNight,park:park,voiceOnly:voiceOnly) }
-        let lead=String(localized:"Tonight at \(park.shortName)")+"."
+        // Its own sentence, closed as the language closes one ("今夜の…。").
+        let lead=String(localized:"Tonight at \(park.shortName).")
         let zone=DarkWindowAnswer.zoneNote(park:park,at:whatsUp.coreNight.highest,device:device)
         return ClosureLine.around(Sentences.join([lead]+lines+[zone]),park:park,closure:closure)
     }

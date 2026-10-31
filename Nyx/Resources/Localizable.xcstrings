@@ -2381,184 +2381,6 @@
         }
       }
     },
-    "%@, %@. %lld seconds of sound, from %@ to %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld Sekunde Klang, von %@ bis %@."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld Sekunden Klang, von %@ bis %@."
-                }
-              }
-            }
-          }
-        },
-        "en": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld second of sound, from %@ to %@."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld seconds of sound, from %@ to %@."
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld segundo de sonido, de %@ a %@."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld segundos de sonido, de %@ a %@."
-                }
-              }
-            }
-          }
-        },
-        "fr": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld seconde de son, de %@ à %@."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld secondes de son, de %@ à %@."
-                }
-              }
-            }
-          }
-        },
-        "ja": {
-          "variations": {
-            "plural": {
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%1$@、%2$@。%4$@から%5$@までを%3$lld秒の音で。"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "%@, %@. %lld seconds of touch, from %@ to %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld Sekunde Berührung, von %@ bis %@."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld Sekunden Berührung, von %@ bis %@."
-                }
-              }
-            }
-          }
-        },
-        "en": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld second of touch, from %@ to %@."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld seconds of touch, from %@ to %@."
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld segundo de tacto, de %@ a %@."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld segundos de tacto, de %@ a %@."
-                }
-              }
-            }
-          }
-        },
-        "fr": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld seconde de toucher, de %@ à %@."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%@, %@. %lld secondes de toucher, de %@ à %@."
-                }
-              }
-            }
-          }
-        },
-        "ja": {
-          "variations": {
-            "plural": {
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%1$@、%2$@。%4$@から%5$@までを%3$lld秒の触感で。"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "%@, %@. Observed Bortle %lld.": {
       "extractionState": "manual",
       "localizations": {
@@ -3710,41 +3532,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@。この緯度では今夜、完全には暗くなりません。"
-          }
-        }
-      }
-    },
-    "%@. Past night": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@. Vergangene Nacht"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@. Past night"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@. Noche pasada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@. Nuit passée"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@。過ぎた夜"
           }
         }
       }
@@ -7021,6 +6808,184 @@
                       "value": "%arg"
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld seconds of sound, from %@ to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Sekunde Klang, von %@ bis %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Sekunden Klang, von %@ bis %@"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld second of sound, from %@ to %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld seconds of sound, from %@ to %@"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld segundo de sonido, de %@ a %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld segundos de sonido, de %@ a %@"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld seconde de son, de %@ à %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld secondes de son, de %@ à %@"
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%2$@から%3$@までを%1$lld秒の音で"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld seconds of touch, from %@ to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Sekunde Berührung, von %@ bis %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Sekunden Berührung, von %@ bis %@"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld second of touch, from %@ to %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld seconds of touch, from %@ to %@"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld segundo de tacto, de %@ a %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld segundos de tacto, de %@ a %@"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld seconde de toucher, de %@ à %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld secondes de toucher, de %@ à %@"
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%2$@から%3$@までを%1$lld秒の触感で"
                 }
               }
             }
@@ -12553,37 +12518,37 @@
         }
       }
     },
-    "As of %@.": {
+    "As of %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stand: %@."
+            "value": "Stand: %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "As of %@."
+            "value": "As of %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Datos de las %@."
+            "value": "Datos de las %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mis à jour à %@."
+            "value": "Mis à jour à %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@時点。"
+            "value": "%@時点"
           }
         }
       }
@@ -21602,37 +21567,37 @@
         }
       }
     },
-    "Darkness score %lld, %@, as of %@.": {
+    "Darkness score %lld, %@, as of %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dunkelheitswert %lld, %@, Stand %@."
+            "value": "Dunkelheitswert %lld, %@, Stand %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Darkness score %lld, %@, as of %@."
+            "value": "Darkness score %lld, %@, as of %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Índice de oscuridad %lld, noche %@, según datos del %@."
+            "value": "Índice de oscuridad %lld, noche %@, según datos del %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Indice d’obscurité %lld, nuit %@, selon les données de %@."
+            "value": "Indice d’obscurité %lld, nuit %@, selon les données de %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "暗さスコア%1$lld、%2$@（%3$@時点）。"
+            "value": "暗さスコア%1$lld、%2$@（%3$@時点）"
           }
         }
       }
@@ -30647,37 +30612,37 @@
         }
       }
     },
-    "I expect to be back by sunrise, %@.": {
+    "I expect to be back by sunrise, %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ich rechne damit, bis Sonnenaufgang zurück zu sein, %@."
+            "value": "Ich rechne damit, bis Sonnenaufgang zurück zu sein, %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "I expect to be back by sunrise, %@."
+            "value": "I expect to be back by sunrise, %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cuento con volver antes del amanecer (%@)."
+            "value": "Cuento con volver antes del amanecer (%@)"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je compte être de retour au lever du soleil, à %@."
+            "value": "Je compte être de retour au lever du soleil, à %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "日の出（%@）までには戻る予定です。"
+            "value": "日の出（%@）までには戻る予定です"
           }
         }
       }
@@ -36286,72 +36251,72 @@
         }
       }
     },
-    "Milky Way core clear of moonlight from %@ to %@.": {
+    "Milky Way core clear of moonlight from %@ to %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Milchstraßenzentrum ohne Mondlicht von %1$@ bis %2$@."
+            "value": "Milchstraßenzentrum ohne Mondlicht von %1$@ bis %2$@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Milky Way core clear of moonlight from %@ to %@."
+            "value": "Milky Way core clear of moonlight from %@ to %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Núcleo de la Vía Láctea sin luz de Luna de %1$@ a %2$@."
+            "value": "Núcleo de la Vía Láctea sin luz de Luna de %1$@ a %2$@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cœur de la Voie lactée à l’abri du clair de lune de %1$@ à %2$@."
+            "value": "Cœur de la Voie lactée à l’abri du clair de lune de %1$@ à %2$@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "天の川の中心部は%1$@から%2$@まで月明かりなしで見えます。"
+            "value": "天の川の中心部は%1$@から%2$@まで月明かりなしで見えます"
           }
         }
       }
     },
-    "Milky Way core clear of moonlight, %@ – %@.": {
+    "Milky Way core clear of moonlight, %@ – %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Milchstraßenzentrum ohne Mondlicht, %1$@–%2$@."
+            "value": "Milchstraßenzentrum ohne Mondlicht, %1$@–%2$@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Milky Way core clear of moonlight, %@ – %@."
+            "value": "Milky Way core clear of moonlight, %@ – %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Núcleo de la Vía Láctea sin luz de Luna, %1$@ – %2$@."
+            "value": "Núcleo de la Vía Láctea sin luz de Luna, %1$@ – %2$@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cœur de la Voie lactée à l’abri du clair de lune, %1$@ – %2$@."
+            "value": "Cœur de la Voie lactée à l’abri du clair de lune, %1$@ – %2$@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "月明かりのない天の川の中心部：%1$@ – %2$@。"
+            "value": "月明かりのない天の川の中心部：%1$@ – %2$@"
           }
         }
       }
@@ -39286,37 +39251,37 @@
         }
       }
     },
-    "My plan for the night: %@, %@.": {
+    "My plan for the night: %@, %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mein Plan für die Nacht: %1$@, %2$@."
+            "value": "Mein Plan für die Nacht: %1$@, %2$@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "My plan for the night: %@, %@."
+            "value": "My plan for the night: %@, %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mi plan para la noche: %1$@, %2$@."
+            "value": "Mi plan para la noche: %1$@, %2$@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mon plan pour la nuit : %1$@, %2$@."
+            "value": "Mon plan pour la nuit : %1$@, %2$@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今夜の予定：%1$@、%2$@。"
+            "value": "今夜の予定：%1$@、%2$@"
           }
         }
       }
@@ -57114,7 +57079,7 @@
         }
       }
     },
-    "Saved on this iPhone for offline use: the forecast from %@, park alerts from %@.": {
+    "Saved on this iPhone for offline use: the forecast from %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -57123,13 +57088,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Für die Offline-Nutzung auf diesem iPad gespeichert: die Vorhersage vom %1$@, Parkhinweise vom %2$@."
+                  "value": "Für die Offline-Nutzung auf diesem iPad gespeichert: die Vorhersage vom %@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Für die Offline-Nutzung auf diesem iPhone gespeichert: die Vorhersage vom %1$@, Parkhinweise vom %2$@."
+                  "value": "Für die Offline-Nutzung auf diesem iPhone gespeichert: die Vorhersage vom %@"
                 }
               }
             }
@@ -57141,13 +57106,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Saved on this iPad for offline use: the forecast from %@, park alerts from %@."
+                  "value": "Saved on this iPad for offline use: the forecast from %@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Saved on this iPhone for offline use: the forecast from %@, park alerts from %@."
+                  "value": "Saved on this iPhone for offline use: the forecast from %@"
                 }
               }
             }
@@ -57159,13 +57124,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Guardado en este iPad para usar sin conexión: el pronóstico del %1$@ y las alertas del parque del %2$@."
+                  "value": "Guardado en este iPad para usar sin conexión: el pronóstico del %@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Guardado en este iPhone para usar sin conexión: el pronóstico del %1$@ y las alertas del parque del %2$@."
+                  "value": "Guardado en este iPhone para usar sin conexión: el pronóstico del %@"
                 }
               }
             }
@@ -57177,13 +57142,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Enregistré sur cet iPad pour un usage hors ligne : la prévision du %1$@, les alertes du parc du %2$@."
+                  "value": "Enregistré sur cet iPad pour un usage hors ligne : la prévision du %@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Enregistré sur cet iPhone pour un usage hors ligne : la prévision du %1$@, les alertes du parc du %2$@."
+                  "value": "Enregistré sur cet iPhone pour un usage hors ligne : la prévision du %@"
                 }
               }
             }
@@ -57195,13 +57160,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "オフラインで使えるようこのiPadに保存済み：予報（%1$@）、公園のアラート（%2$@）。"
+                  "value": "オフラインで使えるようこのiPadに保存済み：予報（%@）"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "オフラインで使えるようこのiPhoneに保存済み：予報（%1$@）、公園のアラート（%2$@）。"
+                  "value": "オフラインで使えるようこのiPhoneに保存済み：予報（%@）"
                 }
               }
             }
@@ -57209,7 +57174,7 @@
         }
       }
     },
-    "Saved on this iPhone for offline use: the forecast from %@.": {
+    "Saved on this iPhone for offline use: the forecast from %@, park alerts from %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -57218,13 +57183,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Für die Offline-Nutzung auf diesem iPad gespeichert: die Vorhersage vom %@."
+                  "value": "Für die Offline-Nutzung auf diesem iPad gespeichert: die Vorhersage vom %1$@, Parkhinweise vom %2$@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Für die Offline-Nutzung auf diesem iPhone gespeichert: die Vorhersage vom %@."
+                  "value": "Für die Offline-Nutzung auf diesem iPhone gespeichert: die Vorhersage vom %1$@, Parkhinweise vom %2$@"
                 }
               }
             }
@@ -57236,13 +57201,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Saved on this iPad for offline use: the forecast from %@."
+                  "value": "Saved on this iPad for offline use: the forecast from %@, park alerts from %@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Saved on this iPhone for offline use: the forecast from %@."
+                  "value": "Saved on this iPhone for offline use: the forecast from %@, park alerts from %@"
                 }
               }
             }
@@ -57254,13 +57219,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Guardado en este iPad para usar sin conexión: el pronóstico del %@."
+                  "value": "Guardado en este iPad para usar sin conexión: el pronóstico del %1$@ y las alertas del parque del %2$@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Guardado en este iPhone para usar sin conexión: el pronóstico del %@."
+                  "value": "Guardado en este iPhone para usar sin conexión: el pronóstico del %1$@ y las alertas del parque del %2$@"
                 }
               }
             }
@@ -57272,13 +57237,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Enregistré sur cet iPad pour un usage hors ligne : la prévision du %@."
+                  "value": "Enregistré sur cet iPad pour un usage hors ligne : la prévision du %1$@, les alertes du parc du %2$@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Enregistré sur cet iPhone pour un usage hors ligne : la prévision du %@."
+                  "value": "Enregistré sur cet iPhone pour un usage hors ligne : la prévision du %1$@, les alertes du parc du %2$@"
                 }
               }
             }
@@ -57290,13 +57255,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "オフラインで使えるようこのiPadに保存済み：予報（%@）。"
+                  "value": "オフラインで使えるようこのiPadに保存済み：予報（%1$@）、公園のアラート（%2$@）"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "オフラインで使えるようこのiPhoneに保存済み：予報（%@）。"
+                  "value": "オフラインで使えるようこのiPhoneに保存済み：予報（%1$@）、公園のアラート（%2$@）"
                 }
               }
             }
@@ -64202,72 +64167,37 @@
         }
       }
     },
-    "Sun and Moon paths for %@.": {
+    "Sun and Moon paths for %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bahnen von Sonne und Mond für %@."
+            "value": "Bahnen von Sonne und Mond für %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sun and Moon paths for %@."
+            "value": "Sun and Moon paths for %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trayectorias del Sol y la Luna para %@."
+            "value": "Trayectorias del Sol y la Luna para %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trajectoires du Soleil et de la Lune pour %@."
+            "value": "Trajectoires du Soleil et de la Lune pour %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@の太陽と月の通り道。"
-          }
-        }
-      }
-    },
-    "Sun and Moon paths for %@. Sunset %@. %@ Moonrise %@, moonset %@. %@Times in %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bahnen von Sonne und Mond für %@. Sonnenuntergang %@. %@ Mondaufgang %@, Monduntergang %@. %@Zeitzone: %@."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sun and Moon paths for %@. Sunset %@. %@ Moonrise %@, moonset %@. %@Times in %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trayectorias del Sol y la Luna para %@. Puesta del sol: %@. %@ Salida de la Luna: %@; puesta de la Luna: %@. %@Horario: %@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trajectoires du Soleil et de la Lune pour %@. Coucher du soleil à %@. %@ Lever de la Lune à %@, coucher de la Lune à %@. %@Fuseau horaire : %@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@の太陽と月の通り道。日の入り%2$@。%3$@月の出%4$@、月の入り%5$@。%6$@時刻は%7$@の時間です。"
+            "value": "%@の太陽と月の通り道"
           }
         }
       }
@@ -64622,37 +64552,37 @@
         }
       }
     },
-    "Sunset %@; true darkness from %@ to %@.": {
+    "Sunset %@; true darkness from %@ to %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonnenuntergang %1$@; echte Dunkelheit von %2$@ bis %3$@."
+            "value": "Sonnenuntergang %1$@; echte Dunkelheit von %2$@ bis %3$@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sunset %@; true darkness from %@ to %@."
+            "value": "Sunset %@; true darkness from %@ to %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Puesta de sol: %1$@; oscuridad total de %2$@ a %3$@."
+            "value": "Puesta de sol: %1$@; oscuridad total de %2$@ a %3$@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Coucher du soleil à %1$@ ; obscurité totale de %2$@ à %3$@."
+            "value": "Coucher du soleil à %1$@ ; obscurité totale de %2$@ à %3$@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "日没%1$@。完全な暗さは%2$@から%3$@まで。"
+            "value": "日没%1$@。完全な暗さは%2$@から%3$@まで"
           }
         }
       }
@@ -72255,6 +72185,41 @@
         }
       }
     },
+    "Tonight at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute Nacht in %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta noche en %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce soir à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜の%@。"
+          }
+        }
+      }
+    },
     "Tonight at %@: true darkness from %@ to %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -75266,41 +75231,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@に更新"
-          }
-        }
-      }
-    },
-    "Updated %@. Open Nyx to refresh.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktualisiert %@. Öffne Nyx zum Aktualisieren."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Updated %@. Open Nyx to refresh."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Actualizado: %@. Abre Nyx para actualizar."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mis à jour %@. Ouvrez Nyx pour actualiser."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@に更新。Nyxを開くと最新になります。"
           }
         }
       }

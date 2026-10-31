@@ -14772,37 +14772,37 @@
         }
       }
     },
-    "Tonight at %@": {
+    "Tonight at %@.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Heute Nacht in %@"
+            "value": "Heute Nacht in %@."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tonight at %@"
+            "value": "Tonight at %@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Esta noche en %@"
+            "value": "Esta noche en %@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ce soir à %@"
+            "value": "Ce soir à %@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今夜の%@"
+            "value": "今夜の%@。"
           }
         }
       }

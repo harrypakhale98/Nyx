@@ -67,7 +67,9 @@ nonisolated struct NightTouch: Sendable {
         swells=sound.cues.filter { $0.sound == .chime }.map { Swell(time: max(0, min(duration-3, $0.offset*scale)), duration: 3) }
         lines=sound.cues.filter { $0.sound != .none || $0.kind == .darkness }.map { Line(offset: $0.offset*scale, text: $0.line) }
         let seconds=Int(duration.rounded())
-        opening=String(localized: "\(sound.park.shortName), \(sound.park.dayLabel(sound.window.start)). \(seconds) seconds of touch, from \(sound.park.time(sound.window.start)) to \(sound.park.time(sound.window.end)).")
+        // Each sentence closed on its own: a date ("Sa. 31. Okt.") or time ("9:04 p.m.") that ends one takes no second period.
+        opening=Sentences.join([Sentences.end(Phrase.clauses([sound.park.shortName, sound.park.dayLabel(sound.window.start)])),
+                                Sentences.end(String(localized: "\(seconds) seconds of touch, from \(sound.park.time(sound.window.start)) to \(sound.park.time(sound.window.end))"))])
     }
     /// The hum: faint at dusk and dawn, strongest in true darkness, softened by moonlight (a full
     /// Moon overhead takes half of it away).

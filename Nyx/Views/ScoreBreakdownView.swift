@@ -64,7 +64,7 @@ struct ScoreBreakdownView: View {
                 HStack(alignment:.top,spacing:14) {
                     SkyGlyph(item:event.kind,color:palette.accent).frame(width:22,height:22).padding(.top,2)
                     VStack(alignment:.leading,spacing:6) {
-                        Text([event.title,event.note].compactMap { $0 }.joined(separator:", ")).font(.headline)
+                        Text(Phrase.clauses([event.title,event.note].compactMap { $0 })).font(.headline)
                         if let value=event.value { Text(value).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink) }
                         Text(event.detail).font(.callout).fixedSize(horizontal:false,vertical:true)
                         Text("Also in the sky this night. Not part of the score.").font(.footnote).foregroundStyle(palette.muted)
