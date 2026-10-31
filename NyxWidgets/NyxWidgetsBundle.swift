@@ -113,7 +113,8 @@ struct MoonProvider:AppIntentTimelineProvider {
         return MoonEntry(date:.now,park:Self.park(configuration.park,snapshot:snapshot),nightVision:SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey),
                          unsaved:TonightProvider.unsaved(configuration.park,snapshot:snapshot))
     }
-    /// Every hour for a day, plus each rise and set, so "up now" and the next event turn over on time.
+    /// Every hour for a day, plus each rise and set and sunrise turnover (`MoonEntry.moments`), so "up
+    /// now", the next event and the night's lit fraction turn over on time.
     func timeline(for configuration:MoonWidgetIntent,in context:Context) async -> Timeline<MoonEntry> {
         let now=Date.now, snapshot=SharedSettings.read()
         let park=Self.park(configuration.park,snapshot:snapshot), vision=SharedSettings.defaults.bool(forKey:NightLook.nightVisionKey)
@@ -121,10 +122,7 @@ struct MoonProvider:AppIntentTimelineProvider {
         if let unsaved=TonightProvider.unsaved(configuration.park,snapshot:snapshot) {
             return Timeline(entries:[MoonEntry(date:now,park:nil,nightVision:vision,unsaved:unsaved)],policy:.never)
         }
-        let hour=Calendar.current.dateInterval(of:.hour,for:now)?.end ?? now.addingTimeInterval(3600)
-        let end=hour.addingTimeInterval(23*3600)
-        let events=park.map { MoonNow.events(at:$0,around:now).map(\.date).filter { $0>now && $0<end } } ?? []
-        let dates=Set([now]+(0..<24).map { hour.addingTimeInterval(Double($0)*3600) }+events.map { $0.addingTimeInterval(1) }).sorted()
+        let (dates,end)=MoonEntry.moments(from:now,park:park)
         return Timeline(entries:dates.map { MoonEntry(date:$0,park:park,nightVision:vision) },policy:.after(end))
     }
     /// The chosen park, else the first saved park; with neither, the gallery's preview shows Joshua

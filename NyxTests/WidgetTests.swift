@@ -80,6 +80,17 @@ import WidgetKit
         }
         #expect(MoonEntry(date: now, park: nil, nightVision: false).moon.phase.percentLit == engine.moonPhase(at: now).percentLit)
     }
+    /// The Moon widget redraws a second past sunrise, as the Tonight widget does, so it never shows
+    /// last night's Moon beside the Tonight widget's new night.
+    @Test func moonWidgetTurnsOverToTheNewNightAtSunrise() throws {
+        let jotr = try park("jotr")
+        let (dates, end) = MoonEntry.moments(from: now, park: jotr)
+        let turnovers = jotr.nightTurnovers(from: now, to: end)
+        #expect(!turnovers.isEmpty && turnovers.allSatisfy(dates.contains))
+        let turnover = try #require(turnovers.first)
+        #expect(MoonEntry(date: turnover, park: jotr, nightVision: false).night != MoonEntry(date: turnover.addingTimeInterval(-60), park: jotr, nightVision: false).night)
+        #expect(MoonEntry.moments(from: now, park: nil).dates.count == 25)
+    }
 
     @Test func moonRectangleFollowsTheReadersPercentAndSaysNoEventItCannotKnow() throws {
         let gaar = try park("gaar")

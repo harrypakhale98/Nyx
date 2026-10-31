@@ -23,6 +23,16 @@ struct MoonEntry: TimelineEntry {
         moon=MoonNow(at: date, park: park, night: night)
         self.night=night
     }
+    /// When a timeline from `now` redraws, through `end`: now, every hour for a day, a second past each
+    /// rise and set ("up now" and the next event), and the park's sunrise turnovers, where its night,
+    /// and so the night's lit fraction, moves on as the Tonight widget's does (`Park.nightTurnovers`).
+    static func moments(from now: Date, park: Park?) -> (dates: [Date], end: Date) {
+        let hour=Calendar.current.dateInterval(of: .hour, for: now)?.end ?? now.addingTimeInterval(3600)
+        let end=hour.addingTimeInterval(23*3600)
+        let events=park.map { MoonNow.events(at: $0, around: now).map(\.date).filter { $0>now && $0<end } } ?? []
+        let turnovers=park?.nightTurnovers(from: now, to: end) ?? []
+        return (Set([now]+(0..<24).map { hour.addingTimeInterval(Double($0)*3600) }+events.map { $0.addingTimeInterval(1) }+turnovers).sorted(), end)
+    }
     /// The system's redacted placeholder: the Moon at Joshua Tree from the bundled parks, never the
     /// App Group's snapshot (0.8 MB, decoded synchronously, for a shape drawn redacted).
     static func placeholder(at date: Date = .now) -> MoonEntry {
