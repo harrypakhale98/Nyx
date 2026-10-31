@@ -99,7 +99,7 @@ struct MoonWidgetFace: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(week.map { facts.spoken+" "+Self.spokenWeek($0) } ?? facts.spoken))
     }
-    /// The Moon now above the week: each night's weekday, its Moon and how much is lit.
+    /// Tonight's Moon (at 10 PM) above the week: each night's weekday, its Moon and how much is lit.
     private func large(_ week: MoonWeek) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 18) {
