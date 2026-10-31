@@ -79,6 +79,8 @@ struct RootView:View {
                     // Parks becomes a list beside the park on a wide iPad; a stack in narrow windows and on iPhone.
                     Tab(AppTab.parks.title,systemImage:AppTab.parks.symbol,value:.parks) { ParksTab().modifier(TabChrome(tab:.parks,tint:palette.ink)) }
                     Tab(AppTab.plan.title,systemImage:AppTab.plan.symbol,value:.plan) { NavigationStack { PlanView() }.modifier(TabChrome(tab:.plan,tint:palette.ink)) }
+                        // A park held over Plan's tab item or sidebar row opens Plan, whose screen takes the drop (its month).
+                        .springLoadingBehavior(.enabled)
                     Tab(AppTab.journal.title,systemImage:AppTab.journal.symbol,value:.journal) { NavigationStack { JournalView() }.modifier(TabChrome(tab:.journal,tint:palette.ink)) }
                         // A night from Plan's month or a park held over the Journal's tab item or sidebar
                         // row opens the Journal, which takes the drop (`acceptsJournalDrop`). The tab item itself

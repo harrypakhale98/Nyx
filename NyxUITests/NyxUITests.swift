@@ -257,6 +257,25 @@ final class NyxUITests:XCTestCase {
         tonight.press(forDuration:1.0,thenDragTo:journal,withVelocity:.slow,thenHoldForDuration:3.0)
         XCTAssertTrue(app.navigationBars["Journal"].waitForExistence(timeout:10),"A night held over the Journal did not open it")
     }
+    /// iPad: a park row lifted from Parks and held over Plan's row in the sidebar opens Plan, whose
+    /// screen takes the drop (that park's month), as the Journal does for a night.
+    func testAParkHeldOverPlanOpensIt() { parkHeld(over:"Plan") }
+    private func parkHeld(over target:String) {
+        guard UIDevice.current.userInterfaceIdiom == .pad else { return }
+        continueAfterFailure=false
+        // Portrait: the tabs stand at the top of the window, the list beside the park below them.
+        XCUIDevice.shared.orientation = .portrait
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","parks","-nyx-state","no-forecast","-nyx-reduce-motion"]
+        app.launch()
+        let row=app.buttons.matching(NSPredicate(format:"label BEGINSWITH %@","Death Valley")).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout:20),"No Death Valley in the list")
+        let plan=app.buttons.matching(identifier:target).firstMatch
+        XCTAssertTrue(plan.waitForExistence(timeout:5),"No \(target) among the tabs")
+        XCTAssertTrue(row.isHittable,"Death Valley is covered")
+        row.coordinate(withNormalizedOffset:CGVector(dx:0.25,dy:0.3)).press(forDuration:1.5,thenDragTo:plan.coordinate(withNormalizedOffset:CGVector(dx:0.5,dy:0.5)),withVelocity:.slow,thenHoldForDuration:3.0)
+        XCTAssertTrue(app.navigationBars[target].waitForExistence(timeout:10),"A park held over \(target) did not open it")
+    }
     /// The night-vision switch is a lamp (`NightVisionLamp`): a tap turns the red on under a black
     /// cover, two quick taps turn back and forth from wherever the cover is, and once the lamp has
     /// settled the switch shows the stored setting again. Ends with night vision off, as it began.
