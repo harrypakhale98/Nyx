@@ -5,6 +5,7 @@ struct TonightView: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @MotionReduced private var reduceMotion: Bool
     @Environment(\.nyxAccess) private var access
     @State private var shooting=0.0
@@ -49,6 +50,9 @@ struct TonightView: View {
     /// key it was worked out for; worked out off the main thread from the bundled light map.
     @State private var darkerSky:(key:String,offer:DarkerSky.Offer?)?
     @State private var width=0.0
+    /// The page's height between its bars, and the dial's top in the page: an iPhone in landscape sizes the dial to them.
+    @State private var pageHeight=0.0
+    @State private var dialTop=0.0
     /// Wide iPad: the night chosen on the best park's river, with that park, and whether it is being
     /// dragged. Kept with its park, so a new best park (another radius or starting point) starts at
     /// its own tonight rather than carrying the old park's date.
@@ -81,16 +85,10 @@ struct TonightView: View {
     }
     /// A wide iPad: the answer on the left, the ways to change the question on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
-    /// The world catalogue abroad, or the offline caches still being read after the first frame
-    /// (`PlanModel.cachesPending`): the loader, never a score those reads are about to change.
-    private var loading:Bool { DebugScenario.state=="loading" || awaitingWorld || model.cachesPending }
-    /// From outside the US the answer weighs the world catalogue, read off the main thread from launch:
-    /// until it is ready the page shows the loader, never the national parks' empty state or a US-only
-    /// answer that would change a moment later.
-    private var awaitingWorld:Bool {
-        guard !model.catalogIsReady, let from else { return false }
-        return !USOutline.contains(latitude:from.latitude,longitude:from.longitude)
-    }
+    /// The world catalogue abroad or near a border (`PlanModel.awaitingWorld`), or the offline caches
+    /// still being read after the first frame (`PlanModel.cachesPending`): the loader, never a score
+    /// those reads are about to change, nor the national parks' empty state.
+    private var loading:Bool { DebugScenario.state=="loading" || model.awaitingWorld || model.cachesPending }
     var body: some View {
         let all=candidates
         let best=self.best(all)
@@ -142,9 +140,10 @@ struct TonightView: View {
                         LookingBackPanel()
                     }
                     extras(hero:best.first)
-                }.padding(24).readableColumn()
+                }.padding(24).readableColumn().coordinateSpace(.named(Self.pageSpace))
             }
         }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
+        .onScrollGeometryChange(for:Double.self) { $0.containerSize.height-$0.contentInsets.top-$0.contentInsets.bottom } action:{ _,new in pageHeight=new }
         // The loader gives way to the answer (or the calm empty state) in a dissolve, never a cut.
         .animation(NyxMotion.spring(reduced:reduceMotion),value:loading)
         .animation(NyxMotion.spring(reduced:reduceMotion),value:empty)
@@ -289,6 +288,14 @@ struct TonightView: View {
     private static let startID="startingPoint"
     /// The hero dial's side at accessibility sizes: the numeral stays over 80 pt inside it.
     private static let accessibleDial=200.0
+    nonisolated private static let pageSpace="tonightPage"
+    /// The hero dial's height in one column: 240 pt, or on an iPhone in landscape what is left of the
+    /// first screen under the park's pill, so the dial and its band word clear the tab bar when the page
+    /// opens; never under 160 pt, where the page scrolls to the rest instead.
+    nonisolated static func dialHeight(compact:Bool,page:Double,top:Double)->Double {
+        guard compact, page>0 else { return 240 }
+        return min(240,max(160,(page-top-12).rounded(.down)))
+    }
     /// The answer's line, and the way to what it names: a tap moves the page to the starting point and
     /// its radius, which sit below the answer and its alternatives.
     private func reachLine(_ park:Park,day:String)->some View {
@@ -455,7 +462,9 @@ struct TonightView: View {
         return CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis,
                               revealKey:revealKey(night),range:range,night:model.ring(night)) { heroSettledKey=$0 }
             // At accessibility sizes the dial is held small enough that a closure under it is on the first screen.
-            .environment(\.gaugeAccessibleMax,Self.accessibleDial).frame(height:large ? nil : wide ? 300 : 240)
+            .environment(\.gaugeAccessibleMax,Self.accessibleDial)
+            .frame(height:large ? nil : wide ? 300 : Self.dialHeight(compact:verticalSizeClass == .compact,page:pageHeight,top:dialTop))
+            .onGeometryChange(for:Double.self) { $0.frame(in:.named(Self.pageSpace)).minY } action:{ dialTop=$0 }
             .modifier(DepthParallax(depth:0.08))
             .contentShape(Rectangle())
             .gesture(DialPan(enabled:ready) { dialScrub($0) })
@@ -816,6 +825,23 @@ nonisolated enum TonightReach {
     static func candidates(parks:[Park],places:[Park],originInUS:Bool)->[Park] {
         if originInUS, !parks.isEmpty, places.allSatisfy({ $0.countryCode.uppercased()=="US" }) { return parks }
         return places
+    }
+    /// Whether a circle of `radiusMeters` around a point leaves the US outline (`USOutline`): sampled at
+    /// 36 bearings on rings at a third, two thirds and all of the radius. A coast counts as an edge.
+    static func crossesUSEdge(latitude:Double,longitude:Double,radiusMeters:Double)->Bool {
+        let earth=6_371_000.0, lat=latitude * .pi/180, lon=longitude * .pi/180
+        for ring in [1.0/3,2.0/3,1] {
+            let d=radiusMeters*ring/earth
+            for step in 0..<36 {
+                let bearing=Double(step)*10 * .pi/180
+                let lat2=asin(sin(lat)*cos(d)+cos(lat)*sin(d)*cos(bearing))
+                let lon2=lon+atan2(sin(bearing)*sin(d)*cos(lat),cos(d)-sin(lat)*sin(lat2))
+                var east=lon2*180 / .pi
+                if east>180 { east-=360 } else if east < -180 { east+=360 }
+                if !USOutline.contains(latitude:lat2*180 / .pi,longitude:east) { return true }
+            }
+        }
+        return false
     }
     /// At most `limit` places to rank first: every curated park and saved spot in reach, then catalogue
     /// places by what their sky offers before any forecast (the lower Bortle class first, a DarkSky

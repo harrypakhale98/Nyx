@@ -19,6 +19,23 @@ extension PlanModel {
         let places=TonightReach.candidates(parks:parks,places:everything,originInUS:USOutline.contains(latitude:from.latitude,longitude:from.longitude))
         return (places,places != parks)
     }
+    /// True while the answer for the places in reach still waits on the world catalogue: until it is
+    /// ready, from a starting point outside the US, or one whose reach crosses the US edge, where a
+    /// place across a border (or the catalogue's kept forecasts) would change a parks-only answer a
+    /// moment after it was shown. Tonight and Plan's best nights show their loader meanwhile.
+    var awaitingWorld:Bool {
+        guard !catalogIsReady, let from=reachOrigin else { return false }
+        return !USOutline.contains(latitude:from.latitude,longitude:from.longitude) || reachCrossesUSEdge(from:from)
+    }
+    /// Whether the circle of the chosen radius around `from` leaves the US outline anywhere (a border,
+    /// or a coast, which is treated alike): tested at 36 bearings on three rings, once per origin and radius.
+    func reachCrossesUSEdge(from:(latitude:Double,longitude:Double))->Bool {
+        let key="\(from.latitude),\(from.longitude),\(radiusMeters)"
+        if let memo=edgeMemo, memo.key == key { return memo.crosses }
+        let crosses=TonightReach.crossesUSEdge(latitude:from.latitude,longitude:from.longitude,radiusMeters:radiusMeters)
+        edgeMemo=(key,crosses)
+        return crosses
+    }
     /// `places` as a screen ranks them at once: all of them, or where a radius holds hundreds (abroad)
     /// the darkest skies nearest `reachOrigin` (`TonightReach.shortlist`), never hundreds on the main thread.
     func shortlist(_ places:[Park])->[Park] {

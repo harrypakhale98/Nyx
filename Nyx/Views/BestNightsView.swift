@@ -16,13 +16,9 @@ struct BestNightsView: View {
     @State private var explaining=false
     @State private var width=0.0
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
-    /// Abroad, the world catalogue must arrive before "in reach" means anything; and caches the loader
-    /// is about to replace are never ranked (Tonight waits for the same).
-    private var loading:Bool {
-        if DebugScenario.state=="loading" || model.cachesPending { return true }
-        guard !model.catalogIsReady, let from=model.reachOrigin else { return false }
-        return !USOutline.contains(latitude:from.latitude,longitude:from.longitude)
-    }
+    /// Abroad or near a border, the world catalogue must arrive before "in reach" means anything
+    /// (`PlanModel.awaitingWorld`); and caches the loader is about to replace are never ranked (Tonight waits for the same).
+    private var loading:Bool { DebugScenario.state=="loading" || model.cachesPending || model.awaitingWorld }
     /// Ranked again when the places in reach, the radius, the night (`today` moves at each sunrise turnover) or the data change.
     private var key:String {
         guard !loading else { return "loading" }

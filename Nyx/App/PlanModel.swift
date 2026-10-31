@@ -22,9 +22,12 @@ import Observation
     /// The catalogue's lookup, spatial index, search terms and forecast regions, built with it.
     @ObservationIgnored private var placeCatalog=PlaceCatalog.empty
     @ObservationIgnored private var catalogTask: Task<Void,Never>?
-    /// True once the catalogue has been read (even if it came back empty). Observed, so a screen that
-    /// waits for the world abroad (Tonight's loader, the Parks list's skeleton rows) moves on when it arrives.
+    /// True once the catalogue has been read (even if it came back empty) and the forecasts kept for
+    /// its places in reach have been taken (`takeKeptForecasts`). Observed, so a screen that waits for
+    /// the world (Tonight's loader, the Parks list's skeleton rows) moves on when it arrives.
     private(set) var catalogIsReady=false
+    /// `reachCrossesUSEdge`'s last answer, by origin and radius: the outline is tested once per change.
+    @ObservationIgnored var edgeMemo:(key:String,crosses:Bool)?
     /// The curated parks' folded search terms, made on the first search.
     @ObservationIgnored private var curatedTerms: [PlaceCatalog.Terms]?
     let loadError: Bool
@@ -424,8 +427,20 @@ import Observation
         let curated=Set(parks.map(\.id))
         catalogTask=Task { [weak self] in
             let built=await Task.detached(priority:.userInitiated) { PlaceCatalog.bundled(excluding:curated) }.value
-            self?.install(built)
+            guard let self else { return }
+            self.install(built)
+            // The first answer that weighs the catalogue counts what is kept for its places, so it is not
+            // ranked on their usual clouds and again a moment later when a refresh reads the same files.
+            await self.takeKeptForecasts(self.placesInReach().places)
+            self.catalogIsReady=true
         }
+    }
+    /// The forecasts kept on this device for the world catalogue places among `places`, read from the
+    /// files alone, never asked for (`WeatherProviding.catalogForecasts`). Debug screens keep their fixtures.
+    func takeKeptForecasts(_ places:[Park]) async {
+        let world=places.filter(\.isCatalogPlace)
+        guard !world.isEmpty, DebugScenario.screen == nil else { return }
+        takeForecasts(await weather.catalogForecasts([world],network:false,force:false))
     }
     /// Waits until the catalogue is ready (at once if it is). Paths that resolve saved `wd:` ids for
     /// the widgets, the watch and reminders wait here, so a followed catalogue place is never dropped.
@@ -453,7 +468,6 @@ import Observation
     }
     private func install(_ built:PlaceCatalog) {
         placeCatalog=built
-        catalogIsReady=true
         catalog=built.places
         // A journal entry at a catalogue place read before the catalogue was there is scored again.
         journalScores=[:]
