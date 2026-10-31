@@ -52,7 +52,7 @@ nonisolated enum DarkWeekends {
     }
     /// "New moon Mar 11" in the place's calendar.
     static func newMoonLine(_ weekend: Weekend) -> String {
-        var format=Date.FormatStyle.dateTime.month(.abbreviated).day(); format.timeZone=weekend.firstNight.park.timeZone
+        let format=weekend.firstNight.park.nightStyle().month(.abbreviated).day()
         return String(localized:"New moon \(weekend.newMoon.formatted(format))")
     }
     /// What VoiceOver hears for a row.
@@ -92,7 +92,7 @@ nonisolated struct CoreSeason: Sendable, Equatable {
     }
     /// "Milky Way season at Joshua Tree runs until about Oct 12." or "…opens about Feb 20 and runs to about Oct 12."
     func sentence(_ park: Park) -> String {
-        var format=Date.FormatStyle.dateTime.month(.abbreviated).day(); format.timeZone=park.timeZone
+        let format=park.nightStyle().month(.abbreviated).day()
         let from=start.formatted(format), to=end.formatted(format)
         return now ? String(localized:"Milky Way season at \(park.shortName) runs until about \(to): the core is up at least an hour in true darkness on moonless nights.")
                    : String(localized:"Milky Way season at \(park.shortName) opens about \(from) and runs to about \(to): the core is up at least an hour in true darkness on moonless nights.")

@@ -257,13 +257,13 @@ struct TimeRiver: View {
         .allowsHitTesting(false).accessibilityHidden(true)
     }
     /// The loupe's date: the weekday and day in the reader's language, in the park's own time zone
-    /// ("Fri 16", "vie 16"). Always the date, never "Tonight", so it reads the same on every night.
+    /// and the Gregorian calendar of the labels beside it (`Park.nightStyle`) ("Fri 16", "vie 16"). Always the date, never "Tonight", so it reads the same on every night.
     nonisolated static func loupeDate(_ date:Date,locale:Locale,timeZone:TimeZone)->String {
-        date.formatted(Date.FormatStyle(locale:locale,timeZone:timeZone).weekday(.abbreviated).day())
+        date.formatted(Park.nightStyle(timeZone:timeZone,locale:locale).weekday(.abbreviated).day())
     }
     /// An axis tick: the month and day in the reader's language and the park's time zone ("Nov 8", "8 nov").
     nonisolated static func tickDate(_ date:Date,locale:Locale,timeZone:TimeZone)->String {
-        date.formatted(Date.FormatStyle(locale:locale,timeZone:timeZone).month(.abbreviated).day())
+        date.formatted(Park.nightStyle(timeZone:timeZone,locale:locale).month(.abbreviated).day())
     }
     /// Where the loupe sits: lifted above the night's point, kept inside the river's width and at
     /// most `headroom` (`loupeHeadroom` by default) above it (a Pristine night near the top lifts

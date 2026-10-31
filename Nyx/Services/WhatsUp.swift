@@ -448,8 +448,7 @@ nonisolated struct WhatsUp: Sendable {
         // An evening planet is best soon after sunset; a morning one before dawn.
         let evening=night.best<window.start.addingTimeInterval(window.duration/2)
         let title=String(localized: "\(night.planet.name) at its best")
-        var format=Date.FormatStyle.dateTime.month(.abbreviated).day()
-        format.timeZone=park.timeZone
+        let format=park.nightStyle().month(.abbreviated).day()
         let place=placed(altitude: night.bestAltitude, azimuth: night.bestAzimuth)
         let detail=evening ? String(localized: "Farthest from the Sun's glare around \(day.formatted(format)): the best evenings to find it, \(place) after sunset.")
             : String(localized: "Farthest from the Sun's glare around \(day.formatted(format)): the best mornings to find it, \(place) before sunrise.")

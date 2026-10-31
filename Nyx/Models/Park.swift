@@ -228,15 +228,27 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     /// A night's own labels ("Sat, Oct 31", "S", "Saturday, October 31") count in the Gregorian
     /// calendar, as the month grids and `monthLabel` beside them do, in the reader's language. A device
     /// set to the Hebrew calendar would otherwise put "Sat, 20 Heshvan" over an October grid. A journal
-    /// entry's `dateLabel` keeps the person's own calendar.
-    private func nightStyle(_ locale: Locale) -> Date.FormatStyle {
+    /// entry's `dateLabel` keeps the person's own calendar. Every other night label (the river's
+    /// loupe and ticks, the week grid, Best nights, What's up) starts from this style too, so one
+    /// screen never mixes two calendars.
+    func nightStyle(_ locale: Locale = .autoupdatingCurrent) -> Date.FormatStyle {
         Date.FormatStyle(locale: locale, calendar: calendar, timeZone: timeZone)
+    }
+    /// The same for a zone alone, where no place is at hand.
+    static func nightStyle(timeZone: TimeZone, locale: Locale = .autoupdatingCurrent) -> Date.FormatStyle {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        return Date.FormatStyle(locale: locale, calendar: calendar, timeZone: timeZone)
     }
     func weekdayInitial(_ date: Date, locale: Locale = .autoupdatingCurrent) -> String {
         date.formatted(nightStyle(locale).weekday(.narrow))
     }
     func dayLabel(_ date: Date, locale: Locale = .autoupdatingCurrent) -> String {
         date.formatted(nightStyle(locale).weekday(.abbreviated).month(.abbreviated).day())
+    }
+    /// "October 30, 2026": a night's full date, as `dayLabel` counts it.
+    func nightDateLabel(_ date: Date, locale: Locale = .autoupdatingCurrent) -> String {
+        date.formatted(nightStyle(locale).month(.wide).day().year())
     }
     func dateLabel(_ date: Date) -> String {
         var format = Date.FormatStyle.dateTime.month(.wide).day().year()

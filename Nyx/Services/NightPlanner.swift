@@ -295,7 +295,7 @@ nonisolated enum WeekBest {
     /// The same for a best night already found, without the "every night" case, which needs the week.
     static func label(_ best: Night, first: Night, scored: Bool = true) -> String {
         if best.id == first.id { return String(localized: "Best this week: tonight") }
-        let day = best.id.formatted(Date.FormatStyle(timeZone: best.park.timeZone).weekday(.abbreviated))
+        let day = best.id.formatted(best.park.nightStyle().weekday(.abbreviated))
         return scored ? String(localized: "Best this week: \(day) · \(best.score.value)") : String(localized: "Best this week: \(day)")
     }
 }

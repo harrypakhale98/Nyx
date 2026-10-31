@@ -117,8 +117,7 @@ struct WeekAcrossParksPanel: View {
         return excellent.count>=3 ? excellent : Array(sorted.prefix(3))
     }
     private func header(_ night:Night,tonight:Bool)->some View {
-        var weekday=Date.FormatStyle.dateTime.weekday(.abbreviated); weekday.timeZone=night.park.timeZone
-        var day=Date.FormatStyle.dateTime.day(); day.timeZone=night.park.timeZone
+        let weekday=night.park.nightStyle().weekday(.abbreviated), day=night.park.nightStyle().day()
         return VStack(spacing:1) {
             Text(tonight ? String(localized:"Tonight") : night.id.formatted(weekday)).font(.caption.weight(tonight ? .semibold : .regular))
                 .foregroundStyle(tonight ? palette.ink : palette.muted).lineLimit(1).minimumScaleFactor(0.8)

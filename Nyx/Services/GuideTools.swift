@@ -269,9 +269,7 @@ nonisolated extension NightLookup {
         var calendar=Calendar(identifier: .gregorian)
         calendar.timeZone=zone
         guard let date=calendar.date(from: DateComponents(year: day.year, month: day.month, day: day.day, hour: 12)) else { return nil }
-        var style=Date.FormatStyle().month(.abbreviated).day()
-        style.timeZone=zone
-        return date.formatted(style)
+        return date.formatted(Park.nightStyle(timeZone: zone).month(.abbreviated).day())
     }
     /// A park as the person knows it, or the words the model used when none matched.
     private func lookupName(_ name: String) -> String {

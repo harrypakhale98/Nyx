@@ -64,7 +64,7 @@ struct NightDetail: View {
             VStack(alignment: .leading, spacing: 24) { scoreBlock(plan); moon(plan) }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text("\(park.name), night of \(park.dateLabel(plan.sky.evening))"))
+        .accessibilityLabel(Text("\(park.name), night of \(park.nightDateLabel(plan.sky.evening))"))
     }
     private func scoreBlock(_ plan: NightPlan) -> some View {
         let inputs = model.inputs, park = plan.park
