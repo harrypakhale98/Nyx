@@ -37,6 +37,10 @@ struct ParksView: View {
     var position: Binding<ScrollPosition>?=nil
     @State private var ownPosition=ScrollPosition(idType:String.self)
     private var scroll:Binding<ScrollPosition> { position ?? $ownPosition }
+    /// The list is at its top, and its scroll has settled (no finger on it, nothing still moving): the
+    /// return to the top edge waits for both, so a drag from mid-list on into pull-to-refresh is never cut.
+    @State private var atTop=false
+    @State private var settled=true
     private var search:String { state.wrappedValue.search }
     private var darkOnly:Bool { state.wrappedValue.darkOnly }
     private var stepFreeOnly:Bool { state.wrappedValue.stepFreeOnly }
@@ -147,11 +151,15 @@ struct ParksView: View {
         .scrollPosition(scroll,anchor:.top)
         // Scrolled back to the top, the list is kept at its top, not at its first park (which would hide what
         // is above it). Only the person's scroll: a list just built, still at zero, keeps the park it was handed.
-        .onScrollGeometryChange(for:Bool.self) { $0.contentOffset.y+$0.contentInsets.top<=1 } action:{ _,top in
-            if top, scroll.wrappedValue.isPositionedByUser, scroll.wrappedValue.viewID != nil { scroll.wrappedValue.scrollTo(edge:.top) }
-        }
+        // Once the scroll settles there, so a drag under way is never interrupted.
+        .onScrollGeometryChange(for:Bool.self) { $0.contentOffset.y+$0.contentInsets.top<=1 } action:{ _,top in atTop=top; keepTop(top:top,settled:settled) }
+        .onScrollPhaseChange { _,phase in settled = phase == .idle; keepTop(top:atTop,settled:phase == .idle) }
         .background(NightBackground(veil:0.45)).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
             .modifier(SystemSearch(text:state.search,focused:$searchFocused,prompt:searchPrompt,enabled:!typeSize.isAccessibilitySize))
+    }
+    /// Back at the top by the person's own scroll, and settled: the list is kept at its top edge.
+    private func keepTop(top:Bool,settled:Bool) {
+        if top, settled, scroll.wrappedValue.isPositionedByUser, scroll.wrappedValue.viewID != nil { scroll.wrappedValue.scrollTo(edge:.top) }
     }
     var body: some View {
         withWorld(list)
