@@ -109,6 +109,8 @@ import Observation
     var alertsBusy=false
     /// The Park Service did not accept the person's own key on the last alerts request (`NPSKeyField`).
     var npsKeyRefused=false
+    /// Whose key the Park Service did not accept on the last alerts request, named where alerts are shown.
+    var alertsRefusal:MissingInput.KeyRefusal?
     /// The last forecast detail request was held back by Low Data Mode.
     var detailPausedForLowData=false
     /// Forecast detail (models, layers, smoke) is fetched only once a park's page has been opened
@@ -723,6 +725,7 @@ import Observation
     /// alerts are asked for again at once with the new one.
     func npsKeyChanged() async {
         if npsKeyRefused { npsKeyRefused=false }
+        if alertsRefusal != nil { alertsRefusal=nil }
         await parkStore.keyChanged(to:npsKey)
         await refreshParkUpdates([],force:true)
     }
@@ -906,9 +909,12 @@ import Observation
         await hydration?.value
         let update=await parkStore.alerts(for:self.parks,key:key,network:network,force:force,pages:alertPages)
         apply(update)
-        // Said under the key field only; the shared key refused is the busy line everywhere else.
+        // Under the key field, and in the access line wherever alerts are shown.
         let refusedOwn=own != nil && update.keyRefused
         if npsKeyRefused != refusedOwn { npsKeyRefused=refusedOwn }
+        // `-nyx-nps-key-refused` (DEBUG), with `-nyx-alerts-busy`: the refused line, for screenshots.
+        let refusal:MissingInput.KeyRefusal?=update.keyRefused ? (own != nil ? .own : .shared) : DebugScenario.isEnabled("nps-key-refused") ? .own : nil
+        if alertsRefusal != refusal { alertsRefusal=refusal }
         guard programs else { return }
         for park in parks {
             if Task.isCancelled { return }

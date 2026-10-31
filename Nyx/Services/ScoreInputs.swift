@@ -17,6 +17,8 @@ nonisolated struct ScoreInputs: Sendable, Equatable {
     var alerts: ParkAlertsCache?
     /// The Park Service refused the last request, or is being left alone after one (`AlertsUpdate.busy`).
     var alertsBusy = false
+    /// That refusal was of the key itself (`AlertsUpdate.keyRefused`), named in the access line.
+    var alertsRefusal: MissingInput.KeyRefusal?
 
     /// The closure beside the park's score, from the last park update.
     func closure(_ park: Park) -> String? { alerts?.closure(for: park) }
@@ -30,7 +32,7 @@ nonisolated struct ScoreInputs: Sendable, Equatable {
     /// or why there is none to read (switched off, no key, not fetched yet, or busy).
     func accessNote(_ park: Park) -> String? {
         if let code = park.nps, let listed = alerts?.alerts[code] { return AlertRanking.closure(listed) == nil ? AlertRanking.summary(listed, park: park) : nil }
-        if alertsBusy { return MissingInput.unchecked(busy: true) }
+        if alertsBusy { return MissingInput.unchecked(busy: true, refused: alertsRefusal) }
         if !alertsOn { return MissingInput.alertsOff }
         return MissingInput.unchecked(busy: false)
     }

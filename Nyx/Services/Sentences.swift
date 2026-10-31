@@ -67,8 +67,20 @@ nonisolated enum ClosureLine {
 nonisolated enum MissingInput {
     static var alertsOff: String { String(localized: "Park alerts are off in Your privacy, so closures are not checked.") }
     /// No park update covers the park yet: the Park Service refusing requests, or nothing fetched.
-    static func unchecked(busy: Bool) -> String {
-        busy ? String(localized: "Park alerts are busy. Check current conditions on nps.gov.") : String(localized: "Access not checked. Confirm closures with the park.")
+    /// `refused`: the refusal was of the key itself, which waiting will not mend, so it is named.
+    static func unchecked(busy: Bool, refused: KeyRefusal? = nil) -> String {
+        if busy, let refused { return refusal(refused, cached: false) }
+        return busy ? String(localized: "Park alerts are busy. Check current conditions on nps.gov.") : String(localized: "Access not checked. Confirm closures with the park.")
+    }
+    /// Whose key the Park Service did not accept (401, 403): the person's own, or the one every copy shares.
+    nonisolated enum KeyRefusal: Sendable, Equatable { case own, shared }
+    /// The Park Service did not accept the key. `cached`: alerts from an earlier update are shown.
+    static func refusal(_ key: KeyRefusal, cached: Bool) -> String {
+        switch key {
+        case .own: cached ? String(localized: "The Park Service did not accept your key, so park alerts were not updated.")
+            : String(localized: "The Park Service did not accept your key, so closures were not checked.")
+        case .shared: String(localized: "Park alerts are unavailable right now. Check current conditions on nps.gov before you go.")
+        }
     }
     static var smokeOff: String { String(localized: "Smoke and haze are off in Your privacy, so smoke is not counted.") }
     static var noSmokeYet: String { String(localized: "No smoke forecast on this device yet, so smoke is not counted.") }

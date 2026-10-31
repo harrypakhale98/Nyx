@@ -48,6 +48,8 @@ extension VisionModel {
     /// whether the Park Service is refusing requests.
     func take(_ update: AlertsUpdate) {
         if alertsBusy != update.busy { alertsBusy = update.busy }
+        let refusal: MissingInput.KeyRefusal? = update.keyRefused ? .shared : nil
+        if alertsRefusal != refusal { alertsRefusal = refusal }
         if let cache = update.cache, cache.updated > (alerts?.updated ?? .distantPast) { alerts = cache }
     }
     /// Takes in forecasts, summit layers and smoke newer than those held; true when anything changed

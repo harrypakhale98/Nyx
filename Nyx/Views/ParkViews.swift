@@ -294,9 +294,14 @@ struct AlertsBusyNote: View {
     let park: Park
     /// True when the summary above already says the alerts are busy.
     var summarySaysBusy=false
+    /// The Park Service did not accept the key: named, since waiting will not mend it.
+    var refused:MissingInput.KeyRefusal?=nil
     var body: some View {
         VStack(alignment:.leading,spacing:4) {
-            if !summarySaysBusy { Text("Park alerts are busy. Check current conditions on nps.gov.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            if !summarySaysBusy {
+                Text(refused.map { MissingInput.refusal($0,cached:true) } ?? String(localized:"Park alerts are busy. Check current conditions on nps.gov."))
+                    .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            }
             if let url=BrowserLink.parkConditions(park) {
                 Link(destination:url) { Label("Current conditions on nps.gov",systemImage:"safari").font(.subheadline).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
                     .foregroundStyle(palette.ink).accessibilityHint("Opens the park's page in Safari.")
@@ -305,3 +310,4 @@ struct AlertsBusyNote: View {
     }
 }
 #Preview("Alerts busy") { if let park=try? ParkData.load().first { AlertsBusyNote(park:park).padding(24).background(Color.black).preferredColorScheme(.dark) } }
+#Preview("Key refused") { if let park=try? ParkData.load().first { AlertsBusyNote(park:park,refused:.own).padding(24).background(Color.black).preferredColorScheme(.dark) } }

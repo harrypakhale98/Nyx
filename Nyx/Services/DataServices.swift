@@ -538,6 +538,9 @@ actor ParkStore: ParkProviding {
     private var refused=false
     /// That refusal was of the key itself (401, 403).
     private var keyRefused=false
+    /// When the key was last refused: waiting will not mend it, so the same key is asked again an
+    /// hour later, or ten minutes later when pulled to refresh (`retryable`), never on every refresh.
+    private var keyTried: Date?
     /// The key in use since the person last saved or removed one (`keyChanged`). A caller still
     /// holding the key it replaced (read before the change) sends nothing with it, and what a request
     /// with that key brings back sets no wait and no refusal.
@@ -572,7 +575,7 @@ actor ParkStore: ParkProviding {
     /// it is this method (not the protocol's default) that answers.
     func keyChanged(to key: String) async {
         backoff.succeeded(Self.host)
-        refused=false; keyRefused=false; currentKey=key; newKey=key
+        refused=false; keyRefused=false; keyTried=nil; currentKey=key; newKey=key
         programsTried=[:]
     }
     /// The shared file, or (once, after an update from a version that kept one file per park)
@@ -620,7 +623,9 @@ actor ParkStore: ParkProviding {
         guard !superseded(key), !Task.isCancelled else { return update(busy: refused) }
         let replacing=newKey == key
         // Fresh alerts are not busy because another request (programs, say) made the host wait.
-        guard replacing || Self.stale(alertCache?.updated, maxAge: 6*3600, force: force, now: clock()) else { return update(busy: refused) }
+        guard replacing || (Self.stale(alertCache?.updated, maxAge: 6*3600, force: force, now: clock()) && Self.retryable(keyTried, force: force, now: clock())) else {
+            return update(busy: refused)
+        }
         guard backoff.allows(Self.host, now: clock()) else { return update(busy: true) }
         if replacing { newKey=nil }
         let codes=Array(Set(parks.compactMap(\.nps))).sorted(), ids=parks.map(\.id)
@@ -777,7 +782,9 @@ actor ParkStore: ParkProviding {
         var records: [Record] = [], read=0, complete=false
         for _ in 0..<max(1, min(pages, Self.alertPages)) {
             let reply=await get(Page.self, url("alerts", [("parkCode", codes.joined(separator: ",")), ("limit", "500"), ("start", String(read))]), key: key)
-            if let status=reply.refusal?.status, Self.refuses(status) { refused=true; keyRefused=Self.refusesKey(status) } else if reply.value != nil { refused=false; keyRefused=false }
+            if let status=reply.refusal?.status, Self.refuses(status) {
+                refused=true; keyRefused=Self.refusesKey(status); keyTried=keyRefused ? clock() : nil
+            } else if reply.value != nil { refused=false; keyRefused=false; keyTried=nil }
             guard let page=reply.value else { return .failed }
             // `start` counts every record on the page, read or not, so the next page follows on.
             read+=page.data.count

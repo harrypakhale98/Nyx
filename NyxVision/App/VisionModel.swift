@@ -164,6 +164,8 @@ nonisolated struct SkyMoment: Sendable {
     var aurora: AuroraOutlook? { didSet { if settled, aurora != oldValue { refresh(resetTime: false) } } }
     /// The Park Service refused the last request, or is being left alone after one.
     var alertsBusy = false
+    /// The Park Service did not accept the key every copy shares (the headset has no key field).
+    var alertsRefusal: MissingInput.KeyRefusal?
     /// "Cloud forecasts" in Your privacy: on unless turned off. The transport reads
     /// the same preference before any request (`SafeHTTP`), so off means no request at all.
     var forecastsOn = NetworkService.forecasts.isOn() {
@@ -202,7 +204,7 @@ nonisolated struct SkyMoment: Sendable {
     }
     /// What every score here counts, and what it says it does not (`ScoreInputs`).
     var inputs: ScoreInputs {
-        ScoreInputs(smokeOn: smokeOn, smokeKnown: Set(smoke.keys), alertsOn: alertsOn, alerts: alerts, alertsBusy: alertsBusy)
+        ScoreInputs(smokeOn: smokeOn, smokeKnown: Set(smoke.keys), alertsOn: alertsOn, alerts: alerts, alertsBusy: alertsBusy, alertsRefusal: alertsRefusal)
     }
     let weather: any WeatherProviding
     let summits: SummitLayerService

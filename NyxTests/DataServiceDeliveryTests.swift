@@ -419,6 +419,43 @@ struct DataServiceDeliveryTests {
         let accepted=await store.alerts(for: [jotr], key: "fixed", network: true, force: true)
         #expect(!accepted.busy && !accepted.keyRefused)
     }
+    /// A refused key is not sent on every refresh: again an hour later, or ten minutes later when
+    /// pulled to refresh; a key saved or removed goes at once.
+    @Test func aRefusedKeyWaitsBeforeItIsSentAgain() async throws {
+        let jotr=try park("jotr")
+        let clock=BudgetClock(Self.monday)
+        let http=PathHTTP(["/api/v1/alerts": .status(403)])
+        let store=ParkStore(transport: http, persist: false, clock: { clock.now })
+        #expect(await store.alerts(for: [jotr], key: "k", network: true, force: false).keyRefused)
+        clock.advance(300)
+        #expect(await store.alerts(for: [jotr], key: "k", network: true, force: true).keyRefused)
+        #expect(await store.alerts(for: [jotr], key: "k", network: true, force: false).keyRefused)
+        #expect(await http.count("/api/v1/alerts") == 1)
+        clock.advance(301)
+        _=await store.alerts(for: [jotr], key: "k", network: true, force: false)
+        #expect(await http.count("/api/v1/alerts") == 1)
+        _=await store.alerts(for: [jotr], key: "k", network: true, force: true)
+        #expect(await http.count("/api/v1/alerts") == 2)
+        clock.advance(3600)
+        _=await store.alerts(for: [jotr], key: "k", network: true, force: false)
+        #expect(await http.count("/api/v1/alerts") == 3)
+        await store.keyChanged(to: "other")
+        _=await store.alerts(for: [jotr], key: "other", network: true, force: false)
+        #expect(await http.count("/api/v1/alerts") == 4)
+    }
+    /// Where alerts are shown, a refused key is named rather than called busy: the person's own key,
+    /// or the shared one, with the cue to check the Park Service's site.
+    @Test func aRefusedKeyIsNamedWhereAlertsAreShown() throws {
+        let jotr=try park("jotr")
+        let busy=MissingInput.unchecked(busy: true)
+        let own=ScoreInputs(alertsBusy: true, alertsRefusal: .own).accessNote(jotr)
+        let shared=ScoreInputs(alertsBusy: true, alertsRefusal: .shared).accessNote(jotr)
+        #expect(own == MissingInput.refusal(.own, cached: false) && own != busy)
+        #expect(shared == MissingInput.refusal(.shared, cached: false) && shared != busy && shared?.contains("nps.gov") == true)
+        #expect(MissingInput.refusal(.own, cached: true) != own)
+        #expect(ScoreInputs(alertsBusy: true).accessNote(jotr) == busy)
+        #expect(MissingInput.unchecked(busy: false, refused: .own) == MissingInput.unchecked(busy: false))
+    }
     /// Fresh alerts are not called busy because another request (programs) made the Park Service's host wait.
     @Test func anotherRequestsRefusalLeavesFreshAlertsCalm() async throws {
         let jotr=try park("jotr")

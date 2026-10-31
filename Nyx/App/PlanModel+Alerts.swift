@@ -9,7 +9,7 @@ extension PlanModel {
     }
     func alertSummary(_ park:Park)->String {
         // The same words Vision Pro says beside its scores (`AlertRanking.summary`).
-        guard let data=enrichments[park.id] else { return MissingInput.unchecked(busy:alertsBusy) }
+        guard let data=enrichments[park.id] else { return MissingInput.unchecked(busy:alertsBusy,refused:alertsRefusal) }
         return AlertRanking.summary(data.alerts,park:park)
     }
     /// Where a place's access stands for Ask Nyx, in Nyx's own fixed words only. A closure is a flag
@@ -17,9 +17,7 @@ extension PlanModel {
     /// and the on-device model must not read it as an instruction or quote it as access advice.
     func guideAccess(_ park:Park)->String {
         guard park.nps != nil else { return park.unknownClosuresLine }
-        guard let data=enrichments[park.id] else {
-            return alertsBusy ? String(localized:"Park alerts are busy. Check current conditions on nps.gov.") : String(localized:"Access not checked. Confirm closures with the park.")
-        }
+        guard let data=enrichments[park.id] else { return MissingInput.unchecked(busy:alertsBusy,refused:alertsRefusal) }
         if closure(park) != nil { return OnDeviceGuide.closureRecord }
         if data.alerts.contains(where:{ $0.kind == .danger }) { return String(localized:"A safety alert is listed in the last park update. Read it in Nyx before you go.") }
         if data.alerts.isEmpty { return String(localized:"No alerts in the last park update. Confirm access before travel.") }

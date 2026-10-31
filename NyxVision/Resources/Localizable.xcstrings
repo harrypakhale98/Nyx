@@ -10257,6 +10257,41 @@
         }
       }
     },
+    "Park alerts are unavailable right now. Check current conditions on nps.gov before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parkhinweise sind gerade nicht verfügbar. Sieh vor der Fahrt die aktuellen Bedingungen auf nps.gov nach."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park alerts are unavailable right now. Check current conditions on nps.gov before you go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las alertas del parque no están disponibles por ahora. Consulta las condiciones actuales en nps.gov antes de ir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les alertes du parc sont indisponibles pour le moment. Consultez les conditions actuelles sur nps.gov avant de partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園のアラートは現在利用できません。出かける前にnps.govで現在の状況を確認してください。"
+          }
+        }
+      }
+    },
     "Park data unavailable": {
       "extractionState": "manual",
       "localizations": {
@@ -13263,6 +13298,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "North Unitは中部時間を使っていて、Nyxがこの公園に表示する時刻より1時間進んでいます。"
+          }
+        }
+      }
+    },
+    "The Park Service did not accept your key, so closures were not checked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der National Park Service hat deinen Schlüssel nicht angenommen, daher wurden Sperrungen nicht geprüft."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Park Service did not accept your key, so closures were not checked."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El National Park Service no aceptó tu clave, así que no se verificaron los cierres."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le National Park Service n’a pas accepté votre clé, les fermetures n’ont donc pas été vérifiées."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National Park Serviceがあなたのキーを受け付けなかったため、閉鎖は確認していません。"
+          }
+        }
+      }
+    },
+    "The Park Service did not accept your key, so park alerts were not updated.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der National Park Service hat deinen Schlüssel nicht angenommen, daher wurden die Parkhinweise nicht aktualisiert."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Park Service did not accept your key, so park alerts were not updated."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El National Park Service no aceptó tu clave, así que no se actualizaron las alertas del parque."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le National Park Service n’a pas accepté votre clé, les alertes du parc n’ont donc pas été mises à jour."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National Park Serviceがあなたのキーを受け付けなかったため、公園のアラートは更新されていません。"
           }
         }
       }
