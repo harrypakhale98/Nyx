@@ -69,7 +69,7 @@ struct ParkWindowRoot: View {
         // Nyx coming forward in this window (the main one out of sight behind it) catches up as it would there,
         // and a Save or a spot changed here reaches the widgets, the watch and reminders, as from the main window:
         // after a relaunch this window can be the only one connected.
-        .activeUpkeep(saved:saved,spots:spots)
+        .activeUpkeep(saved:saved,spots:spots,palette:palette)
         .savedUpkeep(saved:saved,spots:spots)
         .modifier(BringsMainWindowForRequests())
         .environment(commands).focusedSceneValue(commands)

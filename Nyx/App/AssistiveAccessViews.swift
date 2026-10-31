@@ -21,38 +21,31 @@ struct AssistiveAccessRoot: View {
         NavigationStack { AssistiveHome() }.scoreGate()
             .environment(\.nyx,palette)
             .preferredColorScheme(.dark)
-            .background(AssistiveSavedSync())
+            // The upkeep below carries the switch to widgets, the Control Center control, the watch and a
+            // followed night's Live Activity, as in the full app (`ActiveUpkeep`).
+            .background(AssistiveSavedSync(palette:palette))
             .modifier(NightVisionFilter(enabled:nightVision,red:palette.red))
             .animation(NyxMotion.spring(reduced:reduceMotion),value:nightVision)
-            .task { model.savedSync.palette=palette }
-            .onChange(of:nightVision) { _,on in
-                // The same follow-through as the full app (`RootView`): widgets, the Control Center
-                // control, the watch and a followed night's Live Activity change colour with the switch.
-                model.savedSync.palette=NyxPalette(nightVision:on,highContrast:true,boldText:legibility == .bold)
-                WidgetCenter.shared.reloadAllTimelines()
-                ControlCenter.shared.reloadControls(ofKind:"NightVisionControl")
-                model.savedSync.pushWatch(model)
-                if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:on) } }
-            }
     }
 }
-/// The main window's saved-park upkeep, for this scene: the full app's `RootView` does not run in
-/// Assistive Access, so "Remind me" would otherwise save a park and switch reminders on without
-/// anything being scheduled. The widget's snapshot, the watch and reminders follow the saved parks
-/// through the same `SavedSkySync`, on the same changes as the full app (`savedUpkeep`), which keeps
-/// the last snapshot's parks when the store could not open.
+/// The main window's upkeep, for this scene: the full app's `RootView` does not run in Assistive
+/// Access, so "Remind me" would otherwise save a park and switch reminders on without anything being
+/// scheduled. The widget's snapshot, the watch and reminders follow the saved parks through the same
+/// `SavedSkySync`, on the same changes as the full app (`savedUpkeep`), which keeps the last snapshot's
+/// parks when the store could not open; coming forward, "tonight" through sunrise, At dusk, night vision's
+/// followers and the Live Activity are the full app's too (`activeUpkeep`).
 private struct AssistiveSavedSync: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.scenePhase) private var scenePhase
     @Query private var saved: [SavedPark]
     /// Saved spots are saved places too: the model resolves their `pin:` ids from these.
     @Query private var spots: [SavedSpot]
+    let palette: NyxPalette
     var body: some View {
         Color.clear.frame(width: 0, height: 0).accessibilityHidden(true)
-            .task { await model.savedSync.update(model, saved: saved, spots: spots) }
+            .activeUpkeep(saved: saved, spots: spots, palette: palette)
             .savedUpkeep(saved: saved, spots: spots)
             .onChange(of: scenePhase) { _, phase in
-                if phase == .active { model.tick(); Task { await model.savedSync.update(model, saved: saved, spots: spots) } }
                 if phase == .background, DebugScenario.screen == nil { SavedSkySync.scheduleRefresh() }
             }
     }

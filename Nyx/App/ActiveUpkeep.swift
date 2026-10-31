@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 /// What Nyx does each time it comes forward, whichever window that is (a main window, or a park's own
 /// window in front of it on iPad): "tonight" checked against the clock, the saved parks published again
@@ -7,15 +8,20 @@ import SwiftData
 /// caught up. Once per coming forward: a second window already active (two side by side) adds nothing.
 /// While Nyx is on screen, one of its active windows also keeps "tonight" honest through sunrise and
 /// follows night vision At dusk (`ActiveWindows.keeper`), so a park's window restored alone does both.
+/// The same window carries night vision's turn to the rest of the system (the Control Center control,
+/// widgets, the watch and a followed night's Live Activity), once, wherever the switch was flipped.
 struct ActiveUpkeep: ViewModifier {
     @Environment(PlanModel.self) private var model
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage(NightLook.nightVisionKey,store:SharedSettings.defaults) private var nightVision=false
     /// Night vision At dusk (`NightVisionDusk`): followed while Nyx is active, never in the background.
     @AppStorage(NightVisionMode.atDuskKey,store:SharedSettings.defaults) private var atDusk=false
+    @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     @State private var id=UUID()
     let saved: [SavedPark]
     let spots: [SavedSpot]
+    /// This window's palette: the widget's Moon pictures are drawn in the keeping window's.
+    let palette: NyxPalette
     /// Whether the saved parks may be published from here yet: a main window's launch publishes them
     /// itself, after Spotlight's index, and becoming active at launch leaves it to that one.
     var publish=true
@@ -25,11 +31,33 @@ struct ActiveUpkeep: ViewModifier {
         content
             .onChange(of:scenePhase,initial:true) { _,phase in
                 guard ActiveWindows.shared.update(id,active:phase == .active) else { return }
+                // The only window active, so the keeper: its palette first, before anything is published.
+                model.savedSync.palette=palette
                 model.tick()
                 if publish { Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
                 if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:nightVision) } }
             }
             .onDisappear { _=ActiveWindows.shared.update(id,active:false) }
+            .onChange(of:keeps ? palette : nil) { _,palette in if let palette { model.savedSync.palette=palette } }
+            // Keep the Control Center toggle and widgets in step with the switch, wherever it was flipped
+            // (in any window, At dusk, a Focus or field mode). Away from Nyx's windows, Control Center and
+            // the Focus tell the same followers themselves (`NightVisionFollowers`).
+            .onChange(of:nightVision) { _,on in
+                guard keeps else { return }
+                WidgetCenter.shared.reloadAllTimelines()
+                ControlCenter.shared.reloadControls(ofKind:"NightVisionControl")
+                // The watch hears the parks the widget has, never the empty list of a store that could not open.
+                model.savedSync.pushWatch(model)
+                // A followed night on the Lock Screen changes colour with the app.
+                if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:on) } }
+            }
+            // Widgets, a followed night and the watch draw their red from the same choice (`NightLook`, `WatchContext.brighterRed`).
+            .onChange(of:brighterRed) { _,_ in
+                guard keeps else { return }
+                WidgetCenter.shared.reloadAllTimelines()
+                model.savedSync.pushWatch(model)
+                if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:nightVision) } }
+            }
             .task(id:keeps) {
                 // Keep "tonight" honest on a screen left open through sunrise.
                 guard keeps else { return }
@@ -58,8 +86,8 @@ struct ActiveUpkeep: ViewModifier {
 }
 extension View {
     /// `ActiveUpkeep`, for a window of either kind.
-    func activeUpkeep(saved: [SavedPark], spots: [SavedSpot], publish: Bool=true) -> some View {
-        modifier(ActiveUpkeep(saved:saved,spots:spots,publish:publish))
+    func activeUpkeep(saved: [SavedPark], spots: [SavedSpot], palette: NyxPalette, publish: Bool=true) -> some View {
+        modifier(ActiveUpkeep(saved:saved,spots:spots,palette:palette,publish:publish))
     }
 }
 

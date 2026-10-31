@@ -187,28 +187,12 @@ struct RootView:View {
         } }
         // "Tonight", the saved parks (and so reminders) and the night's Live Activity catch up whenever Nyx
         // comes forward, in whichever window: a park's own window in front of this one does the same. While
-        // Nyx is on screen one window keeps "tonight" honest through sunrise and follows At dusk.
-        .activeUpkeep(saved:saved,spots:spots,publish:launchPublished)
+        // Nyx is on screen one window keeps "tonight" honest through sunrise, follows At dusk and carries
+        // night vision's turn to Control Center, widgets, the watch and the Live Activity.
+        .activeUpkeep(saved:saved,spots:spots,palette:palette,publish:launchPublished)
         .onDisappear { NotificationRouter.shared.disconnect(routerID) }
         .onReceive(NotificationCenter.default.publisher(for:FieldModeRequest.notification)) { _ in openRequestedField() }
         .onReceive(NotificationCenter.default.publisher(for:ParkOpenRequest.notification)) { _ in openRequestedPark() }
-        .onChange(of:palette.nightVision) { _,_ in model.savedSync.palette=palette }
-        .onChange(of:nightVision) { _,on in
-            // Keep the Control Center toggle and widgets in step with the switch, wherever it was flipped
-            // (in Nyx, Control Center, a Focus or field mode).
-            WidgetCenter.shared.reloadAllTimelines()
-            ControlCenter.shared.reloadControls(ofKind:"NightVisionControl")
-            // The watch hears the parks the widget has, never the empty list of a store that could not open.
-            model.savedSync.pushWatch(model)
-            // A followed night on the Lock Screen changes colour with the app.
-            if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:on) } }
-        }
-        // Widgets, a followed night and the watch draw their red from the same choice (`NightLook`, `WatchContext.brighterRed`).
-        .onChange(of:brighterRed) { _,_ in
-            WidgetCenter.shared.reloadAllTimelines()
-            model.savedSync.pushWatch(model)
-            if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:nightVision) } }
-        }
         // The saved parks and spots, the starting park and the reminder switches: the widgets' snapshot,
         // the watch and reminders follow each change, as in Assistive Access (`savedUpkeep`).
         .savedUpkeep(saved:saved,spots:spots)
