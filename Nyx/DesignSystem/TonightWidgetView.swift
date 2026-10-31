@@ -53,14 +53,15 @@ struct TonightTimeline {
     var unsaved:String?=nil
     /// The widget's setting and size, where it offers previous and next night (`WidgetNightStep`).
     var stepScope:String?=nil
-    /// Where the widgets keep each one's night (the App Group; a test's own suite).
+    /// Where the widgets keep each setting and size's night (the App Group; a test's own suite).
     var stepDefaults:UserDefaults=SharedSettings.defaults
     /// The widget gallery's preview, which keeps no choice of its own.
     var preview=false
     /// Which "next saved place" choice a widget that follows the saved places reads (`WidgetSelection`):
-    /// one per size that draws the button. Medium and large are told by their night buttons' scope,
-    /// the extra large sizes by `large` without one. Nil for the small and Lock Screen widgets, which
-    /// have no button and always show the darkest.
+    /// one per size that draws the button, shared by every widget of that size that follows the saved
+    /// places (WidgetKit names no single widget). Medium and large are told by their night buttons'
+    /// scope, the extra large sizes by `large` without one. Nil for the small and Lock Screen widgets,
+    /// which have no button and always show the darkest.
     var selectionScope:String? {
         guard pinned == nil, !preview else { return nil }
         if let stepScope { return stepScope }

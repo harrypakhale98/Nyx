@@ -28,7 +28,8 @@ struct CycleWidgetParkIntent: AppIntent {
 /// holds another park until that park's night turns over at sunrise, so the widget never keeps
 /// showing a choice from yesterday. Kept per widget size (`TonightTimeline.selectionScope`), so a
 /// tap on one size never moves another, and the sizes without the button (small, Lock Screen)
-/// always show the darkest.
+/// always show the darkest. WidgetKit names no single widget, so two widgets of one size that
+/// both follow the saved places share the choice: a tap on either moves both.
 nonisolated enum WidgetSelection {
     static let kind="TonightWidget"
     /// The Tonight control's kind (`TonightControl`), reloaded whenever the snapshot changes.
@@ -92,7 +93,9 @@ struct StepWidgetNightIntent: AppIntent {
 /// Which night each Tonight widget shows. Tonight unless its previous and next buttons moved it,
 /// and then only while that night's tonight is still tonight at the same place: the night turns
 /// over at sunrise (`TonightTimeline.turnovers`) and the widget is back on tonight. Kept in the
-/// App Group per widget setting and size, so two widgets never move each other.
+/// App Group per widget setting and size: WidgetKit names no single widget, so two widgets with
+/// the same setting and size share their night and move together, while any other pair never
+/// moves each other.
 nonisolated enum WidgetNightStep {
     static let key="widgetNights"
     /// Tonight and the six nights after it, the medium widget's week.
