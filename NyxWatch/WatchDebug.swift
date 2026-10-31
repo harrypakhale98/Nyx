@@ -256,7 +256,9 @@ private struct ComplicationReview: View {
                     }
                     .environment(\.widgetRenderingMode, mode)
                 }
+                // Before a place is chosen.
                 WatchComplicationView(previewFamily: .accessoryRectangular, entry: WatchSkyEntry(date: .now, night: nil, next: nil, nightVision: red)).frame(height: 50)
+                NextDarkComplicationView(previewFamily: .accessoryRectangular, entry: NextDarkEntry(date: .now, park: nil, moment: .none, nightVision: red), now: .now).frame(height: 50)
             }
         }
         .navigationTitle("Complications")

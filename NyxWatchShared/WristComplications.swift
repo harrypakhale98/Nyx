@@ -186,7 +186,8 @@ struct NextDarkComplicationView: View {
                         Text(entry.park?.shortName ?? "Nyx").font(.system(.headline, design: .serif)).lineLimit(1)
                     }
                     headline.font(.system(.body, design: .serif)).foregroundStyle(colors.accent).widgetAccentable().lineLimit(1).minimumScaleFactor(0.7)
-                    Text(detail).font(.caption2).foregroundStyle(colors.muted).lineLimit(1).minimumScaleFactor(0.8)
+                    // No place yet, "Choose a place" says it: where would be cut on a 40 mm face, and VoiceOver hears it (`summary`).
+                    if entry.park != nil { Text(detail).font(.caption2).foregroundStyle(colors.muted).lineLimit(1).minimumScaleFactor(0.8) }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -236,7 +237,8 @@ struct NextDarkComplicationView: View {
         }
     }
     private var detail: String {
-        guard let park = entry.park else { return String(localized: "Choose a place in Nyx on Apple Watch.") }
+        // Not shown without a place (the headline says "Choose a place").
+        guard let park = entry.park else { return "" }
         switch entry.moment {
         case .darkNow(let until, true): return String(localized: "Until moonrise at \(park.zonedTime(until))")
         case .darkNow(let until, false): return String(localized: "Until dawn twilight at \(park.zonedTime(until))")

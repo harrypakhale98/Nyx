@@ -16657,37 +16657,37 @@
         }
       }
     },
-    "Choose a place in Nyx on Apple Watch.": {
+    "Choose a place in Nyx.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wähle in Nyx auf der Apple Watch einen Ort."
+            "value": "Wähle einen Ort in Nyx."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Choose a place in Nyx on Apple Watch."
+            "value": "Choose a place in Nyx."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Elige un lugar en Nyx en el Apple Watch."
+            "value": "Elige un lugar en Nyx."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Choisissez un lieu dans Nyx sur l’Apple Watch."
+            "value": "Choisissez un lieu dans Nyx."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apple WatchのNyxで場所を選択してください。"
+            "value": "Nyxで場所を選択"
           }
         }
       }
