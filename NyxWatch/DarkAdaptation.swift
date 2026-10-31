@@ -48,10 +48,12 @@ struct DarkAdaptationView: View {
                         Spacer()
                     }
                 }
-                .alert("Nyx will ask to tap your wrist at 25 and 30 minutes.", isPresented: $explaining) {
+                .sheet(isPresented: $explaining) {
                     // From a request the clock already runs: Continue adds its reminders.
-                    Button("Continue") { if store.adaptation == nil { start() } else { Task { permission = await store.remindAdaptation() } } }
-                    Button("Cancel", role: .cancel) {}
+                    AdaptationExplainer {
+                        if store.adaptation == nil { start() } else { Task { permission = await store.remindAdaptation() } }
+                    }
+                    .environment(\.nyx, palette).modifier(WatchDebug.TypeSize())
                 }
                 .sheet(isPresented: $showsInfo) { AdaptationInfo().environment(\.nyx, palette).modifier(WatchDebug.TypeSize()) }
         }
@@ -258,6 +260,40 @@ private struct RingArc: View, Animatable {
     }
 }
 
+/// Nyx's line before the system asks to tap the wrist, in the cover's red: a system alert drew it
+/// white on grey over the red screen. Continue goes on to the system's question; the close button
+/// (or a swipe) leaves the reminders unasked. Filtered and dark as `AdaptationInfo`.
+private struct AdaptationExplainer: View {
+    @Environment(\.nyx) private var palette
+    @Environment(\.dismiss) private var dismiss
+    let proceed: () -> Void
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 10) {
+                    Text("Nyx will ask to tap your wrist at 25 and 30 minutes.").font(.footnote)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button("Continue") { dismiss(); proceed() }
+                }
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+            }
+            .modifier(WatchDebug.ScrollEnd())
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button { dismiss() } label: { Label("Cancel", systemImage: "xmark") }.tint(palette.toolbarTint)
+                }
+            }
+            .containerBackground(Color.black, for: .navigation)
+        }
+        .scrollIndicators(.never)
+        .foregroundStyle(palette.ink)
+        .tint(palette.ink)
+        .modifier(NightVisionFilter(enabled: true, red: palette.red))
+        .background(Color.black)
+    }
+}
+
 /// Why the clock exists, in a sheet so the field screen stays one glance. Like the cover, its own
 /// stack filtered as a whole, with a dark Done in place of the system's white close button and a
 /// black container, so nothing on it is brighter than the red.
@@ -349,6 +385,9 @@ nonisolated final class AdaptationNotificationDelegate: NSObject, UNUserNotifica
 
 #Preview("Not started") {
     WatchPreviewHost(nightVision: true) { park, _ in DarkAdaptationView(park: park) }
+}
+#Preview("Before the first Start") {
+    AdaptationExplainer {}.environment(\.nyx, NyxPalette(nightVision: true, highContrast: false))
 }
 #Preview("Ring • 12 min") {
     AdaptationRing(clock: AdaptationClock(start: .now.addingTimeInterval(-12*60)), now: .now)
