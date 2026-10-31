@@ -383,6 +383,7 @@ struct CalendarView: View {
                 .tint(palette.muted)
             }
             ForEach(data.nights.filter { $0.id>=data.tonight }) { night in
+            let stretch=data.inWindow.contains(night.id)
             Button { choose(night) } label:{
                 VStack(alignment:.leading,spacing:8) {
                     Text(park.dayLabel(night.id)).font(.headline)
@@ -393,10 +394,12 @@ struct CalendarView: View {
                     }
                     Text(Sentences.join([night.basisCaption(typical:true) ?? String(localized:"Includes cloud forecast."),night.smokeSentence() ?? ""])).font(.caption).foregroundStyle(palette.muted)
                     if let marker=model.events(night).marker(park:park) { Text(marker.name).font(.caption).foregroundStyle(palette.ink) }
+                    // The stretch the panel above names, in words: the list draws no ring.
+                    if stretch { Label(data.stretch.kind.spoken,systemImage:"circle.circle").font(.caption).foregroundStyle(palette.ink) }
                 }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
             }.buttonStyle(.plain).accessibilityElement(children:.ignore)
-                .accessibilityLabel(night.spokenSummary(.calendar(event:model.events(night).marker(park:park)?.name)))
-                .accessibilityHint(data.inWindow.contains(night.id) ? data.stretch.kind.spokenHint : String(localized:"Opens the score breakdown."))
+                .accessibilityLabel(Sentences.join([night.spokenSummary(.calendar(event:model.events(night).marker(park:park)?.name)),stretch ? Sentences.end(data.stretch.kind.spoken) : ""]))
+                .accessibilityHint(String(localized:"Opens the score breakdown."))
                 .accessibilityAction(named:"Open this night") { chosen=night;peeking=true }
                 .contextMenu {
                     Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
@@ -655,23 +658,29 @@ struct CalendarView: View {
                 : String(localized:"The stretch is the best five nights in a row; one night alone scores higher.")
         case .moon:
             guard !stretch.nights.isEmpty else { return nil }
-            if best.basis != .usual { return String(localized:"The ring marks the least moonlight past the forecasts; the best night is one a forecast reaches.") }
-            return best.score.cloudPoints == nil ? String(localized:"The ring marks the least moonlight; the score also counts the hours of true darkness and when the Moon is up.")
-                : String(localized:"The ring marks the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up.")
+            // "This stretch", not "the ring": at accessibility sizes the month is a list with no ring.
+            if best.basis != .usual { return String(localized:"This stretch has the least moonlight past the forecasts; the best night is one a forecast reaches.") }
+            return best.score.cloudPoints == nil ? String(localized:"This stretch has the least moonlight; the score also counts the hours of true darkness and when the Moon is up.")
+                : String(localized:"This stretch has the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up.")
         }
     }
     /// How the ring was chosen, for the key: five nights in a row by score while forecasts reach them,
     /// else the least moonlight. Nil when the panel already says the stretch lies beyond the month.
-    nonisolated static func stretchNote(_ stretch:Stretch)->String? {
-        switch stretch.kind {
-        case .best: String(localized:"The ring marks the five nights in a row with the highest scores while forecasts reach them. A closure can still change the best choice.")
-        case .moon: stretch.inMonth ? String(localized:"Past the forecasts, the ring marks the five nights with the least moonlight. Their clouds are not known yet.") : nil
+    /// `list`: the accessibility-size list, which draws no ring and names the stretch on its nights.
+    nonisolated static func stretchNote(_ stretch:Stretch,list:Bool=false)->String? {
+        switch (stretch.kind,list) {
+        case (.best,false): String(localized:"The ring marks the five nights in a row with the highest scores while forecasts reach them. A closure can still change the best choice.")
+        case (.best,true): String(localized:"The best stretch is the five nights in a row with the highest scores while forecasts reach them. A closure can still change the best choice.")
+        case (.moon,false): stretch.inMonth ? String(localized:"Past the forecasts, the ring marks the five nights with the least moonlight. Their clouds are not known yet.") : nil
+        case (.moon,true): stretch.inMonth ? String(localized:"Past the forecasts, the darkest moon stretch is the five nights with the least moonlight. Their clouds are not known yet.") : nil
         }
     }
     /// The key says how this month's early looks treat their forecast (`EarlyLookNote`), from the
     /// half-filled nights shown, else from any night ahead: eased toward the usual clouds, or counted
-    /// as it stands where the place has none for the month.
-    nonisolated static func legend(_ ahead:[Night])->String {
+    /// as it stands where the place has none for the month. `list`: the accessibility-size list, which
+    /// draws no dots, fills or streaks: its rows say each night's score, basis and stretch in words.
+    nonisolated static func legend(_ ahead:[Night],list:Bool=false)->String {
+        if list { return String(localized:"Each night shows its darkness score, from 0 to 100, and what the score rests on. Nights in the stretch above say so. A meteor shower's peak or a lunar eclipse you can see is named under its night; neither changes the score.") }
         let early=ahead.filter { $0.basis.isEarlyLook }, note=EarlyLookNote(early.isEmpty ? ahead : early)
         let half=switch (note?.eased ?? true,note?.asItStands ?? false) {
         case (true,true): String(localized:"Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds, or counted as it stands where those are not known.")
@@ -687,9 +696,10 @@ struct CalendarView: View {
         DisclosureGroup(isExpanded:$legendShown) {
             VStack(alignment:.leading,spacing:8) {
                 // What the number is, first; then the ring.
-                Text(Self.legend(data.nights.filter { $0.id>=data.tonight })).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                if let note=Self.stretchNote(data.stretch) { Text(note).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-                if access.differentiate { Text(Sentences.join([NightMark.legend,String(localized:"A line through the date marks a night that has passed.")])).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                let list=typeSize.isAccessibilitySize
+                Text(Self.legend(data.nights.filter { $0.id>=data.tonight },list:list)).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                if let note=Self.stretchNote(data.stretch,list:list) { Text(note).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                if access.differentiate && !list { Text(Sentences.join([NightMark.legend,String(localized:"A line through the date marks a night that has passed.")])).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }.padding(.top,6).frame(maxWidth:.infinity,alignment:.leading)
         } label:{
             Text("What the marks mean").font(.subheadline).foregroundStyle(palette.ink).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
@@ -804,7 +814,6 @@ struct CalendarView: View {
             var title:String { self == .best ? String(localized:"Best stretch") : String(localized:"Darkest moon stretch") }
             /// What VoiceOver adds to a ringed night.
             var spoken:String { self == .best ? String(localized:"In the best stretch") : String(localized:"In the darkest moon stretch") }
-            var spokenHint:String { self == .best ? String(localized:"In the best stretch. Opens the score breakdown.") : String(localized:"In the darkest moon stretch. Opens the score breakdown.") }
         }
         let kind:Kind
         let nights:ArraySlice<Night>

@@ -111,16 +111,28 @@ import Testing
         let moon=CalendarView.stretch(nights,month:nights,after:nights[0].id)
         #expect(moon.kind == .moon)
         #expect(CalendarView.apart(best:nights[6],from:moon)==nil)
-        #expect(CalendarView.apart(best:nights[20],from:moon)=="The ring marks the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up.")
+        #expect(CalendarView.apart(best:nights[20],from:moon)=="This stretch has the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up.")
         let bare=nights[20], noClouds=Night(park:jotr,sky:bare.sky,score:DarknessScore(value:80,moonPoints:40,cloudPoints:nil,bortlePoints:20,lengthPoints:15,basis:.usual),cloudCover:nil,forecastUpdated:nil)
-        #expect(CalendarView.apart(best:noClouds,from:moon)=="The ring marks the least moonlight; the score also counts the hours of true darkness and when the Moon is up.")
+        #expect(CalendarView.apart(best:noClouds,from:moon)=="This stretch has the least moonlight; the score also counts the hours of true darkness and when the Moon is up.")
         let forecast=night(jotr,first.adding(1),score:90,illumination:0.6,forecast:true)
-        #expect(CalendarView.apart(best:forecast,from:moon)=="The ring marks the least moonlight past the forecasts; the best night is one a forecast reaches.")
+        #expect(CalendarView.apart(best:forecast,from:moon)=="This stretch has the least moonlight past the forecasts; the best night is one a forecast reaches.")
         #expect(CalendarView.apart(best:forecast,from:CalendarView.Stretch(kind:.moon,nights:[],inMonth:false))==nil)
         let best=CalendarView.Stretch(kind:.best,nights:nights[0..<5],inMonth:true)
         #expect(CalendarView.apart(best:nights[20],from:best)=="The stretch keeps to forecast nights; the best night lies beyond.")
         #expect(CalendarView.apart(best:forecast,from:best)==nil)
         #expect(CalendarView.apart(best:night(jotr,first.adding(12),score:90,illumination:0.6,forecast:true),from:best)=="The stretch is the best five nights in a row; one night alone scores higher.")
+    }
+    /// The accessibility-size list draws no ring, dots, fills or streaks, so its key and stretch lines
+    /// never describe them; the grid's key still does.
+    @Test func theListKeyDescribesOnlyWhatTheListShows() throws {
+        let jotr=try park("jotr"), first=TripDay(year:2026,month:11,day:1)
+        let nights=(0..<30).map { i in night(jotr,first.adding(i),score:70,illumination:(5...9).contains(i) ? 0.03 : 0.6,forecast:false) }
+        let stretches=[CalendarView.stretch(nights,month:nights,after:nights[0].id),CalendarView.Stretch(kind:.best,nights:nights[0..<5],inMonth:true)]
+        let words=[CalendarView.legend(nights,list:true)]+stretches.compactMap { CalendarView.stretchNote($0,list:true) }
+        #expect(words.count==3)
+        for line in words { for mark in ["ring","dot","streak","Half-filled","Hollow","Solid","shaded"] { #expect(!line.contains(mark),"\(line)") } }
+        #expect(stretches.compactMap { CalendarView.stretchNote($0) }.allSatisfy { $0.contains("the ring marks") || $0.hasPrefix("The ring marks") })
+        #expect(CalendarView.legend(nights).contains("the dot grows with it"))
     }
 
     // MARK: Trip stays
