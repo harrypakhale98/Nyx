@@ -119,6 +119,10 @@ private struct AheadPreview: View {
     AheadPreview(model: VisionModel(now: .now)).dynamicTypeSize(.accessibility3)
 }
 
+#Preview("Darkest ahead, largest accessibility size") {
+    AheadPreview(model: VisionModel(now: .now)).dynamicTypeSize(.accessibility5)
+}
+
 #if DEBUG
 #Preview("Darkest ahead, forecast and early looks, a later night chosen") {
     let model = VisionModel(now: .now)

@@ -154,3 +154,7 @@ struct NightControls: View {
 #Preview("Night controls, accessibility size") {
     NightControls().environment(VisionModel(now: .now)).dynamicTypeSize(.accessibility3)
 }
+
+#Preview("Night controls, largest accessibility size") {
+    NightControls().environment(VisionModel(now: .now)).dynamicTypeSize(.accessibility5)
+}

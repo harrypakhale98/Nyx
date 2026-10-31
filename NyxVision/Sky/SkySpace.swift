@@ -96,5 +96,5 @@ struct SkySpace: View {
         VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency || contrast == .increased, boldText: legibilityWeight == .bold)
     }
     /// The labels' text size: the person's, or DEBUG's `-nyx-ax5`.
-    private var typeSize: DynamicTypeSize { VisionDebug.isEnabled("ax5") ? .accessibility3 : dynamicTypeSize }
+    private var typeSize: DynamicTypeSize { VisionDebug.typeSize ?? dynamicTypeSize }
 }

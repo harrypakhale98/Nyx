@@ -97,6 +97,10 @@ struct YourPrivacyView: View {
     YourPrivacyView().environment(VisionModel(now: .now)).dynamicTypeSize(.accessibility3)
 }
 
+#Preview("Your privacy, largest accessibility size") {
+    YourPrivacyView().environment(VisionModel(now: .now)).dynamicTypeSize(.accessibility5)
+}
+
 #Preview("Your privacy, night vision") {
     YourPrivacyView().environment(VisionModel(now: .now)).environment(\.visionPalette, VisionPalette(nightVision: true))
 }

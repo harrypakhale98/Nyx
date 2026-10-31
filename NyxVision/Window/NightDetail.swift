@@ -320,6 +320,10 @@ struct ParkDataUnavailable: View {
     NavigationStack { NightDetail() }.environment(VisionModel(now: .now)).dynamicTypeSize(.accessibility3)
 }
 
+#Preview("Night detail, largest accessibility size") {
+    NavigationStack { NightDetail() }.environment(VisionModel(now: .now)).dynamicTypeSize(.accessibility5)
+}
+
 #Preview("Night detail, night vision and Reduce Transparency") {
     let model = VisionModel(now: .now)
     model.nightVision = true

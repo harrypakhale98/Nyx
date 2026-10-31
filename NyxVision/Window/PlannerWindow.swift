@@ -179,7 +179,7 @@ private struct NightVisionWindow: ViewModifier {
 }
 struct DebugTypeSize: ViewModifier {
     func body(content: Content) -> some View {
-        if VisionDebug.isEnabled("ax5") { content.dynamicTypeSize(.accessibility3) } else { content }
+        if let size = VisionDebug.typeSize { content.dynamicTypeSize(size) } else { content }
     }
 }
 

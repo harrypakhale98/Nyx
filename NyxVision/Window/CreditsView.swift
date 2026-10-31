@@ -47,6 +47,10 @@ struct CreditsView: View {
     CreditsView().dynamicTypeSize(.accessibility3)
 }
 
+#Preview("Credits, largest accessibility size") {
+    CreditsView().dynamicTypeSize(.accessibility5)
+}
+
 #Preview("Credits, night vision") {
     CreditsView().environment(\.visionPalette, VisionPalette(nightVision: true))
 }

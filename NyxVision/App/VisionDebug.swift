@@ -1,4 +1,4 @@
-import Foundation
+import SwiftUI
 
 /// DEBUG launch arguments for screenshots; all of them disappear from Release builds.
 /// `-nyx-date 2026-07-15` (now is 21:00 UTC that day), `-nyx-park jotr`, `-nyx-vision-time 0.5`
@@ -29,6 +29,8 @@ enum VisionDebug {
     static var clouds: Double? { argument("-nyx-vision-clouds").flatMap(Double.init) }
     static var time: Double? { argument("-nyx-vision-time").flatMap(Double.init) }
     static var body: String? { argument("-nyx-vision-body") }
+    /// `-nyx-ax5`: the largest accessibility text size, as the system's own setting gives it.
+    static var typeSize: DynamicTypeSize? { isEnabled("ax5") ? .accessibility5 : nil }
     /// `-nyx-vision-moon-night 9`: the Moon volume opens on that many nights after tonight.
     static var moonNights: Int? { argument("-nyx-vision-moon-night").flatMap(Int.init) }
     static var look: (yaw: Float, pitch: Float)? {
