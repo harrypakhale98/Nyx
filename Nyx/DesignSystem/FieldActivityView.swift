@@ -85,10 +85,12 @@ struct FieldActivityLockView: View {
             }
             if heading {
                 // Before arrival: the two times that decide when to be there, and the one line that decides whether to go.
-                HStack(spacing:12) {
-                    timeMark(String(localized:"Sunset"),attributes.dusk)
-                    if let dark=attributes.darkStart { timeMark(String(localized:"True darkness"),dark) }
-                }.font(.caption).foregroundStyle(colors.muted).lineLimit(1).minimumScaleFactor(0.8)
+                // Named where both fit whole, else by their symbols (spoken by name), else one to a line: never a cut word.
+                ViewThatFits(in:.horizontal) {
+                    HStack(spacing:12) { headingMarks(symbols:false).fixedSize() }
+                    HStack(spacing:12) { headingMarks(symbols:true).fixedSize() }
+                    VStack(alignment:.leading,spacing:2) { headingMarks(symbols:false) }
+                }.font(.caption).foregroundStyle(colors.muted)
                 if let closure=attributes.closure(state) {
                     // The warning in its red and the words in ink, as in the app: amber is the score's and light's.
                     Label { Text(closure).foregroundStyle(colors.ink).lineLimit(2) } icon:{ Image(systemName:"exclamationmark.triangle.fill").foregroundStyle(colors.caution).accessibilityHidden(true) }
@@ -134,8 +136,16 @@ struct FieldActivityLockView: View {
     private func laterMark(_ item:FieldActivityAttributes.Milestone)->some View {
         HStack(spacing:4) { Text(item.title); Text(item.date,style:.time).monospacedDigit() }.fixedSize()
     }
-    private func timeMark(_ title:String,_ date:Date)->some View {
-        HStack(spacing:4) { Text(title); Text(date,style:.time).monospacedDigit().foregroundStyle(colors.ink) }
+    /// Sunset and true darkness with their clock times. `symbols`: each named by its milestone's symbol.
+    @ViewBuilder private func headingMarks(symbols:Bool)->some View {
+        timeMark(String(localized:"Sunset"),symbol:"sunset",attributes.dusk,symbols:symbols)
+        if let dark=attributes.darkStart { timeMark(String(localized:"True darkness"),symbol:"moon.stars",dark,symbols:symbols) }
+    }
+    private func timeMark(_ title:String,symbol:String,_ date:Date,symbols:Bool)->some View {
+        HStack(alignment:.firstTextBaseline,spacing:4) {
+            if symbols { Image(systemName:symbol).accessibilityLabel(title) } else { Text(title) }
+            Text(date,style:.time).monospacedDigit().foregroundStyle(colors.ink).lineLimit(1).fixedSize()
+        }
     }
 }
 
