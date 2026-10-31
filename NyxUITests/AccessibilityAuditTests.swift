@@ -14,7 +14,9 @@ final class AccessibilityAuditTests:XCTestCase {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
         return ["tonight","going","parks","parks-map","calendar","best","journal","learn","detail","breakdown","editor","entry",
                 "onboarding","settings","privacy","data","article","share","river","skyarc","whatsup",
-                "field","field-compass","alarm-explainer","light","lights-out","long-view","listen","accessibility","trip","constellation","recap","icons","first-light","sky","ask:answered"]
+                "field","field-compass","alarm-explainer","light","lights-out","long-view","listen","accessibility","trip","constellation","recap","icons","first-light","sky","ask:answered",
+                "assistive","assistive-tonight","assistive-saved","save-spot","spot","places","credits","location-explainer","notification-explainer",
+                "diagnostics","stay","from-home","loader","nps-key"]
         // Not "live-activity": that DEBUG page redraws Lock Screen and Dynamic Island faces outside the
         // system containers that host, scale and tint them, so its findings do not transfer. Reviewed by screenshot.
     }
@@ -242,6 +244,12 @@ final class AccessibilityAuditTests:XCTestCase {
         // An unlabelled element of the system search bar (no frame; reported at AX5 only).
         ("parks",""),
     ]
+    /// Rows whose "Text clipped" finding was checked on screen and found drawn in full (`isKnownFalsePositive`).
+    private static let symbolRows:[(screen:String,label:String)]=[
+        ("assistive","Tonight"),("assistive","Saved places"),("assistive","Red light"),
+        ("save-spot","Coordinates"),("save-spot","Use where I am now"),
+        ("diagnostics","Copy diagnostic report"),
+    ]
     /// A text's contrast in its own capture: the most common colour (the ground) against the most common colour at
     /// least 1.5:1 brighter than it (the glyphs' solid core), which must cover 24 pixels or more, so a star or a
     /// glyph's anti-aliased edge cannot stand in for the text. Nil for anything but static text or a button, or when
@@ -392,7 +400,12 @@ final class AccessibilityAuditTests:XCTestCase {
             // full (capture 2026-10-21), and the text grows with its content, so a real third line would show.
             // The same quirk as the Learn title. This line only, at standard sizes; AX5 still measures it.
             let designationLine=screen=="light" && pass != "ax5" && issue.element?.elementType == .staticText && issue.element?.label=="An International Dark Sky Park, certified by DarkSky International."
-            return !visible || pastHomeIndicator || learnTitle || privacyCaption || designationLine || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
+            // Rows with a leading symbol (2026-10-30): Assistive Access's three choices, Save a spot's "Coordinates" choice and
+            // its "Use where I am now" button, and Diagnostics' "Copy diagnostic report". The audit reports each label as
+            // clipped in both palettes; every one is drawn in full on one line with room to spare (iPhone 18 Pro captures,
+            // both palettes). These labels on these screens only, at standard sizes; AX5 still measures them.
+            let symbolRow=pass != "ax5" && Self.symbolRows.contains { $0.screen==screen && $0.label==issue.element?.label }
+            return !visible || pastHomeIndicator || learnTitle || privacyCaption || designationLine || symbolRow || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
         case .elementDetection:
             // Decorative "NYX" wordmark; the sky map's Canvas-drawn inset names (Alaska, Hawaiʻi, Am. Samoa, Virgin Is.):
             // decoration; each star is a labelled button and the map has a spoken summary.
