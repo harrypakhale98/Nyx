@@ -497,11 +497,12 @@ actor AuroraService {
         if persist { CacheDirectory.write(fresh, name: "aurora") }
         return fresh
     }
-    /// "Aurora forecast" was switched off: the copy here is dropped, in memory and on disk.
+    /// "Aurora forecast" was switched off: the copy here is dropped, in memory and on disk. The
+    /// hour's wait after a request is dropped too, so switching it back on asks at once.
     func forget() {
         generation+=1
         running?.cancel(); running=nil
-        memory=nil; loaded=true
+        memory=nil; loaded=true; attempted=nil
         if persist { CacheDirectory.remove(name: "aurora") }
     }
 }

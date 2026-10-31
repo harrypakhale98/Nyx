@@ -223,6 +223,20 @@ struct AuroraForecastTests {
         let forgotten=await service.cached()
         #expect(forgotten == nil)
     }
+    /// Switched off and on again within the hour: the forecast is asked for at once, not an hour later.
+    @Test func switchingBackOnAsksAtOnce() async throws {
+        let http=KpStubHTTP(body: """
+        [{"time_tag":"2026-10-15T00:00:00","kp":3,"observed":"predicted"}]
+        """)
+        let clock=KpClock(Date(timeIntervalSince1970: t0))
+        let service=AuroraService(transport: http, persist: false, clock: { clock.now })
+        _=try #require(await service.outlook(network: true))
+        await service.forget()
+        clock.now=clock.now.addingTimeInterval(60)
+        let back=await service.outlook(network: true)
+        let asked=await http.count
+        #expect(back?.periods.count == 1 && asked == 2)
+    }
 }
 
 /// Turning "Aurora forecast" off while a request is out keeps nothing that arrives.
