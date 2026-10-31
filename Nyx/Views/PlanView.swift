@@ -75,7 +75,8 @@ struct PlanView: View {
         }
         .accessibilityLabel("Plan").accessibilityValue(Text(Self.name(shown)))
         return FittingPicker {
-            control.pickerStyle(.segmented)
+            // On the same glass as the menu, so the page scrolling under the bar never runs through its names.
+            control.pickerStyle(.segmented).padding(4).nyxGlass(Capsule(),role:.bar)
         } menu:{
             // A narrow phone at the largest sizes takes the menu a step smaller rather than breaking a mode's name.
             ViewThatFits(in:.horizontal) { menu;menu.dynamicTypeSize(...DynamicTypeSize.accessibility3) }
