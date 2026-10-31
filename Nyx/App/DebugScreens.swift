@@ -157,13 +157,23 @@ struct DebugTypeSize: ViewModifier {
     @ViewBuilder func body(content:Content)->some View {
         #if DEBUG
         // `-nyx-bold` stands in for Bold Text, which the simulator cannot switch from the command line.
+        // The environment value alone reaches the palette's strokes but no glyph: text is set bold by the
+        // window scene's trait, as the system setting sets it, so the scene is told too.
         let sized=DebugScenario.isEnabled("ax5") ? AnyView(content.dynamicTypeSize(.accessibility5)) : AnyView(content)
-        if DebugScenario.isEnabled("bold") { sized.environment(\.legibilityWeight,.bold) } else { sized }
+        if DebugScenario.isEnabled("bold") { sized.environment(\.legibilityWeight,.bold).onAppear { Self.boldScenes() } } else { sized }
         #else
         // Release: both switches are always off, so the app's root is never type-erased.
         content
         #endif
     }
+    #if DEBUG
+    /// Bold Text for every connected window scene: its windows, sheets and covers alike.
+    private static func boldScenes() {
+        for case let scene as UIWindowScene in UIApplication.shared.connectedScenes where scene.traitCollection.legibilityWeight != .bold {
+            scene.traitOverrides.legibilityWeight = .bold
+        }
+    }
+    #endif
 }
 #if DEBUG
 /// iPad screenshot scenarios: `-nyx-narrow` draws the app in a 390-point compact column, as in a
