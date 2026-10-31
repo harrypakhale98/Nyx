@@ -68,6 +68,8 @@ struct ParkDetailView: View {
     @State private var holdingArc=false
     @State private var width=0.0
     @State private var chapter=ParkChapter.tonight
+    /// A chapter chosen in the bar's "Jump to" menu, scrolled to by the page (`jumpMenu`).
+    @State private var jump:ParkChapter?
     /// Chapter positions, kept out of observation so scrolling never re-evaluates the page.
     @State private var tracker=ChapterTracker()
     @State var titleGone=false
@@ -136,7 +138,12 @@ struct ParkDetailView: View {
                     .safeAreaBar(edge:.top) { if showsIndex { index(proxy) } }
                 }
             }
-            .toolbar { if showsJumpMenu { ToolbarItem(placement:.topBarTrailing) { jumpMenu(proxy) } } }
+            // The bar's "Jump to" menu asks for a chapter (`toolbar`); the scroll happens here, where the reader is.
+            .onChange(of:jump) { _,target in
+                guard let target else { return }
+                jump=nil
+                withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(target,anchor:.top) }
+            }
             .onPreferenceChange(RiverScrubbingKey.self) { now in
                 scrubbing=now
                 // The river releases its hold when the finger lifts; a scrub cut short by the system releases it here.
@@ -209,11 +216,14 @@ struct ParkDetailView: View {
             // Under the full-screen sky the page's own stars and dial rest, so the turning sky has the frames.
             .environment(\.skyResting,showsSky)
             .navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
-            .toolbar { toolbar }.modifier(SkyFullBleed(enabled:!wide))
+            .modifier(SkyFullBleed(enabled:!wide))
             .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night,isTonight:isTonight) }.nyxPresentation().presentationDetents([.large]) }
             // Wide iPad: the breakdown stays beside the page and follows the river's night.
             // The close button only while it is open: iOS 27 lends a closed inspector's toolbar to the page's bar.
             .inspector(isPresented:$inspector) { NightInspector(night:night,isTonight:isTonight,close:inspector ? { inspector=false } : nil) }
+            // The page's bar items below the inspector, not above it: declared inside, in the Parks split view
+            // they went to the inspector's column and the park's bar stood empty (no Save, Share or Jump to).
+            .toolbar { toolbar }
             .onChange(of:width) { _,_ in if inspector, !inspectorRoom { inspector=false } }
             .onChange(of:sizeClass) { _,_ in if inspector, !inspectorRoom { inspector=false } }
             // Only a night chosen here is kept: storing the one the page opened on would hold a
@@ -272,9 +282,9 @@ struct ParkDetailView: View {
         })
     }
     /// At accessibility sizes: the same three chapters in a menu, the one in view checked.
-    private func jumpMenu(_ proxy:ScrollViewProxy)->some View {
+    private var jumpMenu:some View {
         Menu {
-            Picker("Chapter",selection:chapterSelection(proxy)) { ForEach(ParkChapter.allCases) { Text($0.title).tag($0) } }.pickerStyle(.inline)
+            Picker("Chapter",selection:Binding(get:{ chapter },set:{ chapter=$0; jump=$0 })) { ForEach(ParkChapter.allCases) { Text($0.title).tag($0) } }.pickerStyle(.inline)
         } label:{ Label("Jump to a part of the page",systemImage:"list.bullet") }
         .accessibilityValue(Text(chapter.title))
     }
@@ -307,6 +317,7 @@ struct ParkDetailView: View {
                 Color.clear.frame(width:1,height:1).accessibilityHidden(true)
             }
         }
+        if showsJumpMenu { ToolbarItem(placement:.topBarTrailing) { jumpMenu } }
         // Nothing to share until the page has its score (`ScoreGate`).
         ToolbarItem(placement:.topBarTrailing) { ShareNightMenu(night:night).disabled(model.cachesPending) }
         // iPad: this park in a window of its own, beside another (not in a park's own window).

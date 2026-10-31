@@ -201,6 +201,21 @@ final class NyxUITests:XCTestCase {
             XCTAssertFalse(app.buttons["Record this night"].exists,"A night still ahead offers Record this night")
         }
     }
+    /// iPad: the park beside the list keeps its bar (Save, Share), as it does in its own window
+    /// or a sheet. The breakdown's inspector once took the page's bar items into its own column.
+    func testParkBesideTheListHasItsBar() {
+        guard UIDevice.current.userInterfaceIdiom == .pad else { return }
+        continueAfterFailure=false
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","parks","-nyx-state","no-forecast","-nyx-reduce-motion"]
+        app.launch()
+        let river=app.descendants(matching:.any)["Thirty-night darkness timeline"].firstMatch
+        XCTAssertTrue(river.waitForExistence(timeout:20),"No park beside the list")
+        let save=app.buttons.matching(NSPredicate(format:"label IN %@",["Save park","Remove from saved parks"])).firstMatch
+        XCTAssertTrue(save.waitForExistence(timeout:5),"No Save in the park's bar")
+        XCTAssertGreaterThan(save.frame.minX,app.searchFields.firstMatch.frame.maxX,"Save is not over the park")
+        XCTAssertTrue(save.isHittable,"Save is not reachable")
+    }
     /// iPad: a night lifted from the month and held over the Journal's row in the sidebar opens
     /// the Journal, whose screen takes the drop ("Record a night" for that night). On iPhone a long
     /// press stays the night's menu alone.
