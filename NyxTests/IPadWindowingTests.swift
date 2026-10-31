@@ -196,6 +196,17 @@ import UniformTypeIdentifiers
         _=windows.update(main,active:false); _=windows.update(park,active:false)
         #expect(windows.keeper==nil)
     }
+    /// "Show Main Window" finds the main window's session by Nyx's own mark, and a session from before
+    /// the mark by SwiftUI's window group; a park's window is never taken for it.
+    @Test func theMainWindowIsFoundByItsMark() {
+        #expect(MainWindows.isMain([MainWindows.kindKey:"main"]))
+        #expect(!MainWindows.isMain([MainWindows.kindKey:"park"]))
+        // The mark wins over the group's name.
+        #expect(!MainWindows.isMain([MainWindows.kindKey:"park","com.apple.SwiftUI.sceneID":"Nyx.ContentScene"]))
+        #expect(MainWindows.isMain(["com.apple.SwiftUI.sceneID":"Nyx.ContentScene"]))
+        #expect(!MainWindows.isMain(["com.apple.SwiftUI.sceneID":"park"]))
+        #expect(!MainWindows.isMain(nil) && !MainWindows.isMain([:]))
+    }
     /// ⌘⇧N opens the night on screen: a page on a later night reports it, tonight reports none,
     /// and the night leaves with its page.
     @MainActor @Test func eachTabReportsItsNightForANewWindow() {

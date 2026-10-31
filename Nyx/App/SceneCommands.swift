@@ -177,7 +177,11 @@ struct WindowSceneReader: View {
     final class ProbeView: UIView {
         weak var commands:SceneCommands?
         override func didMoveToWindow() { super.didMoveToWindow(); report() }
-        func report() { if let scene=window?.windowScene { commands?.windowScene=scene } }
+        func report() {
+            guard let scene=window?.windowScene, let commands else { return }
+            commands.windowScene=scene
+            MainWindows.mark(scene.session,main:!commands.parkWindow)
+        }
     }
 }
 

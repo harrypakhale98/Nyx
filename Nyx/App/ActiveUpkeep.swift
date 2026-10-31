@@ -91,11 +91,26 @@ extension View {
         entries.removeAll { $0.commands == nil || $0.commands === commands }
         entries.append(Entry(commands))
     }
+    /// Nyx's own mark on each window's session ("main" or "park"), which the system keeps with the
+    /// session across a relaunch (`WindowSceneReader` sets it once the window has a scene).
+    nonisolated static let kindKey="nyx.window"
+    static func mark(_ session: UISceneSession, main: Bool) {
+        let kind=main ? "main" : "park"
+        guard session.userInfo?[kindKey] as? String != kind else { return }
+        var info=session.userInfo ?? [:]
+        info[kindKey]=kind
+        session.userInfo=info
+    }
+    /// Whether a session is a main window's: by Nyx's mark; a session from before the mark by the window
+    /// group SwiftUI names in it (a park's own windows are "park").
+    nonisolated static func isMain(_ info: [String: Any]?) -> Bool {
+        if let kind=info?[kindKey] as? String { return kind == "main" }
+        return (info?["com.apple.SwiftUI.sceneID"] as? String).map { $0 != "park" } ?? false
+    }
     static func bringForward() {
         let scene=entries.reversed().compactMap { $0.commands?.windowScene }.first { $0.activationState != .unattached }
-        // Not connected: the main window's own session, restored with the app, rather than a new window
-        // beside it. Each scene's session names its window group; a park's own windows are "park".
-        let session=scene?.session ?? UIApplication.shared.openSessions.first { ($0.userInfo?["com.apple.SwiftUI.sceneID"] as? String).map { $0 != "park" } ?? false }
+        // Not connected: the main window's own session, restored with the app, rather than a new window beside it.
+        let session=scene?.session ?? UIApplication.shared.openSessions.first { isMain($0.userInfo) }
         let request=session.map { UISceneSessionActivationRequest(session:$0) } ?? UISceneSessionActivationRequest(role:.windowApplication)
         UIApplication.shared.activateSceneSession(for:request,errorHandler:nil)
     }
