@@ -6,8 +6,9 @@ import WidgetKit
 /// watch app and its widget extension (which hosts the control), like the iPhone's field-mode
 /// control: it runs in the app, which opens straight onto the red clock (`AdaptationRequest`).
 /// It is the clock the eye button and Double Tap start: the same stored start
-/// (`WatchSky.adaptationStart`) and, once the app takes the request (`WatchStore.startAdaptation`),
-/// the same wrist taps at 25 and 30 minutes. A clock already running is kept, never restarted.
+/// (`WatchSky.adaptationStart`) and, once the app takes the request (`AdaptationRequests`, with or
+/// without a place chosen), the same wrist taps at 25 and 30 minutes (`WatchStore.remindAdaptation`,
+/// after Nyx's line the first time). A clock already running is kept, never restarted.
 struct StartAdaptationIntent: AppIntent {
     static let title: LocalizedStringResource = "Start dark adaptation"
     static let description = IntentDescription("Opens Nyx in red and starts a 30-minute dark-adaptation clock, with wrist taps at 25 and 30 minutes.")

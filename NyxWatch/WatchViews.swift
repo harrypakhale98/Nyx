@@ -193,12 +193,12 @@ struct ParkNightView: View {
 /// One wrist tap when a moment of the night passes (sunset, true darkness, moonrise…) while the
 /// screen counting down to it is up. Never for a change of park.
 struct MilestoneTap: ViewModifier {
-    let park: Park
+    let park: Park?
     let next: NightMilestone?
     let active: Bool
     private struct Key: Equatable { let park: String; let next: NightMilestone? }
     func body(content: Content) -> some View {
-        content.sensoryFeedback(.start, trigger: Key(park: park.id, next: next)) { old, new in
+        content.sensoryFeedback(.start, trigger: Key(park: park?.id ?? "", next: next)) { old, new in
             active && old.park == new.park && old.next != nil && old.next != new.next
         }
     }

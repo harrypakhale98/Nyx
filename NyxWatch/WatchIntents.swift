@@ -127,7 +127,8 @@ struct RedLightOnIntent: AppIntent {
 }
 
 /// Takes the requests the dark-adaptation intent leaves (`AdaptationRequest`): starts the app's own
-/// clock and the reminders, and opens the red screen for the park on Tonight. The first time, the
+/// clock and the reminders, and opens the red screen for the park on Tonight (with no moments under
+/// the clock before any place is chosen). The first time, the
 /// reminders wait: the screen opens with Nyx's line about the wrist taps up, and the system asks only
 /// after Continue, as the screen's own Start does. Also keeps the clock's complication in step when
 /// the clock starts or stops.
@@ -153,28 +154,29 @@ struct AdaptationRequests: ViewModifier {
         guard WatchDebug.screen == nil, let start = AdaptationRequest.take() else { return }
         // The same start the intent stored, so a clock already running keeps its minutes.
         store.startClock(at: start)
-        // Before any park is followed there are no moments to show; the clock and its complication
-        // still run, and the reminders wait for a start on the screen, where Nyx can say why.
+        // Before any park is followed the screen still opens, with no moments under the clock, so
+        // the first time Nyx can say why the system will ask and the reminders follow its Continue.
         let park = store.featured(at: .now)
         Task {
             let asks = await AdaptationReminders.status() == .notDetermined
             if !asks { await store.remindAdaptation() }
-            if let park { shown = AdaptationCover(park: park, explainsFirst: asks) }
+            shown = AdaptationCover(park: park, explainsFirst: asks)
         }
     }
     #if DEBUG
     /// `-nyx-watch-request open | explain`: the cover as a request opens it, with a clock just
     /// started and nothing scheduled, so the system never asks (`explain`: with Nyx's line up).
     private func debugOpen(explainsFirst: Bool) {
-        guard shown == nil, let park = store.featured(at: .now) else { return }
+        guard shown == nil else { return }
         if store.adaptation == nil { store.debugSet(adaptation: AdaptationClock(start: .now)) }
-        shown = AdaptationCover(park: park, explainsFirst: explainsFirst)
+        shown = AdaptationCover(park: store.featured(at: .now), explainsFirst: explainsFirst)
     }
     #endif
 }
 private struct AdaptationCover: Identifiable {
-    let park: Park
+    /// Nil before any place is chosen.
+    let park: Park?
     /// The clock runs but the reminders wait: Nyx's line comes first (the permission is undecided).
     var explainsFirst = false
-    var id: String { park.id }
+    var id: String { park?.id ?? "" }
 }

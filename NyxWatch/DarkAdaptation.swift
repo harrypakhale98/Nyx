@@ -9,7 +9,9 @@ struct DarkAdaptationView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.legibilityWeight) private var legibility
-    let park: Park
+    /// Nil when Siri, the Action button or the control starts the clock before any place is chosen:
+    /// the clock and its reminders, with no moments under it.
+    let park: Park?
     /// Opened by Siri, the Action button or the control with the clock running and the reminders'
     /// permission undecided: Nyx's line about the wrist taps comes up first, and Continue schedules them.
     var explainsFirst = false
@@ -87,8 +89,8 @@ struct DarkAdaptationView: View {
         TimelineView(.periodic(from: store.adaptation?.start ?? .now, by: 60)) { timeline in
             let now = timeline.date
             let clock = store.adaptation
-            let night = store.tonight(park, at: now)
-            let next = NightMilestone.next(after: now, in: night.sky)
+            let night = park.map { store.tonight($0, at: now) }
+            let next = night.flatMap { NightMilestone.next(after: now, in: $0.sky) }
             ScrollView {
                 // Words above the ring, and the ring as large as the room left above the bottom bar's button
                 // (112 pt where it fits): on a 40 mm watch two lines of words pushed a 112 pt ring's "minutes" under it.
@@ -101,7 +103,7 @@ struct DarkAdaptationView: View {
                     VStack(spacing: 4) {
                         if first { AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: 0)) }
                         Group {
-                            if let next {
+                            if let night, let next {
                                 NextInDark(night: night, next: next, now: now, showsTime: !crowded || first)
                                     .frame(maxWidth: .infinity)
                                     .background {
@@ -109,8 +111,11 @@ struct DarkAdaptationView: View {
                                             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { whole = $0 }
                                     }
                             } else {
-                                Text("Nothing more tonight").font(.footnote).foregroundStyle(palette.muted).nonEssential()
-                                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { whole = $0 }
+                                Group {
+                                    if park == nil { Text("Choose a place in Nyx.") } else { Text("Nothing more tonight") }
+                                }
+                                .font(.footnote).foregroundStyle(palette.muted).nonEssential()
+                                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { whole = $0 }
                             }
                         }
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { words = $0 }
@@ -385,6 +390,9 @@ nonisolated final class AdaptationNotificationDelegate: NSObject, UNUserNotifica
 
 #Preview("Not started") {
     WatchPreviewHost(nightVision: true) { park, _ in DarkAdaptationView(park: park) }
+}
+#Preview("No place chosen") {
+    WatchPreviewHost(nightVision: true) { _, _ in DarkAdaptationView(park: nil) }
 }
 #Preview("Before the first Start") {
     AdaptationExplainer {}.environment(\.nyx, NyxPalette(nightVision: true, highContrast: false))
