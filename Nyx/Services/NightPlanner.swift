@@ -280,8 +280,17 @@ nonisolated enum WeekBest {
     /// `scored: false` leaves the score out ("Best this week: Sat"), for a surface that sets it as a numeral beside it.
     static func label(_ week: [Night], scored: Bool = true) -> String? {
         guard let best = NightPlanner.best(week), let first = week.first else { return nil }
-        if week.count > 1, week.allSatisfy({ $0.score.value == best.score.value }) { return String(localized: "Best this week: every night") }
+        if everyNight(week, best: best) { return String(localized: "Best this week: every night") }
         return label(best, first: first, scored: scored)
+    }
+    /// The night a week's marks ring as its best: none when every night scores the same, where the
+    /// words say "every night" and a ring on one of them would contradict them.
+    static func ringed(_ week: [Night]) -> Night? {
+        guard let best = NightPlanner.best(week) else { return nil }
+        return everyNight(week, best: best) ? nil : best
+    }
+    private static func everyNight(_ week: [Night], best: Night) -> Bool {
+        week.count > 1 && week.allSatisfy { $0.score.value == best.score.value }
     }
     /// The same for a best night already found, without the "every night" case, which needs the week.
     static func label(_ best: Night, first: Night, scored: Bool = true) -> String {

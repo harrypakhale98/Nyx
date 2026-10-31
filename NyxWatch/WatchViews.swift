@@ -681,8 +681,9 @@ struct WeekPage: View {
     let now: Date
     let isHome: Bool
     var body: some View {
-        // The best by the iPhone's tie-breaks is ringed and named in the words of every surface (`WeekBest`).
-        let best = NightPlanner.best(nights)
+        // The best by the iPhone's tie-breaks is named in the words of every surface (`WeekBest`), and
+        // ringed unless every night scores the same ("Best this week: every night").
+        let best = NightPlanner.best(nights), ringed = WeekBest.ringed(nights)
         let scores = nights.map(\.score.value), low = scores.min() ?? 0, high = scores.max() ?? 0
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
@@ -700,7 +701,7 @@ struct WeekPage: View {
                         .accessibilityElement(children: .ignore).accessibilityLabel(label(night))
                     }
                 } else {
-                    HStack(spacing: 0) { ForEach(nights) { night in column(night, best: night.id == best?.id, low: low, high: high) } }
+                    HStack(spacing: 0) { ForEach(nights) { night in column(night, best: night.id == ringed?.id, low: low, high: high) } }
                 }
                 if let best, let line = WeekBest.label(nights, scored: false) {
                     VStack(alignment: .leading, spacing: 0) {
@@ -744,9 +745,13 @@ struct WeekPage: View {
     /// What the marks mean, in the iPhone's week legend: the fills where a night has no full forecast,
     /// the stars under Differentiate Without Color.
     private var legend: String? {
-        let marks = String(localized: "Solid: forecast. Half-filled: an early look. Hollow: usual clouds. The ring marks the week's best night.")
+        // The ring is named only where one is drawn.
+        let ring = WeekBest.ringed(nights) != nil
+        let marks = ring ? String(localized: "Solid: forecast. Half-filled: an early look. Hollow: usual clouds. The ring marks the week's best night.")
+                         : String(localized: "Solid: forecast. Half-filled: an early look. Hollow: usual clouds.")
         if nights.contains(where: { $0.basis.fill != .full }) { return differentiate ? Sentences.join([NightMark.legend, marks]) : marks }
-        return differentiate ? String(localized: "\(NightMark.legend) The ring marks the week's best night.") : nil
+        guard differentiate else { return nil }
+        return ring ? String(localized: "\(NightMark.legend) The ring marks the week's best night.") : NightMark.legend
     }
     private func column(_ night: Night, best: Bool, low: Int, high: Int) -> some View {
         VStack(spacing: 3) {

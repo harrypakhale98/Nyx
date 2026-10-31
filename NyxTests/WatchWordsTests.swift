@@ -33,6 +33,15 @@ struct WatchWordsTests {
         #expect(WeekBest.label(later) == "Best this week: \(day) · 82")
         #expect(WeekBest.label(later) == WeekBest.label(try #require(NightPlanner.best(later)), first: later[0]))
     }
+    /// The week's marks ring the night the words name, and none where the words say "every night".
+    @Test func weekRingsTheBestUnlessEveryNightScoresTheSame() throws {
+        let jotr = try park("jotr")
+        #expect(WeekBest.ringed([]) == nil)
+        #expect(try WeekBest.ringed(week(jotr, Array(repeating: 26, count: 7))) == nil)
+        #expect(try WeekBest.ringed(week(jotr, [42]))?.score.value == 42)
+        let later = try week(jotr, [60, 70, 82, 75, 80, 66, 71])
+        #expect(WeekBest.ringed(later)?.id == later[2].id)
+    }
     /// Equal top scores name the night the iPhone's ranking puts first (here the larger sum of parts),
     /// not simply the earlier one.
     @Test func weekBestBreaksTiesByTheRanking() throws {
