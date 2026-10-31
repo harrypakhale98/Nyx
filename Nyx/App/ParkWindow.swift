@@ -32,26 +32,33 @@ struct ParkWindowRoot: View {
     private func waits(_ id:String)->Bool { model.awaitsCatalog(id) || (id.hasPrefix(SavedSpots.prefix) && !spotsFed) }
     var body: some View {
         // The same palette as the main window, brighter red included (`RootView`).
-        let palette=NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed,boldText:legibility == .bold)
+        let palette=NyxPalette.window(nightVision:nightVision,contrast:contrast,brighterRed:brighterRed,legibility:legibility)
         NavigationStack {
-            if let value, let park=model.park(value.parkID) {
-                ParkDetailView(park:park,initialDate:ParkWindowRoot.night(stored:chosenNight,opened:value.night,tonight:model.tonight(park)),nightChanged:{ night in chosenNight=night.timeIntervalSince1970 })
-                    .id(park.id)
-                    // Night vision one tap away here too, as in every tab of the main window, and the way back to
-                    // the main window, which a park's window can cover entirely (full screen).
-                    .toolbar {
-                        ToolbarItem(placement:.topBarLeading) { NightVisionToggle() }
-                        ToolbarItem(placement:.topBarLeading) {
-                            Button("Show Main Window",systemImage:"macwindow") { MainWindows.bringForward() }
-                                .labelStyle(.iconOnly).help("Show Main Window")
-                                .accessibilityInputLabels([Text("Show Main Window"),Text("Main window")])
-                        }
-                    }
-            } else if let value, waits(value.parkID) {
-                ConstellationLoader().frame(maxWidth:.infinity,maxHeight:.infinity).background(NightBackground())
-            } else {
-                CalmState(symbol:"mountain.2",title:"This park is not in Nyx",message:"Close this window and choose a park from the list.")
-                    .frame(maxHeight:.infinity).background(NightBackground())
+            Group {
+                if let value, let park=model.park(value.parkID) {
+                    ParkDetailView(park:park,initialDate:ParkWindowRoot.night(stored:chosenNight,opened:value.night,tonight:model.tonight(park)),nightChanged:{ night in chosenNight=night.timeIntervalSince1970 })
+                        .id(park.id)
+                } else if let value, waits(value.parkID) {
+                    ConstellationLoader().frame(maxWidth:.infinity,maxHeight:.infinity).background(NightBackground())
+                } else if let value, value.parkID.hasPrefix(SavedSpots.prefix) {
+                    // A spot deleted here or in another window: its page cannot come back.
+                    CalmState(symbol:"mappin.slash",title:"This spot was deleted",message:"Close this window and choose another place.")
+                        .frame(maxHeight:.infinity).background(NightBackground())
+                } else {
+                    CalmState(symbol:"mountain.2",title:"This park is not in Nyx",message:"Close this window and choose a park from the list.")
+                        .frame(maxHeight:.infinity).background(NightBackground())
+                }
+            }
+            // Night vision one tap away here too, as in every tab of the main window, and the way back to
+            // the main window, which a park's window can cover entirely (full screen): on the loader and
+            // on a place that is gone as well as on the page.
+            .toolbar {
+                ToolbarItem(placement:.topBarLeading) { NightVisionToggle() }
+                ToolbarItem(placement:.topBarLeading) {
+                    Button("Show Main Window",systemImage:"macwindow") { MainWindows.bringForward() }
+                        .labelStyle(.iconOnly).help("Show Main Window")
+                        .accessibilityInputLabels([Text("Show Main Window"),Text("Main window")])
+                }
             }
         }
         .environment(\.nyxTab,0)

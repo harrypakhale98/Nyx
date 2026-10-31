@@ -65,6 +65,9 @@ struct SpotPanel: View {
     @Environment(\.nyx) private var palette
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.isPresented) private var presented
+    @Environment(\.dismissWindow) private var dismissWindow
+    @Environment(SceneCommands.self) private var commands: SceneCommands?
     let spot: Park
     @State private var renaming=false
     @State private var newName=""
@@ -131,7 +134,14 @@ struct SpotPanel: View {
     }
     private func delete() {
         guard !model.journalUnavailable else { failed=true; return }
-        do { try SavedSpots.delete(spot.id,in:context); dismiss() } catch { failed=true }
+        do { try SavedSpots.delete(spot.id,in:context); close() } catch { failed=true }
+    }
+    /// Closes the deleted spot's page: back a page or out of a sheet; as the root of a window of its own
+    /// (iPad), that window, with the main window brought forward so Nyx stays on screen.
+    private func close() {
+        guard !presented, commands?.parkWindow == true else { dismiss(); return }
+        MainWindows.bringForward()
+        dismissWindow()
     }
 }
 
