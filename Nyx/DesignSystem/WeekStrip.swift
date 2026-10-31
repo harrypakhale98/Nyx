@@ -16,6 +16,8 @@ struct WeekStrip: View {
     let nights: [Night]
     /// The best night, ties broken as everywhere (`NightPlanner.best`).
     private var best: Night? { NightPlanner.best(nights) }
+    /// The night ringed as the best: none when every night scores alike and the words say "every night" (`WeekBest.ringed`).
+    private var ringed: Night? { WeekBest.ringed(nights) }
     var body: some View {
         if let best, let first=nights.first {
             // Said as the week's best: the park page and Best nights name the best of thirty nights.
@@ -26,7 +28,7 @@ struct WeekStrip: View {
             if typeSize.isAccessibilitySize { line }
             else {
                 let pitch=WeekStrip.pitch(scaledPitch)
-                let strip=dots(best:best,pitch:pitch).frame(width:CGFloat(nights.count)*pitch,height:pitch*1.1)
+                let strip=dots(ringed:ringed,pitch:pitch).frame(width:CGFloat(nights.count)*pitch,height:pitch*1.1)
                 // In a narrow row the caption moves under the dots whole rather than orphaning its score.
                 ViewThatFits(in:.horizontal) {
                     HStack(spacing:10) { strip;line.fixedSize() }
@@ -43,7 +45,7 @@ struct WeekStrip: View {
     static let ringRadius=5+1.7
     /// The column pitch for a scaled 16 pt: never below 16, never above 1.8× it.
     static func pitch(_ scaled:Double)->Double { min(max(scaled,basePitch),basePitch*1.8) }
-    private func dots(best:Night,pitch:Double)->some View {
+    private func dots(ringed:Night?,pitch:Double)->some View {
         let scores=nights.map(\.score.value), low=scores.min() ?? 0, high=scores.max() ?? 0
         return Canvas { context,size in
             let scale=pitch/WeekStrip.basePitch
@@ -52,7 +54,7 @@ struct WeekStrip: View {
                 let radius=NightMark.radius(score:night.score.value,low:low,high:high)*scale
                 let mark=NightMark.mark(night,differentiate:access.differentiate)
                 mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent,fillOpacity:palette.markOpacity(score:night.score.value),lineWidth:0.8*scale,stroke:palette.stroke)
-                if night.id==best.id {
+                if night.id==ringed?.id {
                     let ring=WeekStrip.ringRadius*scale
                     context.stroke(Path(ellipseIn:CGRect(x:center.x-ring,y:center.y-ring,width:2*ring,height:2*ring)),with:.color(palette.accent.opacity(0.75)),lineWidth:0.7*scale*palette.stroke)
                 }
@@ -60,10 +62,11 @@ struct WeekStrip: View {
         }.accessibilityHidden(true)
     }
     /// For a row's VoiceOver label, with the best night's forecast caveat ("Early look", "No cloud
-    /// forecast yet") when it has one, as the dots show it.
+    /// forecast yet") when it has one, as the dots show it. Every night alike singles none out, as the caption says.
     static func summary(_ nights:[Night])->String? {
         guard let first=nights.first, let best=WeekStrip(nights:nights).best else { return nil }
-        let line=best.id==first.id ? String(localized:"Tonight is the best night this week.")
+        let line=WeekBest.ringed(nights) == nil ? Sentences.end(String(localized:"Best this week: every night"))
+            : best.id==first.id ? String(localized:"Tonight is the best night this week.")
             : String(localized:"Best night this week: \(best.park.dayLabel(best.id)), \(best.score.value).")
         return Sentences.join([line]+best.basisLabels.map(Sentences.end))
     }

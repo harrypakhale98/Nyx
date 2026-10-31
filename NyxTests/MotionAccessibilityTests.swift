@@ -22,6 +22,9 @@ import Testing
         #expect(early.hasSuffix("Early look."))
         let usual=try #require(WeekStrip.summary(try nights(jotr,scores:[90,70],basis:.usual)))
         #expect(usual.hasPrefix("Tonight is the best night this week.") && usual.hasSuffix("No cloud forecast yet."))
+        // Every night alike: no night is ringed, and VoiceOver hears the caption's words.
+        let alike=try #require(WeekStrip.summary(try nights(jotr,scores:[61,61,61],basis:.usual)))
+        #expect(alike.hasPrefix("Best this week: every night."))
     }
 
     @Test func doubleTapFollowsTheReminderRule() throws {

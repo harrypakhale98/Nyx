@@ -507,10 +507,10 @@ struct TonightWidgetView:View {
         return renderer.uiImage
     }
     /// Seven nights as small skies, as the app's week strip draws them: the dot grows with the score
-    /// across the week's own range, the best night gets a ring, early looks are half-filled and
-    /// nights without a cloud forecast hollow.
+    /// across the week's own range, the best night gets a ring (none when every night scores alike,
+    /// `WeekBest.ringed`), early looks are half-filled and nights without a cloud forecast hollow.
     private func weekStrip(_ week:[Night])->some View {
-        let best=NightPlanner.best(week)?.id
+        let best=WeekBest.ringed(week)?.id
         let scores=week.map(\.score.value), low=scores.min() ?? 0, high=scores.max() ?? 0
         return VStack(alignment:.leading,spacing:6) {
             HStack(spacing:0) {
