@@ -413,9 +413,10 @@ struct OpenMeteoBudgetTests {
         #expect(RefreshOutcome.of(forecastsOn: true, fetched: false, current: false, newest: nil, heldBack: true, now: now) == .paused(nil))
         #expect(RefreshOutcome.of(forecastsOn: true, fetched: false, current: false, newest: old, now: now) == .unreachable)
         #expect(RefreshOutcome.of(forecastsOn: false, fetched: false, current: false, newest: old, heldBack: true, now: now) == .forecastsOff)
-        // Lines say the time in this device's own format, as of the real clock.
-        #expect(RefreshOutcome.current(recent).line.hasSuffix(RefreshOutcome.when(recent)))
-        #expect(RefreshOutcome.paused(old).line.hasSuffix(RefreshOutcome.when(old)))
+        // Lines say the time in this device's own format, as of the real clock, and end as sentences.
+        #expect(RefreshOutcome.current(recent).line.hasSuffix(Sentences.end(RefreshOutcome.when(recent))))
+        #expect(RefreshOutcome.paused(old).line.hasSuffix(Sentences.end(RefreshOutcome.when(old))))
+        #expect(RefreshOutcome.paused(old).line.hasSuffix(".") && !RefreshOutcome.paused(old).line.hasSuffix(".."))
         var utc=Calendar(identifier: .gregorian)
         utc.timeZone=TimeZone(identifier: "UTC") ?? .current
         var utcTime=Date.FormatStyle(date: .omitted, time: .shortened)
@@ -425,7 +426,7 @@ struct OpenMeteoBudgetTests {
         let denver=try #require(TimeZone(identifier: "America/Denver"))
         var mountain=Calendar.current
         mountain.timeZone=denver
-        #expect(RefreshOutcome.current(recent).line(in: denver).hasSuffix(RefreshOutcome.when(recent, calendar: mountain)))
+        #expect(RefreshOutcome.current(recent).line(in: denver).hasSuffix(Sentences.end(RefreshOutcome.when(recent, calendar: mountain))))
         var denverTime=Date.FormatStyle(date: .omitted, time: .shortened)
         denverTime.timeZone=denver
         #expect(RefreshOutcome.when(recent, now: recent, calendar: mountain) == recent.formatted(denverTime))

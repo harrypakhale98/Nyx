@@ -340,8 +340,9 @@ nonisolated enum RefreshOutcome: Equatable {
         case .updated: return String(localized:"Updated")
         case .forecastsOff: return String(localized:"Cloud forecasts are off in Your privacy. Showing saved data.")
         case .unreachable: return String(localized:"Could not reach the forecast. Showing saved data.")
-        case .current(let issued): return String(localized:"Up to date. Forecast from \(Self.when(issued,calendar:calendar))")
-        case .paused(let issued?): return String(localized:"Forecast requests are paused for a while. Showing the forecast from \(Self.when(issued,calendar:calendar))")
+        // Closed as sentences here, not in the catalog: a time that ends in "p.m." takes no second period.
+        case .current(let issued): return Sentences.end(String(localized:"Up to date. Forecast from \(Self.when(issued,calendar:calendar))"))
+        case .paused(let issued?): return Sentences.end(String(localized:"Forecast requests are paused for a while. Showing the forecast from \(Self.when(issued,calendar:calendar))"))
         case .paused(nil): return String(localized:"Forecast requests are paused for a while. Showing saved data.")
         }
     }
