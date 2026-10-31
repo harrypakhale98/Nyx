@@ -493,12 +493,12 @@ struct NightGlance: View {
 
 /// Where the clouds came from and how old they are, after any line saying the score has none.
 /// `labelShown`: the night's basis label is already on screen (`NightGlance`), so its short note,
-/// the same words, is not said again.
+/// the same words, is not said again, and the long note does not open with them.
 func cloudLines(_ night: Night, context: WatchContext?, now: Date, labelShown: Bool = false) -> [String] {
     let source = WatchSky.cloudSource(night.park, context: context, now: now)
     // A forecast the iPhone could refresh says so plainly, never "no forecast for this night".
     var lines: [String] = []
-    if !(labelShown && source.explainsItself), let note = WatchSky.forecastNote(night, context: context, short: source.explainsItself) { lines.append(note) }
+    if !(labelShown && source.explainsItself), let note = WatchSky.forecastNote(night, context: context, short: source.explainsItself, labelShown: labelShown) { lines.append(note) }
     if let line = source.line(for: night.park) { lines.append(line) }
     if let line = context?.dataNote { lines.append(line) }
     return lines

@@ -271,14 +271,15 @@ extension Night {
     }
     /// The long form; nil with a forecast: "No cloud forecast yet." or "Cloud forecast
     /// unavailable." (`noForecastSentence`), then what the score uses instead. `typical` adds
-    /// "About 8 in 10 … nights here are mostly clear."
-    nonisolated func basisCaption(typical: Bool = false) -> String? {
+    /// "About 8 in 10 … nights here are mostly clear." `opening` false leaves out the first sentence,
+    /// for a screen that already shows `basisLabel` beside it.
+    nonisolated func basisCaption(typical: Bool = false, opening: Bool = true) -> String? {
         switch basis {
         case .forecast: return nil
         case .blended: return basis.earlyLookCaption(usualClouds: usualCloud != nil)
         case .usual:
             // Never "Arches's": the park follows the month rather than taking a possessive.
-            let line = Sentences.join([noForecastSentence ?? "", usualCloud == nil ? String(localized: "This score counts the Moon and darkness only.")
+            let line = Sentences.join([opening ? noForecastSentence ?? "" : "", usualCloud == nil ? String(localized: "This score counts the Moon and darkness only.")
                 : String(localized: "This score uses the usual \(park.monthName(id)) clouds at \(park.shortName).")])
             return typical ? withTypicalClouds(line) : line
         }

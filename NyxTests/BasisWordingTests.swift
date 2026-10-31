@@ -39,6 +39,15 @@ import Testing
         }
         #expect(ShareCard(night: later).basis == "No cloud forecast yet · usual clouds for the month")
     }
+    /// Beside the label (a night turned to on the watch), the long caption says what the score uses
+    /// without opening with the label's own words again.
+    @Test func aCaptionBesideItsLabelSkipsTheOpening() throws {
+        let tonight = night(try park("jotr")), bare = night(try park("jotr"), climate: CloudClimate(parks: [:]))
+        let caption = try #require(tonight.basisCaption(opening: false))
+        #expect(!caption.contains("Cloud forecast unavailable") && caption.hasPrefix("This score uses the usual"))
+        #expect(bare.basisCaption(opening: false) == "This score counts the Moon and darkness only.")
+        #expect(tonight.basisCaption() == Sentences.join([tonight.noForecastSentence ?? "", caption]))
+    }
     @Test func withoutUsualCloudsTheScoreSaysMoonAndDarknessOnly() throws {
         let bare = night(try park("jotr"), climate: CloudClimate(parks: [:]))
         #expect(bare.usualCloud == nil && bare.score.cloudPoints == nil)

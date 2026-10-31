@@ -181,11 +181,12 @@ nonisolated enum WatchSky {
         choice.nightVision(phone: context?.nightVision, park: park(), dusk: context?.duskPlace, at: now)
     }
     /// What a score's clouds rest on when there is no full forecast, in one short honest line, in
-    /// the iPhone's words (`Night.basisCaption`).
-    static func forecastNote(_ night: Night, context: WatchContext?, short: Bool = false) -> String? {
+    /// the iPhone's words (`Night.basisCaption`). `labelShown`: the night's basis label is already on
+    /// screen, so the long line does not open with it again.
+    static func forecastNote(_ night: Night, context: WatchContext?, short: Bool = false, labelShown: Bool = false) -> String? {
         guard let label = night.basisLabel else { return nil }
         if short { return label }
-        return Sentences.join([night.basisCaption() ?? "", unsyncedNote(night, context: context) ?? ""])
+        return Sentences.join([night.basisCaption(opening: !labelShown) ?? "", unsyncedNote(night, context: context) ?? ""])
     }
     /// Before the iPhone has sent anything, a night a forecast should reach says where its clouds
     /// come from; one beyond every forecast's reach needs no such line.
