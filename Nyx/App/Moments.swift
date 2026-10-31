@@ -143,8 +143,9 @@ struct MomentsWatcher: View {
     private func offer() {
         guard let top=commands?.topController else { offering=true; return }
         let host=UIHostingController(rootView:explainer.nyxPresentation().environment(\.nyx,palette))
-        // Three quarters, as the explainer asks of a SwiftUI sheet (`PermissionExplainer`).
-        host.sheetPresentationController?.detents=[.custom { $0.maximumDetentValue*0.75 },.large()]
+        // Three quarters, as the explainer asks of a SwiftUI sheet (`PermissionExplainer`); the whole
+        // screen at accessibility sizes, where its choices follow the reason down the page.
+        host.sheetPresentationController?.detents=top.traitCollection.preferredContentSizeCategory.isAccessibilityCategory ? [.large()] : [.custom { $0.maximumDetentValue*0.75 },.large()]
         if top.modalPresentationStyle == .popover, let below=top.presentingViewController {
             top.dismiss(animated:true) { below.present(host,animated:true) }
         } else { top.present(host,animated:true) }

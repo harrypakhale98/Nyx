@@ -758,23 +758,39 @@ struct CaveatLine: View {
 
 struct PermissionExplainer: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var typeSize
     let symbol:String
     let title:LocalizedStringKey
     let message:LocalizedStringKey
     let action:LocalizedStringKey
     let proceed:()->Void
     var body: some View {
-        // The choice stays pinned under the message, so the sheet at half height never shows only Close.
-        NavigationStack { ScrollView { CalmState(symbol:symbol,title:title,message:message).padding(.horizontal,24) }.background(Color.black)
-            .safeAreaInset(edge:.bottom) { VStack(spacing:14) { Button(action,action:proceed).secondaryAction();Button("Continue without it") { dismiss() }.frame(minHeight:44) }.padding(.horizontal,24).padding(.vertical,12).frame(maxWidth:.infinity).background(Color.black) }
+        NavigationStack {
+            ScrollView {
+                CalmState(symbol:symbol,title:title,message:message).padding(.horizontal,24)
+                // At accessibility sizes the choices follow the reason down the page: pinned, they took
+                // most of the screen and covered the reason (on an iPhone SE all but the title).
+                if typeSize.isAccessibilitySize { choices.padding(.bottom,24) }
+            }.defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(Color.black)
+            // Otherwise the choice stays pinned under the message, so the sheet never shows only Close.
+            .safeAreaInset(edge:.bottom) { if !typeSize.isAccessibilitySize { choices.background(Color.black) } }
             .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Close") { dismiss() } } } }
             // Three quarters, not half: on an iPhone SE half the screen held the pinned choice and only the
-            // title above it, so the reason was out of sight.
-            .presentationDetents([.fraction(0.75),.large])
+            // title above it, so the reason was out of sight. The whole screen at accessibility sizes.
+            .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.fraction(0.75),.large])
             // A form-sized card on iPad, never a page stretched across the window.
             .presentationSizing(.form)
     }
+    private var choices: some View {
+        VStack(spacing:14) {
+            // The label wraps rather than truncating ("Use my loca…" at AX5).
+            Button(action:proceed) { Text(action).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }.secondaryAction()
+            Button("Continue without it") { dismiss() }.frame(minHeight:44)
+        }.padding(.horizontal,24).padding(.vertical,12).frame(maxWidth:.infinity)
+    }
 }
+#Preview("Explainer") { PermissionExplainer(symbol:"location",title:"Find dark places near you",message:"Nyx compares distances on this iPhone. Your location is never sent to a service.",action:"Use my location") {}.preferredColorScheme(.dark) }
+#Preview("Explainer • AX5") { PermissionExplainer(symbol:"location",title:"Find dark places near you",message:"Nyx compares distances on this iPhone. Your location is never sent to a service.",action:"Use my location") {}.dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
 #Preview("Tonight") { NavigationStack { TonightView() }.environment(PlanModel()).preferredColorScheme(.dark) }
 #Preview("Tonight • from abroad") { NavigationStack { TonightView() }.environment(TonightReach.previewModel(from:"Reykjavík")).preferredColorScheme(.dark) }
 #Preview("Tonight • from abroad, AX5, night vision") {
