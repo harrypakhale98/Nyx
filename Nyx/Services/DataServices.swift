@@ -908,8 +908,17 @@ actor ParkStore: ParkProviding {
               (1...12).contains(month), (1...31).contains(day), (1000...9999).contains(year) else { return nil }
         return String(format: "%04d-%02d-%02d", year, month, day)
     }
+    /// NPS text as plain text. A line break, paragraph or list item ends its line, so sentences
+    /// never run together ("advance.<br /><br />This is"); other tags go; spaces and blank lines
+    /// are collapsed.
     static func plain(_ html: String) -> String {
-        html.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+        html.replacingOccurrences(of: "<br\\s*/?>|</li>", with: "\n", options: [.regularExpression, .caseInsensitive])
+            .replacingOccurrences(of: "</(p|div|h[1-6])>", with: "\n\n", options: [.regularExpression, .caseInsensitive])
+            .replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
             .replacingOccurrences(of: "&nbsp;", with: " ").replacingOccurrences(of: "&amp;", with: "&")
+            .replacingOccurrences(of: "[ \t]+", with: " ", options: .regularExpression)
+            .replacingOccurrences(of: " ?\n ?", with: "\n", options: .regularExpression)
+            .replacingOccurrences(of: "\n{3,}", with: "\n\n", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

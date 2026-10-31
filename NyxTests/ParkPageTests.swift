@@ -195,6 +195,14 @@ import SwiftUI
         let programs=try #require(await store.programs(for: jotr, key: "k", network: true))
         #expect(programs.programs.map(\.date) == ["2099-02-08"])
     }
+    /// NPS's paragraphs and line breaks stay apart as plain text, never run together.
+    @Test func npsTextKeepsItsBreaks() {
+        #expect(ParkStore.plain("Reserve in advance.<br /><br />This is a free program.") == "Reserve in advance.\n\nThis is a free program.")
+        #expect(ParkStore.plain("<p>First.</p><p>Second &amp; last.</p>") == "First.\n\nSecond & last.")
+        #expect(ParkStore.plain("<ul><li>Red light</li><li>Warm layers</li></ul>") == "Red light\nWarm layers")
+        #expect(ParkStore.plain("Meet at <b>Keys View</b>.<BR>Bring water.") == "Meet at Keys View.\nBring water.")
+        #expect(ParkStore.plain("  Two&nbsp; spaces  ") == "Two spaces")
+    }
     /// NPS writes "07:00 PM" in every language; the card says it in the reader's own format, in the park's zone.
     @Test func programTimesFollowTheReadersLocale() throws {
         let jotr=try park("jotr")
