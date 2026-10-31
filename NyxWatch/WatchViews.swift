@@ -304,6 +304,8 @@ struct TonightFace: View {
                 ForEach(cloudLines(shown, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
                 }
+                // Where no closure stands under the score, why none may be known, in the iPhone's words.
+                if let note = context?.alertsNote(night.park) { AlertsNote(text: note) }
                 AskIPhoneRow(source: WatchSky.cloudSource(night.park, context: context, now: now))
             }.frame(maxWidth: .infinity)
         }
@@ -385,6 +387,18 @@ struct WristClosureLine: View {
             .multilineTextAlignment(alignment).fixedSize(horizontal: false, vertical: true)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(ClosureLine.spoken(text))
+    }
+}
+
+/// Why a national park's closures are not known on the wrist (`WatchContext.alertsNote`), where no
+/// closure stands: without it an empty closure line would read as "nothing closed".
+struct AlertsNote: View {
+    @Environment(\.nyx) private var palette
+    let text: String
+    var alignment: TextAlignment = .center
+    var body: some View {
+        Text(text).font(.caption2).foregroundStyle(palette.muted)
+            .multilineTextAlignment(alignment).fixedSize(horizontal: false, vertical: true).nonEssential()
     }
 }
 
@@ -625,6 +639,7 @@ struct MilestonesPage: View {
                 ForEach(cloudLines(night, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.muted).nonEssential()
                 }
+                if let note = context?.alertsNote(night.park) { AlertsNote(text: note, alignment: .leading) }
                 AskIPhoneRow(source: WatchSky.cloudSource(night.park, context: context, now: now))
                 // No score stands on this page, so the line says what the range is of: under "Clouds
                 // from …" a bare "Forecast models: 59–89" read as cloud cover.
@@ -704,6 +719,8 @@ struct WeekPage: View {
                 }
                 // The park's closure from the iPhone's last park update, under the week's score, as on every surface.
                 if let closure = store.context?.closures[park.id] { WristClosureLine(text: closure, alignment: .leading).frame(maxWidth: .infinity, alignment: .leading) }
+                // Else, why none may be known: park alerts off on iPhone, or no park update covering the park.
+                else if let note = store.context?.alertsNote(park) { AlertsNote(text: note, alignment: .leading) }
                 Group {
                     // Why Tonight shows this place, where nothing on screen says so: nothing is saved on iPhone.
                     if isHome, let line = WatchSky.caption(store.rule(at: now)) { Text(line) }
