@@ -11,53 +11,62 @@ struct YourPrivacyView: View {
     var body: some View {
         @Bindable var model = model
         NavigationStack {
-            Form {
-                Section {
-                    Text("Nyx has no account, no ads, no tracking.").font(.system(.title3, design: .serif))
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text("Only the four optional updates below go out to the internet from this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared.")
-                        .fixedSize(horizontal: false, vertical: true)
-                    // The one other thing that leaves: Handoff (`VisionHandoff`), to the person's own devices.
-                    Text("Handoff offers the park and night on screen to your own devices signed in to the same Apple Account, so you can continue there.")
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Section {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("What is sent").font(.subheadline.weight(.semibold))
-                        Text("The public coordinates and park codes of the \(model.parks.count) national parks. Nothing about you.")
+            ScrollViewReader { proxy in
+                Form {
+                    Section {
+                        Text("Nyx has no account, no ads, no tracking.").font(.system(.title3, design: .serif))
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text("Only the four optional updates below go out to the internet from this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared.")
+                            .fixedSize(horizontal: false, vertical: true)
+                        // The one other thing that leaves: Handoff (`VisionHandoff`), to the person's own devices.
+                        Text("Handoff offers the park and night on screen to your own devices signed in to the same Apple Account, so you can continue there.")
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityElement(children: .combine)
-                    Toggle("Cloud forecasts", isOn: $model.forecastsOn)
-                        .accessibilityHint(Text("Shows each night's forecast clouds in the score and the sky"))
-                    Text("Clouds only, from api.open-meteo.com: the forecast for all the parks at most every six hours while Nyx is open, and the cloud layers above Haleakalā's summit at most every twelve hours. The service receives network information such as your IP address.")
-                        .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
-                    Text(status).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
-                    Toggle("Smoke and haze", isOn: $model.smokeOn)
-                        .accessibilityHint(Text("Counts forecast smoke and haze in every score"))
-                    Text("Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all \(model.parks.count) parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.")
-                        .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
-                    Text(smokeStatus).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
-                    Toggle("Aurora forecast", isOn: $model.auroraOn)
-                        .accessibilityHint(Text("Shows when aurora may reach a park, in What's up"))
-                    Text("Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours. The request names no place and nothing about you. The service receives network information such as your IP address.")
-                        .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
-                    Text(auroraStatus).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
-                    Toggle("Park alerts", isOn: $model.alertsOn)
-                        .accessibilityHint(Text("Shows park closures beside every score"))
-                    Text("Alerts for all \(model.parks.count) U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks interest you. Your coordinates are never sent. The service receives network information such as your IP address.")
-                        .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
-                    Text(alertsStatus).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
-                } header: {
-                    Text("Optional data updates")
+                    Section {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("What is sent").font(.subheadline.weight(.semibold))
+                            Text("The public coordinates and park codes of the \(model.parks.count) national parks. Nothing about you.")
+                        }
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityElement(children: .combine)
+                        Toggle("Cloud forecasts", isOn: $model.forecastsOn)
+                            .accessibilityHint(Text("Shows each night's forecast clouds in the score and the sky"))
+                        Text("Clouds only, from api.open-meteo.com: the forecast for all the parks at most every six hours while Nyx is open, and the cloud layers above Haleakalā's summit at most every twelve hours. The service receives network information such as your IP address.")
+                            .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                        Text(status).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                        Toggle("Smoke and haze", isOn: $model.smokeOn)
+                            .accessibilityHint(Text("Counts forecast smoke and haze in every score"))
+                        Text("Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all \(model.parks.count) parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.")
+                            .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                        Text(smokeStatus).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                        Toggle("Aurora forecast", isOn: $model.auroraOn)
+                            .accessibilityHint(Text("Shows when aurora may reach a park, in What's up"))
+                        Text("Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours. The request names no place and nothing about you. The service receives network information such as your IP address.")
+                            .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                        Text(auroraStatus).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                            .id("aurora")
+                        Toggle("Park alerts", isOn: $model.alertsOn)
+                            .accessibilityHint(Text("Shows park closures beside every score"))
+                        Text("Alerts for all \(model.parks.count) U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks interest you. Your coordinates are never sent. The service receives network information such as your IP address.")
+                            .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                        Text(alertsStatus).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                    } header: {
+                        Text("Optional data updates")
+                    }
+                    Section {
+                        Text("Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. Turning smoke and haze off removes the smoke forecast, and scores say smoke is not counted. Turning park alerts off stops new requests; closures already here stay beside the score. Turning the aurora forecast off removes it from this device. The Moon, the stars and every score still work offline.")
+                            .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                    }
                 }
-                Section {
-                    Text("Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. Turning smoke and haze off removes the smoke forecast, and scores say smoke is not counted. Turning park alerts off stops new requests; closures already here stay beside the score. Turning the aurora forecast off removes it from this device. The Moon, the stars and every score still work offline.")
-                        .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                // Switches that are on in the iPhone's violet, not the system's green.
+                .tint(palette.controlTint)
+                // DEBUG captures (`-nyx-vision-privacy-bottom`): the aurora forecast's status line in view.
+                .task {
+                    guard VisionDebug.isEnabled("vision-privacy-bottom") else { return }
+                    try? await Task.sleep(for: .seconds(2))
+                    proxy.scrollTo("aurora", anchor: .center)
                 }
             }
-            // Switches that are on in the iPhone's violet, not the system's green.
-            .tint(palette.controlTint)
             .navigationTitle(Text("Your privacy"))
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
