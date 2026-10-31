@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 import UniformTypeIdentifiers
+import UIKit
 @testable import Nyx
 
 /// iPad windowing, drag and drop, the inspector's room, and the week across parks on wide Tonight.
@@ -51,6 +52,20 @@ import UniformTypeIdentifiers
 
     // MARK: Windows
 
+    /// "Open in New Window" where a second window can sit beside the first: a screen regular both ways
+    /// (an iPad, iPhone Duo's open inner display), never one compact either way (its closed outer display).
+    @MainActor @Test func aNewWindowNeedsRoomBeside() {
+        #expect(SceneCommands.roomBeside(horizontal:.regular,vertical:.regular))
+        #expect(!SceneCommands.roomBeside(horizontal:.compact,vertical:.regular))
+        #expect(!SceneCommands.roomBeside(horizontal:.regular,vertical:.compact))
+        #expect(SceneCommands.roomBeside(horizontal:.unspecified,vertical:.unspecified))
+        let commands=SceneCommands()
+        #expect(SceneCommands.opensParkWindows(multipleWindows:true,commands) && !SceneCommands.opensParkWindows(multipleWindows:false,commands))
+        commands.screenChanged(UITraitCollection(horizontalSizeClass:.compact))
+        #expect(!SceneCommands.opensParkWindows(multipleWindows:true,commands))
+        #expect(!SceneCommands.opensParkWindows(multipleWindows:true,SceneCommands(parkWindow:true)))
+        #expect(SceneCommands.opensParkWindows(multipleWindows:true,nil))
+    }
     @Test func aParkWindowRestoresFromItsValue() throws {
         let night=Date(timeIntervalSince1970:1_791_400_000)
         let value=ParkWindow(parkID:"jotr",night:night)

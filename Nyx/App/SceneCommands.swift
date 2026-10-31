@@ -76,6 +76,25 @@ nonisolated enum AppTab: Int, CaseIterable, Hashable, Sendable {
     }
     /// Whether the tabs stand in an iPad sidebar, where the selected row is white text on the tint.
     var sidebar=false
+    /// Whether a second window can sit beside this one, so "Open in New Window" and ⌘⇧N are offered:
+    /// the screen it is on is regular both ways (an iPad, iPhone Duo's open inner display). Not on iPhone
+    /// Duo's closed outer display, where the system's multiple windows (app-wide) could only replace this
+    /// one. True until the window's scene is known (`WindowSceneReader`).
+    private(set) var roomBeside=true
+    func screenChanged(_ traits:UITraitCollection) {
+        let room=Self.roomBeside(horizontal:traits.horizontalSizeClass,vertical:traits.verticalSizeClass)
+        if room != roomBeside { roomBeside=room }
+    }
+    /// A screen regular both ways holds two windows side by side; one compact either way does not.
+    /// Unspecified (a screen not described yet) leaves the system's own answer standing.
+    nonisolated static func roomBeside(horizontal:UIUserInterfaceSizeClass,vertical:UIUserInterfaceSizeClass)->Bool {
+        horizontal != .compact && vertical != .compact
+    }
+    /// "Open in New Window" for a park: where the system offers more than one window, a second one can
+    /// sit beside this one, and this is not already a park's own window.
+    static func opensParkWindows(multipleWindows:Bool,_ commands:SceneCommands?)->Bool {
+        multipleWindows && commands?.parkWindow != true && commands?.roomBeside != false
+    }
     /// Night vision asked of this window's toolbar switch: `RootView` dims the window to black,
     /// turns the palette under the cover and reveals it (`NightVisionLamp`). Each tap is a new request.
     private(set) var lampRequest:NightVisionLamp.Request?
@@ -176,10 +195,17 @@ struct WindowSceneReader: View {
     }
     final class ProbeView: UIView {
         weak var commands:SceneCommands?
+        override init(frame:CGRect) {
+            super.init(frame:frame)
+            // A turn or a move to another screen (iPhone Duo folded or opened) changes the window's size classes.
+            registerForTraitChanges([UITraitHorizontalSizeClass.self,UITraitVerticalSizeClass.self]) { (view:ProbeView,_) in view.report() }
+        }
+        required init?(coder:NSCoder) { nil }
         override func didMoveToWindow() { super.didMoveToWindow(); report() }
         func report() {
             guard let scene=window?.windowScene, let commands else { return }
             commands.windowScene=scene
+            commands.screenChanged(scene.screen.traitCollection)
             MainWindows.mark(scene.session,main:!commands.parkWindow)
         }
     }
@@ -217,7 +243,7 @@ struct NyxCommands: Commands {
         CommandGroup(after:.newItem) {
             Button("Open Park in New Window") { if let id=scene?.visiblePark { openWindow(value:ParkWindow(parkID:id,night:scene?.visibleNight)) } }
                 .keyboardShortcut("n",modifiers:[.command,.shift])
-                .disabled(!multipleWindows || tabless || menu?.park == nil)
+                .disabled(!SceneCommands.opensParkWindows(multipleWindows:multipleWindows,scene) || tabless || menu?.park == nil)
         }
         CommandGroup(before:.sidebar) {
             ForEach(AppTab.allCases,id:\.self) { tab in

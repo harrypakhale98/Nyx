@@ -322,7 +322,7 @@ struct ParkDetailView: View {
         // Nothing to share until the page has its score (`ScoreGate`).
         ToolbarItem(placement:.topBarTrailing) { ShareNightMenu(night:night).disabled(model.cachesPending) }
         // iPad: this park in a window of its own, beside another (not in a park's own window).
-        if multipleWindows, commands?.parkWindow != true {
+        if SceneCommands.opensParkWindows(multipleWindows:multipleWindows,commands) {
             // A window of its own is a convenience: the first to overflow when a side bar runs short.
             if #available(iOS 27.0,*) {
                 ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:isTonight ? nil : night.id).labelStyle(.iconOnly).help("Open in New Window") }.visibilityPriority(.low)

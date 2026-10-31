@@ -97,8 +97,9 @@ struct ParkWindowRoot: View {
         return candidate
     }
 }
-/// "Open in New Window", wherever the system offers more than one window and this is not already
-/// a park's own window. Nothing on iPhone.
+/// "Open in New Window", wherever the system offers more than one window, a second one can sit beside
+/// this one and this is not already a park's own window (`SceneCommands.opensParkWindows`). Nothing on
+/// iPhone, nor on iPhone Duo's closed outer display.
 struct OpenParkWindowButton: View {
     @Environment(\.openWindow) private var openWindow
     @Environment(\.supportsMultipleWindows) private var multipleWindows
@@ -106,7 +107,7 @@ struct OpenParkWindowButton: View {
     let park: Park
     var night: Date?=nil
     var body: some View {
-        if multipleWindows, commands?.parkWindow != true {
+        if SceneCommands.opensParkWindows(multipleWindows:multipleWindows,commands) {
             Button("Open in New Window",systemImage:"macwindow.badge.plus") { openWindow(value:ParkWindow(parkID:park.id,night:night)) }
                 .accessibilityInputLabels([Text("Open in New Window"),Text("New window")])
         }
