@@ -26,7 +26,9 @@ struct ScoreAnatomy:View {
     private func shade(_ i:Int)->Double { [1,0.75,0.55,0.4][i] }
     var body:some View {
         VStack(spacing:compact ? 8 : 12) {
-            CelestialGauge(score:94,haptics:false,night:example).id(active).frame(height:typeSize.isAccessibilitySize ? nil : roomy ? 300 : min(compact ? compactHeight : height,CelestialGauge.labelsInsideFrom-1)) // fresh, silent count-up each time the page arrives; the real answer owns the pulses
+            CelestialGauge(score:94,haptics:false,night:example).id(active)
+                // At accessibility sizes no larger than Tonight's dial, so the recipe under it stays near.
+                .environment(\.gaugeAccessibleMax,200).frame(height:typeSize.isAccessibilitySize ? nil : roomy ? 300 : min(compact ? compactHeight : height,CelestialGauge.labelsInsideFrom-1)) // fresh, silent count-up each time the page arrives; the real answer owns the pulses
             VStack(alignment:.leading,spacing:8) {
                 Text("Share of the score").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
                 GeometryReader { proxy in

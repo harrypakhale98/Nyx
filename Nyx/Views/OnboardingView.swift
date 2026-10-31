@@ -58,8 +58,11 @@ struct OnboardingView:View {
                         } else {
                             let layout=beside ? AnyLayout(HStackLayout(spacing:36)) : AnyLayout(VStackLayout(spacing:gap(index)))
                             layout {
+                                // At accessibility sizes the score's example follows its words, which open the page as the other pages' do.
+                                let wordsFirst=index==1 && typeSize.isAccessibilitySize
+                                if wordsFirst { words(index) }
                                 art(index).frame(maxWidth:beside ? 320 : nil)
-                                words(index)
+                                if !wordsFirst { words(index) }
                             }.padding(.horizontal,compactHeight || short ? 20 : 28).padding(.vertical,index==1 || typeSize.isAccessibilitySize || beside || short ? 12 : 28).frame(maxWidth:beside ? 760 : 560).frame(maxWidth:.infinity)
                         }
                     }.scrollBounceBehavior(.basedOnSize).defaultScrollAnchor(.center,for:.alignment)
@@ -136,7 +139,7 @@ struct OnboardingView:View {
     @ViewBuilder private func art(_ index:Int)->some View {
         switch index {
         case 0: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:3).frame(width:moonSize,height:moonSize).padding(.vertical,moonPadding) }
-        case 1: ScoreAnatomy(active:page==1,roomy:roomy,compact:short)
+        case 1: ScoreAnatomy(active:page==1,roomy:roomy,compact:short || compactHeight)
         // The last page ends bright: a waxing gibbous Moon, which turns red with the switch below it.
         default: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:11).frame(width:moonSize,height:moonSize).padding(.vertical,moonPadding) }
         }
