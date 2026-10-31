@@ -115,6 +115,14 @@ struct DebugScreen: View {
         if DebugScenario.isEnabled("journal-revisit") {
             Task { try? await Task.sleep(for:.seconds(5)); commands.tab = .tonight; try? await Task.sleep(for:.seconds(1)); commands.tab = .journal }
         }
+        // `-nyx-seed-spot`: one saved spot in the capture's own store (with `-nyx-open-window pin:…aa`, its
+        // page in a window of its own), so deleting a spot from its own window can be run for real. Only with a
+        // `-nyx-screen`, whose store is in memory.
+        if DebugScenario.isEnabled("seed-spot"), DebugScenario.screen != nil {
+            context.insert(SavedSpot(id:"pin:00000000-0000-4000-8000-0000000000aa",name:"Pullout off Pinto Basin Road",latitude:33.92,longitude:-115.93,
+                                     timeZoneID:"America/Los_Angeles",countryCode:"US",region:"California"))
+            try? context.save()
+        }
         if DebugScenario.state=="populated" {
             // Illustrative sessions so store captures show a lived-in journal, written in the capture's language
             // (sample text only; DEBUG never adds catalog keys).

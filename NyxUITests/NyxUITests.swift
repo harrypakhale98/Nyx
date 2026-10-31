@@ -326,6 +326,44 @@ final class NyxUITests:XCTestCase {
         row.coordinate(withNormalizedOffset:CGVector(dx:0.25,dy:0.3)).press(forDuration:1.5,thenDragTo:plan.coordinate(withNormalizedOffset:CGVector(dx:0.5,dy:0.5)),withVelocity:.slow,thenHoldForDuration:3.0)
         XCTAssertTrue(app.navigationBars[target].waitForExistence(timeout:10),"A park held over \(target) did not open it")
     }
+    /// iPad: a saved spot deleted from its own window (`-nyx-seed-spot`, `-nyx-open-window`) closes that
+    /// window, rather than leaving "This spot was deleted" behind, and the main window stays on screen.
+    func testASpotDeletedInItsOwnWindowClosesIt() throws {
+        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad,"iPad only")
+        continueAfterFailure=false
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","parks","-nyx-state","no-forecast","-nyx-reduce-motion","-nyx-seed-spot","-nyx-open-window","pin:00000000-0000-4000-8000-0000000000aa"]
+        app.launch()
+        let deletes=app.buttons.matching(identifier:"Delete spot")
+        let delete=deletes.firstMatch
+        XCTAssertTrue(delete.waitForExistence(timeout:30),"The spot's window did not open")
+        // The spot's panel opens the page's last chapter, far down its column.
+        // Flicked by its edge, clear of the Moon, which takes a finger itself; back a little if it went past.
+        let column=app.scrollViews.containing(.button,identifier:"Delete spot").firstMatch, origin=app.coordinate(withNormalizedOffset:.zero)
+        for _ in 0..<40 where !delete.isHittable {
+            let frame=column.frame, up=delete.frame.minY>frame.midY
+            let low=origin.withOffset(CGVector(dx:frame.maxX-40,dy:frame.minY+frame.height*0.8)), high=origin.withOffset(CGVector(dx:frame.maxX-40,dy:frame.minY+frame.height*0.3))
+            if up { low.press(forDuration:0.05,thenDragTo:high,withVelocity:.fast,thenHoldForDuration:0) }
+            else { high.press(forDuration:0.05,thenDragTo:low,withVelocity:.slow,thenHoldForDuration:0.3) }
+        }
+        XCTAssertTrue(delete.isHittable,"Delete spot is out of reach")
+        let panel=delete.frame
+        delete.tap()
+        // The confirmation's own Delete spot, beside the panel's.
+        let confirmed=NSPredicate { _,_ in deletes.count>1 }
+        XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:confirmed,object:nil)],timeout:5),.completed,"No confirmation")
+        let confirm=try XCTUnwrap((0..<deletes.count).map { deletes.element(boundBy:$0) }.first { $0.frame != panel && $0.isHittable },"No confirmation button")
+        confirm.tap()
+        XCTAssertTrue(app.staticTexts["Your spot"].waitForNonExistence(timeout:10),"The spot's page stayed")
+        XCTAssertTrue(app.navigationBars["Parks"].waitForExistence(timeout:10),"The main window is not on screen")
+        // The window is gone, not left behind: a relaunch restores the main window alone, never "This spot was deleted".
+        sleep(2)
+        app.terminate()
+        app.launchArguments=["-nyx-screen","parks","-nyx-state","no-forecast","-nyx-reduce-motion"]
+        app.launch()
+        XCTAssertTrue(app.navigationBars["Parks"].waitForExistence(timeout:20),"The main window did not come back")
+        XCTAssertFalse(app.staticTexts["This spot was deleted"].waitForExistence(timeout:8),"The deleted spot's window came back")
+    }
     /// The night-vision switch is a lamp (`NightVisionLamp`): a tap turns the red on under a black
     /// cover, two quick taps turn back and forth from wherever the cover is, and once the lamp has
     /// settled the switch shows the stored setting again. Ends with night vision off, as it began.
