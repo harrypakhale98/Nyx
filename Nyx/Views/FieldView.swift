@@ -21,6 +21,7 @@ struct FieldView: View {
     @State private var alarmsShown: Bool?
     @State private var aboutEyes=false
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.legibilityWeight) private var legibility
     @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     @Environment(\.dynamicTypeSize) private var typeSize
     @MotionReduced private var reduceMotion: Bool
@@ -59,7 +60,8 @@ struct FieldView: View {
         return Sentences.join([String(localized:"Cloud forecast unavailable."),score.cloudPoints == nil ? String(localized:"This score counts the Moon and darkness only.") : String(localized:"This score uses the park's usual clouds.")])
     }
     /// Red whatever the app's setting. Built here, not read from the environment: this view sets it for everything inside.
-    private var palette: NyxPalette { NyxPalette(nightVision:true,highContrast:contrast == .increased,brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red")) }
+    /// Increase Contrast and Bold Text (and their DEBUG stand-ins) as the app's root reads them (`RootView`).
+    private var palette: NyxPalette { NyxPalette(nightVision:true,highContrast:contrast == .increased || DebugScenario.isEnabled("contrast"),brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red"),boldText:legibility == .bold || DebugScenario.isEnabled("bold")) }
     var body: some View {
         VStack(spacing:0) {
             header
