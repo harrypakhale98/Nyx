@@ -226,8 +226,18 @@ extension Night {
             }
         }
     }
-    /// "62% average cover through true darkness.": the forecast's average, when one counts.
-    nonisolated var coverSentence: String? { cloudCover.map { String(localized: "\(Int($0.rounded()))% average cover through true darkness.") } }
+    /// "62% average cover through true darkness.": the forecast's average, when one counts, over the
+    /// hours it was taken (`SkyConditions.cloudHours`), so a night with no true darkness never claims it.
+    nonisolated var coverSentence: String? {
+        cloudCover.map { cover in
+            let percent=Int(cover.rounded())
+            return switch sky.cloudHours {
+            case .darkness: String(localized: "\(percent)% average cover through true darkness.")
+            case .sunsetToSunrise: String(localized: "\(percent)% average cover from sunset to sunrise.")
+            case .darkestHours: String(localized: "\(percent)% average cover over the four darkest hours.")
+            }
+        }
+    }
     /// Haleakalā's summit, scored from mid and high cloud only (`upperCloudOnly`); nil elsewhere.
     nonisolated var summitSentence: String? {
         upperCloudOnly ? String(localized: "The summit sits above most low cloud, so the score counts mid and high cloud only.") : nil

@@ -118,9 +118,11 @@ nonisolated struct NightLookup: Sendable {
             return words+(night.typicalClouds.map { "; "+String(localized: "typically: \($0)") } ?? "")+limit(night)
         }
     }
-    /// "; Moonlight limits this night to 44." (or clouds, sky glow, smoke, short darkness) when a cap
-    /// holds the score down, so the model never has to guess why a clear night scored low.
-    private static func limit(_ night: Night) -> String { night.score.limit.map { "; "+$0.sentence(tonight: false) } ?? "" }
+    /// "; Moonlight limits this night to 44." (or clouds, sky glow, smoke, short or no darkness) when a
+    /// cap holds the score down, so the model never has to guess why a clear night scored low. In the
+    /// app's own words for that cap (`DarknessScore.limitSentence`): a night with no true darkness is
+    /// never said as short hours.
+    private static func limit(_ night: Night) -> String { night.score.limitSentence(tonight: false).map { "; "+$0 } ?? "" }
     /// The access note, so the model never recommends a ferry-only park as a drive.
     func access(_ park: Park) -> String {
         park.accessNote.map { "; "+String(localized: "getting there: \($0)") } ?? ""

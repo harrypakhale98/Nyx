@@ -105,6 +105,47 @@ import Testing
         // A short night keeps its own words.
         let short = DarknessScore(value: 60, moonPoints: 30, cloudPoints: 25, bortlePoints: 15, lengthPoints: 1.5, limit: .darkness(60))
         #expect(short.limitSentence(tonight: true) == "Short hours of true darkness limit tonight to 60.")
+        // Ask Nyx's record and the breakdown say it the same way, and say the cap once.
+        let night = Night(park: dena, sky: sky, score: score, cloudCover: 4, forecastUpdated: .now)
+        #expect(NightLookup.basis(night) == "cloud forecast included, 4% cloud; With no true darkness, this night can reach only 39.")
+        #expect(ScoreBreakdownView.darknessNote(night, tonight: true) == "No true darkness tonight at this latitude.")
+        let glac = try park("glac"), early = try #require(glac.calendar.date(from: DateComponents(year: 2026, month: 6, day: 1, hour: 13)))
+        let shortSky = AstronomyEngine().conditions(for: glac, on: glac.evening(early))
+        try #require(shortSky.darkHours > 0 && ScoreEngine.cap(darkHours: shortSky.darkHours) < 100)
+        let held = DarknessScore(value: 50, moonPoints: 30, cloudPoints: 25, bortlePoints: 15, lengthPoints: 1, limit: .darkness(50))
+        #expect(ScoreBreakdownView.darknessNote(Night(park: glac, sky: shortSky, score: held, cloudCover: 0, forecastUpdated: .now), tonight: true) == nil)
+        // When another cap binds, the darkness cap is still said, once, in the footer.
+        let clouded = DarknessScore(value: 30, moonPoints: 30, cloudPoints: 5, bortlePoints: 15, lengthPoints: 1, limit: .clouds(30))
+        #expect(ScoreBreakdownView.darknessNote(Night(park: glac, sky: shortSky, score: clouded, cloudCover: 80, forecastUpdated: .now), tonight: true)?.hasPrefix("True darkness lasts only ") == true)
+        #expect(ScoreBreakdownView.darknessNote(Night(park: dena, sky: sky, score: clouded, cloudCover: 80, forecastUpdated: .now), tonight: false)
+                == "No true darkness on this night at this latitude. The score is capped below 40.")
+    }
+    /// A night with no true darkness averages its clouds over other hours, and says which: Denali sets
+    /// and rises in June (sunset to sunrise), Gates of the Arctic has the midnight Sun (four darkest hours).
+    @Test func cloudsWithoutDarknessNameTheirHours() throws {
+        for (id, hours, words) in [("dena", SkyConditions.CloudHours.sunsetToSunrise, "from sunset to sunrise"), ("gaar", .darkestHours, "over the four darkest hours")] {
+            let place = try park(id), day = try #require(place.calendar.date(from: DateComponents(year: 2027, month: 6, day: 20, hour: 13)))
+            let sky = AstronomyEngine().conditions(for: place, on: place.evening(day))
+            try #require(sky.darkHours == 0, "\(id)")
+            #expect(sky.cloudHours == hours, "\(id)")
+            let night = Night(park: place, sky: sky, score: DarknessScore(value: 39, moonPoints: 30, cloudPoints: 24, bortlePoints: 20, lengthPoints: 0), cloudCover: 4, forecastUpdated: .now)
+            let cover = try #require(night.coverSentence)
+            #expect(cover == "4% average cover \(words).", "\(cover)")
+            for usual in [true, false] {
+                for context in [true, false] {
+                    let detail = ScoreBreakdownView.cloudDetail(usualClouds: usual, context: context, hours: sky.cloudHours)
+                    #expect(detail.hasPrefix("With no true darkness, the hourly forecast is averaged ") && detail.contains(words), "\(detail)")
+                    #expect(!detail.contains("over true darkness"), "\(detail)")
+                }
+            }
+            for line in [night.cloudCaption(), ScoreBreakdownView.cloudFact(night)] { #expect(!line.contains("true darkness"), "\(line)") }
+        }
+        // A night with true darkness keeps its words.
+        let jotr = try park("jotr"), day = try #require(jotr.calendar.date(from: DateComponents(year: 2026, month: 10, day: 30, hour: 13)))
+        let sky = AstronomyEngine().conditions(for: jotr, on: jotr.evening(day))
+        #expect(sky.cloudHours == .darkness)
+        #expect(Night(park: jotr, sky: sky, score: DarknessScore(value: 70, moonPoints: 20, cloudPoints: 24, bortlePoints: 15, lengthPoints: 11), cloudCover: 4, forecastUpdated: .now).coverSentence == "4% average cover through true darkness.")
+        #expect(ScoreBreakdownView.cloudDetail(usualClouds: true, context: false).hasPrefix("The hourly forecast averaged over true darkness. Beyond about three days "))
     }
 
     /// One sample snapshot for the widget and complication galleries: Joshua Tree, no forecast.

@@ -50,14 +50,13 @@ struct ScoreBreakdownView: View {
             if let limit=ScoreReadout.limitLine(night.score,tonight:isTonight) { figures(limit) }
             row("Moonlight",points:Double(shown.moon),of:40,fact:moonFact,detail:String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one."))
             row("Clouds",points:shown.cloud.map(Double.init),of:25,fact:Self.cloudFact(night),
-                context:cloudContext,detail:Self.cloudDetail(usualClouds:night.usualCloud != nil,context:!cloudContext.isEmpty))
+                context:cloudContext,detail:Self.cloudDetail(usualClouds:night.usualCloud != nil,context:!cloudContext.isEmpty,hours:night.sky.cloudHours))
             row("Sky glow",points:Double(shown.glow),of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9 (1 is the darkest), estimated."),context:lightContext,dipper:LittleDipper.reading(night),detail:String(localized:"Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))
             row("True darkness",points:Double(shown.length),of:15,fact:night.sky.darkHours>0 ? String(localized:"\(darkness) of true darkness.") : String(localized:"No true darkness."),detail:String(localized:"True darkness: the Sun more than 18° below the horizon. Ten hours earn full credit."))
             if let caption=night.basisCaption(typical:true) { Text(Sentences.join([caption,String(localized:"The score will change as a forecast arrives.")])).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             // What the score leaves out, said once and quietly: smoke switched off, or no smoke forecast reaching the night.
             if let smoke=model.smokeNote(night) { Text(smoke).font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-            if night.sky.darkHours==0 { figures(isTonight ? String(localized:"No true darkness tonight at this latitude. The score is capped below 40.") : String(localized:"No true darkness on this night at this latitude. The score is capped below 40.")) }
-            else if ScoreEngine.cap(darkHours:night.sky.darkHours)<100 { figures(isTonight ? String(localized:"True darkness lasts only \(darkness) tonight, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.") : String(localized:"True darkness lasts only \(darkness) on this night, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.")) }
+            if let note=Self.darknessNote(night,tonight:isTonight) { figures(note) }
             if let event=model.events(night).item(park:night.park,sky:night.sky,isTonight:isTonight) {
                 // An eclipse or a shower peak is a reason to go, said beside the score, never in it.
                 HStack(alignment:.top,spacing:14) {
@@ -100,17 +99,39 @@ struct ScoreBreakdownView: View {
         }
         return lit
     }
+    /// The darkness cap, said once: in full when another limit binds or none does, and only the plain
+    /// "No true darkness … at this latitude." when the limit line above already names it (nil for a
+    /// short night then).
+    nonisolated static func darknessNote(_ night:Night,tonight:Bool)->String? {
+        let hours=night.sky.darkHours, cap=ScoreEngine.cap(darkHours:hours)
+        var said=false
+        if case .darkness? = night.score.limit, night.score.limitSentence(tonight:tonight) != nil { said=true }
+        if hours==0 {
+            if said { return SkyConditions.noDarknessMessage(tonight:tonight) }
+            return tonight ? String(localized:"No true darkness tonight at this latitude. The score is capped below 40.") : String(localized:"No true darkness on this night at this latitude. The score is capped below 40.")
+        }
+        guard cap<100, !said else { return nil }
+        let darkness=darknessText(hours)
+        return tonight ? String(localized:"True darkness lasts only \(darkness) tonight, so the score is held to \(cap) or less.") : String(localized:"True darkness lasts only \(darkness) on this night, so the score is held to \(cap) or less.")
+    }
     /// Whole points that add up to the score's `partsSum`, so the rows make the sum the caption names.
     private var shown:(moon:Int,cloud:Int?,glow:Int,length:Int) { night.score.displayedParts }
-    /// How the clouds are scored. Where the place has no usual clouds for the month there is nothing
+    /// How the clouds are scored: over which hours (`SkyConditions.cloudHours`, true darkness only when
+    /// the night has some), then how. Where the place has no usual clouds for the month there is nothing
     /// to ease toward: an early look counts its forecast as it stands (`NightPlanner.night`).
-    nonisolated static func cloudDetail(usualClouds:Bool,context:Bool)->String {
-        switch (usualClouds,context) {
-        case (true,false): String(localized:"The hourly forecast averaged over true darkness. Beyond about three days it is eased toward the park's usual clouds for the month; with no forecast, the usual clouds count alone.")
-        case (true,true): String(localized:"The hourly forecast averaged over true darkness, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; smoke or haze can cap the score.")
-        case (false,false): String(localized:"The hourly forecast averaged over true darkness, counted as it stands: there are no usual clouds for this place. With no forecast, the score counts the Moon and darkness only.")
-        case (false,true): String(localized:"The hourly forecast averaged over true darkness, counted as it stands: there are no usual clouds for this place. Model agreement and cloud layers are context; smoke or haze can cap the score.")
+    nonisolated static func cloudDetail(usualClouds:Bool,context:Bool,hours:SkyConditions.CloudHours = .darkness)->String {
+        let averaged=switch hours {
+        case .darkness: String(localized:"The hourly forecast averaged over true darkness.")
+        case .sunsetToSunrise: String(localized:"With no true darkness, the hourly forecast is averaged from sunset to sunrise.")
+        case .darkestHours: String(localized:"With no true darkness, the hourly forecast is averaged over the four darkest hours.")
         }
+        let how=switch (usualClouds,context) {
+        case (true,false): String(localized:"Beyond about three days it is eased toward the park's usual clouds for the month; with no forecast, the usual clouds count alone.")
+        case (true,true): String(localized:"Beyond about three days it is eased toward the park's usual clouds. Model agreement and cloud layers are context; smoke or haze can cap the score.")
+        case (false,false): String(localized:"It is counted as it stands: there are no usual clouds for this place. With no forecast, the score counts the Moon and darkness only.")
+        case (false,true): String(localized:"It is counted as it stands: there are no usual clouds for this place. Model agreement and cloud layers are context; smoke or haze can cap the score.")
+        }
+        return Sentences.join([averaged,how])
     }
     /// The fact the clouds were scored from, in the words every surface uses for the night's basis
     /// (`Night.coverSentence`), with the summit's line where only mid and high cloud count.
@@ -162,7 +183,8 @@ struct ScoreBreakdownView: View {
         return [("globe.americas",lights),
                 ("camera.aperture",String(localized:"Measured by the Park Service at its darkest site here, \(darkest.name): \(MeasuredSky.reading(measured.sqm)) in \(MeasuredSky.span(year...year)) (higher is darker). Context only; not part of the score."))]
     }
-    private var darkness:String { Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed:[.hours,.minutes],width:.wide)) }
+    private var darkness:String { Self.darknessText(night.sky.darkHours) }
+    nonisolated static func darknessText(_ hours:Double)->String { Duration.seconds(hours*3600).formatted(.units(allowed:[.hours,.minutes],width:.wide)) }
     /// `weight` is the component's share of 100; with no cloud figure at all the others are scaled up to fill it.
     /// Each part states the fact it was scored from, then how it is scored.
     /// `dipper`: the Sky glow part's illustration, what that glow and the night's Moon leave of the Little Dipper.

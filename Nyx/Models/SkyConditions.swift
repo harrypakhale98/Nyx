@@ -59,10 +59,20 @@ nonisolated struct SkyConditions: Sendable {
     /// (local 22:00–02:00 if that is unknown), so an Alaska summer night still reports its
     /// forecast instead of looking like it has none.
     var cloudWindow: (start: Date, end: Date) {
-        if let darkStart, let darkEnd, darkEnd > darkStart { return (darkStart, darkEnd) }
-        if let sunset, let sunrise, sunrise > sunset { return (sunset, sunrise) }
-        if let lowestSun { return (lowestSun.addingTimeInterval(-2*3600), lowestSun.addingTimeInterval(2*3600)) }
+        switch cloudHours {
+        case .darkness: if let darkStart, let darkEnd { return (darkStart, darkEnd) }
+        case .sunsetToSunrise: if let sunset, let sunrise { return (sunset, sunrise) }
+        case .darkestHours: if let lowestSun { return (lowestSun.addingTimeInterval(-2*3600), lowestSun.addingTimeInterval(2*3600)) }
+        }
         return (evening.addingTimeInterval(10*3600), evening.addingTimeInterval(14*3600))
+    }
+    /// Which hours `cloudWindow` averages, so the words for that average name them: true darkness
+    /// only when the night has some.
+    enum CloudHours: Sendable { case darkness, sunsetToSunrise, darkestHours }
+    var cloudHours: CloudHours {
+        if let darkStart, let darkEnd, darkEnd > darkStart { return .darkness }
+        if let sunset, let sunrise, sunrise > sunset { return .sunsetToSunrise }
+        return .darkestHours
     }
     /// Where the Moon is during true darkness, decided once for every surface (`MoonInDarkness`).
     /// "All" and "none" by `moonDownPercent`, so the iPhone, the watch and Vision Pro round alike.
