@@ -120,7 +120,7 @@ struct WhatsUpPanel: View {
     private func mention(_ item:WhatsUp.Item)->some View {
         HStack(alignment:.firstTextBaseline,spacing:10) {
             if !typeSize.isAccessibilitySize { SkyGlyph(SkyGlyph.Kind(item.kind),color:palette.muted).frame(width:glyphSize*0.7,height:glyphSize*0.7) }
-            Text([item.title,item.value ?? item.note].compactMap { $0 }.joined(separator:" · ")+(Self.gloss(whatsUp,item:item).map { ". "+$0 } ?? ""))
+            Text(Self.mentionLine(item,gloss:Self.gloss(whatsUp,item:item)))
                 .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }
         .accessibilityElement(children:.ignore)
@@ -132,6 +132,12 @@ struct WhatsUpPanel: View {
     static func layout(_ whatsUp:WhatsUp)->WhatsUp.Layout { whatsUp.layout }
     static let showerRow=WhatsUp.showerRow
     /// One plain line for the eclipse words a newcomer may not know.
+    /// "October Draconids · about 2 an hour", then the gloss as a sentence of its own ("…。" in Japanese).
+    static func mentionLine(_ item:WhatsUp.Item,gloss:String?,language:String = Sentences.language)->String {
+        let line=[item.title,item.value ?? item.note].compactMap { $0 }.joined(separator:" · ")
+        guard let gloss else { return line }
+        return Sentences.join([Sentences.end(line,language:language),gloss],language:language)
+    }
     static func gloss(_ whatsUp:WhatsUp,item:WhatsUp.Item)->String? {
         guard item.kind == .eclipse, let night=whatsUp.events.eclipse, night.visible != nil else { return nil }
         switch night.eclipse.type {

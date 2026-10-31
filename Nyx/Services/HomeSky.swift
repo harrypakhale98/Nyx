@@ -136,7 +136,7 @@ nonisolated struct HomeSky: Sendable {
     /// "Rural to suburban transition. Estimated from satellite data. …"; nil unless from the grid.
     var skyLine: String? {
         guard case .satellite=light else { return nil }
-        return BortleScale.name(place.bortleEstimate)+". "+String(localized: "Estimated from satellite data. A light close by can make your own sky brighter.")
+        return Sentences.join([Sentences.end(BortleScale.name(place.bortleEstimate)), String(localized: "Estimated from satellite data. A light close by can make your own sky brighter.")])
     }
     /// How the Moon shares the dark hours, in one sentence: the words every surface uses
     /// (`MoonInDarkness`), without how much is lit (the phase line above says it), and where the Moon

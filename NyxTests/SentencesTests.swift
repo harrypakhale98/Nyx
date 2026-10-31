@@ -38,4 +38,19 @@ struct SentencesTests {
         #expect(Sentences.end("月の輝面比82%", language: "ja") == "月の輝面比82%。")
         #expect(Sentences.end("82% lit", language: "en") == "82% lit.")
     }
+
+    /// A quieter thing in the sky with its gloss: a full stop and a space in English, "。" and no
+    /// space in Japanese.
+    @Test @MainActor func mentionsEndBeforeTheirGloss() {
+        let item=WhatsUp.Item(id: "eclipse", kind: .eclipse, title: "Lunar eclipse", value: "1:04 – 2:12 AM", detail: "", spoken: "")
+        #expect(WhatsUpPanel.mentionLine(item, gloss: "Partial: part of the Moon in Earth's darkest shadow.", language: "en") == "Lunar eclipse · 1:04 – 2:12 AM. Partial: part of the Moon in Earth's darkest shadow.")
+        let ja=WhatsUp.Item(id: "eclipse", kind: .eclipse, title: "部分月食", note: "今夜", detail: "", spoken: "")
+        #expect(WhatsUpPanel.mentionLine(ja, gloss: "月の一部が地球の濃い影に入ります。", language: "ja") == "部分月食 · 今夜。月の一部が地球の濃い影に入ります。")
+        #expect(WhatsUpPanel.mentionLine(ja, gloss: nil, language: "ja") == "部分月食 · 今夜")
+    }
+    /// The satellite sky's line in Japanese: the class name closed with "。", no ASCII ". " after it.
+    @Test func japaneseClassNameEndsInItsOwnMark() {
+        #expect(Sentences.join([Sentences.end("郊外の空", language: "ja"), "衛星データからの推定です。"], language: "ja") == "郊外の空。衛星データからの推定です。")
+        #expect(Sentences.join([Sentences.end("Suburban sky", language: "en"), "Estimated from satellite data."], language: "en") == "Suburban sky. Estimated from satellite data.")
+    }
 }
