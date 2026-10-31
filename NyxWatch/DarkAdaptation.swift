@@ -22,6 +22,9 @@ struct DarkAdaptationView: View {
     /// The page's room between its bars, and the words' height above the ring: the ring takes what is left.
     @State private var room: CGFloat = 200
     @State private var words: CGFloat = 0
+    /// The words' height with the moment's clock time, measured apart from what shows, so leaving the
+    /// time out never changes the measure that decided it.
+    @State private var whole: CGFloat = 0
     /// Always red; under Increase Contrast or by the iPhone's choice the brighter red, as everywhere in Nyx (`NyxPalette.red`).
     private var palette: NyxPalette {
         NyxPalette(nightVision: true, highContrast: contrast == .increased, brighterRed: store.context?.brighterRed ?? false, boldText: legibility == .bold)
@@ -71,11 +74,12 @@ struct DarkAdaptationView: View {
     }
     /// The ring's side: 112 pt where it fits, else what the room under the words leaves, counting the
     /// open bottom of the ring (about a fifth of its side, below "minutes") as free to sit over the bar.
-    nonisolated static func ring(room: CGFloat, words: CGFloat) -> CGFloat { min(112, max(80, (room-words-4)/0.82)) }
-    /// Whether the words leave too little room for even the smallest ring above the button (the
-    /// accessibility sizes on 40 mm, where Start sat over "minutes"): then the ring comes first, sized
-    /// to the room alone, and the words follow below it.
-    nonisolated static func ringFirst(room: CGFloat, words: CGFloat) -> Bool { words+4+80*0.82 > room }
+    nonisolated static func ring(room: CGFloat, words: CGFloat, floor: CGFloat = 80) -> CGFloat { min(112, max(floor, (room-words-4)/0.82)) }
+    /// Whether the words leave too little room for an 80 pt ring above the button (French or German
+    /// on 40 mm, the large sizes). At the accessibility sizes the ring then comes first, sized to the
+    /// room alone, and the words follow below it. At the standard sizes the next moment stays on the
+    /// first screen: its clock time gives way (VoiceOver keeps it), then the ring, down to 64 pt.
+    nonisolated static func crowded(room: CGFloat, words: CGFloat) -> Bool { words+4+80*0.82 > room }
     private var content: some View {
         // Minutes counted from the moment the clock started, not from the wall clock's minute.
         TimelineView(.periodic(from: store.adaptation?.start ?? .now, by: 60)) { timeline in
@@ -86,22 +90,33 @@ struct DarkAdaptationView: View {
             ScrollView {
                 // Words above the ring, and the ring as large as the room left above the bottom bar's button
                 // (112 pt where it fits): on a 40 mm watch two lines of words pushed a 112 pt ring's "minutes" under it.
-                // Where even the smallest ring would not fit under the words, it leads, and they scroll below it.
-                let first = Self.ringFirst(room: room, words: words)
-                VStack(spacing: 4) {
-                    if first { AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: 0)) }
-                    Group {
-                        if let next {
-                            NextInDark(night: night, next: next, now: now)
-                        } else {
-                            Text("Nothing more tonight").font(.footnote).foregroundStyle(palette.muted).nonEssential()
+                // Where even the smallest ring would not fit under the words (`crowded`), at the accessibility
+                // sizes it leads and they scroll below it; at the standard sizes the words keep the first screen.
+                // The size is read inside the cover, where the debug text sizes apply too.
+                TypeSizeReader { typeSize in
+                    let crowded = Self.crowded(room: room, words: whole)
+                    let first = crowded && typeSize.isAccessibilitySize
+                    VStack(spacing: 4) {
+                        if first { AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: 0)) }
+                        Group {
+                            if let next {
+                                NextInDark(night: night, next: next, now: now, showsTime: !crowded || first)
+                                    .frame(maxWidth: .infinity)
+                                    .background {
+                                        NextInDark(night: night, next: next, now: now).hidden()
+                                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { whole = $0 }
+                                    }
+                            } else {
+                                Text("Nothing more tonight").font(.footnote).foregroundStyle(palette.muted).nonEssential()
+                                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { whole = $0 }
+                            }
                         }
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { words = $0 }
+                        // Below the ring, the words start past the bottom bar (about 40 pt below the room) and
+                        // its button, never under it: on 49 mm the room reaches further below the ring.
+                        .padding(.top, first ? max(0, room+40-Self.ring(room: room, words: 0)-4) : 0)
+                        if !first { AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: words, floor: 64)) }
                     }
-                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { words = $0 }
-                    // Below the ring, the words start past the bottom bar (about 40 pt below the room) and
-                    // its button, never under it: on 49 mm the room reaches further below the ring.
-                    .padding(.top, first ? max(0, room+40-Self.ring(room: room, words: 0)-4) : 0)
-                    if !first { AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: words)) }
                 }
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
@@ -143,14 +158,25 @@ private struct NextInDark: View {
     let night: Night
     let next: NightMilestone
     let now: Date
+    /// False where the room is short at the standard sizes: the countdown alone, its clock time spoken.
+    var showsTime = true
     var body: some View {
+        let time = Text("at \(night.park.zonedTime(next.date))")
         VStack(spacing: 0) {
             Countdown(next: next, now: now, wraps: typeSize.isAccessibilitySize).font(.system(.subheadline, design: .serif))
-            Text("at \(night.park.zonedTime(next.date))").font(.caption2).foregroundStyle(palette.muted).nonEssential()
+            if showsTime { time.font(.caption2).foregroundStyle(palette.muted).nonEssential() }
         }
         .fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .combine)
+        .accessibilityValue(showsTime ? Text(verbatim: "") : time)
     }
+}
+
+/// The text size where its content is drawn, for a decision made above a view that reads it.
+private struct TypeSizeReader<Content: View>: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @ViewBuilder let content: (DynamicTypeSize) -> Content
+    var body: some View { content(typeSize) }
 }
 
 /// The adaptation clock as the gauge's arc: open at the bottom, a tick every five minutes, the
