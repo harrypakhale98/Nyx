@@ -319,7 +319,9 @@ struct MoonControls: View {
             // Starlight, as the iPhone's controls: amber is the score's and light's.
             .tint(palette.ink)
             .accessibilityValue(Text(title))
-            if let view {
+            // An ornament cannot scroll, and at accessibility sizes the caption pushed the night's title
+            // out of it; there it is left out (its words are the globe's VoiceOver value, `MoonGlobe.show`).
+            if let view, !typeSize.isAccessibilitySize {
                 Text(Self.caption(view)).font(.footnote).foregroundStyle(palette.muted).multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true).frame(maxWidth: 420)
             }
@@ -374,6 +376,12 @@ struct MoonControls: View {
     let model = VisionModel(now: .now)
     return MoonControls(view: model.park.map { MoonVolumeNight(park: $0, night: $0.currentNight(at: .now), isTonight: true) }, nights: .constant(0))
         .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Moon controls, largest accessibility size, planner closed") {
+    let model = VisionModel(now: .now)
+    return MoonControls(view: model.park.map { MoonVolumeNight(park: $0, night: $0.date($0.currentNight(at: .now), addingDays: 3), isTonight: false) }, nights: .constant(3), offersPlanner: true)
+        .dynamicTypeSize(.accessibility5)
 }
 
 #Preview("Moon volume", windowStyle: .volumetric) {

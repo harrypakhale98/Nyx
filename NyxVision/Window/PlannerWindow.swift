@@ -230,8 +230,9 @@ struct ParkList: View {
 /// A park and its night: the score, and under it the band, or "Early look" / "Estimate" when the
 /// night has no full cloud forecast (the iPhone's compact words); under the name, the park's
 /// closure, as in the iPhone's Parks list. VoiceOver hears the closure, or that closures or smoke
-/// are not counted (`ScoreInputs.spoken`), after the score. At accessibility sizes the closure takes
-/// the row's whole width under the name and score, rather than a word to a line beside the score.
+/// are not counted (`ScoreInputs.spoken`), after the score. At accessibility sizes the row stacks,
+/// as the iPhone's rows do: the name takes the row's whole width (never broken mid-word beside the
+/// score), the score and band under it, then the closure, rather than a word to a line beside the score.
 struct ParkRow: View {
     @Environment(\.visionPalette) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -240,28 +241,40 @@ struct ParkRow: View {
     var closure: String?
     var notes: [String] = []
     var body: some View {
-        let wide = typeSize.isAccessibilitySize
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(park.shortName).font(.system(.body, design: .serif))
-                    Text(park.statesLine).font(.caption).foregroundStyle(palette.muted)
-                    if let closure, !wide {
-                        VisionCaution(text: Text(closure)).font(.caption).padding(.top, 2)
+        Group {
+            if typeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 4) {
+                    name
+                    if let night {
+                        HStack(alignment: .firstTextBaseline, spacing: 10) {
+                            numeral(night)
+                            band(night)
+                        }
+                    } else {
+                        ProgressView().controlSize(.small)
+                    }
+                    if let closure {
+                        VisionCaution(text: Text(closure)).font(.caption)
                     }
                 }
-                Spacer(minLength: 8)
-                if let night {
-                    VStack(alignment: .trailing, spacing: 0) {
-                        Text(night.score.value, format: .number).scoreNumeral(.title2, accent: palette.accent)
-                        Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted)
+            } else {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        name
+                        if let closure {
+                            VisionCaution(text: Text(closure)).font(.caption).padding(.top, 2)
+                        }
                     }
-                } else {
-                    ProgressView().controlSize(.small)
+                    Spacer(minLength: 8)
+                    if let night {
+                        VStack(alignment: .trailing, spacing: 0) {
+                            numeral(night)
+                            band(night)
+                        }
+                    } else {
+                        ProgressView().controlSize(.small)
+                    }
                 }
-            }
-            if let closure, wide {
-                VisionCaution(text: Text(closure)).font(.caption)
             }
         }
         .accessibilityElement(children: .combine)
@@ -269,6 +282,18 @@ struct ParkRow: View {
         // carry the closure, or that closures or smoke are not counted.
         .accessibilityLabel(night.map { Text(verbatim: Sentences.join([$0.spokenRow(closure: nil, withBasis: true)]+notes)) } ?? Text(park.name))
         .accessibilityValue(night == nil ? Text("Computing") : Text(verbatim: ""))
+    }
+    private var name: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(park.shortName).font(.system(.body, design: .serif))
+            Text(park.statesLine).font(.caption).foregroundStyle(palette.muted)
+        }
+    }
+    private func numeral(_ night: Night) -> some View {
+        Text(night.score.value, format: .number).scoreNumeral(.title2, accent: palette.accent)
+    }
+    private func band(_ night: Night) -> some View {
+        Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted)
     }
 }
 
@@ -289,6 +314,21 @@ struct ParkRow: View {
             ParkRow(park: park, night: nil)
         }
     }
+}
+
+#Preview("Park rows, largest accessibility size") {
+    let parks = Array(VisionModel(now: .now).parks.prefix(3))
+    let now = Date.now
+    return List {
+        ForEach(parks) { park in
+            let evening = park.currentNight(at: now)
+            let night = NightPlanner.night(park: park, sky: AstronomyEngine().conditions(for: park, on: evening), forecast: nil, detail: nil, now: now)
+            ParkRow(park: park, night: night, closure: park == parks.first ? "Scenic drive closed for repairs" : nil)
+        }
+        ParkRow(park: parks[0], night: nil)
+    }
+    .frame(width: 320)
+    .dynamicTypeSize(.accessibility5)
 }
 
 #Preview("Planner") {
