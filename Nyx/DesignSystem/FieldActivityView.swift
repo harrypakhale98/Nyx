@@ -232,7 +232,9 @@ struct FieldActivitySymbol: View {
 }
 /// The countdown to the shown milestone; sunrise's clock time when only that is left or once
 /// stale. In the compact island on iOS 27 it follows the system's width: hours and minutes when
-/// there is room, minutes alone ("91m") when the island is narrowed. iOS 26 caps the width.
+/// there is room, minutes alone ("91m") when the island is narrowed. iOS 26 caps the width, so
+/// its compact island counts in the narrow style ("1h 31m"), which fits the cap whole where "1 hr,
+/// 31 min" would be cut; the expanded island and the Lock Screen keep the abbreviated words.
 struct FieldActivityCountdown: View {
     let attributes: FieldActivityAttributes
     let state: FieldActivityAttributes.ContentState
@@ -249,7 +251,7 @@ struct FieldActivityCountdown: View {
             if compact, #available(iOS 27.0, *) {
                 FieldActivityAdaptiveCountdown(attributes:attributes,state:state,isStale:isStale)
             } else {
-                face(.abbreviated).frame(maxWidth:maxWidth,alignment:.trailing)
+                face(compact ? .narrow : .abbreviated).frame(maxWidth:maxWidth,alignment:.trailing)
             }
         }
         .monospacedDigit().lineLimit(1).minimumScaleFactor(0.8).multilineTextAlignment(.trailing)
