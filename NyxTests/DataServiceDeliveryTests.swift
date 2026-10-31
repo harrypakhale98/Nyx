@@ -74,6 +74,22 @@ actor KeyedGateHTTP: HTTPTransport {
     func release() { held?.resume(); held=nil }
 }
 
+/// Holds the first request until `release()` and then fails it as a cancelled request does
+/// (`URLError.cancelled`); later requests get empty alerts at once. Counts the requests.
+actor CancelledFirstHTTP: HTTPTransport {
+    private(set) var asked=0
+    private var held: CheckedContinuation<Void, Never>?
+    func get(_ url: URL) async throws -> Data {
+        asked+=1
+        if asked == 1 {
+            await withCheckedContinuation { held=$0 }
+            throw URLError(.cancelled)
+        }
+        return Data("{\"data\":[]}".utf8)
+    }
+    func release() { held?.resume(); held=nil }
+}
+
 /// Collects what a service hands on (`observe`), so a test can wait for a delivery.
 final class Deliveries<Value: Sendable>: Sendable {
     private let state=Mutex<[Value]>([])
@@ -339,9 +355,9 @@ struct DataServiceDeliveryTests {
         await http.set("/api/v1/alerts", .status(403))
         #expect(await store.alerts(for: [jotr], key: "k", network: true, force: true).busy)
         #expect(await store.alerts(for: [jotr], key: "k", network: true, force: false).busy)
-        // A Wi-Fi sign-in page is not a refusal, and does not end one either.
+        // A Wi-Fi sign-in page (once the refused key's day has passed) is not a refusal, and does not end one either.
         await http.set("/api/v1/alerts", .status(302))
-        clock.advance(601)
+        clock.advance(NPSKeyPause.length)
         #expect(await store.alerts(for: [jotr], key: "k", network: true, force: true).busy)
         await http.set("/api/v1/alerts", .body("{\"data\":[]}"))
         clock.advance(601)
@@ -408,7 +424,7 @@ struct DataServiceDeliveryTests {
         #expect(refused.busy && refused.keyRefused)
         #expect(await store.hydrate([jotr]).keyRefused)
         await http.set("/api/v1/alerts", .status(429))
-        clock.advance(601)
+        clock.advance(NPSKeyPause.length)
         let quota=await store.alerts(for: [jotr], key: "mine", network: true, force: true)
         #expect(quota.busy && !quota.keyRefused)
         await http.set("/api/v1/alerts", .status(401))
@@ -419,29 +435,114 @@ struct DataServiceDeliveryTests {
         let accepted=await store.alerts(for: [jotr], key: "fixed", network: true, force: true)
         #expect(!accepted.busy && !accepted.keyRefused)
     }
-    /// A refused key is not sent on every refresh: again an hour later, or ten minutes later when
-    /// pulled to refresh; a key saved or removed goes at once.
-    @Test func aRefusedKeyWaitsBeforeItIsSentAgain() async throws {
+    /// A refused key is not sent again for a day, even when pulled to refresh; a key saved or removed
+    /// goes at once.
+    @Test func aRefusedKeyWaitsADay() async throws {
         let jotr=try park("jotr")
         let clock=BudgetClock(Self.monday)
         let http=PathHTTP(["/api/v1/alerts": .status(403)])
         let store=ParkStore(transport: http, persist: false, clock: { clock.now })
         #expect(await store.alerts(for: [jotr], key: "k", network: true, force: false).keyRefused)
-        clock.advance(300)
+        clock.advance(3601)
         #expect(await store.alerts(for: [jotr], key: "k", network: true, force: true).keyRefused)
         #expect(await store.alerts(for: [jotr], key: "k", network: true, force: false).keyRefused)
         #expect(await http.count("/api/v1/alerts") == 1)
-        clock.advance(301)
-        _=await store.alerts(for: [jotr], key: "k", network: true, force: false)
-        #expect(await http.count("/api/v1/alerts") == 1)
+        clock.advance(NPSKeyPause.length-3602)
         _=await store.alerts(for: [jotr], key: "k", network: true, force: true)
+        #expect(await http.count("/api/v1/alerts") == 1)
+        clock.advance(1)
+        #expect(await store.alerts(for: [jotr], key: "k", network: true, force: false).keyRefused)
         #expect(await http.count("/api/v1/alerts") == 2)
-        clock.advance(3600)
-        _=await store.alerts(for: [jotr], key: "k", network: true, force: false)
-        #expect(await http.count("/api/v1/alerts") == 3)
         await store.keyChanged(to: "other")
         _=await store.alerts(for: [jotr], key: "other", network: true, force: false)
-        #expect(await http.count("/api/v1/alerts") == 4)
+        #expect(await http.count("/api/v1/alerts") == 3)
+    }
+    /// The day's pause outlives the app: a store made later (a relaunch) reads it, and holds alerts,
+    /// programs and campgrounds for that key, still saying the key was refused. It is kept as a date
+    /// and a hash, never the key. A key saved or removed ends it, file and all.
+    @Test func aRefusedKeysPauseOutlivesARelaunch() async throws {
+        let jotr=try park("jotr")
+        let clock=BudgetClock(Self.monday)
+        let file=FileManager.default.temporaryDirectory.appendingPathComponent("nyx-nps-pause-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let key="refusedKey0123456789abcdefghijklmnopqrstu"
+        let http=PathHTTP(["/api/v1/alerts": .status(403), "/api/v1/events": .body("{\"data\":[]}"), "/api/v1/campgrounds": .body("{\"data\":[]}")])
+        let first=ParkStore(transport: http, persist: false, pauseFile: file, clock: { clock.now })
+        #expect(await first.alerts(for: [jotr], key: key, network: true, force: true).keyRefused)
+        let stamp=try String(contentsOf: file, encoding: .utf8)
+        #expect(!stamp.contains(key) && stamp.contains(NPSKeyPause.digest(key)) && NPSKeyPause.digest(key).count == 16)
+        clock.advance(3600)
+        let relaunched=ParkStore(transport: http, persist: false, pauseFile: file, clock: { clock.now })
+        let held=await relaunched.alerts(for: [jotr], key: key, network: true, force: true)
+        #expect(held.busy && held.keyRefused)
+        #expect(await relaunched.programs(for: jotr, key: key, network: true, force: true) == nil)
+        #expect(await relaunched.campgrounds(for: [jotr], key: key, network: true, force: true) == nil)
+        #expect(await http.urls.count == 1)
+        // Another key is not held by it.
+        #expect(await relaunched.programs(for: jotr, key: "another", network: true, force: true) != nil)
+        #expect(await http.urls.count == 2)
+        // A day after the refusal, the next launch asks again (and is refused again).
+        clock.advance(NPSKeyPause.length-3600)
+        let nextDay=ParkStore(transport: http, persist: false, pauseFile: file, clock: { clock.now })
+        _=await nextDay.alerts(for: [jotr], key: key, network: true, force: false)
+        #expect(await http.count("/api/v1/alerts") == 2)
+        await nextDay.keyChanged(to: "other")
+        #expect(!FileManager.default.fileExists(atPath: file.path))
+        let cleared=ParkStore(transport: http, persist: false, pauseFile: file, clock: { clock.now })
+        _=await cleared.alerts(for: [jotr], key: key, network: true, force: false)
+        #expect(await http.count("/api/v1/alerts") == 3)
+    }
+    /// Campgrounds NPS refused, or answered unreadably, are not asked for on every park page: again an
+    /// hour later. One record that cannot be read costs only itself, never the other campgrounds.
+    @Test func campgroundsWaitAfterARefusalAndKeepReadableRecords() async throws {
+        let jotr=try park("jotr")
+        let clock=BudgetClock(Self.monday)
+        let http=PathHTTP(["/api/v1/campgrounds": .status(403)])
+        let store=ParkStore(transport: http, persist: false, clock: { clock.now })
+        #expect(await store.campgrounds(for: [jotr], key: "k", network: true, force: false) == nil)
+        #expect(await store.campgrounds(for: [jotr], key: "k", network: true, force: false) == nil)
+        #expect(await http.count("/api/v1/campgrounds") == 1)
+        clock.advance(3601)
+        await http.set("/api/v1/campgrounds", .body("not json"))
+        #expect(await store.campgrounds(for: [jotr], key: "k", network: true, force: false) == nil)
+        #expect(await store.campgrounds(for: [jotr], key: "k", network: true, force: false) == nil)
+        #expect(await http.count("/api/v1/campgrounds") == 2)
+        clock.advance(3601)
+        await http.set("/api/v1/campgrounds", .body("{\"total\":\"2\",\"data\":[{\"name\":\"Jumbo Rocks\",\"parkCode\":\"jotr\",\"campsites\":{\"totalSites\":124}},{\"name\":\"Indian Cove\",\"parkCode\":\"jotr\"}]}"))
+        let kept=await store.campgrounds(for: [jotr], key: "k", network: true, force: false)
+        #expect(kept?.campgrounds["jotr"]?.map(\.name) == ["Indian Cove"])
+        #expect(await http.count("/api/v1/campgrounds") == 3)
+    }
+    /// A caller still holding a key the person has since replaced asks NPS for nothing: no programs,
+    /// no campgrounds.
+    @Test func aReplacedKeyAsksForNothingMore() async throws {
+        let jotr=try park("jotr")
+        let http=PathHTTP(["/api/v1/events": .body("{\"data\":[]}"), "/api/v1/campgrounds": .body("{\"data\":[]}")])
+        let store=ParkStore(transport: http, persist: false)
+        await store.keyChanged(to: "new")
+        #expect(await store.programs(for: jotr, key: "old", network: true, force: true) == nil)
+        #expect(await store.campgrounds(for: [jotr], key: "old", network: true, force: true) == nil)
+        #expect(await http.urls.isEmpty)
+        _=await store.programs(for: jotr, key: "new", network: true, force: true)
+        #expect(await http.urls.count == 1)
+    }
+    /// A caller that joins an alerts request just cancelled (its only waiter left) asks again itself,
+    /// rather than taking the cancelled request's failure and the old cache.
+    @Test(.timeLimit(.minutes(1))) func aCallerJoiningACancelledRequestAsksAgain() async throws {
+        let jotr=try park("jotr")
+        let http=CancelledFirstHTTP()
+        let store=ParkStore(transport: http, persist: false)
+        let first=Task { await store.alerts(for: [jotr], key: "k", network: true, force: true) }
+        while await http.asked == 0 { try await Task.sleep(for: .milliseconds(5)) }
+        first.cancel()
+        #expect(await first.value.cache == nil)
+        // Joins the cancelled request while its answer is still held.
+        let second=Task { await store.alerts(for: [jotr], key: "k", network: true, force: true) }
+        try await Task.sleep(for: .milliseconds(100))
+        await http.release()
+        let answer=await second.value
+        #expect(answer.cache?.alerts["jotr"] == [] && !answer.busy)
+        #expect(await http.asked == 2)
     }
     /// Where alerts are shown, a refused key is named rather than called busy: the person's own key,
     /// or the shared one, with the cue to check the Park Service's site.

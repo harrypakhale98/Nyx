@@ -72,14 +72,17 @@ nonisolated enum MissingInput {
         if busy, let refused { return refusal(refused, cached: false) }
         return busy ? String(localized: "Park alerts are busy. Check current conditions on nps.gov.") : String(localized: "Access not checked. Confirm closures with the park.")
     }
-    /// Whose key the Park Service did not accept (401, 403): the person's own, or the one every copy shares.
-    nonisolated enum KeyRefusal: Sendable, Equatable { case own, shared }
+    /// Whose key the Park Service did not accept (401, 403): the person's own, or the one every copy
+    /// shares. Handed to Apple Watch by name (`WatchContext.alertsRefusal`).
+    nonisolated enum KeyRefusal: String, Codable, Sendable, Equatable { case own, shared }
     /// The Park Service did not accept the key. `cached`: alerts from an earlier update are shown.
+    /// The shared key is not asked again for a day (`NPSKeyPause`), and nothing in the app can mend
+    /// it, so it is said plainly: alerts are unavailable in this version.
     static func refusal(_ key: KeyRefusal, cached: Bool) -> String {
         switch key {
         case .own: cached ? String(localized: "The Park Service did not accept your key, so park alerts were not updated.")
             : String(localized: "The Park Service did not accept your key, so closures were not checked.")
-        case .shared: String(localized: "Park alerts are unavailable right now. Check current conditions on nps.gov before you go.")
+        case .shared: String(localized: "Park alerts are unavailable in this version of Nyx. Check current conditions on nps.gov before you go.")
         }
     }
     static var smokeOff: String { String(localized: "Smoke and haze are off in Your privacy, so smoke is not counted.") }

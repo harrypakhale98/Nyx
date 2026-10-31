@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 
 // Park updates (NPS), forecast detail and the smoke forecast, for Nyx on iPhone and iPad and on
@@ -512,6 +513,25 @@ actor AuroraService {
         if persist { CacheDirectory.remove(name: "aurora") }
     }
 }
+/// NPS did not accept a key (401, 403 on the alerts request). Waiting an hour will not mend that, so
+/// nothing more is asked with that key for a day (alerts, programs, campgrounds), across relaunches,
+/// and the screens say park alerts are unavailable. Kept with the offline caches as the date and the
+/// first 16 hex digits of the key's SHA-256: enough to tell one key from another, never the key
+/// itself, which stays in the Keychain (`NPSKeyStore`) or the app. A key saved or removed
+/// (`ParkStore.keyChanged`), or an answer with the paused key, ends it.
+nonisolated struct NPSKeyPause: Codable, Sendable, Equatable {
+    let refused: Date
+    let key: String
+    static let length: TimeInterval=86400
+    static func stamp(_ key: String, at date: Date) -> NPSKeyPause { NPSKeyPause(refused: date, key: digest(key)) }
+    static func digest(_ key: String) -> String { SHA256.hash(data: Data(key.utf8)).prefix(8).map { String(format: "%02x", $0) }.joined() }
+    /// True for a day after the refusal, for that key only. A refusal dated ahead of the clock (a
+    /// clock set back) holds nothing.
+    func holds(for key: String, now: Date) -> Bool {
+        let age=now.timeIntervalSince(refused)
+        return age>=0 && age<Self.length && self.key == Self.digest(key)
+    }
+}
 /// Every install shares one NPS key and its hourly quota (1,000 requests), so requests are spent
 /// carefully. Alerts for all 63 parks arrive in one request every six hours, whichever screen asks
 /// first, so a request never reveals which parks are near someone. Ranger programs are asked for
@@ -530,7 +550,9 @@ actor ParkStore: ParkProviding {
     private var alertsTask: (task: Task<AlertsFetch, Never>, pages: Int)?
     /// How an alerts request ended: kept, failed, or stopped at its page cap before the set was whole
     /// (a background refresh), which keeps the last complete set.
-    private nonisolated enum AlertsFetch: Sendable { case kept, failed, partial }
+    /// `cancelled`: it failed because nobody was waiting for it any more (`wait(for:)`), so a caller
+    /// that joined it since asks again itself.
+    private nonisolated enum AlertsFetch: Sendable { case kept, failed, partial, cancelled }
     /// Callers waiting on `alertsTask`; when the last one is cancelled, so is the request.
     private var alertWaiters=0
     /// The last alerts request was refused (the quota spent, a refused key, a server error); a
@@ -538,9 +560,10 @@ actor ParkStore: ParkProviding {
     private var refused=false
     /// That refusal was of the key itself (401, 403).
     private var keyRefused=false
-    /// When the key was last refused: waiting will not mend it, so the same key is asked again an
-    /// hour later, or ten minutes later when pulled to refresh (`retryable`), never on every refresh.
-    private var keyTried: Date?
+    /// The key NPS last refused, and when (`NPSKeyPause`): read from disk once, written when it changes.
+    private var pause: NPSKeyPause?
+    private var pauseLoaded=false
+    private let pauseFile: URL?
     /// The key in use since the person last saved or removed one (`keyChanged`). A caller still
     /// holding the key it replaced (read before the change) sends nothing with it, and what a request
     /// with that key brings back sets no wait and no refusal.
@@ -559,9 +582,14 @@ actor ParkStore: ParkProviding {
     private var campgroundCache: CampgroundsCache?
     private var campgroundsLoaded=false
     private var campgroundsTask: Task<Void, Never>?
-    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, clock: @escaping @Sendable () -> Date = { .now }) {
+    /// When the campgrounds request was last answered with nothing usable (refused, unreadable) or
+    /// timed out on its 2 MB answer, so opening a park's page again does not ask on every visit (`retryable`).
+    private var campgroundsTried: Date?
+    /// `pauseFile`: where the pause is kept; by default with the offline caches when `persist`, else in memory only.
+    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, pauseFile: URL? = nil, clock: @escaping @Sendable () -> Date = { .now }) {
         self.transport=transport; self.persist=persist; self.clock=clock
         self.backoff=backoff ?? (persist ? .shared : HostBackoff(file: nil))
+        self.pauseFile=pauseFile ?? (persist ? CacheDirectory.url.appendingPathComponent("nyx-nps-pause.json") : nil)
     }
     private var busy: Bool { refused || !backoff.allows(Self.host, now: clock()) }
     private func update(busy: Bool) -> AlertsUpdate { AlertsUpdate(cache: alertCache, busy: busy, keyRefused: keyRefused) }
@@ -571,12 +599,35 @@ actor ParkStore: ParkProviding {
     }
     /// Every key has a quota of its own, and the shared key's spent quota is no reason to keep a
     /// new key waiting (nor the other way round): the wait the last key earned is lifted, its
-    /// refusal forgotten, and the next request goes at once. Async, as the protocol declares it, so
+    /// refusal and its day's pause (`NPSKeyPause`) forgotten, and the next request goes at once. Async, as the protocol declares it, so
     /// it is this method (not the protocol's default) that answers.
     func keyChanged(to key: String) async {
         backoff.succeeded(Self.host)
-        refused=false; keyRefused=false; keyTried=nil; currentKey=key; newKey=key
-        programsTried=[:]
+        refused=false; keyRefused=false; currentKey=key; newKey=key
+        programsTried=[:]; campgroundsTried=nil
+        endPause()
+    }
+    /// True while NPS's refusal of `key` stands (`NPSKeyPause`).
+    private func paused(_ key: String) -> Bool {
+        loadPause()
+        return pause?.holds(for: key, now: clock()) ?? false
+    }
+    private func loadPause() {
+        guard !pauseLoaded else { return }
+        pauseLoaded=true
+        if pause == nil, let pauseFile { pause=(try? Data(contentsOf: pauseFile)).flatMap { try? JSONDecoder().decode(NPSKeyPause.self, from: $0) } }
+    }
+    private func startPause(_ key: String) {
+        pauseLoaded=true
+        let stamp=NPSKeyPause.stamp(key, at: clock())
+        pause=stamp
+        if let pauseFile, let data=try? JSONEncoder().encode(stamp) { try? data.write(to: pauseFile, options: .atomic) }
+    }
+    private func endPause() {
+        loadPause()
+        guard pause != nil else { return }
+        pause=nil
+        if let pauseFile { try? FileManager.default.removeItem(at: pauseFile) }
     }
     /// The shared file, or (once, after an update from a version that kept one file per park)
     /// the last per-park alerts, so closures known offline are never forgotten by an upgrade.
@@ -614,16 +665,19 @@ actor ParkStore: ParkProviding {
         // so a waiter never sees a request that has already ended. A cancelled caller stops waiting
         // and returns what is cached. After an alerts request, only its own refusal is busy.
         // One sent with the key just replaced is followed by one with the new key, sent by a caller
-        // holding the new key; a caller still holding the old one sends nothing.
+        // holding the new key; a caller still holding the old one sends nothing. One cancelled because
+        // its last waiter left before this caller joined is followed by this caller's own.
         while let running=alertsTask {
             guard let outcome=await wait(for: running.task) else { return update(busy: refused) }
-            guard (outcome == .partial && running.pages<pages) || newKey == key else { return update(busy: refused) }
+            guard (outcome == .partial && running.pages<pages) || outcome == .cancelled || newKey == key else { return update(busy: refused) }
         }
         // A cancelled caller sends nothing either, so it never spends the new key's request.
         guard !superseded(key), !Task.isCancelled else { return update(busy: refused) }
+        // A key NPS refused is not sent again for a day, even when pulled to refresh: said, not asked.
+        if paused(key) { refused=true; keyRefused=true; return update(busy: true) }
         let replacing=newKey == key
         // Fresh alerts are not busy because another request (programs, say) made the host wait.
-        guard replacing || (Self.stale(alertCache?.updated, maxAge: 6*3600, force: force, now: clock()) && Self.retryable(keyTried, force: force, now: clock())) else {
+        guard replacing || Self.stale(alertCache?.updated, maxAge: 6*3600, force: force, now: clock()) else {
             return update(busy: refused)
         }
         guard backoff.allows(Self.host, now: clock()) else { return update(busy: true) }
@@ -632,7 +686,7 @@ actor ParkStore: ParkProviding {
         let task=Task { () -> AlertsFetch in
             let outcome=await self.fetchAlerts(codes: codes, parkIDs: ids, key: key, pages: pages)
             self.alertsTask=nil
-            return outcome
+            return outcome == .failed && Task.isCancelled ? .cancelled : outcome
         }
         alertsTask=(task, pages)
         _=await wait(for: task)
@@ -653,7 +707,8 @@ actor ParkStore: ParkProviding {
         if persist, programsLoaded.insert(park.id).inserted, programCache[park.id] == nil {
             programCache[park.id]=CacheDirectory.read(ProgramsCache.self, name: "programs-\(park.id)")
         }
-        guard network, Self.usable(key) else { return programCache[park.id] }
+        // A key since replaced, or one NPS refused (`NPSKeyPause`), asks for nothing.
+        guard network, Self.usable(key), !superseded(key), !paused(key) else { return programCache[park.id] }
         // A request for this park on its way: its answer, never a second request. A cancelled caller
         // stops waiting and returns what is cached, as for alerts.
         if let running=programTasks[park.id] {
@@ -679,12 +734,14 @@ actor ParkStore: ParkProviding {
             campgroundsLoaded=true
             if persist, campgroundCache == nil { campgroundCache=CacheDirectory.read(CampgroundsCache.self, name: "campgrounds") }
         }
-        guard network, Self.usable(key) else { return campgroundCache }
+        guard network, Self.usable(key), !superseded(key), !paused(key) else { return campgroundCache }
         if let running=campgroundsTask {
             _=await SharedRequest.value(of: running)
             return campgroundCache
         }
-        guard Self.stale(campgroundCache?.updated, maxAge: Self.campgroundsFresh, force: force, now: clock()), backoff.allows(Self.host, now: clock()) else { return campgroundCache }
+        let now=clock()
+        guard Self.stale(campgroundCache?.updated, maxAge: Self.campgroundsFresh, force: force, now: now), Self.retryable(campgroundsTried, force: force, now: now),
+              backoff.allows(Self.host, now: now) else { return campgroundCache }
         let codes=Array(Set(parks.compactMap(\.nps))).sorted()
         let task=Task {
             await self.fetchCampgrounds(codes: codes, key: key)
@@ -699,15 +756,20 @@ actor ParkStore: ParkProviding {
     private func fetchCampgrounds(codes: [String], key: String) async {
         var all: [Campground] = [], read=0
         for _ in 0..<4 {
-            guard let data=await data(url("campgrounds", [("parkCode", codes.joined(separator: ",")), ("limit", "500"), ("start", String(read))]), key: key, constrained: false).data,
-                  let page=try? Campground.page(data) else { return }
+            let reply=await data(url("campgrounds", [("parkCode", codes.joined(separator: ",")), ("limit", "500"), ("start", String(read))]), key: key, constrained: false)
+            guard let data=reply.data, let page=try? Campground.page(data) else {
+                // Answered with nothing usable (a request NPS refused, a body Nyx cannot read), or timed
+                // out on the 2 MB answer: asked again an hour later, not on every park page.
+                if reply.data != nil || reply.refusal?.refusesRequest == true || reply.timedOut { campgroundsTried=clock() }
+                return
+            }
             all+=page.campgrounds; read+=page.count
             guard let total=page.total, read<total, page.count>0 else { break }
         }
         var grouped=Dictionary(uniqueKeysWithValues: codes.map { ($0, [Campground]()) })
         for campground in all where grouped[campground.parkCode] != nil { grouped[campground.parkCode]?.append(campground) }
         let fresh=CampgroundsCache(updated: clock(), campgrounds: grouped)
-        campgroundCache=fresh
+        campgroundCache=fresh; campgroundsTried=nil
         if persist { CacheDirectory.write(fresh, name: "campgrounds") }
     }
     /// A part is due once it is older than `maxAge`; even a forced refresh waits ten minutes
@@ -734,18 +796,19 @@ actor ParkStore: ParkProviding {
         return (try? JSONDecoder().decode(type, from: data), true, nil)
     }
     /// The body of a request that may wait for an unconstrained network: Low Data Mode holding it
-    /// back is not a refusal and starts no backoff. `refusal`: the error status NPS answered with.
-    private func data(_ url: URL?, key: String, constrained: Bool) async -> (data: Data?, refusal: HTTPStatusError?) {
-        guard let url else { return (nil, nil) }
+    /// back is not a refusal and starts no backoff. `refusal`: the error status NPS answered with;
+    /// `timedOut`: no answer came in time.
+    private func data(_ url: URL?, key: String, constrained: Bool) async -> (data: Data?, refusal: HTTPStatusError?, timedOut: Bool) {
+        guard let url else { return (nil, nil, false) }
         do {
             let data=try await transport.get(url, headers: ["X-Api-Key": key], constrained: constrained)
             backoff.succeeded(Self.host)
-            return (data, nil)
+            return (data, nil, false)
         } catch {
             // Low Data Mode holding it back is no refusal; nor is an answer to a key since replaced.
-            if Backoff.constrained(error) || superseded(key) { return (nil, nil) }
+            if Backoff.constrained(error) || superseded(key) { return (nil, nil, false) }
             backoff.record(error, host: Self.host, now: clock())
-            return (nil, error as? HTTPStatusError)
+            return (nil, error as? HTTPStatusError, (error as? URLError)?.code == .timedOut)
         }
     }
     /// An answer that means NPS is refusing alerts: the shared key's quota spent (429), the key
@@ -783,8 +846,9 @@ actor ParkStore: ParkProviding {
         for _ in 0..<max(1, min(pages, Self.alertPages)) {
             let reply=await get(Page.self, url("alerts", [("parkCode", codes.joined(separator: ",")), ("limit", "500"), ("start", String(read))]), key: key)
             if let status=reply.refusal?.status, Self.refuses(status) {
-                refused=true; keyRefused=Self.refusesKey(status); keyTried=keyRefused ? clock() : nil
-            } else if reply.value != nil { refused=false; keyRefused=false; keyTried=nil }
+                refused=true; keyRefused=Self.refusesKey(status)
+                if keyRefused { startPause(key) }
+            } else if reply.value != nil, !superseded(key) { refused=false; keyRefused=false; endPause() }
             guard let page=reply.value else { return .failed }
             // `start` counts every record on the page, read or not, so the next page follows on.
             read+=page.data.count

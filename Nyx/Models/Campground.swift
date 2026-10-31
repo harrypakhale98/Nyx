@@ -63,7 +63,8 @@ nonisolated struct Campground: Codable, Hashable, Sendable, Identifiable {
     }
 
     /// One page of `/api/v1/campgrounds`. Numbers arrive as strings ("62"); missing or odd values
-    /// become nil rather than failing the page. Records without a name or park code are skipped.
+    /// become nil rather than failing the page. Records without a name or park code are skipped, and
+    /// a record that still cannot be read costs only itself, never the page.
     struct Page: Sendable {
         let campgrounds: [Campground]
         let total: Int?
@@ -84,11 +85,19 @@ nonisolated struct Campground: Codable, Hashable, Sendable, Identifiable {
             struct Sites: Decodable { let totalSites: String? }
             struct Access: Decodable { let wheelchairAccess: String?; let adaInfo: String? }
         }
-        struct Response: Decodable { let data: [Record]; let total: String? }
+        struct Response: Decodable {
+            let data: [Lenient<Record>]; let total: String?
+            enum CodingKeys: String, CodingKey { case data, total }
+            init(from decoder: any Decoder) throws {
+                let c = try decoder.container(keyedBy: CodingKeys.self)
+                data = try c.decode([Lenient<Record>].self, forKey: .data)
+                total = try? c.decodeIfPresent(String.self, forKey: .total)
+            }
+        }
         let response = try JSONDecoder().decode(Response.self, from: data)
         func number(_ text: String?) -> Int? { text.flatMap { Int($0.trimmingCharacters(in: .whitespaces)) }.flatMap { $0 >= 0 ? $0 : nil } }
         func note(_ text: String?) -> String? { text.map(firstSentence).flatMap { $0.isEmpty ? nil : $0 } }
-        let campgrounds = response.data.compactMap { r -> Campground? in
+        let campgrounds = response.data.compactMap(\.value).compactMap { r -> Campground? in
             guard let name = r.name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty,
                   let code = r.parkCode?.lowercased().trimmingCharacters(in: .whitespaces), !code.isEmpty else { return nil }
             return Campground(id: r.id ?? "\(code)-\(name)", name: name, parkCode: code, summary: firstSentence(r.description ?? ""),
