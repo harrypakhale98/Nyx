@@ -170,6 +170,17 @@ import UniformTypeIdentifiers
     }
     /// ⌘⇧N opens the night on screen: a page on a later night reports it, tonight reports none,
     /// and the night leaves with its page.
+    /// Nyx's upkeep runs once each time it comes forward, from whichever window that is: a second
+    /// window active beside the first adds nothing, and the same window reporting again adds nothing.
+    @MainActor @Test func upkeepRunsOncePerComingForward() {
+        var windows=ActiveWindows()
+        let main=UUID(), park=UUID()
+        let steps=[windows.update(main,active:true),windows.update(main,active:true),windows.update(park,active:true),
+                   windows.update(main,active:false),windows.update(park,active:false),
+                   // A park's window alone in front (the main one in the background) comes forward by itself.
+                   windows.update(park,active:true)]
+        #expect(steps==[true,false,false,false,false,true])
+    }
     @MainActor @Test func eachTabReportsItsNightForANewWindow() {
         let commands=SceneCommands()
         commands.tab = .parks

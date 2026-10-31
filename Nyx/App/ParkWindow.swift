@@ -23,6 +23,8 @@ struct ParkWindowRoot: View {
     /// The night last chosen in this window, as seconds since 1970 (0: none yet).
     @SceneStorage("windowNight") private var chosenNight=0.0
     @State private var commands=SceneCommands(parkWindow:true)
+    @Query private var saved:[SavedPark]
+    @Query private var spots:[SavedSpot]
     /// The saved spots have reached the model (`SavedSpotsFeed`): until then a spot's window waits.
     @State private var spotsFed=false
     /// A restored window's place is not known yet: a place abroad before the world catalogue is
@@ -35,8 +37,16 @@ struct ParkWindowRoot: View {
             if let value, let park=model.park(value.parkID) {
                 ParkDetailView(park:park,initialDate:ParkWindowRoot.night(stored:chosenNight,opened:value.night,tonight:model.tonight(park)),nightChanged:{ night in chosenNight=night.timeIntervalSince1970 })
                     .id(park.id)
-                    // Night vision one tap away here too, as in every tab of the main window.
-                    .toolbar { ToolbarItem(placement:.topBarLeading) { NightVisionToggle() } }
+                    // Night vision one tap away here too, as in every tab of the main window, and the way back to
+                    // the main window, which a park's window can cover entirely (full screen).
+                    .toolbar {
+                        ToolbarItem(placement:.topBarLeading) { NightVisionToggle() }
+                        ToolbarItem(placement:.topBarLeading) {
+                            Button("Show Main Window",systemImage:"macwindow") { MainWindows.bringForward() }
+                                .labelStyle(.iconOnly).help("Show Main Window")
+                                .accessibilityInputLabels([Text("Show Main Window"),Text("Main window")])
+                        }
+                    }
             } else if let value, waits(value.parkID) {
                 ConstellationLoader().frame(maxWidth:.infinity,maxHeight:.infinity).background(NightBackground())
             } else {
@@ -49,6 +59,9 @@ struct ParkWindowRoot: View {
         .scrollEdgeEffectStyle(.soft,for:.all)
         // A spot's page in its own window resolves the spot through the model, which this scene keeps fed.
         .background(SavedSpotsFeed(fed:$spotsFed))
+        // Nyx coming forward in this window (the main one out of sight behind it) catches up as it would there.
+        .activeUpkeep(saved:saved,spots:spots)
+        .modifier(BringsMainWindowForRequests())
         .environment(commands).focusedSceneValue(commands)
         .background(WindowSceneReader(commands:commands).frame(width:0,height:0).accessibilityHidden(true))
         .environment(\.nyx,palette).environment(\.skyHome,model.home)

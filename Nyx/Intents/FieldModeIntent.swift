@@ -43,6 +43,11 @@ nonisolated struct PendingPark: Equatable {
         if let night { request["night"]=night }
         defaults.set(request, forKey: key)
     }
+    /// Whether a request made within the last minute waits under `key`, leaving it there.
+    static func waits(key: String, now: Date, defaults: UserDefaults) -> Bool {
+        guard let at=defaults.dictionary(forKey: key)?["at"] as? Double else { return false }
+        return abs(now.timeIntervalSince1970-at)<60
+    }
     /// The request under `key`, once, if it was made within the last minute.
     static func take(key: String, now: Date, defaults: UserDefaults) -> PendingPark? {
         guard let request=defaults.dictionary(forKey: key) else { return nil }

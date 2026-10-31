@@ -54,6 +54,8 @@ struct RootView:View {
     @Environment(\.dynamicTypeSize) private var typeSize
     /// This window's place among the windows a tapped reminder may open in (`NotificationRouter`).
     @State private var routerID=UUID()
+    /// Requests waiting for this window to be brought forward (`forward`).
+    @State private var forwarded:[()->Void]=[]
     /// The tab bar recedes as a page scrolls down and returns on the way up, except where a bar that
     /// moves would cost someone their place: VoiceOver, Switch Control and accessibility text sizes.
     private var tabBarMinimize:TabBarMinimizeBehavior {
@@ -144,6 +146,7 @@ struct RootView:View {
             moonIcon=RootView.currentMoonIcon()
             model.savedSync.palette=palette
             NotificationRouter.shared.connect(routerID) { route in openReminder(route) }
+            MainWindows.activated(commands)
             if let screen=DebugScenario.screen { commands.tab=AppTab(route:screen) ?? .tonight }
             DebugScreens.launch(model:model,context:context,commands:commands)
             if let hold=DebugScenario.number("-nyx-promo-hold") { Task { try? await Task.sleep(for:.seconds(hold)); promoHold=false } }
@@ -176,13 +179,17 @@ struct RootView:View {
             if phase == .active {
             // The window used last opens a tapped reminder, never one closed since.
             NotificationRouter.shared.connect(routerID) { route in openReminder(route) }
-            model.tick(); moonIcon=RootView.currentMoonIcon()
-            if launchPublished { Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
+            MainWindows.activated(commands)
+            moonIcon=RootView.currentMoonIcon()
             if firstLight == nil { Task { if let park=await FirstLightWatcher.check(model:model) { firstLight=park } } }
+            // What waited for this window to come forward, then anything asked for meanwhile.
+            let waiting=forwarded; forwarded=[]
+            waiting.forEach { $0() }
             openRequestedField(); openRequestedPark()
-            // The night's Live Activity catches up (or ends at dawn) whenever Nyx is opened.
-            if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:nightVision) } }
         } }
+        // "Tonight", the saved parks (and so reminders) and the night's Live Activity catch up whenever Nyx
+        // comes forward, in whichever window: a park's own window in front of this one does the same.
+        .activeUpkeep(saved:saved,spots:spots,publish:launchPublished)
         .onDisappear { NotificationRouter.shared.disconnect(routerID) }
         .onReceive(NotificationCenter.default.publisher(for:FieldModeRequest.notification)) { _ in openRequestedField() }
         .onReceive(NotificationCenter.default.publisher(for:ParkOpenRequest.notification)) { _ in openRequestedPark() }
@@ -214,14 +221,16 @@ struct RootView:View {
         // the watch and reminders follow each change, as in Assistive Access (`savedUpkeep`).
         .savedUpkeep(saved:saved,spots:spots)
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
-            withPlace(activity.userInfo?[CSSearchableItemActivityIdentifier] as? String) { open($0) }
+            forward { withPlace(activity.userInfo?[CSSearchableItemActivityIdentifier] as? String) { open($0) } }
         }
         // A park and night handed off from park detail on another iPhone or iPad.
         .onContinueUserActivity(ParkHandoff.type) { activity in
             guard let handoff=ParkHandoff(userInfo:activity.userInfo) else { return }
-            withPlace(handoff.parkID) { park in
-                // A night that has passed since it was handed off opens tonight instead.
-                open(park,night:handoff.evening(in:park).flatMap { LaunchPark.night($0,tonight:model.tonight(park),whatsUp:false) })
+            forward {
+                withPlace(handoff.parkID) { park in
+                    // A night that has passed since it was handed off opens tonight instead.
+                    open(park,night:handoff.evening(in:park).flatMap { LaunchPark.night($0,tonight:model.tonight(park),whatsUp:false) })
+                }
             }
         }
         .onOpenURL { url in
@@ -278,8 +287,22 @@ struct RootView:View {
             try? await Task.sleep(for:.seconds(wait))
         }
     }
+    /// What a link, a reminder, Siri or Control Center asks of this window is shown in it. When the window
+    /// is out of sight (a park's own window full screen in front of it on iPad), it is brought forward
+    /// first and the request waits for it, so nothing opens unseen.
+    private func forward(_ act:@escaping ()->Void) {
+        guard let scene=commands.windowScene, scene.activationState == .background else { act(); return }
+        forwarded.append(act)
+        UIApplication.shared.activateSceneSession(for:UISceneSessionActivationRequest(session:scene.session)) { _ in
+            // Not brought forward: shown where it would have been, rather than lost.
+            Task { @MainActor in let waiting=forwarded; forwarded=[]; waiting.forEach { $0() } }
+        }
+    }
     /// Widgets, Spotlight, Live Activities, calendar events Nyx drafted and In-App Events all land here.
     private func handle(_ link:DeepLink?) {
+        forward { route(link) }
+    }
+    private func route(_ link:DeepLink?) {
         switch link {
         case .park(let id): withPlace(id) { open($0) }
         case .parkNight(let id,let day): withPlace(id) { open($0,night:LaunchPark.night(day.evening(in:$0),tonight:model.tonight($0),whatsUp:false)) }
@@ -307,21 +330,25 @@ struct RootView:View {
     private func openRequestedField() {
         guard DebugScenario.screen == nil, let request=FieldModeRequest.take() else { return }
         let show:(Park)->Void={ FieldPresenter.present(park:$0,model:model,from:commands.topController) }
-        if let id=request.parkID { withPlace(id,show); return }
-        let last=SharedSettings.defaults.string(forKey:FieldModeRequest.lastParkKey)
-        Task { if let park=await model.usualFieldPlace(lastUsed:last) { show(park) } }
+        forward {
+            if let id=request.parkID { withPlace(id,show); return }
+            let last=SharedSettings.defaults.string(forKey:FieldModeRequest.lastParkKey)
+            Task { if let park=await model.usualFieldPlace(lastUsed:last) { show(park) } }
+        }
     }
     /// A tapped reminder opens the night it announced (a shower reminder at What's up).
     private func openReminder(_ route:ReminderRoute) {
-        withPlace(route.parkID) { park in open(park,night:route.day.flatMap { LaunchPark.night($0.evening(in:park),tonight:model.tonight(park),whatsUp:route.whatsUp) }) }
+        forward { withPlace(route.parkID) { park in open(park,night:route.day.flatMap { LaunchPark.night($0.evening(in:park),tonight:model.tonight(park),whatsUp:route.whatsUp) }) } }
     }
     /// Opens the park Spotlight, Siri or a snippet's "Open in Nyx" asked for (`OpenParkIntent`),
     /// or the Tonight tab when the Tonight control was tapped before any park was saved.
     private func openRequestedPark() {
         guard DebugScenario.screen == nil, let request=ParkOpenRequest.take() else { return }
-        guard let id=request.parkID else { commands.tab = .tonight; return }
-        // A night the best-night card named opens as a widget's link to that night does.
-        if let day=request.night.flatMap(TripDay.init(iso:)) { handle(.parkNight(park:id,day:day)) } else { withPlace(id) { open($0) } }
+        forward {
+            guard let id=request.parkID else { commands.tab = .tonight; return }
+            // A night the best-night card named opens as a widget's link to that night does.
+            if let day=request.night.flatMap(TripDay.init(iso:)) { route(.parkNight(park:id,day:day)) } else { withPlace(id) { open($0) } }
+        }
     }
     /// Every route from outside (links, widgets, reminders, Spotlight, Handoff, Siri) finds its place
     /// here: at once when it is known; a place abroad named on a cold launch, before the world catalogue

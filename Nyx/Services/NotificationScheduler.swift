@@ -371,13 +371,20 @@ nonisolated struct NotificationScheduler {
     /// The windows' handlers, the one used last at the end.
     private var windows:[(id:UUID,open:(ReminderRoute)->Void)]=[]
     private var pending:ReminderRoute?
+    /// A tapped reminder waits for a main window to open it (`waiting`).
+    static let waiting=Notification.Name("NyxReminderWaiting")
+    var waits:Bool { pending != nil }
     func connect(_ id:UUID,_ handler:@escaping (ReminderRoute)->Void) {
         windows.removeAll { $0.id==id }
         windows.append((id,handler))
         if let pending { self.pending=nil; handler(pending) }
     }
     func disconnect(_ id:UUID) { windows.removeAll { $0.id==id } }
-    func deliver(_ route:ReminderRoute) { if let open=windows.last?.open { open(route) } else { pending=route } }
+    func deliver(_ route:ReminderRoute) {
+        if let open=windows.last?.open { open(route); return }
+        pending=route
+        NotificationCenter.default.post(name:Self.waiting,object:nil)
+    }
     nonisolated func userNotificationCenter(_ center:UNUserNotificationCenter,didReceive response:UNNotificationResponse) async {
         guard let route=ReminderRoute(userInfo:response.notification.request.content.userInfo) else { return }
         await deliver(route)
