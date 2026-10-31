@@ -1192,6 +1192,76 @@
         }
       }
     },
+    "%lld%% average cover from sunset to sunrise.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %% mittlere Bewölkung von Sonnenuntergang bis Sonnenaufgang."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% average cover from sunset to sunrise."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% de nubosidad media desde la puesta hasta la salida del sol."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %% de couverture moyenne du coucher au lever du soleil."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日没から日の出までの平均雲量は%lld%%。"
+          }
+        }
+      }
+    },
+    "%lld%% average cover over the four darkest hours.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %% mittlere Bewölkung in den vier dunkelsten Stunden."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% average cover over the four darkest hours."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% de nubosidad media en las cuatro horas más oscuras."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %% de couverture moyenne pendant les quatre heures les plus sombres."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最も暗い4時間の平均雲量は%lld%%。"
+          }
+        }
+      }
+    },
     "%lld%% average cover through true darkness.": {
       "extractionState": "manual",
       "localizations": {
@@ -6263,6 +6333,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "低い：地平線方向の視界が開けていることが大切です。"
+          }
+        }
+      }
+    },
+    "Lower than that, haze and terrain usually hide it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiefer verbergen es meist Dunst und Gelände."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lower than that, haze and terrain usually hide it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más abajo, la bruma y el relieve suelen ocultarlo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus bas, la brume et le relief le cachent en général."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "それより低いと、もやや地形に隠れることがほとんどです。"
           }
         }
       }
@@ -13477,6 +13582,41 @@
         }
       }
     },
+    "The bright center climbs past %lld° at %@, after true darkness ends at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das helle Zentrum steigt um %2$@ über %1$lld°, nachdem die echte Dunkelheit um %3$@ endet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bright center climbs past %lld° at %@, after true darkness ends at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El centro brillante sube por encima de %1$lld° (%2$@), después de que termina la oscuridad total (%3$@)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le centre brillant passe au-dessus de %1$lld° à %2$@, après la fin de l’obscurité totale à %3$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "明るい中心部は%2$@に%1$lld°より高くなります。完全な暗さが%3$@に終わった後です。"
+          }
+        }
+      }
+    },
     "The bright center is near the Sun this season. The Milky Way's fainter band still crosses dark skies.": {
       "extractionState": "manual",
       "localizations": {
@@ -13582,72 +13722,37 @@
         }
       }
     },
-    "The bright center rises at %@, after true darkness ends at %@.": {
+    "The bright center sinks below %lld° at %@, before true darkness begins at %@.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Das helle Zentrum geht um %@ auf, nachdem die echte Dunkelheit um %@ endet."
+            "value": "Das helle Zentrum sinkt um %2$@ unter %1$lld°, bevor die echte Dunkelheit um %3$@ beginnt."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The bright center rises at %@, after true darkness ends at %@."
+            "value": "The bright center sinks below %lld° at %@, before true darkness begins at %@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El centro brillante sale (%1$@), después de que termina la oscuridad total (%2$@)."
+            "value": "El centro brillante baja de %1$lld° (%2$@), antes de que empiece la oscuridad total (%3$@)."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le centre brillant se lève à %1$@, après la fin de l’obscurité totale à %2$@."
+            "value": "Le centre brillant passe sous %1$lld° à %2$@, avant le début de l’obscurité totale à %3$@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "明るい中心部は%1$@に昇ります。完全な暗さが%2$@に終わった後です。"
-          }
-        }
-      }
-    },
-    "The bright center sets at %@, before true darkness begins at %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Das helle Zentrum geht um %@ unter, bevor die echte Dunkelheit um %@ beginnt."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The bright center sets at %@, before true darkness begins at %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El centro brillante se pone (%1$@), antes de que empiece la oscuridad total (%2$@)."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le centre brillant se couche à %1$@, avant le début de l’obscurité totale à %2$@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "明るい中心部は%1$@に沈みます。完全な暗さが%2$@に始まる前です。"
+            "value": "明るい中心部は%2$@に%1$lld°より低くなります。完全な暗さが%3$@に始まる前です。"
           }
         }
       }
@@ -14838,6 +14943,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "今夜の空"
+          }
+        }
+      }
+    },
+    "Too low in darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu tief in der Dunkelheit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Too low in darkness"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demasiado bajo en la oscuridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trop bas dans l’obscurité"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暗い時間は低すぎる"
           }
         }
       }

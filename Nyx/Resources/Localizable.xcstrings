@@ -7362,6 +7362,76 @@
         }
       }
     },
+    "%lld%% average cover from sunset to sunrise.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %% mittlere Bewölkung von Sonnenuntergang bis Sonnenaufgang."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% average cover from sunset to sunrise."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% de nubosidad media desde la puesta hasta la salida del sol."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %% de couverture moyenne du coucher au lever du soleil."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日没から日の出までの平均雲量は%lld%%。"
+          }
+        }
+      }
+    },
+    "%lld%% average cover over the four darkest hours.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %% mittlere Bewölkung in den vier dunkelsten Stunden."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% average cover over the four darkest hours."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% de nubosidad media en las cuatro horas más oscuras."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %% de couverture moyenne pendant les quatre heures les plus sombres."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最も暗い4時間の平均雲量は%lld%%。"
+          }
+        }
+      }
+    },
     "%lld%% average cover through true darkness.": {
       "extractionState": "manual",
       "localizations": {
@@ -15149,6 +15219,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "いちばん：%@ · %lld"
+          }
+        }
+      }
+    },
+    "Beyond about three days it is eased toward the park's usual clouds for the month; with no forecast, the usual clouds count alone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ab etwa drei Tagen wird sie an die übliche Bewölkung des Parks im jeweiligen Monat angenähert; ohne Vorhersage zählt allein die übliche Bewölkung."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beyond about three days it is eased toward the park's usual clouds for the month; with no forecast, the usual clouds count alone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Después de unos tres días se ajusta hacia la nubosidad habitual del parque en ese mes; sin pronóstico, solo cuenta la nubosidad habitual."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au-delà d’environ trois jours, elle est rapprochée de la nébulosité habituelle du parc pour le mois ; sans prévision, seule la nébulosité habituelle compte."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "約3日より先は、公園のその月の平年の雲量に寄せています。予報がない場合は、平年の雲量だけを使います。"
+          }
+        }
+      }
+    },
+    "Beyond about three days it is eased toward the park's usual clouds. Model agreement and cloud layers are context; smoke or haze can cap the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ab etwa drei Tagen wird sie an die übliche Bewölkung des Parks angenähert. Übereinstimmung der Modelle und Wolkenschichten sind Kontext; Rauch oder Dunst können den Wert begrenzen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beyond about three days it is eased toward the park's usual clouds. Model agreement and cloud layers are context; smoke or haze can cap the score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Después de unos tres días se ajusta hacia la nubosidad habitual del parque. La coincidencia entre modelos y las capas de nubes son contexto; el humo o la bruma pueden limitar el índice."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au-delà d’environ trois jours, elle est rapprochée de la nébulosité habituelle du parc. La concordance des modèles et les couches nuageuses servent de contexte ; la fumée ou la brume peuvent plafonner l’indice."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "約3日より先は、公園の平年の雲量に寄せています。モデルの一致度と雲の層は参考情報です。煙やもやはスコアの上限を下げることがあります。"
           }
         }
       }
@@ -23482,6 +23622,41 @@
         }
       }
     },
+    "Each night shows its darkness score, from 0 to 100, and what the score rests on. Nights in the stretch above say so. A meteor shower's peak or a lunar eclipse you can see is named under its night; neither changes the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jede Nacht zeigt ihren Dunkelheitswert, von 0 bis 100, und worauf er beruht. Nächte der Serie oben sagen es dazu. Das Maximum eines Meteorstroms oder eine sichtbare Mondfinsternis steht unter ihrer Nacht; beides ändert den Wert nicht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each night shows its darkness score, from 0 to 100, and what the score rests on. Nights in the stretch above say so. A meteor shower's peak or a lunar eclipse you can see is named under its night; neither changes the score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada noche muestra su índice de oscuridad, de 0 a 100, y en qué se basa. Las noches de la racha de arriba lo indican. El máximo de una lluvia de meteoros o un eclipse de Luna visible se nombra bajo su noche; ninguno cambia el índice."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque nuit montre son indice d’obscurité, de 0 à 100, et ce sur quoi il repose. Les nuits de la série ci-dessus l’indiquent. Le maximum d’une pluie de météores ou une éclipse de Lune visible est nommé sous sa nuit ; ni l’un ni l’autre ne modifie l’indice."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "各夜には0〜100の暗さのスコアと、その根拠が表示されます。上の連夜に入る夜にはそのことが示されます。流星群の極大や見られる月食は、その夜の下に名前が出ます。どちらもスコアは変えません。"
+          }
+        }
+      }
+    },
     "Each night you record shines at its park on this map of the sky. Nights in the same season join into a figure of their own. Every entry stays on this iPhone.": {
       "extractionState": "manual",
       "localizations": {
@@ -31417,41 +31592,6 @@
         }
       }
     },
-    "In the best stretch. Opens the score breakdown.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In der besten Serie. Öffnet die Aufschlüsselung des Werts."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In the best stretch. Opens the score breakdown."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En la mejor racha. Abre el desglose del índice."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dans la meilleure série. Ouvre le détail de l’indice."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "いちばんよい連夜の中。スコアの内訳を開きます。"
-          }
-        }
-      }
-    },
     "In the darkest moon stretch": {
       "extractionState": "manual",
       "localizations": {
@@ -31483,41 +31623,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "月明かりのいちばん少ない連夜の中"
-          }
-        }
-      }
-    },
-    "In the darkest moon stretch. Opens the score breakdown.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In der mondärmsten Serie. Öffnet die Aufschlüsselung des Werts."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In the darkest moon stretch. Opens the score breakdown."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En la racha de luna más oscura. Abre el desglose del índice."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dans la série de lune la plus sombre. Ouvre le détail de l’indice."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月明かりのいちばん少ない連夜の中。スコアの内訳を開きます。"
           }
         }
       }
@@ -31938,6 +32043,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "名前もスコアもありません。誰も確かめていない、光の地図上の一区画です。出かける前に、そこに何があるか、立ち入れるかを確かめてください。"
+          }
+        }
+      }
+    },
+    "It is counted as it stands: there are no usual clouds for this place. Model agreement and cloud layers are context; smoke or haze can cap the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sie wird unverändert gezählt: Für diesen Ort ist keine übliche Bewölkung bekannt. Übereinstimmung der Modelle und Wolkenschichten sind Kontext; Rauch oder Dunst können den Wert begrenzen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It is counted as it stands: there are no usual clouds for this place. Model agreement and cloud layers are context; smoke or haze can cap the score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se cuenta tal cual: no se conoce la nubosidad habitual de este lugar. La coincidencia entre modelos y las capas de nubes son contexto; el humo o la bruma pueden limitar el índice."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elle est comptée telle quelle : la nébulosité habituelle de ce lieu n’est pas connue. La concordance des modèles et les couches nuageuses servent de contexte ; la fumée ou la brume peuvent plafonner l’indice."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報はそのまま計算しています。この場所の平年の雲量はわかりません。モデルの一致度と雲の層は参考情報です。煙やもやはスコアの上限を下げることがあります。"
+          }
+        }
+      }
+    },
+    "It is counted as it stands: there are no usual clouds for this place. With no forecast, the score counts the Moon and darkness only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sie wird unverändert gezählt: Für diesen Ort ist keine übliche Bewölkung bekannt. Ohne Vorhersage berücksichtigt der Wert nur Mond und Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It is counted as it stands: there are no usual clouds for this place. With no forecast, the score counts the Moon and darkness only."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se cuenta tal cual: no se conoce la nubosidad habitual de este lugar. Sin pronóstico, el índice solo cuenta la Luna y la oscuridad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elle est comptée telle quelle : la nébulosité habituelle de ce lieu n’est pas connue. Sans prévision, l’indice ne compte que la Lune et l’obscurité."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報はそのまま計算しています。この場所の平年の雲量はわかりません。予報がない場合は、月と暗さだけで計算します。"
           }
         }
       }
@@ -34998,6 +35173,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "クラスが低いほど人工の光が少ないことを示します。状況は公園内でも異なります。"
+          }
+        }
+      }
+    },
+    "Lower than that, haze and terrain usually hide it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiefer verbergen es meist Dunst und Gelände."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lower than that, haze and terrain usually hide it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más abajo, la bruma y el relieve suelen ocultarlo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus bas, la brume et le relief le cachent en général."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "それより低いと、もやや地形に隠れることがほとんどです。"
           }
         }
       }
@@ -51354,6 +51564,41 @@
         }
       }
     },
+    "Past the forecasts, the darkest moon stretch is the five nights with the least moonlight. Their clouds are not known yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jenseits der Vorhersagen ist die mondärmste Serie die fünf Nächte mit dem wenigsten Mondlicht. Ihre Wolken sind noch nicht bekannt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Past the forecasts, the darkest moon stretch is the five nights with the least moonlight. Their clouds are not known yet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más allá de los pronósticos, la racha de luna más oscura son las cinco noches con menos luz de luna. Aún no se conocen sus nubes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au-delà des prévisions, la série de lune la plus sombre, ce sont les cinq nuits avec le moins de clair de lune. Leurs nuages ne sont pas encore connus."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報の範囲より先では、月明かりのいちばん少ない連夜は、月明かりの最も少ない5夜です。それらの夜の雲はまだわかりません。"
+          }
+        }
+      }
+    },
     "Past the forecasts, the ring marks the five nights with the least moonlight. Their clouds are not known yet.": {
       "extractionState": "manual",
       "localizations": {
@@ -67140,6 +67385,41 @@
         }
       }
     },
+    "The best stretch is the five nights in a row with the highest scores while forecasts reach them. A closure can still change the best choice.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die beste Serie sind die fünf aufeinanderfolgenden Nächte mit den höchsten Werten, soweit die Vorhersagen reichen. Eine Sperrung kann die beste Wahl trotzdem ändern."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The best stretch is the five nights in a row with the highest scores while forecasts reach them. A closure can still change the best choice."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La mejor racha son las cinco noches seguidas con los índices más altos mientras los pronósticos las alcanzan. Un cierre aún puede cambiar la mejor opción."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La meilleure série, ce sont les cinq nuits d’affilée aux indices les plus élevés, tant que les prévisions les couvrent. Une fermeture peut encore changer le meilleur choix."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "いちばんよい連夜は、予報が届く範囲で、スコアが最も高い連続した5夜です。閉鎖によって、いちばんよい選択が変わることもあります。"
+          }
+        }
+      }
+    },
     "The bright Moon, for nights you spend with it.": {
       "extractionState": "manual",
       "localizations": {
@@ -67171,6 +67451,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "明るい月。月と一緒に過ごす夜のために。"
+          }
+        }
+      }
+    },
+    "The bright center climbs past %lld° at %@, after true darkness ends at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das helle Zentrum steigt um %2$@ über %1$lld°, nachdem die echte Dunkelheit um %3$@ endet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bright center climbs past %lld° at %@, after true darkness ends at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El centro brillante sube por encima de %1$lld° (%2$@), después de que termina la oscuridad total (%3$@)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le centre brillant passe au-dessus de %1$lld° à %2$@, après la fin de l’obscurité totale à %3$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "明るい中心部は%2$@に%1$lld°より高くなります。完全な暗さが%3$@に終わった後です。"
           }
         }
       }
@@ -67280,72 +67595,37 @@
         }
       }
     },
-    "The bright center rises at %@, after true darkness ends at %@.": {
+    "The bright center sinks below %lld° at %@, before true darkness begins at %@.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Das helle Zentrum geht um %@ auf, nachdem die echte Dunkelheit um %@ endet."
+            "value": "Das helle Zentrum sinkt um %2$@ unter %1$lld°, bevor die echte Dunkelheit um %3$@ beginnt."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The bright center rises at %@, after true darkness ends at %@."
+            "value": "The bright center sinks below %lld° at %@, before true darkness begins at %@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El centro brillante sale (%1$@), después de que termina la oscuridad total (%2$@)."
+            "value": "El centro brillante baja de %1$lld° (%2$@), antes de que empiece la oscuridad total (%3$@)."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le centre brillant se lève à %1$@, après la fin de l’obscurité totale à %2$@."
+            "value": "Le centre brillant passe sous %1$lld° à %2$@, avant le début de l’obscurité totale à %3$@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "明るい中心部は%1$@に昇ります。完全な暗さが%2$@に終わった後です。"
-          }
-        }
-      }
-    },
-    "The bright center sets at %@, before true darkness begins at %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Das helle Zentrum geht um %@ unter, bevor die echte Dunkelheit um %@ beginnt."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The bright center sets at %@, before true darkness begins at %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El centro brillante se pone (%1$@), antes de que empiece la oscuridad total (%2$@)."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le centre brillant se couche à %1$@, avant le début de l’obscurité totale à %2$@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "明るい中心部は%1$@に沈みます。完全な暗さが%2$@に始まる前です。"
+            "value": "明るい中心部は%2$@に%1$lld°より低くなります。完全な暗さが%3$@に始まる前です。"
           }
         }
       }
@@ -68145,142 +68425,37 @@
         }
       }
     },
-    "The hourly forecast averaged over true darkness, counted as it stands: there are no usual clouds for this place. Model agreement and cloud layers are context; smoke or haze can cap the score.": {
+    "The hourly forecast averaged over true darkness.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die stündliche Vorhersage, gemittelt über die echte Dunkelheit, unverändert gezählt: Für diesen Ort ist keine übliche Bewölkung bekannt. Übereinstimmung der Modelle und Wolkenschichten sind Kontext; Rauch oder Dunst können den Wert begrenzen."
+            "value": "Die stündliche Vorhersage, gemittelt über die echte Dunkelheit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The hourly forecast averaged over true darkness, counted as it stands: there are no usual clouds for this place. Model agreement and cloud layers are context; smoke or haze can cap the score."
+            "value": "The hourly forecast averaged over true darkness."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El pronóstico por hora, promediado durante la oscuridad total y contado tal cual: no se conoce la nubosidad habitual de este lugar. La coincidencia entre modelos y las capas de nubes son contexto; el humo o la bruma pueden limitar el índice."
+            "value": "El pronóstico por hora, promediado durante la oscuridad total."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La prévision horaire moyennée sur l’obscurité totale, comptée telle quelle : la nébulosité habituelle de ce lieu n’est pas connue. La concordance des modèles et les couches nuageuses servent de contexte ; la fumée ou la brume peuvent plafonner l’indice."
+            "value": "La prévision horaire moyennée sur l’obscurité totale."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "1時間ごとの予報を完全に暗い時間で平均し、そのまま計算しています。この場所の平年の雲量はわかりません。モデルの一致度と雲の層は参考情報です。煙やもやはスコアの上限を下げることがあります。"
-          }
-        }
-      }
-    },
-    "The hourly forecast averaged over true darkness, counted as it stands: there are no usual clouds for this place. With no forecast, the score counts the Moon and darkness only.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die stündliche Vorhersage, gemittelt über die echte Dunkelheit, unverändert gezählt: Für diesen Ort ist keine übliche Bewölkung bekannt. Ohne Vorhersage berücksichtigt der Wert nur Mond und Dunkelheit."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The hourly forecast averaged over true darkness, counted as it stands: there are no usual clouds for this place. With no forecast, the score counts the Moon and darkness only."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El pronóstico por hora, promediado durante la oscuridad total y contado tal cual: no se conoce la nubosidad habitual de este lugar. Sin pronóstico, el índice solo cuenta la Luna y la oscuridad."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La prévision horaire moyennée sur l’obscurité totale, comptée telle quelle : la nébulosité habituelle de ce lieu n’est pas connue. Sans prévision, l’indice ne compte que la Lune et l’obscurité."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1時間ごとの予報を完全に暗い時間で平均し、そのまま計算しています。この場所の平年の雲量はわかりません。予報がない場合は、月と暗さだけで計算します。"
-          }
-        }
-      }
-    },
-    "The hourly forecast averaged over true darkness, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; smoke or haze can cap the score.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die stündliche Vorhersage, gemittelt über die echte Dunkelheit, ab etwa drei Tagen an die übliche Bewölkung des Parks angenähert. Übereinstimmung der Modelle und Wolkenschichten sind Kontext; Rauch oder Dunst können den Wert begrenzen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The hourly forecast averaged over true darkness, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; smoke or haze can cap the score."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El pronóstico por hora, promediado durante la oscuridad total y ajustado hacia la nubosidad habitual del parque después de unos tres días. La coincidencia entre modelos y las capas de nubes son contexto; el humo o la bruma pueden limitar el índice."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La prévision horaire moyennée sur l’obscurité totale, rapprochée de la nébulosité habituelle du parc au-delà d’environ trois jours. La concordance des modèles et les couches nuageuses servent de contexte ; la fumée ou la brume peuvent plafonner l’indice."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1時間ごとの予報を完全に暗い時間で平均したものです。約3日より先は、公園の平年の雲量に寄せています。モデルの一致度と雲の層は参考情報です。煙やもやはスコアの上限を下げることがあります。"
-          }
-        }
-      }
-    },
-    "The hourly forecast averaged over true darkness. Beyond about three days it is eased toward the park's usual clouds for the month; with no forecast, the usual clouds count alone.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die stündliche Vorhersage, gemittelt über die echte Dunkelheit. Ab etwa drei Tagen wird sie an die übliche Bewölkung des Parks im jeweiligen Monat angenähert; ohne Vorhersage zählt allein die übliche Bewölkung."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The hourly forecast averaged over true darkness. Beyond about three days it is eased toward the park's usual clouds for the month; with no forecast, the usual clouds count alone."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El pronóstico por hora, promediado durante la oscuridad total. Después de unos tres días se ajusta hacia la nubosidad habitual del parque en ese mes; sin pronóstico, solo cuenta la nubosidad habitual."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La prévision horaire moyennée sur l’obscurité totale. Au-delà d’environ trois jours, elle est rapprochée de la nébulosité habituelle du parc pour le mois ; sans prévision, seule la nébulosité habituelle compte."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1時間ごとの予報を完全に暗い時間で平均したものです。約3日より先は、公園のその月の平年の雲量に寄せています。予報がない場合は、平年の雲量だけを使います。"
+            "value": "1時間ごとの予報を完全に暗い時間で平均したものです。"
           }
         }
       }
@@ -69601,111 +69776,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "リングは、予報が届く範囲で、スコアが最も高い連続した5夜を示します。閉鎖によって、いちばんよい選択が変わることもあります。"
-          }
-        }
-      }
-    },
-    "The ring marks the least moonlight past the forecasts; the best night is one a forecast reaches.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jenseits der Vorhersagen markiert der Ring das wenigste Mondlicht; die beste Nacht ist eine, die eine Vorhersage erreicht."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The ring marks the least moonlight past the forecasts; the best night is one a forecast reaches."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Más allá de los pronósticos, el anillo marca la menor luz de luna; la mejor noche es una que alcanza un pronóstico."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Au-delà des prévisions, l’anneau marque le moins de clair de lune ; la meilleure nuit est une nuit qu’une prévision atteint."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "予報の範囲より先では、リングは月明かりの最も少ない夜を示します。いちばんよい夜は予報の届く夜です。"
-          }
-        }
-      }
-    },
-    "The ring marks the least moonlight; the score also counts the hours of true darkness and when the Moon is up.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Ring markiert das wenigste Mondlicht; der Wert zählt auch die Stunden echter Dunkelheit und wann der Mond am Himmel steht."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The ring marks the least moonlight; the score also counts the hours of true darkness and when the Moon is up."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El anillo marca la menor luz de luna; el índice también cuenta las horas de oscuridad total y cuándo está la Luna en el cielo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "L’anneau marque le moins de clair de lune ; l’indice compte aussi les heures d’obscurité totale et le moment où la Lune est levée."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "リングは月明かりの最も少ない夜を示します。スコアには、完全に暗い時間の長さと月が出ている時間帯も含まれます。"
-          }
-        }
-      }
-    },
-    "The ring marks the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Ring markiert das wenigste Mondlicht; der Wert zählt auch die übliche Bewölkung, die Stunden echter Dunkelheit und wann der Mond am Himmel steht."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The ring marks the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El anillo marca la menor luz de luna; el índice también cuenta las nubes habituales, las horas de oscuridad total y cuándo está la Luna en el cielo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "L’anneau marque le moins de clair de lune ; l’indice compte aussi la nébulosité habituelle, les heures d’obscurité totale et le moment où la Lune est levée."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "リングは月明かりの最も少ない夜を示します。スコアには、平年の雲量、完全に暗い時間の長さ、月が出ている時間帯も含まれます。"
           }
         }
       }
@@ -71310,6 +71380,111 @@
         }
       }
     },
+    "This stretch has the least moonlight past the forecasts; the best night is one a forecast reaches.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Serie hat jenseits der Vorhersagen das wenigste Mondlicht; die beste Nacht ist eine, für die es schon eine Vorhersage gibt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This stretch has the least moonlight past the forecasts; the best night is one a forecast reaches."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta racha tiene la menor luz de luna más allá de los pronósticos; la mejor noche es una a la que llega un pronóstico."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au-delà des prévisions, cette série a le moins de clair de lune ; la meilleure nuit est une nuit que couvre une prévision."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この連夜は、予報の範囲より先で月明かりが最も少ない夜です。いちばんよい夜は予報の届く夜です。"
+          }
+        }
+      }
+    },
+    "This stretch has the least moonlight; the score also counts the hours of true darkness and when the Moon is up.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Serie hat das wenigste Mondlicht; der Wert zählt auch die Stunden echter Dunkelheit und wann der Mond am Himmel steht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This stretch has the least moonlight; the score also counts the hours of true darkness and when the Moon is up."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta racha tiene la menor luz de luna; el índice también cuenta las horas de oscuridad total y cuándo está la Luna en el cielo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette série a le moins de clair de lune ; l’indice compte aussi les heures d’obscurité totale et le moment où la Lune est levée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この連夜は月明かりが最も少ない夜です。スコアには、完全に暗い時間の長さと月が出ている時間帯も含まれます。"
+          }
+        }
+      }
+    },
+    "This stretch has the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Serie hat das wenigste Mondlicht; der Wert zählt auch die übliche Bewölkung, die Stunden echter Dunkelheit und wann der Mond am Himmel steht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This stretch has the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta racha tiene la menor luz de luna; el índice también cuenta las nubes habituales, las horas de oscuridad total y cuándo está la Luna en el cielo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette série a le moins de clair de lune ; l’indice compte aussi la nébulosité habituelle, les heures d’obscurité totale et le moment où la Lune est levée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この連夜は月明かりが最も少ない夜です。スコアには、平年の雲量、完全に暗い時間の長さ、月が出ている時間帯も含まれます。"
+          }
+        }
+      }
+    },
     "This week": {
       "extractionState": "manual",
       "localizations": {
@@ -72636,6 +72811,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "まだ判断できません。雲の予報が完全になるのは、その夜の約3日前からです。"
+          }
+        }
+      }
+    },
+    "Too low in darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu tief in der Dunkelheit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Too low in darkness"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demasiado bajo en la oscuridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trop bas dans l’obscurité"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暗い時間は低すぎる"
           }
         }
       }
@@ -78301,6 +78511,76 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "With no true darkness, the hourly forecast is averaged from sunset to sunrise.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne echte Dunkelheit wird die stündliche Vorhersage von Sonnenuntergang bis Sonnenaufgang gemittelt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With no true darkness, the hourly forecast is averaged from sunset to sunrise."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin oscuridad total, el pronóstico por hora se promedia desde la puesta hasta la salida del sol."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans obscurité totale, la prévision horaire est moyennée du coucher au lever du soleil."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間がないため、1時間ごとの予報を日没から日の出まで平均しています。"
+          }
+        }
+      }
+    },
+    "With no true darkness, the hourly forecast is averaged over the four darkest hours.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne echte Dunkelheit wird die stündliche Vorhersage über die vier dunkelsten Stunden gemittelt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With no true darkness, the hourly forecast is averaged over the four darkest hours."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin oscuridad total, el pronóstico por hora se promedia en las cuatro horas más oscuras."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans obscurité totale, la prévision horaire est moyennée sur les quatre heures les plus sombres."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間がないため、1時間ごとの予報を最も暗い4時間で平均しています。"
           }
         }
       }
