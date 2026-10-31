@@ -816,7 +816,9 @@ actor ParkStore: ParkProviding {
         // (dates, tags, times) an entry that cannot be read costs only itself too.
         struct Event: Decodable {
             let id: String, title: String, datestart: String?, description: String, tags: [String]?, dates: [String]?, times: [Time]?, location: String?
-            enum CodingKeys: String, CodingKey { case id, title, datestart, description, tags, dates, times, location }
+            /// Days NPS has cancelled ("02/09/2027"), which can still be listed in `dates`.
+            let cancelled: [String]?
+            enum CodingKeys: String, CodingKey { case id, title, datestart, description, tags, dates, times, location, cancelleddatelist }
             init(from decoder: any Decoder) throws {
                 let c=try decoder.container(keyedBy: CodingKeys.self)
                 id=try c.decode(String.self, forKey: .id); title=try c.decode(String.self, forKey: .title)
@@ -826,7 +828,7 @@ actor ParkStore: ParkProviding {
                     let read=(try? c.decodeIfPresent([Lenient<T>].self, forKey: key))?.compactMap(\.value)
                     return read?.isEmpty == false ? read : nil
                 }
-                tags=list(.tags); dates=list(.dates); times=list(.times)
+                tags=list(.tags); dates=list(.dates); times=list(.times); cancelled=list(.cancelleddatelist)
                 location=try? c.decodeIfPresent(String.self, forKey: .location)
             }
         }
@@ -872,7 +874,9 @@ actor ParkStore: ParkProviding {
             }
         }
         let programs=events.filter { Self.isNightSky(title: $0.title, tags: $0.tags ?? []) }.flatMap { event in
-            (event.dates ?? event.datestart.map { [$0] } ?? []).filter { $0 >= today }.map { day in RangerProgram(id: event.id+day, title: event.title, date: day, description: Self.plain(event.description),
+            // A cancelled day is never offered, even while NPS still lists it among the dates.
+            let cancelled=Set((event.cancelled ?? []).compactMap(Self.cancelledDay))
+            return (event.dates ?? event.datestart.map { [$0] } ?? []).filter { $0 >= today && !cancelled.contains($0) }.map { day in RangerProgram(id: event.id+day, title: event.title, date: day, description: Self.plain(event.description),
                 time: event.times?.first.flatMap { RangerProgram.timeRange(start: $0.timestart, end: $0.timeend) }, location: RangerProgram.place(event.location),
                 timeStart: event.times?.first?.timestart, timeEnd: event.times?.first?.timeend) }
         }.sorted { $0.date<$1.date }
@@ -893,6 +897,16 @@ actor ParkStore: ParkProviding {
     static func isNightSky(title: String, tags: [String]) -> Bool {
         let text=(title+" "+tags.joined(separator: " ")).lowercased()
         return ["astronom","stargaz","night sky","night-sky","star party","star parties","telescope","milky way","dark sky","dark-sky","constellation","meteor"].contains(where: text.contains)
+    }
+    /// A day in NPS's `cancelleddatelist` ("02/09/2027", month first) as the days in `dates` are
+    /// written ("2027-02-09"); one already written that way stays as it is; nil for anything else.
+    static func cancelledDay(_ text: String) -> String? {
+        let text=text.trimmingCharacters(in: .whitespaces)
+        if text.wholeMatch(of: /\d{4}-\d{2}-\d{2}/) != nil { return text }
+        let parts=text.split(separator: "/").map { Int($0) }
+        guard parts.count == 3, let month=parts[0], let day=parts[1], let year=parts[2],
+              (1...12).contains(month), (1...31).contains(day), (1000...9999).contains(year) else { return nil }
+        return String(format: "%04d-%02d-%02d", year, month, day)
     }
     static func plain(_ html: String) -> String {
         html.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)

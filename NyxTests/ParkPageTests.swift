@@ -182,6 +182,19 @@ import SwiftUI
         #expect(program.time==nil && program.location==nil && program.timeStart==nil)
         #expect(program.localTime(try park("jotr"))==nil)
     }
+    /// A day NPS lists as cancelled (month first, "02/09/2099") is not offered, though it is still
+    /// among the event's dates; an entry that is not a date costs only itself.
+    @Test func cancelledProgramDaysAreLeftOut() async throws {
+        #expect(ParkStore.cancelledDay("02/09/2027") == "2027-02-09")
+        #expect(ParkStore.cancelledDay(" 2/9/2027 ") == "2027-02-09")
+        #expect(ParkStore.cancelledDay("2027-02-09") == "2027-02-09")
+        #expect(ParkStore.cancelledDay("13/01/2027") == nil && ParkStore.cancelledDay("soon") == nil && ParkStore.cancelledDay("") == nil)
+        let body=#"{"total":"1","data":[{"id":"e","title":"Star party","dates":["2099-02-08","2099-02-09","2099-06-19"],"cancelleddatelist":["02/09/2099",5,"06/19/2099"]}]}"#
+        let store=ParkStore(transport: PathHTTP(["/api/v1/events": .body(body)]), persist: false)
+        let jotr=try park("jotr")
+        let programs=try #require(await store.programs(for: jotr, key: "k", network: true))
+        #expect(programs.programs.map(\.date) == ["2099-02-08"])
+    }
     /// NPS writes "07:00 PM" in every language; the card says it in the reader's own format, in the park's zone.
     @Test func programTimesFollowTheReadersLocale() throws {
         let jotr=try park("jotr")
