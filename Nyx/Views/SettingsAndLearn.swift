@@ -386,7 +386,8 @@ struct NPSKeyField: View {
                         Task { await model.npsKeyChanged() }
                     }.frame(minHeight:44)
                 } else {
-                    SecureField("Your National Park Service key",text:$draft).textContentType(.password).autocorrectionDisabled().textInputAutocapitalization(.never).font(.body.monospaced())
+                    // Monospaced once typed, so a key's characters can be told apart; the prompt in the body face, so it fits whole.
+                    SecureField("Your National Park Service key",text:$draft).textContentType(.password).autocorrectionDisabled().textInputAutocapitalization(.never).font(draft.isEmpty ? .body : .body.monospaced())
                         .submitLabel(.done).onSubmit(save)
                     Button("Use this key",action:save).disabled(draft.isEmpty).frame(minHeight:44)
                 }

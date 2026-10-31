@@ -365,7 +365,10 @@ final class AccessibilityAuditTests:XCTestCase {
             // the audit fails it there in the standard pass while passing the same caption on Tonight and the park page, and the
             // fallback finds too few glyph pixels in 12 pt caption type to measure it. Checked in a zoomed iPad Pro 13-inch capture.
             let riverCaption=screen=="parks" && UIDevice.current.userInterfaceIdiom == .pad && issue.element?.elementType == .staticText && issue.element?.label=="Cloud forecast"
-            if !visible || underBar || riverCaption || issue.compactDescription.contains("nearly") || (screen=="parks" && (numeral || bandLabel)) || toolbarButton || recapSerif || learnCaption || nightScore { return true }
+            // A control that is switched off ("Use this key" before a key is typed) is dimmed by the system on purpose;
+            // WCAG 1.4.3 does not ask inactive controls for contrast. An enabled control is always measured.
+            let inactive=issue.element?.elementType == .button && issue.element?.isEnabled == false
+            if !visible || underBar || riverCaption || inactive || issue.compactDescription.contains("nearly") || (screen=="parks" && (numeral || bandLabel)) || toolbarButton || recapSerif || learnCaption || nightScore { return true }
             // iPad (2026-10-09): over the real sky the audit misjudges small text it can read in the pixels. Plan's
             // "CA · International Dark Sky Park" captures at 9.6:1 (5.7:1 in night vision) and passes over plain black or
             // with the faint layer off: the Milky Way's glow, one to five levels above black and invisible, outnumbers the
@@ -416,7 +419,11 @@ final class AccessibilityAuditTests:XCTestCase {
             // capture, AX5, Bold Text, Increase Contrast), and the eyebrow grows with its text (`Eyebrow`), so a real third
             // line would show. The same quirk as the Learn title. This eyebrow on Plan only; the park page's passes.
             let planEyebrow=pass=="ax5" && (screen=="plan" || screen=="calendar") && issue.element?.elementType == .staticText && issue.element?.label=="CA · International Dark Sky Park"
-            return !visible || pastHomeIndicator || learnTitle || privacyCaption || designationLine || symbolRow || planEyebrow || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
+            // Your privacy's key field (2026-10-31, once the audit opened it): its prompt, "Your National Park Service key", is
+            // reported as clipped in both palettes while drawn whole with room to spare (iPhone 18 Pro captures), as the search
+            // field's is. A one-line field's prompt, never its contents: the field is named by its label for VoiceOver.
+            let keyPrompt=issue.element?.elementType == .secureTextField
+            return !visible || pastHomeIndicator || learnTitle || privacyCaption || designationLine || symbolRow || planEyebrow || keyPrompt || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
         case .elementDetection:
             // Decorative "NYX" wordmark; the sky map's Canvas-drawn inset names (Alaska, Hawaiʻi, Am. Samoa, Virgin Is.):
             // decoration; each star is a labelled button and the map has a spoken summary.
