@@ -182,7 +182,7 @@ struct CelestialGauge: View {
         .onChange(of:revealKey) { _,key in if settled && !waiting && shown==score { onSettled?(key) } }
         // The count's frames: one value per display frame, read from the time since it began, and
         // no frames at all once no count runs (landed, cut short, overtaken or held).
-        .background { if Self.framesRun(countStart:countStart,counting:counting,still:still) { TimelineView(.animation) { timeline in Color.clear.onChange(of:timeline.date,initial:true) { _,now in tick(now) } } } }
+        .background { if Self.framesRun(countStart:countStart,counting:counting,still:still), let countStart { CountFrames(start:countStart,score:score) { tick($0) }.equatable() } }
         .sensoryFeedback(.impact(weight:.medium),trigger:milestone) { _,_ in haptics }
         .sensoryFeedback(.impact(weight:.light),trigger:landed) { _,_ in haptics }
         .onScrollVisibilityChange(threshold:0.02) { onScreen=$0 }
@@ -746,6 +746,16 @@ nonisolated struct DialRing:Shape {
         arc.addArc(center:center,radius:radius,startAngle:DialMetrics.rimStart,endAngle:.degrees(540-DialMetrics.rimStart.degrees),clockwise:false)
         return arc.strokedPath(StrokeStyle(lineWidth:DialMetrics.ringWidth(side:side),lineCap:.round))
     }
+}
+/// The display's frames for one count-up, apart from the dial: equal while the same count runs, so the
+/// dial's redraw on each frame never rebuilds the timeline, which then handed its change a second date
+/// within one frame ("onChange(of: Date) action tried to update multiple times per frame").
+private struct CountFrames: View, Equatable {
+    let start: Date
+    let score: Int
+    let tick: (Date)->Void
+    nonisolated static func ==(a:CountFrames,b:CountFrames)->Bool { a.start==b.start && a.score==b.score }
+    var body: some View { TimelineView(.animation) { timeline in Color.clear.onChange(of:timeline.date,initial:true) { _,now in tick(now) } } }
 }
 /// The score reveals seen this session, by `key`: in memory only, empty at every launch. A key is
 /// added only when a count-up lands in front of the person, never when it is held or cut short.
