@@ -56,6 +56,11 @@ nonisolated struct MoonWeek: Sendable, Equatable {
         guard calendar.component(.hour, from: date) < 6 else { return day }
         return calendar.date(byAdding: .day, value: -1, to: day) ?? day
     }
+    /// Tonight's Moon's moment: `hour` on the evening `date` falls in (`tonight`), the moment each of
+    /// the week's nights is drawn for, so tonight's figure and the week's agree.
+    static func evening(at date: Date, calendar: Calendar) -> Date {
+        calendar.date(bySettingHour: hour, minute: 0, second: 0, of: tonight(at: date, calendar: calendar)) ?? date
+    }
     /// The first new moon after `date`: the phase cycle wraps from 1 to 0 there. Found by
     /// six-hour steps, then halving to under a minute.
     static func newMoon(after date: Date) -> Date {

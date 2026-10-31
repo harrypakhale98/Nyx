@@ -108,6 +108,22 @@ struct VisionReachTests {
         let morning = try Self.date("2026-10-11T14:00:00Z")
         #expect(calendar.component(.day, from: MoonWeek(at: morning, calendar: calendar).nights[0].date) == 12)
     }
+    /// Tonight's Moon is drawn at 10 PM on tonight's evening, the moment the week's nights use: last
+    /// night's before 6 AM, the coming evening's from then on, the same all afternoon and evening.
+    @Test func tonightsMoonIsTenPMOnTonightsEvening() throws {
+        let calendar = try Self.calendar("America/Los_Angeles")
+        // 2 AM on October 11 in Los Angeles: still the night of October 10, so 10 PM on October 10.
+        let late = try Self.date("2026-10-11T09:00:00Z"), lastNight = try Self.date("2026-10-11T05:00:00Z")
+        #expect(MoonWeek.evening(at: late, calendar: calendar) == lastNight)
+        // 7 AM and 11 PM on October 11 are both the night of October 11.
+        let morning = try Self.date("2026-10-11T14:00:00Z"), night = try Self.date("2026-10-12T06:00:00Z")
+        let tonight = try Self.date("2026-10-12T05:00:00Z")
+        #expect(MoonWeek.evening(at: morning, calendar: calendar) == tonight)
+        #expect(MoonWeek.evening(at: night, calendar: calendar) == tonight)
+        // The night before the week's first.
+        let week = MoonWeek(at: morning, calendar: calendar)
+        #expect(week.nights[0].date.timeIntervalSince(tonight) == 86400)
+    }
     /// Each night's lit fraction is the engine's, and the next new moon is a true new moon: after
     /// the date, the Moon dark there, and one lunar month before the one after it.
     @Test func phasesAndTheNextNewMoon() throws {

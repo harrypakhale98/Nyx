@@ -17,10 +17,11 @@ nonisolated struct MoonFacts: Sendable, Equatable {
     let fraction: Double
     let nextNewMoon: Date
 
-    init(at date: Date) {
-        // The Moon at the entry's moment, as the iPhone's Moon widget and the watch's Moon face show
-        // it (`MoonNow`), so the three agree whenever each refreshes.
-        let glance = MoonWeek.Glance(at: date)
+    init(at date: Date, calendar: Calendar = .current) {
+        // Tonight's Moon: its look at 10 PM on the evening `date` falls in, as the week below draws each
+        // night and as every device names a night's Moon (`AstronomyEngine.moonPhase(night:park:)`), so the
+        // headline gives tonight the window's figure whenever the widget refreshes.
+        let glance = MoonWeek.Glance(at: MoonWeek.evening(at: date, calendar: calendar))
         self.date = date
         phaseName = glance.phaseName
         waxing = glance.waxing
