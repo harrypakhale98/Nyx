@@ -55,9 +55,18 @@ struct WhereToStayPanel: View {
         } else if loading && model.npsEnabled {
             HStack(spacing:10) { ProgressView(); Text("Loading campgrounds") }.font(.subheadline).foregroundStyle(palette.muted)
         } else {
-            Text(model.npsEnabled ? "Campgrounds appear once Nyx reaches the National Park Service." : "Park updates are off in Your privacy, so campgrounds are not loaded.")
-                .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            Text(unloaded).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             planLink
+        }
+    }
+    /// Why no campgrounds are here: switched off, a key the Park Service did not accept (which
+    /// waiting will not mend, in the alerts line's terms: `MissingInput.refusal`), or not reached yet.
+    private var unloaded: String {
+        guard model.npsEnabled else { return String(localized:"Park updates are off in Your privacy, so campgrounds are not loaded.") }
+        switch model.alertsRefusal {
+        case .own: return String(localized:"The Park Service did not accept your key, so campgrounds could not be loaded.")
+        case .shared: return String(localized:"This version of Nyx cannot load campgrounds.")
+        case nil: return String(localized:"Campgrounds appear once Nyx reaches the National Park Service.")
         }
     }
     @ViewBuilder private var planLink: some View {

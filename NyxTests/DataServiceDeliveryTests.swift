@@ -557,6 +557,23 @@ struct DataServiceDeliveryTests {
         #expect(ScoreInputs(alertsBusy: true).accessNote(jotr) == busy)
         #expect(MissingInput.unchecked(busy: false, refused: .own) == MissingInput.unchecked(busy: false))
     }
+    /// Alerts an earlier update left, while the Park Service refuses requests: the refused key (or
+    /// that alerts are busy) is said after what they list, closure or not, so an old update never
+    /// passes for a current one.
+    @Test func cachedAlertsSayWhenTheyCannotBeUpdated() throws {
+        let jotr=try park("jotr")
+        let cache=ParkAlertsCache(updated: .now, alerts: ["jotr": []])
+        let summary=AlertRanking.summary([], park: jotr)
+        #expect(ScoreInputs(alerts: cache).accessNote(jotr) == summary)
+        let refused=ScoreInputs(alerts: cache, alertsBusy: true, alertsRefusal: .shared).accessNote(jotr)
+        #expect(refused == Sentences.join([summary, MissingInput.refusal(.shared, cached: true)]))
+        #expect(MissingInput.refusal(.shared, cached: true) != MissingInput.refusal(.shared, cached: false))
+        #expect(ScoreInputs(alerts: cache, alertsBusy: true).accessNote(jotr) == Sentences.join([summary, MissingInput.unchecked(busy: true)]))
+        // A closure stands beside the score on its own: the note says only that it cannot be updated.
+        let closed=ParkAlertsCache(updated: .now, alerts: ["jotr": [ParkAlert(id: "c", title: "Keys View Road closed", description: "", category: "Park Closure")]])
+        #expect(ScoreInputs(alerts: closed).accessNote(jotr) == nil)
+        #expect(ScoreInputs(alerts: closed, alertsBusy: true, alertsRefusal: .own).accessNote(jotr) == MissingInput.refusal(.own, cached: true))
+    }
     /// Fresh alerts are not called busy because another request (programs) made the Park Service's host wait.
     @Test func anotherRequestsRefusalLeavesFreshAlertsCalm() async throws {
         let jotr=try park("jotr")

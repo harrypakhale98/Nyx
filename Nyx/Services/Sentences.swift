@@ -77,13 +77,20 @@ nonisolated enum MissingInput {
     nonisolated enum KeyRefusal: String, Codable, Sendable, Equatable { case own, shared }
     /// The Park Service did not accept the key. `cached`: alerts from an earlier update are shown.
     /// The shared key is not asked again for a day (`NPSKeyPause`), and nothing in the app can mend
-    /// it, so it is said plainly: alerts are unavailable in this version.
+    /// it, so it is said plainly: alerts are unavailable in this version, or, beside the alerts an
+    /// earlier update left, that this version cannot update them.
     static func refusal(_ key: KeyRefusal, cached: Bool) -> String {
         switch key {
         case .own: cached ? String(localized: "The Park Service did not accept your key, so park alerts were not updated.")
             : String(localized: "The Park Service did not accept your key, so closures were not checked.")
-        case .shared: String(localized: "Park alerts are unavailable in this version of Nyx. Check current conditions on nps.gov before you go.")
+        case .shared: cached ? String(localized: "This version of Nyx cannot update park alerts. Check current conditions on nps.gov before you go.")
+            : String(localized: "Park alerts are unavailable in this version of Nyx. Check current conditions on nps.gov before you go.")
         }
+    }
+    /// Beside alerts an earlier update left, while the Park Service refuses requests: the refused
+    /// key named, or that the alerts are busy.
+    static func stale(refused: KeyRefusal?) -> String {
+        refused.map { refusal($0, cached: true) } ?? String(localized: "Park alerts are busy. Check current conditions on nps.gov.")
     }
     static var smokeOff: String { String(localized: "Smoke and haze are off in Your privacy, so smoke is not counted.") }
     static var noSmokeYet: String { String(localized: "No smoke forecast on this device yet, so smoke is not counted.") }

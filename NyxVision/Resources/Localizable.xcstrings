@@ -14527,6 +14527,41 @@
         }
       }
     },
+    "This version of Nyx cannot update park alerts. Check current conditions on nps.gov before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Version von Nyx kann Parkhinweise nicht aktualisieren. Sieh vor der Fahrt die aktuellen Bedingungen auf nps.gov nach."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This version of Nyx cannot update park alerts. Check current conditions on nps.gov before you go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta versión de Nyx no puede actualizar las alertas del parque. Consulta las condiciones actuales en nps.gov antes de ir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette version de Nyx ne peut pas mettre à jour les alertes du parc. Consultez les conditions actuelles sur nps.gov avant de partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このバージョンのNyxでは公園のアラートを更新できません。出かける前にnps.govで現在の状況を確認してください。"
+          }
+        }
+      }
+    },
     "Through binoculars": {
       "extractionState": "manual",
       "localizations": {

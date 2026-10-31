@@ -53269,6 +53269,41 @@
         }
       }
     },
+    "Programs could not be checked. Ask at the visitor center for current night-sky programs.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Programme konnten nicht geprüft werden. Frag im Besucherzentrum nach aktuellen Nachthimmel-Programmen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Programs could not be checked. Ask at the visitor center for current night-sky programs."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron revisar los programas. Pregunta en el centro de visitantes por los programas de cielo nocturno actuales."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les programmes n’ont pas pu être vérifiés. Renseignez-vous au centre d’accueil sur les programmes nocturnes en cours."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プログラムを確認できませんでした。現在の夜空のプログラムについては、ビジターセンターで尋ねてください。"
+          }
+        }
+      }
+    },
     "Promising-night reminders": {
       "extractionState": "manual",
       "localizations": {
@@ -66756,6 +66791,41 @@
         }
       }
     },
+    "The Park Service did not accept your key, so campgrounds could not be loaded.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der National Park Service hat deinen Schlüssel nicht angenommen, daher konnten keine Campingplätze geladen werden."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Park Service did not accept your key, so campgrounds could not be loaded."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El National Park Service no aceptó tu clave, así que no se pudieron cargar los campamentos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le National Park Service n’a pas accepté votre clé, les campings n’ont donc pas pu être chargés."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National Park Serviceがあなたのキーを受け付けなかったため、キャンプ場を読み込めませんでした。"
+          }
+        }
+      }
+    },
     "The Park Service did not accept your key, so closures were not checked.": {
       "extractionState": "manual",
       "localizations": {
@@ -71516,6 +71586,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "この連夜は月明かりが最も少ない夜です。スコアには、平年の雲量、完全に暗い時間の長さ、月が出ている時間帯も含まれます。"
+          }
+        }
+      }
+    },
+    "This version of Nyx cannot load campgrounds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Version von Nyx kann keine Campingplätze laden."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This version of Nyx cannot load campgrounds."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta versión de Nyx no puede cargar los campamentos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette version de Nyx ne peut pas charger les campings."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このバージョンのNyxではキャンプ場を読み込めません。"
+          }
+        }
+      }
+    },
+    "This version of Nyx cannot update park alerts. Check current conditions on nps.gov before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Version von Nyx kann Parkhinweise nicht aktualisieren. Sieh vor der Fahrt die aktuellen Bedingungen auf nps.gov nach."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This version of Nyx cannot update park alerts. Check current conditions on nps.gov before you go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta versión de Nyx no puede actualizar las alertas del parque. Consulta las condiciones actuales en nps.gov antes de ir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette version de Nyx ne peut pas mettre à jour les alertes du parc. Consultez les conditions actuelles sur nps.gov avant de partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このバージョンのNyxでは公園のアラートを更新できません。出かける前にnps.govで現在の状況を確認してください。"
           }
         }
       }

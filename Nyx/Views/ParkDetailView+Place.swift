@@ -64,7 +64,11 @@ extension ParkDetailView {
                 if !programs.isEmpty, let updated=data.updated {
                     Text("From the National Park Service, \(park.timestamp(updated)).").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
-            } else { Text("Programs are not checked yet. Ask at the visitor center for current night-sky programs.").font(.subheadline).foregroundStyle(palette.muted) }
+            } else {
+                // A key the Park Service did not accept is not mended by waiting: said as the alerts line says it.
+                Text(model.alertsRefusal == nil ? "Programs are not checked yet. Ask at the visitor center for current night-sky programs."
+                     : "Programs could not be checked. Ask at the visitor center for current night-sky programs.").font(.subheadline).foregroundStyle(palette.muted)
+            }
         } }.id("programs")
     }
 }

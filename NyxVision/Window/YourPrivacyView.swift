@@ -91,10 +91,13 @@ struct YourPrivacyView: View {
         guard let last = model.aurora?.updated else { return String(localized: "No aurora forecast on this device yet.") }
         return String(localized: "Last aurora forecast: \(last.formatted(date: .abbreviated, time: .shortened)).")
     }
-    /// When the last park update arrived; without a key built in, that none is asked for.
+    /// When the last park update arrived; without a key built in, that none is asked for. A key the
+    /// Park Service did not accept is said after it, in the words beside the scores.
     private var alertsStatus: String {
-        if let last = model.alerts?.updated { return String(localized: "Last park update: \(last.formatted(date: .abbreviated, time: .shortened)).") }
-        return ParkStore.usable(VisionModel.npsKey) ? String(localized: "No park update on this device yet.") : String(localized: "This copy of Nyx has no park service key, so park alerts are not requested.")
+        let refused = model.alertsRefusal.map { MissingInput.refusal($0, cached: model.alerts != nil) } ?? ""
+        if let last = model.alerts?.updated { return Sentences.join([String(localized: "Last park update: \(last.formatted(date: .abbreviated, time: .shortened))."), refused]) }
+        return ParkStore.usable(VisionModel.npsKey) ? Sentences.join([String(localized: "No park update on this device yet."), refused])
+            : String(localized: "This copy of Nyx has no park service key, so park alerts are not requested.")
     }
 }
 

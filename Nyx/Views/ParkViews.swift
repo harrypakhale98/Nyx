@@ -299,7 +299,7 @@ struct AlertsBusyNote: View {
     var body: some View {
         VStack(alignment:.leading,spacing:4) {
             if !summarySaysBusy {
-                Text(refused.map { MissingInput.refusal($0,cached:true) } ?? String(localized:"Park alerts are busy. Check current conditions on nps.gov."))
+                Text(MissingInput.stale(refused:refused))
                     .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             }
             if let url=BrowserLink.parkConditions(park) {

@@ -22,7 +22,17 @@ extension VisionModel {
         // Screenshot routes never touch the network: a fixed forecast (`-nyx-vision-clouds 60`),
         // or the cache alone when the date is pinned (`-nyx-date`).
         // No summit layers there: the fixture's cover is the cover every park counts.
-        if let cover = VisionDebug.clouds { forecasts = Self.fixture(parks: parks, cover: cover, issued: now); return }
+        if let cover = VisionDebug.clouds {
+            forecasts = Self.fixture(parks: parks, cover: cover, issued: now)
+            // `-nyx-shared-key-refused`: the shared key refused, over a park update from the day before
+            // that lists nothing (`-nyx-no-alerts`: with none on this device).
+            if VisionDebug.isEnabled("shared-key-refused") {
+                alertsBusy = true; alertsRefusal = .shared
+                alerts = VisionDebug.isEnabled("no-alerts") ? nil
+                    : ParkAlertsCache(updated: now.addingTimeInterval(-86400), alerts: Dictionary(parks.compactMap(\.nps).map { ($0, []) }, uniquingKeysWith: { first, _ in first }))
+            }
+            return
+        }
         #endif
         let live = VisionDebug.date == nil, asking = network && live && forecastsOn
         let fresh = await weather.forecasts(for: parks, network: asking, force: false)

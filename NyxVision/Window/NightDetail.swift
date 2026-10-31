@@ -105,7 +105,7 @@ struct NightDetail: View {
             Text(model.cloudCaption(plan.night))
                 .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
             // What the score could not count (smoke switched off or not here yet), and where the
-            // park's access stands when no closure does, in the iPhone's words.
+            // park's access stands when no closure does (or that an old update cannot be renewed), in the iPhone's words.
             ForEach([inputs.smokeNote(park, night: plan.night), inputs.accessNote(park)].compactMap { $0 }, id: \.self) { note in
                 Text(note).font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
             }

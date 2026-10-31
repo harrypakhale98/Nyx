@@ -28,10 +28,16 @@ nonisolated struct ScoreInputs: Sendable, Equatable {
     /// before the night (beyond its few days, or a cache left from a week offline) is said too, never
     /// passed off as clear air. Without the night (not scored yet), only whether any forecast is here.
     func smokeNote(_ park: Park, night: Night?) -> String? { MissingInput.smoke(on: smokeOn, known: smokeKnown.contains(park.id), counted: night.map { $0.aerosol != nil }) }
-    /// The line under the score when no closure stands beside it: what the last park update lists,
-    /// or why there is none to read (switched off, no key, not fetched yet, or busy).
+    /// The line under the score: what the last park update lists when no closure stands beside it,
+    /// or why there is none to read (switched off, no key, not fetched yet, or busy). While the Park
+    /// Service refuses requests, alerts an earlier update left say so too (`MissingInput.stale`),
+    /// closure or not, so an old update never passes for a current one.
     func accessNote(_ park: Park) -> String? {
-        if let code = park.nps, let listed = alerts?.alerts[code] { return AlertRanking.closure(listed) == nil ? AlertRanking.summary(listed, park: park) : nil }
+        if let code = park.nps, let listed = alerts?.alerts[code] {
+            let summary = AlertRanking.closure(listed) == nil ? AlertRanking.summary(listed, park: park) : nil
+            guard alertsBusy else { return summary }
+            return Sentences.join([summary.map { Sentences.end($0) } ?? "", MissingInput.stale(refused: alertsRefusal)])
+        }
         if alertsBusy { return MissingInput.unchecked(busy: true, refused: alertsRefusal) }
         if !alertsOn { return MissingInput.alertsOff }
         return MissingInput.unchecked(busy: false)
