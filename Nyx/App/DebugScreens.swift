@@ -58,7 +58,7 @@ struct DebugScreen: View {
         case "widgets-large": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),large:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         case "snippet": DebugSnippetView().task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         // About the data with the clearly labelled DEBUG luminance fixture (no real MetricKit report in the simulator).
-        case "metric": if DebugScenario.state=="privacy" { PrivacyView().defaultScrollAnchor(.bottom) } else { AboutDataView() }
+        case "metric": if DebugScenario.state=="privacy" { PrivacyView() } else { AboutDataView() }
         case "widgets-xl": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),extraLarge:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         // 1.1 platform features: inline, the Moon, a closure line, a widget set to one park; iPad's portrait extra-large.
         case "widgets-new": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),newer:true,moon:MoonEntry(date:.now,park:model.home,nightVision:false)).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }

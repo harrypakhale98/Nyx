@@ -211,7 +211,7 @@ struct PrivacyView:View {
     @Environment(PlanModel.self) private var model
     var body:some View {
         @Bindable var model=model
-        Form {
+        ScrollViewReader { proxy in Form {
             Section {
                 Text("Nyx has no account, no ads, no tracking. Your journal never leaves this phone.").font(.system(.title3,design:.serif))
                 Text("Saved parks and spots, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data.")
@@ -241,8 +241,10 @@ struct PrivacyView:View {
             Section { NPSKeyField();ForecastRequestsToday() } header:{ Eyebrow(text:"Advanced") }.openRows(palette)
             Section("Measured on this iPhone") {
                 Text("iOS reports how Nyx performs, including how bright its screen was, through MetricKit about once a day. Nyx keeps only the last screen brightness, to show here and in About the data. It is never sent anywhere.")
-                if let reading=LuminanceProof.current { Text(reading.sentence) }
-                else { Text("No report from iOS yet. The first usually arrives about a day after you start using Nyx.").foregroundStyle(palette.muted) }
+                Group {
+                    if let reading=LuminanceProof.current { Text(reading.sentence) }
+                    else { Text("No report from iOS yet. The first usually arrives about a day after you start using Nyx.").foregroundStyle(palette.muted) }
+                }.id(Self.measuredID)
             }.openRows(palette)
             Section {
                 Text("Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, Plan, saved parks and the journal work offline.")
@@ -254,7 +256,15 @@ struct PrivacyView:View {
                 Text("Crash reports that iOS gives Nyx stay on this iPhone, under Settings › Diagnostics, until you choose to share one.")
             }.openRows(palette)
         }.readableForm().nightForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
+            .task {
+                // DEBUG captures (`-nyx-screen metric -nyx-state privacy`): the screen's brightness reading in view.
+                guard DebugScenario.screen=="metric" else { return }
+                try? await Task.sleep(for:.seconds(1))
+                proxy.scrollTo(Self.measuredID,anchor:.center)
+            }
+        }
     }
+    private static let measuredID="measured"
 }
 struct AboutDataView:View {
     @Environment(\.nyx) private var palette
