@@ -123,7 +123,7 @@ nonisolated enum GoingCheck {
     /// holds it down, and the better choice when there is one.
     static func summary(_ going: GoingNight, night: Night, alternative: Alternative?) -> String {
         let now=String(localized:"Now \(night.score.value), \(night.score.band.label), down from \(going.chosenScore) when you chose it.")
-        let why=night.score.limit.flatMap { $0.cap<night.score.partsSum ? $0.sentence(tonight:false) : nil }
+        let why=night.score.limitSentence(tonight:false)
         return Sentences.join([now,why,alternative.map(sentence)].compactMap { $0 })
     }
 }

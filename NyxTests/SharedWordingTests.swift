@@ -91,6 +91,21 @@ import Testing
         #expect(loose.limitSentence(tonight: true) == nil)
         #expect(DarknessScore(value: 73, moonPoints: 22, cloudPoints: 21, bortlePoints: 15, lengthPoints: 15).limitSentence(tonight: true) == nil)
     }
+    /// Denali on June 15, 2026 has no true darkness: its cap is never said as short hours, on the
+    /// readout, the breakdown, Vision Pro or an "I'm going" check alike.
+    @Test func noDarknessIsNeverShortHours() throws {
+        let dena = try park("dena"), evening = try #require(dena.calendar.date(from: DateComponents(year: 2026, month: 6, day: 15, hour: 13)))
+        let sky = AstronomyEngine().conditions(for: dena, on: dena.evening(evening))
+        #expect(sky.darkHours == 0)
+        let score = ScoreEngine().score(sky: sky, bortle: dena.bortleEstimate, cloud: 0, basis: .forecast, aerosol: nil)
+        #expect(score.value == 39 && score.limit == .darkness(39))
+        #expect(score.limitSentence(tonight: true) == "With no true darkness, tonight can reach only 39.")
+        #expect(score.limitSentence(tonight: false) == "With no true darkness, this night can reach only 39.")
+        #expect(ScoreReadout.limitLine(score, tonight: true)?.contains("Short hours") == false)
+        // A short night keeps its own words.
+        let short = DarknessScore(value: 60, moonPoints: 30, cloudPoints: 25, bortlePoints: 15, lengthPoints: 1.5, limit: .darkness(60))
+        #expect(short.limitSentence(tonight: true) == "Short hours of true darkness limit tonight to 60.")
+    }
 
     /// One sample snapshot for the widget and complication galleries: Joshua Tree, no forecast.
     @Test func theGallerySampleIsJoshuaTree() throws {

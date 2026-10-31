@@ -46,11 +46,8 @@ struct ScoreBreakdownView: View {
             }
             .accessibilityElement(children:.combine)
             // The weakest link, said beside the number it sets, before the parts that add up to more.
-            if let limit=night.score.limit, limit.cap<partsSum {
-                if case .darkness = limit {} else {
-                    figures(Sentences.join([limit.sentence(tonight:isTonight),String(localized:"The four parts add up to \(partsSum), but that limit comes first.")]))
-                }
-            }
+            // In the readout's words (`ScoreReadout.limitLine`), by one rule on every surface.
+            if let limit=ScoreReadout.limitLine(night.score,tonight:isTonight) { figures(limit) }
             row("Moonlight",points:Double(shown.moon),of:40,fact:moonFact,detail:String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one."))
             row("Clouds",points:shown.cloud.map(Double.init),of:25,fact:Self.cloudFact(night),
                 context:cloudContext,detail:Self.cloudDetail(usualClouds:night.usualCloud != nil,context:!cloudContext.isEmpty))
@@ -103,9 +100,7 @@ struct ScoreBreakdownView: View {
         }
         return lit
     }
-    /// The four parts' sum before any cap, as the readout shows them.
-    private var partsSum:Int { night.score.partsSum }
-    /// Whole points that add up to `partsSum`, so the rows make the sum the caption names.
+    /// Whole points that add up to the score's `partsSum`, so the rows make the sum the caption names.
     private var shown:(moon:Int,cloud:Int?,glow:Int,length:Int) { night.score.displayedParts }
     /// How the clouds are scored. Where the place has no usual clouds for the month there is nothing
     /// to ease toward: an early look counts its forecast as it stands (`NightPlanner.night`).

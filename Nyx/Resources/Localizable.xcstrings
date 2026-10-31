@@ -78200,6 +78200,76 @@
         }
       }
     },
+    "With no true darkness, this night can reach only %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne echte Dunkelheit erreicht der Wert dieser Nacht höchstens %lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With no true darkness, this night can reach only %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin oscuridad total, esa noche solo puede llegar a %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans obscurité totale, cette nuit ne peut atteindre que %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間がないため、この夜は最大%lld点です。"
+          }
+        }
+      }
+    },
+    "With no true darkness, tonight can reach only %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne echte Dunkelheit erreicht der Wert heute Nacht höchstens %lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With no true darkness, tonight can reach only %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin oscuridad total, esta noche solo puede llegar a %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans obscurité totale, cette nuit ne peut atteindre que %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に暗い時間がないため、今夜は最大%lld点です。"
+          }
+        }
+      }
+    },
     "With the lights out": {
       "extractionState": "manual",
       "localizations": {

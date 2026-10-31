@@ -200,9 +200,11 @@ nonisolated enum ScoreLimit: Sendable, Equatable {
     case skyGlow(Int)
     case smoke(Int)
     var cap: Int { switch self { case .darkness(let c), .moonlight(let c), .clouds(let c), .skyGlow(let c), .smoke(let c): c } }
-    /// "Clouds limit tonight to 55."
-    func sentence(tonight: Bool) -> String {
+    /// "Clouds limit tonight to 55." `noDarkness`: the night has no true darkness at all, so its cap
+    /// is never said as short hours.
+    func sentence(tonight: Bool, noDarkness: Bool = false) -> String {
         switch self {
+        case .darkness(let c) where noDarkness: tonight ? String(localized: "With no true darkness, tonight can reach only \(c).") : String(localized: "With no true darkness, this night can reach only \(c).")
         case .darkness(let c): tonight ? String(localized: "Short hours of true darkness limit tonight to \(c).") : String(localized: "Short hours of true darkness limit this night to \(c).")
         case .moonlight(let c): tonight ? String(localized: "Moonlight limits tonight to \(c).") : String(localized: "Moonlight limits this night to \(c).")
         case .clouds(let c): tonight ? String(localized: "Clouds limit tonight to \(c).") : String(localized: "Clouds limit this night to \(c).")
@@ -255,10 +257,10 @@ nonisolated struct DarknessScore: Sendable {
     var hasForecast: Bool { basis == .forecast }
     /// The weakest link in words, when its cap holds the score below the sum of its parts ("Clouds
     /// limit tonight to 55."), on every device; nil when nothing does. The iPhone, which shows the
-    /// four parts, adds their sum.
+    /// four parts, adds their sum. A night with no true darkness has no duration points.
     func limitSentence(tonight: Bool) -> String? {
         guard let limit, limit.cap < partsSum else { return nil }
-        return limit.sentence(tonight: tonight)
+        return limit.sentence(tonight: tonight, noDarkness: lengthPoints <= 0)
     }
 }
 extension SkyConditions {
