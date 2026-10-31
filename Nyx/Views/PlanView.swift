@@ -65,8 +65,15 @@ struct PlanView: View {
             Text("One park").tag(Mode.month)
             Text("Nights I can go").tag(Mode.free)
         }
-        // Starlight, as every control that is not the score: amber is the score's and light's.
-        let menu=control.pickerStyle(.menu).tint(palette.ink)
+        // The menu's label on glass (a solid panel where glass would cost contrast), so the page that
+        // scrolls under the bar is veiled behind it rather than running through the words. Starlight, as
+        // every control that is not the score: amber is the score's and light's.
+        let menu=Menu { control } label:{
+            HStack(spacing:8) { Text(Self.name(shown)).multilineTextAlignment(.leading); Image(systemName:"chevron.up.chevron.down").font(.footnote.weight(.semibold)).accessibilityHidden(true) }
+                .foregroundStyle(palette.ink).padding(.horizontal,18).padding(.vertical,10)
+                .nyxGlass(RoundedRectangle(cornerRadius:24,style:.continuous),role:.pill)
+        }
+        .accessibilityLabel("Plan").accessibilityValue(Text(Self.name(shown)))
         return FittingPicker {
             control.pickerStyle(.segmented)
         } menu:{
@@ -77,6 +84,9 @@ struct PlanView: View {
         // As wide as the page under it (the month's column, or the planner's), set by whoever places it.
         .padding(.horizontal,24).padding(.vertical,8)
         .accessibilityHint("The best nights in reach this month, one park's month, or the best park for each night you are free.")
+    }
+    private static func name(_ mode:Mode)->LocalizedStringKey {
+        switch mode { case .best: "Best nights"; case .month: "One park"; case .free: "Nights I can go" }
     }
 }
 #Preview("Plan") { NavigationStack { PlanView() }.environment(PlanModel()).preferredColorScheme(.dark) }
