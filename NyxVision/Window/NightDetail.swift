@@ -59,7 +59,9 @@ struct NightDetail: View {
         let park = plan.park
         return ViewThatFits(in: .horizontal) {
             HStack(alignment: .center, spacing: 44) { scoreBlock(plan); Spacer(minLength: 0); moon(plan) }
-            VStack(alignment: .leading, spacing: 24) { moon(plan); scoreBlock(plan) }
+            // Stacked (narrow window, large text): the score, its band and any closure first, so they
+            // never fall below the fold under the Moon, and VoiceOver reads them first, as side by side.
+            VStack(alignment: .leading, spacing: 24) { scoreBlock(plan); moon(plan) }
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text("\(park.name), night of \(park.dateLabel(plan.sky.evening))"))
