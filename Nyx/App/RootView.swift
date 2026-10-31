@@ -62,7 +62,7 @@ struct RootView:View {
         voiceOver || switchControl || typeSize.isAccessibilitySize || DebugScenario.isEnabled("ax5") ? .never : .onScrollDown
     }
 
-    private var palette:NyxPalette { NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision" || DebugScenario.isEnabled("night-vision"),highContrast:contrast == .increased || DebugScenario.isEnabled("contrast"),brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red"),boldText:legibility == .bold || DebugScenario.isEnabled("bold")) }
+    private var palette:NyxPalette { NyxPalette.window(nightVision:nightVision,contrast:contrast,brighterRed:brighterRed,legibility:legibility) }
     var body:some View {
         Group {
             if model.loadError { CalmState(symbol:"moon",title:"The park library could not open",message:"Close and reopen Nyx. Your saved nights remain on this iPhone.").background(Color.black) }
@@ -404,7 +404,14 @@ private struct ParkSheet:View {
         .onAppear { commands.layer(layer,shown:true) }
         .onDisappear { commands.layer(layer,shown:false) }
         // The palette goes outside the presentation's style, which reads it to redden the whole sheet.
-        .nyxPresentation().nyxAccessibility().environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed,boldText:legibility == .bold))
+        .nyxPresentation().nyxAccessibility().environment(\.nyx,NyxPalette.window(nightVision:nightVision,contrast:contrast,brighterRed:brighterRed,legibility:legibility))
+    }
+}
+extension NyxPalette {
+    /// A window's palette from the person's settings (a main window, a park's own window, a park opened over
+    /// one); DEBUG captures add their scenario's night vision, contrast, brighter red and bold text.
+    static func window(nightVision:Bool,contrast:ColorSchemeContrast,brighterRed:Bool,legibility:LegibilityWeight?)->NyxPalette {
+        NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision" || DebugScenario.isEnabled("night-vision"),highContrast:contrast == .increased || DebugScenario.isEnabled("contrast"),brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red"),boldText:legibility == .bold || DebugScenario.isEnabled("bold"))
     }
 }
 #Preview("Tab shell") { RootView().environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self,SavedSpot.self],inMemory:true) }
