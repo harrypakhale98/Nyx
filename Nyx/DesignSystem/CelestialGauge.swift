@@ -1,4 +1,5 @@
 import SwiftUI
+import QuartzCore
 
 /// The Darkness Score as an instrument. The first time a park, night and score is shown in a
 /// session the score counts up like an odometer: a decaying spring, fast at first and settling
@@ -182,7 +183,9 @@ struct CelestialGauge: View {
         .onChange(of:revealKey) { _,key in if settled && !waiting && shown==score { onSettled?(key) } }
         // The count's frames: one value per display frame, read from the time since it began, and
         // no frames at all once no count runs (landed, cut short, overtaken or held).
-        .background { if Self.framesRun(countStart:countStart,counting:counting,still:still), let countStart { CountFrames(start:countStart,score:score) { tick($0) }.equatable() } }
+        // One display link per count, keyed by its start: a score that changes mid-count (a forecast
+        // settling) leaves it running, and the next count gets a fresh one.
+        .background { if Self.framesRun(countStart:countStart,counting:counting,still:still), let countStart { CountFrames(start:countStart) { tick($0) }.equatable().id(countStart) } }
         .sensoryFeedback(.impact(weight:.medium),trigger:milestone) { _,_ in haptics }
         .sensoryFeedback(.impact(weight:.light),trigger:landed) { _,_ in haptics }
         .onScrollVisibilityChange(threshold:0.02) { onScreen=$0 }
@@ -747,15 +750,38 @@ nonisolated struct DialRing:Shape {
         return arc.strokedPath(StrokeStyle(lineWidth:DialMetrics.ringWidth(side:side),lineCap:.round))
     }
 }
-/// The display's frames for one count-up, apart from the dial: equal while the same count runs, so the
-/// dial's redraw on each frame never rebuilds the timeline, which then handed its change a second date
-/// within one frame ("onChange(of: Date) action tried to update multiple times per frame").
+/// The display's frames for one count-up, apart from the dial, from the screen's own display link.
+/// Not a `TimelineView` read through `onChange(of: Date)`: when the page changed under a running count
+/// (Tonight's answer settling as places arrive) after a slow frame, the timeline handed its change two
+/// dates in one update ("onChange(of: Date) action tried to update multiple times per frame"). The link
+/// calls once per frame from outside the view update, up to ProMotion's 120 Hz. Equal by the count's
+/// start alone: `tick` reads the dial's score, so a new score mid-count changes nothing here.
 private struct CountFrames: View, Equatable {
     let start: Date
-    let score: Int
     let tick: (Date)->Void
-    nonisolated static func ==(a:CountFrames,b:CountFrames)->Bool { a.start==b.start && a.score==b.score }
-    var body: some View { TimelineView(.animation) { timeline in Color.clear.onChange(of:timeline.date,initial:true) { _,now in tick(now) } } }
+    @State private var link=FrameLink()
+    nonisolated static func ==(a:CountFrames,b:CountFrames)->Bool { a.start==b.start }
+    var body: some View {
+        Color.clear
+            .onAppear { tick(.now); link.start { tick(.now) } }
+            .onDisappear { link.stop() }
+    }
+}
+/// One display link, running from `start` until `stop`. While added, the link holds this object, so it
+/// lives exactly as long as the frames are wanted.
+@MainActor private final class FrameLink: NSObject {
+    private var link: CADisplayLink?
+    private var frame: (()->Void)?
+    func start(_ frame: @escaping ()->Void) {
+        stop()
+        self.frame=frame
+        let link=CADisplayLink(target:self,selector:#selector(step))
+        link.preferredFrameRateRange=CAFrameRateRange(minimum:30,maximum:120,preferred:120)
+        link.add(to:.main,forMode:.common)
+        self.link=link
+    }
+    func stop() { link?.invalidate(); link=nil; frame=nil }
+    @objc private func step(_ link: CADisplayLink) { frame?() }
 }
 /// The score reveals seen this session, by `key`: in memory only, empty at every launch. A key is
 /// added only when a count-up lands in front of the person, never when it is held or cut short.
