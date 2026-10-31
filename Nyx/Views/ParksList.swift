@@ -7,6 +7,15 @@ import SwiftData
 /// (the US parks among them). Search finds any place by name, region or country, accents folded.
 /// Places abroad are scored only as their rows appear, and their forecasts are asked for only for
 /// what is on screen (`OnScreen`), by whole 10° tiles (`PlanModel.refreshForecasts(for:)`).
+/// What narrows the Parks list: the search, the filters and the countries opened abroad. Held by the
+/// tab, so a window crossing the split's width (a rotation, a Stage Manager resize) keeps them.
+struct ParksNarrowing: Equatable {
+    var search=""
+    var darkOnly=false
+    var stepFreeOnly=DebugScenario.state=="step-free"
+    var savedOnly=false
+    var openCountries:Set<String>=[]
+}
 struct ParksView: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
@@ -18,10 +27,15 @@ struct ParksView: View {
     var selection: Binding<String?>?=nil
     @Environment(\.dynamicTypeSize) private var typeSize
     @FocusState private var searchFocused: Bool
-    @State private var search=""
-    @State private var darkOnly=false
-    @State private var stepFreeOnly=DebugScenario.state=="step-free"
-    @State private var savedOnly=false
+    /// The search and the narrowing switches: the tab's (`ParksTab`), so a resize that trades the split for a
+    /// stack keeps them; the list's own where nothing hands them in.
+    var narrowing: Binding<ParksNarrowing>?=nil
+    @State private var ownNarrowing=ParksNarrowing()
+    private var state:Binding<ParksNarrowing> { narrowing ?? $ownNarrowing }
+    private var search:String { state.wrappedValue.search }
+    private var darkOnly:Bool { state.wrappedValue.darkOnly }
+    private var stepFreeOnly:Bool { state.wrappedValue.stepFreeOnly }
+    private var savedOnly:Bool { state.wrappedValue.savedOnly }
     @State private var saveFailed=false
     /// "Save a spot" is open.
     @State private var addingSpot=false
@@ -36,7 +50,7 @@ struct ParksView: View {
     @State private var found:[Park]=[]
     @State private var foundCapped=false
     /// The countries opened in the world list, for this window.
-    @State private var openCountries:Set<String>=[]
+    private var openCountries:Set<String> { state.wrappedValue.openCountries }
     /// The "Around the world" row under the US parks, open or closed, kept for the window.
     @SceneStorage("parksWorldOpen") private var worldOpen=false
     /// The catalogue rows on screen, so their forecasts are asked for and nothing else.
@@ -104,7 +118,7 @@ struct ParksView: View {
             VStack(alignment:.leading,spacing:18) {
                 // Waiting for the world, no count yet: "63 places" would describe only the US parks.
                 if !waiting { Eyebrow(text:eyebrow) }
-                if typeSize.isAccessibilitySize { InlineSearchField(text:$search,prompt:searchPrompt,focus:$searchFocused) }
+                if typeSize.isAccessibilitySize { InlineSearchField(text:state.search,prompt:searchPrompt,focus:$searchFocused) }
                 // Only worth saying when a row actually reads "Estimate", in the rows' own words.
                 if !waiting, let note=estimateNote(shown:shown,own:own) { Text(note.estimate).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if stepFreeOnly { Text("Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
@@ -126,7 +140,7 @@ struct ParksView: View {
         // On an iPhone in landscape the keyboard hides all but the first result: a drag down puts it away.
         .scrollDismissesKeyboard(.interactively)
         .background(NightBackground(veil:0.45)).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
-            .modifier(SystemSearch(text:$search,focused:$searchFocused,prompt:searchPrompt,enabled:!typeSize.isAccessibilitySize))
+            .modifier(SystemSearch(text:state.search,focused:$searchFocused,prompt:searchPrompt,enabled:!typeSize.isAccessibilitySize))
     }
     var body: some View {
         withWorld(list)
@@ -159,7 +173,7 @@ struct ParksView: View {
     @ViewBuilder private var listOptions: some View {
         // Abroad the list is by country and name; the darkest place within reach tonight is Tonight's answer.
         if !abroad { Picker("Sort",selection:$byScore) { Label("Name",systemImage:"textformat").tag(false); Label("Darkest tonight",systemImage:"moon.stars").tag(true) } }
-        Section { Toggle("Dark Sky designated only",isOn:$darkOnly); Toggle("Step-free viewing",isOn:$stepFreeOnly); Toggle("Saved parks only",isOn:$savedOnly) }
+        Section { Toggle("Dark Sky designated only",isOn:state.darkOnly); Toggle("Step-free viewing",isOn:state.stepFreeOnly); Toggle("Saved parks only",isOn:state.savedOnly) }
         Section {
             Button { addingSpot=true } label:{ Label("Save a spot",systemImage:"plus") }
                 .accessibilityInputLabels([Text("Save a spot"),Text("Add a spot"),Text("New spot")])
@@ -325,7 +339,7 @@ struct ParksView: View {
     private func countryRow(_ group:CountryGroup,open:Bool)->some View {
         Button {
             // A big country adds hundreds of lazy rows: they appear at once, and only the chevron turns.
-            let toggle:()->Void={ if open { openCountries.remove(group.code); return }; openCountries.insert(group.code) }
+            let toggle:()->Void={ if open { state.wrappedValue.openCountries.remove(group.code); return }; state.wrappedValue.openCountries.insert(group.code) }
             // The chevron animates itself (below), so the rows can go in without a transaction.
             if group.places.count>Self.animatedRows { toggle() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring,toggle) }
         } label:{

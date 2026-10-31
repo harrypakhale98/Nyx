@@ -216,6 +216,25 @@ final class NyxUITests:XCTestCase {
         XCTAssertGreaterThan(save.frame.minX,app.searchFields.firstMatch.frame.maxX,"Save is not over the park")
         XCTAssertTrue(save.isHittable,"Save is not reachable")
     }
+    /// iPad: a search typed in Parks survives a rotation, which on iPad mini trades the stack for
+    /// the list beside the park (two lists, one search).
+    func testParksSearchSurvivesRotation() {
+        guard UIDevice.current.userInterfaceIdiom == .pad else { return }
+        continueAfterFailure=false
+        XCUIDevice.shared.orientation = .portrait
+        defer { XCUIDevice.shared.orientation = .portrait }
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","parks","-nyx-state","no-forecast","-nyx-reduce-motion"]
+        app.launch()
+        let field=app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout:20),"No search in Parks")
+        field.tap()
+        field.typeText("Zion")
+        XCTAssertTrue(app.staticTexts["Zion"].waitForExistence(timeout:5),"The search found nothing")
+        XCUIDevice.shared.orientation = .landscapeLeft
+        let kept=NSPredicate { _,_ in (app.searchFields.firstMatch.value as? String) == "Zion" }
+        XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:kept,object:nil)],timeout:10),.completed,"The search was lost in the turn")
+    }
     /// iPad: a night lifted from the month and held over the Journal's row in the sidebar opens
     /// the Journal, whose screen takes the drop ("Record a night" for that night). On iPhone a long
     /// press stays the night's menu alone.

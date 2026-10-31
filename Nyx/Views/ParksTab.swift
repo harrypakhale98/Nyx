@@ -15,6 +15,8 @@ struct ParksTab: View {
     /// The park beside the list, kept for the window (and restored with it).
     @SceneStorage("parksPark") private var selection: String?
     @State private var path: [Park]=[]
+    /// The list's search and filters, here rather than in the list: the split and the stack each build their own list.
+    @State private var narrowing=ParksNarrowing()
     /// iPhone Duo's fold on its inner display, half open or flat (`readingFold`); nil everywhere else.
     @State private var fold: Fold?
     /// The tab's and the list's leading edges on screen, in whole points: the floating sidebar starts a
@@ -71,7 +73,7 @@ struct ParksTab: View {
             if split && !showsMap {
                 let column=ParksTab.listColumn(atFold:listAtFold,returningFlat:returningFlat)
                 NavigationSplitView(columnVisibility:$columnVisibility) {
-                    ParksView(selection:$selection)
+                    ParksView(selection:$selection,narrowing:$narrowing)
                         .onGeometryChange(for:Double.self) { $0.frame(in:.global).minX.rounded() } action:{ listMinX=$0 }
                         .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ listWidthSeen=$0 }
                         .modifier(listRefresh).toolbar { mapToggle }.tabRootToolbar()
@@ -104,7 +106,7 @@ struct ParksTab: View {
                                 .modifier(RefreshKey { await model.refresh(model.parks,force:true) })
                                 .navigationDestination(for:Park.self) { park in ParkDetailView(park:park) }
                                 .transition(.opacity)
-                        } else { ParksView().modifier(listRefresh).transition(.opacity) }
+                        } else { ParksView(narrowing:$narrowing).modifier(listRefresh).transition(.opacity) }
                     }.toolbar { mapToggle }.tabRootToolbar()
                 }.transition(.opacity)
             }
