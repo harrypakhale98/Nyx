@@ -26,11 +26,15 @@ nonisolated extension Park: Transferable {
     /// park itself always comes from the bundle, and a spot's `pin:` id, which lives in the person's
     /// store, resolves to nothing here.
     static func transferred(id:String,catalog:[Park]?=nil) throws -> Park {
-        // Today's letter ids and the namespaced ones (`wd:Q42`, `pin:<uuid>`) read as a link would read them.
-        let trimmed=id.trimmingCharacters(in:.whitespacesAndNewlines), id=PlaceIDText.validated(trimmed) ?? trimmed.lowercased()
+        let id=transferredID(id)
         let found:Park?=if let catalog { catalog.first { $0.id==id } } else { ParkLibrary.place(id,snapshot:nil) }
         guard let park=found else { throw ParkTransferError.unknownPark }
         return park
+    }
+    /// An id as it arrives: today's letter ids and the namespaced ones (`wd:Q42`, `pin:<uuid>`) read as a link would read them.
+    static func transferredID(_ id:String)->String {
+        let trimmed=id.trimmingCharacters(in:.whitespacesAndNewlines)
+        return PlaceIDText.validated(trimmed) ?? trimmed.lowercased()
     }
     static func transferred(url:URL,catalog:[Park]?=nil) throws -> Park {
         switch DeepLink(url) {
@@ -38,4 +42,30 @@ nonisolated extension Park: Transferable {
         default: throw ParkTransferError.unknownPark
         }
     }
+}
+/// A place dropped on one of Nyx's own screens (Plan, the Journal): only its id, resolved there through the
+/// app's model, which knows the person's saved spots as well as the bundle's parks and the catalogue. The
+/// same two ways in as `Park`'s (Nyx's type, a `nyx://park/<id>` link); `Park`'s own import stays for
+/// anything without the model.
+nonisolated struct DroppedPark: Transferable, Equatable, Sendable {
+    let id: String
+    init(id: String) { self.id=Park.transferredID(id) }
+    /// Far larger than any place id: refused before it is read.
+    static let largest=512
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(importedContentType:.nyxPark) { data in
+            guard data.count <= largest else { throw ParkTransferError.unknownPark }
+            return DroppedPark(id:String(decoding:data,as:UTF8.self))
+        }
+        ProxyRepresentation(importing:{ (url:URL) in
+            switch DeepLink(url) {
+            case .park(let id)?, .parkNight(let id,_)?: DroppedPark(id:id)
+            default: throw ParkTransferError.unknownPark
+            }
+        })
+    }
+}
+extension DroppedPark {
+    /// The place it names on this device, a saved spot included; nil for one Nyx does not know.
+    @MainActor func place(in model:PlanModel)->Park? { model.park(id) }
 }

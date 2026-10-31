@@ -38,10 +38,25 @@ struct ParkDropTarget<Item: Transferable>: ViewModifier {
             .sensoryFeedback(.selection,trigger:targeted) { _,now in now }
     }
 }
+/// `acceptsPark`: a dropped id becomes the place the model knows by it; one it does not know is not taken.
+private struct AcceptsPark: ViewModifier {
+    @Environment(PlanModel.self) private var model
+    let prompt: LocalizedStringKey
+    let symbol: String
+    let drop: (Park)->Void
+    func body(content:Content)->some View {
+        content.modifier(ParkDropTarget<DroppedPark>(prompt:prompt,symbol:symbol) { dropped in
+            guard let park=dropped.place(in:model) else { return false }
+            drop(park)
+            return true
+        })
+    }
+}
 extension View {
-    /// Accepts a park dropped onto the screen (`ParkDropTarget`).
+    /// Accepts a park dropped onto the screen (`ParkDropTarget`), a saved spot included: the place is found
+    /// through the app's model (`DroppedPark`).
     func acceptsPark(_ prompt:LocalizedStringKey,systemImage:String,drop:@escaping (Park)->Void)->some View {
-        modifier(ParkDropTarget<Park>(prompt:prompt,symbol:systemImage) { park in drop(park); return true })
+        modifier(AcceptsPark(prompt:prompt,symbol:systemImage,drop:drop))
     }
     /// Accepts a night or a park dropped onto the journal; `drop` says whether it was taken.
     func acceptsJournalDrop(_ prompt:LocalizedStringKey,systemImage:String,drop:@escaping (JournalDrop)->Bool)->some View {
@@ -57,5 +72,6 @@ extension JournalPrefill {
 }
 #Preview("Drop target") {
     Color.black.frame(height:400).acceptsPark("Plan this park",systemImage:"calendar") { _ in }
+        .environment(PlanModel())
         .environment(\.nyx,NyxPalette(nightVision:false,highContrast:false)).preferredColorScheme(.dark)
 }

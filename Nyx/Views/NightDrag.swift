@@ -46,7 +46,7 @@ nonisolated enum JournalDrop: Transferable, Equatable, Sendable {
     static var transferRepresentation: some TransferRepresentation {
         // Nyx's night, else a park by any of the ways a park arrives (its id, its nyx:// link).
         DataRepresentation(importedContentType:.nyxNight) { data in JournalDrop.night(try NightTransfer.received(data)) }
-        ProxyRepresentation(importing:{ (park:Park) in JournalDrop.park(park.id) })
+        ProxyRepresentation(importing:{ (park:DroppedPark) in JournalDrop.park(park.id) })
     }
 }
 extension JournalDrop {

@@ -35,6 +35,28 @@ import UIKit
         #expect(throws:ParkTransferError.self) { try Park.transferred(id:"zzzz") }
         #expect(try Park.transferred(id:" JOTR\n").id=="jotr")
     }
+    /// A saved spot lives in the person's store, not the bundle: dropped on Plan or the Journal, its id is
+    /// found through the app's model, as a park's is.
+    @MainActor @Test func aDroppedSpotIsFoundThroughTheModel() async throws {
+        let model=PlanModel(weather:WeatherService(transport:StubHTTP([:]),persist:false),parkStore:ParkStore(transport:StubHTTP([:]),persist:false),
+                            detail:ForecastDetailService(transport:StubHTTP([:]),persist:false))
+        let id="pin:3f2a8c1e-5b7d-4e9a-8c6f-1d2e3f4a5b6c"
+        let spot=Place(spotID:id,name:"Spot",latitude:38.9,longitude:-106.9,timeZoneID:"America/Denver",countryCode:"US",region:"CO",grid:SkyGrid(bundle:.main,layers:[]))
+        model.setSpots(places:[spot])
+        let data=try await spot.exported(as:.nyxPark)
+        // The bundle alone cannot name it; the model can.
+        await #expect(throws:(any Error).self) { try await Park(importing:data,contentType:.nyxPark) }
+        let dropped=try await DroppedPark(importing:data,contentType:.nyxPark)
+        #expect(dropped.id==id && dropped.place(in:model)==spot)
+        let journal=try await JournalDrop(importing:data,contentType:.nyxPark)
+        #expect(journal == .park(id) && journal.prefill(model:model)?.parkID==id)
+        // A park still arrives the same way; a spot deleted since, or an id far too long, does not.
+        let jotr=try #require(park("jotr"))
+        #expect(try await DroppedPark(importing:jotr.exported(as:.nyxPark),contentType:.nyxPark).place(in:model)?.id=="jotr")
+        #expect(DroppedPark(id:"pin:9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d").place(in:model)==nil)
+        #expect(DroppedPark(id:" JOTR\n").id=="jotr")
+        await #expect(throws:(any Error).self) { try await DroppedPark(importing:Data(repeating:0x61,count:4096),contentType:.nyxPark) }
+    }
     @Test func theTypeIsDeclaredInTheApp() {
         #expect(UTType.nyxPark.identifier=="com.harrypakhale.nyx.park")
         #expect(ParkLibrary.place("acad",snapshot:nil) != nil && ParkLibrary.place("pin:abc",snapshot:nil) == nil)
