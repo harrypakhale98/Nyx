@@ -4263,7 +4263,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ : %@, %@, %@"
+            "value": "%@ : %@, %@, %@"
           }
         },
         "ja": {
@@ -7368,7 +7368,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld %% mittlere Bewölkung von Sonnenuntergang bis Sonnenaufgang."
+            "value": "%lld %% mittlere Bewölkung von Sonnenuntergang bis Sonnenaufgang."
           }
         },
         "en": {
@@ -7403,7 +7403,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld %% mittlere Bewölkung in den vier dunkelsten Stunden."
+            "value": "%lld %% mittlere Bewölkung in den vier dunkelsten Stunden."
           }
         },
         "en": {
@@ -15334,7 +15334,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jenseits der Vorhersage weiß Nyx, wie bewölkt die Nächte jedes Parks in jedem Monat üblicherweise sind: zehn Jahre (2015 bis 2024) ERA5, eine aus Beobachtungen rekonstruierte Aufzeichnung des vergangenen Wetters, gemittelt über die echte Dunkelheit jeder Nacht an den Koordinaten des Parks. Eine Nacht nutzt am 15. den Wert ihres Monats und nähert sich schrittweise dem des nächsten Monats, damit die Werte am 1. nicht springen. Nächte ohne Vorhersage werden mit dieser üblichen Bewölkung bewertet und sagen das auch („Noch keine Wolkenvorhersage“), damit ein Park mit meist bedeckten Winternächten nicht mit einer Wüste gleichzieht und eine Nacht, die niemand vorhersagen kann, nie als klar gilt. Sie sagen auch, wie oft die Nächte dieses Monats überwiegend klar sind (unter 30 % Bewölkung). Es ist ein langjähriger Mittelwert, nie eine Vorhersage. Enthält veränderte Informationen des Copernicus Climate Change Service (2026), aus ERA5, 2015 bis 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), gelesen aus seiner stündlichen Zeitreihe (DOI 10.24381/1cf1ad76) und von Nyx über die echte Dunkelheit jeder Nacht gemittelt. Lizenziert unter CC BY 4.0. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
+            "value": "Jenseits der Vorhersage weiß Nyx, wie bewölkt die Nächte jedes Parks in jedem Monat üblicherweise sind: zehn Jahre (2015 bis 2024) ERA5, eine aus Beobachtungen rekonstruierte Aufzeichnung des vergangenen Wetters, gemittelt über die echte Dunkelheit jeder Nacht an den Koordinaten des Parks. Eine Nacht nutzt am 15. den Wert ihres Monats und nähert sich schrittweise dem des nächsten Monats, damit die Werte am 1. nicht springen. Nächte ohne Vorhersage werden mit dieser üblichen Bewölkung bewertet und sagen das auch („Noch keine Wolkenvorhersage“), damit ein Park mit meist bedeckten Winternächten nicht mit einer Wüste gleichzieht und eine Nacht, die niemand vorhersagen kann, nie als klar gilt. Sie sagen auch, wie oft die Nächte dieses Monats überwiegend klar sind (unter 30 % Bewölkung). Es ist ein langjähriger Mittelwert, nie eine Vorhersage. Enthält veränderte Informationen des Copernicus Climate Change Service (2026), aus ERA5, 2015 bis 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), gelesen aus seiner stündlichen Zeitreihe (DOI 10.24381/1cf1ad76) und von Nyx über die echte Dunkelheit jeder Nacht gemittelt. Lizenziert unter CC BY 4.0. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
           }
         },
         "en": {
@@ -21836,7 +21836,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Anneau en pointillés : votre rayon de recherche, en ligne droite"
+            "value": "Anneau en pointillés : votre rayon de recherche, en ligne droite"
           }
         },
         "ja": {
@@ -24073,7 +24073,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Erste Einschätzung: Die Vorhersage sagt %1$lld %% Wolken, %2$lld Tage im Voraus. Nyx zählt sie so, wie sie ist."
+            "value": "Erste Einschätzung: Die Vorhersage sagt %1$lld %% Wolken, %2$lld Tage im Voraus. Nyx zählt sie so, wie sie ist."
           }
         },
         "en": {
@@ -24091,7 +24091,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tendance : la prévision annonce %lld %% de nuages, à %lld jours. Nyx la compte telle quelle."
+            "value": "Tendance : la prévision annonce %lld %% de nuages, à %lld jours. Nyx la compte telle quelle."
           }
         },
         "ja": {
@@ -24108,7 +24108,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Erste Einschätzung: Die Vorhersage sagt %1$lld %% Wolken, aber sie liegt %2$lld Tage im Voraus, deshalb mischt Nyx sie mit der üblichen Bewölkung dieses Monats und zählt %3$lld %%."
+            "value": "Erste Einschätzung: Die Vorhersage sagt %1$lld %% Wolken, aber sie liegt %2$lld Tage im Voraus, deshalb mischt Nyx sie mit der üblichen Bewölkung dieses Monats und zählt %3$lld %%."
           }
         },
         "en": {
@@ -24126,7 +24126,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tendance : la prévision annonce %1$lld %% de nuages, mais elle est à %2$lld jours ; Nyx la mélange donc avec la nébulosité habituelle de ce mois et compte %3$lld %%."
+            "value": "Tendance : la prévision annonce %1$lld %% de nuages, mais elle est à %2$lld jours ; Nyx la mélange donc avec la nébulosité habituelle de ce mois et compte %3$lld %%."
           }
         },
         "ja": {
@@ -27658,7 +27658,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Für die nächsten sieben Tage fragt Nyx außerdem drei unabhängige Vorhersagemodelle (GFS der NOAA, IFS des ECMWF und ICON des DWD) für dieselben Stunden echter Dunkelheit ab. Liegen ihre Mittelwerte innerhalb von 15 Prozentpunkten Bewölkung, stimmen sie überein; innerhalb von 35 stimmen sie ungefähr überein; darüber hinaus weichen sie voneinander ab, und der Zeitstrom zeigt die Spanne der Werte, die sie zulassen. Der Wert selbst nutzt die Best-Match-Vorhersage von Open-Meteo; bei Gleichstand steht die engere Übereinstimmung der Modelle vorn. Wolkenschichten, die kälteste Stunde, Taugefahr (Luft innerhalb von 2 °C ihres Taupunkts) und die stärkste Böe stammen aus derselben Siebentagesvorhersage. Ebenso Regen und Schnee (genannt, sobald die Wahrscheinlichkeit einer Stunde 25 % erreicht), Gewitter und Nebel (aus den Wettercodes der Vorhersage; Nebel ist besonders schwer vorherzusagen und heißt daher „möglich“) sowie der Wasserdampf über einem Ort: Unter 10 kg/m², ohne Dunst und bei wolkenlosem Himmel gilt die Luft als sehr trocken, was meist bedeutet, dass schwache Sterne gut hervortreten. Die Sichtweite ist ein grober Modellwert und erscheint nur als Hinweis auf Dunst. Nichts davon ändert den Wert."
+            "value": "Für die nächsten sieben Tage fragt Nyx außerdem drei unabhängige Vorhersagemodelle (GFS der NOAA, IFS des ECMWF und ICON des DWD) für dieselben Stunden echter Dunkelheit ab. Liegen ihre Mittelwerte innerhalb von 15 Prozentpunkten Bewölkung, stimmen sie überein; innerhalb von 35 stimmen sie ungefähr überein; darüber hinaus weichen sie voneinander ab, und der Zeitstrom zeigt die Spanne der Werte, die sie zulassen. Der Wert selbst nutzt die Best-Match-Vorhersage von Open-Meteo; bei Gleichstand steht die engere Übereinstimmung der Modelle vorn. Wolkenschichten, die kälteste Stunde, Taugefahr (Luft innerhalb von 2 °C ihres Taupunkts) und die stärkste Böe stammen aus derselben Siebentagesvorhersage. Ebenso Regen und Schnee (genannt, sobald die Wahrscheinlichkeit einer Stunde 25 % erreicht), Gewitter und Nebel (aus den Wettercodes der Vorhersage; Nebel ist besonders schwer vorherzusagen und heißt daher „möglich“) sowie der Wasserdampf über einem Ort: Unter 10 kg/m², ohne Dunst und bei wolkenlosem Himmel gilt die Luft als sehr trocken, was meist bedeutet, dass schwache Sterne gut hervortreten. Die Sichtweite ist ein grober Modellwert und erscheint nur als Hinweis auf Dunst. Nichts davon ändert den Wert."
           }
         },
         "en": {
@@ -27676,7 +27676,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour les sept prochains jours, Nyx interroge aussi trois modèles de prévision indépendants (GFS de la NOAA, IFS de l’ECMWF et ICON du DWD) sur les mêmes heures d’obscurité totale. Quand leurs moyennes sont à moins de 15 points de couverture nuageuse, ils concordent ; à moins de 35, ils concordent à peu près ; au-delà, ils divergent, et la rivière du temps dessine la fourchette d’indices qu’ils permettent. L’indice lui-même utilise la prévision best match d’Open-Meteo ; en cas d’égalité, la meilleure concordance entre modèles passe en premier. Les couches nuageuses, l’heure la plus froide, le risque de rosée (air à moins de 2 °C de son point de rosée) et la plus forte rafale viennent de la même prévision à sept jours. Il en va de même pour la pluie et la neige (signalées quand le risque d’une heure atteint 25 %), les orages et le brouillard (d’après les codes météo de la prévision ; le brouillard est particulièrement difficile à prévoir, il est donc dit « possible »), et la vapeur d’eau au-dessus d’un lieu : sous 10 kg/m², sans brume et par ciel dégagé, l’air est dit très sec, ce qui signifie en général que les étoiles faibles ressortent bien. La visibilité est une valeur grossière du modèle et n’apparaît que comme indice de brume. Rien de tout cela ne modifie l’indice."
+            "value": "Pour les sept prochains jours, Nyx interroge aussi trois modèles de prévision indépendants (GFS de la NOAA, IFS de l’ECMWF et ICON du DWD) sur les mêmes heures d’obscurité totale. Quand leurs moyennes sont à moins de 15 points de couverture nuageuse, ils concordent ; à moins de 35, ils concordent à peu près ; au-delà, ils divergent, et la rivière du temps dessine la fourchette d’indices qu’ils permettent. L’indice lui-même utilise la prévision best match d’Open-Meteo ; en cas d’égalité, la meilleure concordance entre modèles passe en premier. Les couches nuageuses, l’heure la plus froide, le risque de rosée (air à moins de 2 °C de son point de rosée) et la plus forte rafale viennent de la même prévision à sept jours. Il en va de même pour la pluie et la neige (signalées quand le risque d’une heure atteint 25 %), les orages et le brouillard (d’après les codes météo de la prévision ; le brouillard est particulièrement difficile à prévoir, il est donc dit « possible »), et la vapeur d’eau au-dessus d’un lieu : sous 10 kg/m², sans brume et par ciel dégagé, l’air est dit très sec, ce qui signifie en général que les étoiles faibles ressortent bien. La visibilité est une valeur grossière du modèle et n’apparaît que comme indice de brume. Rien de tout cela ne modifie l’indice."
           }
         },
         "ja": {
@@ -28296,7 +28296,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quatre composantes font 100 : clair de lune, nuages, halo lumineux et obscurité totale. La plus faible peut faire baisser toute la nuit. Les détails suivent."
+            "value": "Quatre composantes font 100 : clair de lune, nuages, halo lumineux et obscurité totale. La plus faible peut faire baisser toute la nuit. Les détails suivent."
           }
         },
         "ja": {
@@ -29491,7 +29491,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les nuits à moitié remplies sont une tendance : une prévision à plusieurs jours, mélangée à la nébulosité habituelle. La lueur douce montre l’écart des indices de trois modèles de prévision."
+            "value": "Les nuits à moitié remplies sont une tendance : une prévision à plusieurs jours, mélangée à la nébulosité habituelle. La lueur douce montre l’écart des indices de trois modèles de prévision."
           }
         },
         "ja": {
@@ -30356,7 +30356,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vide : %@. Nyx n’utilise que la Lune et l’obscurité."
+            "value": "Vide : %@. Nyx n’utilise que la Lune et l’obscurité."
           }
         },
         "ja": {
@@ -30391,7 +30391,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vide : %@. Nyx utilise la nébulosité habituelle du parc, ou seulement la Lune et l’obscurité là où elle n’est pas connue."
+            "value": "Vide : %@. Nyx utilise la nébulosité habituelle du parc, ou seulement la Lune et l’obscurité là où elle n’est pas connue."
           }
         },
         "ja": {
@@ -30426,7 +30426,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vide : %@. Nyx utilise la nébulosité habituelle du parc."
+            "value": "Vide : %@. Nyx utilise la nébulosité habituelle du parc."
           }
         },
         "ja": {
@@ -33128,7 +33128,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Letzte Nacht in %1$@ sagte Nyx %2$lld bei %3$lld%% Bewölkung. Im Rückblick setzen die Wettermodelle die Bewölkung bei %4$lld%% an, und der Wert bleibt bei %5$lld."
+            "value": "Letzte Nacht in %1$@ sagte Nyx %2$lld bei %3$lld %% Bewölkung. Im Rückblick setzen die Wettermodelle die Bewölkung bei %4$lld %% an, und der Wert bleibt bei %5$lld."
           }
         },
         "en": {
@@ -33163,7 +33163,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Letzte Nacht in %1$@ sagte Nyx %2$lld bei %3$lld%% Bewölkung. Im Rückblick setzen die Wettermodelle die Bewölkung bei %4$lld%% an: etwa %5$lld."
+            "value": "Letzte Nacht in %1$@ sagte Nyx %2$lld bei %3$lld %% Bewölkung. Im Rückblick setzen die Wettermodelle die Bewölkung bei %4$lld %% an: etwa %5$lld."
           }
         },
         "en": {
@@ -38217,7 +38217,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mondlicht zählt 40 %, Wolken 25 %, Himmelsaufhellung (geschätzt) 20 % und echte Dunkelheit 15 %. Das Mondlicht folgt der Mondphase und der Höhe des Mondes während der echten Dunkelheit (Krisciunas und Schaefer, 1991), daher kostet eine tief stehende Sichel weniger als ein hoch stehender, fast voller Mond. Die vier Teile werden addiert, dann begrenzt das schwächste Glied die Summe: Wolken halten eine Nacht bei 100 minus 0,9 Punkten je Prozent Bewölkung (bedeckt höchstens 10, halb bewölkt 55); Himmelsaufhellung hält einen Park der Bortle-Klasse 3 bei 89, Klasse 4 bei 84, Klasse 5 bei 74, Klasse 6 bei 59 und hellere Himmel bei 39, sodass nur Bortle 2 oder dunkler „Makellos“ erreichen kann; dichter Rauch oder Dunst (aerosoloptische Dicke 0,5 oder mehr) hält eine Nacht bei 59, leichterer Rauch (0,25 bis 0,5) bei 74. Auch das Mondlicht begrenzt die Summe, auf 100 minus 61 mal das Mondlicht hoch zwei Drittel: Ein hoch stehender Vollmond während der echten Dunkelheit hält eine Nacht bei etwa 40, wie es die Aufhellung einer Stadt täte, und ein Halbmond am Abendhimmel hält eine Nacht unter „Makellos“. Ohne echte Dunkelheit bleibt eine Nacht unter 40, und diese Grenze hebt sich schrittweise über die ersten drei Stunden echter Dunkelheit. Die Aufschlüsselung nennt die geltende Grenze. Bei gleichem Wert stehen Parks mit dunklerem Himmel in den NASA-Satellitendaten der Nachtlichter vorn, dann die Nacht, deren vier Teile vor einer Grenze zusammen mehr ergeben, dann längere echte Dunkelheit."
+            "value": "Mondlicht zählt 40 %, Wolken 25 %, Himmelsaufhellung (geschätzt) 20 % und echte Dunkelheit 15 %. Das Mondlicht folgt der Mondphase und der Höhe des Mondes während der echten Dunkelheit (Krisciunas und Schaefer, 1991), daher kostet eine tief stehende Sichel weniger als ein hoch stehender, fast voller Mond. Die vier Teile werden addiert, dann begrenzt das schwächste Glied die Summe: Wolken halten eine Nacht bei 100 minus 0,9 Punkten je Prozent Bewölkung (bedeckt höchstens 10, halb bewölkt 55); Himmelsaufhellung hält einen Park der Bortle-Klasse 3 bei 89, Klasse 4 bei 84, Klasse 5 bei 74, Klasse 6 bei 59 und hellere Himmel bei 39, sodass nur Bortle 2 oder dunkler „Makellos“ erreichen kann; dichter Rauch oder Dunst (aerosoloptische Dicke 0,5 oder mehr) hält eine Nacht bei 59, leichterer Rauch (0,25 bis 0,5) bei 74. Auch das Mondlicht begrenzt die Summe, auf 100 minus 61 mal das Mondlicht hoch zwei Drittel: Ein hoch stehender Vollmond während der echten Dunkelheit hält eine Nacht bei etwa 40, wie es die Aufhellung einer Stadt täte, und ein Halbmond am Abendhimmel hält eine Nacht unter „Makellos“. Ohne echte Dunkelheit bleibt eine Nacht unter 40, und diese Grenze hebt sich schrittweise über die ersten drei Stunden echter Dunkelheit. Die Aufschlüsselung nennt die geltende Grenze. Bei gleichem Wert stehen Parks mit dunklerem Himmel in den NASA-Satellitendaten der Nachtlichter vorn, dann die Nacht, deren vier Teile vor einer Grenze zusammen mehr ergeben, dann längere echte Dunkelheit."
           }
         },
         "en": {
@@ -38235,7 +38235,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le clair de lune compte pour 40 %, les nuages pour 25 %, le halo lumineux (estimé) pour 20 % et l’obscurité totale pour 15 %. Le clair de lune suit la phase de la Lune et sa hauteur pendant l’obscurité totale (Krisciunas et Schaefer, 1991) : un fin croissant bas pèse moins qu’une Lune gibbeuse haute. Les quatre composantes s’additionnent, puis le maillon faible plafonne la somme : les nuages limitent une nuit à 100 moins 0,9 point par pour cent de nuages (ciel couvert, 10 au plus ; à moitié nuageux, 55) ; le halo lumineux limite un parc Bortle 3 à 89, Bortle 4 à 84, Bortle 5 à 74, Bortle 6 à 59 et les ciels plus lumineux à 39, si bien que seul un Bortle 2 ou plus sombre peut atteindre Immaculée ; une fumée ou une brume épaisse (épaisseur optique des aérosols de 0,5 ou plus) limite une nuit à 59, et une fumée plus légère (0,25 à 0,5) à 74. Le clair de lune plafonne aussi la somme, à 100 moins 61 fois le clair de lune à la puissance deux tiers : une pleine lune haute pendant l’obscurité totale limite une nuit à 40 environ, comme le ferait le halo d’une ville, et une demi-lune dans le ciel du soir tient une nuit hors d’Immaculée. Sans obscurité totale, une nuit reste sous 40, et ce plafond se lève progressivement pendant les trois premières heures d’obscurité totale. Le détail nomme le plafond qui s’applique. En cas d’égalité, les parcs au ciel le plus noir selon les lumières nocturnes satellite de la NASA passent en premier, puis la nuit dont les quatre parties totalisent davantage avant tout plafond, puis celle à l’obscurité totale la plus longue."
+            "value": "Le clair de lune compte pour 40 %, les nuages pour 25 %, le halo lumineux (estimé) pour 20 % et l’obscurité totale pour 15 %. Le clair de lune suit la phase de la Lune et sa hauteur pendant l’obscurité totale (Krisciunas et Schaefer, 1991) : un fin croissant bas pèse moins qu’une Lune gibbeuse haute. Les quatre composantes s’additionnent, puis le maillon faible plafonne la somme : les nuages limitent une nuit à 100 moins 0,9 point par pour cent de nuages (ciel couvert, 10 au plus ; à moitié nuageux, 55) ; le halo lumineux limite un parc Bortle 3 à 89, Bortle 4 à 84, Bortle 5 à 74, Bortle 6 à 59 et les ciels plus lumineux à 39, si bien que seul un Bortle 2 ou plus sombre peut atteindre Immaculée ; une fumée ou une brume épaisse (épaisseur optique des aérosols de 0,5 ou plus) limite une nuit à 59, et une fumée plus légère (0,25 à 0,5) à 74. Le clair de lune plafonne aussi la somme, à 100 moins 61 fois le clair de lune à la puissance deux tiers : une pleine lune haute pendant l’obscurité totale limite une nuit à 40 environ, comme le ferait le halo d’une ville, et une demi-lune dans le ciel du soir tient une nuit hors d’Immaculée. Sans obscurité totale, une nuit reste sous 40, et ce plafond se lève progressivement pendant les trois premières heures d’obscurité totale. Le détail nomme le plafond qui s’applique. En cas d’égalité, les parcs au ciel le plus noir selon les lumières nocturnes satellite de la NASA passent en premier, puis la nuit dont les quatre parties totalisent davantage avant tout plafond, puis celle à l’obscurité totale la plus longue."
           }
         },
         "ja": {
@@ -39940,7 +39940,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Indique ce qui vaut le coup d’œil ce soir dans le parc que Nyx suit au poignet: le cœur de la Voie lactée, les planètes brillantes, une pluie de météores ou une éclipse, avec les heures du parc."
+            "value": "Indique ce qui vaut le coup d’œil ce soir dans le parc que Nyx suit au poignet : le cœur de la Voie lactée, les planètes brillantes, une pluie de météores ou une éclipse, avec les heures du parc."
           }
         },
         "ja": {
@@ -40115,7 +40115,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zone sombre la plus proche sur la carte satellite de la lumière (sans nom, sans indice, non vérifiée sur le terrain) : à %1$@ depuis %3$@, direction %2$@, en ligne droite, Bortle %4$lld."
+            "value": "Zone sombre la plus proche sur la carte satellite de la lumière (sans nom, sans indice, non vérifiée sur le terrain) : à %1$@ depuis %3$@, direction %2$@, en ligne droite, Bortle %4$lld."
           }
         },
         "ja": {
@@ -42765,7 +42765,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pas de crépuscule ni d’aube à %@ aujourd’hui : la vision nocturne reste comme vous l’avez réglée."
+            "value": "Pas de crépuscule ni d’aube à %@ aujourd’hui : la vision nocturne reste comme vous l’avez réglée."
           }
         },
         "ja": {
@@ -42800,7 +42800,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pas de crépuscule ni d’aube là où vous êtes aujourd’hui : la vision nocturne reste comme vous l’avez réglée."
+            "value": "Pas de crépuscule ni d’aube là où vous êtes aujourd’hui : la vision nocturne reste comme vous l’avez réglée."
           }
         },
         "ja": {
@@ -46673,7 +46673,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx n’envoie jamais l’endroit où vous êtes. Un endroit enregistré n’est envoyé que par sa position, arrondie à environ %@, pour sa prévision de nuages ; vous pouvez le désactiver plus bas. Ouvrir la page d’un parc américain demande les programmes des rangers de ce parc, et les lieux à l’étranger sont demandés par régions entières, jamais un par un."
+            "value": "Nyx n’envoie jamais l’endroit où vous êtes. Un endroit enregistré n’est envoyé que par sa position, arrondie à environ %@, pour sa prévision de nuages ; vous pouvez le désactiver plus bas. Ouvrir la page d’un parc américain demande les programmes des rangers de ce parc, et les lieux à l’étranger sont demandés par régions entières, jamais un par un."
           }
         },
         "ja": {
@@ -47232,13 +47232,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx utilise votre position pendant que vous l’utilisez : pour trouver des parcs à une distance en ligne droite, partir de là où vous êtes la prochaine fois, savoir quand vous êtes dans un parc national des États-Unis, orienter la carte du ciel vers le nord géographique et activer la vision nocturne au crépuscule. Elle reste sur cet iPad. Vous pouvez aussi choisir une ville ou un parc."
+                  "value": "Nyx utilise votre position pendant que vous l’utilisez : pour trouver des parcs à une distance en ligne droite, partir de là où vous êtes la prochaine fois, savoir quand vous êtes dans un parc national des États-Unis, orienter la carte du ciel vers le nord géographique et activer la vision nocturne au crépuscule. Elle reste sur cet iPad. Vous pouvez aussi choisir une ville ou un parc."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Nyx utilise votre position pendant que vous l’utilisez : pour trouver des parcs à une distance en ligne droite, partir de là où vous êtes la prochaine fois, savoir quand vous êtes dans un parc national des États-Unis, orienter la carte du ciel vers le nord géographique et activer la vision nocturne au crépuscule. Elle reste sur cet iPhone. Vous pouvez aussi choisir une ville ou un parc."
+                  "value": "Nyx utilise votre position pendant que vous l’utilisez : pour trouver des parcs à une distance en ligne droite, partir de là où vous êtes la prochaine fois, savoir quand vous êtes dans un parc national des États-Unis, orienter la carte du ciel vers le nord géographique et activer la vision nocturne au crépuscule. Elle reste sur cet iPhone. Vous pouvez aussi choisir une ville ou un parc."
                 }
               }
             }
@@ -57893,7 +57893,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Écart d’indice selon les modèles de prévision : %1$lld à %2$lld."
+            "value": "Écart d’indice selon les modèles de prévision : %1$lld à %2$lld."
           }
         },
         "ja": {
@@ -57928,7 +57928,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Écart d’indice selon les modèles de prévision : %1$lld–%2$lld"
+            "value": "Écart d’indice selon les modèles de prévision : %1$lld–%2$lld"
           }
         },
         "ja": {
@@ -61786,7 +61786,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Plein : prévision. À moitié plein : tendance. Vide : nébulosité habituelle."
+            "value": "Plein : prévision. À moitié plein : tendance. Vide : nébulosité habituelle."
           }
         },
         "ja": {
@@ -64278,7 +64278,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bahnen von Sonne und Mond für %@. Sonnenuntergang %@. %@ Mondaufgang %@, Monduntergang %@. %@Zeiten in %@."
+            "value": "Bahnen von Sonne und Mond für %@. Sonnenuntergang %@. %@ Mondaufgang %@, Monduntergang %@. %@Zeitzone: %@."
           }
         },
         "en": {
@@ -68239,7 +68239,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le cadran montre la nuit : coucher du soleil %@"
+            "value": "Le cadran montre la nuit : coucher du soleil %@"
           }
         },
         "ja": {
@@ -69349,7 +69349,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le nombre sous chaque nuit est son indice d’obscurité, de 0 à 100, et le point grandit avec lui. Un nuage marque un ciel couvert. Les nuits passées ne gardent qu’un point pâle. Un petit trait marque le maximum d’une pluie de météores, une Lune ombrée une éclipse de Lune visible ; ni l’un ni l’autre ne modifie l’indice."
+            "value": "Le nombre sous chaque nuit est son indice d’obscurité, de 0 à 100, et le point grandit avec lui. Un nuage marque un ciel couvert. Les nuits passées ne gardent qu’un point pâle. Un petit trait marque le maximum d’une pluie de météores, une Lune ombrée une éclipse de Lune visible ; ni l’un ni l’autre ne modifie l’indice."
           }
         },
         "ja": {
@@ -71736,7 +71736,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zeit in %@"
+            "value": "Zeit (%@)"
           }
         },
         "en": {
@@ -71876,7 +71876,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die Zeiten hier folgen %@, nach dem nächsten Ort in der Liste von Nyx. Nahe einer Grenze kann das die Zeit des Nachbarlands sein."
+            "value": "Die Zeiten hier folgen der Zeitzone %@, nach dem nächsten Ort in der Liste von Nyx. Nahe einer Grenze kann das die Zeitzone des Nachbarlands sein."
           }
         },
         "en": {
@@ -71911,7 +71911,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zeiten in %@"
+            "value": "Zeitzone: %@"
           }
         },
         "en": {
@@ -74614,7 +74614,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Inchangée pour l’instant : %1$lld, %2$@, comme quand vous l’avez choisie."
+            "value": "Inchangée pour l’instant : %1$lld, %2$@, comme quand vous l’avez choisie."
           }
         },
         "ja": {
@@ -75766,7 +75766,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Übliche Bewölkung hier zu dieser Jahreszeit: %lld%%."
+            "value": "Übliche Bewölkung hier zu dieser Jahreszeit: %lld %%."
           }
         },
         "en": {
@@ -86303,13 +86303,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "iOS misst die durchschnittliche Helligkeit der Pixel, die Nyx zeichnet (die mittlere Pixelluminanz von MetricKit: 0 % ist ein ganz schwarzer Bildschirm, 100 % ganz weiß), und meldet sie etwa einmal am Tag. Sie wird auf diesem iPad gemessen und verlässt es nie."
+                  "value": "iOS misst die durchschnittliche Helligkeit der Pixel, die Nyx zeichnet (die mittlere Pixelluminanz von MetricKit: 0 % ist ein ganz schwarzer Bildschirm, 100 % ganz weiß), und meldet sie etwa einmal am Tag. Sie wird auf diesem iPad gemessen und verlässt es nie."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "iOS misst die durchschnittliche Helligkeit der Pixel, die Nyx zeichnet (die mittlere Pixelluminanz von MetricKit: 0 % ist ein ganz schwarzer Bildschirm, 100 % ganz weiß), und meldet sie etwa einmal am Tag. Sie wird auf diesem iPhone gemessen und verlässt es nie."
+                  "value": "iOS misst die durchschnittliche Helligkeit der Pixel, die Nyx zeichnet (die mittlere Pixelluminanz von MetricKit: 0 % ist ein ganz schwarzer Bildschirm, 100 % ganz weiß), und meldet sie etwa einmal am Tag. Sie wird auf diesem iPhone gemessen und verlässt es nie."
                 }
               }
             }

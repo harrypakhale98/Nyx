@@ -1198,7 +1198,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld %% mittlere Bewölkung von Sonnenuntergang bis Sonnenaufgang."
+            "value": "%lld %% mittlere Bewölkung von Sonnenuntergang bis Sonnenaufgang."
           }
         },
         "en": {
@@ -1233,7 +1233,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld %% mittlere Bewölkung in den vier dunkelsten Stunden."
+            "value": "%lld %% mittlere Bewölkung in den vier dunkelsten Stunden."
           }
         },
         "en": {
@@ -8251,7 +8251,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Indique ce qui vaut le coup d’œil ce soir dans un parc national : le cœur de la Voie lactée, les planètes brillantes, une pluie de météores ou une éclipse, avec les heures du parc. Laissez le parc vide pour le parc choisi dans Nyx."
+            "value": "Indique ce qui vaut le coup d’œil ce soir dans un parc national : le cœur de la Voie lactée, les planètes brillantes, une pluie de météores ou une éclipse, avec les heures du parc. Laissez le parc vide pour le parc choisi dans Nyx."
           }
         },
         "ja": {
@@ -14673,7 +14673,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zeiten in %@"
+            "value": "Zeitzone: %@"
           }
         },
         "en": {
