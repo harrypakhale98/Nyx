@@ -23,6 +23,8 @@ import WidgetKit
     private var listening=false
     /// The places Home Screen widgets and the Tonight control are set to, as the last run read them (`widgetPlaces`).
     private var widgetIDs:[String]?
+    /// The places Moon widgets are set to (`widgetPlaces`): they need their Moon pictures, not forecasts.
+    private var moonWidgetIDs:[String]=[]
     /// What the widget, the watch and reminders were last handed, as `FollowedData` sees it.
     private var published:FollowedData?
     /// A republish waiting for changes made outside a run to settle (`noteChange`).
@@ -60,7 +62,10 @@ import WidgetKit
         running=true
         changedDuringRun=false
         // A widget set to a park is followed as a saved park is: its clouds are fetched and carried.
-        if !publishOnly || widgetIDs == nil { widgetIDs=await Self.widgetPlaces() }
+        if !publishOnly || widgetIDs == nil {
+            let places=await Self.widgetPlaces()
+            widgetIDs=places.followed; moonWidgetIDs=places.moons
+        }
         // A followed world catalogue place (`wd:`) resolves only once the catalogue is read; it is
         // never dropped from the widget, the watch or reminders for having been asked too early.
         if followedIDs(model).contains(where:{ $0.hasPrefix(Park.catalogPrefix) }) { await model.catalogReady() }
@@ -193,14 +198,17 @@ import WidgetKit
     func followedData(_ model:PlanModel)->FollowedData {
         FollowedData(ids:followedIDs(model),forecasts:model.forecasts,details:model.details,closures:Self.closures(model),aurora:model.aurora?.updated)
     }
-    /// The parks the Tonight's sky widgets and the Tonight control are set to; empty when none is
-    /// set or the system cannot say (a "darkest saved park" widget follows the saved parks anyway).
-    static func widgetPlaces() async -> [String] {
-        guard DebugScenario.screen == nil else { return [] }
+    /// The parks the Tonight's sky widgets and the Tonight control are set to (`followed`: their
+    /// clouds are fetched and carried), and those the Moon widgets are set to (`moons`: their Moon
+    /// pictures are drawn, and no forecast is needed). Empty when none is set or the system cannot
+    /// say (a "darkest saved park" widget follows the saved parks anyway).
+    static func widgetPlaces() async -> (followed:[String],moons:[String]) {
+        guard DebugScenario.screen == nil else { return ([],[]) }
         let widgets=(try? await WidgetCenter.shared.currentConfigurations()) ?? []
         let controls=(try? await ControlCenter.shared.currentControls()) ?? []
-        return widgets.compactMap { $0.widgetConfigurationIntent(of:TonightWidgetIntent.self)?.park?.id }
-            + controls.compactMap { $0.configurationIntent(of:TonightControlIntent.self)?.park?.id }
+        return (widgets.compactMap { $0.widgetConfigurationIntent(of:TonightWidgetIntent.self)?.park?.id }
+                    + controls.compactMap { $0.configurationIntent(of:TonightControlIntent.self)?.park?.id },
+                widgets.compactMap { $0.widgetConfigurationIntent(of:MoonWidgetIntent.self)?.park?.id })
     }
     /// Forecasts, smoke, summit layers, closures or the followed places changed in the model. A run
     /// hands over its own changes; outside one (a pull to refresh on Tonight or Parks, a park's page
@@ -394,9 +402,9 @@ import WidgetKit
     }
     private func publish(_ model:PlanModel,_ parks:[Park]) async {
         // The watch's places too (its kept place, the starting park…), so it is handed the same Moon,
-        // and the places widgets are set to (`widgetIDs`), so one set to an unsaved park shows it too.
+        // and the places widgets are set to (`widgetIDs`, `moonWidgetIDs`), so one set to an unsaved park shows it too.
         var drawnFor=Set<String>()
-        let widgetParks=(widgetIDs ?? []).compactMap { model.park($0) }
+        let widgetParks=((widgetIDs ?? [])+moonWidgetIDs).compactMap { model.park($0) }
         let moonsDrawn=await renderWidgetMoons(model,(parks+watchMoonPlaces(model)+widgetParks).filter { drawnFor.insert($0.id).inserted })
         // Taken as the snapshot is built (before its write suspends), so a change that lands during
         // the write still differs from `published` and is republished when this run ends.
