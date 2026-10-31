@@ -170,7 +170,7 @@ struct ParkNightView: View {
             // A wrist tap as a moment of the night passes, while its countdown is on screen.
             .modifier(MilestoneTap(park: park, next: NightMilestone.next(after: now, in: night.sky), active: page < 2 && !darkMode))
         }
-        .nyxTitle(park.shortName)
+        .nyxTitle(park.shortName, shorter: park.wristName)
         .toolbar {
             if isHome {
                 ToolbarItem(placement: .topBarLeading) {
@@ -868,17 +868,40 @@ extension NyxPalette {
 }
 extension View {
     /// The system title is a dim grey that falls below 4.5:1 once turned red; draw it in ink instead.
-    func nyxTitle(_ title: String) -> some View { modifier(NyxTitle(title: title)) }
+    /// `shorter`: the name as said on a small wrist (`Park.wristName`), where the whole one does not fit.
+    func nyxTitle(_ title: String, shorter: String? = nil) -> some View { modifier(NyxTitle(title: title, shorter: shorter ?? title)) }
 }
 private struct NyxTitle: ViewModifier {
     @Environment(\.nyx) private var palette
     let title: String
+    let shorter: String
     func body(content: Content) -> some View {
-        // Long names ("Black Canyon of the Gunnison") shrink before they truncate. One line even at
-        // accessibility sizes: a second line would run into the system clock above it.
-        content.navigationTitle { Text(title).foregroundStyle(palette.ink).lineLimit(1).minimumScaleFactor(0.6) }
-            .toolbarForegroundStyle(palette.ink, for: .navigationBar)
+        // The whole name where it fits, else the shorter one, which shrinks before it truncates: at
+        // 60% the 40 mm title still cut "Great Smoky…" and "American Sa…". One line even at
+        // accessibility sizes: a second line would run into the system clock above it. VoiceOver
+        // always hears the whole name.
+        content.navigationTitle {
+            ViewThatFits(in: .horizontal) {
+                Text(title)
+                Text(shorter).accessibilityLabel(title)
+                Text(shorter).minimumScaleFactor(0.6).accessibilityLabel(title)
+            }
+            .foregroundStyle(palette.ink).lineLimit(1)
+        }
+        .toolbarForegroundStyle(palette.ink, for: .navigationBar)
     }
+}
+extension Park {
+    /// The name the watch's title gives a bundled park whose short name is too long for a 40 mm
+    /// title even at 60% (`NyxTitle`): the form rangers and visitors say. Every other place, and
+    /// every larger watch the whole name fits, keeps `shortName`.
+    var wristName: String? { localShortName == nil ? Self.wristNames[id] : nil }
+    private static let wristNames: [String: String] = [
+        "blca": "Black Canyon", "grsm": "Great Smokies", "gumo": "Guadalupe", "thro": "T. Roosevelt",
+        "gaar": "Gates", "wrst": "Wrangell", "havo": "Volcanoes", "grsa": "Sand Dunes", "cave": "Carlsbad",
+        "npsa": "Am. Samoa", "cuva": "Cuyahoga", "neri": "New River", "romo": "Rocky Mtn", "lavo": "Lassen",
+        "chis": "Channel Isl.", "noca": "N. Cascades", "pefo": "Petrified", "maca": "Mammoth",
+    ]
 }
 
 #Preview("Tonight • At dusk by day") {
