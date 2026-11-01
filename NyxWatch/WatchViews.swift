@@ -296,17 +296,20 @@ struct TonightFace: View {
                 gauge.frame(width: side, height: side)
                 // At accessibility sizes the band word leaves the dial for this line.
                 if typeSize.isAccessibilitySize { Text(shown.score.band.label).bandWord(.headline, ink: palette.ink) }
-                // Directly under the score, as on iPhone and Vision Pro: the one line never to be missed.
-                if let closure { WristClosureLine(text: closure) }
+                // Directly under the score, as on iPhone and Vision Pro: the one line never to be missed,
+                // and then, if the Park Service refuses requests, that it is an earlier update's.
+                if let closure {
+                    WristClosureLine(text: closure)
+                    if let note = context?.alertsNote(night.park) { AlertsNote(text: note) }
+                }
                 if looking { NightGlance(night: shown, isTonight: offset == 0, models: models) } else { NextMoment(night: night, now: now, models: models, wraps: true) }
                 if let smoke = shown.smokeCaveat { SmokeLine(text: smoke, spoken: smoke) }
                 // A later night's glance already names what its clouds rest on.
                 ForEach(cloudLines(shown, context: context, now: now, labelShown: looking && offset != 0), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
                 }
-                // Why no closure under the score may be known, or that the alerts are an earlier update's
-                // while the Park Service refuses requests, in the iPhone's words.
-                if let note = context?.alertsNote(night.park) { AlertsNote(text: note) }
+                // Why no closure under the score may be known, in the iPhone's words (with a closure, under it).
+                if closure == nil, let note = context?.alertsNote(night.park) { AlertsNote(text: note) }
                 AskIPhoneRow(source: WatchSky.cloudSource(night.park, context: context, now: now))
             }.frame(maxWidth: .infinity)
         }
@@ -325,7 +328,11 @@ struct TonightFace: View {
         let lines: Int? = wraps ? nil : 1
         // A closure stands directly under the score on every surface, whole, so the road or trail it
         // names is never cut off: it wraps, and the face scrolls where it would leave the gauge too small.
-        if let closure { WristClosureLine(text: closure).layoutPriority(1) }
+        if let closure {
+            WristClosureLine(text: closure).layoutPriority(1)
+            // A closure kept from an earlier update while the Park Service refuses requests says so under it.
+            if let note = context?.alertsNote(night.park) { AlertsNote(text: note).layoutPriority(1) }
+        }
         if looking {
             NightGlance(night: shown, isTonight: isTonight, models: context?.modelRange(for: shown), wraps: wraps).layoutPriority(1)
         } else {
