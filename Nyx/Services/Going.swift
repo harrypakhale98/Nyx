@@ -89,8 +89,10 @@ nonisolated enum GoingCheck {
         return night.score.value<=announced-further
     }
     /// A clearly better choice: the same place on a nearby night, or a place close by on the same
-    /// night. At least 10 points better and Good, never at a closed place; the best first, then the
-    /// same place, then the nearer, then the earlier.
+    /// night. At least 10 points better and Good, never at a closed place, and never a night that
+    /// counts no clouds ("Moon and darkness only") against a night whose clouds are counted; the best
+    /// first (a night that counts clouds before one that does not, `NightPlanner.countsCloudsFirst`),
+    /// then the same place, then the nearer, then the earlier.
     struct Alternative: Equatable {
         let night: Night
         /// Nil at the same place.
@@ -100,11 +102,14 @@ nonisolated enum GoingCheck {
     static let margin=10
     static let nearby: Double=160_934
     static func alternative(to night: Night, sameplace: [Night], nearby: [(night: Night, meters: Double, closed: Bool)]) -> Alternative? {
-        let floor=max(night.score.value+margin,60)
-        let here=sameplace.filter { $0.id != night.id && $0.score.value>=floor }.map { Alternative(night:$0,meters:nil) }
-        let near=nearby.filter { !$0.closed && $0.night.park.id != night.park.id && $0.night.score.value>=floor }.map { Alternative(night:$0.night,meters:$0.meters) }
+        let floor=max(night.score.value+margin,60), counted=night.score.cloudPoints != nil
+        // A 97 that counts no clouds is any moonless night, not a clearer sky than one whose clouds are known.
+        func better(_ other: Night) -> Bool { other.score.value>=floor && (!counted || other.score.cloudPoints != nil) }
+        let here=sameplace.filter { $0.id != night.id && better($0) }.map { Alternative(night:$0,meters:nil) }
+        let near=nearby.filter { !$0.closed && $0.night.park.id != night.park.id && better($0.night) }.map { Alternative(night:$0.night,meters:$0.meters) }
         let options=here+near
         return options.min { a, b in
+            if let first=NightPlanner.countsCloudsFirst(a.night,b.night) { return first }
             if a.night.score.value != b.night.score.value { return a.night.score.value>b.night.score.value }
             if (a.meters == nil) != (b.meters == nil) { return a.meters == nil }
             if a.meters != b.meters { return (a.meters ?? 0)<(b.meters ?? 0) }

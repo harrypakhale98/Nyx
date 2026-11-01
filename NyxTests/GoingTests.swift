@@ -94,6 +94,27 @@ import Testing
         #expect(GoingCheck.alternative(to: shown, sameplace: [night(jotr, saturday, score: 58)], nearby: []) == nil)
         #expect(GoingCheck.alternative(to: night(jotr, friday, score: 70), sameplace: [night(jotr, saturday, score: 75)], nearby: []) == nil)
     }
+    /// A night that counts no clouds is never the clearly better choice for a night whose clouds are
+    /// counted, however high it reads; against one that counts none too, it can be.
+    @Test func alternativeNeverOffersANightThatCountsNoClouds() throws {
+        let jotr = try park("jotr"), deva = try park("deva")
+        let friday = try sky(jotr, "2026-10-23"), saturday = try sky(jotr, "2026-10-24")
+        func cloudless(_ park: Park, _ sky: SkyConditions, _ score: Int) -> Night {
+            Night(park: park, sky: sky, score: DarknessScore(value: score, moonPoints: 40, cloudPoints: nil, bortlePoints: 20, lengthPoints: 15, basis: .usual),
+                  cloudCover: nil, forecastUpdated: nil)
+        }
+        let fallen = night(jotr, friday, score: 50)
+        let moonOnly = [(night: cloudless(deva, try sky(deva, "2026-10-23"), 97), meters: 120_000.0, closed: false)]
+        // Only the Moon-and-darkness 97: nothing to offer.
+        #expect(GoingCheck.alternative(to: fallen, sameplace: [cloudless(jotr, saturday, 96)], nearby: moonOnly) == nil)
+        // Beside a night that counts clouds, that night is offered, though it reads lower.
+        let counted = [night(jotr, saturday, score: 72)]
+        #expect(GoingCheck.alternative(to: fallen, sameplace: counted, nearby: moonOnly)?.night.park.id == "jotr")
+        // A kept night that counts no clouds itself can be offered one that counts them first.
+        let bare = cloudless(jotr, friday, 50)
+        #expect(GoingCheck.alternative(to: bare, sameplace: counted, nearby: moonOnly)?.night.score.value == 72)
+        #expect(GoingCheck.alternative(to: bare, sameplace: [], nearby: moonOnly)?.night.park.id == "deva")
+    }
     @Test func summarySaysNowThenWhyThenTheChoice() throws {
         let jotr = try park("jotr"), sky = try sky(jotr, "2026-10-23")
         let going = GoingNight(parkID: "jotr", night: sky.evening, chosenScore: 82, chosenAt: .now)
