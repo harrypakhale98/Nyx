@@ -130,11 +130,29 @@ final class NyxUITests:XCTestCase {
         let tonightsMonth=month()
         /// A night that stands for the page: the 15th, or the 28th in tonight's month, whose past weeks fold away.
         func day(_ title:String)->String { title == tonightsMonth ? " 28" : " 15" }
+        /// The top of the floating tab bar, less a margin, where the bar stands at the foot of the window
+        /// (on iPad it sits at the top or gives way to a sidebar, and nothing at the foot covers a night).
+        func clearBelow()->CGFloat? {
+            let bar=app.tabBars.firstMatch
+            guard bar.exists, bar.frame.minY>app.frame.midY else { return nil }
+            return bar.frame.minY-16
+        }
+        /// Scrolls a night out from under the tab bar, so a finger meant for it does not land on a tab.
+        /// Which week sits at the foot depends on the date, so this runs whatever the month.
+        func reveal(_ element:XCUIElement) {
+            guard let limit=clearBelow(), element.frame.maxY>limit else { return }
+            let origin=app.coordinate(withNormalizedOffset:.zero)
+            let from=origin.withOffset(CGVector(dx:app.frame.midX,dy:limit-8))
+            let to=origin.withOffset(CGVector(dx:app.frame.midX,dy:limit-8-(element.frame.maxY-limit)-24))
+            from.press(forDuration:0.05,thenDragTo:to,withVelocity:.slow,thenHoldForDuration:0.3)
+            sleep(1)
+        }
         /// The visible page's nights: a night of the month named by the header is on screen.
         func pageMatches(_ title:String,file:StaticString=#filePath,line:UInt=#line) {
             let short=String(title.prefix(3))
             let night=app.buttons.matching(NSPredicate(format:"label CONTAINS %@",short+day(title))).firstMatch
             XCTAssertTrue(night.waitForExistence(timeout:5),"No night of \(title) in the tree",file:file,line:line)
+            reveal(night)
             XCTAssertTrue(night.isHittable,"\(title)'s nights are not on screen",file:file,line:line)
             XCTAssertEqual(app.buttons.matching(NSPredicate(format:"label CONTAINS %@",day(title)+".")).count,1,"More than one month in the tree",file:file,line:line)
         }
@@ -149,8 +167,9 @@ final class NyxUITests:XCTestCase {
         /// stands beside it in an inspector, so a drag across the window's width would start in the inspector.
         func drag(left:Bool) {
             let row=app.buttons.matching(NSPredicate(format:"label CONTAINS %@",day(month()))).firstMatch
+            reveal(row)
             let column=app.buttons["Previous month"].firstMatch.frame.union(next.frame)
-            let y=row.frame.midY/app.frame.height
+            let y=min(row.frame.midY,clearBelow() ?? .infinity)/app.frame.height
             func x(_ share:Double)->Double { (column.minX+column.width*share)/app.frame.width }
             let from=app.coordinate(withNormalizedOffset:CGVector(dx:x(left ? 0.85 : 0.15),dy:y))
             from.press(forDuration:0.05,thenDragTo:app.coordinate(withNormalizedOffset:CGVector(dx:x(left ? 0.15 : 0.85),dy:y)),withVelocity:.fast,thenHoldForDuration:0)
@@ -173,6 +192,7 @@ final class NyxUITests:XCTestCase {
         // The peek on the visible page.
         let night=app.buttons.matching(NSPredicate(format:"label CONTAINS %@",String(first.prefix(3))+" 28")).firstMatch
         XCTAssertTrue(night.waitForExistence(timeout:5))
+        reveal(night)
         night.press(forDuration:1.2)
         XCTAssertTrue(app.buttons["Why this score"].waitForExistence(timeout:5),"No peek on the visible month")
     }
