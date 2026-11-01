@@ -66,8 +66,9 @@ private enum VisionDescriber {
 /// the on-device model can't write one. Only labels Vision is very sure of (90% precision) and that
 /// mean something on a night out, at most four, in a fixed order: the sky, the land, water, then
 /// what people brought. Vision's labels are English identifiers, so each is named by Nyx's own word
-/// from the String Catalog, and the line is offered only where the app's language is the person's
-/// own (English and Spanish today); elsewhere a list in another language would not help.
+/// from the String Catalog and joined as the language joins one ("、" in Japanese); the line is
+/// offered only where the app's language is the person's own, since elsewhere a list in another
+/// language would not help.
 nonisolated enum PhotoLabels {
     /// Vision identifiers, in the order a line names them, with Nyx's word for each (the Moon
     /// capitalized, as everywhere in Nyx).
@@ -113,7 +114,8 @@ nonisolated enum PhotoLabels {
     static let maximumWords=4
     /// The line for the labels Vision kept (identifier → confidence): its words in order, without
     /// repeats, "sky" left out beside "night sky", the first letter capitalized; nil when none apply.
-    static func line(from labels: [String: Float], locale: Locale = .current) -> String? {
+    /// The words are joined by `bundle`'s "%@, %@" ("%@、%@" in Japanese).
+    static func line(from labels: [String: Float], locale: Locale = .current, bundle: Bundle = .main) -> String? {
         let kept=Set(labels.filter { $0.value>=minimumConfidence }.keys)
         var chosen: [String]=[]
         for (ids, word) in words where !kept.isDisjoint(with: ids) && !chosen.contains(word) {
@@ -122,7 +124,7 @@ nonisolated enum PhotoLabels {
             if chosen.count == maximumWords { break }
         }
         guard let first=chosen.first?.first else { return nil }
-        let line=chosen.joined(separator: ", ")
+        let line=chosen.dropFirst().reduce(chosen[0]) { String(localized: "\($0), \($1)", bundle: bundle, locale: locale) }
         return String(first).uppercased(with: locale)+line.dropFirst()
     }
     /// True when the app's language is the person's first language, so Nyx's words are theirs.

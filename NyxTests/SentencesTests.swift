@@ -128,6 +128,34 @@ struct SentencesTests {
             #expect(String(format: format, locale: locale, 2, "Denver") == two, "\(language)")
         }
     }
+    /// The parks-near record the model may quote holds that counted distance whole: "1 Meile", never "1 Meilen".
+    @Test func parksNearRecordKeepsItsCountedDistance() throws {
+        let expected=["en": "Arches, UT; 1 mile straight-line from Moab; tonight 88/100 Excellent",
+                      "de": "Arches, UT; 1 Meile Luftlinie von Moab; heute Nacht 88/100 Excellent",
+                      "es": "Arches, UT; a 1 milla en línea recta de Moab; esta noche 88/100 Excellent",
+                      "fr": "Arches, UT\u{202F}; à 1 mile à vol d’oiseau depuis Moab\u{202F}; ce soir 88/100 Excellent",
+                      "ja": "Arches、UT；Moabから直線距離で1マイル；今夜88/100 Excellent"]
+        for (language, line) in expected {
+            let bundle=try #require(Bundle.main.path(forResource: language, ofType: "lproj").flatMap(Bundle.init(path:)), "\(language)")
+            let locale=Locale(identifier: language)
+            let detail=String(format: bundle.localizedString(forKey: "%lld miles straight-line from %@", value: nil, table: nil), locale: locale, 1, "Moab")
+            let format=bundle.localizedString(forKey: "%@, %@; %@; tonight %lld/100 %@", value: nil, table: nil)
+            #expect(String(format: format, locale: locale, "Arches", "UT", detail, 88, "Excellent") == line, "\(language)")
+        }
+    }
+    /// Ask Nyx's "Looked up" lines read as sentences: a German date's own period is not doubled.
+    @MainActor @Test func lookedUpLinesAreSpokenAsSentences() {
+        #expect(GuideLookups.spoken(["Best nights · Arches · 30 nights from Oct 9", "Weather · Arches"]) == "Best nights · Arches · 30 nights from Oct 9. Weather · Arches")
+        #expect(GuideLookups.spoken(["Beste Nächte · Arches · 30 Nächte ab Sa. 31. Okt.", "Wetter · Arches"]) == "Beste Nächte · Arches · 30 Nächte ab Sa. 31. Okt. Wetter · Arches")
+        #expect(GuideLookups.spoken(["Weather · Arches"]) == "Weather · Arches")
+    }
+    /// The Moon phases met are a list in the reader's language, not names glued with an ASCII ", ".
+    @MainActor @Test func phasesMetAreListed() {
+        let names=[0, 4, 6].map { MoonPhase(fraction: YearRecap.phaseFraction($0)).name }
+        #expect(names == ["New moon", "Full moon", "Last quarter"])
+        #expect(MoonPhaseRow.spoken([6, 0, 4]) == "Phases met: \(names.formatted(.list(type: .and)))")
+        #expect(MoonPhaseRow.spoken([0]) == "Phases met: New moon")
+    }
     /// The satellite sky's line in Japanese: the class name closed with "。", no ASCII ". " after it.
     @Test func japaneseClassNameEndsInItsOwnMark() {
         #expect(Sentences.join([Sentences.end("郊外の空", language: "ja"), "衛星データからの推定です。"], language: "ja") == "郊外の空。衛星データからの推定です。")

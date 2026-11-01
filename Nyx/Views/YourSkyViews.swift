@@ -372,8 +372,12 @@ struct MoonPhaseRow: View {
             }
         }
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel(String(localized:"Phases met: \((0..<8).filter(met.contains).map { MoonPhase(fraction:YearRecap.phaseFraction($0)).name }.joined(separator:", "))"))
+        .accessibilityLabel(Self.spoken(met))
         .accessibilityIgnoresInvertColors()
+    }
+    /// The phases met, in their order, listed as the language lists names ("、" in Japanese).
+    static func spoken(_ met:Set<Int>)->String {
+        String(localized:"Phases met: \(Phrase.list((0..<8).filter(met.contains).map { MoonPhase(fraction:YearRecap.phaseFraction($0)).name }))")
     }
 }
 struct RecapCard: View {

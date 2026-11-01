@@ -207,9 +207,9 @@ nonisolated struct NightLookup: Sendable {
         return ranked.map { park, distance in
             let night=tonight[park.id], basis=night.map(Self.basis) ?? "", whole=Int(distance.rounded()), score=night?.score.value ?? 0, band=night?.score.band.label ?? ""
             let region=Self.locality(park)
-            let line=system == .miles ? String(localized: "\(park.shortName), \(region); \(whole) miles straight-line from \(origin.label); tonight \(score)/100 \(band)")
-                                      : String(localized: "\(park.shortName), \(region); \(whole) km straight-line from \(origin.label); tonight \(score)/100 \(band)")
+            // The distance from its own key, so "1 mile" keeps its plural form inside the record.
             let detail=system == .miles ? String(localized: "\(whole) miles straight-line from \(origin.label)") : String(localized: "\(whole) km straight-line from \(origin.label)")
+            let line=String(localized: "\(park.shortName), \(region); \(detail); tonight \(score)/100 \(band)")
             let record=line+(basis.isEmpty ? "" : "; "+basis)+access(park)
             return GuideFact(text: closed.contains(park.id) ? Phrase.sentences([record, OnDeviceGuide.closureRecord]) : record,
                              place: park, night: night?.id, score: night?.score.value, band: night?.score.band.label, detail: detail)

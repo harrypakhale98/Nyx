@@ -107,6 +107,14 @@ import Testing
         // "sky" alone still names the sky.
         #expect(PhotoLabels.line(from:["sky":0.9,"tree":0.9]) == "Sky, trees")
     }
+    /// Japanese lists its words with "、", never an ASCII comma and space (the words themselves are
+    /// the test host's English; the join is the Japanese catalog's).
+    @Test func labelsJoinAsTheLanguageJoinsAList() throws {
+        try #require(Bundle.main.preferredLocalizations.first?.hasPrefix("en") == true)
+        let ja=try #require(Bundle.main.path(forResource:"ja",ofType:"lproj").flatMap(Bundle.init(path:)))
+        let line=PhotoLabels.line(from:["tent":0.9,"mountain":0.8,"night_sky":0.95],locale:Locale(identifier:"ja_JP"),bundle:ja)
+        #expect(line == "Night sky、mountains、tent")
+    }
     @Test func labelsAreOfferedOnlyInThePersonsLanguage() {
         #expect(PhotoLabels.speaks(app:"en",preferred:["en-US","es-MX"]))
         #expect(PhotoLabels.speaks(app:"es",preferred:["es-MX"]))

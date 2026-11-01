@@ -596,8 +596,11 @@ struct GuideLookups: View {
         .frame(maxWidth:.infinity,alignment:.leading)
         .accessibilityElement(children:.ignore)
         .accessibilityLabel(Text("Looked up"))
-        .accessibilityValue(lines.joined(separator:". "))
+        .accessibilityValue(Self.spoken(lines))
     }
+    /// The lines as sentences, punctuated as the language does it: a line ending in a date's own
+    /// period ("31. Okt.") takes no second one, and Japanese joins with "。".
+    static func spoken(_ lines:[String])->String { Phrase.sentences(lines) }
 }
 /// Chips that wrap onto as many lines as they need, left to right.
 struct FlowLayout: Layout {

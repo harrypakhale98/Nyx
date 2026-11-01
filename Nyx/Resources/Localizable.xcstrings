@@ -2416,72 +2416,37 @@
         }
       }
     },
-    "%@, %@; %lld km straight-line from %@; tonight %lld/100 %@": {
+    "%@, %@; %@; tonight %lld/100 %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@; %lld km Luftlinie von %@; heute Nacht %lld/100 %@"
+            "value": "%@, %@; %@; heute Nacht %lld/100 %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@; %lld km straight-line from %@; tonight %lld/100 %@"
+            "value": "%@, %@; %@; tonight %lld/100 %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@; a %lld km en línea recta de %@; esta noche %lld/100 %@"
+            "value": "%@, %@; a %@; esta noche %lld/100 %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@ ; à %lld km à vol d’oiseau depuis %@ ; ce soir %lld/100 %@"
+            "value": "%@, %@ ; à %@ ; ce soir %lld/100 %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@、%2$@；%4$@から直線距離で%3$lld km；今夜%5$lld/100 %6$@"
-          }
-        }
-      }
-    },
-    "%@, %@; %lld miles straight-line from %@; tonight %lld/100 %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@; %lld Meilen Luftlinie von %@; heute Nacht %lld/100 %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@; %lld miles straight-line from %@; tonight %lld/100 %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@; a %lld millas en línea recta de %@; esta noche %lld/100 %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@ ; à %lld miles à vol d’oiseau depuis %@ ; ce soir %lld/100 %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@、%2$@；%4$@から直線距離で%3$lldマイル；今夜%5$lld/100 %6$@"
+            "value": "%1$@、%2$@；%3$@；今夜%4$lld/100 %5$@"
           }
         }
       }
