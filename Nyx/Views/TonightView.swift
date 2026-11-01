@@ -322,12 +322,13 @@ struct TonightView: View {
     /// screen still shows it down to its units, 12 pt clear of the tab bar's soft edge (`unitsDepth`; the
     /// page scrolls to the times under its ends); otherwise never under 160 pt, the words below a smaller
     /// ring, unless the page itself is shorter. That shortfall is the dial beside the pill's: stacked, the
-    /// pill has already gone beside wherever the whole dial would not fit (`pillBeside`).
+    /// pill has already gone beside wherever the whole dial would not fit (`pillBeside`). Within a point of
+    /// it, the dial is the one that keeps its words inside, as `pillBeside` rounds the room up to stay stacked.
     nonisolated static func dialHeight(compact:Bool,page:Double,top:Double,inside:Double = .infinity,closure:Double=0)->Double {
         guard compact, page>0 else { return 240 }
         let need=inside.isFinite ? min(inside,CelestialGauge.compactCap) : inside
-        let fit=(page-top-12-(closure>0 ? closure+heroSpacing : 0)).rounded(.down)
-        if fit<need, closure==0, fit>=need*unitsDepth { return need }
+        let room=page-top-12-(closure>0 ? closure+heroSpacing : 0), fit=room.rounded(.down)
+        if fit<need, room.rounded(.up)>=need || (closure==0 && fit>=need*unitsDepth) { return need }
         return min(240,max(min(160,(page-20).rounded(.down)),fit))
     }
     /// How far down a dial with its words inside its units reach, as a share of its side: the rest is the

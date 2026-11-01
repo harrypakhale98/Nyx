@@ -332,6 +332,10 @@ import Testing
         #expect(TonightView.dialHeight(compact: true, page: 234, top: 8, inside: 228) == 220)
         // Stacked with a closure, the dial leaves the closure's line above the tab bar.
         #expect(TonightView.dialHeight(compact: true, page: 340, top: 92, inside: 190, closure: 30) == 196)
+        // Half a point short of the room with a closure: stacked, as the room rounds up, and the dial that keeps
+        // its words inside, never a point smaller with its word dropped under the ring.
+        #expect(!TonightView.pillBeside(page: 333.5, stackedTop: 92, inside: 190, closure: 30))
+        #expect(TonightView.dialHeight(compact: true, page: 333.5, top: 92, inside: 190, closure: 30) == 190)
         // A page shorter than the floor: the dial keeps to the page.
         #expect(TonightView.dialHeight(compact: true, page: 150, top: 8, inside: 190) == 130)
     }
