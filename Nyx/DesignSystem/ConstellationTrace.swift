@@ -6,6 +6,8 @@ struct ConstellationTrace: View {
     let ink: Color
     let accent: Color
     let reduceMotion: Bool
+    /// The words under the figure: "Reading the night" unless a screen names what it waits for.
+    var caption: LocalizedStringResource?=nil
     @State private var progress=0.0
     @State private var asterism=Asterism.dipper
     /// The whole figure fades away before the next one is traced, so a figure is never cut off.
@@ -17,8 +19,8 @@ struct ConstellationTrace: View {
                 .frame(width:150,height:70).accessibilityHidden(true)
             // The traced figure is the progress: no spinner beside it, two indicators at once read as
             // noise. Under Reduce Motion the figure stands still, so the system spinner says it is working.
-            if reduceMotion { ProgressView("Reading the night").tint(accent) }
-            else { ProgressView("Reading the night").progressViewStyle(LoaderWords(ink:ink)) }
+            if reduceMotion { ProgressView { words }.tint(accent) }
+            else { ProgressView { words }.progressViewStyle(LoaderWords(ink:ink)) }
         }.padding(40)
             .task(id:reduceMotion) {
                 guard !reduceMotion else { progress=1; shown=1; return }
@@ -38,6 +40,7 @@ struct ConstellationTrace: View {
                 }
             }
     }
+    private var words: Text { caption.map { Text($0) } ?? Text("Reading the night") }
 }
 /// Unit-square star positions, traced in drawing order. Recognizable asterisms, simplified.
 nonisolated private enum Asterism: CaseIterable {

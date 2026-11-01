@@ -37,9 +37,11 @@ struct GuideView:View {
     }
     /// The places in reach, weighed as Tonight weighs them (`TonightReach`): from a US starting point with
     /// only US places in range, the national parks; otherwise every place in range (`PlanModel.wholeReach`).
-    /// Abroad, nil until tonight at all of them is worked out (begun as the page opens, and done already when
+    /// Nil while Tonight shows its loader: before the world catalogue is read abroad or near a border, and
+    /// abroad until tonight at all of them is worked out (begun as the page opens, and done already when
     /// Tonight has been seen): the records wait, so they never name a place other than Tonight's.
-    private var inReach:[Park]? { model.wholeReach }
+    /// `-nyx-state loading` (DEBUG captures) holds it, as on Tonight and in Assistive Access.
+    private var inReach:[Park]? { DebugScenario.state=="loading" ? nil : model.wholeReach }
     /// Planning, with a starting point, while the places in reach are still being worked out (`inReach`).
     private var waitsForReach:Bool { mode.isPlanning && model.home != nil && inReach == nil }
     /// Where a record's access stands, in Nyx's own fixed words (`PlanModel.guideAccess`); a closure
@@ -97,16 +99,16 @@ struct GuideView:View {
                 // answer, never the records below it.
                 GuideAnswerBlock(guide:guide,shown:shown,lit:$lit)
                 if let error=guide.error { Text(error).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-                if asked.isEmpty && !guide.loading { suggestionChips }
+                // Not while the records wait: until the world catalogue is read, abroad, the examples would name
+                // the nearest national park (an ocean away) rather than the starting point's own place.
+                if asked.isEmpty && !guide.loading && !waitsForReach { suggestionChips }
                 if case .learn = mode {
                     // The source is the essay the reader just left; don't print it twice.
                     Text("Source: the essay you were reading.").font(.caption).foregroundStyle(palette.muted)
                 } else if sent == nil && waitsForReach {
                     // Abroad, the records wait until every place in reach is weighed, as Tonight's answer does.
-                    VStack(spacing:8) {
-                        ConstellationLoader()
-                        Text("Finding tonight's darkest place").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                    }.frame(maxWidth:.infinity)
+                    // One caption, the loader's own, in Assistive Access's words.
+                    ConstellationLoader(caption:"Finding tonight's darkest place").frame(maxWidth:.infinity)
                 } else {
                     GuideRecords(all:(shown+guide.lookedUp.map(\.fact)).map { GuideRecord($0) },citations:checkedCitations,lit:lit,othersOpen:$othersOpen)
                 }

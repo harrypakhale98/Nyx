@@ -2,10 +2,12 @@ import SwiftUI
 /// The full-screen loader and AI streaming's mark: a constellation traced star by star
 /// (`ConstellationTrace`, shared with Apple Vision Pro) in Nyx's palette, still under Reduce Motion.
 struct ConstellationLoader: View {
+    /// What it is waiting for, in place of "Reading the night".
+    var caption: LocalizedStringResource?=nil
     @Environment(\.nyx) private var palette
     @MotionReduced private var reduceMotion: Bool
     var body: some View {
-        ConstellationTrace(ink:palette.ink,accent:palette.accent,reduceMotion:reduceMotion)
+        ConstellationTrace(ink:palette.ink,accent:palette.accent,reduceMotion:reduceMotion,caption:caption)
     }
 }
 /// A row still loading: the row's shapes in the hairline colour, with a soft light passing over them

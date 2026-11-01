@@ -60,9 +60,11 @@ extension PlanModel {
     /// thread. A sunrise elsewhere (a US park's, seen from abroad) leaves them as they are.
     var preparedReach:String? { reachPrepared.flatMap { $0.night==today ? $0.places : nil } }
     /// The places in reach as Tonight, Ask Nyx and Assistive Access rank them: all of them, so every one
-    /// names the same place; nil abroad while their tonight is still being worked out (`prepareReach`),
-    /// as a shortlist's leader could give way to a place beyond it.
+    /// names the same place; nil while Tonight shows its loader: the world catalogue abroad or near a
+    /// border (`awaitingWorld`), the launch's cache reads (`cachesPending`), or abroad while their tonight
+    /// is still being worked out (`prepareReach`), as a shortlist's leader could give way to a place beyond it.
     var wholeReach:[Park]? {
+        guard !awaitingWorld, !cachesPending else { return nil }
         let places=placesInReach().places
         return TonightReach.waits(places,prepared:preparedReach) ? nil : places
     }

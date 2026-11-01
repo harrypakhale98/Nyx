@@ -44,6 +44,17 @@ import Testing
         func hydrate(_ parks: [Park]) async -> [String: Forecast] { [:] }
         func seed(_ cached: [String: Forecast], parks: [Park]) async {}
     }
+    /// No clouds from anywhere, and a note of every catalogue place asked about over the network.
+    actor AskedWeather: WeatherProviding {
+        private(set) var asked=Set<String>()
+        func forecasts(for parks: [Park], network: Bool, force: Bool) async -> [String: Forecast] { [:] }
+        func hydrate(_ parks: [Park]) async -> [String: Forecast] { [:] }
+        func seed(_ cached: [String: Forecast], parks: [Park]) async {}
+        func catalogForecasts(_ requests: [[Park]], network: Bool, force: Bool) async -> [String: Forecast] {
+            if network { asked.formUnion(requests.joined().map(\.id)) }
+            return [:]
+        }
+    }
     /// A model that never reaches the network: the services answer from stubs.
     static func quietModel(weather: any WeatherProviding) throws -> PlanModel {
         let defaults=try #require(UserDefaults(suiteName: "nyx-first-answer-\(UUID().uuidString)"))
@@ -244,9 +255,28 @@ import Testing
         let sydney=try #require(StartingPlaces.all.first { $0.name == "Sydney" })
         model.choose(sydney)
         #expect(model.awaitingWorld && AssistiveTonight.inReach(model) == nil && AssistiveTonight.best(model) == nil)
+        // Ask Nyx's records wait too: nothing from the starting point alone.
+        #expect(model.wholeReach == nil)
         await model.catalogReady()
         await model.prepareReach(model.placesInReach().places)
         #expect(!model.awaitingWorld && AssistiveTonight.inReach(model) != nil)
+    }
+
+    /// Assistive Access asks for the clouds of the place it names when that is a catalogue place leading a
+    /// reach of a few places, named on a cold launch before the world catalogue is read.
+    @Test func assistiveHomeAsksForTheCataloguePlaceItNames() async throws {
+        let weather=AskedWeather()
+        let model=try Self.quietModel(weather: weather)
+        let sydney=try #require(StartingPlaces.all.first { $0.name == "Sydney" })
+        model.choose(sydney)
+        model.radiusMeters=50_000
+        await AssistiveHome.upkeep(model)
+        // The reach as it stands once the catalogue is read: what was asked about must already include its leader.
+        await model.catalogReady()
+        try #require((1...TonightReach.shortlistSize).contains(model.placesInReach().places.count))
+        let named=try #require(AssistiveTonight.best(model))
+        #expect(named.isCatalogPlace)
+        #expect(await weather.asked.contains(named.id))
     }
 
     /// Abroad, the reach stays worked out while a night turns over elsewhere (Joshua Tree's sunrise, in the

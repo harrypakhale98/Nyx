@@ -66,10 +66,19 @@ struct AssistiveHome: View {
                 .tint(palette.controlTint)
         }
         .navigationTitle("Nyx")
-        .task(id: TonightReach.key(model.placesInReach().places, night: model.today)) {
-            await model.prepareReach(model.placesInReach().places)
-            if let park=AssistiveTonight.best(model) { await model.refresh([park]) }
-        }
+        .task(id: TonightReach.key(model.placesInReach().places, night: model.today)) { await Self.upkeep(model) }
+    }
+    /// Fresh clouds for the place Tonight names. The world catalogue and the launch's cache reads come
+    /// first: until both are in, no place is named (`AssistiveTonight.best`), and their arrival need not
+    /// change the task's id (a catalogue place leading a reach of a few places, abroad or with no national
+    /// park in reach), so the place would otherwise never be asked about. The curated parks are asked
+    /// about with the saved ones (`AssistiveSavedSync`).
+    static func upkeep(_ model: PlanModel) async {
+        await model.catalogReady()
+        await model.cachesReady()
+        guard !Task.isCancelled else { return }
+        await model.prepareReach(model.placesInReach().places)
+        if !Task.isCancelled, let park=AssistiveTonight.best(model) { await model.refresh([park]) }
     }
 }
 
@@ -83,9 +92,7 @@ struct AssistiveTonight: View {
     /// example until one is chosen), so this screen and the full app name the same place. Nil while
     /// Tonight shows its loader: the world catalogue abroad or near a border (`PlanModel.awaitingWorld`),
     /// the offline caches still being read, or abroad, tonight at hundreds of places being worked out.
-    static func inReach(_ model: PlanModel) -> [Park]? {
-        model.awaitingWorld || model.cachesPending ? nil : model.wholeReach
-    }
+    static func inReach(_ model: PlanModel) -> [Park]? { model.wholeReach }
     /// The darkest place in reach tonight.
     static func best(_ model: PlanModel) -> Park? { inReach(model).flatMap { model.ranked($0).first } }
     var body: some View {
