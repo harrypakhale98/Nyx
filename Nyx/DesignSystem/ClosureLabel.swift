@@ -30,7 +30,7 @@ struct ClosureLabel: View {
         let large=typeSize.isAccessibilitySize
         let label=HStack(alignment:.firstTextBaseline,spacing:6) {
             // The glyph filled, drawn here rather than through `CautionLabelStyle`, whose icon came out as the outline.
-            Label { Text(named ? ClosureLine.spoken(closure) : closure).foregroundStyle(palette.ink) }
+            Label { words.foregroundStyle(palette.ink) }
                 icon:{ Image(systemName:"exclamationmark.triangle").symbolVariant(.fill).foregroundStyle(palette.caution) }
                 .multilineTextAlignment(centered && !large ? .center : .leading)
                 .fixedSize(horizontal:false,vertical:true)
@@ -49,6 +49,17 @@ struct ClosureLabel: View {
         .accessibilityLabel(ClosureLine.spoken(closure))
         .accessibilityAddTraits(.isStaticText)
     }
+    /// The closure in its own words, or after "Closure alert". Under a score the heading is a line of its
+    /// own, held whole on one line, so a narrow column never breaks it inside a word ("Sper-" in German)
+    /// and leaves only that on the first screen.
+    @ViewBuilder private var words: some View {
+        if named && prominence == .hero {
+            VStack(alignment:centered && !typeSize.isAccessibilitySize ? .center : .leading,spacing:2) {
+                Text("Closure alert").fontWeight(.semibold).lineLimit(1).minimumScaleFactor(0.5).allowsTightening(true)
+                Text(closure)
+            }
+        } else { Text(named ? ClosureLine.spoken(closure) : closure) }
+    }
 }
 
 private let previewClosure="Keys View Road closed at night for repairs through the end of the month"
@@ -56,6 +67,7 @@ private let previewClosure="Keys View Road closed at night for repairs through t
 #Preview("Closure • hero, opens the alerts") { ClosureLabel(previewClosure,prominence:.hero,opens:true).padding(24).background(.black).preferredColorScheme(.dark) }
 #Preview("Closure • row") { ClosureLabel(previewClosure).padding(24).background(.black).preferredColorScheme(.dark) }
 #Preview("Closure • named") { ClosureLabel(previewClosure,named:true,font:.title3.weight(.semibold)).padding(24).background(.black).preferredColorScheme(.dark) }
+#Preview("Closure • hero, named, AX5") { ClosureLabel(previewClosure,prominence:.hero,named:true).dynamicTypeSize(.accessibility5).frame(width:300).padding(24).background(.black).preferredColorScheme(.dark) }
 #Preview("Closure • hero AX5") { ClosureLabel(previewClosure,prominence:.hero,opens:true).dynamicTypeSize(.accessibility5).padding(24).background(.black).preferredColorScheme(.dark) }
 #Preview("Closure • Increase Contrast") { ClosureLabel(previewClosure,prominence:.hero).environment(\.nyx,NyxPalette(nightVision:false,highContrast:true)).padding(24).background(.black).preferredColorScheme(.dark) }
 #Preview("Closure • night vision") {
