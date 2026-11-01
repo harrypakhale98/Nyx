@@ -519,11 +519,14 @@ struct FieldAlarmSmallView: View {
 #if DEBUG
 extension FieldActivityAttributes {
     /// The same night moved in time, so a review screen's system timers count against a real clock.
-    /// Its clock times stay the park's own: the zone is moved back by the same amount (to the
-    /// minute), so a capture taken at any hour reads "Sunset 5:47 PM", never the capture's hour.
-    func shifted(by seconds:TimeInterval)->FieldActivityAttributes {
-        let day=86400, half=43200
-        let offset=timeZone.secondsFromGMT(for:dusk)-Int((seconds/60).rounded())*60
+    /// Its clock times stay the park's own: the night moves by whole minutes and the zone back by the
+    /// same amount, so a capture taken at any hour reads "Sunset 5:47 PM", never the capture's hour.
+    /// Nil on a night on which the park's clock changes: one fixed offset cannot give the times on
+    /// both sides of the change, so the review keeps that night on its own dates.
+    func shifted(by seconds:TimeInterval)->FieldActivityAttributes? {
+        guard timeZone.secondsFromGMT(for:dusk) == timeZone.secondsFromGMT(for:dawn) else { return nil }
+        let day=86400, half=43200, seconds=(seconds/60).rounded()*60
+        let offset=timeZone.secondsFromGMT(for:dusk)-Int(seconds)
         let wrapped=((offset+half)%day+day)%day-half
         let zone=String(format:"GMT%@%02d%02d",wrapped<0 ? "-" : "+",abs(wrapped)/3600,abs(wrapped)%3600/60)
         return FieldActivityAttributes(parkID:parkID,parkName:parkName,score:score,band:band,dusk:dusk+seconds,dawn:dawn+seconds,darkStart:darkStart.map { $0+seconds },darkEnd:darkEnd.map { $0+seconds },

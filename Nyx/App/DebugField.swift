@@ -41,9 +41,10 @@ struct DebugField: View {
 
 /// `-nyx-screen live-activity`: the Live Activity's Lock Screen and Dynamic Island faces for
 /// tonight at the starting park, in starlight, in night vision, stale and finished.
-/// With `-nyx-date`, the night stays on its own dates and the review's clock stands at its moments,
-/// so a night on which a clock changes shows its zone mark as it will (the countdowns still count
-/// from the real clock).
+/// With `-nyx-date`, and on a night on which the park's clock changes (which a moved night cannot
+/// show truly), the night stays on its own dates and the review's clock stands at its moments, so
+/// the zone mark and the times after the change read as they will (the countdowns still count from
+/// the real clock).
 struct FieldActivityReview: View {
     let night: Night
     var body: some View {
@@ -52,13 +53,14 @@ struct FieldActivityReview: View {
         let moment=(night.sky.sunset ?? night.sky.evening).addingTimeInterval(50*60)
         // An illustrative closure line (sample text, DEBUG only), as a followed night carries one.
         let base=FieldActivityAttributes(night: field, score: night.score.value, band: night.score.band.label, closure: "Keys View Road closed at night")
-        let pinned=DebugScenario.date != nil
-        let attributes=pinned ? base : base.shifted(by: Date.now.timeIntervalSince(moment))
+        let moved=DebugScenario.date == nil ? base.shifted(by: Date.now.timeIntervalSince(moment)) : nil
+        let pinned=moved == nil
+        let attributes=moved ?? base
         let now=pinned ? moment : Date.now
         let state=attributes.state(at: now, nightVision: false)
         // Followed ahead: 40 minutes before sunset, planned the day before.
         let ahead=pinned ? base.dusk.addingTimeInterval(-40*60) : now
-        let early=pinned ? base : base.shifted(by: now.timeIntervalSince(base.dusk.addingTimeInterval(-40*60)))
+        let early=pinned ? base : base.shifted(by: now.timeIntervalSince(base.dusk.addingTimeInterval(-40*60))) ?? base
         let heading=Self.planned(early.state(at: ahead, nightVision: false, heading: true), at: ahead.addingTimeInterval(-26*3600))
         // Stale three hours after the moment it was counting down to.
         let stale=attributes.state(at: now.addingTimeInterval(-3*3600), nightVision: false)

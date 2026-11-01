@@ -258,3 +258,32 @@ import Testing
         #expect(next>now && next<=now.addingTimeInterval(60))
     }
 }
+
+/// The DEBUG review moves a night onto the real clock by whole minutes and keeps its clock times; a
+/// night on which the park's clock changes stays on its own dates.
+@MainActor struct FieldActivityShiftTests {
+    let en=Locale(identifier: "en_US")
+    func night(dusk: Date, hours: Double) -> FieldActivityAttributes {
+        let dark=dusk.addingTimeInterval(85*60)
+        return FieldActivityAttributes(parkID: "jotr", parkName: "Joshua Tree", score: 94, band: "Pristine", dusk: dusk, dawn: dusk.addingTimeInterval(hours*3600),
+            darkStart: dark, darkEnd: nil, milestones: [.init(title: "True darkness", date: dark, symbol: "moon.stars")], timeZoneID: "America/Los_Angeles")
+    }
+    func clock(_ date: Date, _ zone: TimeZone) -> String { date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: en, timeZone: zone)) }
+
+    @Test func movesByWholeMinutesKeepingClockTimes() throws {
+        let a=night(dusk: Date(timeIntervalSince1970: 1_797_213_060), hours: 12.7)
+        // 205.76 minutes moves 206: no part minute to tip a clock time over.
+        let moved=try #require(a.shifted(by: 12_345.6))
+        #expect(moved.dusk.timeIntervalSince(a.dusk) == 206*60)
+        for (old, new) in zip([a.dusk, a.dawn, a.milestones[0].date], [moved.dusk, moved.dawn, moved.milestones[0].date]) {
+            #expect(clock(new, moved.timeZone) == clock(old, a.timeZone))
+        }
+    }
+
+    @Test func keepsAClockChangeNightOnItsDates() throws {
+        // Saturday 31 October 2026: the clocks go back between sunset (PDT) and sunrise (PST).
+        let dusk=try Date("2026-11-01T00:47:00Z", strategy: .iso8601)
+        #expect(night(dusk: dusk, hours: 13.25).shifted(by: 3600) == nil)
+        #expect(night(dusk: dusk.addingTimeInterval(7*86400), hours: 13.25).shifted(by: 3600) != nil)
+    }
+}
