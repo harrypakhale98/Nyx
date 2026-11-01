@@ -125,7 +125,8 @@ struct WeekAcrossParksPanel: View {
                     AccessibilityRotorEntry(Text(WeekAcrossParks.spoken(night,isBest:week.best == cell,closure:week.closures[night.park.id])),id:cell,in:rotor)
                 }
             }
-            Text(access.differentiate ? String(localized:"\(NightMark.legend) The ring marks the week's best night.") : week.legend)
+            // Under Differentiate Without Color the stars are explained before the fills, as on the watch.
+            Text(access.differentiate ? Sentences.join([NightMark.legend,week.legend]) : week.legend)
                 .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         } }
     }

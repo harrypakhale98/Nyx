@@ -26,6 +26,7 @@ struct ParksView: View {
     /// Beside the park on a wide iPad: rows choose the park shown in the detail column instead of pushing it.
     var selection: Binding<String?>?=nil
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.nyxAccess) private var access
     @FocusState private var searchFocused: Bool
     /// The search and the narrowing switches: the tab's (`ParksTab`), so a resize that trades the split for a
     /// stack keeps them; the list's own where nothing hands them in.
@@ -132,6 +133,9 @@ struct ParksView: View {
                 if typeSize.isAccessibilitySize { InlineSearchField(text:state.search,prompt:searchPrompt,focus:$searchFocused) }
                 // Only worth saying when a row actually reads "Estimate", in the rows' own words.
                 if !waiting, let note=estimateNote(shown:shown,own:own) { Text(note.estimate).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                // Under Differentiate Without Color the rows' week strips draw the best nights as stars: said once,
+                // above the rows. At accessibility sizes the strips give way to their sentence alone.
+                if access.differentiate, !typeSize.isAccessibilitySize, !waiting, !nothing { Text(NightMark.legend).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if stepFreeOnly { Text("Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if DebugScenario.state=="loading" || waiting { VStack(spacing:0) { ForEach(0..<5,id:\.self) { _ in SkeletonRow(); Divider().overlay(palette.line) } } } // the real rows' rhythm, so nothing jumps when they arrive
                 else if nothing || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }

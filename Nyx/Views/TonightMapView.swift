@@ -338,7 +338,7 @@ struct ParksMapView: View {
                     .nyxCard(radius:NyxMetrics.heroRadius,fill:palette.panel)
                 // What the marks mean, under the picture it explains (and clear of the tab bar's fade at rest). At
                 // accessibility sizes it runs long, so the answer comes first and the legend follows the list.
-                if !typeSize.isAccessibilitySize { legend(ring:ring != nil) }
+                if !typeSize.isAccessibilitySize { legend(map,ring:ring != nil) }
                 Eyebrow(text:"Darkest tonight")
                 if !ready {
                     ProgressView().frame(maxWidth:.infinity,minHeight:44)
@@ -355,7 +355,7 @@ struct ParksMapView: View {
                         }
                     }
                 }
-                if typeSize.isAccessibilitySize { legend(ring:ring != nil) }
+                if typeSize.isAccessibilitySize { legend(map,ring:ring != nil) }
                 // As on the Parks list and Tonight: said only when a row here reads "Estimate". The local date is
                 // explained in each night's score breakdown.
                 if let note=UsualCloudsNote(map.darkest.prefix(5).compactMap { byID[$0.id].map { model.night($0) } }) {
@@ -405,10 +405,12 @@ struct ParksMapView: View {
             Text(SkyMap.Region.world.name).tag(SkyMap.Region.world)
         }
     }
-    /// What the marks mean, in words beside small drawn examples.
-    private func legend(ring:Bool)->some View {
-        var items:[(LegendGlyph.Kind,LocalizedStringKey)]=[(.sizes,"Larger and brighter: a darker night"),(.fills,"Filled: forecast. Half: early look. Hollow: usual clouds"),(.closure,"Closure in the last park update")]
-        if ring { items.append((.ring,"Dashed ring: your search radius, in a straight line")) }
+    /// What the marks mean, in words beside small drawn examples. Under Differentiate Without Color the
+    /// sizes' line says what the stars are too.
+    private func legend(_ map:TonightMap,ring:Bool)->some View {
+        let sizes=String(localized:"Larger and brighter: a darker night")
+        var items:[(LegendGlyph.Kind,String)]=[(.sizes,access.differentiate ? Sentences.join([Sentences.end(sizes),NightMark.legend]) : sizes),(.fills,map.fillsLegend),(.closure,String(localized:"Closure in the last park update"))]
+        if ring { items.append((.ring,String(localized:"Dashed ring: your search radius, in a straight line"))) }
         return VStack(alignment:.leading,spacing:10) {
             ForEach(Array(items.enumerated()),id:\.offset) { _,item in
                 HStack(alignment:.top,spacing:12) {

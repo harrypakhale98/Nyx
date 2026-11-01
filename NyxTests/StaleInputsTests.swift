@@ -62,6 +62,13 @@ import Testing
         #expect(notYet.hollow == "Hollow: no cloud forecast yet. Nyx uses the park's usual clouds.")
         #expect(UsualCloudsNote([bare])?.hollow == "Hollow: cloud forecast unavailable. Nyx uses only the Moon and darkness.")
     }
+    /// The map's key names the Moon and darkness only where a mark counts no clouds.
+    @Test func mapKeyNamesTheCloudlessMarks() throws {
+        let jotr = try park("jotr")
+        let tonight = night(jotr), bare = night(jotr, climate: CloudClimate(parks: [:]))
+        #expect(TonightMap(nights: [tonight]).fillsLegend == "Filled: forecast. Half: early look. Hollow: usual clouds")
+        #expect(TonightMap(nights: [tonight, bare]).fillsLegend == "Filled: forecast. Half: early look. Hollow: usual clouds, or the Moon and darkness only")
+    }
     /// The calendar's key and the river's tip name only the hollow nights there are.
     @Test func monthKeyAndRiverTipFollowTheirNights() throws {
         let jotr = try park("jotr")

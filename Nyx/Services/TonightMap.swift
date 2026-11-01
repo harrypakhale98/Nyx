@@ -37,6 +37,8 @@ nonisolated struct TonightMap: Sendable {
     let inView: Int
     /// Each mark's turn in the reveal, 0…1: west to east across the map as drawn.
     let reveal: [String: Double]
+    /// Some place's night counts no clouds at all (Moon and darkness only), drawn hollow as on the usual clouds.
+    let cloudless: Bool
 
     /// `frame`: the map (the lower 48 unless given). A place the projection cannot draw (Lambert's
     /// antipode) is left out.
@@ -57,6 +59,12 @@ nonisolated struct TonightMap: Sendable {
         let across=built.map(\.1).sorted { $0.point.x != $1.point.x ? $0.point.x<$1.point.x : $0.id<$1.id }
         let count=Double(max(1,across.count))
         reveal=Dictionary(across.enumerated().map { ($1.id,Double($0)/count) },uniquingKeysWith:{ a,_ in a })
+        cloudless=built.contains { $0.0.basis == .usual && $0.0.score.cloudPoints == nil }
+    }
+    /// The legend's line for the fills, naming the Moon and darkness only where a mark counts no clouds.
+    var fillsLegend: String {
+        cloudless ? String(localized:"Filled: forecast. Half: early look. Hollow: usual clouds, or the Moon and darkness only")
+            : String(localized:"Filled: forecast. Half: early look. Hollow: usual clouds")
     }
     static func geographic(_ marks: [Mark]) -> [Mark] {
         let regions=SkyMap.Region.unitedStates

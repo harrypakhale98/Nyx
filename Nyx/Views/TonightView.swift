@@ -670,6 +670,8 @@ struct TonightView: View {
             }
             // Only worth saying when a row actually reads "Estimate", in the rows' own words, as on Parks.
             if let note=UsualCloudsNote(Array(shown.dropFirst())) { Text(note.estimate).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            // Under Differentiate Without Color the rows' week strips draw the best nights as stars, as on Parks.
+            if access.differentiate && !typeSize.isAccessibilitySize { Text(NightMark.legend).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         }
     }
     /// The sky over the starting point itself, for anyone not travelling tonight: the device's

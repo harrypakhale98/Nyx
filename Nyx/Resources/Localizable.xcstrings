@@ -26081,6 +26081,41 @@
         }
       }
     },
+    "Filled: forecast. Half: early look. Hollow: usual clouds, or the Moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gefüllt: Vorhersage. Halb: erste Einschätzung. Leer: übliche Bewölkung oder nur Mond und Dunkelheit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filled: forecast. Half: early look. Hollow: usual clouds, or the Moon and darkness only"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relleno: pronóstico. A medias: vista anticipada. Sin relleno: nubosidad habitual, o solo la Luna y la oscuridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plein : prévision. Moitié : tendance. Vide : nébulosité habituelle, ou seulement la Lune et l’obscurité"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "塗りつぶし：予報。半分：早めの見通し。白抜き：平年の雲量、または月と暗さだけ"
+          }
+        }
+      }
+    },
     "Filter": {
       "extractionState": "manual",
       "localizations": {
