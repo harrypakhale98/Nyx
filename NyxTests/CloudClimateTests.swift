@@ -34,6 +34,15 @@ struct CloudClimateTests {
         #expect(rainforest.clear <= 35 && rainforest.cloud >= 60)
         #expect(desert.month == 10 && rainforest.month == 11)
     }
+    /// Denali and Kenai Fjords take their usual clouds where their forecast is asked for, the visitor
+    /// centres, so the score reads the same sky either side of the forecast horizon: Denali's June
+    /// nights by the park road are clearer than at the park's centre (81).
+    @Test func forecastSitesKeepTheirOwnUsualClouds() throws {
+        let climate = try #require(CloudClimate.load())
+        let dena = try park("dena"), kefj = try park("kefj")
+        #expect(climate.typical(dena, on: try evening(dena, 2027, 6, 15)) == CloudClimate.Typical(month: 6, cloud: 63, clear: 23))
+        #expect(climate.typical(kefj, on: try evening(kefj, 2027, 10, 15)) == CloudClimate.Typical(month: 10, cloud: 81, clear: 9))
+    }
     @Test func sentenceSaysHowOftenNightsAreClear() {
         #expect(CloudClimate.Typical(month: 11, cloud: 12, clear: 78).sentence(monthName: "November") == "About 8 in 10 November nights here are mostly clear.")
         #expect(CloudClimate.Typical(month: 1, cloud: 90, clear: 3).sentence(monthName: "January") == "January nights here are rarely clear.")

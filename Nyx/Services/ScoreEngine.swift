@@ -14,7 +14,7 @@ nonisolated struct ScoreEngine: ScoreProviding {
     /// astronomy, the cloud basis, the caps) that can move a score. Apple Watch compares it, with the
     /// bundled parks and usual clouds (`WatchContext.bundledData`), and says when its Nyx and the
     /// iPhone's would score the same night differently.
-    static let rulesVersion = 2
+    static let rulesVersion = 3
     /// Four parts are added, then the weakest link caps the sum.
     ///
     /// **Parts**: 40 moon + 25 clouds + 20 Bortle + 15 duration.
@@ -34,7 +34,8 @@ nonisolated struct ScoreEngine: ScoreProviding {
     ///   Bortle 7 town and caps near 39, as the sky-glow cap does there; a first-quarter Moon up for
     ///   the evening keeps a night out of Pristine. Rules version 2 (2026-10-20); before it a full
     ///   Moon at a dark park could read Good. Version 2 also eases each place's usual clouds from one
-    ///   month's middle to the next (`CloudClimate.typical`).
+    ///   month's middle to the next (`CloudClimate.typical`). Version 3 (2026-10-31): Denali's and
+    ///   Kenai Fjords' usual clouds are their forecast site's, not the park centre's.
     /// - Clouds: 100 − 0.9 × cloud% (overcast 10, 80% 28, 50% 55, 30% 73, 10% 91). Additive clouds
     ///   alone could never pull a moonless desert night below Good; a cap can.
     /// - Sky glow: Bortle 1–2 100, 3 89, 4 84, 5 74, 6 59, 7 and above 39. "Pristine" needs a

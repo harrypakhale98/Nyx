@@ -1,6 +1,6 @@
 {
- "source": "ERA5 hourly total cloud cover, 2015-2024, Copernicus Climate Change Service (CC BY 4.0)",
- "method": "Per calendar month: mean cloud over each night's true-dark hours (the app's cloud window), percent; and the share of nights under 30 percent (mostly clear).",
+ "source": "ERA5 hourly total cloud cover, and for forecast sites ERA5 monthly averaged reanalysis by hour of day, 2015-2024, Copernicus Climate Change Service (CC BY 4.0)",
+ "method": "Per calendar month: mean cloud over each night's true-dark hours (the app's cloud window), percent; and the share of nights under 30 percent (mostly clear). Parks with a forecast site (Denali, Kenai Fjords) are given for that site, from ERA5 monthly averages by hour of day over the same years and window at its nearest 0.25-degree point, with the clear share estimated from the mean.",
  "clearBelow": 30.0,
  "parks": {
   "acad": {
@@ -455,32 +455,32 @@
   },
   "dena": {
    "cloud": [
-    59,
-    69,
-    68,
+    64,
     67,
-    75,
-    81,
-    85,
-    88,
-    84,
-    78,
-    69,
-    71
+    65,
+    57,
+    61,
+    63,
+    70,
+    79,
+    77,
+    76,
+    77,
+    72
    ],
    "clear": [
-    28,
-    21,
-    23,
     22,
-    10,
-    4,
-    5,
-    4,
-    6,
-    12,
     20,
-    17
+    21,
+    29,
+    25,
+    23,
+    17,
+    11,
+    12,
+    13,
+    12,
+    16
    ]
   },
   "drto": {
@@ -1055,32 +1055,32 @@
   },
   "kefj": {
    "cloud": [
-    70,
-    71,
-    66,
+    77,
+    77,
     69,
-    75,
-    71,
-    74,
     70,
-    71,
-    73,
-    66,
-    77
+    78,
+    74,
+    78,
+    76,
+    79,
+    81,
+    77,
+    85
    ],
    "clear": [
-    23,
+    12,
+    12,
+    18,
     17,
-    23,
-    19,
+    11,
     14,
-    18,
-    14,
-    18,
-    18,
-    15,
-    21,
-    11
+    11,
+    13,
+    11,
+    9,
+    12,
+    7
    ]
   },
   "kica": {
