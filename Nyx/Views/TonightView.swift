@@ -321,7 +321,8 @@ struct TonightView: View {
     /// (`CelestialGauge.compactLabelsFrom`, at most the compact cap), the dial is that size when the first
     /// screen still shows it down to its units, 12 pt clear of the tab bar's soft edge (`unitsDepth`; the
     /// page scrolls to the times under its ends); otherwise never under 160 pt, the words below a smaller
-    /// ring, unless the page itself is shorter.
+    /// ring, unless the page itself is shorter. That shortfall is the dial beside the pill's: stacked, the
+    /// pill has already gone beside wherever the whole dial would not fit (`pillBeside`).
     nonisolated static func dialHeight(compact:Bool,page:Double,top:Double,inside:Double = .infinity,closure:Double=0)->Double {
         guard compact, page>0 else { return 240 }
         let need=inside.isFinite ? min(inside,CelestialGauge.compactCap) : inside
@@ -335,15 +336,15 @@ struct TonightView: View {
     /// The space between the hero's lines: the context, the pill, the dial and a closure.
     nonisolated static let heroSpacing=10.0
     /// An iPhone in landscape: whether the pill goes beside the dial rather than above it. Stacked, the
-    /// dial would start at `stackedTop`; there it needs room for the dial that keeps its words inside
-    /// (`inside`, at most the compact cap) down to its units clear of the tab bar's edge, or with a
-    /// closure line (`closure`, its height) the whole dial and the closure under it. Short of that, the
-    /// pill, the closure and the context take the left column and the dial the right, from the hero's top.
+    /// dial would start at `stackedTop`; there it needs room for the whole dial that keeps its words inside
+    /// (`inside`, at most the compact cap), its times included, 12 pt clear of the tab bar's edge, and with
+    /// a closure line (`closure`, its height) the closure under it too, in whole points as the dial is
+    /// sized (an iPhone 18 Pro Max at the default size has that room to a fraction of a point). Short of
+    /// that, the pill, the closure and the context take the left column and the dial the right, from the hero's top.
     nonisolated static func pillBeside(page:Double,stackedTop:Double,inside:Double,closure:Double=0)->Bool {
         guard page>0 else { return false }
         let need=min(inside,CelestialGauge.compactCap)
-        if closure>0 { return stackedTop+need+heroSpacing+closure+12>page }
-        return page-stackedTop-12<need*unitsDepth
+        return (page-stackedTop-12-(closure>0 ? heroSpacing+closure : 0)).rounded(.up)<need
     }
     /// The answer's line, and the way to what it names: a tap moves the page to the starting point and
     /// its radius, which sit below the answer and its alternatives.
@@ -484,7 +485,10 @@ struct TonightView: View {
         let closure=park.nps == nil ? nil : model.closure(park)
         // A closure is the one line here that must never be lost in the sky: straight under the score
         // (or the pill, beside the dial), as on the park's page, on a dark scrim.
-        let closureLine=closure.map { ClosureLabel($0,prominence:.hero).onGeometryChange(for:Double.self) { $0.size.height } action:{ heroFit.closure=$0 } }
+        // At accessibility sizes in landscape the first screen may show only its first line, so that line
+        // says "Closure alert" in words rather than leaving the warning to the glyph.
+        let compact=verticalSizeClass == .compact
+        let closureLine=closure.map { ClosureLabel($0,prominence:.hero,named:compact && large).onGeometryChange(for:Double.self) { $0.size.height } action:{ heroFit.closure=$0 } }
         let scores=Dictionary(others.map { ($0.park.id,$0.score.value) },uniquingKeysWith:{ first,_ in first })
         // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`), scored for the dial's night.
         let pill=ParkPillPicker(park:park,others:others.map(\.park),score:{ scores[$0.id] ?? model.night($0).score.value },zoom:zoom,night:later ? park.dayLabel(night.id) : nil,offset:offset,rowHeight:{ heroFit.pill=$0 })
@@ -493,14 +497,19 @@ struct TonightView: View {
         // would not stand whole above the tab bar with any closure under it (`pillBeside`), and always at
         // accessibility sizes, where the wrapped name and its toggle leave the dial no room and a dial small
         // enough to fit would take the numeral under 80 pt.
-        let compact=verticalSizeClass == .compact
         let beside=compact && (large || (!wide && Self.pillBeside(page:pageHeight,stackedTop:heroFit.stackedTop,inside:CelestialGauge.compactLabelsFrom(band:bandSize),closure:closure == nil ? 0 : heroFit.closure)))
         return VStack(spacing:Self.heroSpacing) {
             if beside {
                 // The pill, any closure and the context on the left, the dial on the right with all the page's
                 // height. Top-aligned, so the list of other parks opening under the pill never moves the dial.
+                // The step buttons and the way back follow the context there, in the room the column leaves
+                // beside the dial, rather than under the whole hero and the tab bar.
                 HStack(alignment:.top,spacing:20) {
-                    VStack(spacing:Self.heroSpacing) { pill; closureLine; context }.frame(maxWidth:.infinity)
+                    VStack(spacing:Self.heroSpacing) {
+                        pill; closureLine; context
+                        if ready && access.preferSteps { dialSteps(offset) }
+                        if later { backToTonight }
+                    }.frame(maxWidth:.infinity)
                     dial(night,basis:night.basisCaption(),range:range,offset:offset,ready:ready,beside:true,closure:0).frame(maxWidth:.infinity)
                 }
             } else {
@@ -508,12 +517,12 @@ struct TonightView: View {
                 pill
                 dial(night,basis:night.basisCaption(),range:range,offset:offset,ready:ready,beside:false,closure:closure == nil ? 0 : heroFit.closure)
                 closureLine
+                // Switch Control and "prefers action slider alternative": the nights a button at a time.
+                if ready && access.preferSteps { dialSteps(offset) }
+                // A later night is held after the finger lifts, with the way back right under it.
+                if later { backToTonight }
+                if large { context }
             }
-            // Switch Control and "prefers action slider alternative": the nights a button at a time.
-            if ready && access.preferSteps { dialSteps(offset) }
-            // A later night is held after the finger lifts, with the way back right under it.
-            if later { backToTonight }
-            if large && !beside { context }
             // The rest in the park page's order (`NightNotes`), the alerts in Tonight's own words.
             NightNotes(night:night,isTonight:!later,range:range) { alerts(park,closure:closure,stale:stale) }
             // "Darker on…", an eclipse or shower ahead, and field mode are tonight's: weighed against tonight

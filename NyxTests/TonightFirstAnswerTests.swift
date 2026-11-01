@@ -249,21 +249,25 @@ import Testing
         #expect(!model.awaitingWorld && AssistiveTonight.inReach(model) != nil)
     }
 
-    /// iPhone in landscape: the pill goes beside the dial when, stacked, the dial that keeps its words inside
-    /// would not show down to its units, or with a closure, would not stand whole with the closure under it.
+    /// iPhone in landscape: the pill goes beside the dial when, stacked, the whole dial that keeps its words
+    /// inside would not stand above the tab bar's edge, or with a closure, would not with the closure under it.
     @Test func theLandscapePillGoesBesideTheDialWhenItMust() {
         // iPhone SE: 234 pt of page, the dial 98 pt down when stacked.
         #expect(TonightView.pillBeside(page: 234, stackedTop: 98, inside: 190))
-        // Stacked where its units clear the tab bar's edge by 12 pt (an iPhone 18 Pro Max at the default size),
-        // unless a closure needs its line on the first screen; beside it where they would not (an 18 Pro).
+        // Stacked where the whole dial clears the tab bar's edge by 12 pt (an iPhone 18 Pro Max at the default
+        // size), unless a closure needs its line on the first screen; beside it where it would not (an 18 Pro).
         #expect(!TonightView.pillBeside(page: 300, stackedTop: 92, inside: 190))
+        #expect(!TonightView.pillBeside(page: 298, stackedTop: 96.33, inside: 190))
         #expect(TonightView.pillBeside(page: 264, stackedTop: 92, inside: 190))
         #expect(TonightView.pillBeside(page: 300, stackedTop: 92, inside: 190, closure: 30))
         #expect(!TonightView.pillBeside(page: 400, stackedTop: 92, inside: 190, closure: 30))
         #expect(!TonightView.pillBeside(page: 0, stackedTop: 0, inside: 190))
+        // Beside it when the units would show but the times under the ring's ends would not (a Pro Max at XL).
+        #expect(TonightView.pillBeside(page: 300, stackedTop: 100, inside: 209))
+        #expect(TonightView.pillBeside(page: 293, stackedTop: 92, inside: 190))
         // Larger text never asks for more than the compact cap (220 pt): 228 pt would have put it beside.
-        #expect(!TonightView.pillBeside(page: 300, stackedTop: 100, inside: 228))
-        #expect(TonightView.pillBeside(page: 297, stackedTop: 100, inside: 228))
+        #expect(!TonightView.pillBeside(page: 335, stackedTop: 100, inside: 228))
+        #expect(TonightView.pillBeside(page: 330, stackedTop: 100, inside: 228))
         // Beside it on an iPhone SE, the dial has the page's height: its words inside at the default size, and
         // at XXL the capped dial while its units show.
         #expect(TonightView.dialHeight(compact: true, page: 234, top: 8, inside: 190) == 214)
@@ -290,7 +294,8 @@ import Testing
         #expect(TonightView.dialHeight(compact: true, page: 330, top: 110) == 208)
         #expect(TonightView.dialHeight(compact: true, page: 600, top: 110) == 240)
         #expect(TonightView.dialHeight(compact: true, page: 250, top: 130) == 160)
-        // Short of the dial that keeps its word inside (190 pt): that dial while the first screen shows its units...
+        // Beside the pill, short of the dial that keeps its word inside (190 pt): that dial while the first screen
+        // shows its units...
         #expect(TonightView.dialHeight(compact: true, page: 285, top: 105, inside: 190) == 190)
         #expect(TonightView.dialHeight(compact: true, page: 320, top: 105, inside: 190) == 203)
         // ...and the fitted dial, words below, when even its units would go under the tab bar.
