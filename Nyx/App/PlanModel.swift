@@ -30,8 +30,9 @@ import Observation
     @ObservationIgnored var edgeMemo:(key:String,crosses:Bool)?
     /// The places in reach whose tonight has been worked out (`TonightReach.key`, `prepareReach`), and the
     /// night it was worked out on (`today`). Observed, so every screen that ranks them moves from waiting to
-    /// the answer together. Read through `preparedReach`, which lets it go once the night turns over.
-    var reachPrepared:(places:String,night:Date)?
+    /// the answer together, and the places themselves, so a night turning over elsewhere leaves it be (`tick`).
+    /// Read through `preparedReach`, which lets it go once one of their own nights turns over.
+    var reachPrepared:(places:String,night:Date,members:[Park])?
     /// The curated parks' folded search terms, made on the first search.
     @ObservationIgnored private var curatedTerms: [PlaceCatalog.Terms]?
     let loadError: Bool
@@ -270,6 +271,11 @@ import Observation
     func tick(_ now:Date = .now) {
         // A saved spot far from every park (another continent) turns its night over at its own sunrise.
         guard (places+viewedCatalog).contains(where:{ $0.currentNight(at:clock) != $0.currentNight(at:now) }) else { return }
+        // The reach worked out for tonight stays so while none of its own places has turned over: abroad,
+        // a US park's sunrise never sends Tonight's answer, Ask Nyx or Assistive Access back to waiting.
+        if let prepared=reachPrepared, prepared.night==clock, !prepared.members.contains(where:{ $0.currentNight(at:clock) != $0.currentNight(at:now) }) {
+            reachPrepared?.night=now
+        }
         clock=now
         trimPastNights()
     }

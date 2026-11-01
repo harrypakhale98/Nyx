@@ -249,6 +249,34 @@ import Testing
         #expect(!model.awaitingWorld && AssistiveTonight.inReach(model) != nil)
     }
 
+    /// Abroad, the reach stays worked out while a night turns over elsewhere (Joshua Tree's sunrise, in the
+    /// middle of Sydney's night), so Tonight, Ask Nyx and Assistive Access keep their answer; once one of its
+    /// own places turns over, it waits to be worked out again.
+    @Test func abroadTheReachOutlastsANightTurningOverElsewhere() async throws {
+        let model=try Self.quietModel(weather: NoWeather())
+        let sydney=try #require(StartingPlaces.all.first { $0.name == "Sydney" })
+        model.choose(sydney)
+        await model.catalogReady()
+        let all=model.placesInReach().places
+        try #require(all.count>TonightReach.shortlistSize)
+        // Nov 10, 2026: Joshua Tree's sunrise, a minute either side.
+        let start=Date(timeIntervalSince1970: 1_794_268_800)
+        let sunrise=try #require(model.park("jotr")?.nightTurnovers(from: start, to: start.addingTimeInterval(2*86_400)).first)
+        let before=sunrise.addingTimeInterval(-60), after=sunrise.addingTimeInterval(60)
+        try #require(!all.contains { $0.currentNight(at: before) != $0.currentNight(at: after) })
+        model.pinClock(before)
+        await model.prepareReach(all)
+        #expect(model.wholeReach?.map(\.id) == all.map(\.id))
+        model.tick(after)
+        #expect(model.today == after)
+        #expect(model.preparedReach == TonightReach.key(all) && model.wholeReach?.map(\.id) == all.map(\.id))
+        let own=try #require(all.first?.nightTurnovers(from: after, to: after.addingTimeInterval(2*86_400)).first)
+        model.tick(own.addingTimeInterval(60))
+        #expect(model.preparedReach == nil && model.wholeReach == nil && AssistiveTonight.inReach(model) == nil)
+        await model.prepareReach(all)
+        #expect(model.wholeReach?.map(\.id) == all.map(\.id))
+    }
+
     /// iPhone in landscape: the pill goes beside the dial when, stacked, the whole dial that keeps its words
     /// inside would not stand above the tab bar's edge, or with a closure, would not with the closure under it.
     @Test func theLandscapePillGoesBesideTheDialWhenItMust() {

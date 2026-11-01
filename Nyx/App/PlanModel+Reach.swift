@@ -53,10 +53,11 @@ extension PlanModel {
         let key=TonightReach.key(places), night=today
         await takeKeptForecasts(newIn:places)
         await prepareNights(places,count:1)
-        if !Task.isCancelled, TonightReach.key(placesInReach().places)==key { reachPrepared=(key,night) }
+        if !Task.isCancelled, TonightReach.key(placesInReach().places)==key { reachPrepared=(key,night,places) }
     }
     /// The places whose tonight is worked out (`reachPrepared`) while that night is still tonight: nil once
-    /// a night turns over (`tick`), until tonight at each is worked out again off the main thread.
+    /// one of their own nights turns over (`tick`), until tonight at each is worked out again off the main
+    /// thread. A sunrise elsewhere (a US park's, seen from abroad) leaves them as they are.
     var preparedReach:String? { reachPrepared.flatMap { $0.night==today ? $0.places : nil } }
     /// The places in reach as Tonight, Ask Nyx and Assistive Access rank them: all of them, so every one
     /// names the same place; nil abroad while their tonight is still being worked out (`prepareReach`),
