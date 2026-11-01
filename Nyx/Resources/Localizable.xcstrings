@@ -53549,6 +53549,41 @@
         }
       }
     },
+    "Ranked from the %lld places with the darkest skies nearest %@, of %lld in reach.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gereiht aus den %1$lld Orten mit dem dunkelsten Himmel nahe %2$@, von %3$lld im Umkreis."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ranked from the %lld places with the darkest skies nearest %@, of %lld in reach."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clasificado entre los %1$lld lugares de cielo más oscuro cercanos a %2$@, de %3$lld dentro del radio."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classé parmi les %1$lld lieux au ciel le plus noir près de %2$@, sur %3$lld dans ce rayon."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この範囲の%3$lld か所のうち、%2$@に近く空が最も暗い%1$lld か所から順位を付けています。"
+          }
+        }
+      }
+    },
     "Ranked from the %lld places with the darkest skies nearest your starting point, of %lld in reach.": {
       "extractionState": "manual",
       "localizations": {

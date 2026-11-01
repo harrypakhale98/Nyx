@@ -17,13 +17,13 @@ import Testing
     @Test func assistiveAccessWeighsTonightsPlaces() throws {
         let model = model(), jotr = try park("jotr"), acad = try park("acad")
         model.choose(parkID: jotr.id)
-        #expect(AssistiveTonight.inReach(model).map(\.id) == model.shortlistInReach.map(\.id))
+        #expect(AssistiveTonight.inReach(model)?.map(\.id) == model.placesInReach().places.map(\.id))
         model.location.latitude = acad.latitude; model.location.longitude = acad.longitude
         defer { model.location.latitude = nil; model.location.longitude = nil }
-        let reach = AssistiveTonight.inReach(model)
-        #expect(reach.map(\.id) == model.shortlist(model.placesInReach().places).map(\.id))
+        let reach = try #require(AssistiveTonight.inReach(model))
+        #expect(reach.map(\.id) == model.placesInReach().places.map(\.id))
         #expect(reach.contains { $0.id == acad.id } && !reach.contains { $0.id == jotr.id })
-        #expect(AssistiveTonight.best(model)?.id == model.ranked(model.shortlistInReach).first?.id)
+        #expect(AssistiveTonight.best(model)?.id == model.ranked(reach).first?.id)
     }
     /// A forecast is old once clouds would be asked for again (`ForecastReuse.clouds`), from the model's present.
     @Test func aForecastIsStaleByOneMeasure() {

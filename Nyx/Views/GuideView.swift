@@ -36,9 +36,10 @@ struct GuideView:View {
         NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.present,details:model.details,others:model.spots+model.catalog,closed:model.closedParks,today:model.today,aurora:model.aurora)
     }
     /// The places in reach, weighed as Tonight weighs them (`TonightReach`): from a US starting point with
-    /// only US places in range, the national parks; otherwise every place in range, a shortlist of the
-    /// darkest skies first when there are many (`PlanModel.shortlistInReach`).
-    private var inReach:[Park] { model.shortlistInReach }
+    /// only US places in range, the national parks; otherwise every place in range (`PlanModel.wholeReach`).
+    /// Abroad, until tonight at all of them is worked out (begun as the page opens, and done already when
+    /// Tonight has been seen), the darkest skies nearest (`PlanModel.shortlist`).
+    private var inReach:[Park] { model.wholeReach ?? model.shortlist(model.placesInReach().places) }
     /// Where a record's access stands, in Nyx's own fixed words (`PlanModel.guideAccess`); a closure
     /// is already flagged in the night's own line (`NightLookup.describe`).
     private func closures(_ park:Park,lookup:NightLookup)->String? { lookup.closed.contains(park.id) ? nil : model.guideAccess(park) }
@@ -135,6 +136,8 @@ struct GuideView:View {
             // Said once, at the end: nothing is announced while the answer streams.
             AccessibilityNotification.Announcement(guide.error ?? String(localized:"Numbers checked")).post()
         }
+        // Planning abroad: tonight at every place in reach, so the records name Tonight's place (`inReach`).
+        .task { if mode.isPlanning { await model.prepareReach(model.placesInReach().places) } }
     }
     #if DEBUG
     /// `-nyx-state streaming|answered`: a question with real lookups from the engine (best nights

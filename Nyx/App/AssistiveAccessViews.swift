@@ -66,7 +66,10 @@ struct AssistiveHome: View {
                 .tint(palette.controlTint)
         }
         .navigationTitle("Nyx")
-        .task { if let park=AssistiveTonight.best(model) { await model.refresh([park]) } }
+        .task {
+            await model.prepareReach(model.placesInReach().places)
+            if let park=AssistiveTonight.best(model) { await model.refresh([park]) }
+        }
     }
 }
 
@@ -75,17 +78,21 @@ struct AssistiveHome: View {
 struct AssistiveTonight: View {
     @Environment(PlanModel.self) private var model
     @State private var darker:DarkerSky.Offer?
-    /// The places in reach exactly as Tonight weighs them (`PlanModel.shortlistInReach`): within the
+    /// The places in reach exactly as Tonight weighs them (`PlanModel.wholeReach`): within the
     /// radius of the device under Near me, else of the starting point (the first run's choice, or the
-    /// example until one is chosen), so this screen and the full app name the same place.
-    static func inReach(_ model: PlanModel) -> [Park] { model.shortlistInReach }
+    /// example until one is chosen), so this screen and the full app name the same place. Nil abroad
+    /// while tonight at hundreds of places is still being worked out.
+    static func inReach(_ model: PlanModel) -> [Park]? { model.wholeReach }
     /// The darkest place in reach tonight.
-    static func best(_ model: PlanModel) -> Park? { model.ranked(inReach(model)).first }
+    static func best(_ model: PlanModel) -> Park? { inReach(model).flatMap { model.ranked($0).first } }
     var body: some View {
-        let reach=Self.inReach(model)
+        let reach=Self.inReach(model) ?? []
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
-                if let park=model.ranked(reach).first {
+                if Self.inReach(model) == nil {
+                    // Abroad, every place's tonight is worked out before one is named.
+                    ProgressView().controlSize(.large).frame(maxWidth: .infinity)
+                } else if let park=model.ranked(reach).first {
                     AssistiveParkCard(park: park, reminder: true)
                 } else {
                     Text("No park or dark-sky place is close enough tonight. Ask someone to choose a starting point in Nyx.").font(.title2).fixedSize(horizontal: false, vertical: true)
@@ -100,6 +107,7 @@ struct AssistiveTonight: View {
         }
         .navigationTitle("Tonight")
         .assistiveAccessNavigationIcon(systemImage: "moon.stars")
+        .task(id: TonightReach.key(model.placesInReach().places)) { await model.prepareReach(model.placesInReach().places) }
         .task(id: Self.darkerKey(model, reach)) {
             guard let from=model.reachOrigin, Self.darkerKey(model, reach) != nil else { darker=nil; return }
             let radius=model.radiusMeters, darkest=reach.map(\.bortleEstimate).min()

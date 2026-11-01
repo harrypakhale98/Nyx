@@ -156,6 +156,53 @@ import Testing
         #expect(!TonightReach.waits(shortlist, prepared: nil))
     }
 
+    /// Abroad, Assistive Access and Ask Nyx name Tonight's place: nothing from the shortlist alone, then
+    /// the leader of every place in reach once their tonight is worked out. Ask Nyx's own search of a
+    /// radius too wide to work out says it ranked the darkest skies only.
+    @Test func abroadEveryScreenNamesTonightsPlace() async throws {
+        let model=try Self.quietModel(weather: NoWeather())
+        let sydney=try #require(StartingPlaces.all.first { $0.name == "Sydney" })
+        model.choose(sydney)
+        await model.catalogReady()
+        let all=model.placesInReach().places, shortlist=model.shortlist(all)
+        try #require(all.count>TonightReach.shortlistSize)
+        let listed=Set(shortlist.map(\.id)), now=Date.now
+        model.takeForecasts(Dictionary(uniqueKeysWithValues: all.map { ($0.id, listed.contains($0.id) ? Self.overcast(now) : Self.clear(now)) }))
+        let settled=try #require(model.ranked(all).first)
+        try #require(!listed.contains(settled.id))
+        #expect(model.wholeReach == nil && AssistiveTonight.best(model) == nil)
+        await model.prepareReach(all)
+        #expect(model.wholeReach?.map(\.id) == all.map(\.id))
+        #expect(AssistiveTonight.best(model)?.id == settled.id)
+        let partial={ (facts: [GuideFact]) in facts.contains { $0.text.hasPrefix("Ranked from the \(TonightReach.shortlistSize) places with the darkest skies nearest ") } }
+        #expect(partial(GuideView.lookup(model).parksNearFacts(park: "Sydney", radius: 322, system: .kilometers)))
+        #expect(!partial(GuideView.lookup(model).parksNearFacts(park: "Arches", radius: 150, system: .miles)))
+    }
+
+    /// Abroad, a new radius keeps the answer on screen until every place in it is worked out: the last
+    /// set ranked whole while the place it named is still in reach, never the new shortlist; the loader
+    /// when that place is left behind.
+    @Test func abroadANewRadiusKeepsTheAnswerUntilReady() async throws {
+        let model=try Self.quietModel(weather: NoWeather())
+        let sydney=try #require(StartingPlaces.all.first { $0.name == "Sydney" })
+        model.choose(sydney)
+        await model.catalogReady()
+        let near=model.placesInReach().places
+        await model.prepareReach(near)
+        #expect(TonightReach.pool(near, prepared: model.reachPrepared)?.map(\.id) == near.map(\.id))
+        let leader=try #require(model.ranked(near).first).id
+        model.radiusMeters=500_000
+        let wider=model.placesInReach().places
+        try #require(wider.count>near.count && TonightReach.waits(wider, prepared: model.reachPrepared))
+        let kept=TonightReach.pool(wider, prepared: model.reachPrepared, kept: near, leader: leader)
+        #expect(kept?.map(\.id) == near.map(\.id) && kept?.map(\.id) != model.shortlist(wider).map(\.id))
+        #expect(TonightReach.pool(wider, prepared: model.reachPrepared, kept: nil, leader: nil) == nil)
+        await model.prepareReach(wider)
+        #expect(TonightReach.pool(wider, prepared: model.reachPrepared, kept: near, leader: leader)?.map(\.id) == wider.map(\.id))
+        // A reach that has left the kept place behind (another starting point): the loader, not the old answer.
+        #expect(TonightReach.pool(wider, prepared: nil, kept: near, leader: "elsewhere") == nil)
+    }
+
     /// iPhone in landscape: the pill goes beside the dial when, stacked, the dial that keeps its words inside
     /// would not show down to its units, or with a closure, would not stand whole with the closure under it.
     @Test func theLandscapePillGoesBesideTheDialWhenItMust() {

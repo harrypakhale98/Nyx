@@ -35,14 +35,16 @@ struct TonightView: View {
     private var from:(latitude:Double,longitude:Double)? { model.reachOrigin }
     /// Ranked once per update of the page (the body reads it into `best` and passes it down). Abroad a
     /// radius can hold hundreds of places: until their nights are worked out off the main thread
-    /// (`prepared`), the page ranks a shortlist (`PlanModel.shortlist`), never hundreds at once, and
-    /// shows no answer from it (`TonightReach.waits`): a place beyond it could lead once all are ranked.
+    /// (`PlanModel.prepareReach`), the page shows no answer from a shortlist (`TonightReach.pool`): a place
+    /// beyond it could lead once all are ranked. It keeps the last answer from a whole set (`kept`)
+    /// meanwhile, or shows the loader when there is none; the shortlist is only the loader's order of work.
     private func best(_ all:[Park])->[Park] { Array(model.ranked(pool(all)).prefix(5)) }
     private func pool(_ all:[Park])->[Park] {
-        prepared==TonightReach.key(all) ? all : model.shortlist(all)
+        TonightReach.pool(all,prepared:model.reachPrepared,kept:kept?.places,leader:kept?.leader) ?? model.shortlist(all)
     }
-    /// The places in reach whose tonight has been worked out in the background (`TonightReach.key`).
-    @State private var prepared:String?
+    /// The last places in reach that were ranked whole, and the place they named: kept on screen while a
+    /// wider or narrower radius, or a moved location, is being worked out (`TonightReach.pool`).
+    @State private var kept:(places:[Park],leader:String?)?
     /// The same for the places a wider radius would add (`farther(than:shortlist:)`).
     @State private var widerPrepared:String?
     /// The places' 30 nights behind "Darker on…" (`NightPlanner.horizon`), worked out off the main thread first.
@@ -94,14 +96,16 @@ struct TonightView: View {
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
     /// The world catalogue abroad or near a border (`PlanModel.awaitingWorld`), the offline caches
     /// still being read after the first frame (`PlanModel.cachesPending`), or abroad, tonight at the
-    /// hundreds of places in reach still being worked out (`TonightReach.waits`): the loader, never a
-    /// score those reads are about to change, nor the national parks' empty state.
+    /// hundreds of places in reach still being worked out with no earlier answer to keep (`TonightReach.pool`):
+    /// the loader, never a score those reads are about to change, nor the national parks' empty state.
     private func isLoading(_ all:[Park])->Bool {
-        DebugScenario.state=="loading" || model.awaitingWorld || model.cachesPending || TonightReach.waits(all,prepared:prepared)
+        DebugScenario.state=="loading" || model.awaitingWorld || model.cachesPending || TonightReach.pool(all,prepared:model.reachPrepared,kept:kept?.places,leader:kept?.leader) == nil
     }
     var body: some View {
         let all=candidates
         let loading=isLoading(all)
+        // Every place in reach, once all can be ranked (`TonightReach.pool`); nil while an earlier answer is kept.
+        let whole=TonightReach.waits(all,prepared:model.reachPrepared) ? nil : all
         let best=self.best(all)
         let widerList=widerShortlist(than:best.first,inReach:all)
         let empty=best.isEmpty || DebugScenario.state=="empty"
@@ -233,18 +237,18 @@ struct TonightView: View {
             .task(id:TonightReach.key(all)) {
                 // Hundreds of places in reach (abroad): the clouds kept for those newly in reach, and tonight at
                 // each worked out off the main thread, before ranking them all (the answer waits for them).
-                if all.count>TonightReach.shortlistSize {
-                    await model.takeKeptForecasts(newIn:all)
-                    await model.prepareNights(all,count:1)
-                    if !Task.isCancelled { prepared=TonightReach.key(all) }
-                }
+                await model.prepareReach(all)
                 await model.refresh(all)
             }
+            // The places just ranked whole and the place they name, kept while the next reach is worked out.
+            .onChange(of:whole.map { TonightReach.key($0)+"|"+(best.first?.id ?? "") },initial:true) { _,key in
+                if key != nil, let whole { kept=(whole,best.first?.id) }
+            }
             // The answer here is the one the widgets and Apple Watch follow too (`PlanModel.tonightPickID`):
-            // once a starting point is chosen, and never one the loader is about to replace. Stamped
-            // again when the night turns over (`model.today`), so the same place picked again tonight
-            // is followed tonight rather than expiring with last night's pick.
-            .onChange(of:loading ? nil : TonightPickKey(id:model.startChosen && !empty ? best.first?.id : nil,night:model.today),initial:true) { _,key in
+            // once a starting point is chosen, and never one the loader is about to replace, nor one kept from
+            // an earlier radius. Stamped again when the night turns over (`model.today`), so the same place
+            // picked again tonight is followed tonight rather than expiring with last night's pick.
+            .onChange(of:loading || whole == nil ? nil : TonightPickKey(id:model.startChosen && !empty ? best.first?.id : nil,night:model.today),initial:true) { _,key in
                 if let key, DebugScenario.screen == nil { model.tonightPickID=key.id }
             }
             // Back from the background: where you are may have changed, and so may the sky.
@@ -935,6 +939,15 @@ nonisolated enum TonightReach {
     /// where more are in reach than the shortlist holds (abroad), so the leader a shortlist names is never
     /// replaced a moment later by a place beyond it, under clearer skies.
     static func waits(_ places:[Park],prepared:String?)->Bool { places.count>shortlistSize && prepared != key(places) }
+    /// What Tonight ranks: every place in reach unless it waits (`waits`), and then the last set it ranked
+    /// whole (`kept`, for an earlier radius or location) while the place it named (`leader`) is still in
+    /// reach, so the answer on screen stays until the new one is ready; otherwise nil, the loader. Never a
+    /// shortlist's leader, nor a place the new reach has left behind.
+    static func pool(_ places:[Park],prepared:String?,kept:[Park]?=nil,leader:String?=nil)->[Park]? {
+        guard waits(places,prepared:prepared) else { return places }
+        guard let kept, let leader, places.contains(where:{ $0.id==leader }) else { return nil }
+        return kept
+    }
     /// For previews: a model starting from a city abroad, with the catalogue on its way.
     @MainActor static func previewModel(from city:String)->PlanModel {
         let model=PlanModel()

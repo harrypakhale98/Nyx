@@ -43,9 +43,22 @@ extension PlanModel {
         let from=reachOrigin
         return TonightReach.shortlist(places,latitude:from?.latitude ?? 0,longitude:from?.longitude ?? 0)
     }
-    /// The places in reach, shortlisted (`shortlist`): what Tonight ranks first, and all that Ask Nyx
-    /// and Assistive Access weigh, so every one of them names the same place.
-    var shortlistInReach:[Park] { shortlist(placesInReach().places) }
+    /// Abroad, more places in reach than a shortlist holds: the clouds kept for those newly in reach,
+    /// and tonight at each, worked out off the main thread (`reachPrepared`), so they can all be ranked
+    /// at once. Nothing to do where the places are few.
+    func prepareReach(_ places:[Park]) async {
+        guard places.count>TonightReach.shortlistSize else { return }
+        await takeKeptForecasts(newIn:places)
+        await prepareNights(places,count:1)
+        if !Task.isCancelled { reachPrepared=TonightReach.key(places) }
+    }
+    /// The places in reach as Tonight, Ask Nyx and Assistive Access rank them: all of them, so every one
+    /// names the same place; nil abroad while their tonight is still being worked out (`prepareReach`),
+    /// as a shortlist's leader could give way to a place beyond it.
+    var wholeReach:[Park]? {
+        let places=placesInReach().places
+        return TonightReach.waits(places,prepared:reachPrepared) ? nil : places
+    }
     /// Whether a forecast is old enough to say when it is from, and to refresh: older than the age at
     /// which clouds are asked for again (`ForecastReuse.clouds`), measured from `present`.
     func forecastIsStale(_ updated:Date)->Bool { present.timeIntervalSince(updated)>ForecastReuse.clouds }

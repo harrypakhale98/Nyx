@@ -28,6 +28,9 @@ import Observation
     private(set) var catalogIsReady=false
     /// `reachCrossesUSEdge`'s last answer, by origin and radius: the outline is tested once per change.
     @ObservationIgnored var edgeMemo:(key:String,crosses:Bool)?
+    /// The places in reach whose tonight has been worked out (`TonightReach.key`, `prepareReach`). Observed,
+    /// so every screen that ranks them moves from waiting to the answer together.
+    var reachPrepared:String?
     /// The curated parks' folded search terms, made on the first search.
     @ObservationIgnored private var curatedTerms: [PlaceCatalog.Terms]?
     let loadError: Bool

@@ -176,12 +176,16 @@ nonisolated struct NightLookup: Sendable {
         // Tonight's rule (`TonightReach`): from a US starting point with only US places in range, the
         // national parks; otherwise every place in range, the darkest skies weighed first when there are many.
         var near=inReach(parks)
+        var shortlisted:(ranked:Int,of:Int)?
         if !others.isEmpty {
             let curated=Set(parks.map(\.id))
             let all=near+inReach(others).filter { !curated.contains($0.0.id) }
             let distances=Dictionary(all.map { ($0.0.id, $0.1) }, uniquingKeysWith: { a, _ in a })
             let chosen=TonightReach.candidates(parks: near.map(\.0), places: all.map(\.0), originInUS: USOutline.contains(latitude: origin.latitude, longitude: origin.longitude))
+            // Too many to work out here (a wide radius abroad holds thousands): the darkest skies nearest,
+            // said as such in a record of its own, as Plan's best nights says it, since a place beyond them may lead.
             let pool=chosen.count>TonightReach.shortlistSize ? TonightReach.shortlist(chosen, latitude: origin.latitude, longitude: origin.longitude) : chosen
+            if pool.count<chosen.count { shortlisted=(pool.count, chosen.count) }
             near=pool.compactMap { park in distances[park.id].map { (park, $0) } }
         }
         let tonight=Dictionary(near.map { ($0.0.id, planner.night($0.0, on: $0.0.currentNight(at: tonightClock), now: now)) }, uniquingKeysWith: { a, _ in a })
@@ -194,7 +198,8 @@ nonisolated struct NightLookup: Sendable {
         // Tonight's rule and words), as one more record: no name, no score, said as an estimate.
         let darker=DarkerSky.offer(from: (origin.latitude, origin.longitude), radiusMeters: radius*system.meters,
                                    darkestInReach: near.map(\.0.bortleEstimate).min(), system: system, grid: grid, onLand: onLand).map { DarkerSky.record($0, from: origin.label, system: system) }
-        let farther=[darker].compactMap { $0 }.map { GuideFact(text: $0) }
+        let partial=shortlisted.map { String(localized: "Ranked from the \($0.ranked) places with the darkest skies nearest \(origin.label), of \($0.of) in reach.") }
+        let farther=[partial, darker].compactMap { $0 }.map { GuideFact(text: $0) }
         guard !ranked.isEmpty else {
             return [GuideFact(text: system == .miles ? String(localized: "No parks or dark-sky places within \(Int(radius)) miles of \(origin.label), straight-line.")
                                                      : String(localized: "No parks or dark-sky places within \(Int(radius)) km of \(origin.label), straight-line."))]+farther
