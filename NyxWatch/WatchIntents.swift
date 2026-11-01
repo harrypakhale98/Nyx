@@ -174,7 +174,8 @@ struct AdaptationRequests: ViewModifier {
     /// `-nyx-watch-screen dark`: the red screen as the eye button opens it, on the park Tonight shows
     /// at the debug minute (`-nyx-watch-shift`). `-nyx-watch-request open | explain`: as a request
     /// opens it, with a clock just started and nothing scheduled, so the system never asks (`explain`:
-    /// with Nyx's line up); with `dark` too, the request comes while the screen is already up. Once a launch.
+    /// with Nyx's line up); with `dark` too, the request comes while the screen is already up, at once or
+    /// `-nyx-watch-request-after` seconds later (the open screen's own path). Once a launch.
     private func debugTake() -> Bool {
         guard WatchDebug.screen == "dark" || WatchDebug.request != nil else { return false }
         guard !debugOpened else { return true }
@@ -182,10 +183,20 @@ struct AdaptationRequests: ViewModifier {
         let park = store.featured(at: .now.addingTimeInterval(WatchDebug.clockShift))
         if WatchDebug.screen == "dark" { store.openAdaptation(park: park) }
         if let request = WatchDebug.request {
-            if store.adaptation == nil { store.debugSet(adaptation: AdaptationClock(start: .now)) }
-            store.openAdaptation(park: park, explainsFirst: request == "explain")
+            if let delay = WatchDebug.requestDelay {
+                Task {
+                    try? await Task.sleep(for: delay)
+                    debugRequest(request, park: park)
+                }
+            } else {
+                debugRequest(request, park: park)
+            }
         }
         return true
+    }
+    private func debugRequest(_ request: String, park: Park?) {
+        if store.adaptation == nil { store.debugSet(adaptation: AdaptationClock(start: .now)) }
+        store.openAdaptation(park: park, explainsFirst: request == "explain")
     }
     #endif
 }

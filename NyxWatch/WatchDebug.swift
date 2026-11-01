@@ -4,15 +4,16 @@ import WidgetKit
 
 /// Screenshot routes for the watch, DEBUG only (Release always starts on Tonight):
 /// `-nyx-watch-screen tonight | milestones | whatsup | week | dark | parks | chooser | credits | complications`
-/// `-nyx-watch-state synced | unsynced | polar | samoa | closure | alertsoff | unchecked | refused | busy | expired | models`, `-nyx-watch-palette automatic | red | phone | standard`,
+/// `-nyx-watch-state synced | unsynced | polar | samoa | closure | alertsoff | unchecked | refused | busy | stale | stalebusy | expired | models`, `-nyx-watch-palette automatic | red | phone | standard`,
 /// `-nyx-watch-night 0…6` (Tonight turned to that night with the Crown), `-nyx-watch-adaptation <minutes>`
 /// (the adaptation clock started that long ago), `-nyx-watch-info` (the dark-adaptation info sheet), `-nyx-watch-aod` (Always-On, which the simulator cannot show),
 /// `-nyx-watch-face` (with `complications`: the full-colour renders alone, unlabelled, for the store frame).
 /// `-nyx-watch-ask asking | asked | resending | unreachable | locked`: "Update from iPhone" as if just answered (with `expired` or `unsynced`).
 /// `-nyx-watch-shift <hours>`: the app's minute moved that far ahead, to review moments of the night by day.
-/// `-nyx-watch-notifications off`: the red cover as it is with notifications for Nyx denied.
+/// `-nyx-watch-notifications off | on`: the red cover as it is with notifications for Nyx denied, or allowed.
 /// `-nyx-watch-request open | explain`: the red cover as Siri or the control opens it, asking the system nothing
-/// (with `-nyx-watch-screen dark`: the request comes while the cover is already up).
+/// (with `-nyx-watch-screen dark`: the request comes while the cover is already up; with `-nyx-watch-request-after <seconds>`
+/// too, that long after the cover opened, as a request into an open cover arrives).
 /// `-nyx-watch-type large | xLarge | xxLarge` (or `-nyx-watch-xxxl`, `-nyx-watch-ax`): a text size the simulator cannot set.
 /// States change who is followed, never a score: every night is computed by the real engine.
 enum WatchDebug {
@@ -59,11 +60,21 @@ enum WatchDebug {
         return nil
         #endif
     }
-    /// `-nyx-watch-notifications off`: the reminders' permission read as denied on the red screen, for
-    /// review of what it says and taps then (the simulator cannot deny it before it is asked). Nil in Release.
+    /// `-nyx-watch-request-after <seconds>`: the request (`request`) comes that long after launch, so
+    /// a request into a cover already open (`-nyx-watch-screen dark`) takes the path a real one does. Nil in Release.
+    static var requestDelay: Duration? {
+        #if DEBUG
+        return argument("-nyx-watch-request-after").flatMap(Double.init).map { .milliseconds(Int($0*1000)) }
+        #else
+        return nil
+        #endif
+    }
+    /// `-nyx-watch-notifications off | on`: the reminders' permission read as denied or allowed on the
+    /// red screen, for review of what it says and taps then (the simulator cannot deny it before it is
+    /// asked, nor allow it without asking). Nil in Release.
     static var reminderPermission: UNAuthorizationStatus? {
         #if DEBUG
-        return argument("-nyx-watch-notifications") == "off" ? .denied : nil
+        return argument("-nyx-watch-notifications").flatMap { ["off": .denied, "on": .authorized][$0] }
         #else
         return nil
         #endif
@@ -108,11 +119,13 @@ enum WatchDebug {
             #endif
         }
     }
-    /// `-nyx-watch-scroll bottom`: scroll views open at their end, to review what sits below the fold.
+    /// `-nyx-watch-scroll bottom | center`: scroll views open at their end, or their middle, to review
+    /// what sits below the fold.
     struct ScrollEnd: ViewModifier {
         func body(content: Content) -> some View {
             #if DEBUG
-            content.defaultScrollAnchor(argument("-nyx-watch-scroll") == "bottom" ? .bottom : nil)
+            let anchors: [String: UnitPoint] = ["bottom": .bottom, "center": .center]
+            content.defaultScrollAnchor(argument("-nyx-watch-scroll").flatMap { anchors[$0] })
             #else
             content
             #endif
@@ -147,6 +160,15 @@ enum WatchDebug {
             let context = WatchContext(sent: .now, savedParkIDs: synced.savedParkIDs, homeParkID: "jotr", nightVision: true, forecasts: [:],
                                        alertsOff: off, checkedParkIDs: off ? nil : ["deva"], alertsRefusal: state == "refused" ? .shared : nil,
                                        alertsBusy: state == "busy" || state == "refused")
+            store.debugSet(context: context, pinned: "jotr")
+        case "stale", "stalebusy":
+            // A park update that covered Joshua Tree, kept while the Park Service refuses requests
+            // (`MissingInput.stale`): its closure, with the shared key refused for `stale`, or no
+            // closure and the Park Service busy for `stalebusy`.
+            let refused = argument("-nyx-watch-state") == "stale"
+            let context = WatchContext(sent: .now, savedParkIDs: synced.savedParkIDs, homeParkID: "jotr", nightVision: true, forecasts: [:],
+                                       closures: refused ? ["jotr": "Keys View Road closed for repairs through November"] : [:],
+                                       checkedParkIDs: ["jotr", "deva"], alertsRefusal: refused ? .shared : nil, alertsBusy: true)
             store.debugSet(context: context, pinned: "jotr")
         case "models":
             // The forecast models' range, for review: the iPhone's own "disagree" forecast fixture
