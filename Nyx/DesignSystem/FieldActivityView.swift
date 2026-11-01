@@ -268,8 +268,10 @@ struct FieldActivitySmallView: View {
         let mark=FieldActivityMark(attributes:attributes,state:state,isStale:isStale)
         VStack(alignment:.leading,spacing:2) {
             // The countdown's label names its milestone ("Moonrise, at 9:12 PM"), or says "Dawn" itself.
-            Label { Text(mark.title).lineLimit(1).minimumScaleFactor(0.7) } icon:{ Image(systemName:mark.symbol).accessibilityHidden(true) }
-                .font(.caption.weight(.semibold)).foregroundStyle(colors.ink).accessibilityHidden(mark.namedByCountdown)
+            // Hidden only then: an outer `accessibilityHidden(false)` would make the symbol heard again.
+            let title=Label { Text(mark.title).lineLimit(1).minimumScaleFactor(0.7) } icon:{ Image(systemName:mark.symbol).accessibilityHidden(true) }
+                .font(.caption.weight(.semibold)).foregroundStyle(colors.ink)
+            if mark.namedByCountdown { title.accessibilityHidden(true) } else { title }
             Group {
                 if let milestone=mark.milestone { FieldActivityTimer(mark:milestone,zone:attributes.timeZone) }
                 else if state.finished { Text("Dawn") }
