@@ -205,7 +205,7 @@ import WidgetKit
         guard now.timeIntervalSince(next.date)<90 else { return }
         milestonesPassed+=1
         if next.kind == .darkness { darknessBegan+=1 }
-        AccessibilityNotification.Announcement("\(next.title). \(next.detail)").post()
+        AccessibilityNotification.Announcement(Phrase.sentences([next.title, next.detail])).post()
         if changesPhone { await FieldActivities.refresh(nightVision: true, now: now) }
     }
 }

@@ -85,6 +85,33 @@ struct SentencesTests {
         #expect(WhatsUpPanel.mentionLine(ja, gloss: "月の一部が地球の濃い影に入ります。", language: "ja") == "部分月食 · 今夜。月の一部が地球の濃い影に入ります。")
         #expect(WhatsUpPanel.mentionLine(ja, gloss: nil, language: "ja") == "部分月食 · 今夜")
     }
+    /// The Moon hero's line: a time that ends in "p.m." closes its sentence itself, and Japanese
+    /// runs the sentences together with "。".
+    @Test func moonHeroClosesEachTimeOnce() throws {
+        let jotr=try park("jotr"), night=try date("2026-10-31 21:04", park: jotr)
+        var time=Date.FormatStyle(date: .omitted, time: .shortened, locale: Locale(identifier: "es_US"))
+        time.timeZone=jotr.timeZone
+        let late=night.formatted(time)
+        let es=MoonHero.spoken(lit: "Creciente, con luz desde la derecha.", events: [(label: "Se pone", time: late)], language: "es")
+        #expect(es == "Creciente, con luz desde la derecha. Se pone \(late)")
+        #expect(!es.contains(".."))
+        let ja=MoonHero.spoken(lit: "上弦、右側が明るい。", events: [(label: "昇る", time: "13:02"), (label: "沈む", time: "0:41")], language: "ja")
+        #expect(ja == "上弦、右側が明るい。昇る 13:02。沈む 0:41。")
+    }
+    /// The river's value: the night's summary already ends in its own full stop, so the models'
+    /// agreement and the sky event follow it without a second one ("forecast.. Forecast models agree").
+    @Test func riverValueNeverDoublesAStop() throws {
+        let en=TimeRiver.spokenValue(summary: "Fri, Oct 9, 94 out of 100, Pristine. Includes cloud forecast.", agreement: "Forecast models agree.", marker: "Geminids peak", language: "en")
+        #expect(en == "Fri, Oct 9, 94 out of 100, Pristine. Includes cloud forecast. Forecast models agree. Geminids peak.")
+        let jotr=try park("jotr")
+        let day=jotr.dayLabel(try date("2026-10-31 21:04", park: jotr), locale: Locale(identifier: "de_DE"))
+        let de=TimeRiver.spokenValue(summary: "\(day), 94 von 100, Makellos. Mit Wolkenvorhersage.", agreement: nil, marker: "Höhepunkt der Geminiden", language: "de")
+        #expect(de.hasSuffix("Mit Wolkenvorhersage. Höhepunkt der Geminiden.") && !de.contains(".."))
+        let fr=TimeRiver.spokenValue(summary: "sam. 31 oct., 94 sur 100, Parfaite. Prévision nuageuse comprise.", agreement: "Les modèles de prévision concordent.", marker: nil, language: "fr")
+        #expect(fr == "sam. 31 oct., 94 sur 100, Parfaite. Prévision nuageuse comprise. Les modèles de prévision concordent.")
+        let ja=TimeRiver.spokenValue(summary: "10月31日(土)、94点、最高。雲の予報を含みます。", agreement: "予報モデルは一致しています。", marker: "ふたご座流星群の極大", language: "ja")
+        #expect(ja == "10月31日(土)、94点、最高。雲の予報を含みます。予報モデルは一致しています。ふたご座流星群の極大。")
+    }
     /// The satellite sky's line in Japanese: the class name closed with "。", no ASCII ". " after it.
     @Test func japaneseClassNameEndsInItsOwnMark() {
         #expect(Sentences.join([Sentences.end("郊外の空", language: "ja"), "衛星データからの推定です。"], language: "ja") == "郊外の空。衛星データからの推定です。")

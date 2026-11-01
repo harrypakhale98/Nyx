@@ -97,7 +97,7 @@ struct MoonWidgetFace: View {
         // across-the-room figure stays the face's one amber number. Text sizes capped as the iPhone's widgets.
         .dynamicTypeSize(.small ... .xxxLarge)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(week.map { facts.spoken+" "+Self.spokenWeek($0) } ?? facts.spoken))
+        .accessibilityLabel(Text(Sentences.join([facts.spoken, week.map(Self.spokenWeek) ?? ""])))
     }
     /// Tonight's Moon (at 10 PM) above the week: each night's weekday, its Moon and how much is lit.
     private func large(_ week: MoonWeek) -> some View {
@@ -142,7 +142,9 @@ struct MoonWidgetFace: View {
     /// "The next seven nights: Saturday, 48 percent lit; Sunday, 59 percent lit; …"
     static func spokenWeek(_ week: MoonWeek) -> String {
         let nights = week.nights.map { String(localized: "\($0.date.formatted(.dateTime.weekday(.wide))), \($0.percent) percent lit") }
-        return String(localized: "The next seven nights: \(nights.joined(separator: "; ")).")
+        // "; " as each language writes it: Japanese parts the nights with "。".
+        let list = nights.dropFirst().reduce(nights.first ?? "", Phrase.addition)
+        return String(localized: "The next seven nights: \(list).")
     }
     /// Deep indigo to void black, Nyx's night.
     static var background: LinearGradient {

@@ -173,10 +173,10 @@ struct ScoreReadout: View {
         }
     }
     private var spoken: String {
-        parts.map { part in
-            (part.points.map { String(localized:"\(part.spoken), \(Int($0.rounded())) of \(Int(part.maximum.rounded()))") }
-                ?? String(localized:"\(part.spoken), unknown"))+(part.note.map { ", "+$0 } ?? "")
-        }.joined(separator:". ")+(limitLine.map { ". "+$0 } ?? "")
+        Phrase.sentences(parts.map { part in
+            Phrase.clauses([part.points.map { String(localized:"\(part.spoken), \(Int($0.rounded())) of \(Int(part.maximum.rounded()))") }
+                ?? String(localized:"\(part.spoken), unknown"),part.note ?? ""])
+        }+[limitLine ?? ""])
     }
     /// A hairline track with an amber fill; dashed and empty when the part is unknown. The part that
     /// limits the score is ringed in starlight, a shape as well as words, so it never rests on colour.

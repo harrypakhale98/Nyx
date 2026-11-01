@@ -72,7 +72,7 @@ struct MoonHero: View {
         .accessibilityElement(children:.ignore)
         // A fixed name and the night as its value, so adjusting it says which night it now shows.
         .accessibilityLabel("Moon")
-        .accessibilityValue(Sentences.join([night.park.dayLabel(night.id)+".",Self.spoken(night:night,geometry:target.geometry),
+        .accessibilityValue(Sentences.join([Sentences.end(night.park.dayLabel(night.id)),Self.spoken(night:night,geometry:target.geometry),
                                             names ? MoonFeatures.shared.spoken(geometry:target.geometry,side:beside ? 200 : 280) ?? "" : ""]))
         .accessibilityAdjustableAction { direction in
             guard let step else { return }
@@ -136,9 +136,12 @@ struct MoonHero: View {
     /// "Waxing crescent, 23 percent lit, lit from the lower right. Sets 9:40 PM."
     static func spoken(night:Night,geometry:MoonGeometry)->String {
         let side=MoonView.side(ofDegrees:Int((geometry.brightLimb*180/Double.pi).rounded()))
-        var line=String(localized:"\(night.sky.moon.spoken), lit from the \(side).")
-        for event in events(night) { line+=" "+String(localized:"\(event.label) \(event.time).") }
-        return line
+        return spoken(lit:String(localized:"\(night.sky.moon.spoken), lit from the \(side)."),events:events(night).map { ($0.label,$0.time) })
+    }
+    /// The lit sentence, then each moonrise and moonset as its own sentence, closed here rather than
+    /// in the catalog: a time that ends in "p.m." takes no second period, and Japanese gets "。".
+    nonisolated static func spoken(lit:String,events:[(label:String,time:String)],language:String=Sentences.language)->String {
+        Sentences.join([lit]+events.map { Sentences.end(String(localized:"\($0.label) \($0.time)"),language:language) },language:language)
     }
 }
 /// A Moon that follows its night as the hero's does: on a change, the terminator sweeps to the new

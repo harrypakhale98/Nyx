@@ -552,7 +552,7 @@ struct GuideRecordRow: View {
         Label { Text(line).fixedSize(horizontal:false,vertical:true) } icon:{ Self.moonGlyph(night).accessibilityHidden(true) }
             .font(.subheadline).foregroundStyle(palette.muted).labelStyle(GuideLineLabelStyle())
             .accessibilityElement(children:.ignore)
-            .accessibilityLabel(showsBasis ? "\(moon.spoken). \(Self.basis(night))" : moon.spoken)
+            .accessibilityLabel(showsBasis ? Phrase.sentences([moon.spoken,Self.basis(night)]) : moon.spoken)
         if let closure {
             // The caution glyph and starlight words, as every closure (`CautionLabelStyle`), in this row's column.
             Label { Text(closure).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"exclamationmark.triangle.fill").foregroundStyle(palette.caution).accessibilityHidden(true) }

@@ -400,7 +400,12 @@ struct TimeRiver: View {
 
     private var spokenValue: String {
         guard let current else { return String(localized:"No nights available") }
-        return current.spokenSummary(.river)+(agreementSpoken(current).map { ". "+$0 } ?? "")+(markers[current.id].map { ". "+$0.name } ?? "")
+        return Self.spokenValue(summary:current.spokenSummary(.river),agreement:agreementSpoken(current),marker:markers[current.id]?.name)
+    }
+    /// The night, then whether the models agree, then its sky event, each sentence closed once: the
+    /// summary already ends in its own full stop ("Includes cloud forecast."), and Japanese in "。".
+    nonisolated static func spokenValue(summary:String,agreement:String?,marker:String?,language:String=Sentences.language)->String {
+        Sentences.join([summary,agreement ?? "",marker.map { Sentences.end($0,language:language) } ?? ""],language:language)
     }
     private func agreementSpoken(_ night:Night)->String? {
         guard let outlook=outlooks[night.id], let agreement=outlook.agreement else { return nil }

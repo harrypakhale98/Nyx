@@ -71,7 +71,8 @@ nonisolated struct NightRing: Equatable, Sendable {
         if let start=sky.darkStart, let end=sky.darkEnd, dark != nil { parts.append(String(localized: "true darkness from \(park.time(start)) to \(park.time(end))")) }
         if let window, best != nil { parts.append(String(localized: "best window from \(park.time(window.start)) to \(park.time(window.end))")) }
         parts.append(String(localized: "sunrise \(park.time(sunrise))"))
-        return parts.joined(separator: ", ")+"."
+        // Closed here, not in the catalog: a time that ends in "a.m." takes no second period.
+        return Sentences.end(Phrase.clauses(parts))
     }
 }
 

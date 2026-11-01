@@ -848,7 +848,7 @@ import UIKit
         // "Jupiter 32° up in the southeast": one localized phrase, so a language can order it its own way.
         parts += moment.visiblePlanets.map { String(localized: "\($0.name) \($0.place)", comment: "A body in the sky and where it is: Jupiter 32° up in the southeast") }
         if moment.coreShown { parts.append(String(localized: "\(moment.core.name) \(moment.core.place)", comment: "A body in the sky and where it is: Jupiter 32° up in the southeast")) }
-        return parts.joined(separator: ". ")
+        return Phrase.sentences(parts)
     }
     /// The Milky Way, drawn once by `nyxMilkyWay` (SkyShaders.metal): about 50 ms on the GPU.
     static func milkyWayImage() -> CGImage? {

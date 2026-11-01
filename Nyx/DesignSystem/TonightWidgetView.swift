@@ -739,13 +739,14 @@ struct TonightWidgetView:View {
             let count=month.nights.compactMap { $0 }.count
             let events=month.nights.compactMap { $0 }.filter { month.events[$0.id] != nil }
                 .map { night in String(localized:"\(month.events[night.id] == .eclipse ? String(localized:"Lunar eclipse") : String(localized:"Meteor shower peak")), \(night.park.dayLabel(night.id))") }
-            return ([tonight,Sentences.end(night.sky.moon.spoken),
-                     String(localized:"Best of the next \(count) nights: \(top.park.dayLabel(top.id)), \(top.score.value).")]+events.map { $0+"." }).joined(separator:" ")
+            // Each event closed here: a day that ends in "Okt." takes no second period.
+            return Sentences.join([tonight,Sentences.end(night.sky.moon.spoken),
+                                   String(localized:"Best of the next \(count) nights: \(top.park.dayLabel(top.id)), \(top.score.value).")]+events.map(Sentences.end))
         }
-        if ahead { tonight+=" "+Sentences.end(night.sky.moon.spoken) }
+        if ahead { tonight=Sentences.join([tonight,Sentences.end(night.sky.moon.spoken)]) }
         // The week's best as the strip shows it (`WeekBest`), "every night" included.
         guard family == .systemMedium,let week=WeekBest.label(entry.week) else { return tonight }
-        return tonight+" "+Sentences.end(week)
+        return Sentences.join([tonight,Sentences.end(week)])
     }
 }
 private extension View {

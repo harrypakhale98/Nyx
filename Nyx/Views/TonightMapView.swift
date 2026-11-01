@@ -124,7 +124,7 @@ struct TonightMapView: View {
             .aspectRatio(1/map.frame.aspect,contentMode:.fit)
             .overlay { GeometryReader { proxy in interaction(size:proxy.size) } }
             .accessibilityElement(children:.contain)
-            .accessibilityLabel(title.map { "\($0). \(summary)" } ?? summary)
+            .accessibilityLabel(Phrase.sentences([title ?? "",summary]))
             .accessibilityRotor("West to east") { ForEach(map.marks.sorted { $0.point.x<$1.point.x }) { mark in AccessibilityRotorEntry(Text(mark.label),id:mark.id,in:rotor) } }
             // A new area lights up again from the west, once its places are scored.
             .task(id:RevealKey(frame:map.frame,pending:pending)) { if !pending { await reveal() } }
