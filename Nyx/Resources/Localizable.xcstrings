@@ -11172,37 +11172,37 @@
         }
       }
     },
-    "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, so it never reveals which parks are near you. It is sent at most every six hours, or when you pull to refresh, but never within ten minutes of the last one, except right after you save or remove a key of your own. Nothing is asked about any other place. Ranger programs are requested only for a park whose page you open. Campgrounds for all %lld parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address.": {
+    "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, so it never reveals which parks are near you. It is sent at most every six hours, or when you pull to refresh, but never within ten minutes of the last alerts, except right after you save or remove a key of your own. Nothing is asked about any other place. Ranger programs are requested only for a park whose page you open. Campgrounds for all %lld parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die Hinweise für alle %1$lld US-Nationalparks kommen in einer einzigen Anfrage an developer.nps.gov, sodass sie nie verrät, welche Parks in deiner Nähe liegen. Sie wird höchstens alle sechs Stunden gesendet oder wenn du zum Aktualisieren nach unten ziehst, aber nie innerhalb von zehn Minuten nach der letzten, außer direkt nachdem du einen eigenen Schlüssel speicherst oder entfernst. Zu keinem anderen Ort wird etwas abgefragt. Ranger-Programme werden nur für einen Park abgefragt, dessen Seite du öffnest. Campingplätze für alle %2$lld Parks kommen in einer einzigen Anfrage, höchstens einmal pro Woche, sobald zum ersten Mal „Übernachten“ bei einem Park erscheint; sie nennt jeden Park und nichts über dich. Deine Koordinaten werden nie gesendet. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+            "value": "Die Hinweise für alle %1$lld US-Nationalparks kommen in einer einzigen Anfrage an developer.nps.gov, sodass sie nie verrät, welche Parks in deiner Nähe liegen. Sie wird höchstens alle sechs Stunden gesendet oder wenn du zum Aktualisieren nach unten ziehst, aber nie innerhalb von zehn Minuten nach den letzten Hinweisen, außer direkt nachdem du einen eigenen Schlüssel speicherst oder entfernst. Zu keinem anderen Ort wird etwas abgefragt. Ranger-Programme werden nur für einen Park abgefragt, dessen Seite du öffnest. Campingplätze für alle %2$lld Parks kommen in einer einzigen Anfrage, höchstens einmal pro Woche, sobald zum ersten Mal „Übernachten“ bei einem Park erscheint; sie nennt jeden Park und nichts über dich. Deine Koordinaten werden nie gesendet. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, so it never reveals which parks are near you. It is sent at most every six hours, or when you pull to refresh, but never within ten minutes of the last one, except right after you save or remove a key of your own. Nothing is asked about any other place. Ranger programs are requested only for a park whose page you open. Campgrounds for all %lld parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address."
+            "value": "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, so it never reveals which parks are near you. It is sent at most every six hours, or when you pull to refresh, but never within ten minutes of the last alerts, except right after you save or remove a key of your own. Nothing is asked about any other place. Ranger programs are requested only for a park whose page you open. Campgrounds for all %lld parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las alertas de los %lld parques nacionales de EE. UU. llegan en una sola solicitud a developer.nps.gov, así que nunca revela qué parques tienes cerca. Se envía como máximo cada seis horas, o cuando deslizas hacia abajo para actualizar, pero nunca antes de diez minutos desde la anterior, salvo justo después de guardar o quitar tu propia clave. No se pregunta por ningún otro lugar. Los programas de guardaparques se solicitan solo para el parque cuya página abres. Los campamentos de los %lld parques llegan en una sola solicitud, como máximo una vez por semana, la primera vez que aparece Dónde quedarse en un parque; nombra todos los parques y nada sobre ti. Tus coordenadas nunca se envían. El servicio recibe información de red, como tu dirección IP."
+            "value": "Las alertas de los %lld parques nacionales de EE. UU. llegan en una sola solicitud a developer.nps.gov, así que nunca revela qué parques tienes cerca. Se envía como máximo cada seis horas, o cuando deslizas hacia abajo para actualizar, pero nunca antes de diez minutos desde las últimas alertas, salvo justo después de guardar o quitar tu propia clave. No se pregunta por ningún otro lugar. Los programas de guardaparques se solicitan solo para el parque cuya página abres. Los campamentos de los %lld parques llegan en una sola solicitud, como máximo una vez por semana, la primera vez que aparece Dónde quedarse en un parque; nombra todos los parques y nada sobre ti. Tus coordenadas nunca se envían. El servicio recibe información de red, como tu dirección IP."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les alertes des %lld parcs nationaux des États-Unis arrivent en une seule requête à developer.nps.gov, si bien qu’elle ne révèle jamais quels parcs sont près de vous. Elle est envoyée toutes les six heures au plus, ou quand vous tirez vers le bas pour actualiser, mais jamais moins de dix minutes après la précédente, sauf juste après l’enregistrement ou la suppression de votre propre clé. Rien n’est demandé sur aucun autre lieu. Les programmes des rangers ne sont demandés que pour un parc dont vous ouvrez la page. Les campings des %lld parcs arrivent en une seule requête, une fois par semaine au plus, la première fois que la section Où dormir d’un parc s’affiche ; elle nomme tous les parcs et rien sur vous. Vos coordonnées ne sont jamais envoyées. Le service reçoit des informations réseau, comme votre adresse IP."
+            "value": "Les alertes des %lld parcs nationaux des États-Unis arrivent en une seule requête à developer.nps.gov, si bien qu’elle ne révèle jamais quels parcs sont près de vous. Elle est envoyée toutes les six heures au plus, ou quand vous tirez vers le bas pour actualiser, mais jamais moins de dix minutes après les dernières alertes, sauf juste après l’enregistrement ou la suppression de votre propre clé. Rien n’est demandé sur aucun autre lieu. Les programmes des rangers ne sont demandés que pour un parc dont vous ouvrez la page. Les campings des %lld parcs arrivent en une seule requête, une fois par semaine au plus, la première fois que la section Où dormir d’un parc s’affiche ; elle nomme tous les parcs et rien sur vous. Vos coordonnées ne sont jamais envoyées. Le service reçoit des informations réseau, comme votre adresse IP."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "米国の全%lldか所の国立公園のアラートは、developer.nps.govへの1回のリクエストでまとめて取得するので、近くにある公園がどれかは伝わりません。リクエストは最大で6時間ごと、または下に引っ張って更新したときに送りますが、自分のキーを保存または削除した直後を除き、前回から10分以内に送ることはありません。ほかの場所について問い合わせることはありません。レンジャープログラムは、ページを開いた公園の分だけを取得します。全%lldか所の公園のキャンプ場は、公園の「泊まる場所」を初めて表示したときに、最大で週1回、1回のリクエストでまとめて取得します。リクエストに含まれるのはすべての公園名だけで、あなたについての情報は含まれません。座標が送信されることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
+            "value": "米国の全%lldか所の国立公園のアラートは、developer.nps.govへの1回のリクエストでまとめて取得するので、近くにある公園がどれかは伝わりません。リクエストは最大で6時間ごと、または下に引っ張って更新したときに送りますが、自分のキーを保存または削除した直後を除き、前回アラートを取得してから10分以内に送ることはありません。ほかの場所について問い合わせることはありません。レンジャープログラムは、ページを開いた公園の分だけを取得します。全%lldか所の公園のキャンプ場は、公園の「泊まる場所」を初めて表示したときに、最大で週1回、1回のリクエストでまとめて取得します。リクエストに含まれるのはすべての公園名だけで、あなたについての情報は含まれません。座標が送信されることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
           }
         }
       }
@@ -23767,6 +23767,41 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Each pace above follows a request that worked. After one that fails, Nyx may ask again sooner, at the next refresh or an hour later.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeder oben genannte Abstand gilt nach einer erfolgreichen Anfrage. Nach einer fehlgeschlagenen fragt Nyx womöglich früher erneut, bei der nächsten Aktualisierung oder eine Stunde später."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each pace above follows a request that worked. After one that fails, Nyx may ask again sooner, at the next refresh or an hour later."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada ritmo indicado arriba sigue a una solicitud que funcionó. Tras una que falla, Nyx puede volver a preguntar antes, en la siguiente actualización o una hora después."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque rythme ci-dessus suit une requête réussie. Après un échec, Nyx peut redemander plus tôt, à l’actualisation suivante ou une heure plus tard."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上記の間隔は、リクエストが成功した後のものです。失敗した場合は、次の更新時または1時間後に、早めに再度問い合わせることがあります。"
           }
         }
       }

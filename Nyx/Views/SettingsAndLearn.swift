@@ -236,7 +236,9 @@ struct PrivacyView:View {
                 Toggle("Aurora forecast",isOn:$model.auroraEnabled).tint(palette.controlTint)
                 Text("Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours, or every hour when you pull to refresh. The request names no place and nothing about you. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
                 Toggle("Park alerts and programs",isOn:$model.npsEnabled).tint(palette.controlTint).id("alerts")
-                Text("Alerts for all \(model.parks.count) U.S. national parks arrive in one request to developer.nps.gov, so it never reveals which parks are near you. It is sent at most every six hours, or when you pull to refresh, but never within ten minutes of the last one, except right after you save or remove a key of your own. Nothing is asked about any other place. Ranger programs are requested only for a park whose page you open. Campgrounds for all \(model.parks.count) parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
+                Text("Alerts for all \(model.parks.count) U.S. national parks arrive in one request to developer.nps.gov, so it never reveals which parks are near you. It is sent at most every six hours, or when you pull to refresh, but never within ten minutes of the last alerts, except right after you save or remove a key of your own. Nothing is asked about any other place. Ranger programs are requested only for a park whose page you open. Campgrounds for all \(model.parks.count) parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
+                // Every pace above is counted from the last request that worked (`ParkStore.retryable`, `AuroraService`).
+                Text("Each pace above follows a request that worked. After one that fails, Nyx may ask again sooner, at the next refresh or an hour later.").font(.caption).foregroundStyle(palette.muted).id("paces")
             }.openRows(palette)
             Section { NPSKeyField();ForecastRequestsToday() } header:{ Eyebrow(text:"Advanced") }.openRows(palette)
             Section("Measured on this iPhone") {
@@ -258,7 +260,7 @@ struct PrivacyView:View {
         }.readableForm().nightForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
             .task {
                 // DEBUG captures (`-nyx-screen metric -nyx-state privacy`): the screen's brightness reading in view;
-                // `-nyx-privacy-row clouds | alerts` a network service's switch at the top.
+                // `-nyx-privacy-row clouds | alerts` a network service's switch at the top, `paces` the line on retries.
                 if let row=DebugScenario.text("-nyx-privacy-row") {
                     try? await Task.sleep(for:.seconds(1))
                     proxy.scrollTo(row,anchor:.top)

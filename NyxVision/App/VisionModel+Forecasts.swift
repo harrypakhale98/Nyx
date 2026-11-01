@@ -85,7 +85,9 @@ extension VisionModel {
         return changed || layersChanged || smokeChanged
     }
     /// Asks while the window is open: at once, then every half hour (each park only once its
-    /// forecast is six hours old, smoke twelve, alerts six, so in practice every six hours).
+    /// forecast is six hours old, smoke twelve, alerts six, so every six hours after requests that
+    /// worked; one that failed is asked again at the next half hour, or an hour later after an
+    /// alerts answer with nothing usable or any failed aurora request: `ParkStore.retryable`, `AuroraService`).
     /// One loop however many windows are open (`keep`).
     func keepForecastsFresh() async {
         await keep("forecasts", every: .seconds(1800)) { await refreshForecasts() }

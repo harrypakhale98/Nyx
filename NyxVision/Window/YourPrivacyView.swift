@@ -50,6 +50,11 @@ struct YourPrivacyView: View {
                         Text("Alerts for all \(model.parks.count) U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks interest you. Your coordinates are never sent. The service receives network information such as your IP address.")
                             .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                         Text(alertsStatus).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                        // Every pace above is counted from the last request that worked; a failed one is asked
+                        // again at the next half-hour refresh, or an hour later (`ParkStore.retryable`, `AuroraService`).
+                        Text("Each pace above follows a request that worked. After one that fails, Nyx may ask again sooner, at the next refresh or an hour later.")
+                            .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                            .id("paces")
                     } header: {
                         Text("Optional data updates")
                     }
@@ -60,11 +65,13 @@ struct YourPrivacyView: View {
                 }
                 // Switches that are on in the iPhone's violet, not the system's green.
                 .tint(palette.controlTint)
-                // DEBUG captures (`-nyx-vision-privacy-bottom`): the aurora forecast's status line in view.
+                // DEBUG captures (`-nyx-vision-privacy-bottom`): the aurora forecast's status line in view;
+                // `-nyx-vision-privacy-end`: the section's last line.
                 .task {
-                    guard VisionDebug.isEnabled("vision-privacy-bottom") else { return }
+                    let end = VisionDebug.isEnabled("vision-privacy-end")
+                    guard end || VisionDebug.isEnabled("vision-privacy-bottom") else { return }
                     try? await Task.sleep(for: .seconds(2))
-                    proxy.scrollTo("aurora", anchor: .center)
+                    proxy.scrollTo(end ? "paces" : "aurora", anchor: .center)
                 }
             }
             .navigationTitle(Text("Your privacy"))

@@ -17,7 +17,7 @@ struct PlannerWindow: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var query = ""
     @State private var showCredits = VisionDebug.isEnabled("vision-credits")
-    @State private var showPrivacy = VisionDebug.isEnabled("vision-privacy") || VisionDebug.isEnabled("vision-privacy-bottom")
+    @State private var showPrivacy = ["vision-privacy", "vision-privacy-bottom", "vision-privacy-end"].contains { VisionDebug.isEnabled($0) }
     /// True while the sky is opening or closing, so a second tap cannot start a second transition.
     @State private var skyBusy = false
     /// Whether this window is counted in `model.plannerWindows`.

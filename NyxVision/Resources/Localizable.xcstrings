@@ -4377,6 +4377,41 @@
         }
       }
     },
+    "Each pace above follows a request that worked. After one that fails, Nyx may ask again sooner, at the next refresh or an hour later.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeder oben genannte Abstand gilt nach einer erfolgreichen Anfrage. Nach einer fehlgeschlagenen fragt Nyx womöglich früher erneut, bei der nächsten Aktualisierung oder eine Stunde später."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each pace above follows a request that worked. After one that fails, Nyx may ask again sooner, at the next refresh or an hour later."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada ritmo indicado arriba sigue a una solicitud que funcionó. Tras una que falla, Nyx puede volver a preguntar antes, en la siguiente actualización o una hora después."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque rythme ci-dessus suit une requête réussie. Après un échec, Nyx peut redemander plus tôt, à l’actualisation suivante ou une heure plus tard."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上記の間隔は、リクエストが成功した後のものです。失敗した場合は、次の更新時または1時間後に、早めに再度問い合わせることがあります。"
+          }
+        }
+      }
+    },
     "Early look": {
       "extractionState": "manual",
       "localizations": {
