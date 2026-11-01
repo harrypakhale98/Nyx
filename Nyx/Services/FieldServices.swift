@@ -39,11 +39,12 @@ extension FieldActivityAttributes {
         return max(dusk.addingTimeInterval(-1800), middle.addingTimeInterval(3600-activeLimit))
     }
     /// The alert that announces a followed night when it begins: "Tonight at Joshua Tree",
-    /// "True darkness at 7:42 PM". Park time, as everywhere in Nyx.
-    nonisolated static func followAlert(park: Park, sky: SkyConditions) -> (title: String, body: String) {
+    /// "True darkness at 7:42 PM". Park time, as everywhere in Nyx, with the park's zone where its
+    /// clock is not this iPhone's ("7:42 PM MST"), as the reminders say it.
+    nonisolated static func followAlert(park: Park, sky: SkyConditions, device: TimeZone = .current) -> (title: String, body: String) {
         let title=String(localized: "Tonight at \(park.shortName)")
-        if let dark=sky.darkStart { return (title, String(localized: "True darkness at \(park.time(dark))")) }
-        if let sunset=sky.sunset { return (title, Sentences.end(String(localized: "No true darkness tonight. Sunset at \(park.time(sunset))"))) }
+        if let dark=sky.darkStart { return (title, String(localized: "True darkness at \(park.zonedTime(dark, device: device))")) }
+        if let sunset=sky.sunset { return (title, Sentences.end(String(localized: "No true darkness tonight. Sunset at \(park.zonedTime(sunset, device: device))"))) }
         return (title, SkyConditions.noDarknessMessage(tonight: true))
     }
 }

@@ -48,10 +48,18 @@ import Testing
     }
     @Test func followAlertNamesTheParkAndTrueDarknessInParkTime() throws {
         let jotr=try park("jotr"), sky=try self.sky(jotr, "2026-10-09")
-        let alert=FieldActivityAttributes.followAlert(park: jotr, sky: sky)
+        let alert=FieldActivityAttributes.followAlert(park: jotr, sky: sky, device: jotr.timeZone)
         #expect(alert.title == "Tonight at Joshua Tree")
         let dark=try #require(sky.darkStart)
         #expect(alert.body == "True darkness at \(jotr.time(dark))")
+        // A phone keeping another clock hears whose time it is, as the reminders say it: Petrified
+        // Forest keeps Mountain Standard Time all year, an hour off California's clock in December.
+        let pefo=try park("pefo"), december=try self.sky(pefo, "2026-12-13")
+        let pefoDark=try #require(december.darkStart)
+        let zoned=FieldActivityAttributes.followAlert(park: pefo, sky: december, device: try #require(TimeZone(identifier: "America/Los_Angeles")))
+        #expect(zoned.body == "True darkness at \(pefo.zonedTime(pefoDark, device: try #require(TimeZone(identifier: "America/Los_Angeles"))))")
+        #expect(zoned.body.hasSuffix("MST"))
+        #expect(FieldActivityAttributes.followAlert(park: pefo, sky: december, device: pefo.timeZone).body == "True darkness at \(pefo.time(pefoDark))")
         let dena=try park("dena"), june=try self.sky(dena, "2026-06-21")
         #expect(!FieldActivityAttributes.followAlert(park: dena, sky: june).body.hasPrefix("True darkness at"))
     }
