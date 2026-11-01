@@ -192,14 +192,14 @@ struct CatalogScreensTests {
     }
     /// When the launch marker changes (a new language), the places abroad are indexed again with the
     /// parks, so none keeps its old-language entry.
-    @Test func spotlightIndexesRememberedPlacesWithTheParks() throws {
+    @Test func spotlightIndexesRememberedPlacesWithTheParks() async throws {
         guard !ParkLibrary.catalog().isEmpty else { return }
         let suite = "nyx-spotlight-remembered"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
         defaults.set(["wd:Q10973", "wd:Q0"], forKey: SpotlightIndexer.rememberedKey)
         let parks = try ParkData.load()
-        let all = SpotlightIndexer.everything(parks, defaults: defaults)
+        let all = await SpotlightIndexer.everything(parks, defaults: defaults)
         // An id the catalogue no longer has is left out.
         #expect(all.map(\.id) == parks.map(\.id) + ["wd:Q10973"])
     }

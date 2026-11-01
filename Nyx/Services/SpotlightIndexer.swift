@@ -39,12 +39,17 @@ import UniformTypeIdentifiers
         return (kept,evicted)
     }
     /// The places abroad Spotlight holds, read back for a full re-index (where the app bundles the catalogue).
-    static func rememberedPlaces(defaults:UserDefaults = .standard)->[Park] {
-        let snapshot=SharedSettings.read()
-        return (defaults.stringArray(forKey:rememberedKey) ?? []).compactMap { ParkLibrary.place($0,snapshot:snapshot) }
+    /// Found off the main thread: a place abroad is read from the world catalogue (about 1.5 MB of JSON).
+    static func rememberedPlaces(defaults:UserDefaults = .standard) async -> [Park] {
+        let ids=defaults.stringArray(forKey:rememberedKey) ?? []
+        guard !ids.isEmpty else { return [] }
+        return await Task.detached(priority:.utility) {
+            let snapshot=SharedSettings.read()
+            return ids.compactMap { ParkLibrary.place($0,snapshot:snapshot) }
+        }.value
     }
     /// Everything Spotlight should hold: these curated parks and the remembered places abroad.
-    static func everything(_ parks:[Park],defaults:UserDefaults = .standard)->[Park] { parks+rememberedPlaces(defaults:defaults) }
+    static func everything(_ parks:[Park],defaults:UserDefaults = .standard) async -> [Park] { await parks+rememberedPlaces(defaults:defaults) }
     /// For iOS's request to rebuild the index (`NyxIntents`).
     static func reindexAll() async throws { try await index(everything(ParkData.load())) }
     /// The same for some identifiers only.
@@ -61,7 +66,7 @@ import UniformTypeIdentifiers
         // Encoding 63 parks and hashing them is work for a background thread, not the launch's main one.
         let current=await Task.detached(priority:.utility) { marker(parks) }.value
         guard defaults.string(forKey:markerKey) != current else { return }
-        try await index(everything(parks,defaults:defaults))
+        try await index(await everything(parks,defaults:defaults))
         defaults.set(current,forKey:markerKey)
     }
     nonisolated static func marker(_ parks:[Park])->String {

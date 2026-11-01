@@ -161,7 +161,12 @@ struct RootView:View {
             Task(priority:.utility) { await model.prepareNights(model.parks,count:7) }
             if let link=DebugScenario.link { try? await Task.sleep(for:.seconds(1)); handle(DeepLink(link)) }
             if DebugScenario.screen == nil { firstLight=await FirstLightWatcher.check(model:model) }
-            if DebugScenario.screen == nil { LuminanceProof.shared.start(); try? await SpotlightIndexer.indexIfNeeded(model.parks);await model.savedSync.update(model,saved:saved,spots:spots) }
+            if DebugScenario.screen == nil {
+                LuminanceProof.shared.start()
+                // After the world catalogue is read, so places abroad are found in it rather than read a second time.
+                Task(priority:.utility) { await model.catalogReady(); try? await SpotlightIndexer.indexIfNeeded(model.parks) }
+                await model.savedSync.update(model,saved:saved,spots:spots)
+            }
             launchPublished=true
         }
         .onChange(of:scenePhase) { _,phase in
