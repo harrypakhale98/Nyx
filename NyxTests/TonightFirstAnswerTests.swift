@@ -156,6 +156,39 @@ import Testing
         #expect(!TonightReach.waits(shortlist, prepared: nil))
     }
 
+    /// iPhone in landscape: the pill goes beside the dial when, stacked, the dial that keeps its words inside
+    /// would not show down to its units, or with a closure, would not stand whole with the closure under it.
+    @Test func theLandscapePillGoesBesideTheDialWhenItMust() {
+        // iPhone SE: 234 pt of page, the dial 98 pt down when stacked.
+        #expect(TonightView.pillBeside(page: 234, stackedTop: 98, inside: 190))
+        // Stacked where its units clear the tab bar's edge by 12 pt (an iPhone 18 Pro Max at the default size),
+        // unless a closure needs its line on the first screen; beside it where they would not (an 18 Pro).
+        #expect(!TonightView.pillBeside(page: 300, stackedTop: 92, inside: 190))
+        #expect(TonightView.pillBeside(page: 264, stackedTop: 92, inside: 190))
+        #expect(TonightView.pillBeside(page: 300, stackedTop: 92, inside: 190, closure: 30))
+        #expect(!TonightView.pillBeside(page: 400, stackedTop: 92, inside: 190, closure: 30))
+        #expect(!TonightView.pillBeside(page: 0, stackedTop: 0, inside: 190))
+        // Larger text never asks for more than the compact cap (220 pt): 228 pt would have put it beside.
+        #expect(!TonightView.pillBeside(page: 300, stackedTop: 100, inside: 228))
+        #expect(TonightView.pillBeside(page: 297, stackedTop: 100, inside: 228))
+        // Beside it on an iPhone SE, the dial has the page's height: its words inside at the default size, and
+        // at XXL the capped dial while its units show.
+        #expect(TonightView.dialHeight(compact: true, page: 234, top: 8, inside: 190) == 214)
+        #expect(TonightView.dialHeight(compact: true, page: 234, top: 8, inside: 228) == 220)
+        // Stacked with a closure, the dial leaves the closure's line above the tab bar.
+        #expect(TonightView.dialHeight(compact: true, page: 340, top: 92, inside: 190, closure: 30) == 196)
+        // A page shorter than the floor: the dial keeps to the page.
+        #expect(TonightView.dialHeight(compact: true, page: 150, top: 8, inside: 190) == 130)
+    }
+
+    /// At accessibility sizes in landscape, the dial is held to what the page's height leaves its band word.
+    @Test func anAccessibleDialFitsThePageWithItsWord() {
+        #expect(CelestialGauge.accessibleSide(fitting: .infinity, band: 70) == .infinity)
+        let side=CelestialGauge.accessibleSide(fitting: 214, band: 70)
+        let whole={ (side: Double) in side+16+CelestialGauge.accessibleBandGap(side: side)+70 }
+        #expect(side>100 && whole(side) <= 214 && whole(side+1)>214)
+    }
+
     /// iPhone in landscape: the dial takes what the first screen leaves under the pill, between 160 and 240 pt,
     /// or, a little short of the dial that holds its word inside, that dial when its units still show.
     @Test func theLandscapeDialFitsTheFirstScreen() {
@@ -165,7 +198,7 @@ import Testing
         #expect(TonightView.dialHeight(compact: true, page: 600, top: 110) == 240)
         #expect(TonightView.dialHeight(compact: true, page: 250, top: 130) == 160)
         // Short of the dial that keeps its word inside (190 pt): that dial while the first screen shows its units...
-        #expect(TonightView.dialHeight(compact: true, page: 273, top: 105, inside: 190) == 190)
+        #expect(TonightView.dialHeight(compact: true, page: 285, top: 105, inside: 190) == 190)
         #expect(TonightView.dialHeight(compact: true, page: 320, top: 105, inside: 190) == 203)
         // ...and the fitted dial, words below, when even its units would go under the tab bar.
         #expect(TonightView.dialHeight(compact: true, page: 273, top: 115, inside: 209) == 160)

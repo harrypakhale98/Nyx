@@ -39,6 +39,8 @@ struct CelestialGauge: View {
     @Environment(\.nyxRevealHeld) private var revealHeld
     /// A page's cap on the dial at accessibility sizes (`gaugeAccessibleMax`); unbounded by default.
     @Environment(\.gaugeAccessibleMax) private var accessibleMax
+    /// A page's height for the dial and its band word at accessibility sizes (`gaugeAccessibleHeight`).
+    @Environment(\.gaugeAccessibleHeight) private var accessibleHeight
     @ScaledMetric(relativeTo:.title3) private var bandMetric=20.0
     /// The line height of the sunset and sunrise times under a small dial's ends, for the gap below them.
     @ScaledMetric(relativeTo:.caption2) private var timesLine=14.0
@@ -115,6 +117,8 @@ struct CelestialGauge: View {
     @State private var counting=false
     /// The width offered at accessibility sizes, where the dial grows with the text up to it.
     @State private var available: CGFloat=0
+    /// The band word's height at accessibility sizes, for a dial held to a page's height (`accessibleSide(fitting:band:)`).
+    @State private var bandHeight: CGFloat=0
     /// Band and units fit inside a dial this size at standard text sizes.
     nonisolated static let labelsInsideFrom: CGFloat=236
     /// Where the band and units go is decided by the space the page offers the instrument, never by
@@ -126,13 +130,15 @@ struct CelestialGauge: View {
     /// At compact height they go inside from `compactLabelsFrom`, lower than the cap, so a landscape dial a
     /// little short of height can keep its word beside the score (`TonightView.dialHeight`).
     nonisolated static func labelsInside(offered:CGSize,cap:CGFloat=354,from:CGFloat=labelsInsideFrom)->Bool { min(offered.width,offered.height,cap)>=min(from,cap) }
+    /// The largest dial at compact height, and so the threshold there however large the text.
+    nonisolated static let compactCap: CGFloat=220
     /// The smallest dial holding the band word and units inside at compact height: 190 pt at the default
     /// text size, where the longest words ("Excellente", "Dunkelheit / 100") clear the ticks and the rim's
     /// ends, and in step with the band word's size (`band`, the title 3 style's 20 pt scaled) above it.
     nonisolated static func compactLabelsFrom(band:Double)->CGFloat { (190*max(20,band)/20).rounded(.up) }
     private var labelsInside: Bool {
         guard !typeSize.isAccessibilitySize else { return false }
-        return verticalSize == .compact ? Self.labelsInside(offered:offered,cap:220,from:Self.compactLabelsFrom(band:bandMetric)) : Self.labelsInside(offered:offered)
+        return verticalSize == .compact ? Self.labelsInside(offered:offered,cap:Self.compactCap,from:Self.compactLabelsFrom(band:bandMetric)) : Self.labelsInside(offered:offered)
     }
     private var still: Bool { reduceMotion || export }
     /// An unseen reveal waits while nobody can watch it: onboarding or first light over the tabs,
@@ -145,11 +151,12 @@ struct CelestialGauge: View {
     var body: some View {
         Group {
             if typeSize.isAccessibilitySize {
-                let dial=min(Self.accessibleSide(band:bandMetric,width:available),accessibleMax)
+                let dial=min(Self.accessibleSide(band:bandMetric,width:available),accessibleMax,max(120,Self.accessibleSide(fitting:accessibleHeight,band:bandHeight)))
                 VStack(spacing:16) {
                     ZStack { bezel; drawing; numeral(size:Self.accessibleNumeral(band:bandMetric,side:dial)) }.frame(width:dial,height:dial)
                     // The ring is open at the bottom: the word sits 16 pt under its rounded ends, not under the square's empty corner.
-                    band.padding(.top,NightRingEnds.top(side:dial)-8-dial/2)
+                    band.onGeometryChange(for:CGFloat.self) { $0.size.height.rounded(.up) } action:{ bandHeight=$0 }
+                        .padding(.top,Self.accessibleBandGap(side:dial))
                     units
                 }
                 .frame(maxWidth:.infinity)
@@ -160,7 +167,7 @@ struct CelestialGauge: View {
                         .overlay { VStack(spacing:5) { numeral(size:side*0.36); if labelsInside { band; units.padding(.top,side<270 ? 2 : 8) } } }
                         // Square first, then capped: capped first, a page that proposes no height (the park's)
                         // got a 300 × 354 frame with 27 pt of empty sky above the dial and below it.
-                        .aspectRatio(1,contentMode:.fit).frame(maxWidth:verticalSize == .compact ? 220 : 300)
+                        .aspectRatio(1,contentMode:.fit).frame(maxWidth:verticalSize == .compact ? Self.compactCap : 300)
                         .onGeometryChange(for:CGFloat.self) { min($0.size.width,$0.size.height) } action:{ side=$0 }
                         // No taller than on the widest iPhone, so a wide column does not open a gap around the dial.
                         .frame(maxWidth:354)
@@ -491,6 +498,19 @@ struct CelestialGauge: View {
     nonisolated static func accessibleSide(band:Double,width:Double)->Double {
         let wanted=max(108,band*2.2)/0.36
         return max(160,min(width>0 ? width : 300,wanted))
+    }
+    /// From the dial's square to its band word at accessibility sizes: up into the ring's open bottom,
+    /// 16 pt under its rounded ends (with the stack's 16 pt spacing).
+    nonisolated static func accessibleBandGap(side:Double)->Double { NightRingEnds.top(side:side)-8-side/2 }
+    /// The largest dial at accessibility sizes that stands, with its band word (`band` points tall)
+    /// under it, within `height` (an iPhone in landscape, where the score must clear the tab bar);
+    /// unbounded for a page that sets no height.
+    nonisolated static func accessibleSide(fitting height:Double,band:Double)->Double {
+        guard height.isFinite else { return .infinity }
+        let whole={ (side:Double) in side+16+accessibleBandGap(side:side)+band }
+        var low=0.0, high=max(0,height)
+        for _ in 0..<24 { let mid=(low+high)/2; if whole(mid)<=height { low=mid } else { high=mid } }
+        return low.rounded(.down)
     }
     /// Always laid out, so its slot is reserved and nothing moves when it arrives (at accessibility
     /// sizes too). It shows once the count has landed; a sweep keeps the old word only while the

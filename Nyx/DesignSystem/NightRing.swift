@@ -283,6 +283,17 @@ private func previewRing(_ id: String, days: Int = 0) -> (ring: NightRing, park:
         }.padding().background(.black)
     }
 }
+#Preview("Night track and its ends • hung outward (small dial, larger text)") {
+    if let night = previewRing("jotr") {
+        let palette = NyxPalette(nightVision: false, highContrast: false)
+        HStack(spacing: 80) {
+            ForEach([120.0, 96.0], id: \.self) { side in
+                ZStack { NightTrack(reveal: 1, ring: night.ring, palette: palette, glow: 1); NightRingEnds(ring: night.ring, park: night.park) }
+                    .frame(width: side, height: side)
+            }
+        }.padding(.horizontal, 90).padding(.vertical, 40).background(.black).environment(\.nyx, palette).dynamicTypeSize(.xxxLarge)
+    }
+}
 #Preview("Night track • drawing in, and on the watch") {
     if let night = previewRing("grba", days: 7) {
         let palette = NyxPalette(nightVision: false, highContrast: false)

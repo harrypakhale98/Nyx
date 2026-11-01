@@ -91,8 +91,13 @@ final class AccessibilityAuditTests:XCTestCase {
         let region=["de":"DE","es":"ES","fr":"FR","ja":"JP"][code] ?? "US"
         return ["-AppleLanguages","(\(code))","-AppleLocale","\(code)_\(region)"]
     }
+    /// `NYX_AUDIT_ORIENTATION=landscape` runs a pass with the device turned: an iPhone's landscape layouts
+    /// (Tonight's pill beside its dial) are audited as they are drawn.
+    private static var landscape:Bool { ProcessInfo.processInfo.environment["NYX_AUDIT_ORIENTATION"]=="landscape" }
     private func audit(state:String,screens:[String],extra:[String]=[],pass:String="default") throws {
         var failures:[String]=[]
+        XCUIDevice.shared.orientation=Self.landscape ? .landscapeLeft : .portrait
+        defer { XCUIDevice.shared.orientation = .portrait }
         for listed in screens {
             // "nps-key+nps-key-refused": the screen with launch flags of its own.
             let flagged=listed.split(separator:"+").map(String.init)
