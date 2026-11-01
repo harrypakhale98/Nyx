@@ -247,9 +247,12 @@ struct TonightFace: View {
     private var models: ClosedRange<Int>? { context?.modelRange(for: shown) }
     /// Up to this size the face is fixed as designed: the watch's default text size.
     private var standardSizes: DynamicTypeSize { WatchTonightLayout.largestStandard(screenHeight: WKInterfaceDevice.current().screenBounds.height) }
+    /// Why no closure under the score may be known (`WatchContext.alertsNote`): park alerts off,
+    /// busy, refused or not yet checked.
+    private var alertsNote: String? { context?.alertsNote(night.park) }
     /// Fixed as designed, one line each, without measuring: at the standard sizes, unless a closure
-    /// is shown, whose words are never cut (`WatchTonightLayout.designed`).
-    private var designed: Bool { WatchTonightLayout.designed(standardSize: typeSize <= standardSizes, closure: closure != nil) }
+    /// is shown, whose words are never cut, or a note says closures may not be known (`WatchTonightLayout.designed`).
+    private var designed: Bool { WatchTonightLayout.designed(standardSize: typeSize <= standardSizes, closure: closure != nil || alertsNote != nil) }
     private var measured: WatchTonightLayout {
         WatchTonightLayout.choose(room: room, words: wordsHeight, standardSize: designed, accessibilitySize: typeSize.isAccessibilitySize)
     }
@@ -349,6 +352,11 @@ struct TonightFace: View {
         if let smoke = shown.smokeCaveat, let label = shown.smokeCaveatLabel {
             SmokeLine(text: wraps ? smoke : label, spoken: smoke, lines: wraps ? nil : 1).layoutPriority(1)
         }
+        // No closure under the score is not "nothing closed" while closures may not be known: one short
+        // line, measured with the rest, with the iPhone's whole sentence for VoiceOver (the scrolling face shows it).
+        if closure == nil, let note = alertsNote {
+            AlertsNote(text: String(localized: "Check park alerts before you go."), spoken: note).layoutPriority(1)
+        }
     }
     private var gauge: some View {
         // The best window by the iPhone's own rule, from the hourly clouds it handed over.
@@ -404,9 +412,12 @@ struct AlertsNote: View {
     @Environment(\.nyx) private var palette
     let text: String
     var alignment: TextAlignment = .center
+    /// What VoiceOver reads, when the line shown is the short form of it.
+    var spoken: String? = nil
     var body: some View {
         Text(text).font(.caption2).foregroundStyle(palette.muted)
             .multilineTextAlignment(alignment).fixedSize(horizontal: false, vertical: true).nonEssential()
+            .accessibilityLabel(spoken ?? text)
     }
 }
 

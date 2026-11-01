@@ -135,6 +135,7 @@ nonisolated enum WatchTonightLayout: Equatable, Sendable {
     /// Whether the face keeps its designed layout, one line each, without measuring: only at the
     /// standard sizes and without a closure. A closure's words are never cut (they name the road or
     /// trail that is closed): they wrap, and the face scrolls where they leave the dial too small.
+    /// `closure` is also true for the line that says closures may not be known, measured the same way.
     static func designed(standardSize: Bool, closure: Bool) -> Bool { standardSize && !closure }
     /// `room`: the face's height; `words`: the height of the words under the dial with every line
     /// whole. Either still 0 means not yet measured, and the face stays fixed until it is.
