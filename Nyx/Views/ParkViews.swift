@@ -313,3 +313,5 @@ struct AlertsBusyNote: View {
 }
 #Preview("Alerts busy") { if let park=try? ParkData.load().first { AlertsBusyNote(park:park).padding(24).background(Color.black).preferredColorScheme(.dark) } }
 #Preview("Key refused") { if let park=try? ParkData.load().first { AlertsBusyNote(park:park,refused:.own).padding(24).background(Color.black).preferredColorScheme(.dark) } }
+#Preview("Shared key refused") { if let park=try? ParkData.load().first { AlertsBusyNote(park:park,refused:.shared).padding(24).background(Color.black).preferredColorScheme(.dark) } }
+#Preview("Summary says busy") { if let park=try? ParkData.load().first { AlertsBusyNote(park:park,summarySaysBusy:true).padding(24).background(Color.black).preferredColorScheme(.dark) } }
