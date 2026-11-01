@@ -43,9 +43,10 @@ import UniformTypeIdentifiers
         let snapshot=SharedSettings.read()
         return (defaults.stringArray(forKey:rememberedKey) ?? []).compactMap { ParkLibrary.place($0,snapshot:snapshot) }
     }
-    /// Everything Spotlight should hold, for iOS's request to rebuild the index (`NyxIntents`): the
-    /// curated parks and the remembered places abroad.
-    static func reindexAll() async throws { try await index(ParkData.load()+rememberedPlaces()) }
+    /// Everything Spotlight should hold: these curated parks and the remembered places abroad.
+    static func everything(_ parks:[Park],defaults:UserDefaults = .standard)->[Park] { parks+rememberedPlaces(defaults:defaults) }
+    /// For iOS's request to rebuild the index (`NyxIntents`).
+    static func reindexAll() async throws { try await index(everything(ParkData.load())) }
     /// The same for some identifiers only.
     static func reindex(_ identifiers:[String]) async throws {
         let wanted=Set(identifiers)
@@ -53,13 +54,14 @@ import UniformTypeIdentifiers
     }
     static let markerKey="spotlightIndexed"
     /// At launch: the parks are indexed again only when what Spotlight holds could differ (another
-    /// version of Nyx, language or iOS, or changed park data), not on every launch. Spotlight's own
-    /// requests to re-index (`NyxIntents`) always index.
+    /// version of Nyx, language or iOS, or changed park data), not on every launch. Then the places
+    /// abroad are indexed again with them, so they too take a new language (nothing else indexes them
+    /// again when it changes). Spotlight's own requests to re-index (`NyxIntents`) always index.
     static func indexIfNeeded(_ parks:[Park],defaults:UserDefaults = .standard) async throws {
         // Encoding 63 parks and hashing them is work for a background thread, not the launch's main one.
         let current=await Task.detached(priority:.utility) { marker(parks) }.value
         guard defaults.string(forKey:markerKey) != current else { return }
-        try await index(parks)
+        try await index(everything(parks,defaults:defaults))
         defaults.set(current,forKey:markerKey)
     }
     nonisolated static func marker(_ parks:[Park])->String {
