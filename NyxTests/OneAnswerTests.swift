@@ -13,13 +13,18 @@ import Testing
     }
 
     /// Under Near me the device is the starting point everywhere, Assistive Access included: it once
-    /// measured from the chosen starting point and could name another place than the full app.
-    @Test func assistiveAccessWeighsTonightsPlaces() throws {
+    /// measured from the chosen starting point and could name another place than the full app. Near a
+    /// border it waits, as Tonight does, for the world catalogue and every place in reach.
+    @Test func assistiveAccessWeighsTonightsPlaces() async throws {
         let model = model(), jotr = try park("jotr"), acad = try park("acad")
         model.choose(parkID: jotr.id)
+        #expect(model.awaitingWorld && AssistiveTonight.inReach(model) == nil)
+        await model.catalogReady()
+        await model.prepareReach(model.placesInReach().places)
         #expect(AssistiveTonight.inReach(model)?.map(\.id) == model.placesInReach().places.map(\.id))
         model.location.latitude = acad.latitude; model.location.longitude = acad.longitude
         defer { model.location.latitude = nil; model.location.longitude = nil }
+        await model.prepareReach(model.placesInReach().places)
         let reach = try #require(AssistiveTonight.inReach(model))
         #expect(reach.map(\.id) == model.placesInReach().places.map(\.id))
         #expect(reach.contains { $0.id == acad.id } && !reach.contains { $0.id == jotr.id })

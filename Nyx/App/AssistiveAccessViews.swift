@@ -66,7 +66,7 @@ struct AssistiveHome: View {
                 .tint(palette.controlTint)
         }
         .navigationTitle("Nyx")
-        .task {
+        .task(id: TonightReach.key(model.placesInReach().places, night: model.today)) {
             await model.prepareReach(model.placesInReach().places)
             if let park=AssistiveTonight.best(model) { await model.refresh([park]) }
         }
@@ -80,24 +80,29 @@ struct AssistiveTonight: View {
     @State private var darker:DarkerSky.Offer?
     /// The places in reach exactly as Tonight weighs them (`PlanModel.wholeReach`): within the
     /// radius of the device under Near me, else of the starting point (the first run's choice, or the
-    /// example until one is chosen), so this screen and the full app name the same place. Nil abroad
-    /// while tonight at hundreds of places is still being worked out.
-    static func inReach(_ model: PlanModel) -> [Park]? { model.wholeReach }
+    /// example until one is chosen), so this screen and the full app name the same place. Nil while
+    /// Tonight shows its loader: the world catalogue abroad or near a border (`PlanModel.awaitingWorld`),
+    /// the offline caches still being read, or abroad, tonight at hundreds of places being worked out.
+    static func inReach(_ model: PlanModel) -> [Park]? {
+        model.awaitingWorld || model.cachesPending ? nil : model.wholeReach
+    }
     /// The darkest place in reach tonight.
     static func best(_ model: PlanModel) -> Park? { inReach(model).flatMap { model.ranked($0).first } }
     var body: some View {
-        let reach=Self.inReach(model) ?? []
+        // `-nyx-state loading` (DEBUG captures) holds the spinner, as on Tonight.
+        let inReach=DebugScenario.state=="loading" ? nil : Self.inReach(model)
+        let reach=inReach ?? []
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
-                if Self.inReach(model) == nil {
-                    // Abroad, every place's tonight is worked out before one is named.
-                    ProgressView().controlSize(.large).frame(maxWidth: .infinity)
+                if inReach == nil {
+                    // Every place in reach is weighed before one is named, or "nothing is close enough" said.
+                    ProgressView { Text("Finding tonight's darkest place").font(.title3).multilineTextAlignment(.center) }.controlSize(.large).frame(maxWidth: .infinity)
                 } else if let park=model.ranked(reach).first {
                     AssistiveParkCard(park: park, reminder: true)
                 } else {
                     Text("No park or dark-sky place is close enough tonight. Ask someone to choose a starting point in Nyx.").font(.title2).fixedSize(horizontal: false, vertical: true)
                 }
-                if let darker {
+                if inReach != nil, let darker {
                     VStack(alignment: .leading, spacing: 10) {
                         Text(DarkerSky.headline(darker)).font(.title2).fixedSize(horizontal: false, vertical: true)
                         Text(DarkerSky.shortCaution).font(.title3).fixedSize(horizontal: false, vertical: true)
@@ -107,15 +112,16 @@ struct AssistiveTonight: View {
         }
         .navigationTitle("Tonight")
         .assistiveAccessNavigationIcon(systemImage: "moon.stars")
-        .task(id: TonightReach.key(model.placesInReach().places)) { await model.prepareReach(model.placesInReach().places) }
-        .task(id: Self.darkerKey(model, reach)) {
-            guard let from=model.reachOrigin, Self.darkerKey(model, reach) != nil else { darker=nil; return }
+        .task(id: TonightReach.key(model.placesInReach().places, night: model.today)) { await model.prepareReach(model.placesInReach().places) }
+        .task(id: inReach.flatMap { Self.darkerKey(model, $0) }) {
+            guard let from=model.reachOrigin, let reach=Self.inReach(model), Self.darkerKey(model, reach) != nil else { darker=nil; return }
             let radius=model.radiusMeters, darkest=reach.map(\.bortleEstimate).min()
             let offer=await Task.detached(priority: .utility) { DarkerSky.offer(from: from, radiusMeters: radius, darkestInReach: darkest) }.value
             if !Task.isCancelled { darker=offer }
         }
     }
-    /// What the nearest dark sky depends on; nil when a place in reach is dark already.
+    /// What the nearest dark sky depends on; nil when a place in reach is dark already. Worked out only once
+    /// the places in reach are known (`inReach`), so no offer shows under the spinner.
     static func darkerKey(_ model: PlanModel, _ reach: [Park]) -> String? {
         guard let from=model.reachOrigin else { return nil }
         let darkest=reach.map(\.bortleEstimate).min()

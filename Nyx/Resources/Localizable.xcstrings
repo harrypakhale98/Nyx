@@ -26396,6 +26396,41 @@
         }
       }
     },
+    "Finding tonight's darkest place": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der dunkelste Ort für heute Nacht wird gesucht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finding tonight's darkest place"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscando el lugar más oscuro de esta noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche du lieu le plus sombre ce soir"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜いちばん暗い場所を探しています"
+          }
+        }
+      }
+    },
     "Finding where you are": {
       "extractionState": "manual",
       "localizations": {

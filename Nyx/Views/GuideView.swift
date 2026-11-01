@@ -37,9 +37,11 @@ struct GuideView:View {
     }
     /// The places in reach, weighed as Tonight weighs them (`TonightReach`): from a US starting point with
     /// only US places in range, the national parks; otherwise every place in range (`PlanModel.wholeReach`).
-    /// Abroad, until tonight at all of them is worked out (begun as the page opens, and done already when
-    /// Tonight has been seen), the darkest skies nearest (`PlanModel.shortlist`).
-    private var inReach:[Park] { model.wholeReach ?? model.shortlist(model.placesInReach().places) }
+    /// Abroad, nil until tonight at all of them is worked out (begun as the page opens, and done already when
+    /// Tonight has been seen): the records wait, so they never name a place other than Tonight's.
+    private var inReach:[Park]? { model.wholeReach }
+    /// Planning, with a starting point, while the places in reach are still being worked out (`inReach`).
+    private var waitsForReach:Bool { mode.isPlanning && model.home != nil && inReach == nil }
     /// Where a record's access stands, in Nyx's own fixed words (`PlanModel.guideAccess`); a closure
     /// is already flagged in the night's own line (`NightLookup.describe`).
     private func closures(_ park:Park,lookup:NightLookup)->String? { lookup.closed.contains(park.id) ? nil : model.guideAccess(park) }
@@ -47,7 +49,7 @@ struct GuideView:View {
     private var records:[GuideFact] {
         switch mode {
         case .planning:
-            guard let home=model.home else { return [] }
+            guard let home=model.home, let inReach else { return [] }
             let best=Array(model.ranked(inReach).prefix(3))
             let lookup=lookup
             let start=model.location.latitude != nil ? String(localized:"Starting point: the device location. Distances are straight-line estimates.")
@@ -62,8 +64,9 @@ struct GuideView:View {
         }
     }
     /// Whether `records` has anything in it, without ranking parks again to find out: it is empty
-    /// only when planning has no starting park (the starting-point record is always there otherwise).
-    private var hasRecords:Bool { !mode.isPlanning || model.home != nil }
+    /// only when planning has no starting park, or waits for the places in reach (the starting-point
+    /// record is always there otherwise).
+    private var hasRecords:Bool { !mode.isPlanning || (model.home != nil && !waitsForReach) }
     /// Questions the tools can answer, for an empty page.
     private var suggestions:[String] {
         switch mode {
@@ -98,6 +101,12 @@ struct GuideView:View {
                 if case .learn = mode {
                     // The source is the essay the reader just left; don't print it twice.
                     Text("Source: the essay you were reading.").font(.caption).foregroundStyle(palette.muted)
+                } else if sent == nil && waitsForReach {
+                    // Abroad, the records wait until every place in reach is weighed, as Tonight's answer does.
+                    VStack(spacing:8) {
+                        ConstellationLoader()
+                        Text("Finding tonight's darkest place").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    }.frame(maxWidth:.infinity)
                 } else {
                     GuideRecords(all:(shown+guide.lookedUp.map(\.fact)).map { GuideRecord($0) },citations:checkedCitations,lit:lit,othersOpen:$othersOpen)
                 }
@@ -137,7 +146,9 @@ struct GuideView:View {
             AccessibilityNotification.Announcement(guide.error ?? String(localized:"Numbers checked")).post()
         }
         // Planning abroad: tonight at every place in reach, so the records name Tonight's place (`inReach`).
-        .task { if mode.isPlanning { await model.prepareReach(model.placesInReach().places) } }
+        .task(id:mode.isPlanning ? TonightReach.key(model.placesInReach().places,night:model.today) : nil) {
+            if mode.isPlanning { await model.prepareReach(model.placesInReach().places) }
+        }
     }
     #if DEBUG
     /// `-nyx-state streaming|answered`: a question with real lookups from the engine (best nights
@@ -168,7 +179,7 @@ struct GuideView:View {
     private var tools:NightLookup? { mode.isPlanning ? lookup : nil }
     private func ask(_ text:String) {
         let trimmed=text.trimmingCharacters(in:.whitespacesAndNewlines)
-        guard !trimmed.isEmpty, !guide.loading else { return }
+        guard !trimmed.isEmpty, !guide.loading, hasRecords else { return }
         asked=trimmed; question=""; typing=false; lit=nil; othersOpen=false; sent=records; requestID+=1
     }
     /// A glass bar floating over the night, pinned to the bottom; solid where glass would cost contrast.

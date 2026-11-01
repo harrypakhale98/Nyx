@@ -237,6 +237,18 @@ import Testing
         #expect(model.preparedReach == TonightReach.key(wider) && model.wholeReach?.map(\.id) == wider.map(\.id))
     }
 
+    /// Abroad, Assistive Access waits as Tonight does: before the world catalogue is read, the reach holds
+    /// no place yet, and that is never said as "nothing is close enough".
+    @Test func abroadAssistiveTonightWaitsForTheCatalogue() async throws {
+        let model=try Self.quietModel(weather: NoWeather())
+        let sydney=try #require(StartingPlaces.all.first { $0.name == "Sydney" })
+        model.choose(sydney)
+        #expect(model.awaitingWorld && AssistiveTonight.inReach(model) == nil && AssistiveTonight.best(model) == nil)
+        await model.catalogReady()
+        await model.prepareReach(model.placesInReach().places)
+        #expect(!model.awaitingWorld && AssistiveTonight.inReach(model) != nil)
+    }
+
     /// iPhone in landscape: the pill goes beside the dial when, stacked, the dial that keeps its words inside
     /// would not show down to its units, or with a closure, would not stand whole with the closure under it.
     @Test func theLandscapePillGoesBesideTheDialWhenItMust() {
