@@ -49,8 +49,9 @@ struct WatchRootView: View {
         .tint(palette.ink)
         .modifier(WatchDebug.TypeSize())
         // Scroll bars and Tonight's page dots are system chrome the red filter cannot reach: they
-        // would be the one white thing on the screen, so under red light they go.
-        .scrollIndicators(palette.nightVision ? .never : .automatic)
+        // would be the one white thing on the screen, so under red light they go, and while the red
+        // cover is up: a presentation's bar follows this setting, whatever the palette beneath it.
+        .scrollIndicators(palette.nightVision || store.adaptationCover != nil ? .never : .automatic)
         // The complication review draws in the widgets' own colours, so it is not filtered twice.
         // Under Increase Contrast the brighter red, as on the iPhone (`NyxPalette.red`).
         .modifier(NightVisionFilter(enabled: palette.nightVision && WatchDebug.screen != "complications", red: palette.red))

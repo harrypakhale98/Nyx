@@ -145,7 +145,8 @@ struct AdaptationRequests: ViewModifier {
         content
             .fullScreenCover(item: $store.adaptationCover) { cover in DarkAdaptationView(park: cover.park).environment(store) }
             // A presentation's scroll indicator follows the view that presents it, not the cover's own
-            // setting: a white bar on the red screen otherwise. The root keeps its own.
+            // setting: a white bar on the red screen otherwise. The root sets it too (its own setting,
+            // closer to the cover, wins), so this one is a backstop.
             .scrollIndicators(store.adaptationCover == nil ? .automatic : .never)
             .onAppear { take() }
             .onChange(of: scenePhase) { _, phase in if phase == .active { take() } }
