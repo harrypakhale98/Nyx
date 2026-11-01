@@ -606,14 +606,17 @@ struct TonightView: View {
         .accessibilityInputLabels([Text("Back to tonight"),Text("Tonight")])
     }
     /// Previous and next night as buttons, side by side or stacked at accessibility sizes. A step that
-    /// cannot be taken is set in the muted ink, which keeps its contrast in night vision.
+    /// cannot be taken is set in the muted ink, which keeps its contrast in night vision. Side by side the two
+    /// are one height, their words centred, when one wraps (a narrow column beside the dial in landscape).
     private func dialSteps(_ offset:Int)->some View {
         let layout=typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing:10)) : AnyLayout(HStackLayout(spacing:12))
         let first=offset<=0, last=offset>=TonightScrub.last
+        let words:TextAlignment=typeSize.isAccessibilitySize ? .leading : .center
         return layout {
-            Button { stepDial(-1) } label:{ Label("Previous night",systemImage:"chevron.backward").frame(maxWidth:.infinity,minHeight:30).foregroundStyle(first ? palette.muted : palette.ink) }.disabled(first)
-            Button { stepDial(1) } label:{ Label("Next night",systemImage:"chevron.forward").frame(maxWidth:.infinity,minHeight:30).foregroundStyle(last ? palette.muted : palette.ink) }.disabled(last)
+            Button { stepDial(-1) } label:{ Label { Text("Previous night").multilineTextAlignment(words) } icon:{ Image(systemName:"chevron.backward") }.frame(maxWidth:.infinity,minHeight:30,maxHeight:.infinity).foregroundStyle(first ? palette.muted : palette.ink) }.disabled(first)
+            Button { stepDial(1) } label:{ Label { Text("Next night").multilineTextAlignment(words) } icon:{ Image(systemName:"chevron.forward") }.frame(maxWidth:.infinity,minHeight:30,maxHeight:.infinity).foregroundStyle(last ? palette.muted : palette.ink) }.disabled(last)
         }
+        .fixedSize(horizontal:false,vertical:true)
         .secondaryAction().font(.subheadline.weight(.medium))
         .accessibilityElement(children:.contain)
     }
