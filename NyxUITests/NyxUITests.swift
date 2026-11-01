@@ -326,6 +326,24 @@ final class NyxUITests:XCTestCase {
         row.coordinate(withNormalizedOffset:CGVector(dx:0.25,dy:0.3)).press(forDuration:1.5,thenDragTo:plan.coordinate(withNormalizedOffset:CGVector(dx:0.5,dy:0.5)),withVelocity:.slow,thenHoldForDuration:3.0)
         XCTAssertTrue(app.navigationBars[target].waitForExistence(timeout:10),"A park held over \(target) did not open it")
     }
+    /// Where Parks stacks its rows (every iPhone, an iPad window under 860 points), a tap in a row's blank
+    /// middle, between the name and the score, opens the park as a tap on its name does.
+    func testAStackedParkRowOpensFromItsBlankMiddle() throws {
+        continueAfterFailure=false
+        XCUIDevice.shared.orientation = .portrait
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","parks","-nyx-state","no-forecast","-nyx-reduce-motion"]
+        app.launch()
+        XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout:20))
+        try XCTSkipIf(app.windows.firstMatch.frame.width>=860,"The list stands beside the park in a window this wide")
+        // A row in view with a short name (whatever the sort), so the middle of the row is sky between the name and the score.
+        let rows=app.buttons.matching(NSPredicate(format:"label CONTAINS %@",". Darkness score"))
+        XCTAssertTrue(rows.firstMatch.waitForExistence(timeout:20),"No parks in the list")
+        let row=try XCTUnwrap((0..<min(rows.count,10)).map { rows.element(boundBy:$0) }.first { $0.isHittable && ($0.label.components(separatedBy:". Darkness score").first?.count ?? 99)<=12 },"No short name in view")
+        let frame=row.frame
+        app.coordinate(withNormalizedOffset:.zero).withOffset(CGVector(dx:frame.midX,dy:frame.minY+24)).tap()
+        XCTAssertTrue(app.descendants(matching:.any)["Thirty-night darkness timeline"].firstMatch.waitForExistence(timeout:10),"A tap between the name and the score did not open the park")
+    }
     /// iPad: a saved spot deleted from its own window (`-nyx-seed-spot`, `-nyx-open-window`) closes that
     /// window, rather than leaving "This spot was deleted" behind, and the main window stays on screen.
     func testASpotDeletedInItsOwnWindowClosesIt() throws {

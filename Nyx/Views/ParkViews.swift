@@ -111,6 +111,8 @@ struct ParkRow: View {
             }
             if let closure { ClosureLabel(closure) }
         }.padding(.vertical,14)
+            // The whole row takes the tap, the blank between the name and the score too, not only what is drawn.
+            .contentShape(.interaction,Rectangle())
             .accessibilityElement(children:.ignore)
             // Short, so a list of 63 parks is quick to swipe through: the name, the score, the band and
             // any closure. The rest is a "More content" swipe away (the closure first there too).
