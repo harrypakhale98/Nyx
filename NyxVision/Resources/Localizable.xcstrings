@@ -562,41 +562,6 @@
         }
       }
     },
-    "%@, %@: %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@: %@."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@: %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@: %@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@ : %@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@、%@：%@。"
-          }
-        }
-      }
-    },
     "%@, %@: %lld out of 100, %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -912,6 +877,76 @@
         }
       }
     },
+    "%@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@。"
+          }
+        }
+      }
+    },
+    "%@. %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@。%@"
+          }
+        }
+      }
+    },
     "%@. Darkness score %lld, %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -943,6 +978,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@。暗さスコア%2$lld、%3$@。"
+          }
+        }
+      }
+    },
+    "%@: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：%@"
+          }
+        }
+      }
+    },
+    "%@: %@ around %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@ gegen %3$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@ around %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@, aprox. %3$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ : %2$@ vers %3$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@：%3$@ごろ、%2$@"
           }
         }
       }
@@ -982,41 +1087,6 @@
         }
       }
     },
-    "%@: %@ around %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@: %2$@ gegen %3$@."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@: %@ around %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@: %2$@, aprox. %3$@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ : %2$@ vers %3$@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@：%3$@ごろ、%2$@。"
-          }
-        }
-      }
-    },
     "%@: %lld out of 100, %@. %@ Confirm conditions and park access before traveling.": {
       "extractionState": "manual",
       "localizations": {
@@ -1048,6 +1118,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@：100点中%2$lld点、%3$@。%4$@出発前に、天候と公園に入れるかを確認してください。"
+          }
+        }
+      }
+    },
+    "%@; %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@; %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@; %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@; %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ; %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@。%@"
           }
         }
       }
@@ -4902,107 +5007,107 @@
         }
       }
     },
-    "From %@, it clears the terrain around %@ and drops behind it around %@.": {
+    "From %@, it clears the terrain around %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Von %1$@ aus steigt es gegen %2$@ über das Gelände und sinkt gegen %3$@ dahinter."
+            "value": "Von %1$@ aus steigt es gegen %2$@ über das Gelände"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "From %@, it clears the terrain around %@ and drops behind it around %@."
+            "value": "From %@, it clears the terrain around %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desde %1$@ supera el relieve (aprox. %2$@) y se oculta tras él (aprox. %3$@)."
+            "value": "Desde %1$@ supera el relieve (aprox. %2$@)"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Depuis %1$@, il dépasse le relief vers %2$@ et passe derrière vers %3$@."
+            "value": "Depuis %1$@, il dépasse le relief vers %2$@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@からは、%2$@ごろ地形の上に出て、%3$@ごろ地形の陰に入ります。"
+            "value": "%1$@からは、%2$@ごろ地形の上に出ます"
           }
         }
       }
     },
-    "From %@, it clears the terrain around %@.": {
+    "From %@, it clears the terrain around %@ and drops behind it around %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Von %1$@ aus steigt es gegen %2$@ über das Gelände."
+            "value": "Von %1$@ aus steigt es gegen %2$@ über das Gelände und sinkt gegen %3$@ dahinter"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "From %@, it clears the terrain around %@."
+            "value": "From %@, it clears the terrain around %@ and drops behind it around %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desde %1$@ supera el relieve (aprox. %2$@)."
+            "value": "Desde %1$@ supera el relieve (aprox. %2$@) y se oculta tras él (aprox. %3$@)"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Depuis %1$@, il dépasse le relief vers %2$@."
+            "value": "Depuis %1$@, il dépasse le relief vers %2$@ et passe derrière vers %3$@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@からは、%2$@ごろ地形の上に出ます。"
+            "value": "%1$@からは、%2$@ごろ地形の上に出て、%3$@ごろ地形の陰に入ります"
           }
         }
       }
     },
-    "From %@, it drops behind the terrain around %@.": {
+    "From %@, it drops behind the terrain around %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Von %1$@ aus sinkt es gegen %2$@ hinter das Gelände."
+            "value": "Von %1$@ aus sinkt es gegen %2$@ hinter das Gelände"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "From %@, it drops behind the terrain around %@."
+            "value": "From %@, it drops behind the terrain around %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desde %1$@ se oculta tras el relieve (aprox. %2$@)."
+            "value": "Desde %1$@ se oculta tras el relieve (aprox. %2$@)"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Depuis %1$@, il passe derrière le relief vers %2$@."
+            "value": "Depuis %1$@, il passe derrière le relief vers %2$@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@からは、%2$@ごろ地形の陰に入ります。"
+            "value": "%1$@からは、%2$@ごろ地形の陰に入ります"
           }
         }
       }
@@ -5567,19 +5672,19 @@
         }
       }
     },
-    "In the %@ after dusk; sets at %@.": {
+    "In the %@ after dusk; sets at %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nach der Abenddämmerung im %1$@; geht um %2$@ unter."
+            "value": "Nach der Abenddämmerung im %1$@; geht um %2$@ unter"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "In the %@ after dusk; sets at %@."
+            "value": "In the %@ after dusk; sets at %@"
           }
         },
         "es": {
@@ -5591,13 +5696,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Direction %1$@ après le crépuscule ; se couche à %2$@."
+            "value": "Direction %1$@ après le crépuscule ; se couche à %2$@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "夕暮れ後、%1$@の空。%2$@に沈みます。"
+            "value": "夕暮れ後、%1$@の空。%2$@に沈みます"
           }
         }
       }
@@ -5847,7 +5952,7 @@
         }
       }
     },
-    "Last aurora forecast: %@.": {
+    "Last aurora forecast: %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -5859,7 +5964,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Last aurora forecast: %@."
+            "value": "Last aurora forecast: %@"
           }
         },
         "es": {
@@ -5871,18 +5976,18 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dernière prévision d’aurores : %@."
+            "value": "Dernière prévision d’aurores : %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "最新のオーロラ予報：%@。"
+            "value": "最新のオーロラ予報：%@"
           }
         }
       }
     },
-    "Last forecast: %@.": {
+    "Last forecast: %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -5894,7 +5999,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Last forecast: %@."
+            "value": "Last forecast: %@"
           }
         },
         "es": {
@@ -5906,18 +6011,18 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dernière prévision : %@."
+            "value": "Dernière prévision : %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "最新の予報：%@。"
+            "value": "最新の予報：%@"
           }
         }
       }
     },
-    "Last park update: %@.": {
+    "Last park update: %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -5929,7 +6034,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Last park update: %@."
+            "value": "Last park update: %@"
           }
         },
         "es": {
@@ -5941,13 +6046,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dernière mise à jour des parcs : %@."
+            "value": "Dernière mise à jour des parcs : %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "公園の最新情報：%@。"
+            "value": "公園の最新情報：%@"
           }
         }
       }
@@ -5987,7 +6092,7 @@
         }
       }
     },
-    "Last smoke forecast: %@.": {
+    "Last smoke forecast: %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -5999,7 +6104,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Last smoke forecast: %@."
+            "value": "Last smoke forecast: %@"
           }
         },
         "es": {
@@ -6011,13 +6116,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dernière prévision de fumée : %@."
+            "value": "Dernière prévision de fumée : %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "最新の煙の予報：%@。"
+            "value": "最新の煙の予報：%@"
           }
         }
       }
@@ -6232,19 +6337,19 @@
         }
       }
     },
-    "Low in the %@ after dusk; sets at %@.": {
+    "Low in the %@ after dusk; sets at %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nach der Abenddämmerung tief im %1$@; geht um %2$@ unter."
+            "value": "Nach der Abenddämmerung tief im %1$@; geht um %2$@ unter"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Low in the %@ after dusk; sets at %@."
+            "value": "Low in the %@ after dusk; sets at %@"
           }
         },
         "es": {
@@ -6256,13 +6361,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bas, direction %1$@, après le crépuscule ; se couche à %2$@."
+            "value": "Bas, direction %1$@, après le crépuscule ; se couche à %2$@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "夕暮れ後、%1$@の低い空。%2$@に沈みます。"
+            "value": "夕暮れ後、%1$@の低い空。%2$@に沈みます"
           }
         }
       }
@@ -6757,19 +6862,19 @@
         }
       }
     },
-    "Milky Way core: up in true darkness from %@ to %@.": {
+    "Milky Way core: up in true darkness from %@ to %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Milchstraßenzentrum: bei echter Dunkelheit von %@ bis %@ am Himmel."
+            "value": "Milchstraßenzentrum: bei echter Dunkelheit von %@ bis %@ am Himmel"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Milky Way core: up in true darkness from %@ to %@."
+            "value": "Milky Way core: up in true darkness from %@ to %@"
           }
         },
         "es": {
@@ -6781,13 +6886,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cœur de la Voie lactée : levé en obscurité totale de %@ à %@."
+            "value": "Cœur de la Voie lactée : levé en obscurité totale de %@ à %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "天の川の中心部：完全に暗い時間のうち、%@から%@まで空にあります。"
+            "value": "天の川の中心部：完全に暗い時間のうち、%@から%@まで空にあります"
           }
         }
       }
@@ -7317,6 +7422,41 @@
         }
       }
     },
+    "Moon rises at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondaufgang um %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon rises at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna sale: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lever de la Lune à %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月は%@に昇ります"
+          }
+        }
+      }
+    },
     "Moon rises at %@, %@ lit.": {
       "extractionState": "manual",
       "localizations": {
@@ -7348,41 +7488,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "月は%@に昇ります（輝面比%@）。"
-          }
-        }
-      }
-    },
-    "Moon rises at %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mondaufgang um %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon rises at %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Luna sale: %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lever de la Lune à %@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月は%@に昇ります。"
           }
         }
       }
@@ -7527,6 +7632,41 @@
         }
       }
     },
+    "Moon up until %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond bis %@ am Himmel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up until %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo hasta %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune levée jusqu’à %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月は%@まで空にあります"
+          }
+        }
+      }
+    },
     "Moon up until %@, %@ lit.": {
       "extractionState": "manual",
       "localizations": {
@@ -7558,41 +7698,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "月は%@まで空にあります（輝面比%@）。"
-          }
-        }
-      }
-    },
-    "Moon up until %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mond bis %@ am Himmel."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon up until %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna en el cielo hasta %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lune levée jusqu’à %@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月は%@まで空にあります。"
           }
         }
       }
@@ -7667,42 +7772,7 @@
         }
       }
     },
-    "Moon-free from %@ to %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mondfrei von %@ bis %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon-free from %@ to %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sin Luna de %@ a %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sans Lune de %@ à %@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@から%@まで月なし。"
-          }
-        }
-      }
-    },
-    "Moon-free from %@.": {
+    "Moon-free from %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -7714,7 +7784,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moon-free from %@."
+            "value": "Moon-free from %@"
           }
         },
         "es": {
@@ -7726,13 +7796,48 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sans Lune à partir de %@."
+            "value": "Sans Lune à partir de %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@から月なし。"
+            "value": "%@から月なし"
+          }
+        }
+      }
+    },
+    "Moon-free from %@ to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondfrei von %@ bis %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon-free from %@ to %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin Luna de %@ a %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans Lune de %@ à %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@から%@まで月なし"
           }
         }
       }
@@ -7803,41 +7908,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@まで月なし"
-          }
-        }
-      }
-    },
-    "Moon-free until %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mondfrei bis %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon-free until %@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sin Luna hasta %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sans Lune jusqu’à %@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@まで月なし。"
           }
         }
       }
@@ -11062,19 +11132,19 @@
         }
       }
     },
-    "Rises at %@ in the %@, highest around %@, sets at %@.": {
+    "Rises at %@ in the %@, highest around %@, sets at %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Geht um %@ im %@ auf, steht gegen %@ am höchsten, geht um %@ unter."
+            "value": "Geht um %@ im %@ auf, steht gegen %@ am höchsten, geht um %@ unter"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rises at %@ in the %@, highest around %@, sets at %@."
+            "value": "Rises at %@ in the %@, highest around %@, sets at %@"
           }
         },
         "es": {
@@ -11086,13 +11156,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Se lève à %1$@, direction %2$@, au plus haut vers %3$@, se couche à %4$@."
+            "value": "Se lève à %1$@, direction %2$@, au plus haut vers %3$@, se couche à %4$@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@に%2$@から昇り、%3$@ごろに最も高くなり、%4$@に沈みます。"
+            "value": "%1$@に%2$@から昇り、%3$@ごろに最も高くなり、%4$@に沈みます"
           }
         }
       }
@@ -11150,7 +11220,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sale por el %2$@ (%1$@); punto más alto: aprox. %3$@, en el %4$@"
+            "value": "Sale por el %2$@ (%1$@); punto más alto: aprox. %3$@, en el %4$@."
           }
         },
         "fr": {
@@ -12707,7 +12777,7 @@
         }
       }
     },
-    "Sunset is at %@.": {
+    "Sunset is at %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -12719,7 +12789,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sunset is at %@."
+            "value": "Sunset is at %@"
           }
         },
         "es": {
@@ -12731,13 +12801,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le soleil se couche à %@."
+            "value": "Le soleil se couche à %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "日の入りは%@です。"
+            "value": "日の入りは%@です"
           }
         }
       }
@@ -13617,37 +13687,37 @@
         }
       }
     },
-    "The bright center climbs past %lld° at %@, after true darkness ends at %@.": {
+    "The bright center climbs past %lld° at %@, after true darkness ends at %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Das helle Zentrum steigt um %2$@ über %1$lld°, nachdem die echte Dunkelheit um %3$@ endet."
+            "value": "Das helle Zentrum steigt um %2$@ über %1$lld°, nachdem die echte Dunkelheit um %3$@ endet"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The bright center climbs past %lld° at %@, after true darkness ends at %@."
+            "value": "The bright center climbs past %lld° at %@, after true darkness ends at %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El centro brillante sube por encima de %1$lld° (%2$@), después de que termina la oscuridad total (%3$@)."
+            "value": "El centro brillante sube por encima de %1$lld° (%2$@), después de que termina la oscuridad total (%3$@)"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le centre brillant passe au-dessus de %1$lld° à %2$@, après la fin de l’obscurité totale à %3$@."
+            "value": "Le centre brillant passe au-dessus de %1$lld° à %2$@, après la fin de l’obscurité totale à %3$@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "明るい中心部は%2$@に%1$lld°より高くなります。完全な暗さが%3$@に終わった後です。"
+            "value": "明るい中心部は%2$@に%1$lld°より高くなります。完全な暗さが%3$@に終わった後です"
           }
         }
       }
@@ -13757,37 +13827,37 @@
         }
       }
     },
-    "The bright center sinks below %lld° at %@, before true darkness begins at %@.": {
+    "The bright center sinks below %lld° at %@, before true darkness begins at %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Das helle Zentrum sinkt um %2$@ unter %1$lld°, bevor die echte Dunkelheit um %3$@ beginnt."
+            "value": "Das helle Zentrum sinkt um %2$@ unter %1$lld°, bevor die echte Dunkelheit um %3$@ beginnt"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The bright center sinks below %lld° at %@, before true darkness begins at %@."
+            "value": "The bright center sinks below %lld° at %@, before true darkness begins at %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El centro brillante baja de %1$lld° (%2$@), antes de que empiece la oscuridad total (%3$@)."
+            "value": "El centro brillante baja de %1$lld° (%2$@), antes de que empiece la oscuridad total (%3$@)"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le centre brillant passe sous %1$lld° à %2$@, avant le début de l’obscurité totale à %3$@."
+            "value": "Le centre brillant passe sous %1$lld° à %2$@, avant le début de l’obscurité totale à %3$@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "明るい中心部は%2$@に%1$lld°より低くなります。完全な暗さが%3$@に始まる前です。"
+            "value": "明るい中心部は%2$@に%1$lld°より低くなります。完全な暗さが%3$@に始まる前です"
           }
         }
       }
@@ -14212,7 +14282,7 @@
         }
       }
     },
-    "The sky stays in twilight from sunset at %@ to sunrise at %@.": {
+    "The sky stays in twilight from sunset at %@ to sunrise at %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -14224,25 +14294,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The sky stays in twilight from sunset at %@ to sunrise at %@."
+            "value": "The sky stays in twilight from sunset at %@ to sunrise at %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El cielo sigue en crepúsculo desde la puesta del sol (%@) hasta el amanecer (%@)."
+            "value": "El cielo sigue en crepúsculo desde la puesta del sol (%@) hasta el amanecer (%@)"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le ciel reste crépusculaire du coucher du soleil, à %@, à son lever, à %@."
+            "value": "Le ciel reste crépusculaire du coucher du soleil, à %@, à son lever, à %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "日の入り（%@）から日の出（%@）まで、空は薄明のままです。"
+            "value": "日の入り（%@）から日の出（%@）まで、空は薄明のままです"
           }
         }
       }
@@ -14877,7 +14947,7 @@
         }
       }
     },
-    "Tonight at %@: true darkness from %@ to %@.": {
+    "Tonight at %@: true darkness from %@ to %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -14889,7 +14959,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tonight at %@: true darkness from %@ to %@."
+            "value": "Tonight at %@: true darkness from %@ to %@"
           }
         },
         "es": {
@@ -14901,13 +14971,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ce soir à %@ : obscurité totale de %@ à %@."
+            "value": "Ce soir à %@ : obscurité totale de %@ à %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今夜の%1$@：完全に暗いのは%2$@から%3$@まで。"
+            "value": "今夜の%1$@：完全に暗いのは%2$@から%3$@まで"
           }
         }
       }
@@ -15157,7 +15227,7 @@
         }
       }
     },
-    "True darkness tonight at %@: from %@ to %@.": {
+    "True darkness tonight at %@: from %@ to %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -15169,7 +15239,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "True darkness tonight at %@: from %@ to %@."
+            "value": "True darkness tonight at %@: from %@ to %@"
           }
         },
         "es": {
@@ -15181,13 +15251,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Obscurité totale ce soir à %@ : de %@ à %@."
+            "value": "Obscurité totale ce soir à %@ : de %@ à %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今夜の%1$@の完全な暗さ：%2$@から%3$@まで。"
+            "value": "今夜の%1$@の完全な暗さ：%2$@から%3$@まで"
           }
         }
       }

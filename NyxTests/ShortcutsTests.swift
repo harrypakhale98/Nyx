@@ -28,6 +28,29 @@ import Testing
         #expect(voice == "Tonight at \(jotr.shortName): true darkness from \(jotr.time(start)) to \(jotr.time(end)).")
         #expect(!full.contains("!") && !voice.contains("!"))
     }
+    /// The catalog leaves the period off a sentence that ends in a time (some end in "p.m."): the answer
+    /// closes each one itself, so German and 24-hour Spanish never run two together, and "p.m." takes no second.
+    @Test func darkWindowSentencesEndInEveryLanguage() throws {
+        let jotr=try park("jotr"), sky=try sky(jotr, "2026-10-12")
+        let end=try #require(sky.darkEnd), sunset=try #require(sky.sunset)
+        let de=try #require(Bundle.main.path(forResource: "de", ofType: "lproj").flatMap(Bundle.init(path:)))
+        var german=Date.FormatStyle(date: .omitted, time: .shortened, locale: Locale(identifier: "de_DE")); german.timeZone=jotr.timeZone
+        let deutsch=DarkWindowAnswer.dialog(park: jotr, sky: sky, closure: nil, voiceOnly: false, device: jotr.timeZone, words: de, clock: { $0.formatted(german) })
+        #expect(deutsch.contains("\(end.formatted(german)). Sonnenuntergang"), "\(deutsch)")
+        #expect(deutsch.hasSuffix("\(sunset.formatted(german))."), "\(deutsch)")
+        let voice=DarkWindowAnswer.dialog(park: jotr, sky: sky, closure: nil, voiceOnly: true, device: jotr.timeZone, words: de, clock: { $0.formatted(german) })
+        #expect(voice.hasSuffix("\(end.formatted(german))."), "\(voice)")
+        var mexico=Date.FormatStyle(date: .omitted, time: .shortened, locale: Locale(identifier: "en_MX")); mexico.timeZone=jotr.timeZone
+        try #require(sunset.formatted(mexico).hasSuffix("."))
+        let latin=DarkWindowAnswer.dialog(park: jotr, sky: sky, closure: nil, voiceOnly: false, device: jotr.timeZone, clock: { $0.formatted(mexico) })
+        #expect(latin.contains("\(end.formatted(mexico)) Sunset is at") && latin.hasSuffix(sunset.formatted(mexico)), "\(latin)")
+        #expect(!latin.contains(".."))
+        // Where there is no true darkness, the twilight sentence ends the same way.
+        let denali=try park("dena"), june=try self.sky(denali, "2026-06-21")
+        var alaska=german; alaska.timeZone=denali.timeZone
+        let twilight=DarkWindowAnswer.dialog(park: denali, sky: june, closure: nil, voiceOnly: false, device: denali.timeZone, words: de, clock: { $0.formatted(alaska) })
+        #expect(twilight.hasSuffix(".") && !twilight.contains(".."), "\(twilight)")
+    }
     @Test func darkWindowNamesTheParksZoneWhenTheDeviceIsElsewhere() throws {
         let jotr=try park("jotr"), sky=try sky(jotr, "2026-10-12")
         let eastern=try #require(TimeZone(identifier: "America/New_York"))

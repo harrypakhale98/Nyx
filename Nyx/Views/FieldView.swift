@@ -111,7 +111,7 @@ struct FieldView: View {
         .onChange(of:session.reset) { _,reset in
             guard let reset else { return }
             if resetInPage { withAnimation(reduceMotion ? nil : NyxMotion.spring) { focused="now" } }
-            AccessibilityNotification.Announcement(String(localized:"Your eyes started over at \(session.park.time(reset.at)).")).post()
+            AccessibilityNotification.Announcement(FieldResetNotice.line(session.park,at:reset.at)).post()
         }
         #if DEBUG
         // `-nyx-state reset-later`: scrolled to the night's last milestone, then the eyes start over, as after a return.
@@ -297,9 +297,13 @@ struct FieldResetNotice: View {
     let session: FieldSession
     let reset: DarkAdaptation.Reset
     @Environment(\.nyx) private var palette
+    /// "Your eyes started over at 11:40 PM.", shown and announced: closed here, so "p.m." takes no second period.
+    static func line(_ park: Park, at date: Date) -> String {
+        Sentences.end(String(localized:"Your eyes started over at \(park.time(date))"))
+    }
     var body: some View {
         VStack(alignment:.leading,spacing:12) {
-            Text("Your eyes started over at \(session.park.time(reset.at)).").font(.system(.headline,design:.serif))
+            Text(Self.line(session.park,at:reset.at)).font(.system(.headline,design:.serif))
                 .fixedSize(horizontal:false,vertical:true)
             Text("Nyx can't see what you looked at while you were away. Bright light resets dark adaptation.").font(.subheadline)
                 .fixedSize(horizontal:false,vertical:true)
@@ -476,8 +480,9 @@ struct FieldNightPager: View {
         if sky.moon.negligible { return String(localized:"Almost no moonlight tonight.") }
         let lit=sky.moon.litText
         let up=AstronomyEngine().lunarAltitude(at:now,park:night.park) > -0.833
-        if up { return sky.moonset.flatMap { $0>now ? String(localized:"Moon up, \(lit). It sets at \(night.park.time($0)).") : nil } ?? String(localized:"Moon up, \(lit).") }
-        return sky.moonrise.flatMap { $0>now ? String(localized:"Moon below the horizon until \(night.park.time($0)).") : nil } ?? String(localized:"Moon below the horizon.")
+        // A sentence that ends in a time is closed here: "p.m." takes no second period.
+        if up { return sky.moonset.flatMap { $0>now ? Sentences.end(String(localized:"Moon up, \(lit). It sets at \(night.park.time($0))")) : nil } ?? String(localized:"Moon up, \(lit).") }
+        return sky.moonrise.flatMap { $0>now ? Sentences.end(String(localized:"Moon below the horizon until \(night.park.time($0))")) : nil } ?? String(localized:"Moon below the horizon.")
     }
 }
 

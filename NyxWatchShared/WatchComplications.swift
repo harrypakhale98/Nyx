@@ -405,15 +405,17 @@ struct WatchComplicationView: View {
     private func summary(_ night: Night) -> String {
         // The iPhone widget's words (`Night.widgetSummary`): the closure in every family, right after
         // the score it stands beside, then what the clouds rest on and smoke that holds the score down.
-        var text = night.widgetSummary(closure: entry.closure)
+        var parts = [night.widgetSummary(closure: entry.closure)]
         // In every family, though only the rectangular one has room to show them.
-        for note in entry.notes { text += " " + note.spoken }
+        parts += entry.notes.map(\.spoken)
         if let next = entry.next {
-            text += " " + String(localized: "\(next.title) at \(night.park.time(next.date)).")
+            // Closed here, not in the catalog: a time that ends in "p.m." takes no second period.
+            parts.append(Sentences.end(String(localized: "watch.summary.nextAt", defaultValue: "\(next.title) at \(night.park.time(next.date))",
+                                              comment: "A sentence in the watch complication's VoiceOver summary: the night's next moment and its clock time. No final period.")))
             // The time is the park's: where its clock is not this watch's, say whose.
-            if let zone = night.park.spokenZone(at: next.date) { text += " " + zone }
+            parts.append(night.park.spokenZone(at: next.date) ?? "")
         }
-        return text
+        return Sentences.join(parts)
     }
 }
 

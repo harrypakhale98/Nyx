@@ -77,25 +77,26 @@ struct YourPrivacyView: View {
         .modifier(NightVisionFilter(enabled: palette.nightVision, red: palette.base.red))
         .background { if palette.nightVision { palette.nightPanel } }
     }
-    /// When the last forecast arrived, in this headset's time.
+    /// When the last forecast arrived, in this headset's time. Each of these lines ends in a time and
+    /// is closed here, not in the catalog: "2:00 p.m." takes no second period.
     private var status: String {
         guard let last = model.lastForecast else { return String(localized: "No forecast on this device yet.") }
-        return String(localized: "Last forecast: \(last.formatted(date: .abbreviated, time: .shortened)).")
+        return Sentences.end(String(localized: "Last forecast: \(last.formatted(date: .abbreviated, time: .shortened))"))
     }
     private var smokeStatus: String {
         guard let last = model.lastSmoke else { return String(localized: "No smoke forecast on this device yet.") }
-        return String(localized: "Last smoke forecast: \(last.formatted(date: .abbreviated, time: .shortened)).")
+        return Sentences.end(String(localized: "Last smoke forecast: \(last.formatted(date: .abbreviated, time: .shortened))"))
     }
     /// When this headset last received NOAA's aurora forecast.
     private var auroraStatus: String {
         guard let last = model.aurora?.updated else { return String(localized: "No aurora forecast on this device yet.") }
-        return String(localized: "Last aurora forecast: \(last.formatted(date: .abbreviated, time: .shortened)).")
+        return Sentences.end(String(localized: "Last aurora forecast: \(last.formatted(date: .abbreviated, time: .shortened))"))
     }
     /// When the last park update arrived; without a key built in, that none is asked for. A key the
     /// Park Service did not accept is said after it, in the words beside the scores.
     private var alertsStatus: String {
         let refused = model.alertsRefusal.map { MissingInput.refusal($0, cached: model.alerts != nil) } ?? ""
-        if let last = model.alerts?.updated { return Sentences.join([String(localized: "Last park update: \(last.formatted(date: .abbreviated, time: .shortened))."), refused]) }
+        if let last = model.alerts?.updated { return Sentences.join([Sentences.end(String(localized: "Last park update: \(last.formatted(date: .abbreviated, time: .shortened))")), refused]) }
         return ParkStore.usable(VisionModel.npsKey) ? Sentences.join([String(localized: "No park update on this device yet."), refused])
             : String(localized: "This copy of Nyx has no park service key, so park alerts are not requested.")
     }

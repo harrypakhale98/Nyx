@@ -43,7 +43,7 @@ extension FieldActivityAttributes {
     nonisolated static func followAlert(park: Park, sky: SkyConditions) -> (title: String, body: String) {
         let title=String(localized: "Tonight at \(park.shortName)")
         if let dark=sky.darkStart { return (title, String(localized: "True darkness at \(park.time(dark))")) }
-        if let sunset=sky.sunset { return (title, String(localized: "No true darkness tonight. Sunset at \(park.time(sunset)).")) }
+        if let sunset=sky.sunset { return (title, Sentences.end(String(localized: "No true darkness tonight. Sunset at \(park.time(sunset))"))) }
         return (title, SkyConditions.noDarknessMessage(tonight: true))
     }
 }

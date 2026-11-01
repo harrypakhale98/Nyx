@@ -526,7 +526,8 @@ struct PanoramaCanvas: View {
     /// header is ignored here: a star under the title is still in the sky, so the summary does not
     /// shrink as text grows.
     static func summary(sky:HorizonSky,facing:Double,park:Park,bortle:Double?,size:CGSize=CGSize(width:390,height:800))->String {
-        var lines=[String(localized:"Facing \(Compass.name(facing)), \(park.time(sky.moment)).")]
+        // Closed here, not in the catalog: a time that ends in "p.m." takes no second period.
+        var lines=[Sentences.end(String(localized:"Facing \(Compass.name(facing)), \(park.time(sky.moment))"))]
         if sky.sunAltitude > -6 { lines.append(String(localized:"The Sun is barely down; the sky is still bright.")) }
         else if !sky.dark { lines.append(String(localized:"The sky is still in twilight.")) }
         func place(_ mark:(altitude:Double,azimuth:Double))->String {
@@ -547,7 +548,7 @@ struct PanoramaCanvas: View {
             let toward=sky.domes.sorted { $0.intensity>$1.intensity }.prefix(3).map { Compass.name($0.bearing) }
             lines.append(String(localized:"Town light glows on the horizon toward the \(Array(Set(toward)).sorted().formatted(.list(type:.and))).")) 
         }
-        return lines.joined(separator:" ")
+        return Sentences.join(lines)
     }
 }
 #Preview("Panorama • south at midnight") {

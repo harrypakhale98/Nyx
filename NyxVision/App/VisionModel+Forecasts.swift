@@ -104,7 +104,8 @@ extension VisionModel {
     /// with a forecast when it was issued. Whether a night is beyond the forecast's reach ("not yet")
     /// or within it ("unavailable") comes with the night (`Night.beyondForecast`), as on the iPhone.
     nonisolated static func cloudCaption(_ night: Night, forecastsOn: Bool) -> String {
-        let issued = night.basis == .forecast ? night.forecastUpdated.map { String(localized: "Forecast as of \(night.park.timestamp($0))") } : nil
+        // A sentence after full ones, closed here: a time that ends in "p.m." takes no second period.
+        let issued = night.basis == .forecast ? night.forecastUpdated.map { Sentences.end(String(localized: "Forecast as of \(night.park.timestamp($0))")) } : nil
         return Sentences.join([night.cloudCaption(forecastsOn: forecastsOn), issued ?? ""])
     }
 

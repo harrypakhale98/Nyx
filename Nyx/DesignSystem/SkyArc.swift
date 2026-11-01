@@ -217,24 +217,26 @@ struct SkyArc: View {
         MoonHaptics.enabled ? String(localized:"Double-tap, then slide a finger to feel the night.") : String(localized:"Double-tap, then slide a finger to explore the night.")
     }
     private var darkness:String {
-        night.sky.darkHours==0 ? SkyConditions.noDarknessMessage(tonight:isTonight) : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")
+        night.sky.darkHours==0 ? SkyConditions.noDarknessMessage(tonight:isTonight) : Sentences.end(String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd))"))
     }
     /// The night's crossings as sentences, each only when it happens: a night without a moonrise
-    /// (or, near the poles, a sunset) says nothing of it, never "Moonrise No crossing".
+    /// (or, near the poles, a sunset) says nothing of it, never "Moonrise No crossing". Each ends in a
+    /// time and is closed here, not in the catalog: "5:10 a.m." takes no second period. Keyed apart
+    /// from the arc's own labels ("Sunset %@"), which some languages word differently.
     private var crossings:[String] {
         let park=night.park, sky=night.sky
         var parts:[String]=[]
-        if let sunset=sky.sunset { parts.append(String(localized:"Sunset \(park.time(sunset)).")) }
+        if let sunset=sky.sunset { parts.append(Sentences.end(String(localized:"skyArc.sentence.sunset",defaultValue:"Sunset \(park.time(sunset))",comment:"A sentence in the sky arc's VoiceOver summary; the value is a clock time. No final period."))) }
         parts.append(darkness)
         switch (sky.moonrise,sky.moonset) {
-        case let (rise?,set?): parts.append(String(localized:"Moonrise \(park.time(rise)), moonset \(park.time(set))."))
-        case let (rise?,nil): parts.append(String(localized:"Moonrise \(park.time(rise))."))
-        case let (nil,set?): parts.append(String(localized:"Moonset \(park.time(set))."))
+        case let (rise?,set?): parts.append(Sentences.end(String(localized:"Moonrise \(park.time(rise)), moonset \(park.time(set))")))
+        case let (rise?,nil): parts.append(Sentences.end(String(localized:"skyArc.sentence.moonrise",defaultValue:"Moonrise \(park.time(rise))",comment:"A sentence in the sky arc's VoiceOver summary; the value is a clock time. No final period.")))
+        case let (nil,set?): parts.append(Sentences.end(String(localized:"skyArc.sentence.moonset",defaultValue:"Moonset \(park.time(set))",comment:"A sentence in the sky arc's VoiceOver summary; the value is a clock time. No final period.")))
         case (nil,nil): break
         }
         return parts
     }
-    private var spokenSummary:String { Phrase.sentences(crossings) }
+    private var spokenSummary:String { Sentences.join(crossings) }
     /// The whole element's label: the night's day, its crossings, the Milky Way core and the clock.
     /// Joined as sentences, so a date ("Sa. 31. Okt.") or time ("9:04 p.m.") that ends one takes no second period.
     private var spokenLabel:String {

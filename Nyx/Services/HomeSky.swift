@@ -144,22 +144,23 @@ nonisolated struct HomeSky: Sendable {
     var moonlightLine: String? {
         switch sky.moonInDarkness {
         case .setsAt, .risesAt, .partial:
-            if let free=moonFree { return String(localized: "Moon-free from \(place.time(free.start)) to \(place.time(free.end)).") }
+            if let free=moonFree { return Sentences.end(String(localized: "Moon-free from \(place.time(free.start)) to \(place.time(free.end))")) }
         case .noDarkness, .allFree, .negligible, .allUp: break
         }
         return sky.moonSentence(park: place, withLit: false)
     }
-    /// The whole panel as one VoiceOver summary.
+    /// The whole panel as one VoiceOver summary. A sentence that ends in a time is closed here, not
+    /// in the catalog: "5:10 a.m." takes no second period.
     var summary: String {
-        var parts=[String(localized: "Moon: \(moonPhase). \(moonTimes)."),
-                   hasDarkness ? String(localized: "True darkness: \(darkness).") : darkness]
+        var parts=[Sentences.end(String(localized: "Moon: \(moonPhase). \(moonTimes)")),
+                   hasDarkness ? Sentences.end(String(localized: "True darkness: \(darkness)")) : darkness]
         if let moonlightLine { parts.append(moonlightLine) }
-        if let usualCloudsTitle, let usualCloudsLine { parts.append(usualCloudsTitle+". "+usualCloudsLine) }
-        if let skyClass, let skyLine { parts.append(String(localized: "Sky brightness: \(skyClass).")+" "+skyLine) }
+        if let usualCloudsTitle, let usualCloudsLine { parts.append(Phrase.sentences([usualCloudsTitle, usualCloudsLine])) }
+        if let skyClass, let skyLine { parts.append(Sentences.join([String(localized: "Sky brightness: \(skyClass)."), skyLine])) }
         if let eclipse { parts.append(eclipse.spoken) }
         if let shower { parts.append(shower.spoken) }
-        parts.append(planets.isEmpty ? String(localized: "No bright planets up in true darkness.") : planets.map(\.spoken).joined(separator: " "))
-        return parts.joined(separator: " ")
+        parts.append(planets.isEmpty ? String(localized: "No bright planets up in true darkness.") : Sentences.join(planets.map(\.spoken)))
+        return Sentences.join(parts)
     }
     /// The longest Moon-free stretch inside true darkness (`SkyAlmanac.longest`), its edges on the
     /// engine's own moonset and moonrise where they fall within a step of one, so the times match the

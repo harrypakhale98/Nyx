@@ -266,13 +266,14 @@ struct NextDarkComplicationView: View {
         guard let park = entry.park else { return String(localized: "Nyx. Choose a place in Nyx on Apple Watch.") }
         // The times are the park's: where its clock is not this watch's, say whose.
         let zone = entry.moment.target(at: entry.date).flatMap { park.spokenZone(at: $0) }
-        return zone.map { spoken(park) + " " + $0 } ?? spoken(park)
+        return Sentences.join([spoken(park), zone ?? ""])
     }
     private func spoken(_ park: Park) -> String {
         switch entry.moment {
-        case .darkNow(let until, _): return String(localized: "\(park.shortName). Truly dark now, until \(park.time(until)).")
+        // A sentence that ends in a time is closed here, not in the catalog: "p.m." takes no second period.
+        case .darkNow(let until, _): return Sentences.end(String(localized: "\(park.shortName). Truly dark now, until \(park.time(until))"))
         case .begins(let date, true): return String(localized: "\(park.shortName). The Moon sets at \(park.time(date)); truly dark from then.")
-        case .begins(let date, false): return String(localized: "\(park.shortName). True darkness at \(park.time(date)).")
+        case .begins(let date, false): return Sentences.end(String(localized: "\(park.shortName). True darkness at \(park.time(date))"))
         case .moonlit(let from, let to): return String(localized: "\(park.shortName). True darkness from \(park.time(from)) to \(park.time(to)), with the Moon up all through it.")
         case .none: return String(localized: "\(park.shortName). No true darkness tonight at this latitude.")
         }

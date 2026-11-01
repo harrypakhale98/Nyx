@@ -58,6 +58,24 @@ struct SentencesTests {
         #expect(sound.opening.hasSuffix(".") && !sound.opening.contains(".."))
     }
 
+    /// A sentence whose English ends in a full stop right after a value ("…, highest around 1:10 AM in
+    /// the southeast.") keeps one in every language: the catalog leaves the stop off only where a time
+    /// ends the sentence, and there the key has none and the code closes it (`Sentences.end`).
+    @Test func sentencesEndingAfterAValueKeepTheirStopInEveryLanguage() throws {
+        let url=try #require(Bundle.main.url(forResource: "Localizable", withExtension: "strings", subdirectory: nil, localization: "en"))
+        let english=try #require(NSDictionary(contentsOf: url) as? [String: String])
+        let keys=english.keys.filter { $0.range(of: #"%(\d\$)?(@|lld|d)\.$"#, options: .regularExpression) != nil }
+        #expect(keys.count>20)
+        for language in ["es", "de", "fr", "ja"] {
+            let bundle=try #require(Bundle.main.path(forResource: language, ofType: "lproj").flatMap(Bundle.init(path:)), "\(language)")
+            for key in keys {
+                let value=bundle.localizedString(forKey: key, value: nil, table: nil)
+                #expect(value.hasSuffix(".") || value.hasSuffix("。"), "\(language): \(key) → \(value)")
+            }
+        }
+        let es=try #require(Bundle.main.path(forResource: "es", ofType: "lproj").flatMap(Bundle.init(path:)))
+        #expect(es.localizedString(forKey: "Rises at %@ in the %@; highest around %@ in the %@.", value: nil, table: nil).hasSuffix("en el %4$@."))
+    }
     /// A quieter thing in the sky with its gloss: a full stop and a space in English, "。" and no
     /// space in Japanese.
     @Test @MainActor func mentionsEndBeforeTheirGloss() {

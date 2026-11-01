@@ -33,12 +33,13 @@ nonisolated struct FieldNight: Sendable {
         var list: [Milestone]=[]
         let darkSpan=sky.darkStart.flatMap { start in sky.darkEnd.map { $0.timeIntervalSince(start) } } ?? 0
         if let sunset=sky.sunset {
-            let detail=sky.darkStart.map { String(localized: "Twilight follows. True darkness begins at \(park.time($0)).") } ?? SkyConditions.noDarknessMessage(tonight: true)
+            // Sentences that end in a time are closed here, not in the catalog: "p.m." takes no second period.
+            let detail=sky.darkStart.map { Sentences.end(String(localized: "Twilight follows. True darkness begins at \(park.time($0))")) } ?? SkyConditions.noDarknessMessage(tonight: true)
             list.append(Milestone(kind: .sunset, date: sunset, title: String(localized: "Sunset"), detail: detail, symbol: "sunset"))
         }
         if let start=sky.darkStart, let end=sky.darkEnd, end>start, start>sky.evening.addingTimeInterval(60) {
             list.append(Milestone(kind: .darkness, date: start, title: String(localized: "True darkness"),
-                detail: String(localized: "The Sun is 18° below the horizon: \(Self.span(darkSpan)) of true darkness, until \(park.time(end))."), symbol: "moon.stars"))
+                detail: Sentences.end(String(localized: "The Sun is 18° below the horizon: \(Self.span(darkSpan)) of true darkness, until \(park.time(end))")), symbol: "moon.stars"))
         }
         if let end=sky.darkEnd, sky.darkStart != nil, end<sky.end.addingTimeInterval(-60) {
             list.append(Milestone(kind: .dawn, date: end, title: String(localized: "Dawn twilight"), detail: String(localized: "True darkness ends. The sky starts to brighten."), symbol: "sun.horizon"))
@@ -152,8 +153,9 @@ nonisolated struct FieldNight: Sendable {
         guard let start=sky.darkStart, let end=sky.darkEnd, end>start else {
             let lead=SkyConditions.noDarknessMessage(tonight: true)
             let trailing=sky.state == .polarDay ? String(localized: "The Sun stays up all night.")
-                : sky.sunrise.map { String(localized: "Sunrise at \(park.time($0)).") } ?? ""
-            return Status(phase: .noDarkness, lead: lead, target: nil, trailing: trailing, spoken: [lead, trailing].joined(separator: " "))
+                : sky.sunrise.map { Sentences.end(String(localized: "field.status.sunriseAt", defaultValue: "Sunrise at \(park.time($0))",
+                                                         comment: "A sentence under Now when the night has no true darkness; the value is a clock time. No final period.")) } ?? ""
+            return Status(phase: .noDarkness, lead: lead, target: nil, trailing: trailing, spoken: Sentences.join([lead, trailing]))
         }
         if now<start {
             // The clock time too: the darkness card that showed it is not repeated under "Now".
@@ -163,11 +165,11 @@ nonisolated struct FieldNight: Sendable {
         }
         if now<end {
             return Status(phase: .dark, lead: String(localized: "True darkness for another"), target: end, trailing: String(localized: "until \(park.time(end))"),
-                spoken: String(localized: "True darkness for another \(Self.spokenSpan(end.timeIntervalSince(now))), until \(park.time(end))."))
+                spoken: Sentences.end(String(localized: "True darkness for another \(Self.spokenSpan(end.timeIntervalSince(now))), until \(park.time(end))")))
         }
         let sunrise=sky.sunrise ?? sky.end
         return Status(phase: .dawn, lead: String(localized: "Sunrise in"), target: sunrise, trailing: String(localized: "True darkness ended at \(park.time(end))"),
-            spoken: String(localized: "Sunrise in \(Self.spokenSpan(sunrise.timeIntervalSince(now))). True darkness ended at \(park.time(end))."))
+            spoken: Sentences.end(String(localized: "Sunrise in \(Self.spokenSpan(sunrise.timeIntervalSince(now))). True darkness ended at \(park.time(end))")))
     }
 
     /// "7h 52m": compact, for figures.

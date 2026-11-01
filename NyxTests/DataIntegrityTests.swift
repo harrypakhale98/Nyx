@@ -248,6 +248,22 @@ struct DataIntegrityTests {
         #expect(body.hasPrefix("94 out of 100. ") && body.hasSuffix(". Check closures and access before you go."))
         #expect(!body.contains("park alerts"))
     }
+    /// A reason that ends in a time from a region whose times end in "p.m." (US Spanish, Latin American
+    /// English) closes its own sentence: never "p.m..".
+    @Test func reminderReasonEndingInATimeTakesNoSecondPeriod() throws {
+        let jotr=try park("jotr"), set=try date("2026-10-31 23:40", park: jotr)
+        var time=Date.FormatStyle(date: .omitted, time: .shortened, locale: Locale(identifier: "es_US")); time.timeZone=jotr.timeZone
+        let late=set.formatted(time)
+        try #require(late.hasSuffix("."))
+        let why="Moon down at \(late)"
+        let body=NotificationScheduler.body(score: 94, why: why, closure: nil, parkService: true)
+        #expect(body == "94 out of 100. \(why) Check park alerts before you go.")
+        #expect(!NotificationScheduler.body(score: 94, why: why, closure: nil, parkService: false).contains(".."))
+        let closed=NotificationScheduler.body(score: 94, why: why, closure: "Keys View Road closed at night", parkService: true)
+        #expect(closed == "Closure alert: Keys View Road closed at night. 94 out of 100. \(why)")
+        // A reason without a time is closed once.
+        #expect(NotificationScheduler.body(score: 94, why: "Moon down", closure: nil, parkService: true) == "94 out of 100. Moon down. Check park alerts before you go.")
+    }
 
     // MARK: Widget snapshot and watch context across versions
 

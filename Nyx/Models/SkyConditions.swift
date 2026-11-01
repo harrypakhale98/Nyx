@@ -110,8 +110,9 @@ nonisolated enum MoonInDarkness: Sendable, Equatable {
         case .allFree: return Sentences.end(String(localized: "Moon-free through all of true darkness"))
         case .negligible: return withLit ? String(localized: "Moon too thin to matter, \(lit) lit.") : String(localized: "Moon too thin to matter.")
         case .allUp: return withLit ? String(localized: "Moon up all through true darkness, \(lit) lit.") : Sentences.end(String(localized: "Moon up all through true darkness"))
-        case .setsAt(let set): return withLit ? String(localized: "Moon up until \(park.time(set)), \(lit) lit.") : String(localized: "Moon up until \(park.time(set)).")
-        case .risesAt(let rise): return withLit ? String(localized: "Moon rises at \(park.time(rise)), \(lit) lit.") : String(localized: "Moon rises at \(park.time(rise)).")
+        // Without the share lit, the time ends the sentence: closed here, so "p.m." takes no second period.
+        case .setsAt(let set): return withLit ? String(localized: "Moon up until \(park.time(set)), \(lit) lit.") : Sentences.end(String(localized: "Moon up until \(park.time(set))"))
+        case .risesAt(let rise): return withLit ? String(localized: "Moon rises at \(park.time(rise)), \(lit) lit.") : Sentences.end(String(localized: "Moon rises at \(park.time(rise))"))
         case .partial(let free): return Sentences.end(String(localized: "Moon-free for \(free)% of true darkness"))
         }
     }

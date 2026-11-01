@@ -94,7 +94,8 @@ nonisolated enum SkyNotes {
         guard let shadow = almanac.longest(in: DateInterval(start: start, end: end), where: shadowed), shadow.duration >= 600 else {
             return String(localized: "Satellites overhead catch sunlight all through true darkness at this time of year.")
         }
-        return String(localized: "Satellites overhead catch sunlight until \(WhatsUp.around(shadow.start, park: park)) and again from \(WhatsUp.around(shadow.end, park: park)).")
+        // Closed here, not in the catalog: a time that ends in "p.m." takes no second period.
+        return Sentences.end(String(localized: "Satellites overhead catch sunlight until \(WhatsUp.around(shadow.start, park: park)) and again from \(WhatsUp.around(shadow.end, park: park))"))
     }
 
     // MARK: Zodiacal light

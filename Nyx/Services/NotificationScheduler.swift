@@ -206,12 +206,16 @@ nonisolated struct NotificationScheduler {
     /// check: it says "closures and access" instead. With a closure in the last park update, the
     /// closure comes first in the app's words (`ClosureLine`) and stands in for the advice.
     static func body(_ night:Night,models:ModelAgreement?=nil,closure:String?=nil,device:TimeZone = .current)->String {
-        let why=reason(night,models:models,device:device)
+        body(score:night.score.value,why:reason(night,models:models,device:device),closure:closure,parkService:night.park.nps != nil)
+    }
+    /// The body from its parts, each its own sentence. The reason may end in a time ("Moon down at
+    /// 11:40 p.m."), so it is closed here, never with a second period.
+    static func body(score:Int,why:String,closure:String?,parkService:Bool)->String {
+        let lead=[String(localized:"\(score) out of 100."),Sentences.end(why)]
         if let closure=closure?.trimmingCharacters(in:.whitespacesAndNewlines), !closure.isEmpty {
-            return ClosureLine.first(String(localized:"\(night.score.value) out of 100. \(why)."),closure:closure)
+            return ClosureLine.first(Sentences.join(lead),closure:closure)
         }
-        guard night.park.nps != nil else { return String(localized:"\(night.score.value) out of 100. \(why). Check closures and access before you go.") }
-        return String(localized:"\(night.score.value) out of 100. \(why). Check park alerts before you go.")
+        return Sentences.join(lead+[parkService ? String(localized:"Check park alerts before you go.") : String(localized:"Check closures and access before you go.")])
     }
     /// One thing that is true of this night and makes it dark, the most telling first; with it,
     /// when true, that all three forecast models are clear ("Moon down; all three

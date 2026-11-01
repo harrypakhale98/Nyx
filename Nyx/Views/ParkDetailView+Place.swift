@@ -62,7 +62,7 @@ extension ParkDetailView {
                 ForEach(programs) { program in ProgramCard(park:park,program:program) }
                 // When the listed programs were checked, as "Where to stay" says of its campgrounds.
                 if !programs.isEmpty, let updated=data.updated {
-                    Text("From the National Park Service, \(park.timestamp(updated)).").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    Text(Sentences.end(String(localized:"From the National Park Service, \(park.timestamp(updated))"))).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
             } else {
                 // A key the Park Service did not accept is not mended by waiting: said as the alerts line says it.

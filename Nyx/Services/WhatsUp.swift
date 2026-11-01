@@ -159,7 +159,7 @@ nonisolated struct WhatsUp: Sendable {
     static func coreItem(_ core: SkyAlmanac.CoreNight, park: Park, sky: SkyConditions, almanac: SkyAlmanac = SkyAlmanac()) -> Item {
         let title=String(localized: "Milky Way core")
         func item(_ value: String, _ detail: String) -> Item {
-            Item(id: "core", kind: .core, title: title, value: value, detail: detail, spoken: "\(title): \(value). \(detail)")
+            Item(id: "core", kind: .core, title: title, value: value, detail: detail, spoken: Phrase.sentences([String(localized: "\(title): \(value)"), detail]))
         }
         // The seasonal guidance's own words where nothing can be timed: far north, or no true darkness.
         if core.peakPossible<3 { return item(String(localized: "Below the horizon"), AstronomyEngine().milkyWayGuidance(for: sky, park: park)) }
@@ -176,11 +176,11 @@ nonisolated struct WhatsUp: Sendable {
                 let minimum=Int(SkyAlmanac.coreMinimumAltitude), hidden=String(localized: "Lower than that, haze and terrain usually hide it.")
                 if let sets=core.sets, sets<=start.addingTimeInterval(60) {
                     return item(low ? String(localized: "Too low in darkness") : String(localized: "Sets before darkness"),
-                                Sentences.join([String(localized: "The bright center sinks below \(minimum)° at \(park.time(sets)), before true darkness begins at \(park.time(start))."), hidden]))
+                                Sentences.join([Sentences.end(String(localized: "The bright center sinks below \(minimum)° at \(park.time(sets)), before true darkness begins at \(park.time(start))")), hidden]))
                 }
                 if let rises=core.rises, rises>=end.addingTimeInterval(-60) {
                     return item(low ? String(localized: "Too low in darkness") : String(localized: "Rises after darkness"),
-                                Sentences.join([String(localized: "The bright center climbs past \(minimum)° at \(park.time(rises)), after true darkness ends at \(park.time(end))."), hidden]))
+                                Sentences.join([Sentences.end(String(localized: "The bright center climbs past \(minimum)° at \(park.time(rises)), after true darkness ends at \(park.time(end))")), hidden]))
                 }
             }
             return item(String(localized: "Out of the night sky"), String(localized: "The bright center is near the Sun this season. The Milky Way's fainter band still crosses dark skies."))
@@ -196,7 +196,7 @@ nonisolated struct WhatsUp: Sendable {
         detail=Sentences.join([detail, moonSentence(dark: dark, free: core.moonFree, sky: sky, park: park)])
         if let terrain=terrainSentence(dark: dark, park: park, almanac: almanac) { detail=Sentences.join([detail, terrain]) }
         let spokenRange=String(localized: "up in true darkness from \(park.time(dark.start)) to \(park.time(dark.end))")
-        return Item(id: "core", kind: .core, title: title, value: range, detail: detail, spoken: "\(title): \(spokenRange). \(detail)", timed: true)
+        return Item(id: "core", kind: .core, title: title, value: range, detail: detail, spoken: Phrase.sentences([String(localized: "\(title): \(spokenRange)"), detail]), timed: true)
     }
     /// Whether the core clears 0° at any time in `dark`: a core under its 10° but above the horizon is
     /// "too low", never set or not yet risen.
@@ -220,9 +220,10 @@ nonisolated struct WhatsUp: Sendable {
         }
         let later=seen.start.timeIntervalSince(dark.start)>=900, earlier=dark.end.timeIntervalSince(seen.end)>=900
         switch (later, earlier) {
-        case (true, true): return String(localized: "From \(place), it clears the terrain around \(around(seen.start, park: park)) and drops behind it around \(around(seen.end, park: park)).")
-        case (true, false): return String(localized: "From \(place), it clears the terrain around \(around(seen.start, park: park)).")
-        case (false, true): return String(localized: "From \(place), it drops behind the terrain around \(around(seen.end, park: park)).")
+        // Closed here, not in the catalog: a time that ends in "p.m." takes no second period.
+        case (true, true): return Sentences.end(String(localized: "From \(place), it clears the terrain around \(around(seen.start, park: park)) and drops behind it around \(around(seen.end, park: park))"))
+        case (true, false): return Sentences.end(String(localized: "From \(place), it clears the terrain around \(around(seen.start, park: park))"))
+        case (false, true): return Sentences.end(String(localized: "From \(place), it drops behind the terrain around \(around(seen.end, park: park))"))
         case (false, false): return nil
         }
     }
@@ -234,9 +235,9 @@ nonisolated struct WhatsUp: Sendable {
         let fromStart=abs(free.start.timeIntervalSince(dark.start))<tolerance, toEnd=abs(free.end.timeIntervalSince(dark.end))<tolerance
         switch (fromStart, toEnd) {
         case (true, true): return String(localized: "The Moon is down all that time.")
-        case (false, true): return String(localized: "Moon-free from \(park.time(free.start)).")
-        case (true, false): return String(localized: "Moon-free until \(park.time(free.end)).")
-        case (false, false): return String(localized: "Moon-free from \(park.time(free.start)) to \(park.time(free.end)).")
+        case (false, true): return Sentences.end(String(localized: "Moon-free from \(park.time(free.start))"))
+        case (true, false): return Sentences.end(String(localized: "Moon-free until \(park.time(free.end))"))
+        case (false, false): return Sentences.end(String(localized: "Moon-free from \(park.time(free.start)) to \(park.time(free.end))"))
         }
     }
 
@@ -264,8 +265,8 @@ nonisolated struct WhatsUp: Sendable {
             detail=String(localized: "Up all night, highest around \(around(planet.best, park: park)) in the \(bestDirection).")
         case (nil, let sets?):
             value=String(localized: "Until \(park.time(sets))")
-            detail=planet.bestAltitude<15 ? String(localized: "Low in the \(direction(planet.visible.start)) after dusk; sets at \(park.time(sets)).")
-                : String(localized: "In the \(direction(planet.visible.start)) after dusk; sets at \(park.time(sets)).")
+            detail=Sentences.end(planet.bestAltitude<15 ? String(localized: "Low in the \(direction(planet.visible.start)) after dusk; sets at \(park.time(sets))")
+                : String(localized: "In the \(direction(planet.visible.start)) after dusk; sets at \(park.time(sets))"))
         case (let rises?, nil):
             value=String(localized: "Rises \(park.time(rises))")
             let riseDirection=direction(rises)
@@ -280,11 +281,11 @@ nonisolated struct WhatsUp: Sendable {
             }
         case (let rises?, let sets?):
             value=String(localized: "\(park.time(rises)) – \(park.time(sets))")
-            detail=String(localized: "Rises at \(park.time(rises)) in the \(direction(rises)), highest around \(around(planet.best, park: park)), sets at \(park.time(sets)).")
+            detail=Sentences.end(String(localized: "Rises at \(park.time(rises)) in the \(direction(rises)), highest around \(around(planet.best, park: park)), sets at \(park.time(sets))"))
         }
         let note=brightness(planet.magnitude)
         return Item(id: planet.planet.rawValue, kind: .planet, title: planet.planet.name, note: note, value: value, detail: detail,
-            spoken: "\(planet.planet.name), \(note). \(detail)")
+            spoken: Phrase.sentences([Phrase.clauses([planet.planet.name, note]), detail]))
     }
 
     // MARK: Meteor showers
@@ -340,7 +341,7 @@ nonisolated struct WhatsUp: Sendable {
         }
         let home=homeObserver != nil
         return Item(id: "shower-\(shower.code)", kind: .meteors, title: shower.localizedName, note: note, value: value, detail: lead,
-            spoken: home ? "\(shower.localizedName), \(note): \(value). \(lead)" : "\(shower.localizedName), \(note): \(value). \(lead) \(published)",
+            spoken: Phrase.sentences([String(localized: "\(Phrase.clauses([shower.localizedName, note])): \(value)"), lead, home ? "" : published]),
             footnote: home ? nil : published, timed: night.best != nil)
     }
     /// Why a peak night will be poor from this park, in one honest sentence.
@@ -366,7 +367,7 @@ nonisolated struct WhatsUp: Sendable {
         let eclipse=night.eclipse, title=eclipseName(eclipse)
         guard let visible=night.visible else {
             let detail=String(localized: "Not visible from this park: the Moon is below the horizon.")
-            return Item(id: "eclipse", kind: .eclipse, title: title, note: String(localized: "not visible here"), detail: detail, spoken: "\(title). \(detail)")
+            return Item(id: "eclipse", kind: .eclipse, title: title, note: String(localized: "not visible here"), detail: detail, spoken: Phrase.sentences([title, detail]))
         }
         // Only the partial phase is up here: the Moon rises already in Earth's shadow, or sets
         // during it. Said plainly, with the times it can be seen.
@@ -375,7 +376,7 @@ nonisolated struct WhatsUp: Sendable {
             let rises=eclipse.u1.map { visible.start.timeIntervalSince($0)>120 } ?? false
             let detail=rises ? String(localized: "Rises already in Earth's shadow; partial phase visible \(park.time(visible.start))–\(park.time(visible.end)). Totality is over before moonrise here.")
                 : String(localized: "Sets during the partial phase; visible \(park.time(visible.start))–\(park.time(visible.end)). Totality comes after moonset here.")
-            return Item(id: "eclipse", kind: .eclipse, title: title, note: String(localized: "partial phase here"), value: range, detail: detail, spoken: "\(title). \(detail)", timed: true)
+            return Item(id: "eclipse", kind: .eclipse, title: title, note: String(localized: "partial phase here"), value: range, detail: detail, spoken: Phrase.sentences([title, detail]), timed: true)
         }
         let engine=AstronomyEngine()
         let moment=night.greatestVisible ? eclipse.greatest : visible.start.addingTimeInterval(visible.duration/2)
@@ -400,7 +401,7 @@ nonisolated struct WhatsUp: Sendable {
         if eclipse.type=="partial" { extras.append(String(localized: "At most \(Int((eclipse.umbralMagnitude*100).rounded()))% of the Moon's width is in shadow.")) }
         if eclipse.type=="penumbral" { extras.append(String(localized: "Subtle: the Moon's edge darkens slightly.")) }
         detail=Sentences.join([detail]+extras)
-        return Item(id: "eclipse", kind: .eclipse, title: title, value: range, detail: detail, spoken: "\(title). \(Sentences.join([spokenStage]+extras))", timed: true)
+        return Item(id: "eclipse", kind: .eclipse, title: title, value: range, detail: detail, spoken: Phrase.sentences([title, Sentences.join([spokenStage]+extras)]), timed: true)
     }
 
     // MARK: Highlights
@@ -435,14 +436,14 @@ nonisolated struct WhatsUp: Sendable {
         let place=placed(altitude: pairing.altitude, azimuth: pairing.azimuth)
         let detail=String(localized: "Closest then, \(place). A fine sight by eye or in binoculars.")
         return Item(id: "pairing-\(pairing.id)", kind: .pairing, title: title, note: note, value: when, detail: detail,
-            spoken: "\(title), \(note). "+String(localized: "Closest around \(when), \(place). A fine sight by eye or in binoculars."), timed: true)
+            spoken: Phrase.sentences([Phrase.clauses([title, note]), String(localized: "Closest around \(when), \(place). A fine sight by eye or in binoculars.")]), timed: true)
     }
     static func nearFullMoonItem(distance: Double) -> Item {
         let title=String(localized: "Full Moon at its nearest")
         let km=Measurement(value: (distance/1000).rounded()*1000, unit: UnitLength.kilometers)
             .formatted(.measurement(width: .abbreviated, usage: .road, numberFormatStyle: .number.precision(.fractionLength(0))))
         let detail=String(localized: "About \(km) away, so a little larger and brighter than most Full Moons. Its light hides all but the brightest stars.")
-        return Item(id: "moon-near", kind: .moon, title: title, detail: detail, spoken: "\(title). \(detail)")
+        return Item(id: "moon-near", kind: .moon, title: title, detail: detail, spoken: Phrase.sentences([title, detail]))
     }
     static func planetBestItem(_ night: SkyAlmanac.PlanetNight, day: Date, park: Park, sky: SkyConditions) -> Item {
         let window=SkyAlmanac.nightWindow(sky)
@@ -454,21 +455,21 @@ nonisolated struct WhatsUp: Sendable {
         let detail=evening ? String(localized: "Farthest from the Sun's glare around \(day.formatted(format)): the best evenings to find it, \(place) after sunset.")
             : String(localized: "Farthest from the Sun's glare around \(day.formatted(format)): the best mornings to find it, \(place) before sunrise.")
         let note=String(localized: "this week")
-        return Item(id: "best-\(night.planet.rawValue)", kind: .planetBest, title: title, note: note, detail: detail, spoken: "\(title), \(note). \(detail)")
+        return Item(id: "best-\(night.planet.rawValue)", kind: .planetBest, title: title, note: note, detail: detail, spoken: Phrase.sentences([Phrase.clauses([title, note]), detail]))
     }
     static func solsticeItem(_ solstice: SkyAlmanac.Solstice, sky: SkyConditions) -> Item {
         let title=solstice == .longestNight ? String(localized: "The longest night of the year") : String(localized: "The shortest night of the year")
         let hours=Duration.seconds(sky.darkHours*3600).formatted(.units(allowed: [.hours, .minutes], width: .wide))
         let detail=sky.darkHours>0 ? String(localized: "The solstice falls this night. True darkness lasts \(hours).")
             : String(localized: "The solstice falls this night. At this latitude there is no true darkness.")
-        return Item(id: "solstice", kind: .season, title: title, detail: detail, spoken: "\(title). \(detail)")
+        return Item(id: "solstice", kind: .season, title: title, detail: detail, spoken: Phrase.sentences([title, detail]))
     }
     static func gegenscheinItem(_ point: SkyAlmanac.Gegenschein, park: Park) -> Item {
         let title=String(localized: "Gegenschein"), when=around(point.at, park: park)
         let detail=String(localized: "A very faint, broad glow opposite the Sun, around \(when), \(Int(point.altitude.rounded()))° up in the \(Compass.name(point.azimuth)). Only from the darkest skies, with eyes fully adapted; easy to miss.")
         let note=String(localized: "very faint")
         return Item(id: "gegenschein", kind: .gegenschein, title: title, note: note, value: when, detail: detail,
-            spoken: "\(title), \(note). \(detail)", timed: true)
+            spoken: Phrase.sentences([Phrase.clauses([title, note]), detail]), timed: true)
     }
 
     /// Tonight's best-placed binocular sights (`DeepSky.sights`), one sentence each.
@@ -477,10 +478,10 @@ nonisolated struct WhatsUp: Sendable {
         let lines=sights.map { sight in
             let place=placed(altitude: sight.altitude, azimuth: sight.azimuth), when=around(sight.at, park: park)
             return sight.toTheEye ? String(localized: "\(sight.object.label): \(place) around \(when), visible to the eye too.")
-                : String(localized: "\(sight.object.label): \(place) around \(when).")
+                : Sentences.end(String(localized: "\(sight.object.label): \(place) around \(when)"))
         }
         let detail=Sentences.join(lines)
-        return Item(id: "deepsky", kind: .deepSky, title: title, detail: detail, spoken: "\(title). \(detail)")
+        return Item(id: "deepsky", kind: .deepSky, title: title, detail: detail, spoken: Phrase.sentences([title, detail]))
     }
 
     /// A time rounded to ten minutes on the park's clock, for moments that are only ever "around"

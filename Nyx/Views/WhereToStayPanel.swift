@@ -23,7 +23,8 @@ struct WhereToStayPanel: View {
             }
             content
             if let updated=model.campgrounds?.updated {
-                Text("From the National Park Service, \(park.timestamp(updated)).").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                // Closed here, not in the catalog: a time that ends in "p.m." takes no second period.
+                Text(Sentences.end(String(localized:"From the National Park Service, \(park.timestamp(updated))"))).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             }
         } }
         .task {
