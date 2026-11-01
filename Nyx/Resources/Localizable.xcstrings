@@ -5741,6 +5741,41 @@
         }
       }
     },
+    "%lld of 30 min": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld von 30 Min."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of 30 min"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld de 30 min"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sur 30 min"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld／30分"
+          }
+        }
+      }
+    },
     "%lld of 7 Little Dipper stars, an estimate": {
       "extractionState": "manual",
       "localizations": {
@@ -54330,6 +54365,41 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Red light only. Notifications for Nyx are off, so Nyx taps your wrist at 25 and 30 minutes only while it is on screen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur Rotlicht. Mitteilungen für Nyx sind ausgeschaltet, daher tippt Nyx nach 25 und 30 Minuten nur an dein Handgelenk, solange es auf dem Bildschirm ist."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Red light only. Notifications for Nyx are off, so Nyx taps your wrist at 25 and 30 minutes only while it is on screen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo luz roja. Las notificaciones de Nyx están desactivadas, así que Nyx toca tu muñeca a los 25 y 30 minutos solo mientras está en pantalla."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lumière rouge uniquement. Les notifications de Nyx sont désactivées, donc Nyx tapote votre poignet à 25 et 30 minutes seulement tant qu’il est à l’écran."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "赤い光だけ。Nyxの通知がオフのため、25分と30分の時点でNyxが手首をタップするのは、画面に表示されている間だけです。"
           }
         }
       }

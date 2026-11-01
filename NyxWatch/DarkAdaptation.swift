@@ -12,14 +12,11 @@ struct DarkAdaptationView: View {
     /// Nil when Siri, the Action button or the control starts the clock before any place is chosen:
     /// the clock and its reminders, with no moments under it.
     let park: Park?
-    /// Opened by Siri, the Action button or the control with the clock running and the reminders'
-    /// permission undecided: Nyx's line about the wrist taps comes up first, and Continue schedules them.
-    var explainsFirst = false
-    @State private var showsInfo = WatchDebug.showsInfo
-    /// The first Start's line before the system asks to tap the wrist.
-    @State private var explaining = false
-    /// Whether the line has come up for `explainsFirst`, so it comes up once.
-    @State private var explained = false
+    /// The sheet over the clock: Nyx's line before the system asks to tap the wrist (the first Start,
+    /// or a request from Siri, the Action button or the control), or the info. One at a time, so a
+    /// request that comes while the info is up replaces it rather than fail to open.
+    private enum Sheet: String, Identifiable { case explainer, info; var id: String { rawValue } }
+    @State private var sheet: Sheet? = WatchDebug.showsInfo ? .info : nil
     @State private var permission: UNAuthorizationStatus?
     /// The page's room between its bars, and the words' height above the ring: the ring takes what is left.
     @State private var room: CGFloat = 200
@@ -41,7 +38,7 @@ struct DarkAdaptationView: View {
                         Button { dismiss() } label: { Label("Done", systemImage: "xmark") }.tint(palette.toolbarTint)
                     }
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button { showsInfo = true } label: { Label("About dark adaptation", systemImage: "info") }.tint(palette.toolbarTint)
+                        Button { sheet = .info } label: { Label("About dark adaptation", systemImage: "info") }.tint(palette.toolbarTint)
                     }
                     // Start and Stop sit in the bottom bar, so the ring and the next moment share one screen.
                     ToolbarItemGroup(placement: .bottomBar) {
@@ -50,18 +47,21 @@ struct DarkAdaptationView: View {
                         Spacer()
                     }
                 }
-                .sheet(isPresented: $explaining) {
-                    // From a request the clock already runs: Continue adds its reminders.
-                    AdaptationExplainer {
-                        if store.adaptation == nil { start() } else { Task { permission = await store.remindAdaptation() } }
+                .sheet(item: $sheet) { sheet in
+                    switch sheet {
+                    case .explainer:
+                        // From a request the clock already runs: Continue adds its reminders.
+                        AdaptationExplainer {
+                            if store.adaptation == nil { start() } else { Task { permission = await store.remindAdaptation() } }
+                        }
+                        .environment(\.nyx, palette).modifier(WatchDebug.TypeSize())
+                    case .info: AdaptationInfo(permission: permission).environment(\.nyx, palette).modifier(WatchDebug.TypeSize())
                     }
-                    .environment(\.nyx, palette).modifier(WatchDebug.TypeSize())
                 }
-                .sheet(isPresented: $showsInfo) { AdaptationInfo().environment(\.nyx, palette).modifier(WatchDebug.TypeSize()) }
         }
         // The scroll indicator is system chrome outside the red filter: a white bar at night. A
         // presentation's indicator follows the view that presents it, so this one hides the info
-        // sheet's, and the page that opens this cover hides the cover's (`ParkNightView`).
+        // sheet's, and the root that opens this cover hides the cover's (`AdaptationRequests`).
         .scrollIndicators(.never)
         .foregroundStyle(palette.ink)
         .tint(palette.ink)
@@ -69,12 +69,23 @@ struct DarkAdaptationView: View {
         .modifier(NightVisionFilter(enabled: true, red: palette.red))
         .background(Color.black)
         .modifier(WatchDebug.TypeSize())
-        .task { permission = await AdaptationReminders.status() }
+        .task {
+            if let debug = WatchDebug.reminderPermission { permission = debug } else { permission = await AdaptationReminders.status() }
+        }
         .onChange(of: store.reminderStatus) { _, status in if let status { permission = status } }
         .onAppear {
             store.reloadSettings()
-            if explainsFirst, !explained, store.adaptation != nil { explained = true; explaining = true }
+            explainIfAsked()
         }
+        // A request from Siri, the Action button or the control while this screen is up (`WatchStore.openAdaptation`).
+        .onChange(of: store.adaptationCover?.explainsFirst) { explainIfAsked() }
+    }
+    /// Opened by a request with the clock running and the reminders' permission undecided: Nyx's line
+    /// about the wrist taps comes up first, once per request, and Continue schedules them.
+    private func explainIfAsked() {
+        guard store.adaptationCover?.explainsFirst == true else { return }
+        store.adaptationCover?.explainsFirst = false
+        if store.adaptation != nil { sheet = .explainer }
     }
     /// The ring's side: 112 pt where it fits, else what the room under the words leaves, counting the
     /// open bottom of the ring (about a fifth of its side, below "minutes") as free to sit over the bar.
@@ -83,15 +94,21 @@ struct DarkAdaptationView: View {
     /// on 40 mm, the large sizes). At the accessibility sizes the ring then comes first, sized to the
     /// room alone, and the words follow below it. At the standard sizes the next moment stays on the
     /// first screen: its clock time gives way (VoiceOver keeps it), then the ring, down to 64 pt; where
-    /// even that does not fit (a three-line countdown), the ring starts past the button, never under it.
+    /// even that does not fit (a three-line countdown), the ring starts past the button, never under it,
+    /// and a running clock's minutes stay above the button in words (`AdaptationMinutes`).
     nonisolated static func crowded(room: CGFloat, words: CGFloat) -> Bool { words+4+80*0.82 > room }
+    /// Whether a 64 pt ring would not fit between the words and the button, so it starts past the button.
+    nonisolated static func ringBelow(room: CGFloat, words: CGFloat) -> Bool { (room-words-4)/0.82 < 64 }
     private var content: some View {
         // Minutes counted from the moment the clock started, not from the wall clock's minute.
         TimelineView(.periodic(from: store.adaptation?.start ?? .now, by: 60)) { timeline in
             let now = timeline.date
             let clock = store.adaptation
-            let night = park.map { store.tonight($0, at: now) }
-            let next = night.flatMap { NightMilestone.next(after: now, in: $0.sky) }
+            // The night's moments at the app's minute (`-nyx-watch-shift` moves it in DEBUG, so a cover
+            // before dawn can be reviewed by day); the clock keeps the real one.
+            let moment = now.addingTimeInterval(WatchDebug.clockShift)
+            let night = park.map { store.tonight($0, at: moment) }
+            let next = night.flatMap { NightMilestone.next(after: moment, in: $0.sky) }
             ScrollView {
                 // Words above the ring, and the ring as large as the room left above the bottom bar's button
                 // (112 pt where it fits): on a 40 mm watch two lines of words pushed a 112 pt ring's "minutes" under it.
@@ -105,10 +122,10 @@ struct DarkAdaptationView: View {
                         if first { AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: 0)) }
                         Group {
                             if let night, let next {
-                                NextInDark(night: night, next: next, now: now, showsTime: !crowded || first)
+                                NextInDark(night: night, next: next, now: moment, showsTime: !crowded || first)
                                     .frame(maxWidth: .infinity)
                                     .background {
-                                        NextInDark(night: night, next: next, now: now).hidden()
+                                        NextInDark(night: night, next: next, now: moment).hidden()
                                             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { whole = $0 }
                                     }
                             } else {
@@ -124,7 +141,11 @@ struct DarkAdaptationView: View {
                         // its button, never under it: on 49 mm the room reaches further below the ring.
                         .padding(.top, first ? max(0, room+40-Self.ring(room: room, words: 0)-4) : 0)
                         if !first {
-                            let below = (room-words-4)/0.82 < 64
+                            let below = Self.ringBelow(room: room, words: words)
+                            // The ring past the button (French or German on 40 mm, the large sizes): a running
+                            // clock's minutes stay on the first screen, above the button. Not in the words'
+                            // measure, so the layout never changes because they show; the ring speaks them.
+                            if below, let clock { AdaptationMinutes(clock: clock, now: now) }
                             AdaptationRing(clock: clock, now: now).frame(maxWidth: Self.ring(room: room, words: below ? 0 : words, floor: 64))
                                 .padding(.top, below ? max(0, room+40-words-4) : 0)
                         }
@@ -137,8 +158,12 @@ struct DarkAdaptationView: View {
             }
             // The height between the top bar and the bottom bar: the scroll view's frame sits inside both.
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { room = $0 }
-            // Without permission for reminders, the taps come from the screen while it is up.
-            .sensoryFeedback(.success, trigger: clock?.isAdapted(at: now) ?? false) { old, new in !old && new && !AdaptationReminders.allowed(permission) }
+            // Without permission for reminders, the taps come from the screen while it is up: at 25
+            // minutes, and the success tap at 30.
+            .sensoryFeedback(trigger: clock?.remindersReached(at: now) ?? 0) { old, new in
+                guard new > old, !AdaptationReminders.allowed(permission) else { return nil }
+                return new < AdaptationClock.reminderMinutes.count ? .start : .success
+            }
             .modifier(MilestoneTap(park: park, next: next, active: true))
         }
     }
@@ -150,7 +175,7 @@ struct DarkAdaptationView: View {
         } else {
             // The first time, a line first says why the system will ask (in the page it pushed the ring
             // under this button on a 40 mm watch); after that Start starts at once.
-            Button { if permission == .notDetermined { explaining = true } else { start() } } label: { Label("Start", systemImage: "play.fill") }
+            Button { if permission == .notDetermined { sheet = .explainer } else { start() } } label: { Label("Start", systemImage: "play.fill") }
                 .tint(palette.toolbarTint)
                 .handGestureShortcut(.primaryAction)
                 .accessibilityHint("Starts a 30-minute dark-adaptation clock.")
@@ -189,6 +214,22 @@ private struct TypeSizeReader<Content: View>: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @ViewBuilder let content: (DynamicTypeSize) -> Content
     var body: some View { content(typeSize) }
+}
+
+/// A running clock's minutes as words, above the button, where the ring sits past it.
+private struct AdaptationMinutes: View {
+    @Environment(\.nyx) private var palette
+    let clock: AdaptationClock
+    let now: Date
+    var body: some View {
+        Group {
+            if clock.isAdapted(at: now) { Text("Adapted") } else { Text("\(clock.elapsedMinutes(at: now)) of 30 min") }
+        }
+        .font(.system(.caption, design: .serif)).monospacedDigit().foregroundStyle(palette.ink)
+        .fixedSize(horizontal: false, vertical: true)
+        // The ring below says the same to VoiceOver.
+        .accessibilityHidden(true)
+    }
 }
 
 /// The adaptation clock as the gauge's arc: open at the bottom, a tick every five minutes, the
@@ -310,14 +351,22 @@ private struct AdaptationExplainer: View {
 private struct AdaptationInfo: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dismiss) private var dismiss
+    /// The reminders' permission: with notifications off, the taps come only from the open screen.
+    var permission: UNAuthorizationStatus?
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Dark adaptation").font(.system(.headline, design: .serif))
                     Text("Eyes take 20 to 30 minutes to adapt to the dark. A bright screen or a white light resets them.")
-                    Text("Red light only. Nyx taps your wrist at 25 and 30 minutes, even with the screen off.")
-                        .foregroundStyle(palette.muted)
+                    Group {
+                        if permission == .denied {
+                            Text("Red light only. Notifications for Nyx are off, so Nyx taps your wrist at 25 and 30 minutes only while it is on screen.")
+                        } else {
+                            Text("Red light only. Nyx taps your wrist at 25 and 30 minutes, even with the screen off.")
+                        }
+                    }
+                    .foregroundStyle(palette.muted)
                     // watchOS returns to the watch face two minutes after the wrist drops, by default.
                     Text("To keep Nyx on screen between glances, open Settings › General › Return to Clock › Nyx and choose After 1 hour.")
                         .foregroundStyle(palette.muted)
@@ -401,6 +450,12 @@ nonisolated final class AdaptationNotificationDelegate: NSObject, UNUserNotifica
 }
 #Preview("Before the first Start") {
     AdaptationExplainer {}.environment(\.nyx, NyxPalette(nightVision: true, highContrast: false))
+}
+#Preview("Info") {
+    AdaptationInfo(permission: .authorized).environment(\.nyx, NyxPalette(nightVision: true, highContrast: false))
+}
+#Preview("Info • notifications off") {
+    AdaptationInfo(permission: .denied).environment(\.nyx, NyxPalette(nightVision: true, highContrast: false))
 }
 #Preview("Ring • 12 min") {
     AdaptationRing(clock: AdaptationClock(start: .now.addingTimeInterval(-12*60)), now: .now)

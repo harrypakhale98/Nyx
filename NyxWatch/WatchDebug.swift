@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 import WidgetKit
 
 /// Screenshot routes for the watch, DEBUG only (Release always starts on Tonight):
@@ -9,7 +10,9 @@ import WidgetKit
 /// `-nyx-watch-face` (with `complications`: the full-colour renders alone, unlabelled, for the store frame).
 /// `-nyx-watch-ask asking | asked | resending | unreachable | locked`: "Update from iPhone" as if just answered (with `expired` or `unsynced`).
 /// `-nyx-watch-shift <hours>`: the app's minute moved that far ahead, to review moments of the night by day.
-/// `-nyx-watch-request open | explain`: the red cover as Siri or the control opens it, asking the system nothing.
+/// `-nyx-watch-notifications off`: the red cover as it is with notifications for Nyx denied.
+/// `-nyx-watch-request open | explain`: the red cover as Siri or the control opens it, asking the system nothing
+/// (with `-nyx-watch-screen dark`: the request comes while the cover is already up).
 /// `-nyx-watch-type large | xLarge | xxLarge` (or `-nyx-watch-xxxl`, `-nyx-watch-ax`): a text size the simulator cannot set.
 /// States change who is followed, never a score: every night is computed by the real engine.
 enum WatchDebug {
@@ -52,6 +55,15 @@ enum WatchDebug {
     static var request: String? {
         #if DEBUG
         return argument("-nyx-watch-request")
+        #else
+        return nil
+        #endif
+    }
+    /// `-nyx-watch-notifications off`: the reminders' permission read as denied on the red screen, for
+    /// review of what it says and taps then (the simulator cannot deny it before it is asked). Nil in Release.
+    static var reminderPermission: UNAuthorizationStatus? {
+        #if DEBUG
+        return argument("-nyx-watch-notifications") == "off" ? .denied : nil
         #else
         return nil
         #endif

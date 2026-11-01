@@ -152,8 +152,9 @@ struct ParkNightView: View {
     /// Nights after tonight the dial opens on (a complication's later night), turned with the Crown.
     var startNight = WatchDebug.initialNight
     @State private var page = WatchDebug.initialPage
-    @State private var darkMode = WatchDebug.screen == "dark"
     @Environment(\.watchNow) private var now
+    /// The red dark-adaptation screen is up (opened at the root, `AdaptationRequests`).
+    private var darkMode: Bool { store.adaptationCover != nil }
     var body: some View {
         Group {
             let week = store.week(park, at: now)
@@ -179,14 +180,11 @@ struct ParkNightView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 // Double Tap opens it: a hand holding binoculars can still start adapting.
-                Button { darkMode = true } label: { Label("Dark adaptation", systemImage: "eye") }.tint(palette.toolbarTint)
+                // Opened by the root's one presenter, so a request from Siri or the control finds it up.
+                Button { store.openAdaptation(park: park) } label: { Label("Dark adaptation", systemImage: "eye") }.tint(palette.toolbarTint)
                     .handGestureShortcut(.primaryAction, isEnabled: !darkMode)
             }
         }
-        .fullScreenCover(isPresented: $darkMode) { DarkAdaptationView(park: park) }
-        // A presentation's scroll indicator follows the view that presents it, not the cover's own
-        // setting: hidden while the red cover is up, as the root hides it under red light.
-        .scrollIndicators(darkMode || palette.nightVision ? .never : .automatic)
     }
 }
 

@@ -26,6 +26,10 @@ import WidgetKit
     /// The reminders' permission as the last start found it, so a clock started from Siri or the
     /// control (while the first-time question may still be up) reaches the open screen.
     private(set) var reminderStatus: UNAuthorizationStatus?
+    /// The red dark-adaptation screen, while it is up: one presenter at the root (`AdaptationRequests`)
+    /// for the eye button and for Siri, the Action button or the control alike, so a request that comes
+    /// while the screen is already up reaches it rather than a second screen that cannot open.
+    var adaptationCover: AdaptationCover?
     /// "Update from iPhone": the last request and its answer, shown beside an old forecast.
     private(set) var ask: IPhoneAsk?
     @ObservationIgnored private var skies: [String: SkyConditions] = [:]
@@ -133,6 +137,12 @@ import WidgetKit
         let status = await AdaptationReminders.schedule(clock, now: .now)
         reminderStatus = status
         return status
+    }
+    /// Opens the red screen for `park` (nil before any place is chosen). Already up, it stays on its
+    /// own place, and `explainsFirst` brings Nyx's line about the wrist taps up over it.
+    func openAdaptation(park: Park?, explainsFirst: Bool = false) {
+        if adaptationCover == nil { adaptationCover = AdaptationCover(park: park, explainsFirst: explainsFirst) }
+        else if explainsFirst { adaptationCover?.explainsFirst = true }
     }
     func stopAdaptation() {
         adaptation = nil

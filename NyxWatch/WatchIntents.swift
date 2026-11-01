@@ -130,18 +130,23 @@ struct RedLightOnIntent: AppIntent {
 /// clock and the reminders, and opens the red screen for the park on Tonight (with no moments under
 /// the clock before any place is chosen). The first time, the
 /// reminders wait: the screen opens with Nyx's line about the wrist taps up, and the system asks only
-/// after Continue, as the screen's own Start does. Also keeps the clock's complication in step when
+/// after Continue, as the screen's own Start does. The one presenter of the red screen
+/// (`WatchStore.adaptationCover`): the eye button opens it here too, so a request that comes while
+/// it is up hands its line to the open screen. Also keeps the clock's complication in step when
 /// the clock starts or stops.
 struct AdaptationRequests: ViewModifier {
     @Environment(WatchStore.self) private var store
     @Environment(\.scenePhase) private var scenePhase
-    @State private var shown: AdaptationCover?
+    #if DEBUG
+    @State private var debugOpened = false
+    #endif
     func body(content: Content) -> some View {
+        @Bindable var store = store
         content
-            .fullScreenCover(item: $shown) { cover in DarkAdaptationView(park: cover.park, explainsFirst: cover.explainsFirst).environment(store) }
+            .fullScreenCover(item: $store.adaptationCover) { cover in DarkAdaptationView(park: cover.park).environment(store) }
             // A presentation's scroll indicator follows the view that presents it, not the cover's own
-            // setting (`ParkNightView`): a white bar on the red screen otherwise. The root keeps its own.
-            .scrollIndicators(shown == nil ? .automatic : .never)
+            // setting: a white bar on the red screen otherwise. The root keeps its own.
+            .scrollIndicators(store.adaptationCover == nil ? .automatic : .never)
             .onAppear { take() }
             .onChange(of: scenePhase) { _, phase in if phase == .active { take() } }
             .onReceive(NotificationCenter.default.publisher(for: AdaptationRequest.notification)) { _ in take() }
@@ -149,7 +154,7 @@ struct AdaptationRequests: ViewModifier {
     }
     private func take() {
         #if DEBUG
-        if let request = WatchDebug.request { debugOpen(explainsFirst: request == "explain"); return }
+        if debugTake() { return }
         #endif
         guard WatchDebug.screen == nil, let start = AdaptationRequest.take() else { return }
         // The same start the intent stored, so a clock already running keeps its minutes.
@@ -160,23 +165,34 @@ struct AdaptationRequests: ViewModifier {
         Task {
             let asks = await AdaptationReminders.status() == .notDetermined
             if !asks { await store.remindAdaptation() }
-            shown = AdaptationCover(park: park, explainsFirst: asks)
+            store.openAdaptation(park: park, explainsFirst: asks)
         }
     }
     #if DEBUG
-    /// `-nyx-watch-request open | explain`: the cover as a request opens it, with a clock just
-    /// started and nothing scheduled, so the system never asks (`explain`: with Nyx's line up).
-    private func debugOpen(explainsFirst: Bool) {
-        guard shown == nil else { return }
-        if store.adaptation == nil { store.debugSet(adaptation: AdaptationClock(start: .now)) }
-        shown = AdaptationCover(park: store.featured(at: .now), explainsFirst: explainsFirst)
+    /// `-nyx-watch-screen dark`: the red screen as the eye button opens it, on the park Tonight shows
+    /// at the debug minute (`-nyx-watch-shift`). `-nyx-watch-request open | explain`: as a request
+    /// opens it, with a clock just started and nothing scheduled, so the system never asks (`explain`:
+    /// with Nyx's line up); with `dark` too, the request comes while the screen is already up. Once a launch.
+    private func debugTake() -> Bool {
+        guard WatchDebug.screen == "dark" || WatchDebug.request != nil else { return false }
+        guard !debugOpened else { return true }
+        debugOpened = true
+        let park = store.featured(at: .now.addingTimeInterval(WatchDebug.clockShift))
+        if WatchDebug.screen == "dark" { store.openAdaptation(park: park) }
+        if let request = WatchDebug.request {
+            if store.adaptation == nil { store.debugSet(adaptation: AdaptationClock(start: .now)) }
+            store.openAdaptation(park: park, explainsFirst: request == "explain")
+        }
+        return true
     }
     #endif
 }
-private struct AdaptationCover: Identifiable {
+/// The red screen's place, and whether Nyx's line about the wrist taps comes up first.
+struct AdaptationCover: Identifiable {
     /// Nil before any place is chosen.
     let park: Park?
     /// The clock runs but the reminders wait: Nyx's line comes first (the permission is undecided).
+    /// The open screen takes it once and sets it back (`DarkAdaptationView`).
     var explainsFirst = false
     var id: String { park?.id ?? "" }
 }

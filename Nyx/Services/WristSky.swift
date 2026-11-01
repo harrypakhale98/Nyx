@@ -102,6 +102,9 @@ nonisolated struct AdaptationClock: Equatable, Sendable {
     func isAdapted(at now: Date) -> Bool { elapsed(at: now) >= Double(Self.minutes*60) }
     /// Too old to resume, or started in the future (the clock was changed).
     func isStale(at now: Date) -> Bool { now.timeIntervalSince(start) >= Self.forgetAfter || start.timeIntervalSince(now) > 60 }
+    /// How many of the reminders' minutes the clock has reached: what the open screen taps for
+    /// when the reminders cannot (`reminderMinutes`).
+    func remindersReached(at now: Date) -> Int { Self.reminderMinutes.filter { elapsed(at: now) >= Double($0*60) }.count }
     /// The reminders still ahead of `now`, as minutes and moments.
     func reminders(after now: Date) -> [(minutes: Int, date: Date)] {
         Self.reminderMinutes.map { ($0, start.addingTimeInterval(Double($0*60))) }.filter { $0.date > now }
