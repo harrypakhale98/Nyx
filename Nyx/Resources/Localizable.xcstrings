@@ -69519,37 +69519,37 @@
         }
       }
     },
-    "The number under each night is its darkness score, from 0 to 100, and the dot grows with it. A cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.": {
+    "The number under each night is its darkness score, from 0 to 100, and the dot grows with it. A cloud marks overcast skies. Past nights show their date alone. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die Zahl unter jeder Nacht ist ihr Dunkelheitswert, von 0 bis 100, und der Punkt wächst mit ihm. Eine Wolke markiert bedeckten Himmel. Vergangene Nächte behalten nur einen blassen Punkt. Ein kleiner Strich markiert das Maximum eines Meteorstroms, ein schattierter Mond eine sichtbare Mondfinsternis; beides ändert den Wert nicht."
+            "value": "Die Zahl unter jeder Nacht ist ihr Dunkelheitswert, von 0 bis 100, und der Punkt wächst mit ihm. Eine Wolke markiert bedeckten Himmel. Vergangene Nächte zeigen nur ihr Datum. Ein kleiner Strich markiert das Maximum eines Meteorstroms, ein schattierter Mond eine sichtbare Mondfinsternis; beides ändert den Wert nicht."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The number under each night is its darkness score, from 0 to 100, and the dot grows with it. A cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score."
+            "value": "The number under each night is its darkness score, from 0 to 100, and the dot grows with it. A cloud marks overcast skies. Past nights show their date alone. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El número bajo cada noche es su índice de oscuridad, de 0 a 100, y el punto crece con él. Una nube indica cielo cubierto. Las noches pasadas conservan solo un punto tenue. Un pequeño trazo marca el máximo de una lluvia de meteoros, y una Luna sombreada, un eclipse de Luna visible; ninguno cambia el índice."
+            "value": "El número bajo cada noche es su índice de oscuridad, de 0 a 100, y el punto crece con él. Una nube indica cielo cubierto. Las noches pasadas muestran solo su fecha. Un pequeño trazo marca el máximo de una lluvia de meteoros, y una Luna sombreada, un eclipse de Luna visible; ninguno cambia el índice."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le nombre sous chaque nuit est son indice d’obscurité, de 0 à 100, et le point grandit avec lui. Un nuage marque un ciel couvert. Les nuits passées ne gardent qu’un point pâle. Un petit trait marque le maximum d’une pluie de météores, une Lune ombrée une éclipse de Lune visible ; ni l’un ni l’autre ne modifie l’indice."
+            "value": "Le nombre sous chaque nuit est son indice d’obscurité, de 0 à 100, et le point grandit avec lui. Un nuage marque un ciel couvert. Les nuits passées n’affichent que leur date. Un petit trait marque le maximum d’une pluie de météores, une Lune ombrée une éclipse de Lune visible ; ni l’un ni l’autre ne modifie l’indice."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "各夜の下の数字は0〜100の暗さのスコアで、点はスコアに合わせて大きくなります。雲の印は全天曇りを示します。過ぎた夜は淡い点だけが残ります。小さな流れの印は流星群の極大を、影のある月は見られる月食を示します。どちらもスコアは変えません。"
+            "value": "各夜の下の数字は0〜100の暗さのスコアで、点はスコアに合わせて大きくなります。雲の印は全天曇りを示します。過ぎた夜は日付だけを表示します。小さな流れの印は流星群の極大を、影のある月は見られる月食を示します。どちらもスコアは変えません。"
           }
         }
       }

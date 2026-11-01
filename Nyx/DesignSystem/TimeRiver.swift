@@ -517,7 +517,16 @@ struct TimeRiver: View {
             let label=context.resolve(Text("forecast ends").font(.caption2).foregroundStyle(palette.muted))
             let measured=label.measure(in:size)
             // Beside the tick, not touching it: the dashes are a hairline, the gap is what reads.
-            let lx=min(max(fx+7+measured.width/2,measured.width/2),size.width-measured.width/2)
+            let half=measured.width/2
+            func clamped(_ center:Double)->Double { min(max(center,half),size.width-half) }
+            var lx=clamped(fx+7+half)
+            // The chosen night's hairline runs down through this row: when it would cross the words,
+            // they go on the tick's other side, or, with no room there, just past the hairline.
+            if let index {
+                let stem=x(index,width:size.width)
+                func crosses(_ center:Double)->Bool { abs(stem-center)<half+3 }
+                if crosses(lx) { lx=fx-7-2*half>=0 && !crosses(fx-7-half) ? fx-7-half : clamped(max(stem,fx)+7+half) }
+            }
             context.draw(label,at:CGPoint(x:lx,y:bottom-measured.height/2-2))
         }
 

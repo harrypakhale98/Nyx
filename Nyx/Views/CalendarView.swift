@@ -10,7 +10,7 @@ struct NightCell: View {
     /// What the ring means, for VoiceOver: "In the best stretch" or "In the darkest moon stretch".
     var stretchName:String?=nil
     var isTonight:Bool=false
-    /// A night that has passed: the date dimmed, a faint dot, no ring and no score.
+    /// A night that has passed: its date alone, dimmed, with no dot, ring or score.
     var isPast:Bool=false
     /// A visible lunar eclipse or a notable shower's peak; at most one per night.
     var marker:WhatsUp.Events.Marker?=nil
@@ -42,9 +42,7 @@ struct NightCell: View {
                 // as half a month of nights still to plan.
                 if isPast { return }
                 let mark=NightMark.mark(night,differentiate:access.differentiate)
-                // Past nights fade their dot only; their text keeps full legibility.
-                let fade=isPast ? 0.35 : 1.0
-                mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent.opacity(fade),fillOpacity:palette.markOpacity(score:night.score.value),stroke:palette.stroke)
+                mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent,fillOpacity:palette.markOpacity(score:night.score.value),stroke:palette.stroke)
             }.frame(height:28*scale)
             // The ring and its soft halo (the stretch glows a little, like a dark sky does), behind the dot.
             .background { if highlighted && !isPast { ring } }
@@ -690,9 +688,9 @@ struct CalendarView: View {
         case (false,true): String(localized:"Solid: full forecast. Half-filled: an early look, the forecast counted as it stands.")
         default: String(localized:"Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds.")
         }
-        return Sentences.join([String(localized:"The number under each night is its darkness score, from 0 to 100, and the dot grows with it. A cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score."),half,UsualCloudsNote(ahead)?.hollow ?? ""])
+        return Sentences.join([String(localized:"The number under each night is its darkness score, from 0 to 100, and the dot grows with it. A cloud marks overcast skies. Past nights show their date alone. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score."),half,UsualCloudsNote(ahead)?.hollow ?? ""])
     }
-    /// The marks, with what this month's hollow nights rest on in their own words (`UsualCloudsNote`); past nights are faint dots, not hollow.
+    /// The marks, with what this month's hollow nights rest on in their own words (`UsualCloudsNote`); past nights show their date alone, never hollow.
     /// The key stays one tap away under the month rather than a paragraph across it; the night cells
     /// and their VoiceOver labels already carry each night's own basis.
     @ViewBuilder private func legend(_ data:Month)->some View {
