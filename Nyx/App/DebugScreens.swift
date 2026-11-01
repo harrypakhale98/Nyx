@@ -55,6 +55,9 @@ struct DebugScreen: View {
         case "stay": if let park=model.home { ScrollView { WhereToStayPanel(park:park).padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) }
         case "from-home": if let origin=HomeSky.origin(location:nil,place:model.homePlace,park:model.home) { ScrollView { FromHomePanel(origin:origin,now:model.today).padding(24) }.background(NightBackground()).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline) }
         case "ask": GuideView(mode:.planning)
+        // Ask Nyx's "Looked up" block, worded by the tools as they word it (the model is often absent on a simulator).
+        case "lookups": let lookup=NightLookup(parks:model.parks,forecasts:[:],now:model.present)
+            ScrollView { GuideLookups(lines:[lookup.bestNightsLookup(park:"Arches",from:"2026-10-31",nights:30),lookup.whatsUpLookup(park:"Arches",on:"2026-10-31"),lookup.parksNearLookup(park:"Joshua Tree",radius:200)]).padding(24) }.background(NightBackground())
         case "widgets": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:false)).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         case "widgets-large": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),large:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         case "snippet": DebugSnippetView().task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
