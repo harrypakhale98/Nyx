@@ -419,10 +419,11 @@ final class AccessibilityAuditTests:XCTestCase {
             // capture, AX5, Bold Text, Increase Contrast), and the eyebrow grows with its text (`Eyebrow`), so a real third
             // line would show. The same quirk as the Learn title. This eyebrow on Plan only; the park page's passes.
             let planEyebrow=pass=="ax5" && (screen=="plan" || screen=="calendar") && issue.element?.elementType == .staticText && issue.element?.label=="CA · International Dark Sky Park"
-            // Your privacy's key field (2026-10-31, once the audit opened it): its prompt, "Your National Park Service key", is
-            // reported as clipped in both palettes while drawn whole with room to spare (iPhone 18 Pro captures), as the search
-            // field's is. A one-line field's prompt, never its contents: the field is named by its label for VoiceOver.
-            let keyPrompt=issue.element?.elementType == .secureTextField
+            // Your privacy's key field (2026-10-31): its prompt is reported as clipped at the standard size in both palettes
+            // while drawn whole with room to spare in every language on the narrowest iPhone (SE, iOS 26.5, en/es/de/fr/ja).
+            // A one-line field's prompt, never its contents (the field is named by its label for VoiceOver), on that screen
+            // only and at standard sizes only, so a longer translation at AX5 is still measured.
+            let keyPrompt=screen=="nps-key" && pass != "ax5" && issue.element?.elementType == .secureTextField
             return !visible || pastHomeIndicator || learnTitle || privacyCaption || designationLine || symbolRow || planEyebrow || keyPrompt || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
         case .elementDetection:
             // Decorative "NYX" wordmark; the sky map's Canvas-drawn inset names (Alaska, Hawaiʻi, Am. Samoa, Virgin Is.):
