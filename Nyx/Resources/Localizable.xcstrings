@@ -4574,33 +4574,87 @@
       "extractionState": "manual",
       "localizations": {
         "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld Meilen Luftlinie von %@"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Meile Luftlinie von %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Meilen Luftlinie von %@"
+                }
+              }
+            }
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld miles straight-line from %@"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld mile straight-line from %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld miles straight-line from %@"
+                }
+              }
+            }
           }
         },
         "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld millas en línea recta de %@"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld milla en línea recta de %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld millas en línea recta de %@"
+                }
+              }
+            }
           }
         },
         "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld miles à vol d’oiseau depuis %@"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld mile à vol d’oiseau depuis %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld miles à vol d’oiseau depuis %@"
+                }
+              }
+            }
           }
         },
         "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%2$@から直線距離で%1$lldマイル"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%2$@から直線距離で%1$lldマイル"
+                }
+              }
+            }
           }
         }
       }

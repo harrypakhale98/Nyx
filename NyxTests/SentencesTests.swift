@@ -112,6 +112,22 @@ struct SentencesTests {
         let ja=TimeRiver.spokenValue(summary: "10月31日(土)、94点、最高。雲の予報を含みます。", agreement: "予報モデルは一致しています。", marker: "ふたご座流星群の極大", language: "ja")
         #expect(ja == "10月31日(土)、94点、最高。雲の予報を含みます。予報モデルは一致しています。ふたご座流星群の極大。")
     }
+    /// Ask Nyx's distance under a place counts its miles: "1 mile", "1 Meile", never "1 Meilen".
+    @Test func milesAreCountedInEveryLanguage() throws {
+        let key="%lld miles straight-line from %@"
+        let expected=["en": ("1 mile straight-line from Denver", "2 miles straight-line from Denver"),
+                      "de": ("1 Meile Luftlinie von Denver", "2 Meilen Luftlinie von Denver"),
+                      "es": ("1 milla en línea recta de Denver", "2 millas en línea recta de Denver"),
+                      "fr": ("1 mile à vol d’oiseau depuis Denver", "2 miles à vol d’oiseau depuis Denver"),
+                      "ja": ("Denverから直線距離で1マイル", "Denverから直線距離で2マイル")]
+        for (language, (one, two)) in expected {
+            let bundle=try #require(Bundle.main.path(forResource: language, ofType: "lproj").flatMap(Bundle.init(path:)), "\(language)")
+            let format=bundle.localizedString(forKey: key, value: nil, table: nil)
+            let locale=Locale(identifier: language)
+            #expect(String(format: format, locale: locale, 1, "Denver") == one, "\(language)")
+            #expect(String(format: format, locale: locale, 2, "Denver") == two, "\(language)")
+        }
+    }
     /// The satellite sky's line in Japanese: the class name closed with "。", no ASCII ". " after it.
     @Test func japaneseClassNameEndsInItsOwnMark() {
         #expect(Sentences.join([Sentences.end("郊外の空", language: "ja"), "衛星データからの推定です。"], language: "ja") == "郊外の空。衛星データからの推定です。")
