@@ -354,8 +354,8 @@ struct FieldActivitySymbol: View {
 /// The countdown to the shown milestone; sunrise's clock time, marked as one, when only that is
 /// left or once stale. In the compact island on iOS 27 it follows the system's width: hours when
 /// there is room ("1:31:12"), minutes alone ("91:12") when the island is narrowed. iOS 26 caps the
-/// compact island's width, which "1:31:12" fits at the caption size. The expanded island has room
-/// for "in 1:31:12".
+/// compact island's width, which "1:31:12" fits at the caption size. The expanded island says
+/// "in 1:31:12" where that fits whole, else the timer alone: never "dans 2:06…".
 struct FieldActivityCountdown: View {
     let attributes: FieldActivityAttributes
     let state: FieldActivityAttributes.ContentState
@@ -380,7 +380,16 @@ struct FieldActivityCountdown: View {
         .environment(\.timeZone,attributes.timeZone)
     }
     @ViewBuilder fileprivate func face(showsHours:Bool=true)->some View {
-        if let mark=attributes.shown(state,isStale:isStale) { FieldActivityTimer(mark:mark,zone:attributes.timeZone,showsHours:showsHours,wrapped:!compact) }
+        if let mark=attributes.shown(state,isStale:isStale) {
+            if compact { FieldActivityTimer(mark:mark,zone:attributes.timeZone,showsHours:showsHours) }
+            else {
+                // Both spoken alike: the timer's label names the moment and its clock time.
+                ViewThatFits(in:.horizontal) {
+                    FieldActivityTimer(mark:mark,zone:attributes.timeZone,showsHours:showsHours,wrapped:true)
+                    FieldActivityTimer(mark:mark,zone:attributes.timeZone,showsHours:showsHours)
+                }
+            }
+        }
         else if !state.finished { FieldActivityClock(date:attributes.dawn) }
         else { Text("Dawn") }
     }
@@ -397,7 +406,9 @@ struct FieldActivityExpandedCountdown: View {
     var body: some View {
         let clock=attributes.shown(state,isStale:isStale) == nil && !state.finished
         VStack(alignment:.trailing,spacing:2) {
-            FieldActivityCountdown(attributes:attributes,state:state,isStale:isStale,font:.system(.title3,design:.serif),maxWidth:110,compact:false)
+            // A countdown keeps the milestone's name its room; sunrise's time, beside the shorter
+            // "Sunrise", takes a little more, so a 12-hour time keeps its "AM" at the largest sizes.
+            FieldActivityCountdown(attributes:attributes,state:state,isStale:isStale,font:.system(.title3,design:.serif),maxWidth:clock ? 124 : 110,compact:false)
             if clock {
                 FieldZoneMark(attributes:attributes,parkZone:parkZone,at:attributes.dawn,dot:false)
                     .font(.caption2).foregroundStyle(FieldActivityColors(nightVision:state.nightVision,contrast:contrast).muted)
@@ -500,9 +511,11 @@ struct FieldActivityTimer: View {
 /// Sunrise's clock time where a countdown stands at other times (the Dynamic Island, the Smart
 /// Stack), once only sunrise is left or the activity is stale. Marked as a clock time ("at 07:37",
 /// "um 07:37") so it never reads as a countdown. Where the island has no room for the word, a clock
-/// glyph marks it; where it has no room for that either, the glyph stays, a 12-hour time drops its
-/// "a.m." (the glyph and the sunrise symbol say what it is) and the time shrinks. Never a bare time,
-/// which in a 24-hour language reads as a countdown ("6:40"), nor one cut to "6:40 a…".
+/// glyph marks it; where it has no room for that either, a 12-hour time keeps its "a.m." and drops
+/// the glyph (the day period marks it as a clock time); only where even that does not fit does the
+/// glyph come back with the time alone (the glyph and the sunrise symbol say what it is), shrunk.
+/// Never a bare 24-hour time, which reads as a countdown ("6:40"), nor one cut to "6:40 a…".
+/// VoiceOver hears the whole time in every form ("at 6:40 AM").
 struct FieldActivityClock: View {
     let date: Date
     @Environment(\.timeZone) private var zone
@@ -510,13 +523,16 @@ struct FieldActivityClock: View {
     /// The face's own floor, where it lets text shrink further (the Smart Stack's 0.6).
     @Environment(\.minimumScaleFactor) private var scale
     var body: some View {
-        let time=Self.time(date,zone:zone,locale:locale)
+        let time=Self.time(date,zone:zone,locale:locale), narrow=Self.narrow(date,zone:zone,locale:locale)
+        let at=String(localized:"field.clock.sunriseAt",defaultValue:"at \(time)",
+                      comment:"Sunrise's clock time in the Live Activity's Dynamic Island and Smart Stack, beside the sunrise symbol, where a countdown stands at other times. Short; marks the time as a clock time.")
         ViewThatFits(in:.horizontal) {
-            Text(String(localized:"field.clock.sunriseAt",defaultValue:"at \(time)",
-                        comment:"Sunrise's clock time in the Live Activity's Dynamic Island and Smart Stack, beside the sunrise symbol, where a countdown stands at other times. Short; marks the time as a clock time."))
+            Text(at)
             stamped(time)
-            stamped(Self.narrow(date,zone:zone,locale:locale)).minimumScaleFactor(min(scale,0.7))
+            if narrow != time { Text(time) }
+            stamped(narrow).minimumScaleFactor(min(scale,0.7))
         }
+        .accessibilityElement(children:.ignore).accessibilityLabel(at)
     }
     private func stamped(_ time:String)->some View {
         HStack(spacing:3) { Image(systemName:"clock").imageScale(.small).accessibilityHidden(true); Text(time) }
