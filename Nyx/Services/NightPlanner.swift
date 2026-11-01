@@ -181,12 +181,13 @@ nonisolated struct NightPlanner: Sendable {
     /// look or the park's usual clouds), so scores compare directly. Ties, which are common near new moon,
     /// go to the darker measured sky (Black Marble glow, `glowRank`), then the higher sum of parts
     /// beneath a cap (a park's usual clouds can hold a whole month at one score, and the new Moon
-    /// must still outrank a gibbous one), then the longer true darkness, then the forecast models
-    /// that agree more closely, then the surer cloud basis, then the earlier night and the park's
-    /// name. The numbers shown never change.
+    /// must still outrank a gibbous one), then more hours of true darkness with the Moon down (past
+    /// ten hours darkness scores no more, so a thin crescent's sum can tie a moonless night's), then
+    /// the longer true darkness, then the forecast models that agree more closely, then the surer
+    /// cloud basis, then the earlier night and the park's name. The numbers shown never change.
     ///
     /// Near-equal sums, darkness and spreads tie: each is first rounded to its grid (`tieGrid`:
-    /// half a point, a minute, half a percent) and then compared exactly. A tolerance instead
+    /// half a point for sums, a minute for hours, half a percent for spreads) and then compared exactly. A tolerance instead
     /// ("within half a point") is not transitive, so a sort could name a different best night
     /// for the same nights given in another order.
     static func better(_ a: Night, _ b: Night) -> Bool {
@@ -196,6 +197,8 @@ nonisolated struct NightPlanner: Sendable {
         if ga != gb { return ga < gb }
         let ra = tieGrid(a.score.rawPartsSum, 0.5), rb = tieGrid(b.score.rawPartsSum, 0.5)
         if ra != rb { return ra > rb }
+        let ma = tieGrid(moonFreeHours(a), 1.0/60), mb = tieGrid(moonFreeHours(b), 1.0/60)
+        if ma != mb { return ma > mb }
         let da = tieGrid(a.sky.darkHours, 1.0/60), db = tieGrid(b.sky.darkHours, 1.0/60)
         if da != db { return da > db }
         let sa = tieGrid(a.modelSpread ?? .infinity, 0.5), sb = tieGrid(b.modelSpread ?? .infinity, 0.5)
@@ -210,6 +213,8 @@ nonisolated struct NightPlanner: Sendable {
         let ca = a.score.cloudPoints != nil, cb = b.score.cloudPoints != nil
         return ca == cb ? nil : ca
     }
+    /// Hours of true darkness with the Moon below the horizon, for `better`'s tie-break.
+    static func moonFreeHours(_ night: Night) -> Double { night.sky.darkHours*min(1, max(0, night.sky.moonBelowFraction)) }
     /// `value` rounded to the nearest multiple of `step`, as a count of steps: two values tie
     /// exactly when they share a step. Infinity stays infinite.
     static func tieGrid(_ value: Double, _ step: Double) -> Double { value.isFinite ? (value/step).rounded() : value }

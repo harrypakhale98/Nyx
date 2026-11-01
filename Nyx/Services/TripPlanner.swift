@@ -84,7 +84,7 @@ nonisolated struct TripPlan: Sendable {
 /// gap (weekends only) are independent, since you go home in between. The plan first keeps the
 /// fewest nights that count no clouds ("Moon and darkness only", ranked last wherever nights are
 /// ranked), then maximises the total value; ties are broken in `NightPlanner.better`'s order (the higher score shown, darker measured sky, sum of parts,
-/// longer true darkness, closer models, surer clouds), each summed over the nights, then the shorter total distance driven, then the park whose id sorts first, so the
+/// Moon-free true darkness, longer true darkness, closer models, surer clouds), each summed over the nights, then the shorter total distance driven, then the park whose id sorts first, so the
 /// same inputs always give the same plan. 14 nights × 63 parks × 63 parks is about 56,000 steps;
 /// with the world catalogue the candidates are the places in range, at most `maxCandidates`.
 /// Staying put is always allowed (a hop of zero), so a plan exists whenever one park is in reach.
@@ -98,26 +98,27 @@ nonisolated enum TripPlanner {
     /// over a trip's nights. The score shown comes first, as `better(_:_:closures:)` falls through to
     /// `better` on an equal penalised score: a closed 94 ties an open 84 there, and the 94 goes first.
     struct Tie {
-        var score=0.0, glow=0.0, parts=0.0, dark=0.0, spread=0.0, certainty=0.0
+        var score=0.0, glow=0.0, parts=0.0, moonFree=0.0, dark=0.0, spread=0.0, certainty=0.0
         init() {}
         init(_ night: Night) {
             score=Double(night.score.value)
-            glow=NightPlanner.glowRank(night.park.id); parts=night.score.rawPartsSum; dark=night.sky.darkHours
+            glow=NightPlanner.glowRank(night.park.id); parts=night.score.rawPartsSum; moonFree=NightPlanner.moonFreeHours(night); dark=night.sky.darkHours
             // No models' spread ranks below any spread, as in `better`.
             spread=night.modelSpread ?? 1000; certainty=NightPlanner.certainty(night.basis)
         }
-        func adding(_ o: Tie) -> Tie { Tie(score:score+o.score,glow:glow+o.glow,parts:parts+o.parts,dark:dark+o.dark,spread:spread+o.spread,certainty:certainty+o.certainty) }
-        private init(score: Double, glow: Double, parts: Double, dark: Double, spread: Double, certainty: Double) {
-            self.score=score; self.glow=glow; self.parts=parts; self.dark=dark; self.spread=spread; self.certainty=certainty
+        func adding(_ o: Tie) -> Tie { Tie(score:score+o.score,glow:glow+o.glow,parts:parts+o.parts,moonFree:moonFree+o.moonFree,dark:dark+o.dark,spread:spread+o.spread,certainty:certainty+o.certainty) }
+        private init(score: Double, glow: Double, parts: Double, moonFree: Double, dark: Double, spread: Double, certainty: Double) {
+            self.score=score; self.glow=glow; self.parts=parts; self.moonFree=moonFree; self.dark=dark; self.spread=spread; self.certainty=certainty
         }
         /// Whether this side wins, term by term; nil when every term ties. Each term is rounded to
         /// its grid first and compared exactly (`NightPlanner.tieGrid`), so ties stay transitive.
         func beats(_ o: Tie) -> Bool? {
             func grid(_ a: Double, _ b: Double, _ step: Double) -> (Double, Double) { (NightPlanner.tieGrid(a, step), NightPlanner.tieGrid(b, step)) }
-            let g=grid(glow,o.glow,1e-9), p=grid(parts,o.parts,0.5), d=grid(dark,o.dark,1.0/60), s=grid(spread,o.spread,0.5), c=grid(certainty,o.certainty,1e-9)
+            let g=grid(glow,o.glow,1e-9), p=grid(parts,o.parts,0.5), m=grid(moonFree,o.moonFree,1.0/60), d=grid(dark,o.dark,1.0/60), s=grid(spread,o.spread,0.5), c=grid(certainty,o.certainty,1e-9)
             if score != o.score { return score>o.score }
             if g.0 != g.1 { return g.0<g.1 }
             if p.0 != p.1 { return p.0>p.1 }
+            if m.0 != m.1 { return m.0>m.1 }
             if d.0 != d.1 { return d.0>d.1 }
             if s.0 != s.1 { return s.0<s.1 }
             if c.0 != c.1 { return c.0>c.1 }

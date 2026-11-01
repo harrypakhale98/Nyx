@@ -280,7 +280,8 @@ import Testing
         let planner = NightPlanner(forecasts: ["jotr": forecast()])
         let top = try #require(planner.bestNights([try park("jotr")], from: now, count: 30, now: now, limit: 1).first)
         #expect(best[0] == lookup.describe(top))
-        #expect(best[0].contains("cloud forecast included") && best.last?.contains("score") == true)
+        // On a tie the night with more Moon-free darkness leads: the 4th's thinner crescent, an early look.
+        #expect(best[0].contains("early look") && best.contains { $0.contains("cloud forecast included") } && best.last?.contains("score") == true, "\(best)")
         // "tonight" and unreadable dates start tonight; an unknown park says so instead of guessing.
         #expect(lookup.bestNights(park: "joshua tree", from: "tonight", nights: 3, limit: 3).count == 3)
         #expect(lookup.bestNights(park: "Atlantis", from: "tonight", nights: 3).first?.hasPrefix("No park or dark-sky place matched") == true)

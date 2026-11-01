@@ -88,8 +88,9 @@ struct CloudClimateTests {
     /// Beyond the forecast the clouds cap binds on every Moon-dark night, so a night reads its usual
     /// cloud at the nearest new Moon: Joshua Tree's November 2026 nights up to the 23rd (full Moon on
     /// the 24th) share one cap, the new Moon on the 9th outranks the 35%-lit 2nd, the month's best
-    /// night is one around the new Moon with its score, and the week from the 1st rings the 8th, not
-    /// a crescent. The month and its share of clear nights stay the night's own.
+    /// night is a moonless one around the new Moon with its score (past ten hours of darkness the
+    /// sums of a moonless night and the 13th's thin crescent tie, and the Moon-free hours decide), and
+    /// the week from the 1st rings the 8th, not a crescent. The month and its share of clear nights stay the night's own.
     @Test func newMoonLeadsBeyondTheForecast() throws {
         let jotr = try park("jotr"), planner = NightPlanner(forecasts: [:])
         let now = try evening(jotr, 2026, 10, 20)
@@ -101,8 +102,14 @@ struct CloudClimateTests {
         #expect(nights[23].usualCloud != ninth.usualCloud && Set(nights[23...].compactMap(\.usualCloud)).count == 1)
         #expect(NightPlanner.better(ninth, second))
         let best = try #require(NightPlanner.ranked(nights).first)
-        #expect((5...13).contains(jotr.calendar.component(.day, from: best.id)) && best.score.value == ninth.score.value, "\(best.id)")
+        #expect((6...10).contains(jotr.calendar.component(.day, from: best.id)) && best.score.value == ninth.score.value, "\(best.id)")
+        #expect(NightPlanner.best(nights)?.id == best.id && TripPlanner.Tie(best).beats(TripPlanner.Tie(nights[12])) == true)
         #expect(NightPlanner.ranked(Array(nights[0...7])).first?.id == nights[7].id)
+        // Death Valley's month names a moonless night too, never the 12th's crescent.
+        let deva = try park("deva")
+        let devaNights = try (1...30).map { planner.night(deva, on: try evening(deva, 2026, 11, $0), now: now) }
+        let devaBest = try #require(NightPlanner.best(devaNights))
+        #expect((6...11).contains(deva.calendar.component(.day, from: devaBest.id)), "\(devaBest.id)")
         #expect(second.usualClear == CloudClimate.shared.typical(jotr, on: second.id)?.clear && second.typicalClouds?.contains("November") == true)
     }
     /// The nearest new Moon, from either side of the month: 2026's fall on Oct 10, Nov 9 and Dec 9 (UTC).
