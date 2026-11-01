@@ -45,12 +45,20 @@ nonisolated struct WeekAcrossParks: Sendable {
         return WeekAcrossParks(rows:rows,total:usable.count,best:best,closures:closures.filter { shown.contains($0.key) })
     }
     /// What VoiceOver says for one cell: the row and the column, as a table would, then the night.
+    /// As sentences, so a date that ends in a period ("Sa. 31. Okt.") takes no second one.
     static func spoken(_ night:Night,isBest:Bool,closure:String?=nil)->String {
         var parts=[night.park.shortName,night.park.dayLabel(night.id),String(localized:"\(night.score.value), \(night.score.band.label)")]
-        parts+=night.basisLabels
+        parts+=night.standaloneBasisLabels
         if let closure { parts.append(String(localized:"Closure: \(closure)")) }
         if isBest { parts.append(String(localized:"The best night this week")) }
-        return parts.joined(separator:". ")
+        return Phrase.sentences(parts)
+    }
+    /// What the fills mean, under the grid: a night that counts no clouds is drawn hollow too, and
+    /// named where the week has one, as on the watch.
+    var legend: String {
+        let cloudless=rows.contains { $0.nights.contains { $0.basis == .usual && $0.score.cloudPoints == nil } }
+        return cloudless ? String(localized:"Solid: forecast. Half-filled: an early look. Hollow: usual clouds, or the Moon and darkness only. The ring marks the week's best night.")
+            : String(localized:"Solid: forecast. Half-filled: an early look. Hollow: usual clouds. The ring marks the week's best night.")
     }
 }
 /// The week as a compact grid on Tonight (wide windows): each night drawn as the calendar draws it
@@ -104,7 +112,7 @@ struct WeekAcrossParksPanel: View {
                     AccessibilityRotorEntry(Text(WeekAcrossParks.spoken(night,isBest:week.best == cell,closure:week.closures[night.park.id])),id:cell,in:rotor)
                 }
             }
-            Text(access.differentiate ? "\(NightMark.legend) The ring marks the week's best night." : "Solid: forecast. Half-filled: an early look. Hollow: usual clouds. The ring marks the week's best night.")
+            Text(access.differentiate ? String(localized:"\(NightMark.legend) The ring marks the week's best night.") : week.legend)
                 .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         } }
     }

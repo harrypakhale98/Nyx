@@ -123,7 +123,7 @@ struct ParkRow: View {
     static func moreContent(night:Night,closure:String?,week:[Night],stepFree:Bool)->[ParkRowContent.Item] {
         var items:[ParkRowContent.Item]=[]
         if let closure { items.append(.init(label:String(localized:"Closure alert"),value:closure,high:true)) }
-        items.append(.init(label:String(localized:"Clouds"),value:night.basisLabel ?? String(localized:"Cloud forecast included"),high:false))
+        items.append(.init(label:String(localized:"Clouds"),value:night.standaloneBasisLabel ?? String(localized:"Cloud forecast included"),high:false))
         if let dipper=LittleDipper.reading(night) { items.append(.init(label:String(localized:"Little Dipper"),value:dipper.label,high:false)) }
         if let summary=WeekStrip.summary(week) { items.append(.init(label:String(localized:"This week"),value:summary,high:false)) }
         if stepFree { items.append(.init(label:String(localized:"Step-free viewing"),value:String(localized:"Yes"),high:false)) }

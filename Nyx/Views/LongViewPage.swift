@@ -19,9 +19,7 @@ struct LongViewPage: View {
                 VStack(alignment:.leading,spacing:6) {
                     Eyebrow(text:"The next six months")
                     Text(park.shortName).font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader)
-                    Text(weekends?.first?.best.usualCloud == nil && weekends != nil
-                         ? String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, this place has no usual clouds to go on, so scores rest on the Moon and the hours of true darkness, which are exact.")
-                         : String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds for the month; the Moon and the hours of true darkness are exact."))
+                    Text(DarkWeekends.header(weekends ?? []))
                         .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
                 Panel { VStack(alignment:.leading,spacing:0) {
@@ -100,10 +98,11 @@ struct LongViewPage: View {
     }
     private func row(_ weekend: DarkWeekends.Weekend) -> some View {
         let best=weekend.best
-        // The usual clouds go unsaid on a row: the page says it once above. A row the forecast reaches says so.
+        // The usual clouds go unsaid on a row: the page says it once above. A row the forecast reaches,
+        // or one that counts no clouds, says so (`DarkWeekends.rowLabels`).
         let words=VStack(alignment:.leading,spacing:4) {
             Text("\(park.dayLabel(weekend.firstNight.id)) – \(park.dayLabel(weekend.secondNight.id))").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
-            Text(verbatim:([DarkWeekends.newMoonLine(weekend)]+(best.basis == .usual ? [] : best.basisLabels)).joined(separator:" · ")).font(.subheadline).foregroundStyle(palette.muted)
+            Text(verbatim:([DarkWeekends.newMoonLine(weekend)]+DarkWeekends.rowLabels(weekend)).joined(separator:" · ")).font(.subheadline).foregroundStyle(palette.muted)
         }.fixedSize(horizontal:false,vertical:true)
         let scores=HStack(alignment:.firstTextBaseline,spacing:6) {
             Text("\(weekend.firstNight.score.value) · \(weekend.secondNight.score.value)").scoreNumeral(.title3,accent:palette.accent)

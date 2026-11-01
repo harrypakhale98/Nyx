@@ -58,8 +58,9 @@ import Testing
         let spoken = BestNightsInReach.spoken(night, closure: "Keys View Road closed")
         #expect(spoken.hasPrefix(night.park.shortName))
         #expect(spoken.contains(String(localized: "\(night.score.value), \(night.score.band.label)")))
-        // No cloud figure: the usual-clouds label is said, so an estimate never sounds like a forecast.
-        for label in night.basisLabels { #expect(spoken.contains(label)) }
+        // No clouds counted at all: said so, so an estimate never sounds like a clear forecast.
+        #expect(night.score.cloudPoints == nil && spoken.contains("Moon and darkness only"))
+        for label in night.standaloneBasisLabels { #expect(spoken.contains(label)) }
         #expect(spoken.contains(ClosureLine.spoken("Keys View Road closed")))
     }
 }

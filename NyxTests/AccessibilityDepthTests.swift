@@ -83,14 +83,18 @@ import Testing
         #expect(chart.series.count == 3)
         let scores = chart.series[0]
         #expect(scores.continuous && scores.points.map(\.y) == nights.map { Double($0.score.value) })
-        #expect(scores.points[2].label == "\(nights[2].score.band.label). No cloud forecast yet. Geminids peak")
+        // No clouds counted at all: the point says the score rests on the Moon and darkness only.
+        #expect(scores.points[2].label == "\(nights[2].score.band.label). Moon and darkness only. Geminids peak")
         #expect(scores.points[0].label == nights[0].score.band.label)
         #expect(chart.series[1].points == [NightChart.Point(x: 1, y: 88, label: nil)] && chart.series[2].points == [NightChart.Point(x: 1, y: 70, label: nil)])
         #expect(chart.x.describe(1) == jotr.dayLabel(nights[1].id) && chart.y.describe(94) == "94 out of 100")
         #expect(chart.y.range == 0...100 && chart.x.range == 0...2)
-        #expect(chart.summary.contains("Nights without a cloud forecast yet: 1 of 3."))
+        #expect(chart.summary.contains("Nights without a cloud forecast yet: 1 of 3. Those count the Moon and darkness only."))
         // Without a spread, one series.
         #expect(NightChart.nights(nights, title: "River").series.count == 1)
+        // A month that counts no clouds at all says so, never that it uses the usual clouds.
+        let bare = try ["2026-12-10", "2026-12-11"].map { try night(jotr, $0) }
+        #expect(NightChart.summary(bare).hasSuffix("No night has a cloud forecast yet; scores count the Moon and darkness only."))
     }
     @Test func skyChartTracesSunMoonAndCoreInDegrees() throws {
         let jotr = try park("jotr"), night = try night(jotr, "2026-07-15")

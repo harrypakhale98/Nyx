@@ -187,7 +187,7 @@ struct BestNightSnippetView: View {
                 Text("\(night.score.value)").scoreNumeral(size:min(numeral,76),accent:palette.accent)
                 VStack(alignment:.leading,spacing:2) {
                     Text(night.score.band.label).bandWord(.headline,ink:palette.ink)
-                    Text(night.basisLabel ?? String(localized:"Cloud forecast included")).font(.caption).foregroundStyle(palette.muted)
+                    Text(night.standaloneBasisLabel ?? String(localized:"Cloud forecast included")).font(.caption).foregroundStyle(palette.muted)
                 }
             }
             .accessibilityElement(children:.combine)

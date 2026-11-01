@@ -55,6 +55,32 @@ import Testing
         }
         #expect(DarkWeekends.spoken(plan[0]).contains("New moon"))
     }
+    /// Haleakalā past its summit forecast counts no clouds: the header says so from every row, never
+    /// that the place has no usual clouds, and such a row names its basis.
+    @Test func headerAndRowsSayWhenNoCloudsCount() throws {
+        let hale = try park("hale"), jotr = try park("jotr"), moon = start
+        func weekend(_ park: Park, clouds: Bool) -> DarkWeekends.Weekend {
+            let first = park.evening(start), second = park.date(first, addingDays: 1)
+            func bare(_ evening: Date) -> Night {
+                Night(park: park, sky: engine.conditions(for: park, on: evening), score: DarknessScore(value: 96, moonPoints: 40, cloudPoints: nil, bortlePoints: 20, lengthPoints: 15, basis: .usual), cloudCover: nil, forecastUpdated: nil)
+            }
+            return clouds ? .init(newMoon: moon, firstNight: night(park, first, score: 80), secondNight: night(park, second, score: 82))
+                : .init(newMoon: moon, firstNight: bare(first), secondNight: bare(second))
+        }
+        let usual = DarkWeekends.header([weekend(hale, clouds: true)])
+        #expect(usual.contains("scores rest on the usual clouds for the month;"))
+        #expect(DarkWeekends.header([]) == usual)
+        let summit = DarkWeekends.header([weekend(hale, clouds: false), weekend(hale, clouds: false)])
+        #expect(summit.contains("the usual clouds cannot be used here") && !summit.contains("no usual clouds"))
+        let mixed = DarkWeekends.header([weekend(hale, clouds: true), weekend(hale, clouds: false)])
+        #expect(mixed.contains("or on the Moon and darkness only where those cannot be used"))
+        // A place with no usual clouds at all keeps its own words.
+        #expect(DarkWeekends.header([weekend(jotr, clouds: false)]).contains("this place has no usual clouds"))
+        // Rows: the usual clouds go unsaid (the header says them), a night that counts none says so.
+        #expect(DarkWeekends.rowLabels(weekend(hale, clouds: true)).isEmpty)
+        #expect(DarkWeekends.rowLabels(weekend(hale, clouds: false)) == ["Moon and darkness only"])
+        #expect(DarkWeekends.spoken(weekend(hale, clouds: false)).contains("Moon and darkness only."))
+    }
     @Test func milkyWaySeasonByLatitude() throws {
         let jotr = try park("jotr")
         // In late October the core still clears an hour of true darkness at Joshua Tree, not for long.

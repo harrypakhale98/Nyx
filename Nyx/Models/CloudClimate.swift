@@ -195,6 +195,9 @@ extension Night {
     }
     /// The short parts a list says beside a score: `basisLabel`, then `smokeLabel`.
     nonisolated var basisLabels: [String] { [basisLabel, smokeLabel].compactMap { $0 } }
+    /// `standaloneBasisLabel`, then `smokeLabel`: the parts said beside a score with no band word that
+    /// names its basis (a list's spoken night, a chart point), so a night that counts no clouds says so.
+    nonisolated var standaloneBasisLabels: [String] { [standaloneBasisLabel, smokeLabel].compactMap { $0 } }
     /// `basisLabels` as one line, for the line under a band word that stands alone ("Early look, Haze
     /// or smoke"): nil with a full forecast and clear air. Joined as `Phrase.clauses` joins, which the
     /// widget and watch targets do not compile.

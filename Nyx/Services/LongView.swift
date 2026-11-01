@@ -55,11 +55,35 @@ nonisolated enum DarkWeekends {
         let format=weekend.firstNight.park.nightStyle().month(.abbreviated).day()
         return String(localized:"New moon \(weekend.newMoon.formatted(format))")
     }
+    /// What the page says above the rows about what far-off scores rest on, from every row whose
+    /// better night has no forecast (a row the forecast reaches says its own basis): the usual clouds
+    /// when each counts clouds, the Moon and darkness only when none does, both otherwise. Haleakalā
+    /// has usual clouds it cannot use past its summit forecast (`NightPlanner.night`), so it is never
+    /// said to have none.
+    static func header(_ weekends: [Weekend]) -> String {
+        let far=weekends.filter { $0.best.basis == .usual }
+        let counted=far.filter { $0.best.score.cloudPoints != nil }.count
+        if counted == far.count {
+            return String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds for the month; the Moon and the hours of true darkness are exact.")
+        }
+        if counted>0 {
+            return String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds for the month, or on the Moon and darkness only where those cannot be used; the Moon and the hours of true darkness are exact.")
+        }
+        return far.contains { $0.best.park.aboveInversion == true }
+            ? String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, the usual clouds cannot be used here, so scores rest on the Moon and the hours of true darkness, which are exact.")
+            : String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, this place has no usual clouds to go on, so scores rest on the Moon and the hours of true darkness, which are exact.")
+    }
+    /// The basis a row shows beside its new moon: none for usual clouds, which the header says once;
+    /// "Moon and darkness only" for a night that counts no clouds; a forecast's own words otherwise.
+    static func rowLabels(_ weekend: Weekend) -> [String] {
+        let best=weekend.best
+        return best.basis == .usual && best.score.cloudPoints != nil ? [] : best.standaloneBasisLabels
+    }
     /// What VoiceOver hears for a row.
     static func spoken(_ weekend: Weekend) -> String {
         let park=weekend.firstNight.park
         return Sentences.join([String(localized:"\(park.dayLabel(weekend.firstNight.id)) and \(park.dayLabel(weekend.secondNight.id)): \(weekend.firstNight.score.value) and \(weekend.secondNight.score.value)."),
-                               Sentences.end(newMoonLine(weekend))]+weekend.best.basisLabels.map(Sentences.end))
+                               Sentences.end(newMoonLine(weekend))]+weekend.best.standaloneBasisLabels.map(Sentences.end))
     }
 }
 

@@ -306,7 +306,7 @@ struct TripStayRow: View {
             if several { Text(nightly).font(.caption.monospacedDigit()).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
             Text(lead.reason).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             if let hop=first.hopMeters, hop>1000 { Label(String(localized:"\(distance(hop)) from the night before"),systemImage:"arrow.triangle.turn.up.right.diamond").font(.caption).foregroundStyle(palette.muted) }
-            if let label=night.basisLabel { Text(label).font(.caption).foregroundStyle(palette.muted) }
+            if let label=night.standaloneBasisLabel { Text(label).font(.caption).foregroundStyle(palette.muted) }
             if let closure=stay.stops.compactMap(\.closure).first { ClosureLabel(closure,named:true) }
             if showsAccess { AccessNoteLabel(park:park) }
         }

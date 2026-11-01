@@ -81,7 +81,7 @@ struct NightCell: View {
         if isPast { return Phrase.sentences([night.park.dayLabel(night.id),String(localized:"Past night")]) }
         var parts=[isTonight ? String(localized:"Tonight, \(night.park.dayLabel(night.id))") : night.park.dayLabel(night.id),
                    String(localized:"\(night.score.value), \(night.score.band.label)")]
-        parts+=night.basisLabels
+        parts+=night.standaloneBasisLabels
         if let cloud=night.cloudCover { parts.append(String(localized:"Clouds \(Int(cloud.rounded())) percent")) }
         if highlighted, let stretchName { parts.append(stretchName) }
         if let marker { parts.append(marker.name) }
@@ -742,12 +742,14 @@ struct CalendarView: View {
         if step.move != 0 { move(step.move) }
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { focusedID=step.night }
     }
-    /// One rotor stop per night: the day, its score and band.
+    /// One rotor stop per night: the day, its score and band, then what the score rests on, as the
+    /// night's cell says it ("Moon and darkness only" for a night that counts no clouds).
     struct RotorNight: Identifiable { let id: Date; let label: String }
     static func rotor(_ nights:some Sequence<Night>)->[RotorNight] {
-        nights.map { RotorNight(id:$0.id,label:String(localized:"\($0.park.dayLabel($0.id)), \($0.score.value), \($0.score.band.label)")) }
+        nights.map { RotorNight(id:$0.id,label:Phrase.clauses([String(localized:"\($0.park.dayLabel($0.id)), \($0.score.value), \($0.score.band.label)")]+$0.standaloneBasisLabels)) }
     }
     /// The "Best nights" rotor: tonight onward, Excellent or better; if none, the three best. Date order.
+    /// A night that counts no clouds stays in the list, as the grid shows it, and its label says so (`rotor`).
     static func bestNights(_ nights:[Night],after tonight:Date)->[RotorNight] {
         let ahead=nights.filter { $0.id>=tonight }
         let excellent=ahead.filter { $0.score.value>=ScoreBand.excellent.minimum }

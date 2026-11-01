@@ -4,7 +4,7 @@ import Foundation
 /// night of the next 30, and the places ordered by that night, the best first. A closure in a park's
 /// last update counts against its nights (`NightPlanner.better(_:_:closures:)`), as wherever a best
 /// night is recommended; the scores shown never change. Nights past the forecast rest on each
-/// place's usual clouds and say so (`Night.basisLabel`).
+/// place's usual clouds and say so (`Night.standaloneBasisLabels`).
 nonisolated struct BestNightsInReach: Sendable {
     struct Row: Sendable, Identifiable {
         let best: Night
@@ -35,8 +35,9 @@ nonisolated struct BestNightsInReach: Sendable {
     /// rest on, and a closure.
     static func spoken(_ night: Night, closure: String?) -> String {
         var parts = [night.park.shortName, night.park.dayLabel(night.id), String(localized: "\(night.score.value), \(night.score.band.label)")]
-        parts += night.basisLabels
+        parts += night.standaloneBasisLabels
         if let closure { parts.append(ClosureLine.spoken(closure)) }
-        return parts.joined(separator: ". ")
+        // As sentences, so a date that ends in a period ("Sa. 31. Okt.") takes no second one.
+        return Phrase.sentences(parts)
     }
 }

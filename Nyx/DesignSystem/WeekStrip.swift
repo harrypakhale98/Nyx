@@ -68,7 +68,7 @@ struct WeekStrip: View {
         let line=WeekBest.ringed(nights) == nil ? Sentences.end(String(localized:"Best this week: every night"))
             : best.id==first.id ? String(localized:"Tonight is the best night this week.")
             : String(localized:"Best night this week: \(best.park.dayLabel(best.id)), \(best.score.value).")
-        return Sentences.join([line]+best.basisLabels.map(Sentences.end))
+        return Sentences.join([line]+best.standaloneBasisLabels.map(Sentences.end))
     }
 }
 #Preview("Week strip") { let m=PlanModel();if let p=m.home { WeekStrip(nights:m.nights(p,from:m.tonight(p),count:7)).padding().background(.black).preferredColorScheme(.dark) } }

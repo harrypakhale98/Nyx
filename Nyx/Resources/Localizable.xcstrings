@@ -12273,6 +12273,41 @@
         }
       }
     },
+    "Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds for the month, or on the Moon and darkness only where those cannot be used; the Moon and the hours of true darkness are exact.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um jeden Neumond das Wochenende mit der dunkelsten Nacht. So weit voraus beruhen die Werte auf den üblichen Wolken des Monats oder, wo diese nicht nutzbar sind, nur auf Mond und Dunkelheit; Mond und Stunden echter Dunkelheit sind genau."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds for the month, or on the Moon and darkness only where those cannot be used; the Moon and the hours of true darkness are exact."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca de cada luna nueva, el fin de semana con la noche más oscura. Con tanta antelación, las puntuaciones se basan en las nubes habituales del mes, o solo en la Luna y la oscuridad donde no se pueden usar; la Luna y las horas de oscuridad total son exactas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autour de chaque nouvelle lune, le week-end à la nuit la plus sombre. Si loin à l’avance, les scores reposent sur les nuages habituels du mois, ou seulement sur la Lune et l’obscurité là où ils ne peuvent pas servir ; la Lune et les heures d’obscurité totale sont exactes."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新月ごとに、いちばん暗い夜のある週末を示します。これほど先のスコアはその月の平年の雲量にもとづき、それが使えない場所では月と暗さだけにもとづきます。月と完全に暗い時間は正確です。"
+          }
+        }
+      }
+    },
     "Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds for the month; the Moon and the hours of true darkness are exact.": {
       "extractionState": "manual",
       "localizations": {
@@ -12304,6 +12339,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "新月ごとに、いちばん暗い夜のある週末を示します。これほど先のスコアはその月の平年の雲量にもとづきます。月と完全に暗い時間は正確です。"
+          }
+        }
+      }
+    },
+    "Around each new moon, the weekend with the darkest night. Far ahead, the usual clouds cannot be used here, so scores rest on the Moon and the hours of true darkness, which are exact.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um jeden Neumond das Wochenende mit der dunkelsten Nacht. So weit voraus lassen sich die üblichen Wolken hier nicht nutzen, also beruhen die Werte auf dem Mond und den Stunden echter Dunkelheit, die genau sind."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Around each new moon, the weekend with the darkest night. Far ahead, the usual clouds cannot be used here, so scores rest on the Moon and the hours of true darkness, which are exact."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca de cada luna nueva, el fin de semana con la noche más oscura. Con tanta antelación, aquí no se pueden usar las nubes habituales, así que las puntuaciones se basan en la Luna y las horas de oscuridad total, que son exactas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autour de chaque nouvelle lune, le week-end à la nuit la plus sombre. Si loin à l’avance, les nuages habituels ne peuvent pas servir ici ; les scores reposent donc sur la Lune et les heures d’obscurité totale, qui sont exactes."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新月ごとに、いちばん暗い夜のある週末を示します。ここでは平年の雲量が使えないため、先のスコアは月と完全に暗い時間（どちらも正確）にもとづきます。"
           }
         }
       }
@@ -42846,6 +42916,76 @@
         }
       }
     },
+    "No night has a cloud forecast yet; scores count the Moon and darkness only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch hat keine Nacht eine Wolkenvorhersage; die Werte berücksichtigen nur Mond und Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No night has a cloud forecast yet; scores count the Moon and darkness only."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguna noche tiene aún pronóstico de nubes; los índices solo cuentan la Luna y la oscuridad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune nuit n’a encore de prévision de nuages ; les indices ne comptent que la Lune et l’obscurité."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報のある夜はまだありません。スコアは月と暗さだけで計算しています。"
+          }
+        }
+      }
+    },
+    "No night has a cloud forecast yet; scores use each park's usual clouds, or the Moon and darkness only where those cannot be used.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch hat keine Nacht eine Wolkenvorhersage; die Werte nutzen die übliche Bewölkung jedes Parks oder, wo diese nicht nutzbar ist, nur Mond und Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No night has a cloud forecast yet; scores use each park's usual clouds, or the Moon and darkness only where those cannot be used."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguna noche tiene aún pronóstico de nubes; los índices usan la nubosidad habitual de cada parque, o solo la Luna y la oscuridad donde no se puede usar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune nuit n’a encore de prévision de nuages ; les indices utilisent la nébulosité habituelle de chaque parc, ou seulement la Lune et l’obscurité là où elle ne peut pas servir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報のある夜はまだありません。スコアには各公園の平年の雲量を使い、それが使えない場所では月と暗さだけで計算しています。"
+          }
+        }
+      }
+    },
     "No night has a cloud forecast yet; scores use each park's usual clouds.": {
       "extractionState": "manual",
       "localizations": {
@@ -62042,6 +62182,41 @@
         }
       }
     },
+    "Some of those count the Moon and darkness only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einige davon berücksichtigen nur Mond und Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some of those count the Moon and darkness only."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Algunas de esas solo cuentan la Luna y la oscuridad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Certaines d’entre elles ne comptent que la Lune et l’obscurité."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "そのうち一部の夜は月と暗さだけで計算しています。"
+          }
+        }
+      }
+    },
     "Sort": {
       "extractionState": "manual",
       "localizations": {
@@ -71656,6 +71831,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "今年の星座"
+          }
+        }
+      }
+    },
+    "Those count the Moon and darkness only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese berücksichtigen nur Mond und Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Those count the Moon and darkness only."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esas solo cuentan la Luna y la oscuridad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Celles-ci ne comptent que la Lune et l’obscurité."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "それらの夜は月と暗さだけで計算しています。"
           }
         }
       }

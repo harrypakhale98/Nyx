@@ -145,7 +145,7 @@ struct DarknessSnippetView:View {
                         .frame(width:22,height:22).accessibilityIgnoresInvertColors()
                     Text("\(night.sky.moon.name), \(night.sky.moon.litText)").font(.caption).foregroundStyle(palette.muted)
                 }
-                Text(night.basisLabel ?? String(localized:"Cloud forecast included")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                Text(night.standaloneBasisLabel ?? String(localized:"Cloud forecast included")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 // A place the Park Service does not run: Nyx cannot see its closures, and says so.
                 if let unknown=ClosureLine.unknown(night.park) { Text(unknown).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }

@@ -31,15 +31,15 @@ nonisolated struct NightChart: Sendable {
     // MARK: Nights
 
     /// Darkness score by night: the river's thirty nights or a calendar month. Nights without a
-    /// full cloud forecast say so ("Early look", "No cloud forecast yet"); where three forecast models disagree, two more
+    /// full cloud forecast say so ("Early look", "No cloud forecast yet", "Moon and darkness only"); where three forecast models disagree, two more
     /// series give the clearest and cloudiest models' scores, so the spread can be heard too.
     static func nights(_ nights:[Night],title:String,outlooks:[Date:NightOutlook]=[:],events:[Date:String]=[:])->NightChart {
         let labels=nights.map { $0.park.dayLabel($0.id) }
         let points=nights.indices.map { i in
             let night=nights[i]
-            var parts=[night.score.band.label]+night.basisLabels
+            var parts=[night.score.band.label]+night.standaloneBasisLabels
             if let event=events[night.id] { parts.append(event) }
-            return Point(x:Double(i),y:Double(night.score.value),label:parts.joined(separator:". "))
+            return Point(x:Double(i),y:Double(night.score.value),label:Phrase.sentences(parts))
         }
         var series=[Series(name:String(localized:"Darkness score"),continuous:true,points:points)]
         let ranged=nights.indices.compactMap { i in outlooks[nights[i].id]?.scoreRange.flatMap { $0.upperBound>$0.lowerBound ? (i,$0) : nil } }
@@ -56,15 +56,23 @@ nonisolated struct NightChart: Sendable {
             },
             series:series)
     }
-    /// The best night, how many are estimates, and the best band reached.
+    /// The best night, how many are estimates, and the best band reached. Estimates that count no
+    /// clouds (no usual clouds the place can use) are said to count the Moon and darkness only.
     static func summary(_ nights:[Night])->String {
         guard let best=NightPlanner.best(nights) else { return String(localized:"No nights available") }
-        let estimates=nights.filter { $0.basis == .usual }.count
+        let usual=nights.filter { $0.basis == .usual }
+        let estimates=usual.count, cloudless=usual.filter { $0.score.cloudPoints == nil }.count
         let first=best.spokenSummary(.chartBest)
         let second=estimates==0 ? (nights.allSatisfy { $0.score.hasForecast } ? String(localized:"Every night includes a cloud forecast.") : String(localized:"Every night includes a cloud forecast; the later ones are an early look."))
-            : estimates==nights.count ? String(localized:"No night has a cloud forecast yet; scores use each park's usual clouds.")
+            : estimates==nights.count ? (cloudless==0 ? String(localized:"No night has a cloud forecast yet; scores use each park's usual clouds.")
+                : cloudless==estimates ? String(localized:"No night has a cloud forecast yet; scores count the Moon and darkness only.")
+                : String(localized:"No night has a cloud forecast yet; scores use each park's usual clouds, or the Moon and darkness only where those cannot be used."))
             : String(localized:"Nights without a cloud forecast yet: \(estimates) of \(nights.count).")
-        return first+" "+second
+        // A month part forecast, part past it: say when those past it count no clouds.
+        let third:String?=estimates==0 || estimates==nights.count || cloudless==0 ? nil
+            : cloudless==estimates ? String(localized:"Those count the Moon and darkness only.")
+            : String(localized:"Some of those count the Moon and darkness only.")
+        return Sentences.join([first,second,third ?? ""])
     }
 
     // MARK: The shape of the night
