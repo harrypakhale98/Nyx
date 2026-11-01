@@ -146,7 +146,8 @@ import UIKit
         #expect(sent.alertsRefusal == .shared && sent == context)
         #expect(sent.alertsNote(jotr) == ScoreInputs(alertsBusy: true, alertsRefusal: .shared).uncheckedNote(jotr, closure: nil))
         let deva = try park("deva")
-        #expect(sent.alertsNote(jotr) == MissingInput.refusal(.shared, cached: false) && sent.alertsNote(deva) == nil)
+        // Death Valley, which the last update covered, says its alerts are an earlier update's.
+        #expect(sent.alertsNote(jotr) == MissingInput.refusal(.shared, cached: false) && sent.alertsNote(deva) == MissingInput.refusal(.shared, cached: true))
         let bytes = try #require(context.data)
         var object = try #require(try JSONSerialization.jsonObject(with: bytes) as? [String: Any])
         for name: Any? in [nil, "someday"] {
@@ -167,12 +168,41 @@ import UIKit
         #expect(sent.alertsBusy && sent == context && sent.numbered(7).alertsBusy)
         #expect(sent != WatchContext.make(savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], checkedParkIDs: ["deva"], now: evening))
         #expect(sent.alertsNote(jotr) == ScoreInputs(alertsBusy: true).uncheckedNote(jotr, closure: nil))
-        #expect(sent.alertsNote(jotr) == String(localized: "Park alerts are busy. Check current conditions on nps.gov.") && sent.alertsNote(deva) == nil)
+        #expect(sent.alertsNote(jotr) == String(localized: "Park alerts are busy. Check current conditions on nps.gov.") && sent.alertsNote(deva) == MissingInput.stale(refused: nil))
         let bytes = try #require(context.data)
         var object = try #require(try JSONSerialization.jsonObject(with: bytes) as? [String: Any])
         object["alertsBusy"] = nil
         let older = try #require(WatchContext(data: try JSONSerialization.data(withJSONObject: object)))
         #expect(!older.alertsBusy && older.alertsNote(jotr) == MissingInput.unchecked(busy: false))
+    }
+
+    /// Where the last park update covers the park, or a closure from it stands, a refused key or a
+    /// busy Park Service is said beside those alerts, in the words the iPhone and Vision Pro use
+    /// (`ScoreInputs.accessNote`); otherwise nothing. Siri says a standing closure once, and no more.
+    @Test func coveredParksSayTheirAlertsAreAnEarlierUpdates() throws {
+        let jotr = try park("jotr"), deva = try park("deva")
+        let closure = "Badwater Road closed"
+        func context(busy: Bool = false, refused: MissingInput.KeyRefusal? = nil, off: Bool = false) -> WatchContext {
+            WatchContext(sent: now, savedParkIDs: ["jotr", "deva"], homeParkID: "jotr", nightVision: false, forecasts: [:], closures: ["deva": closure],
+                         alertsOff: off, checkedParkIDs: ["jotr", "deva"], alertsRefusal: refused, alertsBusy: busy || refused != nil)
+        }
+        // A fresh update: the closure stands alone, and a covered park with none says nothing.
+        #expect(context().alertsNote(deva) == nil && context().alertsNote(jotr) == nil)
+        for refused in [nil, MissingInput.KeyRefusal.own, .shared] {
+            let held = context(busy: true, refused: refused)
+            // The iPhone says the same line after the update's own summary, which the wrist is not sent.
+            let code = try #require(jotr.nps)
+            let phone = ScoreInputs(alerts: ParkAlertsCache(updated: now, alerts: [code: []]), alertsBusy: true, alertsRefusal: refused)
+            #expect(held.alertsNote(jotr) == MissingInput.stale(refused: refused) && held.alertsNote(deva) == MissingInput.stale(refused: refused))
+            #expect(phone.accessNote(jotr)?.hasSuffix(MissingInput.stale(refused: refused)) == true)
+            // Siri's answer on the wrist names the closure once and keeps the rest of its order.
+            let night = NightPlanner.night(park: deva, sky: AstronomyEngine().conditions(for: deva, on: deva.currentNight(at: now)), forecast: nil, detail: nil, now: now, climate: .shared)
+            let dialog = TonightAnswer(night: night, closure: closure, unchecked: held.alertsNote(deva)).dialog()
+            #expect(dialog.components(separatedBy: closure).count == 2)
+        }
+        // Park alerts off on iPhone: a standing closure is still shown, with nothing more said.
+        #expect(context(busy: true, off: true).alertsNote(deva) == nil)
+        #expect(context(off: true).alertsNote(jotr) == MissingInput.alertsOff)
     }
 
     /// The first-launch chooser's pick stands in only until the iPhone names Tonight's places: parks

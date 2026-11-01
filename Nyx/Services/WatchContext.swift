@@ -298,14 +298,18 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// its own page stays until let go.
     func releasesPin(_ pinned: String?, provisional: Bool) -> Bool { pinned != nil && provisional && answersTonight }
     /// Why a national park's closures are not known on the wrist when none stands beside its score, in
-    /// the iPhone's words (`ScoreInputs.uncheckedNote`): its park alerts off, or no park update covering
+    /// the iPhone's words (`ScoreInputs.accessNote`): its park alerts off, or no park update covering
     /// the park (`checkedParkIDs`; an older iPhone says only the first), named as a refused key when
     /// the Park Service did not accept one (`alertsRefusal`), or as busy while it refuses requests (`alertsBusy`).
+    /// Where the last update covers the park, or a closure from it stands, those alerts are an earlier
+    /// update's while the Park Service refuses requests, and that is said too (`MissingInput.stale`).
     func alertsNote(_ park: Park) -> String? {
-        guard park.nps != nil, closures[park.id] == nil else { return nil }
-        if alertsOff { return MissingInput.alertsOff }
-        guard let checkedParkIDs, !checkedParkIDs.contains(park.id) else { return nil }
-        return MissingInput.unchecked(busy: alertsBusy || alertsRefusal != nil, refused: alertsRefusal)
+        guard park.nps != nil else { return nil }
+        let stands = closures[park.id] != nil, busy = alertsBusy || alertsRefusal != nil
+        if alertsOff { return stands ? nil : MissingInput.alertsOff }
+        if stands || checkedParkIDs?.contains(park.id) == true { return busy ? MissingInput.stale(refused: alertsRefusal) : nil }
+        guard checkedParkIDs != nil else { return nil }
+        return MissingInput.unchecked(busy: busy, refused: alertsRefusal)
     }
     /// Why smoke is not in the wrist's score for the night, in the iPhone's words (`ScoreInputs.smokeNote`):
     /// the iPhone's switch off, or no smoke forecast handed over for the place or reaching the night.
