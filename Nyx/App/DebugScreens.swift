@@ -24,7 +24,8 @@ struct DebugScreen: View {
             let spot=Place(spotID:"pin:00000000-0000-4000-8000-0000000000aa",name:"Pullout off Pinto Basin Road",latitude:33.92,longitude:-115.93,
                            timeZoneID:"America/Los_Angeles",countryCode:"US",region:"California")
             ParkDetailView(park:spot).onAppear { model.setSpots(places:[spot]) }
-        case "breakdown": if let park=model.home { ScoreBreakdownView(night:model.night(park)).task { await model.refreshForecasts(watching:[park]) } }
+        // `-nyx-night 2027-06-19`: that night's breakdown instead of tonight's.
+        case "breakdown": if let park=model.home { ScoreBreakdownView(night:model.night(park,on:DebugScenario.text("-nyx-night").flatMap(TripDay.init(iso:)).map { $0.evening(in:park) })).task { await model.refreshForecasts(watching:[park]) } }
         case "editor": JournalEditorView()
         case "entry": JournalDetailView(entry:JournalEntry(date:.now,parkID:model.homeID,notes:"The Milky Way stretched above the ridge. A quiet hour under the stars."))
         case "onboarding": OnboardingView {}
