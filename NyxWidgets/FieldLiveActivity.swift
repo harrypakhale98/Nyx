@@ -11,39 +11,21 @@ struct FieldLiveActivity: Widget {
         ActivityConfiguration(for:FieldActivityAttributes.self) { context in
             FieldActivityFace(attributes:context.attributes,state:context.state,isStale:context.isStale)
                 .activityBackgroundTint(Color.black.opacity(0.88))
+                // The modifiers below have no environment to read Increase Contrast from: the standard red.
                 .activitySystemActionForegroundColor(FieldActivityColors(nightVision:context.state.nightVision).ink)
                 .widgetURL(URL(string:"nyx://field/\(context.attributes.parkID)"))
         } dynamicIsland: { context in
-            let colors=FieldActivityColors(nightVision:context.state.nightVision)
-            // One milestone for title, symbol and countdown, so a stale activity never names one moment and times another.
-            let mark=FieldActivityMark(attributes:context.attributes,state:context.state,isStale:context.isStale)
-            let zone=context.attributes.timeZone
-            return DynamicIsland {
+            DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     // A long title drops below the camera rather than truncating beside it.
-                    Label { Text(mark.title).lineLimit(2).minimumScaleFactor(0.75) } icon:{ FieldActivitySymbol(attributes:context.attributes,state:context.state,isStale:context.isStale).accessibilityHidden(true) }
-                        .font(.system(.subheadline,design:.serif)).foregroundStyle(colors.ink)
+                    FieldIslandTitle(attributes:context.attributes,state:context.state,isStale:context.isStale)
                         .dynamicIsland(verticalPlacement:.belowIfTooWide)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     FieldActivityExpandedCountdown(attributes:context.attributes,state:context.state,isStale:context.isStale)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    VStack(alignment:.leading,spacing:6) {
-                        FieldNightLine(attributes:context.attributes,colors:colors).frame(height:14)
-                        if context.isStale && !context.state.finished {
-                            FieldActivityUpdated(attributes:context.attributes,state:context.state).font(.caption2).foregroundStyle(colors.muted)
-                        } else {
-                            // One line: the whole band when it fits, else its one word, never cut.
-                            ViewThatFits(in:.horizontal) {
-                                Text("\(context.attributes.parkName) · \(context.attributes.scoreLine(context.state))").lineLimit(1)
-                                Text("\(context.attributes.parkName) · \(context.attributes.scoreLine(context.state,short:true))").lineLimit(1)
-                                Text("\(context.attributes.parkName) · \(context.attributes.scoreLine(context.state,short:true))").lineLimit(2).minimumScaleFactor(0.8)
-                            }.font(.caption2).foregroundStyle(colors.muted)
-                                .accessibilityElement(children:.ignore)
-                                .accessibilityLabel("\(context.attributes.parkName). \(context.attributes.spokenScore(context.state))")
-                        }
-                    }.environment(\.timeZone,zone)
+                    FieldIslandBottom(attributes:context.attributes,state:context.state,isStale:context.isStale)
                 }
             } compactLeading: {
                 FieldActivitySymbol(attributes:context.attributes,state:context.state,isStale:context.isStale)
@@ -52,7 +34,8 @@ struct FieldLiveActivity: Widget {
             } minimal: {
                 FieldActivitySymbol(attributes:context.attributes,state:context.state,isStale:context.isStale)
             }
-            .keylineTint(colors.accent)
+            // No environment here either: the standard red. The regions above read Increase Contrast themselves.
+            .keylineTint(FieldActivityColors(nightVision:context.state.nightVision).accent)
             .widgetURL(URL(string:"nyx://field/\(context.attributes.parkID)"))
         }
         // Apple Watch's Smart Stack and CarPlay draw the small family; without it they compose one from the island.

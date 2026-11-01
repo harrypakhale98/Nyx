@@ -93,6 +93,7 @@ struct FieldActivityReview: View {
                     island { FieldActivitySymbol(attributes: attributes, state: stale, isStale: true) }.frame(width: 44)
                 }
                 expanded(attributes, state: state, isStale: false)
+                expanded(attributes, state: attributes.state(at: now, nightVision: true), isStale: false)
                 expanded(attributes, state: stale, isStale: true)
             }.padding(24)
         }.defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(LinearGradient(colors: [Color(red: 0.05, green: 0.06, blue: 0.14), .black], startPoint: .top, endPoint: .bottom).ignoresSafeArea())
@@ -117,20 +118,19 @@ struct FieldActivityReview: View {
         Eyebrow(text: "The closure lifted since it was followed")
         face { FieldActivityLockView(attributes: early, state: FieldActivityAttributes.rescored(heading, score: night.score.value, band: night.score.band.label, closure: nil, at: Date.now), isStale: false) }
     }
-    /// The expanded island: its milestone and countdown over the night's line; stale, sunrise's time
-    /// (its zone under it on another clock) and when Nyx last updated it.
+    /// The expanded island as the island draws it: its milestone and countdown over the night's line
+    /// and the score; stale, sunrise's time (its zone under it on another clock) and when Nyx last updated it.
     private func expanded(_ attributes: FieldActivityAttributes, state: FieldActivityAttributes.ContentState, isStale: Bool) -> some View {
         let shape=RoundedRectangle(cornerRadius: 44)
         return VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
-                Label { Text(FieldActivityMark(attributes: attributes, state: state, isStale: isStale).title) } icon: { FieldActivitySymbol(attributes: attributes, state: state, isStale: isStale) }.font(.system(.subheadline, design: .serif))
+                FieldIslandTitle(attributes: attributes, state: state, isStale: isStale)
                 Spacer()
                 FieldActivityExpandedCountdown(attributes: attributes, state: state, isStale: isStale)
             }
-            FieldNightLine(attributes: attributes, colors: FieldActivityColors(nightVision: false)).frame(height: 14)
-            if isStale { FieldActivityUpdated(attributes: attributes, state: state).font(.caption2).foregroundStyle(FieldActivityColors(nightVision: false).muted) }
+            FieldIslandBottom(attributes: attributes, state: state, isStale: isStale)
         }
-        .padding(.horizontal, 22).padding(.vertical, 16).environment(\.timeZone, attributes.timeZone)
+        .padding(.horizontal, 22).padding(.vertical, 16)
         .frame(maxWidth: .infinity, minHeight: 110).background(Color.black, in: shape).overlay(shape.stroke(Color.white.opacity(0.12), lineWidth: 0.5))
     }
     private func face<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {

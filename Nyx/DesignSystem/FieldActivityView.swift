@@ -369,6 +369,46 @@ struct FieldActivityExpandedCountdown: View {
         .accessibilityValue(clock ? attributes.spokenNote(parkZone) : Text(verbatim:""))
     }
 }
+/// The expanded island's milestone, in the faces' colours under Increase Contrast, as its countdown
+/// is: the island's closure has no environment to read it from. One milestone for title, symbol and
+/// countdown, so a stale activity never names one moment and times another.
+struct FieldIslandTitle: View {
+    let attributes: FieldActivityAttributes
+    let state: FieldActivityAttributes.ContentState
+    let isStale: Bool
+    @Environment(\.colorSchemeContrast) private var contrast
+    var body: some View {
+        let mark=FieldActivityMark(attributes:attributes,state:state,isStale:isStale)
+        Label { Text(mark.title).lineLimit(2).minimumScaleFactor(0.75) } icon:{ FieldActivitySymbol(attributes:attributes,state:state,isStale:isStale).accessibilityHidden(true) }
+            .font(.system(.subheadline,design:.serif)).foregroundStyle(FieldActivityColors(nightVision:state.nightVision,contrast:contrast).ink)
+    }
+}
+/// The expanded island's bottom: the night's line, then the park and its score, or when Nyx last
+/// updated it once stale. In the same colours as the title.
+struct FieldIslandBottom: View {
+    let attributes: FieldActivityAttributes
+    let state: FieldActivityAttributes.ContentState
+    let isStale: Bool
+    @Environment(\.colorSchemeContrast) private var contrast
+    var body: some View {
+        let colors=FieldActivityColors(nightVision:state.nightVision,contrast:contrast)
+        VStack(alignment:.leading,spacing:6) {
+            FieldNightLine(attributes:attributes,colors:colors).frame(height:14)
+            if isStale && !state.finished {
+                FieldActivityUpdated(attributes:attributes,state:state).font(.caption2).foregroundStyle(colors.muted)
+            } else {
+                // One line: the whole band when it fits, else its one word, never cut.
+                ViewThatFits(in:.horizontal) {
+                    Text("\(attributes.parkName) · \(attributes.scoreLine(state))").lineLimit(1)
+                    Text("\(attributes.parkName) · \(attributes.scoreLine(state,short:true))").lineLimit(1)
+                    Text("\(attributes.parkName) · \(attributes.scoreLine(state,short:true))").lineLimit(2).minimumScaleFactor(0.8)
+                }.font(.caption2).foregroundStyle(colors.muted)
+                    .accessibilityElement(children:.ignore)
+                    .accessibilityLabel("\(attributes.parkName). \(attributes.spokenScore(state))")
+            }
+        }.environment(\.timeZone,attributes.timeZone)
+    }
+}
 @available(iOS 27.0, *)
 private struct FieldActivityAdaptiveCountdown: View {
     @Environment(\.isDynamicIslandLimitedInWidth) private var limited
@@ -594,6 +634,30 @@ extension FieldActivityAttributes {
         FieldActivityLockView(attributes:a,state:a.state(at:a.dawn,nightVision:false),isStale:false)
         HStack { FieldActivitySmallView(attributes:a,state:a.state(at:a.dusk,nightVision:false),isStale:false); FieldActivitySmallView(attributes:a,state:a.state(at:a.dusk,nightVision:true),isStale:true) }.frame(height:84)
     }.background(Color.black).padding() }
+}
+/// Night vision under Increase Contrast: the expanded island's title, countdown, line and caption,
+/// fresh and stale, and the compact island, all in the one brighter red.
+#Preview("Island, red, Increase Contrast") {
+    let a=FieldActivityAttributes.preview
+    let state=FieldActivityAttributes.ContentState(next:a.milestones[1],nightVision:true)
+    VStack(spacing:12) {
+        ForEach([false,true],id:\.self) { stale in
+            VStack(alignment:.leading,spacing:8) {
+                HStack(alignment:.top) {
+                    FieldIslandTitle(attributes:a,state:state,isStale:stale)
+                    Spacer()
+                    FieldActivityExpandedCountdown(attributes:a,state:state,isStale:stale)
+                }
+                FieldIslandBottom(attributes:a,state:state,isStale:stale)
+            }.padding(.horizontal,22).padding(.vertical,16).background(Color.black,in:RoundedRectangle(cornerRadius:44))
+        }
+        HStack {
+            FieldActivitySymbol(attributes:a,state:state,isStale:false)
+            Spacer(minLength:40)
+            FieldActivityCountdown(attributes:a,state:state,isStale:false)
+        }.padding(.horizontal,14).frame(height:36).background(Color.black,in:Capsule())
+    }
+    .padding().environment(\._colorSchemeContrast,.increased)
 }
 /// A snoozing "wake me" alarm at Joshua Tree, as `FieldAlarms` sets one, for previews.
 @available(iOS 26.1, *)
