@@ -206,14 +206,20 @@ nonisolated struct NightLookup: Sendable {
         }
         return ranked.map { park, distance in
             let night=tonight[park.id], basis=night.map(Self.basis) ?? "", whole=Int(distance.rounded()), score=night?.score.value ?? 0, band=night?.score.band.label ?? ""
-            let region=Self.locality(park)
-            // The distance from its own key, so "1 mile" keeps its plural form inside the record.
-            let detail=system == .miles ? String(localized: "\(whole) miles straight-line from \(origin.label)") : String(localized: "\(whole) km straight-line from \(origin.label)")
-            let line=String(localized: "\(park.shortName), \(region); \(detail); tonight \(score)/100 \(band)")
+            let (detail, line)=Self.nearRecord(park.shortName, region: Self.locality(park), whole: whole, from: origin.label, score: score, band: band, system: system)
             let record=line+(basis.isEmpty ? "" : "; "+basis)+access(park)
             return GuideFact(text: closed.contains(park.id) ? Phrase.sentences([record, OnDeviceGuide.closureRecord]) : record,
                              place: park, night: night?.id, score: night?.score.value, band: night?.score.band.label, detail: detail)
         }+farther
+    }
+    /// A "parks near" record's distance and its line: "Arches, UT; 1 mile straight-line from Moab; tonight
+    /// 88/100 Excellent". The distance comes from its own key, so "1 mile" keeps its plural form inside the
+    /// record. `bundle` and `locale` are the app's own except where a test reads another language.
+    static func nearRecord(_ name: String, region: String, whole: Int, from origin: String, score: Int, band: String,
+                           system: SearchRadius.System, bundle: Bundle? = nil, locale: Locale = .current) -> (detail: String, line: String) {
+        let detail=system == .miles ? String(localized: "\(whole) miles straight-line from \(origin)", bundle: bundle, locale: locale)
+                                    : String(localized: "\(whole) km straight-line from \(origin)", bundle: bundle, locale: locale)
+        return (detail, String(localized: "\(name), \(region); \(detail); tonight \(score)/100 \(band)", bundle: bundle, locale: locale))
     }
     /// The radius a tool may ask for, kept to 10–1,500 miles or 10–2,500 km.
     static func toolRadius(_ asked: Int, _ system: SearchRadius.System) -> Double { Double(min(system == .miles ? 1500 : 2500, max(10, asked))) }

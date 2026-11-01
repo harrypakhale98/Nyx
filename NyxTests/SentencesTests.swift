@@ -128,7 +128,7 @@ struct SentencesTests {
             #expect(String(format: format, locale: locale, 2, "Denver") == two, "\(language)")
         }
     }
-    /// The parks-near record the model may quote holds that counted distance whole: "1 Meile", never "1 Meilen".
+    /// The parks-near record the model may quote, as `parksNearFacts` words it, holds that counted distance whole: "1 Meile", never "1 Meilen".
     @Test func parksNearRecordKeepsItsCountedDistance() throws {
         let expected=["en": "Arches, UT; 1 mile straight-line from Moab; tonight 88/100 Excellent",
                       "de": "Arches, UT; 1 Meile Luftlinie von Moab; heute Nacht 88/100 Excellent",
@@ -137,11 +137,11 @@ struct SentencesTests {
                       "ja": "Arches、UT；Moabから直線距離で1マイル；今夜88/100 Excellent"]
         for (language, line) in expected {
             let bundle=try #require(Bundle.main.path(forResource: language, ofType: "lproj").flatMap(Bundle.init(path:)), "\(language)")
-            let locale=Locale(identifier: language)
-            let detail=String(format: bundle.localizedString(forKey: "%lld miles straight-line from %@", value: nil, table: nil), locale: locale, 1, "Moab")
-            let format=bundle.localizedString(forKey: "%@, %@; %@; tonight %lld/100 %@", value: nil, table: nil)
-            #expect(String(format: format, locale: locale, "Arches", "UT", detail, 88, "Excellent") == line, "\(language)")
+            let record=NightLookup.nearRecord("Arches", region: "UT", whole: 1, from: "Moab", score: 88, band: "Excellent", system: .miles, bundle: bundle, locale: Locale(identifier: language))
+            #expect(record.line == line, "\(language)")
+            #expect(record.line.contains(record.detail), "\(language)")
         }
+        #expect(NightLookup.nearRecord("Arches", region: "UT", whole: 2, from: "Moab", score: 88, band: "Excellent", system: .kilometers).detail == "2 km straight-line from Moab")
     }
     /// Ask Nyx's "Looked up" lines read as sentences: a German date's own period is not doubled.
     @MainActor @Test func lookedUpLinesAreSpokenAsSentences() {
