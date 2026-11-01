@@ -536,10 +536,10 @@ struct PanoramaCanvas: View {
                 : String(localized:"partway up in the \(Compass.name(mark.azimuth))")
         }
         if let moon=sky.moon, moon.altitude>0 { lines.append(String(localized:"The Moon, \(Int((sky.moonIllumination*100).rounded())) percent lit, \(place((moon.altitude,moon.azimuth))).")) }
-        for planet in sky.planets.sorted(by:{ $0.magnitude<$1.magnitude }) { lines.append("\(planet.name), \(place((planet.altitude,planet.azimuth))).") }
+        for planet in sky.planets.sorted(by:{ $0.magnitude<$1.magnitude }) { lines.append(Sentences.end(Phrase.clauses([planet.name,place((planet.altitude,planet.azimuth))]))) }
         let milkyWay=(bortle.map(BortleScale.milkyWay) ?? 0.85)*(sky.dark ? 1 : 0)
         if milkyWay>0.15, let core=sky.core { lines.append(String(localized:"The Milky Way's core, \(place((core.altitude,core.azimuth))).")) }
-        if let radiant=sky.radiant, sky.dark { lines.append("\(radiant.name), \(place((radiant.altitude,radiant.azimuth))).") }
+        if let radiant=sky.radiant, sky.dark { lines.append(Sentences.end(Phrase.clauses([radiant.name,place((radiant.altitude,radiant.azimuth))]))) }
         let view=PanoramaOptions(facing:facing,bortle:bortle)
         for star in labelledStars(sky:sky,options:view,size:size) where star.magnitude<skyLimit(sky:sky,options:view) {
             lines.append(String(localized:"\(star.name), a bright star, \(place((star.altitude,star.azimuth)))."))
