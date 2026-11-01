@@ -938,6 +938,7 @@ import Observation
             if programs, !Task.isCancelled { await refreshParkUpdates(parks,force:force,programs:true,alertPages:alertPages) }
             return
         }
+        let wasBusy=alertsBusy
         apply(update)
         // Under the key field, and in the access line wherever alerts are shown.
         let refusedOwn=own != nil && update.keyRefused
@@ -946,11 +947,11 @@ import Observation
         // `-nyx-shared-key-refused` the shared key's.
         let debugRefusal:MissingInput.KeyRefusal?=DebugScenario.isEnabled("shared-key-refused") ? .shared : DebugScenario.isEnabled("nps-key-refused") ? .own : nil
         let refusal:MissingInput.KeyRefusal?=update.keyRefused ? (own != nil ? .own : .shared) : debugRefusal
-        if alertsRefusal != refusal {
-            alertsRefusal=refusal
-            // Apple Watch names the refusal too (`WatchContext.alertsRefusal`).
-            if DebugScenario.screen == nil { savedSync.pushWatch(self) }
-        }
+        let refusalChanged=alertsRefusal != refusal
+        if refusalChanged { alertsRefusal=refusal }
+        // Apple Watch names the refusal too, and says the alerts are busy (`WatchContext.alertsRefusal`,
+        // `alertsBusy`): one hand-over when either changed.
+        if refusalChanged || alertsBusy != wasBusy, DebugScenario.screen == nil { savedSync.pushWatch(self) }
         guard programs else { return }
         for park in parks {
             if Task.isCancelled { return }

@@ -3,7 +3,7 @@ import WidgetKit
 
 /// Screenshot routes for the watch, DEBUG only (Release always starts on Tonight):
 /// `-nyx-watch-screen tonight | milestones | whatsup | week | dark | parks | chooser | credits | complications`
-/// `-nyx-watch-state synced | unsynced | polar | samoa | closure | alertsoff | unchecked | refused | expired | models`, `-nyx-watch-palette automatic | red | phone | standard`,
+/// `-nyx-watch-state synced | unsynced | polar | samoa | closure | alertsoff | unchecked | refused | busy | expired | models`, `-nyx-watch-palette automatic | red | phone | standard`,
 /// `-nyx-watch-night 0…6` (Tonight turned to that night with the Crown), `-nyx-watch-adaptation <minutes>`
 /// (the adaptation clock started that long ago), `-nyx-watch-info` (the dark-adaptation info sheet), `-nyx-watch-aod` (Always-On, which the simulator cannot show),
 /// `-nyx-watch-face` (with `complications`: the full-colour renders alone, unlabelled, for the store frame).
@@ -127,13 +127,14 @@ enum WatchDebug {
                                       closures: ["jotr": "Keys View Road closed for repairs through November"])
             // Kept on Joshua Tree, so Tonight shows the closure beside its score (unpinned, Tonight led with the best saved park).
             store.debugSet(context: closed, pinned: "jotr")
-        case "alertsoff", "unchecked", "refused":
+        case "alertsoff", "unchecked", "refused", "busy":
             // Why no closure stands beside the score (`WatchContext.alertsNote`), for review: park alerts
             // off in Your privacy, or a park update that covered Death Valley but not Joshua Tree, with
-            // the shared key refused for `refused`.
+            // the shared key refused for `refused`, and the Park Service busy for `busy`.
             let state = argument("-nyx-watch-state"), off = state == "alertsoff"
             let context = WatchContext(sent: .now, savedParkIDs: synced.savedParkIDs, homeParkID: "jotr", nightVision: true, forecasts: [:],
-                                       alertsOff: off, checkedParkIDs: off ? nil : ["deva"], alertsRefusal: state == "refused" ? .shared : nil)
+                                       alertsOff: off, checkedParkIDs: off ? nil : ["deva"], alertsRefusal: state == "refused" ? .shared : nil,
+                                       alertsBusy: state == "busy" || state == "refused")
             store.debugSet(context: context, pinned: "jotr")
         case "models":
             // The forecast models' range, for review: the iPhone's own "disagree" forecast fixture

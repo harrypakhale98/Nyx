@@ -329,8 +329,9 @@ import WidgetKit
                     dusk:NightVisionDusk.startingPoint(model),
                     // The parks the last park update covers, so the wrist says "Access not checked" for the rest, as here.
                     checkedParkIDs:Set(model.parks.filter { $0.nps != nil && model.enrichments[$0.id] != nil }.map(\.id)),
-                    // A key the Park Service refused is named there too, rather than "Access not checked".
-                    alertsRefusal:model.alertsRefusal,complete:complete)
+                    // A key the Park Service refused is named there too, rather than "Access not checked",
+                    // and so are alerts the Park Service is too busy to give.
+                    alertsRefusal:model.alertsRefusal,alertsBusy:model.alertsBusy,complete:complete)
         if watch { pushWatchMoons(model) }
     }
     /// The places whose Moons the watch is handed (`WatchMoons.places`); none without a watch with Nyx.

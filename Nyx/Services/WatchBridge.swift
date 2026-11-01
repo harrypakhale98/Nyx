@@ -54,7 +54,7 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
     func push(savedParkIDs: [String], homeParkID: String, tonightParkID: String? = nil, tonightNight: String? = nil, watchParkIDs: [String] = [], forecasts: [String: Forecast],
               details: [String: ForecastDetail], closures: [String: String], aboveInversion: Set<String>, ranges: [String: [String: ClosedRange<Int>]]?, places: [Place] = [],
               aurora: AuroraOutlook? = nil, dusk: [Double]? = nil, checkedParkIDs: Set<String>? = nil, alertsRefusal: MissingInput.KeyRefusal? = nil,
-              complete: (@MainActor @Sendable () -> Void)? = nil) {
+              alertsBusy: Bool = false, complete: (@MainActor @Sendable () -> Void)? = nil) {
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
         // No watch with Nyx paired: nothing is worked out for one, and `complete` hands over once there
@@ -71,7 +71,7 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
                                         tonightParkID: tonightParkID, tonightNight: tonightNight, watchParkIDs: watchParkIDs, aurora: aurora,
                                         spotForecastsOff: !SpotForecast.isOn(), dusk: dusk,
                                         alertsOff: !NetworkService.alerts.isOn(), smokeOff: !NetworkService.smoke.isOn(), checkedParkIDs: checkedParkIDs,
-                                        alertsRefusal: alertsRefusal)
+                                        alertsRefusal: alertsRefusal, alertsBusy: alertsBusy)
         lock.withLock { latest = context; self.complete = ranges == nil ? complete : nil }
         if session.activationState == .activated { send(session) } else { activate() }
     }

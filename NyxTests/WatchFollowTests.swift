@@ -156,6 +156,25 @@ import UIKit
         }
     }
 
+    /// While the Park Service refuses requests (429, 5xx), the wrist says the alerts are busy where it
+    /// would say "Access not checked", in the iPhone's words; the state counts in what was sent, and a
+    /// context from an older iPhone still reads, and says "Access not checked" as before.
+    @Test func busyAlertsAreSaidOnTheWrist() throws {
+        let jotr = try park("jotr"), deva = try park("deva")
+        let evening = try #require(ISO8601DateFormatter().date(from: "2026-10-08T03:00:00Z"))
+        let context = WatchContext.make(savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], checkedParkIDs: ["deva"], alertsBusy: true, now: evening)
+        let sent = try #require(context.data.flatMap { WatchContext(data: $0) })
+        #expect(sent.alertsBusy && sent == context && sent.numbered(7).alertsBusy)
+        #expect(sent != WatchContext.make(savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], checkedParkIDs: ["deva"], now: evening))
+        #expect(sent.alertsNote(jotr) == ScoreInputs(alertsBusy: true).uncheckedNote(jotr, closure: nil))
+        #expect(sent.alertsNote(jotr) == String(localized: "Park alerts are busy. Check current conditions on nps.gov.") && sent.alertsNote(deva) == nil)
+        let bytes = try #require(context.data)
+        var object = try #require(try JSONSerialization.jsonObject(with: bytes) as? [String: Any])
+        object["alertsBusy"] = nil
+        let older = try #require(WatchContext(data: try JSONSerialization.data(withJSONObject: object)))
+        #expect(!older.alertsBusy && older.alertsNote(jotr) == MissingInput.unchecked(busy: false))
+    }
+
     /// The first-launch chooser's pick stands in only until the iPhone names Tonight's places: parks
     /// saved there, or Tonight's pick there. A context naming only its starting park does not.
     @Test func theChoosersPickGivesWayOnlyToTonightsPlaces() throws {
