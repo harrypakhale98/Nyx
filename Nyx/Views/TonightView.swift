@@ -53,6 +53,9 @@ struct TonightView: View {
     /// The page's height between its bars, and the dial's top in the page: an iPhone in landscape sizes the dial to them.
     @State private var pageHeight=0.0
     @State private var dialTop=0.0
+    /// The dial's band word's size (the title 3 style's 20 pt, scaled), for the smallest landscape dial
+    /// that keeps it inside (`CelestialGauge.compactLabelsFrom`).
+    @ScaledMetric(relativeTo:.title3) private var bandSize=20.0
     /// Wide iPad: the night chosen on the best park's river, with that park, and whether it is being
     /// dragged. Kept with its park, so a new best park (another radius or starting point) starts at
     /// its own tonight rather than carrying the old park's date.
@@ -140,10 +143,14 @@ struct TonightView: View {
                         LookingBackPanel()
                     }
                     extras(hero:best.first)
-                }.padding(24).readableColumn().coordinateSpace(.named(Self.pageSpace))
+                }
+                // Less sky above the answer in landscape, where the first screen's height is the dial's.
+                .padding(.horizontal,24).padding(.bottom,24).padding(.top,verticalSizeClass == .compact ? 8 : 24).readableColumn().coordinateSpace(.named(Self.pageSpace))
             }
         }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
-        .onScrollGeometryChange(for:Double.self) { $0.containerSize.height-$0.contentInsets.top-$0.contentInsets.bottom } action:{ _,new in pageHeight=new }
+        // The visible height less the bars' insets: `containerSize` already leaves them out (iOS 26 and 27), so
+        // taking them from it again left a 402 pt landscape iPhone a 118 pt page and the dial always at its floor.
+        .onScrollGeometryChange(for:Double.self) { $0.visibleRect.height-$0.contentInsets.top-$0.contentInsets.bottom } action:{ _,new in pageHeight=new }
         // The loader gives way to the answer (or the calm empty state) in a dissolve, never a cut.
         .animation(NyxMotion.spring(reduced:reduceMotion),value:loading)
         .animation(NyxMotion.spring(reduced:reduceMotion),value:empty)
@@ -291,11 +298,19 @@ struct TonightView: View {
     nonisolated private static let pageSpace="tonightPage"
     /// The hero dial's height in one column: 240 pt, or on an iPhone in landscape what is left of the
     /// first screen under the park's pill, so the dial and its band word clear the tab bar when the page
-    /// opens; never under 160 pt, where the page scrolls to the rest instead.
-    nonisolated static func dialHeight(compact:Bool,page:Double,top:Double)->Double {
+    /// opens. Short of `inside`, the smallest dial that keeps its word inside beside the score
+    /// (`CelestialGauge.compactLabelsFrom`), the dial is that size when the first screen still shows it down
+    /// to its units (`unitsDepth`; the page scrolls to the times under its ends); otherwise never under
+    /// 160 pt, the words below a smaller ring, where the page scrolls to the rest.
+    nonisolated static func dialHeight(compact:Bool,page:Double,top:Double,inside:Double = .infinity)->Double {
         guard compact, page>0 else { return 240 }
-        return min(240,max(160,(page-top-12).rounded(.down)))
+        let fit=(page-top-12).rounded(.down)
+        if fit<inside, page-top>=inside*unitsDepth { return inside }
+        return min(240,max(160,fit))
     }
+    /// How far down a dial with its words inside its units reach, as a share of its side: the rest is the
+    /// ring's open ends and the times hung under them.
+    nonisolated static let unitsDepth=0.85
     /// The answer's line, and the way to what it names: a tap moves the page to the starting point and
     /// its radius, which sit below the answer and its alternatives.
     private func reachLine(_ park:Park,day:String)->some View {
@@ -431,12 +446,24 @@ struct TonightView: View {
         let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { model.forecastIsStale($0) ? $0 : nil } : nil
         let closure=park.nps == nil ? nil : model.closure(park)
         let scores=Dictionary(others.map { ($0.park.id,$0.score.value) },uniquingKeysWith:{ first,_ in first })
+        // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`), scored for the dial's night.
+        let pill=ParkPillPicker(park:park,others:others.map(\.park),score:{ scores[$0.id] ?? model.night($0).score.value },zoom:zoom,night:later ? park.dayLabel(night.id) : nil,offset:offset)
+        let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis)
         return VStack(spacing:10) {
             if !large { context }
-            // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`), scored for the dial's night.
-            ParkPillPicker(park:park,others:others.map(\.park),score:{ scores[$0.id] ?? model.night($0).score.value },zoom:zoom,night:later ? park.dayLabel(night.id) : nil,offset:offset)
-            let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis)
-            dial(night,basis:night.basisCaption(),range:range,offset:offset,ready:ready)
+            // An iPhone in landscape at accessibility sizes: the pill beside the dial. Under it, the wrapped
+            // name and its toggle left the dial no room above the tab bar, and a dial small enough to fit
+            // would take the numeral under 80 pt. Top-aligned, so the list of other parks opening under the
+            // pill never pushes the dial down the page.
+            if large && verticalSizeClass == .compact {
+                HStack(alignment:.top,spacing:20) {
+                    pill.frame(maxWidth:.infinity)
+                    dial(night,basis:night.basisCaption(),range:range,offset:offset,ready:ready).frame(maxWidth:.infinity)
+                }
+            } else {
+                pill
+                dial(night,basis:night.basisCaption(),range:range,offset:offset,ready:ready)
+            }
             // A closure is the one line here that must never be lost in the sky: straight under the score,
             // as on the park's page, on a dark scrim.
             if let closure { ClosureLabel(closure,prominence:.hero) }
@@ -461,9 +488,10 @@ struct TonightView: View {
         let large=typeSize.isAccessibilitySize
         return CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis,
                               revealKey:revealKey(night),range:range,night:model.ring(night)) { heroSettledKey=$0 }
-            // At accessibility sizes the dial is held small enough that a closure under it is on the first screen.
+            // At accessibility sizes the dial is held at 200 pt, so the numeral stays over 80 pt and the park's
+            // pill and the score share the first screen (beside each other in landscape).
             .environment(\.gaugeAccessibleMax,Self.accessibleDial)
-            .frame(height:large ? nil : wide ? 300 : Self.dialHeight(compact:verticalSizeClass == .compact,page:pageHeight,top:dialTop))
+            .frame(height:large ? nil : wide ? 300 : Self.dialHeight(compact:verticalSizeClass == .compact,page:pageHeight,top:dialTop,inside:CelestialGauge.compactLabelsFrom(band:bandSize)))
             .onGeometryChange(for:Double.self) { $0.frame(in:.named(Self.pageSpace)).minY } action:{ dialTop=$0 }
             .modifier(DepthParallax(depth:0.08))
             .contentShape(Rectangle())

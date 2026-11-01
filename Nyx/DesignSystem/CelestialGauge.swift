@@ -123,8 +123,17 @@ struct CelestialGauge: View {
     /// No taller than on the widest iPhone (354 pt), as the dial itself. Where the dial is capped smaller
     /// (220 pt at compact height, where the labels still fit inside), the threshold is the cap: from 236 a
     /// park page in landscape put the labels below, grew past 236, put them back inside, and never settled.
-    nonisolated static func labelsInside(offered:CGSize,cap:CGFloat=354)->Bool { min(offered.width,offered.height,cap)>=min(labelsInsideFrom,cap) }
-    private var labelsInside: Bool { !typeSize.isAccessibilitySize && Self.labelsInside(offered:offered,cap:verticalSize == .compact ? 220 : 354) }
+    /// At compact height they go inside from `compactLabelsFrom`, lower than the cap, so a landscape dial a
+    /// little short of height can keep its word beside the score (`TonightView.dialHeight`).
+    nonisolated static func labelsInside(offered:CGSize,cap:CGFloat=354,from:CGFloat=labelsInsideFrom)->Bool { min(offered.width,offered.height,cap)>=min(from,cap) }
+    /// The smallest dial holding the band word and units inside at compact height: 190 pt at the default
+    /// text size, where the longest words ("Excellente", "Dunkelheit / 100") clear the ticks and the rim's
+    /// ends, and in step with the band word's size (`band`, the title 3 style's 20 pt scaled) above it.
+    nonisolated static func compactLabelsFrom(band:Double)->CGFloat { (190*max(20,band)/20).rounded(.up) }
+    private var labelsInside: Bool {
+        guard !typeSize.isAccessibilitySize else { return false }
+        return verticalSize == .compact ? Self.labelsInside(offered:offered,cap:220,from:Self.compactLabelsFrom(band:bandMetric)) : Self.labelsInside(offered:offered)
+    }
     private var still: Bool { reduceMotion || export }
     /// An unseen reveal waits while nobody can watch it: onboarding or first light over the tabs,
     /// scrolled away or in another tab, or Nyx in the background. Not while merely inactive: a

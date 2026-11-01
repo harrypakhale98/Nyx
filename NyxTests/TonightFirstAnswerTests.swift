@@ -70,12 +70,19 @@ import Testing
         #expect(!arches.catalogIsReady && !arches.awaitingWorld)
     }
 
-    /// iPhone in landscape: the dial takes what the first screen leaves under the pill, between 160 and 240 pt.
+    /// iPhone in landscape: the dial takes what the first screen leaves under the pill, between 160 and 240 pt,
+    /// or, a little short of the dial that holds its word inside, that dial when its units still show.
     @Test func theLandscapeDialFitsTheFirstScreen() {
         #expect(TonightView.dialHeight(compact: false, page: 300, top: 120) == 240)
         #expect(TonightView.dialHeight(compact: true, page: 0, top: 0) == 240)
         #expect(TonightView.dialHeight(compact: true, page: 330, top: 110) == 208)
         #expect(TonightView.dialHeight(compact: true, page: 600, top: 110) == 240)
         #expect(TonightView.dialHeight(compact: true, page: 250, top: 130) == 160)
+        // Short of the dial that keeps its word inside (190 pt): that dial while the first screen shows its units...
+        #expect(TonightView.dialHeight(compact: true, page: 273, top: 105, inside: 190) == 190)
+        #expect(TonightView.dialHeight(compact: true, page: 320, top: 105, inside: 190) == 203)
+        // ...and the fitted dial, words below, when even its units would go under the tab bar.
+        #expect(TonightView.dialHeight(compact: true, page: 273, top: 115, inside: 209) == 160)
+        #expect(TonightView.dialHeight(compact: false, page: 273, top: 105, inside: 190) == 240)
     }
 }
