@@ -83,14 +83,15 @@ struct CloudClimateTests {
         #expect(!a.score.hasForecast && !b.score.hasForecast)
         #expect(a.score.value > b.score.value)
         #expect(NightPlanner.best([b, a])?.park.id == "deva")
-        #expect(b.typicalClouds?.contains("November") == true)
+        // Its sentence names the month of the nearest new Moon, October 29.
+        #expect(b.typicalClouds?.contains("October") == true)
     }
     /// Beyond the forecast the clouds cap binds on every Moon-dark night, so a night reads its usual
     /// cloud at the nearest new Moon: Joshua Tree's November 2026 nights up to the 23rd (full Moon on
     /// the 24th) share one cap, the new Moon on the 9th outranks the 35%-lit 2nd, the month's best
     /// night is a moonless one around the new Moon with its score (past ten hours of darkness the
     /// sums of a moonless night and the 13th's thin crescent tie, and the Moon-free hours decide), and
-    /// the week from the 1st rings the 8th, not a crescent. The month and its share of clear nights stay the night's own.
+    /// the week from the 1st rings the 8th, not a crescent. The 2nd's month and share of clear nights are November's, its new Moon's.
     @Test func newMoonLeadsBeyondTheForecast() throws {
         let jotr = try park("jotr"), planner = NightPlanner(forecasts: [:])
         let now = try evening(jotr, 2026, 10, 20)
@@ -111,6 +112,20 @@ struct CloudClimateTests {
         let devaBest = try #require(NightPlanner.best(devaNights))
         #expect((6...11).contains(deva.calendar.component(.day, from: devaBest.id)), "\(devaBest.id)")
         #expect(second.usualClear == CloudClimate.shared.typical(jotr, on: second.id)?.clear && second.typicalClouds?.contains("November") == true)
+    }
+    /// Past the forecast the usual cloud, its share of clear nights and the month they are said for all
+    /// come from the nearest new Moon: at Saguaro, June 18, 2027 reads June's (new Moon June 4) and the
+    /// 19th, past full Moon, July's (new Moon July 3), so "Usually N%" and the sentence beside it agree.
+    @Test func usualCloudsAndClearNightsShareOneNewMoon() throws {
+        let sagu = try park("sagu"), planner = NightPlanner(forecasts: [:])
+        let now = try evening(sagu, 2027, 5, 1)
+        for (day, month, name) in [(18, 6, "June"), (19, 7, "July")] {
+            let night = planner.night(sagu, on: try evening(sagu, 2027, 6, day), now: now)
+            let anchor = try #require(CloudClimate.shared.typical(sagu, on: NightPlanner.newMoon(nearest: night.id)))
+            #expect(night.basis == .usual && night.usualMonth == month && anchor.month == month)
+            #expect(night.usualCloud == anchor.cloud && night.usualClear == anchor.clear)
+            #expect(night.typicalClouds?.contains(name) == true && night.basisCaption()?.contains("usual \(name) clouds") == true, "\(day)")
+        }
     }
     /// The nearest new Moon, from either side of the month: 2026's fall on Oct 10, Nov 9 and Dec 9 (UTC).
     @Test func nearestNewMoonIsFoundFromEitherSide() throws {

@@ -147,7 +147,7 @@ struct ScoreBreakdownView: View {
             guard night.usualCloud != nil else {
                 return Sentences.join([String(localized:"Early look: the forecast says \(Int(forecast.rounded()))% cloud, \(days) days ahead. Nyx counts it as it stands."),night.summitSentence ?? ""])
             }
-            return Sentences.join([String(localized:"Early look: the forecast says \(Int(forecast.rounded()))% cloud, but it is \(days) days ahead, so Nyx mixes it with the usual clouds for this month and counts \(Int(counted.rounded()))%."),
+            return Sentences.join([String(localized:"Early look: the forecast says \(Int(forecast.rounded()))% cloud, but it is \(days) days ahead, so Nyx mixes it with the usual clouds and counts \(Int(counted.rounded()))%."),
                                    night.summitSentence ?? ""])
         case .usual:
             // "No cloud forecast yet." or "Cloud forecast unavailable.", as every surface says it.

@@ -152,9 +152,11 @@ extension Night {
     /// iPhone handed over says it on the watch and in widgets as it does on the iPhone.
     nonisolated var typicalClouds: String? {
         guard basis == .usual, let cloud = usualCloud, let clear = usualClear else { return nil }
-        return CloudClimate.Typical(month: park.calendar.component(.month, from: id), cloud: cloud, clear: clear, estimated: usualEstimated)
-            .sentence(monthName: park.monthName(id))
+        return CloudClimate.Typical(month: usualMonth ?? park.calendar.component(.month, from: id), cloud: cloud, clear: clear, estimated: usualEstimated)
+            .sentence(monthName: usualMonthName)
     }
+    /// The month the night's usual clouds are said for, by name: the nearest new Moon's (`usualMonth`).
+    nonisolated var usualMonthName: String { usualMonth.map { park.monthName(month: $0) } ?? park.monthName(id) }
     /// A caption followed by the month's typical clouds, for a night without a forecast.
     nonisolated func withTypicalClouds(_ caption: String) -> String { typicalClouds.map { Sentences.join([caption, $0]) } ?? caption }
 
@@ -290,7 +292,7 @@ extension Night {
         case .usual:
             // Never "Arches's": the park follows the month rather than taking a possessive.
             let line = Sentences.join([opening ? noForecastSentence ?? "" : "", usualCloud == nil ? String(localized: "This score counts the Moon and darkness only.")
-                : String(localized: "This score uses the usual \(park.monthName(id)) clouds at \(park.shortName).")])
+                : String(localized: "This score uses the usual \(usualMonthName) clouds at \(park.shortName).")])
             return typical ? withTypicalClouds(line) : line
         }
     }

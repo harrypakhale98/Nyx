@@ -74,22 +74,21 @@ nonisolated struct NightPlanner: Sendable {
         let used = weight > 0
         let score = scoring.score(sky: sky, bortle: park.bortleEstimate, cloud: counted, basis: CloudBasis.from(weight: weight, leadDays: lead), aerosol: aerosol)
         var night = Night(park: park, sky: sky, score: score, cloudCover: used ? predicted : nil, forecastUpdated: used ? issued : nil,
-                          usualCloud: usual, usualClear: typical?.clear, usualEstimated: typical?.estimated == true,
+                          usualCloud: usual, usualClear: typical?.clear, usualEstimated: typical?.estimated == true, usualMonth: typical?.month,
                           upperCloudOnly: upper && used, modelSpread: spread, aerosol: aerosol)
         night.beyondForecast = beyondForecast(night, forecast: forecast, detail: detail, now: now)
         return night
     }
-    /// The usual clouds a night is scored with: the month and its share of clear nights are the
-    /// night's own (for its sentences), the cloud is read at the nearest new Moon. The usual cloud
-    /// eases a little each day (`CloudClimate.typical`), and beyond the forecast its cap
-    /// (`ScoreEngine.cloudCap`) binds on every Moon-dark night, so read night by night it would rank a
-    /// crescent Moon a few days off over the new Moon itself. Read once per lunation, the nights
-    /// around one new Moon share one cap and the Moon decides; the step falls at full Moon, where
-    /// the moonlight cap binds instead.
+    /// The usual clouds a night is scored with, read at the nearest new Moon: the cloud, the share of
+    /// clear nights and the month they are said for, all from that one day, so the figure shown and the
+    /// sentence beside it never describe two times of year. The usual cloud eases a little each day
+    /// (`CloudClimate.typical`), and beyond the forecast its cap (`ScoreEngine.cloudCap`) binds on
+    /// every Moon-dark night, so read night by night it would rank a crescent Moon a few days off over
+    /// the new Moon itself. Read once per lunation, the nights around one new Moon share one cap and
+    /// the Moon decides; the step falls at full Moon, where the moonlight cap binds instead. The
+    /// night's own month only where the new Moon's has none.
     static func usual(_ park: Park, on evening: Date, climate: CloudClimate) -> CloudClimate.Typical? {
-        guard var typical = climate.typical(park, on: evening) else { return nil }
-        if let cloud = climate.typical(park, on: newMoon(nearest: evening))?.cloud { typical.cloud = cloud }
-        return typical
+        climate.typical(park, on: newMoon(nearest: evening)) ?? climate.typical(park, on: evening)
     }
     /// The new Moon nearest `date`: back to the last one in the waxing half of the month, on to the
     /// next in the waning half. Steps along the true phase until a step is under a second (about

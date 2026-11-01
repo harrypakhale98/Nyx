@@ -280,6 +280,10 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     func monthName(_ date: Date) -> String {
         date.formatted(Date.FormatStyle(calendar: calendar, timeZone: timeZone).month(.wide))
     }
+    /// The same for a month by number, 1–12.
+    func monthName(month: Int) -> String {
+        calendar.date(from: DateComponents(year: 2001, month: min(12, max(1, month)), day: 15, hour: 12)).map(monthName) ?? ""
+    }
     func isoDay(_ date: Date) -> String {
         let parts = calendar.dateComponents([.year, .month, .day], from: date)
         return String(format: "%04d-%02d-%02d", parts.year ?? 2000, parts.month ?? 1, parts.day ?? 1)

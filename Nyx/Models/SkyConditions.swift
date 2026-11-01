@@ -295,6 +295,9 @@ nonisolated struct Night: Identifiable, Sendable {
     /// estimate: from the climate the night was scored with, for `typicalClouds`.
     var usualClear: Double? = nil
     var usualEstimated = false
+    /// The month (1–12) those usual clouds are said for: the nearest new Moon's (`NightPlanner.usual`),
+    /// so near full Moon it can be the next month's or the last one's. nil: the night's own.
+    var usualMonth: Int? = nil
     /// A summit above the inversion, scored from mid and high cloud only (`Park.aboveInversion`).
     var upperCloudOnly = false
     /// How far apart three forecast models' cloud averages are, in percentage points, within
