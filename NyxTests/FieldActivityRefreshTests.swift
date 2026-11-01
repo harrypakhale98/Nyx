@@ -252,6 +252,12 @@ import Testing
         let denver=try #require(TimeZone(identifier: "America/Denver"))
         #expect(FieldActivityClock.time(darkness.date, zone: denver, locale: en).hasPrefix("8:16"))
         #expect(FieldActivityClock.time(darkness.date, zone: pacific, locale: Locale(identifier: "de_DE")) == "19:16")
+        // The island's narrowest clock form keeps the glyph and drops only a 12-hour time's day period.
+        #expect(FieldActivityClock.narrow(darkness.date, zone: pacific, locale: en) == "7:16")
+        #expect(FieldActivityClock.narrow(darkness.date, zone: pacific, locale: Locale(identifier: "es_US")) == "7:16")
+        #expect(FieldActivityClock.narrow(darkness.date, zone: pacific, locale: Locale(identifier: "de_DE")) == "19:16")
+        #expect(FieldActivityClock.narrow(darkness.date, zone: pacific, locale: Locale(identifier: "ja_JP")) == "19:16")
+        #expect(FieldActivityClock.narrow(darkness.date, zone: pacific, locale: Locale(identifier: "ko_KR")) == "7:16")
     }
 }
 

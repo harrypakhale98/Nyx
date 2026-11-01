@@ -452,24 +452,38 @@ struct FieldActivityTimer: View {
 /// Sunrise's clock time where a countdown stands at other times (the Dynamic Island, the Smart
 /// Stack), once only sunrise is left or the activity is stale. Marked as a clock time ("at 07:37",
 /// "um 07:37") so it never reads as a countdown. Where the island has no room for the word, a clock
-/// glyph marks it, and where it has room for neither, the time alone: by then it is a 12-hour time,
-/// which says AM or PM.
+/// glyph marks it; where it has no room for that either, the glyph stays, a 12-hour time drops its
+/// "a.m." (the glyph and the sunrise symbol say what it is) and the time shrinks. Never a bare time,
+/// which in a 24-hour language reads as a countdown ("6:40"), nor one cut to "6:40 a…".
 struct FieldActivityClock: View {
     let date: Date
     @Environment(\.timeZone) private var zone
     @Environment(\.locale) private var locale
+    /// The face's own floor, where it lets text shrink further (the Smart Stack's 0.6).
+    @Environment(\.minimumScaleFactor) private var scale
     var body: some View {
         let time=Self.time(date,zone:zone,locale:locale)
         ViewThatFits(in:.horizontal) {
             Text(String(localized:"field.clock.sunriseAt",defaultValue:"at \(time)",
                         comment:"Sunrise's clock time in the Live Activity's Dynamic Island and Smart Stack, beside the sunrise symbol, where a countdown stands at other times. Short; marks the time as a clock time."))
-            HStack(spacing:3) { Image(systemName:"clock").imageScale(.small).accessibilityHidden(true); Text(time) }
-            Text(time)
+            stamped(time)
+            stamped(Self.narrow(date,zone:zone,locale:locale)).minimumScaleFactor(min(scale,0.7))
         }
+    }
+    private func stamped(_ time:String)->some View {
+        HStack(spacing:3) { Image(systemName:"clock").imageScale(.small).accessibilityHidden(true); Text(time) }
     }
     /// "7:37 AM", "07:37": a clock time as the faces' `Text(_:style: .time)` writes it.
     static func time(_ date:Date,zone:TimeZone,locale:Locale)->String {
         date.formatted(Date.FormatStyle(date:.omitted,time:.shortened,locale:locale,timeZone:zone))
+    }
+    /// `time` without its day period ("7:37" for "7:37 AM", "6:40" for "6:40 a.m."), for the glyph
+    /// form at its narrowest. Cut from `time` itself, so the digits stay as the language writes them;
+    /// a 24-hour time has none and is unchanged.
+    static func narrow(_ date:Date,zone:TimeZone,locale:Locale)->String {
+        var time=date.formatted(Date.FormatStyle(date:.omitted,time:.shortened,locale:locale,timeZone:zone).attributedStyle)
+        for run in time.runs.reversed() where run.foundation.dateField == .amPM { time.removeSubrange(run.range) }
+        return String(time.characters).trimmingCharacters(in:.whitespaces)
     }
 }
 // MARK: Field alarms
