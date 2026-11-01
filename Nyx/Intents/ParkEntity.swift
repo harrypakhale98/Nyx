@@ -37,7 +37,7 @@ struct ParkEntity:IndexedEntity {
         guard !country.isEmpty else { return state }
         let name=Locale.current.localizedString(forRegionCode:country) ?? country
         let region=state.replacingOccurrences(of:",",with:" · ")
-        return region.isEmpty || region==name ? name : "\(region), \(name)"
+        return region.isEmpty || region==name ? name : PlaceNames.joined(region, name)
     }
     /// The state or states, or a region abroad, also Spotlight's state-or-province field.
     @ComputedProperty(title:"Region",indexingKey:\.stateOrProvince)
