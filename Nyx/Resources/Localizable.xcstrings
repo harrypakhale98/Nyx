@@ -29044,13 +29044,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "D’après la prévision de nuages envoyée par votre iPad le %1$@ à %2$@"
+                  "value": "D’après la prévision de nuages envoyée par votre iPad %1$@ à %2$@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "D’après la prévision de nuages envoyée par votre iPhone le %1$@ à %2$@"
+                  "value": "D’après la prévision de nuages envoyée par votre iPhone %1$@ à %2$@"
                 }
               }
             }
@@ -53854,7 +53854,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gereiht aus den %1$lld Orten mit dem dunkelsten Himmel nahe %2$@, von %3$lld im Umkreis."
+            "value": "Ausgewählt aus den %1$lld Orten mit dem dunkelsten Himmel nahe %2$@, von %3$lld im Umkreis."
           }
         },
         "en": {
@@ -53878,7 +53878,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この範囲の%3$lld か所のうち、%2$@に近く空が最も暗い%1$lld か所から順位を付けています。"
+            "value": "この範囲の%3$lldか所のうち、%2$@に近く空が最も暗い%1$lldか所から順位を付けています。"
           }
         }
       }
@@ -53889,7 +53889,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gereiht aus den %lld Orten mit dem dunkelsten Himmel nahe deinem Ausgangspunkt, von %lld in Reichweite."
+            "value": "Ausgewählt aus den %lld Orten mit dem dunkelsten Himmel nahe deinem Ausgangspunkt, von %lld in Reichweite."
           }
         },
         "en": {
@@ -53913,7 +53913,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "行ける範囲の%2$lld か所のうち、出発地に近く空が最も暗い%1$lld か所から順位を付けています。"
+            "value": "行ける範囲の%2$lldか所のうち、出発地に近く空が最も暗い%1$lldか所から順位を付けています。"
           }
         }
       }
@@ -65686,7 +65686,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "行ける範囲の%2$lld か所のうち、上位%1$lld か所です。"
+            "value": "行ける範囲の%2$lldか所のうち、上位%1$lldか所です。"
           }
         }
       }
