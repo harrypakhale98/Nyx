@@ -44,6 +44,17 @@ nonisolated struct WeekAcrossParks: Sendable {
         let shown=Set(rows.map(\.park.id))
         return WeekAcrossParks(rows:rows,total:usable.count,best:best,closures:closures.filter { shown.contains($0.key) })
     }
+    /// What the rows were chosen from, under the heading: `reach` is "within 200 mi of Chicago". In the US,
+    /// the parks in reach. Abroad, places, and `inReach` counts every one in reach: when there are more than
+    /// the weeks given (Tonight passes the darkest tonight, `TonightReach.aheadSize`), it says so.
+    func caption(reach:String,inReach:Int?=nil)->String {
+        let shown=rows.count
+        guard let inReach else {
+            return total>shown ? String(localized:"The \(shown) parks with the darkest nights this week, of \(total) \(reach).") : String(localized:"Every park \(reach), darkest week first.")
+        }
+        if inReach>total { return String(localized:"The \(shown) places with the darkest nights this week, of the \(total) darkest tonight \(reach).") }
+        return total>shown ? String(localized:"The \(shown) places with the darkest nights this week, of \(total) \(reach).") : String(localized:"Every place \(reach), darkest week first.")
+    }
     /// What VoiceOver says for one cell: the row and the column, as a table would, then the night.
     /// As sentences, so a date that ends in a period ("Sa. 31. Okt.") takes no second one.
     static func spoken(_ night:Night,isBest:Bool,closure:String?=nil)->String {
@@ -70,12 +81,14 @@ struct WeekAcrossParksPanel: View {
     let week: WeekAcrossParks
     /// "within 200 mi of Chicago", said in the heading's caption.
     let reach: String
+    /// Abroad, every place in reach (`WeekAcrossParks.caption`); nil for the parks in reach in the US.
+    var inReach: Int? = nil
     @Namespace private var rotor
     var body: some View {
         Panel { VStack(alignment:.leading,spacing:16) {
             VStack(alignment:.leading,spacing:4) {
                 Eyebrow(text:"The next 7 nights in reach")
-                Text(week.total>week.rows.count ? String(localized:"The \(week.rows.count) parks with the darkest nights this week, of \(week.total) \(reach).") : String(localized:"Every park \(reach), darkest week first."))
+                Text(week.caption(reach:reach,inReach:inReach))
                     .font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             }
             // Rows of stacks, not a Grid: every night column shares what is left after the park's name,

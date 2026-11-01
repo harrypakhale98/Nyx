@@ -327,6 +327,19 @@ import UIKit
             #expect(!NightPlanner.better(leftTop,lastTop))
         }
     }
+    /// The caption says what the rows were chosen from: in the US the parks in reach; abroad places, and
+    /// when more are in reach than the weeks given, that the weeks are the darkest tonight.
+    @Test func theWeekCaptionCountsWhatTheRowsCameFrom() {
+        let start=Date(timeIntervalSince1970:1_791_400_000)
+        let ten=WeekAcrossParks.make(weeks(["cuva","jotr","grba","deva","grca","bibe","indu","acad","romo","yell"],from:start))
+        let three=WeekAcrossParks.make(weeks(["cuva","jotr","grba"],from:start))
+        let reach="within 200 mi of Sydney"
+        #expect(ten.caption(reach:reach) == "The 8 parks with the darkest nights this week, of 10 within 200 mi of Sydney.")
+        #expect(three.caption(reach:reach) == "Every park within 200 mi of Sydney, darkest week first.")
+        #expect(ten.caption(reach:reach,inReach:128) == "The 8 places with the darkest nights this week, of the 10 darkest tonight within 200 mi of Sydney.")
+        #expect(ten.caption(reach:reach,inReach:10) == "The 8 places with the darkest nights this week, of 10 within 200 mi of Sydney.")
+        #expect(three.caption(reach:reach,inReach:3) == "Every place within 200 mi of Sydney, darkest week first.")
+    }
     @Test func aWeekWithOneParkOrNoneStillReads() {
         let start=Date(timeIntervalSince1970:1_791_400_000)
         let one=WeekAcrossParks.make(weeks(["jotr"],from:start))
