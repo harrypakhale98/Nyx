@@ -180,14 +180,14 @@ nonisolated struct NightPlanner: Sendable {
         if a.id != b.id { return a.id < b.id }
         return a.park.name < b.park.name
     }
-    /// `value` rounded to the nearest multiple of `step`, as a count of steps: two values tie
-    /// exactly when they share a step. Infinity stays infinite.
     /// Whether `a` goes first because it counts clouds and `b` does not (or the reverse); nil when both
     /// or neither count them. First in both `better`s, so no closure or score lifts such a night past one.
     static func countsCloudsFirst(_ a: Night, _ b: Night) -> Bool? {
         let ca = a.score.cloudPoints != nil, cb = b.score.cloudPoints != nil
         return ca == cb ? nil : ca
     }
+    /// `value` rounded to the nearest multiple of `step`, as a count of steps: two values tie
+    /// exactly when they share a step. Infinity stays infinite.
     static func tieGrid(_ value: Double, _ step: Double) -> Double { value.isFinite ? (value/step).rounded() : value }
     static func certainty(_ basis: CloudBasis) -> Double {
         switch basis { case .forecast: 1; case .blended(let w, _): w; case .usual: 0 }
