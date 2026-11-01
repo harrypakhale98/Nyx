@@ -189,18 +189,52 @@ import Testing
         await model.catalogReady()
         let near=model.placesInReach().places
         await model.prepareReach(near)
-        #expect(TonightReach.pool(near, prepared: model.reachPrepared)?.map(\.id) == near.map(\.id))
+        #expect(TonightReach.pool(near, prepared: model.preparedReach)?.map(\.id) == near.map(\.id))
         let leader=try #require(model.ranked(near).first).id
         model.radiusMeters=500_000
         let wider=model.placesInReach().places
-        try #require(wider.count>near.count && TonightReach.waits(wider, prepared: model.reachPrepared))
-        let kept=TonightReach.pool(wider, prepared: model.reachPrepared, kept: near, leader: leader)
+        try #require(wider.count>near.count && TonightReach.waits(wider, prepared: model.preparedReach))
+        let kept=TonightReach.pool(wider, prepared: model.preparedReach, kept: near, leader: leader)
         #expect(kept?.map(\.id) == near.map(\.id) && kept?.map(\.id) != model.shortlist(wider).map(\.id))
-        #expect(TonightReach.pool(wider, prepared: model.reachPrepared, kept: nil, leader: nil) == nil)
+        #expect(TonightReach.pool(wider, prepared: model.preparedReach, kept: nil, leader: nil) == nil)
         await model.prepareReach(wider)
-        #expect(TonightReach.pool(wider, prepared: model.reachPrepared, kept: near, leader: leader)?.map(\.id) == wider.map(\.id))
+        #expect(TonightReach.pool(wider, prepared: model.preparedReach, kept: near, leader: leader)?.map(\.id) == wider.map(\.id))
         // A reach that has left the kept place behind (another starting point): the loader, not the old answer.
         #expect(TonightReach.pool(wider, prepared: nil, kept: near, leader: "elsewhere") == nil)
+    }
+
+    /// Abroad, the reach is worked out again once the night turns over: tonight at every place is the next
+    /// night's, so nothing ranks them on the main thread until it is ready.
+    @Test func abroadANewNightWaitsForTheReachAgain() async throws {
+        let model=try Self.quietModel(weather: NoWeather())
+        let sydney=try #require(StartingPlaces.all.first { $0.name == "Sydney" })
+        model.choose(sydney)
+        await model.catalogReady()
+        let all=model.placesInReach().places
+        try #require(all.count>TonightReach.shortlistSize)
+        await model.prepareReach(all)
+        #expect(model.wholeReach?.map(\.id) == all.map(\.id))
+        model.pinClock(model.today.addingTimeInterval(86_400))
+        #expect(model.preparedReach == nil && model.wholeReach == nil && AssistiveTonight.inReach(model) == nil)
+        await model.prepareReach(all)
+        #expect(model.wholeReach?.map(\.id) == all.map(\.id))
+    }
+
+    /// A prepare for a reach that has since moved on (another window's, a moment late) never marks the
+    /// current one ready.
+    @Test func aLatePrepareForAnEarlierReachIsDropped() async throws {
+        let model=try Self.quietModel(weather: NoWeather())
+        let sydney=try #require(StartingPlaces.all.first { $0.name == "Sydney" })
+        model.choose(sydney)
+        await model.catalogReady()
+        let near=model.placesInReach().places
+        model.radiusMeters=500_000
+        let wider=model.placesInReach().places
+        try #require(near.count>TonightReach.shortlistSize && wider.count>near.count)
+        await model.prepareReach(near)
+        #expect(model.preparedReach == nil && model.wholeReach == nil)
+        await model.prepareReach(wider)
+        #expect(model.preparedReach == TonightReach.key(wider) && model.wholeReach?.map(\.id) == wider.map(\.id))
     }
 
     /// iPhone in landscape: the pill goes beside the dial when, stacked, the dial that keeps its words inside

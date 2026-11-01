@@ -38,12 +38,15 @@ struct TonightView: View {
     /// (`PlanModel.prepareReach`), the page shows no answer from a shortlist (`TonightReach.pool`): a place
     /// beyond it could lead once all are ranked. It keeps the last answer from a whole set (`kept`)
     /// meanwhile, or shows the loader when there is none; the shortlist is only the loader's order of work.
-    private func best(_ all:[Park])->[Park] { Array(model.ranked(pool(all)).prefix(5)) }
-    private func pool(_ all:[Park])->[Park] {
-        TonightReach.pool(all,prepared:model.reachPrepared,kept:kept?.places,leader:kept?.leader) ?? model.shortlist(all)
+    private func best(_ all:[Park])->[Park] { Array(ranked(all).prefix(5)) }
+    /// The places ranked, darkest first. While tonight at every place is worked out, the kept answer in the
+    /// order it was ranked: never hundreds of nights worked out on the main thread (after a night turns over).
+    private func ranked(_ all:[Park])->[Park] {
+        guard TonightReach.waits(all,prepared:model.preparedReach) else { return model.ranked(all) }
+        return TonightReach.pool(all,prepared:model.preparedReach,kept:kept?.places,leader:kept?.leader) ?? model.ranked(model.shortlist(all))
     }
-    /// The last places in reach that were ranked whole, and the place they named: kept on screen while a
-    /// wider or narrower radius, or a moved location, is being worked out (`TonightReach.pool`).
+    /// The last places in reach that were ranked whole, darkest first, and the place they named: kept on
+    /// screen while a wider or narrower radius, a moved location or the next night is being worked out (`TonightReach.pool`).
     @State private var kept:(places:[Park],leader:String?)?
     /// The same for the places a wider radius would add (`farther(than:shortlist:)`).
     @State private var widerPrepared:String?
@@ -99,14 +102,14 @@ struct TonightView: View {
     /// hundreds of places in reach still being worked out with no earlier answer to keep (`TonightReach.pool`):
     /// the loader, never a score those reads are about to change, nor the national parks' empty state.
     private func isLoading(_ all:[Park])->Bool {
-        DebugScenario.state=="loading" || model.awaitingWorld || model.cachesPending || TonightReach.pool(all,prepared:model.reachPrepared,kept:kept?.places,leader:kept?.leader) == nil
+        DebugScenario.state=="loading" || model.awaitingWorld || model.cachesPending || TonightReach.pool(all,prepared:model.preparedReach,kept:kept?.places,leader:kept?.leader) == nil
     }
     var body: some View {
         let all=candidates
         let loading=isLoading(all)
         // Every place in reach, once all can be ranked (`TonightReach.pool`); nil while an earlier answer is kept.
-        let whole=TonightReach.waits(all,prepared:model.reachPrepared) ? nil : all
-        let best=self.best(all)
+        let whole=TonightReach.waits(all,prepared:model.preparedReach) ? nil : all
+        let order=ranked(all), best=Array(order.prefix(5))
         let widerList=widerShortlist(than:best.first,inReach:all)
         let empty=best.isEmpty || DebugScenario.state=="empty"
         let worthy=worthyNight(best.first,empty:empty,loading:loading)
@@ -234,15 +237,16 @@ struct TonightView: View {
                 await model.prepareNights(pool,count:NightPlanner.horizon)
                 if !Task.isCancelled { aheadPrepared=TonightReach.key(pool) }
             }
-            .task(id:TonightReach.key(all)) {
+            .task(id:TonightReach.key(all,night:model.today)) {
                 // Hundreds of places in reach (abroad): the clouds kept for those newly in reach, and tonight at
-                // each worked out off the main thread, before ranking them all (the answer waits for them).
+                // each worked out off the main thread, before ranking them all (the answer waits for them), again
+                // once the night turns over.
                 await model.prepareReach(all)
                 await model.refresh(all)
             }
             // The places just ranked whole and the place they name, kept while the next reach is worked out.
-            .onChange(of:whole.map { TonightReach.key($0)+"|"+(best.first?.id ?? "") },initial:true) { _,key in
-                if key != nil, let whole { kept=(whole,best.first?.id) }
+            .onChange(of:whole.map { TonightReach.key($0,night:model.today)+"|"+best.map(\.id).joined(separator:",") },initial:true) { _,key in
+                if key != nil, whole != nil { kept=(order,best.first?.id) }
             }
             // The answer here is the one the widgets and Apple Watch follow too (`PlanModel.tonightPickID`):
             // once a starting point is chosen, and never one the loader is about to replace, nor one kept from
@@ -437,8 +441,8 @@ struct TonightView: View {
     /// all of them in the US as before; abroad, the twelve best tonight, so a radius of hundreds of
     /// places never asks for thousands of nights.
     private var aheadPool:[Park] {
-        let ranked=model.ranked(pool(candidates))
-        return reach().world ? Array(ranked.prefix(TonightReach.aheadSize)) : ranked
+        let order=ranked(candidates)
+        return reach().world ? Array(order.prefix(TonightReach.aheadSize)) : order
     }
     /// Nothing in reach. Once the catalogue is read, nothing of any kind is (from a US starting point too,
     /// `TonightReach` weighs every place when no national park is in range); before, only the parks were looked at.
@@ -937,6 +941,8 @@ nonisolated enum TonightReach {
     }
     /// The same places in reach, the same key: whether their nights have been worked out.
     static func key(_ places:[Park])->String { places.map(\.id).sorted().joined(separator:",") }
+    /// The same, on one night (`PlanModel.today`): what a page prepares the reach for, again once the night turns over.
+    static func key(_ places:[Park],night:Date)->String { key(places)+"@\(Int(night.timeIntervalSince1970))" }
     /// Whether Tonight's answer waits for tonight at every place in reach (`prepared`, their `key`): only
     /// where more are in reach than the shortlist holds (abroad), so the leader a shortlist names is never
     /// replaced a moment later by a place beyond it, under clearer skies.

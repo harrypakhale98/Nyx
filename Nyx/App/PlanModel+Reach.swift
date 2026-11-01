@@ -46,18 +46,24 @@ extension PlanModel {
     /// Abroad, more places in reach than a shortlist holds: the clouds kept for those newly in reach,
     /// and tonight at each, worked out off the main thread (`reachPrepared`), so they can all be ranked
     /// at once. Nothing to do where the places are few.
+    /// Marked ready only for the reach still asked about: a late task for an earlier one (another
+    /// window's, or a page opened before the radius changed) never stands in for the current reach.
     func prepareReach(_ places:[Park]) async {
         guard places.count>TonightReach.shortlistSize else { return }
+        let key=TonightReach.key(places), night=today
         await takeKeptForecasts(newIn:places)
         await prepareNights(places,count:1)
-        if !Task.isCancelled { reachPrepared=TonightReach.key(places) }
+        if !Task.isCancelled, TonightReach.key(placesInReach().places)==key { reachPrepared=(key,night) }
     }
+    /// The places whose tonight is worked out (`reachPrepared`) while that night is still tonight: nil once
+    /// a night turns over (`tick`), until tonight at each is worked out again off the main thread.
+    var preparedReach:String? { reachPrepared.flatMap { $0.night==today ? $0.places : nil } }
     /// The places in reach as Tonight, Ask Nyx and Assistive Access rank them: all of them, so every one
     /// names the same place; nil abroad while their tonight is still being worked out (`prepareReach`),
     /// as a shortlist's leader could give way to a place beyond it.
     var wholeReach:[Park]? {
         let places=placesInReach().places
-        return TonightReach.waits(places,prepared:reachPrepared) ? nil : places
+        return TonightReach.waits(places,prepared:preparedReach) ? nil : places
     }
     /// Whether a forecast is old enough to say when it is from, and to refresh: older than the age at
     /// which clouds are asked for again (`ForecastReuse.clouds`), measured from `present`.
