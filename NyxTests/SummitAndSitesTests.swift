@@ -32,6 +32,8 @@ import Testing
             #expect(far.typicalClouds == nil)
             // Where its label stands alone under the score (the watch), it says so rather than "No cloud forecast yet".
             #expect(far.standaloneBasisLabel == String(localized: "Moon and darkness only"))
+            // So does the line under a widget's or the watch week's band word.
+            #expect(far.basisNote == String(localized: "Moon and darkness only"))
         }
         // Layers asked for three days earlier reach no further: still the Moon and darkness only.
         let old=now.addingTimeInterval(-3*86400)
@@ -49,7 +51,7 @@ import Testing
         let s=engine.conditions(for: hale, on: night)
         let near=NightPlanner.night(park: hale, sky: s, forecast: nil, detail: nil, now: night.addingTimeInterval(-3*86400))
         #expect(near.usualCloud != nil && near.score.cloudPoints != nil && near.basis == .usual && !near.beyondForecast)
-        #expect(near.basisLabel == String(localized: "Cloud forecast unavailable") && near.standaloneBasisLabel == near.basisLabel)
+        #expect(near.basisLabel == String(localized: "Cloud forecast unavailable") && near.standaloneBasisLabel == near.basisLabel && near.basisNote == near.basisLabel)
         // Every other park keeps its usual clouds ten days out.
         let havo=try park("havo")
         let far=NightPlanner.night(park: havo, sky: engine.conditions(for: havo, on: try evening(havo, "2026-12-09")), forecast: nil, detail: nil,
