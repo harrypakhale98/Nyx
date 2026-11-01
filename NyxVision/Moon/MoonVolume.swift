@@ -319,11 +319,11 @@ struct MoonControls: View {
             // Starlight, as the iPhone's controls: amber is the score's and light's.
             .tint(palette.ink)
             .accessibilityValue(Text(title))
-            // An ornament cannot scroll, and at accessibility sizes the caption pushed the night's title
-            // out of it; there it is left out (its words are the globe's VoiceOver value, `MoonGlobe.show`).
-            if let view, !typeSize.isAccessibilitySize {
+            // Kept at every size: the ornament's fixed width (below) lets it measure the wrapped caption at
+            // the width it lays it out, so the title and buttons above and below it stay whole.
+            if let view {
                 Text(Self.caption(view)).font(.footnote).foregroundStyle(palette.muted).multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true).frame(maxWidth: 420)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             if nights > 0 || offersPlanner {
                 let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 12)) : AnyLayout(HStackLayout(spacing: 12))
@@ -337,8 +337,10 @@ struct MoonControls: View {
                 .buttonStyle(.bordered).buttonBorderShape(.capsule)
             }
         }
+        // A fixed content width, not a maximum: an ornament proposes no width of its own, so wrapped
+        // text measured against a maximum came out taller or shorter than it was drawn, and clipped.
+        .frame(width: typeSize.isAccessibilitySize ? 588 : 428)
         .padding(.horizontal, 26).padding(.vertical, 18)
-        .frame(maxWidth: typeSize.isAccessibilitySize ? 640 : 480)
         .glassBackgroundEffect(displayMode: palette.nightVision || palette.solid ? .never : .always)
         .background {
             if palette.nightVision { RoundedRectangle(cornerRadius: 32).fill(palette.nightPanel) }
