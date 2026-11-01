@@ -283,21 +283,26 @@ final class NyxUITests:XCTestCase {
     func testANightHeldOverTheJournalOpensIt() throws {
         try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad,"iPad only")
         continueAfterFailure=false
+        // The last test's app closed first: turned while it is still in front, the device waits up to a minute
+        // for that app to idle (once after a drop on the Journal). Closed again before the turn back.
+        let app=XCUIApplication()
+        app.terminate()
         // Landscape, where the sidebar stands beside the month rather than over it.
         XCUIDevice.shared.orientation = .landscapeLeft
-        defer { XCUIDevice.shared.orientation = .portrait }
-        let app=XCUIApplication()
+        defer { app.terminate(); XCUIDevice.shared.orientation = .portrait }
         app.launchArguments=["-nyx-screen","plan","-nyx-state","no-forecast","-nyx-reduce-motion"]
         app.launch()
         let tonight=app.buttons.matching(NSPredicate(format:"label BEGINSWITH %@","Tonight, ")).firstMatch
         XCTAssertTrue(tonight.waitForExistence(timeout:20),"No tonight in the month")
-        let sidebar=app.buttons.matching(NSPredicate(format:"identifier ==[c] %@","ToggleSidebar")).firstMatch
-        if sidebar.exists { sidebar.tap(); sleep(2) }
         let journal=app.descendants(matching:.any).matching(NSPredicate(format:"label == %@ AND elementType != %d","Journal",XCUIElement.ElementType.navigationBar.rawValue)).firstMatch
-        XCTAssertTrue(journal.waitForExistence(timeout:5),"No Journal in the sidebar")
-        XCTAssertTrue(tonight.isHittable,"Tonight is covered")
+        let sidebar=app.buttons.matching(NSPredicate(format:"identifier ==[c] %@","ToggleSidebar")).firstMatch
+        if sidebar.exists { sidebar.tap() }
+        // The sidebar's Journal and tonight both within reach, rather than a fixed pause for the sidebar to open.
+        let reachable=NSPredicate(format:"exists == true AND hittable == true")
+        XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:reachable,object:journal)],timeout:10),.completed,"No Journal in the sidebar")
+        XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:reachable,object:tonight)],timeout:10),.completed,"Tonight is covered")
         tonight.press(forDuration:1.0,thenDragTo:journal,withVelocity:.slow,thenHoldForDuration:3.0)
-        XCTAssertTrue(app.navigationBars["Journal"].waitForExistence(timeout:10),"A night held over the Journal did not open it")
+        XCTAssertTrue(app.navigationBars["Journal"].waitForExistence(timeout:20),"A night held over the Journal did not open it")
     }
     /// iPad: a park row lifted from Parks and held over Plan's row in the sidebar opens Plan, whose
     /// screen takes the drop (that park's month), as the Journal does for a night.
@@ -373,7 +378,12 @@ final class NyxUITests:XCTestCase {
         let confirm=try XCTUnwrap((0..<deletes.count).map { deletes.element(boundBy:$0) }.first { $0.frame != panel && $0.isHittable },"No confirmation button")
         confirm.tap()
         XCTAssertTrue(app.staticTexts["Your spot"].waitForNonExistence(timeout:10),"The spot's page stayed")
-        XCTAssertTrue(app.navigationBars["Parks"].waitForExistence(timeout:10),"The main window is not on screen")
+        // Nyx stays in front, on its main window: the Parks bar within reach, not only somewhere in the tree.
+        // Whether `MainWindows.bringForward` or the system brought it there, a test cannot tell; the relaunch
+        // below is what proves the spot's window was closed rather than left behind.
+        let bar=app.navigationBars["Parks"]
+        XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:NSPredicate(format:"exists == true AND hittable == true"),object:bar)],timeout:10),.completed,"The main window is not in front")
+        XCTAssertEqual(app.state,.runningForeground,"Nyx left the screen")
         // The window is gone, not left behind: a relaunch restores the main window alone, never "This spot was deleted".
         sleep(2)
         app.terminate()
