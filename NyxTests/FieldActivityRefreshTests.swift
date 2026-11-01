@@ -234,28 +234,24 @@ import Testing
     }
 }
 
-/// The Lock Screen countdown is a system timer; VoiceOver hears it in words through a system format
-/// on the current date, in whole minutes with a part minute rounded up, which the system steps
-/// forward on its own.
+/// The Lock Screen countdown is a system timer; VoiceOver hears a fixed label, the milestone and
+/// its clock time in the park's zone, which stays true while the timer runs and survives the system's
+/// archive of the face. Where a face shows a clock time in a countdown's place, it is marked as one.
 @MainActor struct FieldActivityTimerTests {
-    let now=Date(timeIntervalSince1970: 1_800_000_000)
-    func spoken(_ left: TimeInterval) -> String {
-        String(FieldActivityTimer.spoken(now.addingTimeInterval(left)).locale(Locale(identifier: "en_US")).format(now).characters)
-    }
+    let en=Locale(identifier: "en_US")
+    /// 7:16 PM in Joshua Tree on Sunday 13 December 2026 (PST).
+    let darkness=FieldActivityAttributes.Milestone(title: "True darkness", date: Date(timeIntervalSince1970: 1_797_218_160), symbol: "moon.stars")
+    let pacific=TimeZone(identifier: "America/Los_Angeles") ?? .gmt
 
-    @Test func spokenInWordsRoundedUp() {
-        #expect(spoken(22*60+39) == "23 minutes")
-        #expect(spoken(22*60) == "22 minutes")
-        #expect(spoken(130*60) == "2 hours, 10 minutes" && spoken(130*60+1) == "2 hours, 11 minutes")
-        // The moment has come: never a negative, never a minute that is not left.
-        #expect(spoken(0) == "0 minutes" && spoken(-90) == "0 minutes")
-    }
-
-    /// Each next change the format names is later than now, so the words keep up between updates.
-    @Test func spokenStepsForward() throws {
-        let style=FieldActivityTimer.spoken(now.addingTimeInterval(35*60+30))
-        let next=try #require(style.discreteInput(after: now))
-        #expect(next>now && next<=now.addingTimeInterval(60))
+    @Test func spokenAsTheMomentInParkTime() throws {
+        let spoken=FieldActivityTimer.spoken(darkness, zone: pacific, locale: en)
+        #expect(spoken == "True darkness, at \(FieldActivityClock.time(darkness.date, zone: pacific, locale: en))")
+        // Park time wherever the phone is, and never the timer's digits.
+        let clock=FieldActivityClock.time(darkness.date, zone: pacific, locale: en)
+        #expect(clock.hasPrefix("7:16") && clock.hasSuffix("PM"))
+        let denver=try #require(TimeZone(identifier: "America/Denver"))
+        #expect(FieldActivityClock.time(darkness.date, zone: denver, locale: en).hasPrefix("8:16"))
+        #expect(FieldActivityClock.time(darkness.date, zone: pacific, locale: Locale(identifier: "de_DE")) == "19:16")
     }
 }
 

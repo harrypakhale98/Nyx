@@ -86049,6 +86049,42 @@
         }
       }
     },
+    "field.clock.sunriseAt": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "um %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sale: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "à %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@に"
+          }
+        }
+      },
+      "comment": "Sunrise's clock time in the Live Activity's Dynamic Island and Smart Stack, beside the sunrise symbol, where a countdown stands at other times. Short; marks the time as a clock time."
+    },
     "field.scoreLine.asOfTime": {
       "comment": "Live Activity score line for a score worked out earlier the same day; the last value is a clock time (1:10 AM), not a weekday.",
       "extractionState": "manual",
@@ -86156,6 +86192,42 @@
         }
       },
       "comment": "A sentence under Now when the night has no true darkness; the value is a clock time. No final period."
+    },
+    "field.timer.spoken": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ um %2$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ à %2$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@（%2$@）"
+          }
+        }
+      },
+      "comment": "VoiceOver label of the Live Activity's countdown: a milestone's name, then the clock time it comes at. No final period."
     },
     "fire": {
       "extractionState": "manual",

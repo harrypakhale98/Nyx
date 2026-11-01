@@ -71,11 +71,12 @@ struct FieldActivityLockView: View {
                 FieldActivitySchedule(attributes:attributes,state:state,colors:colors)
             } else if let mark {
                 HStack(alignment:.firstTextBaseline) {
+                    // VoiceOver hears the name with the countdown's clock time ("Moonrise, at 9:12 PM").
                     Label { Text(mark.title).lineLimit(1).minimumScaleFactor(0.75) } icon:{ Image(systemName:mark.symbol).accessibilityHidden(true) }
-                        .font(.system(.headline,design:.serif)).foregroundStyle(colors.ink)
+                        .font(.system(.headline,design:.serif)).foregroundStyle(colors.ink).accessibilityHidden(true)
                     Spacer(minLength:8)
-                    // One line, laid out before the milestone's name ("34:36", "2:10:33").
-                    FieldActivityTimer(target:mark.date)
+                    // One line, laid out before the milestone's name ("in 34:36", "in 2:10:33").
+                    FieldActivityTimer(mark:mark,zone:attributes.timeZone,wrapped:true)
                         .lineLimit(1).minimumScaleFactor(0.8).font(.system(.title2,design:.serif)).monospacedDigit().multilineTextAlignment(.trailing)
                         .foregroundStyle(colors.accent).frame(maxWidth:130,alignment:.trailing).layoutPriority(1)
                 }
@@ -239,12 +240,13 @@ struct FieldActivitySmallView: View {
         let colors=FieldActivityColors(nightVision:state.nightVision,contrast:contrast)
         let mark=FieldActivityMark(attributes:attributes,state:state,isStale:isStale)
         VStack(alignment:.leading,spacing:2) {
+            // The countdown's label names its milestone ("Moonrise, at 9:12 PM").
             Label { Text(mark.title).lineLimit(1).minimumScaleFactor(0.7) } icon:{ Image(systemName:mark.symbol).accessibilityHidden(true) }
-                .font(.caption.weight(.semibold)).foregroundStyle(colors.ink)
+                .font(.caption.weight(.semibold)).foregroundStyle(colors.ink).accessibilityHidden(mark.milestone != nil)
             Group {
-                if let milestone=mark.milestone { FieldActivityTimer(target:milestone.date) }
+                if let milestone=mark.milestone { FieldActivityTimer(mark:milestone,zone:attributes.timeZone) }
                 else if state.finished { Text("Dawn") }
-                else { Text(attributes.dawn,style:.time) }
+                else { FieldActivityClock(date:attributes.dawn) }
             }
             .font(.system(.title2,design:.serif).weight(.medium)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
             .foregroundStyle(colors.accent)
@@ -311,10 +313,11 @@ struct FieldActivitySymbol: View {
             .accessibilityLabel(mark.title)
     }
 }
-/// The countdown to the shown milestone; sunrise's clock time when only that is left or once
-/// stale. In the compact island on iOS 27 it follows the system's width: hours when there is
-/// room ("1:31:12"), minutes alone ("91:12") when the island is narrowed. iOS 26 caps the
-/// compact island's width, which "1:31:12" fits at the caption size.
+/// The countdown to the shown milestone; sunrise's clock time, marked as one, when only that is
+/// left or once stale. In the compact island on iOS 27 it follows the system's width: hours when
+/// there is room ("1:31:12"), minutes alone ("91:12") when the island is narrowed. iOS 26 caps the
+/// compact island's width, which "1:31:12" fits at the caption size. The expanded island has room
+/// for "in 1:31:12".
 struct FieldActivityCountdown: View {
     let attributes: FieldActivityAttributes
     let state: FieldActivityAttributes.ContentState
@@ -339,8 +342,8 @@ struct FieldActivityCountdown: View {
         .environment(\.timeZone,attributes.timeZone)
     }
     @ViewBuilder fileprivate func face(showsHours:Bool=true)->some View {
-        if let mark=attributes.shown(state,isStale:isStale) { FieldActivityTimer(target:mark.date,showsHours:showsHours) }
-        else if !state.finished { Text(attributes.dawn,style:.time) }
+        if let mark=attributes.shown(state,isStale:isStale) { FieldActivityTimer(mark:mark,zone:attributes.timeZone,showsHours:showsHours,wrapped:!compact) }
+        else if !state.finished { FieldActivityClock(date:attributes.dawn) }
         else { Text("Dawn") }
     }
 }
@@ -379,23 +382,54 @@ private struct FieldActivityAdaptiveCountdown: View {
 
 /// The countdown on the Lock Screen and in the Dynamic Island: a system timer to the moment
 /// ("34:36", "2:10:33"), which the system advances by itself between the app's updates and stops at
-/// zero. VoiceOver hears it in words, in whole minutes with a part minute rounded up ("22:39" is
-/// "23 minutes", "2 hours, 11 minutes"). Only the system's own timers and formats: another process
-/// draws these faces and cannot read a format style of Nyx's, and the one hours-and-minutes format
-/// that reads in short words (`Date.ComponentsFormatStyle` over `dateRange(endingAt:)`) moves the
-/// range's fixed end, so the system never redraws it.
+/// zero. It never reads as a clock time: "in 34:36" where there is room (the Lock Screen, the
+/// expanded island), and where a face shows a clock time in its place, that time carries its own
+/// mark (`FieldActivityClock`). Only the system's own timers: another process draws these faces and
+/// cannot read a format style of Nyx's. VoiceOver hears the moment as a clock time in the park's
+/// zone ("Moonrise, at 9:12 PM"), a fixed label that stays true while the timer runs and after it
+/// stops. A label that follows the clock (a system format on the current date) is dropped when the
+/// system archives the face, and VoiceOver then reads the timer's digits.
 struct FieldActivityTimer: View {
-    let target: Date
+    let mark: FieldActivityAttributes.Milestone
+    /// The park's zone, the faces' clock (`FieldActivityAttributes.timeZone`).
+    let zone: TimeZone
     /// False in the narrowed island: minutes alone ("91:12").
     var showsHours = true
+    /// "in 34:36", where the face has room for the word.
+    var wrapped = false
     var body: some View {
         // The start only bounds the count: no moment is counted down to from two days ahead.
-        Text(timerInterval:target.addingTimeInterval(-2*24*3600)...target,countsDown:true,showsHours:showsHours)
-            .accessibilityLabel(Text(.currentDate,format:Self.spoken(target)))
+        let timer=Text(timerInterval:mark.date.addingTimeInterval(-2*24*3600)...mark.date,countsDown:true,showsHours:showsHours)
+        // An element of its own: the island reads a timer's own label as its digits.
+        (wrapped ? Text("in \(timer)") : timer).accessibilityElement(children:.ignore).accessibilityLabel(Self.spoken(mark,zone:zone))
     }
-    /// "35 minutes", "2 hours, 11 minutes": the time left in words, a part minute rounded up.
-    static func spoken(_ target:Date)->SystemFormatStyle.DateOffset {
-        .offset(to:target.addingTimeInterval(59),allowedFields:[.hour,.minute],sign:.never)
+    /// "Moonrise, at 9:12 PM": the milestone and its clock time in the park's zone.
+    static func spoken(_ mark:FieldActivityAttributes.Milestone,zone:TimeZone,locale:Locale = .autoupdatingCurrent)->String {
+        String(localized:"field.timer.spoken",defaultValue:"\(mark.title), at \(FieldActivityClock.time(mark.date,zone:zone,locale:locale))",
+               comment:"VoiceOver label of the Live Activity's countdown: a milestone's name, then the clock time it comes at. No final period.")
+    }
+}
+/// Sunrise's clock time where a countdown stands at other times (the Dynamic Island, the Smart
+/// Stack), once only sunrise is left or the activity is stale. Marked as a clock time ("at 07:37",
+/// "um 07:37") so it never reads as a countdown. Where the island has no room for the word, a clock
+/// glyph marks it, and where it has room for neither, the time alone: by then it is a 12-hour time,
+/// which says AM or PM.
+struct FieldActivityClock: View {
+    let date: Date
+    @Environment(\.timeZone) private var zone
+    @Environment(\.locale) private var locale
+    var body: some View {
+        let time=Self.time(date,zone:zone,locale:locale)
+        ViewThatFits(in:.horizontal) {
+            Text(String(localized:"field.clock.sunriseAt",defaultValue:"at \(time)",
+                        comment:"Sunrise's clock time in the Live Activity's Dynamic Island and Smart Stack, beside the sunrise symbol, where a countdown stands at other times. Short; marks the time as a clock time."))
+            HStack(spacing:3) { Image(systemName:"clock").imageScale(.small).accessibilityHidden(true); Text(time) }
+            Text(time)
+        }
+    }
+    /// "7:37 AM", "07:37": a clock time as the faces' `Text(_:style: .time)` writes it.
+    static func time(_ date:Date,zone:TimeZone,locale:Locale)->String {
+        date.formatted(Date.FormatStyle(date:.omitted,time:.shortened,locale:locale,timeZone:zone))
     }
 }
 // MARK: Field alarms
