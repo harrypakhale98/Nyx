@@ -171,7 +171,7 @@ import Testing
         let deva = try park("deva")
         let night = try evening(deva, "2026-12-09")
         let s = engine.conditions(for: deva, on: night)
-        let usual = try #require(CloudClimate.shared.typical(deva, on: night)?.cloud)
+        let usual = try #require(NightPlanner.usual(deva, on: night, climate: .shared)?.cloud)
         let middle = s.cloudWindow.start.addingTimeInterval(s.cloudWindow.end.timeIntervalSince(s.cloudWindow.start)/2)
         // A day ahead: the forecast in full.
         let near = NightPlanner.night(park: deva, sky: s, forecast: forecast(updated: middle.addingTimeInterval(-86400), cover: 90), detail: nil, now: middle)

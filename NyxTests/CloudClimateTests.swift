@@ -85,6 +85,37 @@ struct CloudClimateTests {
         #expect(NightPlanner.best([b, a])?.park.id == "deva")
         #expect(b.typicalClouds?.contains("November") == true)
     }
+    /// Beyond the forecast the clouds cap binds on every Moon-dark night, so a night reads its usual
+    /// cloud at the nearest new Moon: Joshua Tree's November 2026 nights up to the 23rd (full Moon on
+    /// the 24th) share one cap, the new Moon on the 9th outranks the 35%-lit 2nd, the month's best
+    /// night is one around the new Moon with its score, and the week from the 1st rings the 8th, not
+    /// a crescent. The month and its share of clear nights stay the night's own.
+    @Test func newMoonLeadsBeyondTheForecast() throws {
+        let jotr = try park("jotr"), planner = NightPlanner(forecasts: [:])
+        let now = try evening(jotr, 2026, 10, 20)
+        let nights = try (1...30).map { planner.night(jotr, on: try evening(jotr, 2026, 11, $0), now: now) }
+        let second = nights[1], ninth = nights[8]
+        #expect(nights.allSatisfy { $0.basis == .usual && $0.beyondForecast })
+        let shared = Set(nights[0...22].compactMap(\.usualCloud))
+        #expect(shared.count == 1 && second.usualCloud == ninth.usualCloud)
+        #expect(nights[23].usualCloud != ninth.usualCloud && Set(nights[23...].compactMap(\.usualCloud)).count == 1)
+        #expect(NightPlanner.better(ninth, second))
+        let best = try #require(NightPlanner.ranked(nights).first)
+        #expect((5...13).contains(jotr.calendar.component(.day, from: best.id)) && best.score.value == ninth.score.value, "\(best.id)")
+        #expect(NightPlanner.ranked(Array(nights[0...7])).first?.id == nights[7].id)
+        #expect(second.usualClear == CloudClimate.shared.typical(jotr, on: second.id)?.clear && second.typicalClouds?.contains("November") == true)
+    }
+    /// The nearest new Moon, from either side of the month: 2026's fall on Oct 10, Nov 9 and Dec 9 (UTC).
+    @Test func nearestNewMoonIsFoundFromEitherSide() throws {
+        let utc = try #require(TimeZone(identifier: "UTC"))
+        var calendar = Calendar(identifier: .gregorian); calendar.timeZone = utc
+        func day(_ month: Int, _ day: Int) throws -> Date { try #require(calendar.date(from: DateComponents(year: 2026, month: month, day: day, hour: 12))) }
+        for (from, expected) in [((10, 20), (10, 10)), ((10, 30), (11, 9)), ((11, 9), (11, 9)), ((11, 21), (11, 9)), ((11, 28), (12, 9))] {
+            let found = NightPlanner.newMoon(nearest: try day(from.0, from.1))
+            #expect(calendar.component(.month, from: found) == expected.0 && calendar.component(.day, from: found) == expected.1, "\(from)")
+            #expect(AstronomyEngine().moonPhase(at: found).isNew)
+        }
+    }
     /// Usual clouds ease between months instead of stepping on the 1st: the 15th keeps the month's
     /// own value, and October 31 and November 1 at Death Valley read within a point of each other.
     @Test func usualCloudsEaseBetweenMonths() throws {

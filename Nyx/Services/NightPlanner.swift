@@ -26,15 +26,15 @@ nonisolated struct NightPlanner: Sendable {
     /// widgets, Siri, the trip planner, Ask Nyx, the watch and Vision Pro all come through here,
     /// so a rule changed once changes everywhere.
     ///
-    /// **Clouds.** cloud = w·forecast + (1 − w)·usual, with `usual` the park's ERA5 cloud for the
-    /// month and w = `CloudBasis.forecastWeight` of the lead from the forecast's issue to the
-    /// middle of the night's cloud window. No forecast covering the window: the usual clouds
-    /// alone. A park flagged `aboveInversion` (Haleakalā's summit) counts mid and high cloud only,
-    /// from the layer forecast, and never its total cloud: the low cloud of the trade-wind
-    /// inversion, which dominates the total there, lies below the observer, so the total would
-    /// score a clear summit night as overcast. Layers that cover the night are weighed by their own
-    /// issue, as any forecast (an older one eases toward the usual clouds); with none covering a night
-    /// within their seven days (not asked for yet, or failed), the usual clouds alone. Past those days
+    /// **Clouds.** cloud = w·forecast + (1 − w)·usual, with `usual` the park's ERA5 cloud read at the
+    /// new Moon nearest the night (`usual(_:on:climate:)`) and w = `CloudBasis.forecastWeight` of the
+    /// lead from the forecast's issue to the middle of the night's cloud window. No forecast covering
+    /// the window: the usual clouds alone. A park flagged `aboveInversion` (Haleakalā's summit) counts
+    /// mid and high cloud only, from the layer forecast, and never its total cloud: the low cloud of
+    /// the trade-wind inversion, which dominates the total there, lies below the observer, so the total
+    /// would score a clear summit night as overcast. Layers that cover the night are weighed by their
+    /// own issue, as any forecast (an older one eases toward the usual clouds); with none covering a
+    /// night within their seven days (not asked for yet, or failed), the usual clouds alone. Past those days
     /// (`pastLayers`) no cloud is counted at all: the usual clouds are total cloud too, so the score is
     /// the Moon and darkness only, and such a night is ranked after every night that counts clouds (`better`).
     /// **Smoke.** The aerosol forecast's average over the window, whenever it covers it (it can
@@ -44,7 +44,7 @@ nonisolated struct NightPlanner: Sendable {
     static func night(park: Park, sky: SkyConditions, forecast: Forecast?, detail: ForecastDetail?, now: Date,
                       climate: CloudClimate = .shared, scoring: any ScoreProviding = ScoreEngine()) -> Night {
         let window = sky.cloudWindow
-        var typical = climate.typical(park, on: sky.evening)
+        var typical = usual(park, on: sky.evening, climate: climate)
         var predicted = forecast?.mean(from: window.start, to: window.end), issued = forecast?.updated, upper = false
         if park.aboveInversion == true {
             // The summit's total cloud is never its cloud: the layers when they cover the night, else nothing.
@@ -78,6 +78,30 @@ nonisolated struct NightPlanner: Sendable {
                           upperCloudOnly: upper && used, modelSpread: spread, aerosol: aerosol)
         night.beyondForecast = beyondForecast(night, forecast: forecast, detail: detail, now: now)
         return night
+    }
+    /// The usual clouds a night is scored with: the month and its share of clear nights are the
+    /// night's own (for its sentences), the cloud is read at the nearest new Moon. The usual cloud
+    /// eases a little each day (`CloudClimate.typical`), and beyond the forecast its cap
+    /// (`ScoreEngine.cloudCap`) binds on every Moon-dark night, so read night by night it would rank a
+    /// crescent Moon a few days off over the new Moon itself. Read once per lunation, the nights
+    /// around one new Moon share one cap and the Moon decides; the step falls at full Moon, where
+    /// the moonlight cap binds instead.
+    static func usual(_ park: Park, on evening: Date, climate: CloudClimate) -> CloudClimate.Typical? {
+        guard var typical = climate.typical(park, on: evening) else { return nil }
+        if let cloud = climate.typical(park, on: newMoon(nearest: evening))?.cloud { typical.cloud = cloud }
+        return typical
+    }
+    /// The new Moon nearest `date`: back to the last one in the waxing half of the month, on to the
+    /// next in the waning half. Four steps along the true phase settle within a minute, so every
+    /// night of one lunation finds the same new Moon.
+    static func newMoon(nearest date: Date, astronomy: AstronomyEngine = AstronomyEngine()) -> Date {
+        var anchor = date
+        for _ in 0..<4 {
+            let fraction = astronomy.moonPhase(at: anchor).fraction
+            let days = fraction < 0.5 ? -fraction : 1-fraction
+            anchor = anchor.addingTimeInterval(days*AstronomyEngine.synodicDays*86400)
+        }
+        return anchor
     }
     /// How many days of hours a layer forecast holds (`forecast_days=7`, from 00:00 UTC on the day
     /// it is asked for), on iPhone (forecast detail) and on Vision Pro (`SummitLayerService`).

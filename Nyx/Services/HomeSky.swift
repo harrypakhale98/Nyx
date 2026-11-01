@@ -50,7 +50,8 @@ nonisolated struct HomeSky: Sendable {
     let moonFree: DateInterval?
     let light: Light
     /// The usual clouds for this month at a starting point that is not a park, from the cloud
-    /// grid (an estimate, never a forecast); nil for a park, at sea, or without the grid.
+    /// grid (an estimate, never a forecast), as tonight's estimate reads them (`NightPlanner.usual`);
+    /// nil for a park, at sea, or without the grid.
     let usualClouds: CloudClimate.Typical?
     /// Tonight scored on the usual clouds, only where the light is known (a park's estimate or the
     /// sky grid): an assumed Bortle 7 never becomes a score.
@@ -69,7 +70,7 @@ nonisolated struct HomeSky: Sendable {
         self.sky=sky
         var climate=CloudClimate.shared
         climate.grid=grid
-        usualClouds=origin.park == nil ? climate.typical(place, on: sky.evening) : nil
+        usualClouds=origin.park == nil ? NightPlanner.usual(place, on: sky.evening, climate: climate) : nil
         estimate=light == .assumed ? nil : NightPlanner.night(park: place, sky: sky, forecast: nil, detail: nil, now: now, climate: climate)
         let whatsUp=WhatsUp(park: place, sky: sky, isTonight: true, table: table, highlights: false)
         planets=whatsUp.planets

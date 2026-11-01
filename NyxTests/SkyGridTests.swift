@@ -160,6 +160,9 @@ struct SkyGridTests {
 
     // MARK: From home tonight
 
+    /// The fixture's usual cloud for a December night near the new Moon of December 8: 75% eased seven
+    /// of November's 30 days toward its 12%.
+    static let decemberAtNewMoon = 75-63*7.0/30
     func home(_ grid: SkyGrid, _ lat: Double = 36.1, _ lon: Double = -116.1) throws -> HomeSky {
         let origin = HomeSky.Origin(name: "Here", state: "", latitude: lat, longitude: lon, timeZone: try #require(TimeZone(identifier: "America/Los_Angeles")), source: .device)
         // 7 PM in Los Angeles on Geminid night.
@@ -176,9 +179,10 @@ struct SkyGridTests {
         // The cloud layer alone adds the month's usual clouds and nothing about light.
         let clouds = try home(SkyGrid(bundle: bundle, layers: [.clouds]))
         #expect(clouds.light == .assumed && clouds.place.bortleEstimate == HomeSky.assumedBortle && clouds.estimate == nil && clouds.skyClass == nil)
-        // December 13: the month's 75% eased two days toward November's (`CloudClimate.typical`).
+        // December 13 reads its usual cloud at the new Moon, December 8 in Los Angeles (`NightPlanner.usual`):
+        // the month's 75% eased seven days toward November's 12%.
         let usual = try #require(clouds.usualClouds)
-        #expect(usual.month == 12 && usual.clear == 15 && usual.estimated && abs(usual.cloud-75) <= 7)
+        #expect(usual.month == 12 && usual.clear == 15 && usual.estimated && abs(usual.cloud-Self.decemberAtNewMoon) < 1e-6)
         #expect(clouds.usualCloudsTitle == "Usual clouds for December" && clouds.usualCloudsLine == "About 2 in 10 December nights here are mostly clear.")
         #expect(clouds.shower?.detail == bare.shower?.detail && clouds.planets.map(\.spoken) == bare.planets.map(\.spoken))
     }
@@ -189,7 +193,7 @@ struct SkyGridTests {
         #expect(abs(magnitude-21.9) < 1e-9 && lit.place.bortleEstimate == 2 && lit.skyClass == "Bortle 2")
         #expect(lit.skyLine?.contains("Estimated from satellite data") == true && lit.summary.contains("Sky brightness: Bortle 2."))
         let estimate = try #require(lit.estimate)
-        #expect(estimate.basis == .usual && estimate.usualCloud == lit.usualClouds?.cloud && abs((estimate.usualCloud ?? 0)-75) <= 7)
+        #expect(estimate.basis == .usual && estimate.usualCloud == lit.usualClouds?.cloud && abs((estimate.usualCloud ?? 0)-Self.decemberAtNewMoon) < 1e-6)
         if let shower = lit.shower { #expect(shower.detail.contains("Bortle 2 sky, estimated from satellite data") && !shower.detail.contains("suburban")) }
         // At sea or off the grid the assumed sky returns.
         let sea = try home(grid, 35, -119.9), offGrid = try home(grid, 50, 10)
