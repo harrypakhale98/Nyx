@@ -21,4 +21,12 @@ import Testing
     @Test func aHugeOfferIsCappedAtTheWidestPhonesDial() {
         #expect(CelestialGauge.labelsInside(offered:CGSize(width:1200,height:2000)))
     }
+    /// The sunset and sunrise times sit centred on the ring's ends while they clear each other, and
+    /// hang outward from them otherwise (a small dial, larger text).
+    @Test func theTimesAtTheEndsNeverOverlap() {
+        #expect(NightRingEnds.centred(widths:(60,60),apart:128))
+        #expect(NightRingEnds.centred(widths:(60,60),apart:68))
+        #expect(!NightRingEnds.centred(widths:(60,60),apart:64))
+        #expect(!NightRingEnds.centred(widths:(100,96),apart:47))
+    }
 }

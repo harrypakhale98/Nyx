@@ -209,23 +209,41 @@ struct NightRingEnds: View {
     var body: some View {
         GeometryReader { proxy in
             let dial=min(proxy.size.width, proxy.size.height), radius=dial/2-DialMetrics.inset(side: dial)
-            let center=CGPoint(x: proxy.size.width/2, y: proxy.size.height/2)
-            ForEach([(ring.sunset, 0.0, "sunset"), (ring.sunrise, 1.0, "sunrise")], id: \.1) { time, position, symbol in
-                let a=NightTrack.angle(position).radians
-                // Starlight, and below the glass rim's end, not on it: in grey over the glass they failed contrast.
-                // The glyph is quieter than the time it marks.
-                HStack(spacing: 3) {
-                    Image(systemName: symbol).symbolRenderingMode(.monochrome).foregroundStyle(palette.muted)
-                    Text(park.time(time)).monospacedDigit().foregroundStyle(palette.ink)
+            // Hung by their tops, at any text size, under the glass rather than the track: the rim runs
+            // on past the track's end, and its rounded cap is the lowest thing there.
+            EndsLayout(reach: CGFloat(cos(NightTrack.angle(1).radians))*radius, top: proxy.size.height/2+Self.top(side: dial)) {
+                ForEach([(ring.sunset, "sunset"), (ring.sunrise, "sunrise")], id: \.1) { time, symbol in
+                    // Starlight, and below the glass rim's end, not on it: in grey over the glass they failed contrast.
+                    // The glyph is quieter than the time it marks.
+                    HStack(spacing: 3) {
+                        Image(systemName: symbol).symbolRenderingMode(.monochrome).foregroundStyle(palette.muted)
+                        Text(park.time(time)).monospacedDigit().foregroundStyle(palette.ink)
+                    }
+                    .font(.caption2).fixedSize()
                 }
-                .font(.caption2).fixedSize()
-                // Hung by its top, at any text size, under the glass rather than the track: the rim runs
-                // on past the track's end, and its rounded cap is the lowest thing there.
-                .frame(height: 0, alignment: .top)
-                .position(x: center.x+cos(a)*radius, y: center.y+Self.top(side: dial))
             }
         }
         .accessibilityHidden(true)
+    }
+    /// The clear space kept between the two times when each is centred on its end.
+    nonisolated static let gap: CGFloat=8
+    /// Whether the two times, this wide, sit centred on ends `apart` points apart with `gap` between them.
+    /// Otherwise (a small dial, larger text) each hangs outward from its end, sunset to the left of its
+    /// end and sunrise to the right of its own, so they never print over each other.
+    nonisolated static func centred(widths: (CGFloat, CGFloat), apart: CGFloat) -> Bool { (widths.0+widths.1)/2+gap<=apart }
+    /// Sunset and sunrise (in that order) under the ends, `reach` either side of the centre, tops at `top`.
+    private struct EndsLayout: Layout {
+        let reach: CGFloat
+        let top: CGFloat
+        func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize { proposal.replacingUnspecifiedDimensions() }
+        func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+            guard subviews.count == 2 else { return }
+            let sizes=subviews.map { $0.sizeThatFits(.unspecified) }
+            let centred=NightRingEnds.centred(widths: (sizes[0].width, sizes[1].width), apart: 2*reach)
+            let y=bounds.minY+top
+            subviews[0].place(at: CGPoint(x: bounds.midX-reach, y: y), anchor: centred ? .top : .topTrailing, proposal: .unspecified)
+            subviews[1].place(at: CGPoint(x: bounds.midX+reach, y: y), anchor: centred ? .top : .topLeading, proposal: .unspecified)
+        }
     }
     /// How far below the dial's centre the times' tops hang: a clear 8 pt under the rim's rounded ends.
     nonisolated static func top(side: CGFloat) -> CGFloat {
