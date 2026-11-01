@@ -78,7 +78,8 @@ struct PlanView: View {
             // On the same glass as the menu, so the page scrolling under the bar never runs through its names.
             control.pickerStyle(.segmented).padding(4).nyxGlass(Capsule(),role:.bar)
         } menu:{
-            // A narrow phone at the largest sizes takes the menu a step smaller rather than breaking a mode's name.
+            // A narrow phone at the largest sizes takes the menu a step smaller. Where even that is wider than
+            // the bar (the longest name on a 375 pt phone at the largest size), its label wraps between words.
             ViewThatFits(in:.horizontal) { menu;menu.dynamicTypeSize(...DynamicTypeSize.accessibility3) }
         }
         .frame(maxWidth:fold.flatMap { $0.dividesWidth && $0.minX>300 ? $0.minX-48 : nil } ?? .infinity).frame(maxWidth:.infinity,alignment:.leading)
