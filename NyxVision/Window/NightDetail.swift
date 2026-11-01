@@ -155,7 +155,10 @@ struct NightDetail: View {
         // Without true darkness there is nothing for the Moon to stay out of, so say that instead.
         // At a glance, as the iPhone's Moonlight caption says it (`SkyConditions.moonShort`): the rise and
         // set are the value above, so the note says what they mean for true darkness ("Dark until 7:48 PM").
-        let moonNote = sky.darkHours > 0 ? sky.moonShort(park: park) : String(localized: "The Moon counts only in true darkness, and this night has none.")
+        // Under "Sets 7:39 PM", "Moon-free from 7:39 PM", as "Moon-free until" goes under a rise.
+        let moonNote: String = if sky.darkHours <= 0 { String(localized: "The Moon counts only in true darkness, and this night has none.") }
+            else if case .setsAt(let set) = sky.moonInDarkness { String(localized: "Moon-free from \(park.time(set))") }
+            else { sky.moonShort(park: park) }
         // The month's usual night (ERA5), in the iPhone's words: there is no hourly forecast detail here.
         let month = park.calendar.component(.month, from: plan.sky.evening)
         let usual = NightClimate.shared.lines(park, month: month)
