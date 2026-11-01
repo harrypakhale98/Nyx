@@ -126,6 +126,9 @@ struct ParksView: View {
         let line:String=countLine(listed:listedCount(abroad:abroad,shown:shown,groups:groups,found:found,savedWorld:savedWorld))
         let eyebrow:LocalizedStringKey=byScore && !abroad ? "Darkest tonight first" : "\(line)"
         let nothing:Bool=isEmpty(shown:shown,spots:spots,found:found,savedWorld:savedWorld,groups:groups,abroad:abroad)
+        // The places whose rows are drawn, as `sections` draws them, for the star key's one question.
+        let worldRows:[[Park]]=worldShown && worldOpen && search.isEmpty && !savedOnly ? opened(groups) : []
+        let listed:[[Park]]=abroad ? [spots,savedListed,own?.places ?? []]+opened(others) : [spots,savedListed,shown,found,savedOnly ? savedWorld : []]+worldRows
         ScrollView {
             VStack(alignment:.leading,spacing:18) {
                 // Waiting for the world, no count yet: "63 places" would describe only the US parks.
@@ -134,8 +137,8 @@ struct ParksView: View {
                 // Only worth saying when a row actually reads "Estimate", in the rows' own words.
                 if !waiting, let note=estimateNote(shown:shown,own:own) { Text(note.estimate).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 // Under Differentiate Without Color the rows' week strips draw the best nights as stars: said once,
-                // above the rows. At accessibility sizes the strips give way to their sentence alone.
-                if access.differentiate, !typeSize.isAccessibilitySize, !waiting, !nothing { Text(NightMark.legend).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                // above the rows, where a listed row draws a strip. At accessibility sizes the strips give way to their sentence alone.
+                if access.differentiate, !typeSize.isAccessibilitySize, !waiting, !nothing, WorldBrowse.drawsWeeks(listed) { Text(NightMark.legend).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if stepFreeOnly { Text("Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if DebugScenario.state=="loading" || waiting { VStack(spacing:0) { ForEach(0..<5,id:\.self) { _ in SkeletonRow(); Divider().overlay(palette.line) } } } // the real rows' rhythm, so nothing jumps when they arrive
                 else if nothing || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
@@ -357,6 +360,8 @@ struct ParksView: View {
         .sensoryFeedback(.selection,trigger:worldOpen)
         if worldOpen { countries(groups) }
     }
+    /// The places of the countries opened in place.
+    private func opened(_ groups:[CountryGroup])->[[Park]] { groups.filter { openCountries.contains($0.code) }.map(\.places) }
     /// Countries as rows that open in place, and the open ones' places under them: one lazy stack,
     /// so only the rows on screen are built, and only they are scored.
     private func countries(_ groups:[CountryGroup])->some View {
@@ -466,6 +471,9 @@ nonisolated struct CountryGroup: Identifiable, Hashable, Sendable {
 nonisolated enum WorldBrowse {
     /// How many catalogue matches a search shows at once.
     static let searchLimit=50
+    /// Whether any of the listed places draws a week strip, whose best nights Differentiate Without Color
+    /// turns into stars: a US park or a saved spot does; a catalogue place shows tonight's score alone (`worldRow`).
+    static func drawsWeeks(_ lists:[[Park]])->Bool { lists.contains { $0.contains { !$0.isCatalogPlace } } }
     /// The country that leads: the starting city's, or a starting park's; before a starting point is
     /// chosen, this device's region (the example park is in the US for everyone). The US when unknown.
     static func homeCountry(startChosen:Bool,place:String?,park:String?,region:String?)->String {

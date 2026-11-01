@@ -33,6 +33,13 @@ struct CatalogScreensTests {
         // A home country with no places leaves the alphabetical order alone.
         #expect(WorldBrowse.groups(places, home: "ES") { Self.names[$0] ?? $0 }.map(\.code) == ["AT", "FR", "DE"])
     }
+    /// The star key above the list is said only where a row draws a week strip: catalogue rows abroad draw none.
+    @Test func theStarKeyFollowsTheWeekStrips() throws {
+        let abroad = [try Self.place("wd:Q1", "Zugspitze", country: "DE"), try Self.place("wd:Q2", "Écrins", country: "FR")]
+        #expect(!WorldBrowse.drawsWeeks([abroad, [], []]))
+        #expect(!WorldBrowse.drawsWeeks([]))
+        #expect(WorldBrowse.drawsWeeks([abroad, [try park("jotr")]]))
+    }
     @Test func theHomeCountryComesFromTheStartingPoint() {
         // Before a starting point is chosen, this device's region; then the city's, or the park's.
         #expect(WorldBrowse.homeCountry(startChosen: false, place: nil, park: "US", region: "fr") == "FR")
