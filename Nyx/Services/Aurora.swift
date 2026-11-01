@@ -102,6 +102,6 @@ nonisolated enum AuroraForecast {
         let caveat = String(localized: "Aurora comes and goes within a night, and forecasts a day or more ahead often miss.")
         let detail = Sentences.join([lead, place, caveat])
         return WhatsUp.Item(id: "aurora", kind: .aurora, title: title, note: note, value: value, detail: detail,
-                            spoken: "\(title), \(note), Kp \(kp). \(detail)")
+                            spoken: Phrase.sentences([Phrase.clauses([title, note, value]), detail]))
     }
 }
