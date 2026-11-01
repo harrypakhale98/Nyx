@@ -123,6 +123,15 @@ struct CloudClimateTests {
             #expect(AstronomyEngine().moonPhase(at: found).isNew)
         }
     }
+    /// Every evening of one lunation finds the same new Moon, to the local day, even where it falls
+    /// minutes after a park's midnight: 00:04 on July 5, 2035 in Hawaiʻi.
+    @Test func oneLunationFindsOneNewMoonDay() throws {
+        let hale = try park("hale")
+        for day in 0..<28 {
+            let night = hale.date(try evening(hale, 2035, 6, 21), addingDays: day)
+            #expect(hale.isoDay(NightPlanner.newMoon(nearest: night)) == "2035-07-05", "\(hale.isoDay(night))")
+        }
+    }
     /// Usual clouds ease between months instead of stepping on the 1st: the 15th keeps the month's
     /// own value, and October 31 and November 1 at Death Valley read within a point of each other.
     @Test func usualCloudsEaseBetweenMonths() throws {

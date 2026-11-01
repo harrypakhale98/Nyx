@@ -92,14 +92,17 @@ nonisolated struct NightPlanner: Sendable {
         return typical
     }
     /// The new Moon nearest `date`: back to the last one in the waxing half of the month, on to the
-    /// next in the waning half. Four steps along the true phase settle within a minute, so every
-    /// night of one lunation finds the same new Moon.
+    /// next in the waning half. Steps along the true phase until a step is under a second (about
+    /// seven steps; at most ten), so every night of one lunation finds the same new Moon, even one
+    /// that falls minutes from a park's midnight.
     static func newMoon(nearest date: Date, astronomy: AstronomyEngine = AstronomyEngine()) -> Date {
         var anchor = date
-        for _ in 0..<4 {
+        for _ in 0..<10 {
             let fraction = astronomy.moonPhase(at: anchor).fraction
             let days = fraction < 0.5 ? -fraction : 1-fraction
-            anchor = anchor.addingTimeInterval(days*AstronomyEngine.synodicDays*86400)
+            let step = days*AstronomyEngine.synodicDays*86400
+            anchor = anchor.addingTimeInterval(step)
+            if abs(step) < 1 { break }
         }
         return anchor
     }
