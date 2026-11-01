@@ -174,7 +174,7 @@ struct TonightControl:ControlWidget {
             ControlWidgetButton(action:OpenTonightParkIntent(parkID:value.parkID)) {
                 Label {
                     Text(value.score.map { String(localized:"Tonight \($0)") } ?? String(localized:"Tonight"))
-                    Text(value.name ?? String(localized:"Save a place in Nyx"))
+                    Text(value.subtitle)
                 } icon:{ Image(systemName:value.symbol) }
             }
         }.displayName("Tonight's score").description("Tonight's darkness score at your darkest saved place, or a place you choose.")

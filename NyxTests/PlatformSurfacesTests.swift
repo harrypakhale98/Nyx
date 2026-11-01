@@ -186,6 +186,13 @@ import Testing
         #expect(control.parkID == entry.night?.park.id && control.score == entry.night?.score.value)
         let empty=TonightControlValue(snapshot: nil, pinned: nil, now: now)
         #expect(empty.parkID == nil && empty.score == nil)
+        // A control has no VoiceOver label of its own: a closure is said in its second line, beside the glyph.
+        let closed=TonightControlValue(snapshot: snapshot, pinned: deva, now: now)
+        #expect(closed.symbol == ClosureLine.symbol && closed.closure == "Badwater Road closed")
+        #expect(closed.subtitle == "\(deva.shortName) · Badwater Road closed")
+        let open=TonightControlValue(snapshot: snapshot, pinned: jotr, now: now)
+        #expect(open.closure == nil && open.symbol != ClosureLine.symbol && open.subtitle == jotr.shortName)
+        #expect(empty.subtitle == "Save a place in Nyx")
         // The widget's default setting is no park (today's behaviour), so placed widgets keep it.
         #expect(TonightWidgetIntent().park == nil && MoonWidgetIntent().park == nil && TonightControlIntent().park == nil)
     }

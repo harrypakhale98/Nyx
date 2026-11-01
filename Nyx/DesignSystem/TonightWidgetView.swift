@@ -132,7 +132,20 @@ struct TonightControlValue:Sendable {
     let name:String?
     let score:Int?
     let symbol:String
-    init(parkID:String?,name:String?,score:Int?,symbol:String) { self.parkID=parkID; self.name=name; self.score=score; self.symbol=symbol }
+    /// The park's closure line, when it has one.
+    var closure:String?=nil
+    init(parkID:String?,name:String?,score:Int?,symbol:String,closure:String?=nil) {
+        self.parkID=parkID; self.name=name; self.score=score; self.symbol=symbol; self.closure=closure
+    }
+    /// The control's second line: the park, and its closure in the Park Service's words where it has
+    /// one ("Joshua Tree · Keys View Road closed at night"), cut by the control if it must be. A control
+    /// is drawn from its text and symbol alone, with no label of its own for VoiceOver, so the
+    /// closure is said in words beside the warning glyph rather than left to the glyph.
+    var subtitle:String {
+        guard let name else { return String(localized:"Save a place in Nyx") }
+        guard let closure else { return name }
+        return String(localized:"\(name) · \(closure)")
+    }
     /// The set park's night, else the darkest saved park's (`NightPlanner.best`, as everywhere);
     /// no score before any park is saved. Never the park the widget's "next" button moved to: the
     /// control answers "where is darkest tonight", whatever a widget is showing. Darkest is the sky
@@ -146,9 +159,9 @@ struct TonightControlValue:Sendable {
         guard let night=NightPlanner.best(parks.map { planner.night($0,on:$0.currentNight(at:now),now:now) }) else {
             self.init(parkID:nil,name:nil,score:nil,symbol:"moon.stars"); return
         }
-        let closed=snapshot?.closures[night.park.id] != nil
+        let closure=snapshot?.closures[night.park.id]
         self.init(parkID:night.park.id,name:night.park.shortName,score:night.score.value,
-                  symbol:closed ? "exclamationmark.triangle.fill" : night.sky.moon.symbolName(southern:night.park.latitude<0))
+                  symbol:closure != nil ? ClosureLine.symbol : night.sky.moon.symbolName(southern:night.park.latitude<0),closure:closure)
     }
 }
 /// A widget set to a place no longer saved (a spot deleted, a place abroad unsaved): it names the
