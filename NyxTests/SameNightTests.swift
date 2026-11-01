@@ -69,6 +69,26 @@ import Testing
         #expect(NightPlanner.ranked([closed, open], closures: closures).first?.park.id == "deva")
     }
 
+    /// A closed 94 against an open 84 ties once the closure counts: the trip planner breaks the tie
+    /// as every ranking does, on the score shown, so both name Joshua Tree.
+    @Test func closureTieBreaksOnTheScoreShown() throws {
+        let jotr = try park("jotr"), deva = try park("deva")
+        func night(_ park: Park, _ score: Int) -> Night {
+            let sky = AstronomyEngine().conditions(for: park, on: park.currentNight(at: now))
+            return Night(park: park, sky: sky, score: DarknessScore(value: score, moonPoints: 30, cloudPoints: 24, bortlePoints: 16, lengthPoints: 10), cloudCover: 5, forecastUpdated: now)
+        }
+        let closed = night(jotr, 94), open = night(deva, 84), closures = ["jotr": "x"]
+        let day = TripDay(closed.id, calendar: jotr.calendar)
+        let trip = TripPlanner.plan(days: [day], grid: [[closed, open]], closures: closures, maxHopMeters: .infinity)
+        let ranked = try #require(NightPlanner.ranked([closed, open], closures: closures).first)
+        #expect(ranked.park.id == "jotr")
+        #expect(trip.best?.night.park.id == ranked.park.id && trip.best?.night.id == ranked.id)
+        // The assignment itself chose it, not only the badge.
+        #expect(trip.stops.map(\.night.park.id) == ["jotr"])
+        // Given in the other order, the same.
+        #expect(TripPlanner.plan(days: [day], grid: [[open, closed]], closures: closures, maxHopMeters: .infinity).stops.map(\.night.park.id) == ["jotr"])
+    }
+
     /// A world place's usual clouds, carried to the widgets and the watch as whole percents, score
     /// its nights exactly as the iPhone's grid does: the grid holds whole percents itself, and both
     /// ease them between months the same way.
