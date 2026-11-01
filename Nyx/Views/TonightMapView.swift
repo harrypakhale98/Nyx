@@ -406,7 +406,8 @@ struct ParksMapView: View {
         }
     }
     /// What the marks mean, in words beside small drawn examples. Under Differentiate Without Color the
-    /// sizes' line says what the stars are too.
+    /// sizes' line says what the stars are too. VoiceOver and Braille read the lines as sentences, since
+    /// a combined element would join the stars' finished sentence to the next line with ", ".
     private func legend(_ map:TonightMap,ring:Bool)->some View {
         let sizes=String(localized:"Larger and brighter: a darker night")
         var items:[(LegendGlyph.Kind,String)]=[(.sizes,access.differentiate ? Sentences.join([Sentences.end(sizes),NightMark.legend]) : sizes),(.fills,map.fillsLegend),(.closure,String(localized:"Closure in the last park update"))]
@@ -418,7 +419,7 @@ struct ParksMapView: View {
                     Text(item.1).font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
             }
-        }.accessibilityElement(children:.combine)
+        }.accessibilityElement(children:.ignore).accessibilityLabel(Phrase.sentences(items.map(\.1))).accessibilityAddTraits(.isStaticText)
     }
     /// Score, name and line beside each other; at accessibility sizes the score sits above the words,
     /// so a long name keeps the row's full width.
