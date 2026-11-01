@@ -91,6 +91,29 @@ import Testing
         later.nightVision=false
         #expect(FieldActivities.changed(state, later, attributes: attributes))
     }
+    /// A crescent Moon setting in the twilight before true darkness does not end heading out early:
+    /// the activity counts down to true darkness and goes stale only then, so the closure, "Tonight
+    /// at …" and the sunset and true-darkness times stay on a locked phone until arrival.
+    @Test func headingOutCountsToTrueDarknessPastAnEarlyMoonset() throws {
+        let dusk=now.addingTimeInterval(3600)
+        func at(_ minutes: Double) -> Date { dusk.addingTimeInterval(minutes*60) }
+        let attributes=FieldActivityAttributes(parkID: "jotr", parkName: "Joshua Tree", score: 78, band: "Excellent", dusk: dusk, dawn: at(760),
+            darkStart: at(85), darkEnd: at(670),
+            milestones: [.init(title: "Moonset", date: at(40), symbol: "moonset"), .init(title: "True darkness", date: at(85), symbol: "moon.stars"),
+                         .init(title: "Dawn twilight", date: at(670), symbol: "sun.horizon")],
+            timeZoneID: "America/Los_Angeles", closure: "Keys View Road closed")
+        let content=attributes.content(at: at(-30), nightVision: false, heading: true)
+        #expect(content.state.heading == true && content.state.next?.date == at(85))
+        #expect(content.staleDate == attributes.darkStart)
+        // A minute before true darkness: still fresh, heading out, counting to it, closure shown.
+        #expect(at(84)<(content.staleDate ?? .distantPast))
+        #expect(attributes.shown(content.state, isStale: false)?.title == "True darkness")
+        #expect(attributes.closure(content.state) == "Keys View Road closed")
+        // Not heading out (field mode), the Moon's setting is still the next moment.
+        #expect(attributes.state(at: at(-30), nightVision: false).next?.date == at(40))
+        // Once it has gone stale, the schedule lists what follows true darkness.
+        #expect(attributes.schedule(content.state).map(\.title) == ["Dawn twilight"])
+    }
     /// Three hours after the moment the activity was counting down to, with no update, the
     /// face names no moment next: it lists the night's remaining times and when it was updated.
     @Test func staleFaceListsTimesThreeHoursLater() throws {
