@@ -28657,7 +28657,7 @@
         }
       }
     },
-    "From the cloud forecast your iPhone sent at %@.": {
+    "From the cloud forecast your iPhone sent at %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -28666,13 +28666,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Aus der Wolkenvorhersage, die dein iPad um %@ gesendet hat."
+                  "value": "Aus der Wolkenvorhersage, die dein iPad um %@ gesendet hat"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Aus der Wolkenvorhersage, die dein iPhone um %@ gesendet hat."
+                  "value": "Aus der Wolkenvorhersage, die dein iPhone um %@ gesendet hat"
                 }
               }
             }
@@ -28684,13 +28684,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "From the cloud forecast your iPad sent at %@."
+                  "value": "From the cloud forecast your iPad sent at %@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "From the cloud forecast your iPhone sent at %@."
+                  "value": "From the cloud forecast your iPhone sent at %@"
                 }
               }
             }
@@ -28702,13 +28702,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Según el pronóstico de nubes que tu iPad envió (%@)."
+                  "value": "Según el pronóstico de nubes que tu iPad envió (%@)"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Según el pronóstico de nubes que tu iPhone envió (%@)."
+                  "value": "Según el pronóstico de nubes que tu iPhone envió (%@)"
                 }
               }
             }
@@ -28720,13 +28720,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "D’après la prévision de nuages envoyée par votre iPad à %@."
+                  "value": "D’après la prévision de nuages envoyée par votre iPad à %@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "D’après la prévision de nuages envoyée par votre iPhone à %@."
+                  "value": "D’après la prévision de nuages envoyée par votre iPhone à %@"
                 }
               }
             }
@@ -28738,13 +28738,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@にiPadから送られた雲予報によります。"
+                  "value": "%@にiPadから送られた雲予報によります"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@にiPhoneから送られた雲予報によります。"
+                  "value": "%@にiPhoneから送られた雲予報によります"
                 }
               }
             }
@@ -28752,7 +28752,7 @@
         }
       }
     },
-    "From the cloud forecast your iPhone sent on %@ at %@.": {
+    "From the cloud forecast your iPhone sent on %@ at %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -28761,13 +28761,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Aus der Wolkenvorhersage, die dein iPad am %1$@ um %2$@ gesendet hat."
+                  "value": "Aus der Wolkenvorhersage, die dein iPad am %1$@ um %2$@ gesendet hat"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Aus der Wolkenvorhersage, die dein iPhone am %1$@ um %2$@ gesendet hat."
+                  "value": "Aus der Wolkenvorhersage, die dein iPhone am %1$@ um %2$@ gesendet hat"
                 }
               }
             }
@@ -28779,13 +28779,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "From the cloud forecast your iPad sent on %@ at %@."
+                  "value": "From the cloud forecast your iPad sent on %@ at %@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "From the cloud forecast your iPhone sent on %@ at %@."
+                  "value": "From the cloud forecast your iPhone sent on %@ at %@"
                 }
               }
             }
@@ -28797,13 +28797,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Según el pronóstico de nubes que tu iPad envió el %1$@ (%2$@)."
+                  "value": "Según el pronóstico de nubes que tu iPad envió el %1$@ (%2$@)"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Según el pronóstico de nubes que tu iPhone envió el %1$@ (%2$@)."
+                  "value": "Según el pronóstico de nubes que tu iPhone envió el %1$@ (%2$@)"
                 }
               }
             }
@@ -28815,13 +28815,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "D’après la prévision de nuages envoyée par votre iPad le %1$@ à %2$@."
+                  "value": "D’après la prévision de nuages envoyée par votre iPad le %1$@ à %2$@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "D’après la prévision de nuages envoyée par votre iPhone le %1$@ à %2$@."
+                  "value": "D’après la prévision de nuages envoyée par votre iPhone le %1$@ à %2$@"
                 }
               }
             }
@@ -28833,13 +28833,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@の%2$@にiPadから送られた雲予報によります。"
+                  "value": "%1$@の%2$@にiPadから送られた雲予報によります"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@の%2$@にiPhoneから送られた雲予報によります。"
+                  "value": "%1$@の%2$@にiPhoneから送られた雲予報によります"
                 }
               }
             }

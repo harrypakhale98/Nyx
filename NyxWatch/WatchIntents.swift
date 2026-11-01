@@ -104,9 +104,10 @@ nonisolated enum WristTonightAnswer {
             // The iPhone resends a context unchanged (offline, forecasts off, "Update from iPhone"), so a
             // recent send can carry an old forecast: then the forecast's own age is said too.
             let time = context.sent.formatted(date: .omitted, time: .shortened)
-            let sent = Calendar.current.isDate(context.sent, inSameDayAs: now)
-                ? String(localized: "From the cloud forecast your iPhone sent at \(time).")
-                : String(localized: "From the cloud forecast your iPhone sent on \(context.sent.formatted(.dateTime.weekday(.wide))) at \(time).")
+            // Closed once (`Sentences.end`): a shortened time can end in its own full stop ("4:10 p.m.").
+            let sent = Sentences.end(Calendar.current.isDate(context.sent, inSameDayAs: now)
+                ? String(localized: "From the cloud forecast your iPhone sent at \(time)")
+                : String(localized: "From the cloud forecast your iPhone sent on \(context.sent.formatted(.dateTime.weekday(.wide))) at \(time)"))
             return Sentences.join([sent, source.explainsItself ? source.line(for: night.park) : nil].compactMap { $0 })
         }
         return Sentences.join([night.basisCaption(), source.explainsItself ? source.line(for: night.park) : nil].compactMap { $0 })
