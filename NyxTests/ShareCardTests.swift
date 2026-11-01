@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 import SwiftUI
+import UIKit
 @testable import Nyx
 
 /// The share card: its spoken summary carries everything the picture shows, the exported image is
@@ -59,19 +60,34 @@ import SwiftUI
         #expect(export.key != preview.key)
         #expect(export.key==ShareArtwork(night:night,shape:.card,why:nil,range:nil,palette:nil,scale:1).key)
         #expect(export.key != ShareArtwork(night:night,shape:.card,why:nil,range:80...94,palette:nil,scale:1).key)
-        func greenest(_ artwork:ShareArtwork) throws -> Int {
-            let image=try #require(artwork.image()?.cgImage)
-            let w=image.width, h=image.height
-            let context=try #require(CGContext(data:nil,width:w,height:h,bitsPerComponent:8,bytesPerRow:w*4,space:CGColorSpaceCreateDeviceRGB(),bitmapInfo:CGImageAlphaInfo.premultipliedLast.rawValue))
-            context.draw(image,in:CGRect(x:0,y:0,width:w,height:h))
-            let pixels=try #require(context.data).assumingMemoryBound(to:UInt8.self)
-            // Pixels that are clearly amber or white: bright red and bright green together.
-            var count=0
-            for i in stride(from:0,to:w*h*4,by:4) where pixels[i]>180 && pixels[i+1]>130 { count+=1 }
-            return count
+        /// The card's pixels: those drawn brighter than its dark ground, and those clearly amber or
+        /// white (bright red and bright green together). Under heavy load the renderer can time out on
+        /// the Moon's shader and hand back nothing or a blank, so a blank draw is tried again (up to three
+        /// times) rather than read as a palette; whatever comes back is attached when a check fails.
+        func tally(_ artwork:ShareArtwork) throws -> (image:UIImage,drawn:Int,amber:Int) {
+            var last:(image:UIImage,drawn:Int,amber:Int)?
+            for _ in 0..<3 {
+                guard let image=artwork.image(), let cg=image.cgImage else { continue }
+                let w=cg.width, h=cg.height
+                let context=try #require(CGContext(data:nil,width:w,height:h,bitsPerComponent:8,bytesPerRow:w*4,space:CGColorSpaceCreateDeviceRGB(),bitmapInfo:CGImageAlphaInfo.premultipliedLast.rawValue))
+                context.draw(cg,in:CGRect(x:0,y:0,width:w,height:h))
+                let pixels=try #require(context.data).assumingMemoryBound(to:UInt8.self)
+                var drawn=0, amber=0
+                for i in stride(from:0,to:w*h*4,by:4) {
+                    if max(pixels[i],pixels[i+1],pixels[i+2])>120 { drawn+=1 }
+                    if pixels[i]>180 && pixels[i+1]>130 { amber+=1 }
+                }
+                last=(image,drawn,amber)
+                if drawn>200 { break }
+            }
+            return try #require(last,"The card was never drawn")
         }
-        #expect(try greenest(export)>200)
-        #expect(try greenest(preview)==0)
+        let exported=try tally(export), previewed=try tally(preview)
+        #expect(exported.amber>200)
+        #expect(previewed.drawn>200)
+        #expect(previewed.amber==0)
+        if exported.amber<=200 { Attachment.record(exported.image,named:"export") }
+        if previewed.drawn<=200 || previewed.amber != 0 { Attachment.record(previewed.image,named:"preview") }
     }
     /// The limb ring of a small Moon reaches 3:1 against black under Increase Contrast and through
     /// night vision's red (both reds), and stays faint otherwise.
