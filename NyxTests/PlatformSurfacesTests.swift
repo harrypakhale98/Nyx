@@ -96,6 +96,9 @@ import Testing
         #expect(attributes.shown(state, isStale: true) == nil)
         let mark=FieldActivityMark(attributes: attributes, state: state, isStale: true)
         #expect(mark.milestone == nil && mark.title == "Sunrise" && mark.symbol == "sunrise")
+        // VoiceOver hears a milestone's name once, from its countdown; sunrise's clock time does not name it.
+        #expect(!mark.namedByCountdown && FieldActivityMark(attributes: attributes, state: state, isStale: false).namedByCountdown)
+        #expect(FieldActivityMark(attributes: attributes, state: attributes.state(at: attributes.dawn, nightVision: false), isStale: false).namedByCountdown)
         let schedule=attributes.schedule(state)
         #expect(!schedule.isEmpty && schedule.allSatisfy { $0.date>next.date } && schedule == attributes.after(next))
         // Fresh, it still counts down to the next moment.

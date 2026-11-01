@@ -73,6 +73,8 @@ struct FieldActivityReview: View {
                 face { FieldActivityLockView(attributes: attributes, state: attributes.state(at: now, nightVision: true), isStale: false) }
                 Eyebrow(text: "Heading out: a night followed ahead")
                 face { FieldActivityLockView(attributes: early, state: heading, isStale: false) }
+                // Its expanded island: the closure in the night line's place.
+                expanded(early, state: heading, isStale: false)
                 if DebugScenario.state != "stale-score" { rescored(early, heading) }
                 Eyebrow(text: "Three hours after its moment, before Nyx updates it")
                 face { FieldActivityLockView(attributes: attributes, state: stale, isStale: true) }
@@ -85,11 +87,11 @@ struct FieldActivityReview: View {
                 small { FieldActivitySmallView(attributes: attributes, state: stale, isStale: true) }
                 Eyebrow(text: "Dynamic Island")
                 HStack(spacing: 10) {
-                    island { HStack { FieldActivitySymbol(attributes: attributes, state: state, isStale: false); Spacer(minLength: 40); FieldActivityCountdown(attributes: attributes, state: state, isStale: false) }.padding(.horizontal, 14) }
+                    island { HStack { FieldActivitySymbol(attributes: attributes, state: state, isStale: false, besideCountdown: true); Spacer(minLength: 40); FieldActivityCountdown(attributes: attributes, state: state, isStale: false) }.padding(.horizontal, 14) }
                     island { FieldActivitySymbol(attributes: attributes, state: state, isStale: false) }.frame(width: 44)
                 }
                 HStack(spacing: 10) {
-                    island { HStack { FieldActivitySymbol(attributes: attributes, state: stale, isStale: true); Spacer(minLength: 40); FieldActivityCountdown(attributes: attributes, state: stale, isStale: true) }.padding(.horizontal, 14) }
+                    island { HStack { FieldActivitySymbol(attributes: attributes, state: stale, isStale: true, besideCountdown: true); Spacer(minLength: 40); FieldActivityCountdown(attributes: attributes, state: stale, isStale: true) }.padding(.horizontal, 14) }
                     island { FieldActivitySymbol(attributes: attributes, state: stale, isStale: true) }.frame(width: 44)
                 }
                 expanded(attributes, state: state, isStale: false)

@@ -43,28 +43,19 @@ struct FieldActivityLockView: View {
     var body: some View {
         let mark=attributes.shown(state,isStale:isStale)
         VStack(alignment:.leading,spacing:heading ? 8 : 10) {
-            HStack(spacing:6) {
-                Image(systemName:"moon.stars").accessibilityHidden(true)
-                // The zone stays beside the name, which truncates before the score gives way.
-                HStack(spacing:6) {
-                    name
-                    if !state.finished { FieldZoneMark(attributes:attributes,parkZone:parkZone,at:zoneMoment(mark)) }
-                }
-                .layoutPriority(1)
-                Spacer(minLength:8)
-                // The night's latest score; its day when it is old, so the face is never surer than Nyx.
-                // Always shown: laid out before the name. Two lines where the band carries its basis
-                // ("Excellent, usual clouds"): wrapped, never cut. A line that needs more ("Gut, frühe
-                // Vorschau, Dunst oder Rauch") gives way to the band's one word; VoiceOver still hears the whole line.
-                ViewThatFits(in:.vertical) {
-                    Text(attributes.scoreLine(state)).fixedSize(horizontal:false,vertical:true)
-                    Text(attributes.scoreLine(state,short:true)).fixedSize(horizontal:false,vertical:true)
-                    Text(attributes.scoreLine(state,short:true)).lineLimit(2).minimumScaleFactor(0.8)
-                }
-                .frame(maxHeight:scoreLines)
-                .monospacedDigit().multilineTextAlignment(.trailing).layoutPriority(2)
-                .accessibilityElement(children:.ignore).accessibilityLabel(attributes.spokenScore(state))
-            }.font(.caption.weight(.medium)).foregroundStyle(colors.muted)
+            // The night's latest score; its day when it is old, so the face is never surer than Nyx.
+            // Always shown: laid out before the name. Two lines where the band carries its basis
+            // ("Excellent, usual clouds"): wrapped, never cut. A line that needs more ("Gut, frühe
+            // Vorschau, Dunst oder Rauch") gives way to the band's one word; where even that needs a third
+            // line beside the zone mark ("77 · Excellente (ven.)"), the zone goes under the name to give it
+            // room, and the line may shrink a little. VoiceOver still hears the whole line.
+            ViewThatFits(in:.vertical) {
+                header(mark,zoneUnder:false) { Text(attributes.scoreLine(state)).fixedSize(horizontal:false,vertical:true) }
+                header(mark,zoneUnder:false) { Text(attributes.scoreLine(state,short:true)).fixedSize(horizontal:false,vertical:true) }
+                header(mark,zoneUnder:true) { Text(attributes.scoreLine(state,short:true)).lineLimit(2).minimumScaleFactor(0.8) }
+            }
+            .frame(maxHeight:scoreLines)
+            .font(.caption.weight(.medium)).foregroundStyle(colors.muted)
             if state.finished {
                 Text("The night is over. Rest your eyes.").font(.system(.title3,design:.serif)).foregroundStyle(colors.ink)
             } else if isStale {
@@ -94,8 +85,9 @@ struct FieldActivityLockView: View {
                 }.font(.caption).foregroundStyle(colors.muted)
                 if let closure=attributes.closure(state) {
                     // The warning in its red and the words in ink, as in the app: amber is the score's and light's.
-                    Label { Text(closure).foregroundStyle(colors.ink).lineLimit(2) } icon:{ Image(systemName:"exclamationmark.triangle.fill").foregroundStyle(colors.caution).accessibilityHidden(true) }
-                        .font(.caption.weight(.medium))
+                    // VoiceOver hears it with the score, first (`spokenScore`).
+                    Label { Text(closure).foregroundStyle(colors.ink).lineLimit(2) } icon:{ Image(systemName:ClosureLine.symbol).foregroundStyle(colors.caution) }
+                        .font(.caption.weight(.medium)).accessibilityHidden(true)
                 }
             } else if !state.finished {
                 FieldNightLine(attributes:attributes,colors:colors).frame(height:isStale ? 10 : 16)
@@ -118,6 +110,37 @@ struct FieldActivityLockView: View {
         .accessibilityValue(state.finished ? Text(verbatim:"") : attributes.spokenNote(parkZone))
         .environment(\.timeZone,attributes.timeZone)
     }
+    /// The park's name, its zone where its clock is not this iPhone's, and the score line, laid out first.
+    /// `zoneUnder`: the zone under the name (unmarked) rather than beside it, for a score line that needs the room.
+    private func header(_ mark:FieldActivityAttributes.Milestone?,zoneUnder:Bool,@ViewBuilder score:()->some View)->some View {
+        HStack(spacing:6) {
+            Image(systemName:"moon.stars").accessibilityHidden(true)
+            // The zone stays with the name, which truncates before the score gives way.
+            Group {
+                if zoneUnder {
+                    VStack(alignment:.leading,spacing:0) {
+                        name
+                        if !state.finished { FieldZoneMark(attributes:attributes,parkZone:parkZone,at:zoneMoment(mark),dot:false) }
+                    }
+                } else {
+                    HStack(spacing:6) {
+                        name
+                        if !state.finished { FieldZoneMark(attributes:attributes,parkZone:parkZone,at:zoneMoment(mark)) }
+                    }
+                }
+            }
+            .layoutPriority(1)
+            Spacer(minLength:8)
+            score()
+                .monospacedDigit().multilineTextAlignment(.trailing).layoutPriority(2)
+                .accessibilityElement(children:.ignore).accessibilityLabel(spokenScore)
+        }
+    }
+    /// The score as VoiceOver hears it, and before arrival the closure first, as everywhere ("Closure
+    /// alert: Keys View Road closed at night. Darkness score 78, Excellent."): the warning glyph is silent.
+    private var spokenScore: String {
+        ClosureLine.first(attributes.spokenScore(state),closure:heading ? attributes.closure(state) : nil)
+    }
     /// "Tonight at Zion" before arrival where it fits whole, else the park's name alone, which
     /// truncates when it must but keeps its floor. VoiceOver hears the whole line either way.
     private var name: some View {
@@ -138,9 +161,13 @@ struct FieldActivityLockView: View {
         HStack(spacing:4) { Text(item.title); Text(item.date,style:.time).monospacedDigit() }.fixedSize()
     }
     /// Sunset and true darkness with their clock times. `symbols`: each named by its milestone's symbol.
+    /// True darkness is heard once: where the countdown runs to it, its label already says the time.
     @ViewBuilder private func headingMarks(symbols:Bool)->some View {
         timeMark(String(localized:"Sunset"),symbol:"sunset",attributes.dusk,symbols:symbols)
-        if let dark=attributes.darkStart { timeMark(String(localized:"True darkness"),symbol:"moon.stars",dark,symbols:symbols) }
+        if let dark=attributes.darkStart {
+            timeMark(String(localized:"True darkness"),symbol:"moon.stars",dark,symbols:symbols)
+                .accessibilityHidden(attributes.shown(state,isStale:isStale)?.date == dark)
+        }
     }
     private func timeMark(_ title:String,symbol:String,_ date:Date,symbols:Bool)->some View {
         HStack(alignment:.firstTextBaseline,spacing:4) {
@@ -240,9 +267,9 @@ struct FieldActivitySmallView: View {
         let colors=FieldActivityColors(nightVision:state.nightVision,contrast:contrast)
         let mark=FieldActivityMark(attributes:attributes,state:state,isStale:isStale)
         VStack(alignment:.leading,spacing:2) {
-            // The countdown's label names its milestone ("Moonrise, at 9:12 PM").
+            // The countdown's label names its milestone ("Moonrise, at 9:12 PM"), or says "Dawn" itself.
             Label { Text(mark.title).lineLimit(1).minimumScaleFactor(0.7) } icon:{ Image(systemName:mark.symbol).accessibilityHidden(true) }
-                .font(.caption.weight(.semibold)).foregroundStyle(colors.ink).accessibilityHidden(mark.milestone != nil)
+                .font(.caption.weight(.semibold)).foregroundStyle(colors.ink).accessibilityHidden(mark.namedByCountdown)
             Group {
                 if let milestone=mark.milestone { FieldActivityTimer(mark:milestone,zone:attributes.timeZone) }
                 else if state.finished { Text("Dawn") }
@@ -298,19 +325,28 @@ struct FieldActivityMark {
     }
     var title: String { finished ? String(localized:"Dawn") : milestone?.title ?? String(localized:"Sunrise") }
     var symbol: String { milestone?.symbol ?? "sunrise" }
+    /// True when the countdown beside the title already says it to VoiceOver: a milestone's timer is
+    /// labelled with its name ("Moonrise, at 9:12 PM"), and "Dawn" is the time's own word. Sunrise's
+    /// clock time ("at 6:40") does not name it, so the title is heard then.
+    var namedByCountdown: Bool { milestone != nil || finished }
 }
-/// The Dynamic Island's compact and minimal faces, spoken as the moment they stand for.
+/// The Dynamic Island's compact and minimal faces, spoken as the moment they stand for. Beside a
+/// countdown (the compact island) it is silent when the countdown names the moment, so VoiceOver
+/// hears the name once.
 struct FieldActivitySymbol: View {
     let mark: FieldActivityMark
     let nightVision: Bool
+    /// The compact island's leading side, beside the countdown; the minimal face stands alone.
+    let besideCountdown: Bool
     @Environment(\.colorSchemeContrast) private var contrast
-    init(attributes:FieldActivityAttributes,state:FieldActivityAttributes.ContentState,isStale:Bool) {
-        mark=FieldActivityMark(attributes:attributes,state:state,isStale:isStale); nightVision=state.nightVision
+    init(attributes:FieldActivityAttributes,state:FieldActivityAttributes.ContentState,isStale:Bool,besideCountdown:Bool=false) {
+        mark=FieldActivityMark(attributes:attributes,state:state,isStale:isStale); nightVision=state.nightVision; self.besideCountdown=besideCountdown
     }
     var body: some View {
         Image(systemName:mark.symbol)
             .foregroundStyle(FieldActivityColors(nightVision:nightVision,contrast:contrast).accent)
             .accessibilityLabel(mark.title)
+            .accessibilityHidden(besideCountdown && mark.namedByCountdown)
     }
 }
 /// The countdown to the shown milestone; sunrise's clock time, marked as one, when only that is
@@ -377,14 +413,18 @@ struct FieldIslandTitle: View {
     let state: FieldActivityAttributes.ContentState
     let isStale: Bool
     @Environment(\.colorSchemeContrast) private var contrast
-    var body: some View {
+    @ViewBuilder var body: some View {
         let mark=FieldActivityMark(attributes:attributes,state:state,isStale:isStale)
-        Label { Text(mark.title).lineLimit(2).minimumScaleFactor(0.75) } icon:{ FieldActivitySymbol(attributes:attributes,state:state,isStale:isStale).accessibilityHidden(true) }
+        let title=Label { Text(mark.title).lineLimit(2).minimumScaleFactor(0.75) } icon:{ FieldActivitySymbol(attributes:attributes,state:state,isStale:isStale).accessibilityHidden(true) }
             .font(.system(.subheadline,design:.serif)).foregroundStyle(FieldActivityColors(nightVision:state.nightVision,contrast:contrast).ink)
+        // Heard once: the countdown beside it names its moment ("Moonrise, at 9:12 PM"). Hidden only
+        // then: an outer `accessibilityHidden(false)` would make the symbol heard again ("Sunrise, Sunrise").
+        if mark.namedByCountdown { title.accessibilityHidden(true) } else { title }
     }
 }
 /// The expanded island's bottom: the night's line, then the park and its score, or when Nyx last
-/// updated it once stale. In the same colours as the title.
+/// updated it once stale. Heading out with a closure, as on the Lock Screen, the closure takes the
+/// line's place: one line, cut if it must be, never dropped. In the same colours as the title.
 struct FieldIslandBottom: View {
     let attributes: FieldActivityAttributes
     let state: FieldActivityAttributes.ContentState
@@ -393,7 +433,13 @@ struct FieldIslandBottom: View {
     var body: some View {
         let colors=FieldActivityColors(nightVision:state.nightVision,contrast:contrast)
         VStack(alignment:.leading,spacing:6) {
-            FieldNightLine(attributes:attributes,colors:colors).frame(height:14)
+            if let closure=attributes.closure(state), state.heading == true, !isStale, !state.finished {
+                Label { Text(closure).foregroundStyle(colors.ink).lineLimit(1) } icon:{ Image(systemName:ClosureLine.symbol).foregroundStyle(colors.caution) }
+                    .font(.caption2.weight(.medium))
+                    .accessibilityElement(children:.ignore).accessibilityLabel(ClosureLine.spoken(closure))
+            } else {
+                FieldNightLine(attributes:attributes,colors:colors).frame(height:14)
+            }
             if isStale && !state.finished {
                 FieldActivityUpdated(attributes:attributes,state:state).font(.caption2).foregroundStyle(colors.muted)
             } else {

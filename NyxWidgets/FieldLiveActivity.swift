@@ -28,7 +28,7 @@ struct FieldLiveActivity: Widget {
                     FieldIslandBottom(attributes:context.attributes,state:context.state,isStale:context.isStale)
                 }
             } compactLeading: {
-                FieldActivitySymbol(attributes:context.attributes,state:context.state,isStale:context.isStale)
+                FieldActivitySymbol(attributes:context.attributes,state:context.state,isStale:context.isStale,besideCountdown:true)
             } compactTrailing: {
                 FieldActivityCountdown(attributes:context.attributes,state:context.state,isStale:context.isStale)
             } minimal: {
