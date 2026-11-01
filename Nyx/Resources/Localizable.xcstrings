@@ -54439,6 +54439,41 @@
         }
       }
     },
+    "Red light only. Nyx taps your wrist at 25 and 30 minutes while it is on screen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur Rotlicht. Nyx tippt nach 25 und 30 Minuten an dein Handgelenk, solange es auf dem Bildschirm ist."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Red light only. Nyx taps your wrist at 25 and 30 minutes while it is on screen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo luz roja. Nyx toca tu muñeca a los 25 y 30 minutos mientras está en pantalla."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lumière rouge uniquement. Nyx tapote votre poignet à 25 et 30 minutes tant qu’il est à l’écran."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "赤い光だけ。画面に表示されている間、25分と30分の時点でNyxが手首をタップします。"
+          }
+        }
+      }
+    },
     "Red light only. Nyx taps your wrist at 25 and 30 minutes, even with the screen off.": {
       "extractionState": "manual",
       "localizations": {

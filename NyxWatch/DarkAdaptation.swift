@@ -351,7 +351,7 @@ private struct AdaptationExplainer: View {
 private struct AdaptationInfo: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dismiss) private var dismiss
-    /// The reminders' permission: with notifications off, the taps come only from the open screen.
+    /// The reminders' permission: unless notifications are allowed, the taps come only from the open screen.
     var permission: UNAuthorizationStatus?
     var body: some View {
         NavigationStack {
@@ -360,10 +360,14 @@ private struct AdaptationInfo: View {
                     Text("Dark adaptation").font(.system(.headline, design: .serif))
                     Text("Eyes take 20 to 30 minutes to adapt to the dark. A bright screen or a white light resets them.")
                     Group {
-                        if permission == .denied {
+                        // Only reminders it may schedule tap with the screen off; until notifications are
+                        // allowed (or while the answer is unknown), the taps come from the open screen.
+                        if AdaptationReminders.allowed(permission) {
+                            Text("Red light only. Nyx taps your wrist at 25 and 30 minutes, even with the screen off.")
+                        } else if permission == .denied {
                             Text("Red light only. Notifications for Nyx are off, so Nyx taps your wrist at 25 and 30 minutes only while it is on screen.")
                         } else {
-                            Text("Red light only. Nyx taps your wrist at 25 and 30 minutes, even with the screen off.")
+                            Text("Red light only. Nyx taps your wrist at 25 and 30 minutes while it is on screen.")
                         }
                     }
                     .foregroundStyle(palette.muted)
@@ -456,6 +460,9 @@ nonisolated final class AdaptationNotificationDelegate: NSObject, UNUserNotifica
 }
 #Preview("Info • notifications off") {
     AdaptationInfo(permission: .denied).environment(\.nyx, NyxPalette(nightVision: true, highContrast: false))
+}
+#Preview("Info • notifications not asked yet") {
+    AdaptationInfo(permission: .notDetermined).environment(\.nyx, NyxPalette(nightVision: true, highContrast: false))
 }
 #Preview("Ring • 12 min") {
     AdaptationRing(clock: AdaptationClock(start: .now.addingTimeInterval(-12*60)), now: .now)
