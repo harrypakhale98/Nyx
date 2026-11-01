@@ -10,6 +10,9 @@ nonisolated protocol DetailProviding: Sendable {
     /// `weather` and `smoke` are the two switches in Your privacy: forecast detail comes from
     /// the forecast host, aerosols from the air-quality host.
     func details(for parks: [Park], weather: Bool, smoke: Bool, force: Bool) async -> [String: ForecastDetail]
+    /// Only the cloud layers a summit above the inversion is scored from (`Kind.summit`), for those
+    /// among `parks`: Tonight's request before any park page asks for the whole detail.
+    func summitLayers(for parks: [Park], force: Bool) async -> [String: ForecastDetail]
     /// The cached detail, read once from disk off the main actor at launch.
     func hydrate(_ parks: [Park]) async -> [String: ForecastDetail]
     /// Detail already read at launch (`CachePreload`).
@@ -41,10 +44,13 @@ nonisolated extension DetailProviding {
 /// part, and one the service answered with nothing usable waits before it is sent again
 /// (`ForecastReuse.retryable`). Requests to one host go one after the other, never side by side,
 /// within this device's budget (`CallBudget`); each answer is kept as it lands. Detail never uses a
-/// Low Data Mode network: it is context, and the score's clouds still arrive.
+/// Low Data Mode network: it is context, and the score's clouds still arrive. Before any page asks
+/// for it, a summit above the inversion has only the two layers its score reads asked for (`Kind.summit`).
 actor ForecastDetailService: DetailProviding {
     enum Kind: CaseIterable, Sendable {
-        case models, layers, air
+        /// `summit`: the mid and high cloud alone (`ForecastDetail.layerRequired`), kept as the
+        /// summit's layers until a page asks for the whole layers (`scoreOnly`).
+        case models, layers, air, summit
         var host: String { self == .air ? "air-quality-api.open-meteo.com" : "api.open-meteo.com" }
         /// How soon pulling to refresh may ask again: three hours for the forecast models (ICON
         /// runs every three), never sooner than twelve for smoke (CAMS runs twice a day).
@@ -140,6 +146,17 @@ actor ForecastDetailService: DetailProviding {
         memory[id]=cached
     }
     func details(for parks: [Park], weather: Bool, smoke: Bool, force: Bool = false) async -> [String: ForecastDetail] {
+        await details(for: parks, kinds: Set(Kind.allCases.filter { $0 == .air ? smoke : weather && $0 != .summit }), force: force)
+    }
+    func summitLayers(for parks: [Park], force: Bool = false) async -> [String: ForecastDetail] {
+        await details(for: parks.filter { $0.aboveInversion == true }, kinds: [.summit], force: force)
+    }
+    /// Layers holding only what the score reads (`ForecastDetail.layerRequired`): the summit's own
+    /// request (`Kind.summit`), so the whole layers a park page reads are still due.
+    static func scoreOnly(_ layers: HourlySeries?) -> Bool {
+        layers.map { $0.values.keys.allSatisfy(ForecastDetail.layerRequired.contains) } ?? false
+    }
+    func details(for parks: [Park], kinds: Set<Kind>, force: Bool = false) async -> [String: ForecastDetail] {
         for park in parks { load(park.id) }
         // Another request is on its way (perhaps for other parks): wait for it, then decide again
         // what is due, leaving out what it already asked for: a request that failed without a
@@ -156,10 +173,11 @@ actor ForecastDetailService: DetailProviding {
         do {
             let now=clock()
             var jobs: [(Kind, [Park])] = []
-            for kind in Kind.allCases where (kind == .air ? smoke : weather) && backoff.allows(kind.host, now: now) {
+            for kind in Kind.allCases where kinds.contains(kind) && backoff.allows(kind.host, now: now) {
                 let due=parks.filter { park in
                     attempted[kind]?.contains(park.id) != true
-                        && ForecastReuse.due(Self.series(memory[park.id], kind)?.updated, now: now, force: force, normal: Self.freshFor, forced: kind.forced)
+                        && (ForecastReuse.due(Self.series(memory[park.id], kind)?.updated, now: now, force: force, normal: Self.freshFor, forced: kind.forced)
+                            || (kind == .layers && Self.scoreOnly(memory[park.id]?.layers)))
                         && ForecastReuse.retryable(tried[kind]?[park.id], now: now, force: force)
                 }
                 for start in stride(from: 0, to: due.count, by: 50) { jobs.append((kind, Array(due[start..<min(due.count, start+50)]))) }
@@ -321,7 +339,7 @@ actor ForecastDetailService: DetailProviding {
             if kind == .air && generation != airGeneration { continue }
             for (id, series) in fetched ?? [] {
                 var detail=memory[id] ?? ForecastDetail()
-                switch kind { case .models: detail.models=series; case .layers: detail.layers=series; case .air: detail.air=series; airCleared=false }
+                switch kind { case .models: detail.models=series; case .layers, .summit: detail.layers=series; case .air: detail.air=series; airCleared=false }
                 memory[id]=detail; changed.insert(id)
             }
         }
@@ -331,7 +349,7 @@ actor ForecastDetailService: DetailProviding {
         if !landed.isEmpty { observer.send(landed) }
     }
     private static func series(_ detail: ForecastDetail?, _ kind: Kind) -> HourlySeries? {
-        switch kind { case .models: detail?.models; case .layers: detail?.layers; case .air: detail?.air }
+        switch kind { case .models: detail?.models; case .layers, .summit: detail?.layers; case .air: detail?.air }
     }
     /// One kind's request for these places: its URL, the series a place's answer must hold
     /// (`ForecastDetail.layerRequired`, `airRequired`; the models all three), and the context kept
@@ -346,8 +364,10 @@ actor ForecastDetailService: DetailProviding {
         case .models:
             parts.host="api.open-meteo.com"; parts.path="/v1/forecast"; asked=ForecastDetail.modelKeys; required=asked
             items+=[URLQueryItem(name: "hourly", value: "cloud_cover"), URLQueryItem(name: "models", value: "gfs_seamless,ecmwf_ifs025,icon_seamless")]
-        case .layers:
-            parts.host="api.open-meteo.com"; parts.path="/v1/forecast"; asked=ForecastDetail.layerKeys+(extras ? ForecastDetail.layerExtras : []); required=ForecastDetail.layerRequired
+        case .layers, .summit:
+            // The summit's own request is Vision Pro's (`SummitLayerService.url`): the same in every copy of Nyx.
+            parts.host="api.open-meteo.com"; parts.path="/v1/forecast"; required=ForecastDetail.layerRequired
+            asked=kind == .summit ? required : ForecastDetail.layerKeys+(extras ? ForecastDetail.layerExtras : [])
             items.append(URLQueryItem(name: "hourly", value: asked.joined(separator: ",")))
         case .air:
             // CAMS global covers every park, Alaska and American Samoa included.
@@ -372,7 +392,9 @@ actor ForecastDetailService: DetailProviding {
             return Backoff.constrained(error) ? nil : []
         }
         let series=OpenMeteoAnswer.series(data, ids: parks.map(\.id), keys: request.required, extras: request.context, now: clock())
-        note(kind, parks.map(\.id), kept: series.map(\.0))
+        // Whole layers that came back with only what the score reads are kept, and tried again later
+        // like any answer short of what was asked, not on every refresh (they stay `scoreOnly`).
+        note(kind, parks.map(\.id), kept: series.filter { kind != .layers || !Self.scoreOnly($0.1) }.map(\.0))
         return series
     }
     /// Places answered without a usable series are tried again later (`ForecastReuse.retryable`); the rest are clear.

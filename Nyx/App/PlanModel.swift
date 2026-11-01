@@ -906,11 +906,12 @@ import Observation
         let attempt=network ? await weather.lastAttempt() : .answered
         if attempt != forecastAttempt { forecastAttempt=attempt }
         // A summit above the inversion (Haleakalā) is scored from its mid and high cloud, which come
-        // with forecast detail: asked for with the clouds from the first refresh, page or no page, so
-        // Tonight never waits for a park page to score it. Every copy of Nyx asks for that one public
-        // park whatever its whereabouts; once a page is open, the summit rides with every park.
+        // with forecast detail: those two layers alone are asked for with the clouds from the first
+        // refresh, page or no page, so Tonight never waits for a park page to score it. Every copy of
+        // Nyx asks for that one public park whatever its whereabouts; once a page is open, the summit
+        // rides with every park, and its whole layers are asked for then.
         let summits=self.parks.filter { $0.aboveInversion == true }
-        if network, !detailWanted, !summits.isEmpty { _=await detailService.details(for:summits,weather:true,smoke:false,force:force) }
+        if network, !detailWanted, !summits.isEmpty { _=await detailService.summitLayers(for:summits,force:force) }
         takeDetails(await detailService.details(for:self.parks,weather:network && detailWanted,smoke:smokeEnabled && live && detailWanted,force:force))
         // Smoke kept from a page opened in an earlier session still caps the score, so those parks' smoke is
         // kept current page or no page: an old smoke forecast must not hold the night down after the smoke has gone.

@@ -79,7 +79,9 @@ import Testing
     }
 
     /// The summit's layers come with the first refresh, before any park page has opened, in a
-    /// request for that one public park (no smoke); a page opened later does not ask for it again.
+    /// request for that one public park: its mid and high cloud only, what Your privacy names (no
+    /// forecast models, no other detail, no smoke), the same request Vision Pro sends. A page opened
+    /// later asks for every park's whole detail, the summit's included.
     @Test func theFirstRefreshAsksForTheSummitLayers() async throws {
         let hale=try named("hale")
         let http=OpenMeteoEcho()
@@ -90,14 +92,24 @@ import Testing
         func latitudes(_ url:URL) -> [String] { OpenMeteoEcho.list(url,"latitude") }
         let layered=urls.filter { OpenMeteoEcho.list($0,"hourly").contains("cloud_cover_mid") }
         #expect(layered.count == 1 && layered.first.map(latitudes) == [String(hale.forecastPoint.latitude)])
-        #expect(!urls.contains { $0.host == "air-quality-api.open-meteo.com" })
-        #expect(model.details["hale"]?.layers != nil)
+        #expect(layered.first == SummitLayerService.url(for:[hale]))
+        #expect(!urls.contains { $0.host == "air-quality-api.open-meteo.com" || !OpenMeteoEcho.list($0,"models").isEmpty })
+        #expect(urls.count == 3)
+        #expect(model.details["hale"]?.layers?.values.keys.sorted() == ["cloud_cover_high","cloud_cover_mid"])
+        #expect(ForecastDetailService.scoreOnly(model.details["hale"]?.layers))
         // Only the summit: every other park's detail waits for a page.
         #expect(model.details.keys.sorted() == ["hale"])
-        // A page opens: every other park is asked for, the summit is not asked twice within its twelve hours.
+        // Another refresh within twelve hours asks for nothing more.
+        await model.refreshForecasts(watching:[])
+        #expect(await http.urls.count == urls.count)
+        // A page opens: every park's models and whole layers are asked for, the summit's too.
         await model.refresh([],parkUpdates:false,programs:true)
-        let later=await http.urls.dropFirst(urls.count).filter { OpenMeteoEcho.list($0,"hourly").contains("cloud_cover_mid") }
-        let asked=later.flatMap(latitudes)
-        #expect(asked.count == model.parks.count-1 && !asked.contains(String(hale.forecastPoint.latitude)))
+        let later=await http.urls.dropFirst(urls.count)
+        let whole=later.filter { OpenMeteoEcho.list($0,"hourly").contains("temperature_2m") }.flatMap(latitudes)
+        let models=later.filter { !OpenMeteoEcho.list($0,"models").isEmpty }.flatMap(latitudes)
+        #expect(whole.count == model.parks.count && whole.contains(String(hale.forecastPoint.latitude)))
+        #expect(models.count == model.parks.count && models.contains(String(hale.forecastPoint.latitude)))
+        #expect(model.details["hale"]?.layers?.values["temperature_2m"] != nil && model.details["hale"]?.models != nil)
+        #expect(!ForecastDetailService.scoreOnly(model.details["hale"]?.layers))
     }
 }

@@ -271,7 +271,9 @@ struct DataServiceDeliveryTests {
     @Test func aRenamedFieldNeitherDropsTheScoreNorRepeatsTheRequest() async throws {
         let summit=try #require(TestData.parks.first { $0.aboveInversion == true })
         let clock=BudgetClock(Self.monday)
-        let http=PathHTTP(["/v1/forecast": .body("{\"hourly\":{\"time\":[1790000000],\"cloud_cover_mid\":[10],\"cloud_cover_high\":[5],\"visibility_renamed\":[1]}}"),
+        // The other layers still arrive: one renamed field, not an answer holding only the score's two
+        // (that one is asked again later, `ForecastDetailService.scoreOnly`).
+        let http=PathHTTP(["/v1/forecast": .body("{\"hourly\":{\"time\":[1790000000],\"cloud_cover_low\":[20],\"cloud_cover_mid\":[10],\"cloud_cover_high\":[5],\"visibility_renamed\":[1]}}"),
                            "/v1/air-quality": .body("{\"hourly\":{\"time\":[1790000000],\"aod_renamed\":[0.2],\"pm2_5\":[3]}}")])
         let service=ForecastDetailService(transport: http, persist: false, clock: { clock.now })
         let first=await service.details(for: [summit], weather: true, smoke: true, force: false)
