@@ -19,6 +19,41 @@ import Testing
             return Dictionary(requests.joined().map { ($0.id, kept) }, uniquingKeysWith: { first, _ in first })
         }
     }
+    /// The parks' clouds wait at a gate until let go, as a slow network does; the catalogue's kept
+    /// clouds are read from the files at once, and nothing is asked of the network for them.
+    actor GatedWeather: WeatherProviding {
+        let kept: Forecast
+        private var gate: CheckedContinuation<Void, Never>?
+        private(set) var asking=false
+        init(kept: Forecast) { self.kept=kept }
+        func forecasts(for parks: [Park], network: Bool, force: Bool) async -> [String: Forecast] {
+            guard network else { return [:] }
+            await withCheckedContinuation { gate=$0; asking=true }
+            return [:]
+        }
+        func open() { gate?.resume(); gate=nil }
+        func hydrate(_ parks: [Park]) async -> [String: Forecast] { [:] }
+        func seed(_ cached: [String: Forecast], parks: [Park]) async {}
+        func catalogForecasts(_ requests: [[Park]], network: Bool, force: Bool) async -> [String: Forecast] {
+            network ? [:] : Dictionary(requests.joined().map { ($0.id, kept) }, uniquingKeysWith: { first, _ in first })
+        }
+    }
+    /// No clouds from anywhere: a test hands the model its own.
+    actor NoWeather: WeatherProviding {
+        func forecasts(for parks: [Park], network: Bool, force: Bool) async -> [String: Forecast] { [:] }
+        func hydrate(_ parks: [Park]) async -> [String: Forecast] { [:] }
+        func seed(_ cached: [String: Forecast], parks: [Park]) async {}
+    }
+    /// A model that never reaches the network: the services answer from stubs.
+    static func quietModel(weather: any WeatherProviding) throws -> PlanModel {
+        let defaults=try #require(UserDefaults(suiteName: "nyx-first-answer-\(UUID().uuidString)"))
+        defaults.set(true, forKey: "startChosen")
+        let model=PlanModel(weather: weather, parkStore: ParkStore(transport: StubHTTP([:]), persist: false),
+                            detail: ForecastDetailService(transport: StubHTTP([:]), persist: false),
+                            aurora: AuroraService(transport: StubHTTP([:]), persist: false), defaults: defaults)
+        model.radiusMeters=321_869
+        return model
+    }
     static func model(home: String, weather: any WeatherProviding) throws -> PlanModel {
         let defaults=try #require(UserDefaults(suiteName: "nyx-first-answer-\(UUID().uuidString)"))
         defaults.set(home, forKey: "homePark"); defaults.set(true, forKey: "startChosen")
@@ -30,6 +65,10 @@ import Testing
     static func overcast(_ now: Date) -> Forecast {
         let start=now.timeIntervalSince1970-86400
         return Forecast(updated: now, times: (0..<(16*24)).map { start+Double($0)*3600 }, clouds: Array(repeating: 100, count: 16*24))
+    }
+    static func clear(_ now: Date) -> Forecast {
+        let start=now.timeIntervalSince1970-86400
+        return Forecast(updated: now, times: (0..<(16*24)).map { start+Double($0)*3600 }, clouds: Array(repeating: 0, count: 16*24))
     }
 
     @Test func aReachAcrossTheUSEdgeIsKnownWithoutTheCatalogue() throws {
@@ -68,6 +107,53 @@ import Testing
 
         let arches=try Self.model(home: "arch", weather: KeptWeather(kept: Self.overcast(.now)))
         #expect(!arches.catalogIsReady && !arches.awaitingWorld)
+    }
+
+    /// A wider radius (or a late Near-me fix) that brings catalogue places into reach: they count the
+    /// clouds kept for them before the parks' request comes back, never their usual clouds until then.
+    @Test func placesNewlyInReachCountTheirKeptCloudsAtOnce() async throws {
+        let weather=GatedWeather(kept: Self.overcast(.now))
+        let model=try Self.quietModel(weather: weather)
+        model.choose(parkID: "jotr")
+        model.radiusMeters=80_000
+        await model.catalogReady()
+        let near=Set(model.placesInReach().places.map(\.id))
+        model.radiusMeters=321_869
+        let all=model.placesInReach().places
+        let reached=all.filter { $0.isCatalogPlace && !near.contains($0.id) }
+        // Constitution 1857, across the border in Mexico, comes into reach with nothing read for it yet.
+        #expect(reached.contains { $0.id == "wd:Q5164083" })
+        #expect(reached.allSatisfy { model.forecasts[$0.id] == nil })
+        let refresh=Task { await model.refresh(all, parkUpdates: false) }
+        var spins=0
+        while !(await weather.asking), spins<5_000 { spins+=1; try await Task.sleep(for: .milliseconds(2)) }
+        try #require(await weather.asking)
+        // The parks' request is still out, and the places newly in reach already count what is kept for them.
+        #expect(reached.allSatisfy { model.forecasts[$0.id] != nil })
+        await weather.open()
+        await refresh.value
+    }
+
+    /// Abroad, a radius can hold more places than Tonight ranks at once: the shortlist's leader (the
+    /// darkest skies nearest, before any forecast) can give way to a place beyond it under clearer sky
+    /// once every place is ranked. So the answer waits until tonight at all of them is worked out.
+    @Test func abroadTheAnswerWaitsForEveryPlaceInReach() async throws {
+        let model=try Self.quietModel(weather: NoWeather())
+        let sydney=try #require(StartingPlaces.all.first { $0.name == "Sydney" })
+        model.choose(sydney)
+        await model.catalogReady()
+        let all=model.placesInReach().places, shortlist=model.shortlist(all)
+        try #require(all.count>TonightReach.shortlistSize && shortlist.count == TonightReach.shortlistSize)
+        // Clouds by region, as the catalogue's tiles bring them: overcast over the shortlist, clear beyond it.
+        let listed=Set(shortlist.map(\.id)), now=Date.now
+        model.takeForecasts(Dictionary(uniqueKeysWithValues: all.map { ($0.id, listed.contains($0.id) ? Self.overcast(now) : Self.clear(now)) }))
+        let first=try #require(model.ranked(shortlist).first), settled=try #require(model.ranked(all).first)
+        #expect(first.id != settled.id && !listed.contains(settled.id))
+        // Tonight shows no answer from the shortlist alone: only once every place's tonight is prepared.
+        #expect(TonightReach.waits(all, prepared: nil) && TonightReach.waits(all, prepared: TonightReach.key(shortlist)))
+        #expect(!TonightReach.waits(all, prepared: TonightReach.key(all.reversed())))
+        // At home, where the radius holds no more than the shortlist, it never waits.
+        #expect(!TonightReach.waits(shortlist, prepared: nil))
     }
 
     /// iPhone in landscape: the dial takes what the first screen leaves under the pill, between 160 and 240 pt,

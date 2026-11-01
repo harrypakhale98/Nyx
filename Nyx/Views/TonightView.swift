@@ -35,7 +35,8 @@ struct TonightView: View {
     private var from:(latitude:Double,longitude:Double)? { model.reachOrigin }
     /// Ranked once per update of the page (the body reads it into `best` and passes it down). Abroad a
     /// radius can hold hundreds of places: until their nights are worked out off the main thread
-    /// (`prepared`), the page ranks a shortlist (`PlanModel.shortlist`), never hundreds at once.
+    /// (`prepared`), the page ranks a shortlist (`PlanModel.shortlist`), never hundreds at once, and
+    /// shows no answer from it (`TonightReach.waits`): a place beyond it could lead once all are ranked.
     private func best(_ all:[Park])->[Park] { Array(model.ranked(pool(all)).prefix(5)) }
     private func pool(_ all:[Park])->[Park] {
         prepared==TonightReach.key(all) ? all : model.shortlist(all)
@@ -88,16 +89,20 @@ struct TonightView: View {
     }
     /// A wide iPad: the answer on the left, the ways to change the question on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
-    /// The world catalogue abroad or near a border (`PlanModel.awaitingWorld`), or the offline caches
-    /// still being read after the first frame (`PlanModel.cachesPending`): the loader, never a score
-    /// those reads are about to change, nor the national parks' empty state.
-    private var loading:Bool { DebugScenario.state=="loading" || model.awaitingWorld || model.cachesPending }
+    /// The world catalogue abroad or near a border (`PlanModel.awaitingWorld`), the offline caches
+    /// still being read after the first frame (`PlanModel.cachesPending`), or abroad, tonight at the
+    /// hundreds of places in reach still being worked out (`TonightReach.waits`): the loader, never a
+    /// score those reads are about to change, nor the national parks' empty state.
+    private func isLoading(_ all:[Park])->Bool {
+        DebugScenario.state=="loading" || model.awaitingWorld || model.cachesPending || TonightReach.waits(all,prepared:prepared)
+    }
     var body: some View {
         let all=candidates
+        let loading=isLoading(all)
         let best=self.best(all)
         let widerList=widerShortlist(than:best.first,inReach:all)
         let empty=best.isEmpty || DebugScenario.state=="empty"
-        let worthy=worthyNight(best.first,empty:empty)
+        let worthy=worthyNight(best.first,empty:empty,loading:loading)
         let heroReady=best.first.map { heroSettledKey==revealKey(model.night($0)) } ?? false
         // Another night on the dial waits for the places' coming nights, worked out off the main thread for
         // "Darker on…" (`aheadPrepared`): a step then only reads nights the model already keeps.
@@ -223,10 +228,12 @@ struct TonightView: View {
                 if !Task.isCancelled { aheadPrepared=TonightReach.key(pool) }
             }
             .task(id:TonightReach.key(all)) {
-                // Hundreds of places in reach (abroad): tonight at each, worked out off the main thread, before ranking them all.
+                // Hundreds of places in reach (abroad): the clouds kept for those newly in reach, and tonight at
+                // each worked out off the main thread, before ranking them all (the answer waits for them).
                 if all.count>TonightReach.shortlistSize {
+                    await model.takeKeptForecasts(newIn:all)
                     await model.prepareNights(all,count:1)
-                    prepared=TonightReach.key(all)
+                    if !Task.isCancelled { prepared=TonightReach.key(all) }
                 }
                 await model.refresh(all)
             }
@@ -586,7 +593,7 @@ struct TonightView: View {
     }
     /// Tonight's answer when a reminder would announce it (`NotificationScheduler.worthAReminder`),
     /// as "park-day"; nil otherwise, and until a starting point is chosen.
-    private func worthyNight(_ best:Park?,empty:Bool)->String? {
+    private func worthyNight(_ best:Park?,empty:Bool,loading:Bool)->String? {
         guard model.startChosen, !loading, !empty, let park=best else { return nil }
         let night=model.night(park)
         return NotificationScheduler.worthAReminder(night) ? park.id+"-"+park.isoDay(night.id) : nil
@@ -885,6 +892,10 @@ nonisolated enum TonightReach {
     }
     /// The same places in reach, the same key: whether their nights have been worked out.
     static func key(_ places:[Park])->String { places.map(\.id).sorted().joined(separator:",") }
+    /// Whether Tonight's answer waits for tonight at every place in reach (`prepared`, their `key`): only
+    /// where more are in reach than the shortlist holds (abroad), so the leader a shortlist names is never
+    /// replaced a moment later by a place beyond it, under clearer skies.
+    static func waits(_ places:[Park],prepared:String?)->Bool { places.count>shortlistSize && prepared != key(places) }
     /// For previews: a model starting from a city abroad, with the catalogue on its way.
     @MainActor static func previewModel(from city:String)->PlanModel {
         let model=PlanModel()

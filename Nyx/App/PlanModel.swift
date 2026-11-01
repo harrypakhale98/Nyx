@@ -445,6 +445,12 @@ import Observation
         guard !world.isEmpty, DebugScenario.screen == nil else { return }
         takeForecasts(await weather.catalogForecasts([world],network:false,force:false))
     }
+    /// `takeKeptForecasts` for the catalogue places among `places` with no forecast here yet: those newly
+    /// in reach (a late Near-me fix, another radius or starting point), so they are never ranked on their
+    /// usual clouds and again a moment later, once a refresh reads the same files.
+    func takeKeptForecasts(newIn places:[Park]) async {
+        await takeKeptForecasts(places.filter { $0.isCatalogPlace && forecasts[$0.id] == nil })
+    }
     /// Waits until the catalogue is ready (at once if it is). Paths that resolve saved `wd:` ids for
     /// the widgets, the watch and reminders wait here, so a followed catalogue place is never dropped.
     func catalogReady() async {
@@ -855,6 +861,9 @@ import Observation
         }
         #endif
         await hydration?.value
+        // Catalogue places newly in reach count what is kept for them first, from the files alone, not
+        // only after the parks' request below has come back.
+        await takeKeptForecasts(newIn:parks)
         let network=weatherEnabled && live
         var fresh=await weather.forecasts(for:self.parks,network:network,force:force)
         takeForecasts(fresh)
