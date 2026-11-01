@@ -566,10 +566,42 @@ nonisolated enum ForecastRequest {
             backoff.succeeded(host)
             return data
         } catch {
-            // Open-Meteo counts a request it answered with an error as one call; one that never reached it, as none.
-            if error is HTTPStatusError { ledger.settle(ticket, calls: 1) } else { ledger.cancel(ticket) }
+            // Open-Meteo counts a request it answered with an error as one call, and one that never
+            // left this device as none. Any other failure (a timeout, a dropped connection, a request
+            // cancelled on its way, an answer too large) may have reached it: counted in full, as sent.
+            if error is HTTPStatusError { ledger.settle(ticket, calls: 1) } else if unsent(error) { ledger.cancel(ticket) }
             backoff.record(error, host: host, now: clock())
             throw error
+        }
+    }
+    /// Whether a failure proves the request never reached the service: refused before connecting
+    /// (`SafeHTTP.refusedBeforeConnecting`), held off a constrained network by Low Data Mode, no
+    /// connection at all, or a host that could not be found or connected to.
+    static func unsent(_ error: any Error) -> Bool {
+        if SafeHTTP.refusedBeforeConnecting(error) || Backoff.constrained(error) { return true }
+        guard let code=(error as? URLError)?.code else { return false }
+        return [.notConnectedToInternet, .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed].contains(code)
+    }
+}
+/// How the last request for the parks' or saved spots' clouds went, as Tonight says it.
+nonisolated enum ForecastAttempt: Sendable, Equatable {
+    /// Answered with forecasts, or nothing has been asked yet.
+    case answered
+    /// Due but not sent: the service asked Nyx to wait, or this device's budget is spent (`ForecastRequest.HeldBack`).
+    case heldBack
+    /// Failed for want of a connection: "Refresh when a connection returns" is true.
+    case offline
+    /// Answered with an error or with nothing Nyx can read, or failed some other way while online.
+    case unusable
+    /// What a failed request says; nil for a request cancelled on its way, which says nothing about the forecast.
+    init?(_ error: any Error) {
+        if error is ForecastRequest.HeldBack { self = .heldBack; return }
+        if error is CancellationError { return nil }
+        guard let code=(error as? URLError)?.code else { self = .unusable; return }
+        switch code {
+        case .cancelled: return nil
+        case .notConnectedToInternet, .timedOut, .networkConnectionLost, .cannotConnectToHost, .dnsLookupFailed, .cannotFindHost: self = .offline
+        default: self = .unusable
         }
     }
 }
@@ -613,14 +645,18 @@ nonisolated struct SafeHTTP: HTTPTransport {
     func get(_ url: URL) async throws -> Data { try await get(url, headers: [:], constrained: true) }
     /// Why a request may not be made, decided before any connection: `.unsupportedURL` for anything
     /// but HTTPS to the listed hosts, `.cancelled` when that host's switch is off; nil when allowed.
+    /// Thrown marked (`refusedBeforeConnecting`), so the call ledger never counts it.
     static func refusal(_ url: URL, defaults: UserDefaults) -> URLError.Code? {
         guard url.scheme == "https", let host=url.host, let preference=preferences[host] else { return .unsupportedURL }
         return defaults.object(forKey: preference) as? Bool == false ? .cancelled : nil
     }
+    private static let refusedKey="NyxRefusedBeforeConnecting"
+    /// True for the error `get` throws for a `refusal`, before any connection is made.
+    static func refusedBeforeConnecting(_ error: any Error) -> Bool { (error as? URLError)?.userInfo[refusedKey] as? Bool == true }
     func get(_ url: URL, headers: [String: String], constrained: Bool) async throws -> Data {
         let defaults=suite.flatMap(UserDefaults.init(suiteName:)) ?? .standard
         // Checked before any connection is made: a switch turned off means no request at all.
-        if let refusal=Self.refusal(url, defaults: defaults) { throw URLError(refusal) }
+        if let refusal=Self.refusal(url, defaults: defaults) { throw URLError(refusal, userInfo: [Self.refusedKey: true]) }
         var request=URLRequest(url: url)
         for (field, value) in headers { request.setValue(value, forHTTPHeaderField: field) }
         request.allowsConstrainedNetworkAccess=constrained
@@ -796,9 +832,10 @@ nonisolated protocol WeatherProviding: Sendable {
     /// every request cached, and with `network` the requests that are due asked again. Services
     /// without a catalogue answer with nothing.
     func catalogForecasts(_ requests: [[Park]], network: Bool, force: Bool) async -> [String: Forecast]
-    /// True when the parks' or spots' forecast was due but not asked for, because the service asked
-    /// Nyx to wait or this device's budget was spent; false again once a request succeeds.
-    func heldBack() async -> Bool
+    /// How the last request for the parks' or spots' forecast went (`ForecastAttempt`): held back
+    /// because the service asked Nyx to wait or this device's budget was spent, failed offline,
+    /// answered with nothing usable, or answered.
+    func lastAttempt() async -> ForecastAttempt
     /// Called with every forecast the service keeps from a request, as it lands (`StoreObserver`).
     func observe(_ handler: @escaping @Sendable ([String: Forecast]) async -> Void)
 }
@@ -807,7 +844,9 @@ nonisolated extension WeatherProviding {
     func observe(_ handler: @escaping @Sendable ([String: Forecast]) async -> Void) {}
     func spotForecasts(for spots: [Park], network: Bool, force: Bool) async -> [String: Forecast] { [:] }
     func catalogForecasts(_ requests: [[Park]], network: Bool, force: Bool) async -> [String: Forecast] { [:] }
-    func heldBack() async -> Bool { false }
+    func lastAttempt() async -> ForecastAttempt { .answered }
+    /// True when the parks' or spots' forecast was due but not asked for (`ForecastAttempt.heldBack`).
+    func heldBack() async -> Bool { await lastAttempt() == .heldBack }
     func forecast(for park: Park, network: Bool, force: Bool = false) async -> Forecast? {
         await forecasts(for: [park], network: network, force: force)[park.id]
     }
@@ -833,9 +872,9 @@ actor WeatherService: WeatherProviding {
     private(set) var spotWaiting=0
     /// Catalogue tile requests under way, by their members; a caller asking for the same tile waits for it.
     private var catalogFlight: [String: Task<[String: Forecast], Never>] = [:]
-    /// The parks' or spots' forecast was due and held back (`heldBack()`); cleared once a request is
-    /// sent again, whatever it brings, so one that fails offline is said as offline, not paused.
-    private var held=false
+    /// How the parks' or spots' last request went (`lastAttempt()`): set whenever one is due, so one
+    /// that fails offline after a wait is said as offline, not paused.
+    private var attempt=ForecastAttempt.answered
     /// Where the spots' switch is read; tests use their own suite.
     private let suite: String?
     private let observer=StoreObserver<[String: Forecast]>()
@@ -854,7 +893,7 @@ actor WeatherService: WeatherProviding {
         for park in parks where loaded.insert(park.id).inserted && memory[park.id] == nil { memory[park.id]=cached[park.id] }
     }
     /// Async, as the protocol declares it, so it is this method (not the protocol's default) that answers.
-    func heldBack() async -> Bool { held }
+    func lastAttempt() async -> ForecastAttempt { attempt }
     private func load(_ id: String) {
         guard loaded.insert(id).inserted, memory[id] == nil, persist, let cached=CacheDirectory.read(Forecast.self, name: SpotForecast.cacheName(id)) else { return }
         memory[id]=cached
@@ -875,7 +914,7 @@ actor WeatherService: WeatherProviding {
             if network && ForecastReuse.cloudsDue(cached?.updated, now: now, force: force) { due.append(park) }
         }
         // The service asked Nyx to wait: the cached forecasts, and say so.
-        if !due.isEmpty && !backoff.allows(Self.host, now: now) { held=true; due=[] }
+        if !due.isEmpty && !backoff.allows(Self.host, now: now) { attempt = .heldBack; due=[] }
         var waits: [Task<[String: Forecast], Never>] = due.compactMap { inFlight[$0.id] }
         let fresh=due.filter { inFlight[$0.id] == nil }
         if !fresh.isEmpty {
@@ -938,7 +977,7 @@ actor WeatherService: WeatherProviding {
         }
         let now=clock()
         var due=spots.filter { !attempted.contains($0.id) && ForecastReuse.cloudsDue(memory[$0.id]?.updated, now: now, force: force) }
-        if !due.isEmpty && !backoff.allows(Self.host, now: now) { held=true; due=[] }
+        if !due.isEmpty && !backoff.allows(Self.host, now: now) { attempt = .heldBack; due=[] }
         if !due.isEmpty {
             let task=Task {
                 let fetched=await self.fetchSpots(due)
@@ -1001,12 +1040,12 @@ actor WeatherService: WeatherProviding {
             guard let url=SpotForecast.url(for: chunk) else { continue }
             let data: Data
             do { data=try await ForecastRequest.get(url, transport: transport, constrained: true, backoff: backoff, ledger: ledger, caps: budget.essential, clock: clock) } catch {
-                held=error is ForecastRequest.HeldBack
+                if let failed=ForecastAttempt(error) { attempt=failed }
                 break
             }
-            held=false
             struct Response: Decodable { struct Hourly: Decodable { let time: [Double]; let cloud_cover: [Double?] }; let hourly: Hourly }
             let decoded=OpenMeteoAnswer.decode(Response.self, from: data)
+            attempt=decoded.count == chunk.count ? .answered : .unusable
             guard decoded.count == chunk.count else { continue }
             let now=clock()
             for (point, response) in zip(chunk, decoded) where response.hourly.time.count == response.hourly.cloud_cover.count && !response.hourly.time.isEmpty {
@@ -1051,16 +1090,13 @@ actor WeatherService: WeatherProviding {
         let data: Data
         let curated=given == nil
         do { data=try await ForecastRequest.get(url, transport: transport, constrained: true, backoff: backoff, ledger: ledger, caps: caps, clock: clock) } catch {
-            if error is ForecastRequest.HeldBack {
-                // Only the parks' own forecast says it is waiting; places abroad keep their labels.
-                if curated { held=true }
-                return nil
-            }
-            if curated { held=false }
-            return []
+            // Only the parks' own forecast says how it went; places abroad keep their labels.
+            if curated, let failed=ForecastAttempt(error) { attempt=failed }
+            return error is ForecastRequest.HeldBack ? nil : []
         }
-        if curated { held=false }
         let decoded=OpenMeteoAnswer.decode(Response.self, from: data)
+        // Answered, but not with one forecast for each place asked about: nothing in it can be placed.
+        if curated { attempt=decoded.count == parks.count ? .answered : .unusable }
         guard decoded.count == parks.count else { return [] }
         let now=clock()
         return zip(parks, decoded).compactMap { park, response in

@@ -693,15 +693,18 @@ struct TonightView: View {
         let nights=model.nights(dark.place,from:model.tonight(dark.place),count:NightPlanner.horizon)
         return LightsOut.Target(place:dark.place,meters:dark.meters,homeClass:home.bortle,homeKnown:home.known,best:NightPlanner.best(nights))
     }
-    /// Forecasts older than they should be: offline, or (online) held back because the service asked
-    /// Nyx to wait or this iPhone's request budget is spent, said as a refresh says it, in the
-    /// answer's own time. `-nyx-state held` (DEBUG) shows the held-back line.
+    /// Forecasts older than they should be: offline; held back because the service asked Nyx to wait
+    /// or this iPhone's request budget is spent, said as a refresh says it, in the answer's own time;
+    /// or, online, answered with an error or nothing readable, said as a refresh says it.
+    /// `-nyx-state held` and `-nyx-state unreachable` (DEBUG) show those lines.
     @ViewBuilder private func extras(hero:Park?)->some View {
         let stale=model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }
-        if DebugScenario.state=="error" || DebugScenario.state=="offline" || (stale && !model.forecastsHeldBack) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
-        else if stale || DebugScenario.state=="held" {
+        if DebugScenario.state=="error" || DebugScenario.state=="offline" || (stale && model.forecastAttempt == .offline) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
+        else if (stale && model.forecastsHeldBack) || DebugScenario.state=="held" {
             let newest=model.parks.compactMap { model.forecasts[$0.id]?.updated }.max()
             Panel { Label(RefreshOutcome.paused(newest).line(in:hero?.timeZone ?? .current),systemImage:"pause.circle").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+        } else if stale || DebugScenario.state=="unreachable" {
+            Panel { Label(RefreshOutcome.unreachable.line,systemImage:"clock.arrow.circlepath").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         }
     }
     /// One quiet line under the hero, never more, the most significant first: a lunar eclipse the

@@ -447,4 +447,82 @@ struct OpenMeteoBudgetTests {
         #expect(RefreshOutcome.when(recent, now: recent, calendar: mountain) == recent.formatted(denverTime))
         #expect(RefreshOutcome.paused(nil).line == String(localized: "Forecast requests are paused for a while. Showing saved data."))
     }
+    /// A request that may have reached Open-Meteo counts in full: a timeout over all 63 parks is 63
+    /// calls, and the next identical request waits for the minute. Only a request that provably never
+    /// left (no connection, no host, Low Data Mode, a switch turned off) is refunded.
+    @Test func aRequestThatMayHaveArrivedIsCounted() async throws {
+        let parks=try parks(), clock=BudgetClock(Self.midnight.addingTimeInterval(9*3600)), http=OpenMeteoEcho(), ledger=CallLedger(file: nil)
+        let url=try #require(CatalogForecast.url(for: parks)), backoff=HostBackoff(file: nil)
+        let caps=CallBudget.Caps(minute: 63, hour: 1_000, day: 3_000)
+        func send() async throws { _=try await ForecastRequest.get(url, transport: http, constrained: true, backoff: backoff, ledger: ledger, caps: caps, clock: { clock.now }) }
+        var utc=Calendar(identifier: .gregorian)
+        utc.timeZone=try #require(TimeZone(identifier: "UTC"))
+        func today() -> (requests: Int, calls: Double) { ledger.today(now: clock.now, calendar: utc) }
+        #expect(CallWeight.of(url) == 63)
+        await http.refuse(URLError(.timedOut))
+        await #expect(throws: URLError.self) { try await send() }
+        #expect(today().calls == 63 && today().requests == 1)
+        await #expect(throws: ForecastRequest.HeldBack.self) { try await send() }
+        #expect(await http.urls.count == 1)
+        // Through WeatherService too: its two requests for the 63 parks, both timed out, are 63 calls.
+        let calls=CallLedger(file: nil)
+        let weather=WeatherService(transport: http, persist: false, backoff: HostBackoff(file: nil), ledger: calls, clock: { clock.now })
+        #expect(await weather.forecasts(for: parks, network: true, force: true).isEmpty)
+        #expect(await weather.lastAttempt() == .offline)
+        let both=calls.today(now: clock.now, calendar: utc)
+        #expect(both.requests == 2 && both.calls == 63)
+        // Never sent: refunded.
+        let suite="nyx-ledger-switch-\(UUID().uuidString)"
+        let defaults=try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        defaults.set(false, forKey: "weatherEnabled")
+        var switchedOff: (any Error)?
+        do { _=try await SafeHTTP(suite: suite).get(url) } catch { switchedOff=error }
+        let refusal=try #require(switchedOff)
+        #expect(SafeHTTP.refusedBeforeConnecting(refusal) && !SafeHTTP.refusedBeforeConnecting(URLError(.cancelled)))
+        let lowData=URLError(.notConnectedToInternet, userInfo: [NSURLErrorNetworkUnavailableReasonKey: URLError.NetworkUnavailableReason.constrained.rawValue])
+        for unsent in [refusal, lowData, URLError(.notConnectedToInternet), URLError(.cannotFindHost), URLError(.cannotConnectToHost), URLError(.dnsLookupFailed)] as [any Error] {
+            #expect(ForecastRequest.unsent(unsent))
+            clock.advance(60)
+            await http.refuse(unsent)
+            await #expect(throws: (any Error).self) { try await send() }
+            #expect(today().calls == 63)
+        }
+        for sent in [URLError(.timedOut), URLError(.networkConnectionLost), URLError(.cancelled), URLError(.dataLengthExceedsMaximum)] as [any Error] {
+            #expect(!ForecastRequest.unsent(sent))
+        }
+        // An error answer stays one call.
+        clock.advance(60)
+        await http.refuse(HTTPStatusError(status: 400))
+        await #expect(throws: HTTPStatusError.self) { try await send() }
+        #expect(today().calls == 64)
+    }
+    /// Tonight says "offline" only for a phone without a connection. Open-Meteo answering with an
+    /// error (400 `{"error":true}`) or with something Nyx cannot read (200 `{}`) is not offline, and
+    /// says so; a later answer clears it.
+    @MainActor @Test func anAnswerNyxCannotUseIsNotOffline() async throws {
+        let parks=Array(try parks().prefix(3)), clock=BudgetClock(Self.midnight.addingTimeInterval(10*3600))
+        let body=Data("{\"error\":true}".utf8), http=OpenMeteoEcho()
+        await http.refuse(HTTPStatusError(status: 400, reason: HTTPStatusError.reason(in: body)))
+        let refused=WeatherService(transport: http, persist: false, backoff: HostBackoff(file: nil, random: { 0 }), clock: { clock.now })
+        #expect(await refused.forecasts(for: parks, network: true, force: true).isEmpty)
+        let held=await refused.heldBack()
+        #expect(await refused.lastAttempt() == .unusable && !held)
+        let unreadable=WeatherService(transport: RoutedHTTP(clouds: "{}"), persist: false, backoff: HostBackoff(file: nil), clock: { clock.now })
+        #expect(await unreadable.forecasts(for: parks, network: true, force: true).isEmpty)
+        #expect(await unreadable.lastAttempt() == .unusable)
+        // Offline, then answered.
+        await http.refuse(URLError(.networkConnectionLost))
+        _=await refused.forecasts(for: parks, network: true, force: true)
+        #expect(await refused.lastAttempt() == .offline)
+        await http.refuse(nil)
+        #expect(await refused.forecasts(for: parks, network: true, force: true).count == parks.count)
+        #expect(await refused.lastAttempt() == .answered)
+        // Tonight's model reads the same.
+        let model=PlanModel(weather: WeatherService(transport: RoutedHTTP(clouds: "{}"), persist: false, backoff: HostBackoff(file: nil)), parkStore: ParkStore(transport: RoutedHTTP(), persist: false),
+                            detail: ForecastDetailService(transport: RoutedHTTP(), persist: false), defaults: isolatedDefaults())
+        model.weatherEnabled=true
+        await model.refreshForecasts(watching: Array(model.parks.prefix(3)))
+        #expect(model.forecastAttempt == .unusable && !model.forecastsHeldBack && !model.staleForecasts.isEmpty)
+    }
 }
