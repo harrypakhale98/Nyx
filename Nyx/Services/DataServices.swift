@@ -560,6 +560,10 @@ actor ParkStore: ParkProviding {
     private var refused=false
     /// That refusal was of the key itself (401, 403).
     private var keyRefused=false
+    /// When the last alerts request was answered with nothing usable (a body Nyx cannot read, or a
+    /// 4xx other than a refused key or 429), so a park page or the calendar does not ask on every
+    /// visit (`retryable`). A redirect (a Wi-Fi sign-in page) or being offline sets nothing.
+    private var alertsTried: Date?
     /// The key NPS last refused, and when (`NPSKeyPause`): read from disk once, written when it changes.
     private var pause: NPSKeyPause?
     private var pauseLoaded=false
@@ -604,7 +608,7 @@ actor ParkStore: ParkProviding {
     func keyChanged(to key: String) async {
         backoff.succeeded(Self.host)
         refused=false; keyRefused=false; currentKey=key; newKey=key
-        programsTried=[:]; campgroundsTried=nil
+        programsTried=[:]; campgroundsTried=nil; alertsTried=nil
         endPause()
     }
     /// True while NPS's refusal of `key` stands (`NPSKeyPause`).
@@ -677,7 +681,9 @@ actor ParkStore: ParkProviding {
         if paused(key) { refused=true; keyRefused=true; return update(busy: true) }
         let replacing=newKey == key
         // Fresh alerts are not busy because another request (programs, say) made the host wait.
-        guard replacing || Self.stale(alertCache?.updated, maxAge: 6*3600, force: force, now: clock()) else {
+        // One NPS answered with nothing usable waits an hour, as programs do.
+        guard replacing || (Self.stale(alertCache?.updated, maxAge: 6*3600, force: force, now: clock())
+                            && Self.retryable(alertsTried, force: force, now: clock())) else {
             return update(busy: refused)
         }
         guard backoff.allows(Self.host, now: clock()) else { return update(busy: true) }
@@ -848,8 +854,13 @@ actor ParkStore: ParkProviding {
             if let status=reply.refusal?.status, Self.refuses(status) {
                 refused=true; keyRefused=Self.refusesKey(status)
                 if keyRefused { startPause(key) }
-            } else if reply.value != nil, !superseded(key) { refused=false; keyRefused=false; endPause() }
-            guard let page=reply.value else { return .failed }
+            } else if reply.value != nil, !superseded(key) { refused=false; keyRefused=false; alertsTried=nil; endPause() }
+            guard let page=reply.value else {
+                // Answered, but not with alerts: asked again an hour later. A refused key pauses instead.
+                let status=reply.refusal?.status
+                if reply.answered, reply.refusal?.refusesRequest ?? true, !(status.map(Self.refusesKey) ?? false), !superseded(key) { alertsTried=clock() }
+                return .failed
+            }
             // `start` counts every record on the page, read or not, so the next page follows on.
             read+=page.data.count
             records+=page.data.compactMap(\.value)

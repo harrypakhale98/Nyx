@@ -332,6 +332,40 @@ struct DataServiceDeliveryTests {
         let fresh=ParkStore(transport: http, persist: false, clock: { now })
         #expect(await fresh.programs(for: jotr, key: "k", network: true, force: true)?.programs.map(\.date) == ["2099-10-16"])
     }
+    /// Alerts NPS answers with nothing usable (a body Nyx cannot read, a 404) are asked for once,
+    /// then again only after an hour, or ten minutes later when pulled to refresh. A Wi-Fi sign-in
+    /// page holds nothing, and a new key asks at once.
+    @Test(arguments: [PathHTTP.Reply.body("not json"), .status(404)])
+    func unusableAlertsWaitAnHour(_ reply: PathHTTP.Reply) async throws {
+        let jotr=try park("jotr")
+        let clock=BudgetClock(Date(timeIntervalSince1970: 1_792_094_400))
+        let http=PathHTTP(["/api/v1/alerts": reply])
+        let store=ParkStore(transport: http, persist: false, clock: { clock.now })
+        #expect(await store.alerts(for: [jotr], key: "k", network: true, force: false).cache == nil)
+        _=await store.alerts(for: [jotr], key: "k", network: true, force: false)
+        #expect(await http.count("/api/v1/alerts") == 1)
+        clock.advance(599)
+        _=await store.alerts(for: [jotr], key: "k", network: true, force: true)
+        #expect(await http.count("/api/v1/alerts") == 1)
+        clock.advance(1)
+        _=await store.alerts(for: [jotr], key: "k", network: true, force: true)
+        #expect(await http.count("/api/v1/alerts") == 2)
+        clock.advance(3599)
+        _=await store.alerts(for: [jotr], key: "k", network: true, force: false)
+        #expect(await http.count("/api/v1/alerts") == 2)
+        clock.advance(1)
+        _=await store.alerts(for: [jotr], key: "k", network: true, force: false)
+        #expect(await http.count("/api/v1/alerts") == 3)
+        await store.keyChanged(to: "mine")
+        _=await store.alerts(for: [jotr], key: "mine", network: true, force: false)
+        #expect(await http.count("/api/v1/alerts") == 4)
+
+        let portal=PathHTTP(["/api/v1/alerts": .status(302)])
+        let open=ParkStore(transport: portal, persist: false, clock: { clock.now })
+        _=await open.alerts(for: [jotr], key: "k", network: true, force: false)
+        _=await open.alerts(for: [jotr], key: "k", network: true, force: false)
+        #expect(await portal.count("/api/v1/alerts") == 2)
+    }
     /// A Wi-Fi sign-in page, or a later page failing for now, blocks nothing: the next visit asks
     /// again. A later page NPS answers with nothing usable keeps the pages before it.
     @Test func programsAreAskedAgainAfterPassingFailures() async throws {
