@@ -41,6 +41,8 @@ struct ParksView: View {
     /// return to the top edge waits for both, so a drag from mid-list on into pull-to-refresh is never cut.
     @State private var atTop=false
     @State private var settled=true
+    /// A pull-to-refresh is under way: its spinner holds the list past its top edge after the finger lifts.
+    @State private var refreshing=false
     private var search:String { state.wrappedValue.search }
     private var darkOnly:Bool { state.wrappedValue.darkOnly }
     private var stepFreeOnly:Bool { state.wrappedValue.stepFreeOnly }
@@ -157,9 +159,12 @@ struct ParksView: View {
         .background(NightBackground(veil:0.45)).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
             .modifier(SystemSearch(text:state.search,focused:$searchFocused,prompt:searchPrompt,enabled:!typeSize.isAccessibilitySize))
     }
-    /// Back at the top by the person's own scroll, and settled: the list is kept at its top edge.
+    /// Back at the top by the person's own scroll, and settled: the list is kept at its top edge. Not while
+    /// a refresh runs: a pull begun mid-list reads as at the top, and settles to idle, with the spinner
+    /// still showing, and a scroll to the edge then could take the spinner's room from under it. Once the
+    /// refresh ends, the list is kept at its top as any settled scroll there is (`refreshable` below).
     private func keepTop(top:Bool,settled:Bool) {
-        if top, settled, scroll.wrappedValue.isPositionedByUser, scroll.wrappedValue.viewID != nil { scroll.wrappedValue.scrollTo(edge:.top) }
+        if top, settled, !refreshing, scroll.wrappedValue.isPositionedByUser, scroll.wrappedValue.viewID != nil { scroll.wrappedValue.scrollTo(edge:.top) }
     }
     var body: some View {
         withWorld(list)
@@ -174,7 +179,12 @@ struct ParksView: View {
             .onAppear { focusSearchIfAsked() }
             // One request brings cloud forecasts for all 63 parks, so every score can include clouds.
             .task { await model.refresh(model.parks,parkUpdates:false) }
-            .refreshable { await refreshAll() }
+            .refreshable {
+                refreshing=true
+                await refreshAll()
+                refreshing=false
+                keepTop(top:atTop,settled:settled)
+            }
             // One menu beside the map: sorting, narrowing and saving a spot are all occasional, and three
             // buttons beside the map's left the title as "Par…" at accessibility sizes. On iOS 27 it is the
             // system's own overflow menu (the ellipsis is reserved for it), on iOS 26 a menu of its own.
