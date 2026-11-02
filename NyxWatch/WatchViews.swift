@@ -250,9 +250,17 @@ struct TonightFace: View {
     /// Why no closure under the score may be known (`WatchContext.alertsNote`): park alerts off,
     /// busy, refused or not yet checked.
     private var alertsNote: String? { context?.alertsNote(night.park) }
+    /// The clock-time line under tonight's countdown says only the time, so a note can take its place
+    /// (`NextMoment`): no forecast words or models' range already hold it.
+    private var timeLineFree: Bool {
+        NightMilestone.next(after: now, in: night.sky) != nil && night.basis != .usual && context?.modelRange(for: night) == nil
+    }
     /// Fixed as designed, one line each, without measuring: at the standard sizes, unless a closure
-    /// is shown, whose words are never cut, or a note says closures may not be known (`WatchTonightLayout.designed`).
-    private var designed: Bool { WatchTonightLayout.designed(standardSize: typeSize <= standardSizes, closure: closure != nil || alertsNote != nil) }
+    /// is shown, whose words are never cut, or a note says closures may not be known where it would
+    /// cost the dial a line (`WatchTonightLayout.designed`).
+    private var designed: Bool {
+        WatchTonightLayout.designed(standardSize: typeSize <= standardSizes, closure: closure != nil, note: alertsNote != nil, timeLineFree: timeLineFree)
+    }
     private var measured: WatchTonightLayout {
         WatchTonightLayout.choose(room: room, words: wordsHeight, standardSize: designed, accessibilitySize: typeSize.isAccessibilitySize)
     }
@@ -304,6 +312,10 @@ struct TonightFace: View {
                 if let closure {
                     WristClosureLine(text: closure)
                     if let note = context?.alertsNote(night.park) { AlertsNote(text: note) }
+                } else if let note = alertsNote {
+                    // Where a closure would stand, that closures may not be known: the short line, the
+                    // whole sentence for VoiceOver (and on screen at the end).
+                    AlertsNote(text: String(localized: "Check park alerts before you go."), spoken: note)
                 }
                 if looking { NightGlance(night: shown, isTonight: offset == 0, models: models) } else { NextMoment(night: night, now: now, models: models, wraps: true) }
                 if let smoke = shown.smokeCaveat { SmokeLine(text: smoke, spoken: smoke) }
@@ -311,8 +323,9 @@ struct TonightFace: View {
                 ForEach(cloudLines(shown, context: context, now: now, labelShown: looking && offset != 0), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
                 }
-                // Why no closure under the score may be known, in the iPhone's words (with a closure, under it).
-                if closure == nil, let note = context?.alertsNote(night.park) { AlertsNote(text: note) }
+                // Why no closure under the score may be known, in the iPhone's words (with a closure, under
+                // it); VoiceOver heard it with the short line under the score.
+                if closure == nil, let note = alertsNote { AlertsNote(text: note).accessibilityHidden(true) }
                 AskIPhoneRow(source: WatchSky.cloudSource(night.park, context: context, now: now))
             }.frame(maxWidth: .infinity)
         }
@@ -341,7 +354,8 @@ struct TonightFace: View {
         } else {
             // "No cloud forecast" or the models' range rides on the clock-time line where it fits whole,
             // else takes the time's place, so neither costs the gauge a line (the track has no rim mark for either).
-            NextMoment(night: night, now: now, cloudsUnknown: night.basis == .usual, models: context?.modelRange(for: shown), wraps: wraps).layoutPriority(1)
+            NextMoment(night: night, now: now, cloudsUnknown: night.basis == .usual, models: context?.modelRange(for: shown),
+                       alertsNote: wraps || closure != nil ? nil : alertsNote, wraps: wraps).layoutPriority(1)
             if NightMilestone.next(after: now, in: night.sky) == nil, let note = WatchSky.forecastNote(night, context: context, short: true) {
                 Text(note).font(.caption2).foregroundStyle(palette.faint).lineLimit(lines).minimumScaleFactor(0.8)
                     .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: wraps).layoutPriority(1).nonEssential()
@@ -354,7 +368,10 @@ struct TonightFace: View {
         }
         // No closure under the score is not "nothing closed" while closures may not be known: one short
         // line, measured with the rest, with the iPhone's whole sentence for VoiceOver (the scrolling face shows it).
-        if closure == nil, let note = alertsNote {
+        // The designed face has no line to spare: there the note takes the clock time's place under tonight's
+        // countdown (`NextMoment`), and a night turned to with the Crown, which has no such line, leaves it to
+        // tonight and the week.
+        if wraps, closure == nil, let note = alertsNote {
             AlertsNote(text: String(localized: "Check park alerts before you go."), spoken: note).layoutPriority(1)
         }
     }
@@ -561,6 +578,9 @@ struct NextMoment: View {
     var cloudsUnknown = false
     /// Tonight's forecast models' range, when the iPhone shows one (never with `cloudsUnknown`).
     var models: ClosedRange<Int>? = nil
+    /// Why closures may not be known (`WatchContext.alertsNote`), for the designed face: it takes the
+    /// clock time's place.
+    var alertsNote: String? = nil
     /// Every line whole, wrapped rather than shrunk or cut off (always at accessibility sizes).
     var wraps = false
     var body: some View {
@@ -623,6 +643,16 @@ struct NextMoment: View {
                                     Text("Models \(models.lowerBound)–\(models.upperBound)").accessibilityLabel(full)
                                 }
                             }
+                        } else if let alertsNote, !(typeSize.isAccessibilitySize || wraps) {
+                            // Closures may not be known: said in the clock time's place, as the forecast's words
+                            // are, so the note costs the dial no line (the Milestones page gives the time).
+                            // The shorter words where the line would not hold it; VoiceOver hears the time and the whole note.
+                            ViewThatFits(in: .horizontal) {
+                                Text("Check park alerts before you go.")
+                                Text("Closures not checked.").minimumScaleFactor(0.8)
+                            }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(Phrase.sentences([String(localized: "at \(time)"), alertsNote]))
                         } else { at.minimumScaleFactor(0.8) }
                     }
                     .font(.caption2).foregroundStyle(palette.muted).lineLimit(limit).nonEssential()

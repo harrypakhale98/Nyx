@@ -23,6 +23,17 @@ struct WatchTonightLayoutTests {
         // A face about as tall as the 40 mm one under its title, with three lines of large words.
         #expect(Layout.choose(room: 147, words: 96, standardSize: false, accessibilitySize: false) == .scrolling)
     }
+    @Test func aNoteKeepsTheDesignedFaceWhereItTakesTheClockTimesPlace() {
+        // A note that closures may not be known costs the dial nothing where the time's line is free.
+        #expect(Layout.designed(standardSize: true, closure: false, note: true, timeLineFree: true))
+        // Where forecast words or the models' range hold that line, it is measured as a closure is.
+        #expect(!Layout.designed(standardSize: true, closure: false, note: true, timeLineFree: false))
+        // Without a note, that line is the face's own business.
+        #expect(Layout.designed(standardSize: true, closure: false, note: false, timeLineFree: false))
+        // A closure, or a large size, is never the designed face, note or not.
+        #expect(!Layout.designed(standardSize: true, closure: true, note: true, timeLineFree: true))
+        #expect(!Layout.designed(standardSize: false, closure: false, note: true, timeLineFree: true))
+    }
     @Test func nothingMeasuredYetKeepsTheFaceFixed() {
         #expect(Layout.choose(room: 0, words: 80, standardSize: false, accessibilitySize: false) == .fixed)
         #expect(Layout.choose(room: 150, words: 0, standardSize: false, accessibilitySize: false) == .fixed)
