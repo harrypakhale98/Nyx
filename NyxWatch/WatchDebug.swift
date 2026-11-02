@@ -4,7 +4,7 @@ import WidgetKit
 
 /// Screenshot routes for the watch, DEBUG only (Release always starts on Tonight):
 /// `-nyx-watch-screen tonight | milestones | whatsup | week | dark | parks | chooser | credits | complications`
-/// `-nyx-watch-state synced | unsynced | polar | samoa | closure | alertsoff | unchecked | refused | busy | stale | stalebusy | expired | models`, `-nyx-watch-palette automatic | red | phone | standard`,
+/// `-nyx-watch-state synced | unsynced | polar | samoa | closure | alertsoff | unchecked | refused | busy | stale | stalebusy | expired | models | fresh-unchecked | fresh-alertsoff`, `-nyx-watch-palette automatic | red | phone | standard`,
 /// `-nyx-watch-night 0…6` (Tonight turned to that night with the Crown), `-nyx-watch-adaptation <minutes>`
 /// (the adaptation clock started that long ago), `-nyx-watch-info` (the dark-adaptation info sheet), `-nyx-watch-aod` (Always-On, which the simulator cannot show),
 /// `-nyx-watch-face` (with `complications`: the full-colour renders alone, unlabelled, for the store frame).
@@ -139,7 +139,7 @@ enum WatchDebug {
     }
     static func apply(to store: WatchStore) {
         if let palette = argument("-nyx-watch-palette").flatMap(PaletteChoice.init(rawValue:)) { store.palette = palette }
-        // Fixture contexts carry no usable forecast: a fixture never invents clouds.
+        // Fixture contexts carry no usable forecast, but for the iPhone's own forecast fixtures (`modelsContext`).
         let synced = WatchContext(sent: .now, savedParkIDs: ["jotr", "deva", "grba", "bibe"], homeParkID: "jotr", nightVision: true, forecasts: [:])
         switch argument("-nyx-watch-state") {
         case "unsynced": store.debugSet(context: nil, pinned: nil)
@@ -174,9 +174,16 @@ enum WatchDebug {
             // The forecast models' range, for review: the iPhone's own "disagree" forecast fixture
             // (`DebugForecasts`, a different spread each night), its ranges worked out by the
             // iPhone's rule (`NightOutlook.of`, `dialRange`) and handed over through
-            // `WatchContext.make`, as a paired iPhone would. The only watch fixture with clouds,
+            // `WatchContext.make`, as a paired iPhone would. One of two watch fixtures with clouds,
             // because a range needs a forecast; it changes what the wrist is told, never the engine.
             guard let context = modelsContext(savedParkIDs: synced.savedParkIDs, store: store) else { break }
+            store.debugSet(context: context, pinned: "jotr")
+        case "fresh-unchecked", "fresh-alertsoff":
+            // Why no closure stands beside the score, over a fresh forecast whose models agree (the
+            // iPhone's "dry" fixture), for review of the face as it is set with a forecast: a park update
+            // that covered Death Valley but not Joshua Tree, or park alerts off in Your privacy.
+            let off = argument("-nyx-watch-state") == "fresh-alertsoff"
+            guard let context = modelsContext(savedParkIDs: synced.savedParkIDs, store: store, fixture: "dry", alertsOff: off, checkedParkIDs: off ? nil : ["deva"]) else { break }
             store.debugSet(context: context, pinned: "jotr")
         case "expired":
             // A forecast the iPhone sent three days ago: too old to score, so the watch says so.
@@ -193,11 +200,13 @@ enum WatchDebug {
             store.debugSet(adaptation: AdaptationClock(start: .now.addingTimeInterval(-minutes*60)))
         }
     }
-    /// The context a paired iPhone would hand over for the "disagree" forecast fixture, ranges and
-    /// all (the `models` state, and the previews of every place the range shows).
-    static func modelsContext(savedParkIDs: [String], store: WatchStore, now: Date = .now) -> WatchContext? {
+    /// The context a paired iPhone would hand over for the "disagree" forecast fixture (or another
+    /// `fixture` of `DebugForecasts`), ranges and all (the `models` state, and the previews of every
+    /// place the range shows), with what it says about park alerts.
+    static func modelsContext(savedParkIDs: [String], store: WatchStore, fixture state: String = "disagree", alertsOff: Bool = false,
+                              checkedParkIDs: Set<String>? = nil, now: Date = .now) -> WatchContext? {
         let parks = savedParkIDs.compactMap { store.park($0) }
-        guard let fixture = DebugForecasts(state: "disagree", parks: parks, now: now) else { return nil }
+        guard let fixture = DebugForecasts(state: state, parks: parks, now: now) else { return nil }
         var ranges: [String: [String: ClosedRange<Int>]] = [:]
         for park in parks {
             guard let detail = fixture.details[park.id] else { continue }
@@ -210,7 +219,7 @@ enum WatchDebug {
             }
         }
         return WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: savedParkIDs.first ?? "jotr", nightVision: true, forecasts: fixture.forecasts,
-                                 details: fixture.details, ranges: ranges, now: now)
+                                 details: fixture.details, ranges: ranges, alertsOff: alertsOff, checkedParkIDs: checkedParkIDs, now: now)
     }
     @MainActor @ViewBuilder static func view(_ screen: String) -> some View {
         switch screen {
