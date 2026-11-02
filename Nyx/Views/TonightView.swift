@@ -28,6 +28,8 @@ struct TonightView: View {
     /// A save from a park row's menu could not be stored.
     @State private var saveFailed=false
     @Namespace private var zoom
+    /// The zoom space of the hero's hidden, measured twin of the pill, so it is never a transition's source.
+    @Namespace private var twinZoom
     private func nearMe() { StartingPointSheets.nearMe(model) { explainLocation=true } }
     private var candidates:[Park] { reach().places }
     /// Everything in reach (`PlanModel.placesInReach`), as Plan's best nights and the trip planner see it.
@@ -480,7 +482,6 @@ struct TonightView: View {
         // Another night than tonight is said in starlight, so the held night reads as chosen, not as the default.
         let context=reachLine(park,day:park.dayLabel(night.id)).eyebrow()
             .foregroundStyle(later ? palette.ink : palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-            .onGeometryChange(for:Double.self) { $0.size.height } action:{ heroFit.context=$0 }
         // A forecast older than the age at which clouds are asked for again says when it is from.
         let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { model.forecastIsStale($0) ? $0 : nil } : nil
         let closure=park.nps == nil ? nil : model.closure(park)
@@ -489,10 +490,10 @@ struct TonightView: View {
         // At accessibility sizes in landscape the first screen may show only its first line, so that line
         // says "Closure alert" in words rather than leaving the warning to the glyph.
         let compact=verticalSizeClass == .compact
-        let closureLine=closure.map { ClosureLabel($0,prominence:.hero,named:compact && large).onGeometryChange(for:Double.self) { $0.size.height } action:{ heroFit.closure=$0 } }
+        let closureLine=closure.map { ClosureLabel($0,prominence:.hero,named:compact && large) }
         let scores=Dictionary(others.map { ($0.park.id,$0.score.value) },uniquingKeysWith:{ first,_ in first })
         // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`), scored for the dial's night.
-        let pill=ParkPillPicker(park:park,others:others.map(\.park),score:{ scores[$0.id] ?? model.night($0).score.value },zoom:zoom,night:later ? park.dayLabel(night.id) : nil,offset:offset,rowHeight:{ heroFit.pill=$0 })
+        let pill=ParkPillPicker(park:park,others:others.map(\.park),score:{ scores[$0.id] ?? model.night($0).score.value },zoom:zoom,night:later ? park.dayLabel(night.id) : nil,offset:offset)
         let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis)
         // An iPhone in landscape: the pill beside the dial when, stacked, the dial that keeps its words inside
         // would not stand whole above the tab bar with any closure under it (`pillBeside`), and always at
@@ -533,6 +534,19 @@ struct TonightView: View {
                 fieldOffer(best:park)
             }
         }.frame(maxWidth:.infinity)
+        // What `pillBeside` weighs is measured as it would stand stacked, at the hero's whole width, in either
+        // layout: hidden twins of the context, the pill and a closure. Measured in the column beside the dial,
+        // where they wrap to more lines, a hero once beside would stay beside after the text grows smaller.
+        .background(alignment:.top) {
+            if compact && !large {
+                VStack(spacing:0) {
+                    context.onGeometryChange(for:Double.self) { $0.size.height } action:{ heroFit.context=$0 }
+                    ParkPillPicker(park:park,others:others.map(\.park),score:{ scores[$0.id] ?? 0 },zoom:twinZoom,rowHeight:{ heroFit.pill=$0 })
+                    if let closure { ClosureLabel(closure,prominence:.hero).onGeometryChange(for:Double.self) { $0.size.height } action:{ heroFit.closure=$0 } }
+                }
+                .fixedSize(horizontal:false,vertical:true).hidden().accessibilityHidden(true)
+            }
+        }
         .onGeometryChange(for:Double.self) { $0.frame(in:.named(Self.pageSpace)).minY } action:{ heroFit.top=$0 }
     }
     /// The dial, which steps through the coming nights under a sideways drag (`dialScrub`), VoiceOver's
@@ -824,7 +838,8 @@ extension EnvironmentValues {
     @Entry var gaugeAccessibleHeight: Double = .infinity
 }
 /// Tonight's hero as measured on an iPhone in landscape (`TonightView.pillBeside`): its top in the page,
-/// the heights of the context line and of the pill with its toggle, and a closure line's.
+/// the heights of the context line and of the pill with its toggle, and a closure line's, each at the
+/// hero's whole width, as they stand stacked.
 private struct HeroFit: Equatable {
     var top=0.0, context=0.0, pill=0.0, closure=0.0
     /// Where the dial starts with the context and the pill stacked above it.
