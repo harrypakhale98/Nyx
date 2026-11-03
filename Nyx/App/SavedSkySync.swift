@@ -54,13 +54,35 @@ import WidgetKit
         // snapshot stay, and their forecasts keep being refreshed.
         if model.journalUnavailable { if parkIDs == nil { parkIDs=SharedSettings.read()?.parks.map(\.id) } }
         else if let ids { parkIDs=ids }
-        guard let current=parkIDs else { return }
+        guard parkIDs != nil else { return }
         guard !running else {
             again=(publishOnly:(again?.publishOnly ?? true) && publishOnly,background:(again?.background ?? true) && background)
             return
         }
         running=true
-        changedDuringRun=false
+        // What follows a run goes within this call, never in a task of its own, so the caller's
+        // await (and the background time it holds) covers it.
+        var step=(publishOnly:publishOnly,background:background)
+        while true {
+            changedDuringRun=false
+            await runOnce(model,background:step.background,publishOnly:step.publishOnly)
+            var queued=again
+            again=nil
+            // Something a followed place shows changed during the run without being handed over (a
+            // park's page asking for its smoke while alerts were read): it follows from the cache.
+            if queued == nil, followedData(model) != published { queued=(publishOnly:true,background:step.background) }
+            if let next=Self.followUp(queued,cancelled:Task.isCancelled) { step=next; continue }
+            running=false
+            let changed=changedDuringRun
+            changedDuringRun=false
+            // A change made during the run at a place followed only by a Live Activity: it catches up from the cache.
+            if changed, !FieldActivities.Item.activities.isEmpty { await Self.refreshFollowed(model) }
+            return
+        }
+    }
+    /// One run of `update`, for the saved parks as they are now.
+    private func runOnce(_ model:PlanModel,background:Bool,publishOnly:Bool) async {
+        guard let current=parkIDs else { return }
         // A widget set to a park is followed as a saved park is: its clouds are fetched and carried.
         if !publishOnly || widgetIDs == nil {
             let places=await Self.widgetPlaces()
@@ -73,18 +95,6 @@ import WidgetKit
         model.tick()
         // Never a snapshot from before the launch's cache reads land (`PlanModel.cachesPending`).
         await model.cachesReady()
-        defer {
-            running=false
-            var queued=again
-            // Something a followed place shows changed during the run without being handed over (a
-            // park's page asking for its smoke while alerts were read): it follows from the cache.
-            if queued == nil, followedData(model) != published { queued=(publishOnly:true,background:background) }
-            if let next=Self.followUp(queued,cancelled:Task.isCancelled) { Task { await update(model,background:next.background,publishOnly:next.publishOnly) } }
-            // A change made during the run at a place followed only by a Live Activity: it catches up from the cache.
-            else if changedDuringRun, !FieldActivities.Item.activities.isEmpty { Task { await Self.refreshFollowed(model) } }
-            changedDuringRun=false
-            again=nil
-        }
         let parks=current.compactMap { model.park($0) }
         await publish(model,parks)
         if publishOnly { return }
