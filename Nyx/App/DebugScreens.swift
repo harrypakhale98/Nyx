@@ -108,6 +108,26 @@ struct DebugScreen: View {
     }
 }
 @MainActor enum DebugScreens {
+    #if DEBUG
+    /// A dusk sky over a dark ridge, drawn for the populated journal's cards: bright enough to tell
+    /// from the black frame a card shows while its photo loads (the launch starfield is not).
+    static func samplePhoto()->Data? {
+        let size=CGSize(width:1200,height:900)
+        let format=UIGraphicsImageRendererFormat(); format.scale=1
+        return UIGraphicsImageRenderer(size:size,format:format).image { drawing in
+            let context=drawing.cgContext
+            let colors=[UIColor(red:0.04,green:0.06,blue:0.15,alpha:1).cgColor,UIColor(red:0.16,green:0.11,blue:0.31,alpha:1).cgColor,UIColor(red:1,green:0.71,blue:0.33,alpha:1).cgColor]
+            if let gradient=CGGradient(colorsSpace:CGColorSpaceCreateDeviceRGB(),colors:colors as CFArray,locations:[0,0.6,1]) {
+                context.drawLinearGradient(gradient,start:.zero,end:CGPoint(x:0,y:size.height),options:[])
+            }
+            UIColor(white:0.96,alpha:0.9).setFill()
+            for star in 0..<90 { let x=Double((star*733)%1200), y=Double((star*389)%520); context.fillEllipse(in:CGRect(x:x,y:y,width:4,height:4)) }
+            UIColor.black.setFill()
+            let ridge=UIBezierPath(); ridge.move(to:CGPoint(x:0,y:900)); ridge.addLine(to:CGPoint(x:0,y:700))
+            ridge.addLine(to:CGPoint(x:300,y:610)); ridge.addLine(to:CGPoint(x:520,y:690)); ridge.addLine(to:CGPoint(x:820,y:580)); ridge.addLine(to:CGPoint(x:1200,y:680)); ridge.addLine(to:CGPoint(x:1200,y:900)); ridge.fill()
+        }.jpegData(compressionQuality:0.9)
+    }
+    #endif
     /// Once the root's first task runs: the fixtures a capture asked for.
     static func launch(model:PlanModel,context:ModelContext,commands:SceneCommands) {
         #if DEBUG
@@ -136,7 +156,7 @@ struct DebugScreen: View {
             let oldest=JournalEntry(date:.now-81*day,parkID:"deva",observedBortle:2,notes:es ? "Viento tibio desde las dunas. El núcleo galáctico colgaba bajo en el sur." : "Warm wind off the dunes. The galactic core hung low in the south.")
             // A photo and its card thumbnail, as the editor saves them, so the first and last cards show one
             // (the last at the foot of the list with `-nyx-bottom`).
-            if let image=UIImage(named:"LaunchStars")?.pngData(), let photo=PhotoScaling.jpeg(image,maxPixels:2400) {
+            if let image=samplePhoto(), let photo=PhotoScaling.jpeg(image,maxPixels:2400) {
                 for entry in [latest,oldest] { entry.photos=[photo]; entry.thumbnail=PhotoScaling.jpeg(photo,maxPixels:900) }
             }
             context.insert(latest)
