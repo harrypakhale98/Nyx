@@ -469,8 +469,9 @@ struct NightGlance: View {
     var wraps = true
     /// The serif subheadline's size, for the smaller steps of the dark window (sizes ViewThatFits can measure, which a shrink is not).
     @ScaledMetric(relativeTo: .subheadline) private var size: CGFloat = 15
+    /// The caption's size, for the Crown hint's smaller steps.
+    @ScaledMetric(relativeTo: .caption2) private var caption: CGFloat = 14
     var body: some View {
-        let lines: Int? = wraps ? nil : 1, shrink = wraps ? 1 : 0.75
         VStack(spacing: 0) {
             let day = isTonight ? Text("Tonight") : Text(night.park.dayLabel(night.id))
             let eyebrow = Font.caption2.weight(.semibold)
@@ -534,7 +535,23 @@ struct NightGlance: View {
                 }
                 .font(.footnote).lineLimit(1)
             }
-            if isTonight { Text("Turn the Crown to look ahead").font(.caption2).foregroundStyle(palette.muted).lineLimit(lines).minimumScaleFactor(shrink).nonEssential() }
+            if isTonight {
+                let hint = Text("Turn the Crown to look ahead")
+                Group {
+                    if wraps { hint }
+                    else {
+                        // One line on the fixed face, set a little smaller where that keeps it whole, and
+                        // only then wrapped, never cut ("Dreh die Digital Crown, um vorauszus…" on 40 mm).
+                        ViewThatFits(in: .horizontal) {
+                            hint.lineLimit(1)
+                            hint.font(.system(size: caption*0.85)).lineLimit(1)
+                            hint.font(.system(size: caption*0.75)).lineLimit(1)
+                            hint.font(.system(size: caption*0.85))
+                        }
+                    }
+                }
+                .font(.caption2).foregroundStyle(palette.muted).nonEssential()
+            }
             // An early look is named as the iPhone names it, never "no forecast", and a night that counts
             // no clouds says so (`Night.standaloneBasisLabel`).
             // On the fixed face, one line where it fits: else "Usual clouds" for a night scored on them, and
