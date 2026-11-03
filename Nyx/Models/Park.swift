@@ -277,12 +277,12 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     }
     /// "November": the month a night's usual clouds and month grids count in (Gregorian, in the
     /// place's zone), in the reader's language, whatever calendar the device uses.
-    func monthName(_ date: Date) -> String {
-        date.formatted(Date.FormatStyle(calendar: calendar, timeZone: timeZone).month(.wide))
+    func monthName(_ date: Date, locale: Locale = .autoupdatingCurrent) -> String {
+        date.formatted(nightStyle(locale).month(.wide))
     }
     /// The same for a month by number, 1–12.
-    func monthName(month: Int) -> String {
-        calendar.date(from: DateComponents(year: 2001, month: min(12, max(1, month)), day: 15, hour: 12)).map(monthName) ?? ""
+    func monthName(month: Int, locale: Locale = .autoupdatingCurrent) -> String {
+        calendar.date(from: DateComponents(year: 2001, month: min(12, max(1, month)), day: 15, hour: 12)).map { monthName($0, locale: locale) } ?? ""
     }
     func isoDay(_ date: Date) -> String {
         let parts = calendar.dateComponents([.year, .month, .day], from: date)

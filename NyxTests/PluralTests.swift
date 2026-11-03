@@ -80,13 +80,11 @@ struct PluralTests {
         ],"es")
     }
     /// The usual clear share: "1 in 10" takes the singular where the language agrees the verb with it.
-    @Test func oneInTenNightsIsClear() {
+    @Test func oneInTenNightsIsClear() throws {
         let july="juillet", julio="julio", juli="Juli"
         // French leads with the month ("En août"), so it never needs "d’" before août, avril or octobre.
         // The month arrives as `Park.monthName` formats it in French: lowercase, mid-sentence.
-        var gregorian=Calendar(identifier:.gregorian); gregorian.timeZone = .gmt
-        let mid=gregorian.date(from:DateComponents(year:2026,month:8,day:15,hour:12)) ?? .distantPast
-        let august=mid.formatted(Date.FormatStyle(locale:Locale(identifier:"fr"),calendar:gregorian,timeZone:.gmt).month(.wide))
+        let august=try park("jotr").monthName(month:8,locale:Locale(identifier:"fr"))
         #expect(august=="août")
         check([("About \(1) in 10 \(july) nights here are mostly clear.","En juillet, environ 1 nuit sur 10 est ici plutôt dégagée."),
                ("About \(3) in 10 \(august) nights here are mostly clear.","En août, environ 3 nuits sur 10 sont ici plutôt dégagées.")],"fr")
