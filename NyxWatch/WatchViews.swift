@@ -651,14 +651,17 @@ struct NextMoment: View {
                             // left a 40 mm dial too small to read, and the countdown above already says
                             // when (the Milestones page gives the clock time). VoiceOver hears it all.
                             // The iPhone's two words for it (`Night.basisLabel`): not yet beyond the forecast's
-                            // reach, unavailable within it; "Usual clouds" where neither fits.
+                            // reach, unavailable within it; "Usual clouds" where neither fits. A night that counts
+                            // no clouds says so alone (`Night.standaloneBasisLabel`), wrapped rather than cut.
                             let full = night.beyondForecast ? Text("at \(time) · no cloud forecast yet") : Text("at \(time) · cloud forecast unavailable")
                             if typeSize.isAccessibilitySize || wraps { full }
                             else {
+                                let alone = night.standaloneBasisLabel ?? basis
                                 ViewThatFits(in: .horizontal) {
                                     full
-                                    Text(basis).accessibilityLabel(full)
-                                    Text("Usual clouds").minimumScaleFactor(0.8).accessibilityLabel(full)
+                                    Text(alone).accessibilityLabel(full)
+                                    if night.score.cloudPoints != nil { Text("Usual clouds").minimumScaleFactor(0.8).accessibilityLabel(full) }
+                                    else { Text(alone).lineLimit(2).accessibilityLabel(full) }
                                 }
                             }
                         }
