@@ -439,12 +439,20 @@ struct JournalCoverTests {
                 let base=SpeedBenchmarks.footprint()
                 let context=ModelContext(container)
                 let entries=try context.fetch(FetchDescriptor<JournalEntry>(sortBy: [SortDescriptor(\.date, order: .reverse)]))
-                let pictures=entries.compactMap { entry in _=entry.notes; return JournalCovers.picture(of: entry) }
+                // Each night's index from its date, to know the exact bytes its cover was written with.
+                let pictures=entries.compactMap { entry in
+                    _=entry.notes
+                    return JournalCovers.picture(of: entry).map { (Int((entry.date.timeIntervalSince(Self.night)/86_400).rounded()), $0) }
+                }
                 listed.append(SpeedBenchmarks.footprint()-base)
-                var bytes=0
-                for case .cover(let id) in pictures { autoreleasepool { bytes+=JournalCovers.data(id, in: container)?.count ?? 0 } }
+                // Every byte compared, one cover and its expected bytes at a time, let go before the next.
+                var matches=0
+                for case (let index, .cover(let id)) in pictures {
+                    autoreleasepool { if JournalCovers.data(id, in: container) == Self.bytes(150_000, 3_000+index) { matches+=1 } }
+                }
                 read.append(SpeedBenchmarks.footprint()-base)
-                #expect(entries.count == 200 && pictures.count == 200 && bytes == 200*150_000)
+                #expect(entries.count == 200 && pictures.count == 200)
+                #expect(matches == 200)
                 withExtendedLifetime(entries) {}
             }
             #expect(try #require(listed.min()) < 10_000_000, "listing: \(listed)")
