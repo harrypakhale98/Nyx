@@ -27,7 +27,7 @@ import Testing
             #expect(words.contains("Cloud forecast unavailable"), "\(words)")
             #expect(!words.contains("No cloud forecast yet"), "\(words)")
         }
-        #expect(ShareCard(night: tonight).basis == "Cloud forecast unavailable · usual clouds for the month")
+        #expect(ShareCard(night: tonight).basis == "Cloud forecast unavailable · usual clouds")
         #expect(tonight.bandWithBasis.hasSuffix(", usual clouds"))
     }
     @Test func beyondTheHorizonIsNotYetEverywhere() throws {
@@ -37,7 +37,7 @@ import Testing
             #expect(words.contains("No cloud forecast yet"), "\(words)")
             #expect(!words.contains("unavailable"), "\(words)")
         }
-        #expect(ShareCard(night: later).basis == "No cloud forecast yet · usual clouds for the month")
+        #expect(ShareCard(night: later).basis == "No cloud forecast yet · usual clouds")
     }
     /// Beside the label (a night turned to on the watch), the long caption says what the score uses
     /// without opening with the label's own words again.
@@ -81,7 +81,7 @@ import Testing
         #expect(ScoreBreakdownView.cloudFact(eased).contains("mixes it with the usual clouds") && NightLookup.basis(eased).contains("eased toward usual clouds"))
         #expect(CalendarView.legend([eased]).contains("Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds."))
         #expect(CalendarView.legend([eased, bare]).contains("eased toward the usual clouds, or counted as it stands where those are not known."))
-        #expect(UsualCloudsNote.trip([eased, bare]) == "Nights marked \"Early look\" ease the forecast toward each park's usual clouds for the month, or count it as it stands where those are not known.")
+        #expect(UsualCloudsNote.trip([eased, bare]) == "Nights marked \"Early look\" ease the forecast toward each park's usual clouds, or count it as it stands where those are not known.")
         // A stay's unmarked early look with no usual clouds leans on none.
         #expect(UsualCloudsNote.trip([night(jotr, daysAhead: 1, forecast: forecast)], unmarked: [bare]) == nil)
         #expect(CloudBasis.forecast.earlyLookCaption(usualClouds: false) == nil && CloudBasis.usual.earlyLookCaption(usualClouds: true) == nil)

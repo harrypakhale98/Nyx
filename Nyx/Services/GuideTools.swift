@@ -110,8 +110,8 @@ nonisolated struct NightLookup: Sendable {
             // "Not yet" beyond the forecast's reach, "unavailable" within it, and never "usual clouds"
             // where none are known, as every surface says it (`Night.basisLine`).
             let words = switch (night.beyondForecast, night.usualCloud == nil) {
-            case (true, false): String(localized: "no cloud forecast yet; scored with the park's usual clouds for the month")
-            case (false, false): String(localized: "cloud forecast unavailable; scored with the park's usual clouds for the month")
+            case (true, false): String(localized: "no cloud forecast yet; scored with the park's usual clouds around the nearest new moon")
+            case (false, false): String(localized: "cloud forecast unavailable; scored with the park's usual clouds around the nearest new moon")
             case (true, true): String(localized: "no cloud forecast yet; scored on the Moon and darkness only")
             case (false, true): String(localized: "cloud forecast unavailable; scored on the Moon and darkness only")
             }

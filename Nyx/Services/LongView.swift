@@ -64,10 +64,10 @@ nonisolated enum DarkWeekends {
         let far=weekends.filter { $0.best.basis == .usual }
         let counted=far.filter { $0.best.score.cloudPoints != nil }.count
         if counted == far.count {
-            return String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds for the month; the Moon and the hours of true darkness are exact.")
+            return String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds; the Moon and the hours of true darkness are exact.")
         }
         if counted>0 {
-            return String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds for the month, or on the Moon and darkness only where those cannot be used; the Moon and the hours of true darkness are exact.")
+            return String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, scores rest on the usual clouds, or on the Moon and darkness only where those cannot be used; the Moon and the hours of true darkness are exact.")
         }
         return far.contains { $0.best.park.aboveInversion == true }
             ? String(localized:"Around each new moon, the weekend with the darkest night. Far ahead, the usual clouds cannot be used here, so scores rest on the Moon and the hours of true darkness, which are exact.")

@@ -142,14 +142,14 @@ import Testing
         let unavailable = night(jotr, now: now), notYet = night(jotr, daysAhead: 12, now: now), bare = night(jotr, climate: CloudClimate(parks: [:]), now: now)
         try #require(full.basis == .forecast && early.basis.isEarlyLook && !unavailable.beyondForecast && notYet.beyondForecast && bare.usualCloud == nil)
         #expect(UsualCloudsNote.trip([full]) == nil)
-        #expect(UsualCloudsNote.trip([full, early]) == "Nights marked \"Early look\" ease the forecast toward each park's usual clouds for the month.")
-        #expect(UsualCloudsNote.trip([unavailable]) == "Nights marked \"Cloud forecast unavailable\" count each park's usual clouds for the month.")
-        #expect(UsualCloudsNote.trip([notYet]) == "Nights marked \"No cloud forecast yet\" count each park's usual clouds for the month.")
+        #expect(UsualCloudsNote.trip([full, early]) == "Nights marked \"Early look\" ease the forecast toward each park's usual clouds.")
+        #expect(UsualCloudsNote.trip([unavailable]) == "Nights marked \"Cloud forecast unavailable\" count each park's usual clouds.")
+        #expect(UsualCloudsNote.trip([notYet]) == "Nights marked \"No cloud forecast yet\" count each park's usual clouds.")
         #expect(UsualCloudsNote.trip([bare]) == "Nights marked \"Cloud forecast unavailable\" count the Moon and darkness only.")
         #expect(UsualCloudsNote.trip([unavailable, notYet, bare, early, full])
-                == "Nights marked \"No cloud forecast yet\" or \"Cloud forecast unavailable\" count each park's usual clouds for the month, or the Moon and darkness only where those cannot be used. Nights marked \"Early look\" ease the forecast toward each park's usual clouds for the month.")
+                == "Nights marked \"No cloud forecast yet\" or \"Cloud forecast unavailable\" count each park's usual clouds, or the Moon and darkness only where those cannot be used. Nights marked \"Early look\" ease the forecast toward each park's usual clouds.")
         // A stay led by a forecast night whose other nights lean on the usual clouds: no mark named, the lean said.
-        let lean = "In a stay of several nights, nights the forecast does not fully reach lean on each park's usual clouds for the month."
+        let lean = "In a stay of several nights, nights the forecast does not fully reach lean on each park's usual clouds."
         #expect(UsualCloudsNote.trip([full], unmarked: [early]) == lean)
         #expect(UsualCloudsNote.trip([full], unmarked: [notYet]) == lean)
         #expect(UsualCloudsNote.trip([full], unmarked: [full]) == nil)

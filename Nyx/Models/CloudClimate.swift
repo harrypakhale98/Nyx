@@ -220,7 +220,7 @@ extension Night {
         }
     }
     /// One short line where a phrase fits but a caption does not (the share card, Ask Nyx's
-    /// records): "No cloud forecast yet · usual clouds for the month", "Cloud forecast unavailable ·
+    /// records): "No cloud forecast yet · usual clouds", "Cloud forecast unavailable ·
     /// Moon and darkness only"; nil with a forecast.
     nonisolated var basisLine: String? {
         switch basis {
@@ -231,8 +231,8 @@ extension Night {
                 : String(localized: "Early look · forecast eased toward usual clouds")
         case .usual:
             switch (beyondForecast, usualCloud == nil) {
-            case (true, false): return String(localized: "No cloud forecast yet · usual clouds for the month")
-            case (false, false): return String(localized: "Cloud forecast unavailable · usual clouds for the month")
+            case (true, false): return String(localized: "No cloud forecast yet · usual clouds")
+            case (false, false): return String(localized: "Cloud forecast unavailable · usual clouds")
             case (true, true): return String(localized: "No cloud forecast yet · Moon and darkness only")
             case (false, true): return String(localized: "Cloud forecast unavailable · Moon and darkness only")
             }
@@ -507,8 +507,8 @@ nonisolated struct UsualCloudsNote: Equatable, Sendable {
     /// Under a list whose rows name each night's mark (the trip planner's stays).
     var marked: String {
         switch (usual, bare) {
-        case (true, true): String(localized:"Nights marked \(marks) count each park's usual clouds for the month, or the Moon and darkness only where those cannot be used.")
-        case (true, false): String(localized:"Nights marked \(marks) count each park's usual clouds for the month.")
+        case (true, true): String(localized:"Nights marked \(marks) count each park's usual clouds, or the Moon and darkness only where those cannot be used.")
+        case (true, false): String(localized:"Nights marked \(marks) count each park's usual clouds.")
         default: String(localized:"Nights marked \(marks) count the Moon and darkness only.")
         }
     }
@@ -520,14 +520,14 @@ nonisolated struct UsualCloudsNote: Equatable, Sendable {
     static func trip(_ nights: [Night], unmarked: [Night] = []) -> String? {
         let mark=quoted(String(localized:"Early look")), note=EarlyLookNote(nights.filter { $0.basis.isEarlyLook })
         let early:String?=switch (note?.eased,note?.asItStands) {
-        case (true?,true?): String(localized:"Nights marked \(mark) ease the forecast toward each park's usual clouds for the month, or count it as it stands where those are not known.")
+        case (true?,true?): String(localized:"Nights marked \(mark) ease the forecast toward each park's usual clouds, or count it as it stands where those are not known.")
         case (false?,true?): String(localized:"Nights marked \(mark) count the forecast as it stands: there are no usual clouds for those places.")
-        case (true?,_): String(localized:"Nights marked \(mark) ease the forecast toward each park's usual clouds for the month.")
+        case (true?,_): String(localized:"Nights marked \(mark) ease the forecast toward each park's usual clouds.")
         default: nil
         }
         // An early look with no usual clouds counts its forecast as it stands: it leans on none.
         let others=unmarked.contains { $0.basis != .forecast && $0.usualCloud != nil }
-            ? String(localized:"In a stay of several nights, nights the forecast does not fully reach lean on each park's usual clouds for the month.") : nil
+            ? String(localized:"In a stay of several nights, nights the forecast does not fully reach lean on each park's usual clouds.") : nil
         let parts=[UsualCloudsNote(nights)?.marked, early, others].compactMap { $0 }
         return parts.isEmpty ? nil : Sentences.join(parts)
     }

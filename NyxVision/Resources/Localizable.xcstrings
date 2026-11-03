@@ -3276,37 +3276,37 @@
         }
       }
     },
-    "Cloud forecast unavailable · usual clouds for the month": {
+    "Cloud forecast unavailable · usual clouds": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wolkenvorhersage nicht verfügbar · übliche Bewölkung des Monats"
+            "value": "Wolkenvorhersage nicht verfügbar · übliche Bewölkung"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cloud forecast unavailable · usual clouds for the month"
+            "value": "Cloud forecast unavailable · usual clouds"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pronóstico de nubes no disponible · nubosidad habitual del mes"
+            "value": "Pronóstico de nubes no disponible · nubosidad habitual"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Prévision de nuages indisponible · nébulosité habituelle du mois"
+            "value": "Prévision de nuages indisponible · nébulosité habituelle"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "雲予報を取得できません · その月の平年の雲量"
+            "value": "雲予報を取得できません · 平年の雲量"
           }
         }
       }
@@ -9121,37 +9121,37 @@
         }
       }
     },
-    "No cloud forecast yet · usual clouds for the month": {
+    "No cloud forecast yet · usual clouds": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Noch keine Wolkenvorhersage · übliche Bewölkung des Monats"
+            "value": "Noch keine Wolkenvorhersage · übliche Bewölkung"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No cloud forecast yet · usual clouds for the month"
+            "value": "No cloud forecast yet · usual clouds"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aún sin pronóstico de nubes · nubosidad habitual del mes"
+            "value": "Aún sin pronóstico de nubes · nubosidad habitual"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pas encore de prévision de nuages · nébulosité habituelle du mois"
+            "value": "Pas encore de prévision de nuages · nébulosité habituelle"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "雲予報はまだありません · その月の平年の雲量"
+            "value": "雲予報はまだありません · 平年の雲量"
           }
         }
       }

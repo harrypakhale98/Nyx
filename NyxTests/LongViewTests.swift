@@ -68,7 +68,7 @@ import Testing
                 : .init(newMoon: moon, firstNight: bare(first), secondNight: bare(second))
         }
         let usual = DarkWeekends.header([weekend(hale, clouds: true)])
-        #expect(usual.contains("scores rest on the usual clouds for the month;"))
+        #expect(usual.contains("scores rest on the usual clouds;"))
         #expect(DarkWeekends.header([]) == usual)
         let summit = DarkWeekends.header([weekend(hale, clouds: false), weekend(hale, clouds: false)])
         #expect(summit.contains("the usual clouds cannot be used here") && !summit.contains("no usual clouds"))
