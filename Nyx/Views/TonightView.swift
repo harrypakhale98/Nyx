@@ -543,7 +543,8 @@ struct TonightView: View {
                     pill.accessibilityElement(children:.contain).accessibilitySortPriority(5).layoutValue(key:BesideDial.Row.self,value:0)
                     switch fit.context {
                     case .whole: context.accessibilitySortPriority(4).layoutValue(key:BesideDial.Row.self,value:2)
-                    case .day: dayLine.accessibilitySortPriority(4).layoutValue(key:BesideDial.Row.self,value:2)
+                    // The night alone is for the eye: VoiceOver hears it in the dial's value and in the whole context after the hero.
+                    case .day: dayLine.accessibilityHidden(true).layoutValue(key:BesideDial.Row.self,value:2)
                     case .after: EmptyView()
                     }
                     dial(night,basis:night.basisCaption(),range:range,offset:offset,ready:ready,beside:true,closure:0).frame(maxWidth:.infinity).accessibilitySortPriority(3)
