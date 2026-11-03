@@ -19,7 +19,8 @@ import UserNotifications
         // The tilt behind the dial's glint and the stars' drift follows the interface as it turns.
         MotionTilt.shared.interfaceTurns={ FieldMotion.quarterTurns() }
         let store=LaunchSignposts.begin("Open store")
-        let opened=JournalStore.open(inMemory:DebugScenario.screen != nil)
+        // A debug route keeps its journal in memory; `-nyx-store-on-disk` (DEBUG) opens the real one, so an upgrade can be captured.
+        let opened=JournalStore.open(inMemory:DebugScenario.screen != nil && !DebugScenario.isEnabled("store-on-disk"))
         container=opened.container
         LaunchSignposts.end(store)
         let planner=LaunchSignposts.begin("PlanModel init")
