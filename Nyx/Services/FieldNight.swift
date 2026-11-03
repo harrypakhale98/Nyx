@@ -204,7 +204,7 @@ nonisolated struct FieldNight: Sendable {
         var options: [AlarmOption]=[]
         let name=park.shortName
         if let start=sky.darkStart, let end=sky.darkEnd, end>start, start>sky.evening.addingTimeInterval(60) {
-            options.append(AlarmOption(kind: .darkness, fire: start, label: String(localized: "Wake me when true darkness begins"), alarmTitle: String(localized: "True darkness at \(name)")))
+            options.append(AlarmOption(kind: .darkness, fire: start, label: String(localized: "Wake me when true darkness begins"), alarmTitle: String(localized: "alarm.darkness.title", defaultValue: "True darkness at \(name)", comment: "Alarm title; the argument is a place name")))
         }
         let core=SkyAlmanac().core(for: park, sky: sky)
         if let dark=core.dark, dark.duration>=600 {

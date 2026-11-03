@@ -79,4 +79,12 @@ struct PluralTests {
             ("Number \(2) of the next \(1) nights","Número 2 de la próxima noche"),
         ],"es")
     }
+    /// One English line, two jobs: the alarm names a place, the follow alert a clock time.
+    @Test func trueDarknessAtAPlaceOrATime() {
+        let place="Joshua Tree", time="7:42 PM"
+        let alarm=LocalizedStringResource("alarm.darkness.title",defaultValue:"True darkness at \(place)",locale:Locale(identifier:"de"),bundle:.atURL(Bundle.main.bundleURL))
+        #expect(String(localized:alarm)=="Echte Dunkelheit in Joshua Tree")
+        check([("True darkness at \(time)","Oscuridad total: 7:42 PM")],"es")
+        check([("True darkness at \(time)","Echte Dunkelheit ab 7:42 PM")],"de")
+    }
 }

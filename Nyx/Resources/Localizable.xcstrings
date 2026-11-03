@@ -74135,7 +74135,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Oscuridad total en %@"
+            "value": "Oscuridad total: %@"
           }
         },
         "fr": {
@@ -74150,7 +74150,8 @@
             "value": "%@に完全な暗さ"
           }
         }
-      }
+      },
+      "comment": "The follow alert body; the argument is a clock time"
     },
     "True darkness ended at %@": {
       "extractionState": "manual",
@@ -83755,6 +83756,42 @@
           }
         }
       }
+    },
+    "alarm.darkness.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Echte Dunkelheit in %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "True darkness at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuridad total en %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obscurité totale à %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@で完全な暗さ"
+          }
+        }
+      },
+      "comment": "Alarm title; the argument is a place name"
     },
     "around %@": {
       "extractionState": "manual",
