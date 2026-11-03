@@ -164,12 +164,15 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
     /// The state at `now`: the next marked milestone, or finished once the night is over. A night
     /// followed ahead stays "heading out" until true darkness begins (or sunset, without any), and
     /// counts down to that moment: a crescent Moon setting in the twilight before it would make the
-    /// activity stale early, and the heading face (the closure with it) gone before arrival.
+    /// activity stale early, and the heading face (the closure with it) gone before arrival. Sunset
+    /// is not among the marks, so a night with no true darkness counts down to it by name: the
+    /// heading face then ends at sunset, as it ends at true darkness on any other night.
     func state(at now: Date, nightVision: Bool, heading: Bool=false) -> ContentState {
         let finished=now>=dawn
         let end=darkStart ?? dusk
         let ahead=heading && !finished && now<end
-        let next=finished ? nil : (ahead ? milestones.first { $0.date>=end } : nil) ?? milestones.first { $0.date>now }
+        let arrival=darkStart == nil ? Milestone(title: String(localized: "Sunset"), date: dusk, symbol: "sunset") : milestones.first { $0.date>=end }
+        let next=finished ? nil : (ahead ? arrival : nil) ?? milestones.first { $0.date>now }
         return ContentState(next: next, nightVision: nightVision, finished: finished, heading: ahead ? true : nil, updated: now)
     }
     /// Stale when the countdown reaches its milestone (the view then shows the night's remaining

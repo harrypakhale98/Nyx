@@ -91,6 +91,24 @@ import Testing
         later.nightVision=false
         #expect(FieldActivities.changed(state, later, attributes: attributes))
     }
+    /// With no true darkness (Denali in June), heading out ends at sunset: the face counts down to
+    /// sunset by name and goes stale there, never to the Moon or a planet after it.
+    @Test func headingOutWithoutDarknessEndsAtSunset() throws {
+        let dena=try park("dena"), june=try self.sky(dena, "2027-06-20")
+        try #require(june.darkStart == nil && june.sunset != nil)
+        let attributes=FieldActivityAttributes(night: FieldNight(park: dena, sky: june), score: 30, band: "Poor")
+        let start=FieldActivityAttributes.followStart(june)
+        try #require(start<attributes.dusk)
+        let content=attributes.content(at: start, nightVision: false, heading: true)
+        #expect(content.state.heading == true)
+        #expect(content.state.next?.date == attributes.dusk && content.state.next?.symbol == "sunset")
+        #expect(content.staleDate == attributes.dusk)
+        // Once stale, the schedule lists every mark of the night after sunset.
+        #expect(attributes.schedule(content.state) == attributes.milestones.filter { $0.date>attributes.dusk })
+        // Past sunset the night runs as before.
+        let after=attributes.state(at: attributes.dusk.addingTimeInterval(60), nightVision: false, heading: true)
+        #expect(after.heading == nil && after.next == attributes.milestones.first { $0.date>attributes.dusk.addingTimeInterval(60) })
+    }
     /// A crescent Moon setting in the twilight before true darkness does not end heading out early:
     /// the activity counts down to true darkness and goes stale only then, so the closure, "Tonight
     /// at …" and the sunset and true-darkness times stay on a locked phone until arrival.

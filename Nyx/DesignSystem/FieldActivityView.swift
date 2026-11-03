@@ -161,9 +161,11 @@ struct FieldActivityLockView: View {
         HStack(spacing:4) { Text(item.title); Text(item.date,style:.time).monospacedDigit() }.fixedSize()
     }
     /// Sunset and true darkness with their clock times. `symbols`: each named by its milestone's symbol.
-    /// True darkness is heard once: where the countdown runs to it, its label already says the time.
+    /// Each is heard once: where the countdown runs to it (sunset, on a night with no true darkness),
+    /// its label already says the time.
     @ViewBuilder private func headingMarks(symbols:Bool)->some View {
         timeMark(String(localized:"Sunset"),symbol:"sunset",attributes.dusk,symbols:symbols)
+            .accessibilityHidden(attributes.shown(state,isStale:isStale)?.date == attributes.dusk)
         if let dark=attributes.darkStart {
             timeMark(String(localized:"True darkness"),symbol:"moon.stars",dark,symbols:symbols)
                 .accessibilityHidden(attributes.shown(state,isStale:isStale)?.date == dark)
