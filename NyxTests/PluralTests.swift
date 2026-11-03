@@ -79,6 +79,16 @@ struct PluralTests {
             ("Number \(2) of the next \(1) nights","Número 2 de la próxima noche"),
         ],"es")
     }
+    /// The usual clear share: "1 in 10" takes the singular where the language agrees the verb with it.
+    @Test func oneInTenNightsIsClear() {
+        let july="juillet", julio="julio", juli="Juli"
+        check([("About \(1) in 10 \(july) nights here are mostly clear.","Environ 1 nuit de juillet sur 10 est ici plutôt dégagée."),
+               ("About \(3) in 10 \(july) nights here are mostly clear.","Environ 3 nuits de juillet sur 10 sont ici plutôt dégagées.")],"fr")
+        check([("About \(1) in 10 \(julio) nights here are mostly clear.","Alrededor de 1 de cada 10 noches de julio aquí está mayormente despejada."),
+               ("About \(3) in 10 \(julio) nights here are mostly clear.","Alrededor de 3 de cada 10 noches de julio aquí están mayormente despejadas.")],"es")
+        check([("About \(1) in 10 \(juli) nights here are mostly clear.","Im Juli ist hier etwa 1 von 10 Nächten überwiegend klar.")],"de")
+        check([("About \(1) in 10 \("July") nights here are mostly clear.","About 1 in 10 July nights here are mostly clear.")],"en")
+    }
     /// One English line, two jobs: the alarm names a place, the follow alert a clock time.
     @Test func trueDarknessAtAPlaceOrATime() {
         let place="Joshua Tree", time="7:42 PM"

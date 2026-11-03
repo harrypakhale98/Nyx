@@ -9459,33 +9459,87 @@
       "extractionState": "manual",
       "localizations": {
         "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Im %2$@ sind hier etwa %1$lld von 10 Nächten überwiegend klar."
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Im %2$@ ist hier etwa %1$lld von 10 Nächten überwiegend klar."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Im %2$@ sind hier etwa %1$lld von 10 Nächten überwiegend klar."
+                }
+              }
+            }
           }
         },
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "About %lld in 10 %@ nights here are mostly clear."
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "About %lld in 10 %@ nights here are mostly clear."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "About %lld in 10 %@ nights here are mostly clear."
+                }
+              }
+            }
           }
         },
         "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unas %lld de cada 10 noches de %@ aquí están mayormente despejadas."
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Alrededor de %1$lld de cada 10 noches de %2$@ aquí está mayormente despejada."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Alrededor de %1$lld de cada 10 noches de %2$@ aquí están mayormente despejadas."
+                }
+              }
+            }
           }
         },
         "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Environ %lld nuits de %@ sur 10 sont ici plutôt dégagées."
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Environ %1$lld nuit de %2$@ sur 10 est ici plutôt dégagée."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Environ %1$lld nuits de %2$@ sur 10 sont ici plutôt dégagées."
+                }
+              }
+            }
           }
         },
         "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ここでは%2$@の夜の10回に約%1$lld回は、おおむね晴れます。"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "ここでは%2$@の夜の10回に約%1$lld回は、おおむね晴れます。"
+                }
+              }
+            }
           }
         }
       }
