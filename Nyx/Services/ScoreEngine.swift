@@ -45,8 +45,7 @@ nonisolated struct ScoreEngine: ScoreProviding {
     /// - Smoke: aerosol optical depth 0.25–0.5 caps at 74 (Good at most), 0.5 and above at 59
     ///   (Fair at most). Unknown aerosol caps nothing.
     func score(sky: SkyConditions, bortle: Int, cloud cloudCover: Double?, basis: CloudBasis, aerosol: Double?) -> DarknessScore {
-        let dark = sky.darkHours>0
-        let light = dark ? (sky.moonlight ?? sky.moon.illumination*(1-sky.moonBelowFraction)) : sky.moon.illumination
+        let light = sky.scoredMoonlight
         let moon = 40 * (1-min(1,max(0,light)))
         let cloud = cloudCover.flatMap { $0.isFinite ? min(100,max(0,$0)) : nil }
         let cloudPoints = cloud.map { 25*(1-$0/100) }

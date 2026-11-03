@@ -826,9 +826,11 @@ struct CalendarView: View {
     /// The ring, ignoring nights already past. While forecasts exist, it marks the five consecutive
     /// nights with the highest total score (earliest on a tie), so the ring and the numbers beside it
     /// always agree. Where no five forecast nights touch the month, it falls back to the five
-    /// consecutive nights with the least moonlight; such a stretch only counts if it really sits near
-    /// a new moon (some night under 12% lit), since late in a month the few left may be bright. When
-    /// no moon stretch touches this month, the next one ahead is returned with `inMonth` false.
+    /// consecutive nights with the least moonlight the score counts (`SkyConditions.scoredMoonlight`,
+    /// summed on a 0.001 grid); on a tie, the stretch holding the best of those nights
+    /// (`NightPlanner.best`), then the least lit, then the earliest. Such a stretch only counts if it
+    /// really sits near a new moon (some night under 12% lit), since late in a month the few left may
+    /// be bright. When no moon stretch touches this month, the next one ahead is returned with `inMonth` false.
     static func stretch(_ nights:[Night],month:[Night],after tonight:Date)->Stretch {
         guard let first=month.first?.id,let last=month.last?.id else { return Stretch(kind:.moon,nights:[],inMonth:false) }
         let starts=nights.indices.filter { i in i+5<=nights.count && nights[i].id>=tonight }
@@ -836,12 +838,21 @@ struct CalendarView: View {
         func total(_ i:Int)->Int { nights[i..<(i+5)].reduce(0) { $0+$1.score.value } }
         let forecast=starts.filter { i in touches(i) && nights[i..<(i+5)].allSatisfy { $0.basis != .usual } }
         if let best=forecast.max(by:{ a,b in total(a) != total(b) ? total(a)<total(b) : a>b }) { return Stretch(kind:.best,nights:nights[best..<(best+5)],inMonth:true) }
-        func light(_ i:Int)->Double { nights[i..<(i+5)].reduce(0) { $0+$1.sky.moon.illumination } }
+        func light(_ i:Int)->Double { NightPlanner.tieGrid(nights[i..<(i+5)].reduce(0) { $0+$1.sky.scoredMoonlight },0.001) }
+        func lit(_ i:Int)->Double { nights[i..<(i+5)].reduce(0) { $0+$1.sky.moon.illumination } }
         func nearNew(_ i:Int)->Bool { nights[i..<(i+5)].contains { $0.sky.moon.illumination<0.12 } }
-        let touching=starts.filter { touches($0) && nearNew($0) }
-        if let best=touching.min(by:{ light($0)<light($1) }) { return Stretch(kind:.moon,nights:nights[best..<(best+5)],inMonth:true) }
-        let ahead=starts.filter { nights[$0+4].id>last && nearNew($0) }
-        guard let next=ahead.min(by:{ light($0)<light($1) }) else { return Stretch(kind:.moon,nights:[],inMonth:false) }
+        // Moonless nights tie on moonlight, so the stretch that holds the night the panel names as best wins them.
+        func darkest(_ candidates:[Int])->Int? {
+            let best=NightPlanner.best(Set(candidates.flatMap { Array($0..<($0+5)) }).map { nights[$0] })?.id
+            func holds(_ i:Int)->Bool { nights[i..<(i+5)].contains { $0.id==best } }
+            return candidates.min { a,b in
+                if light(a) != light(b) { return light(a)<light(b) }
+                if holds(a) != holds(b) { return holds(a) }
+                return lit(a) != lit(b) ? lit(a)<lit(b) : a<b
+            }
+        }
+        if let best=darkest(starts.filter { touches($0) && nearNew($0) }) { return Stretch(kind:.moon,nights:nights[best..<(best+5)],inMonth:true) }
+        guard let next=darkest(starts.filter { nights[$0+4].id>last && nearNew($0) }) else { return Stretch(kind:.moon,nights:[],inMonth:false) }
         return Stretch(kind:.moon,nights:nights[next..<(next+5)],inMonth:false)
     }
 }

@@ -78,7 +78,7 @@ import Testing
         let evening=day.evening(in:park)
         let fraction=acos(1-2*illumination)/(2*Double.pi)
         let sky=SkyConditions(evening:evening,end:evening+86400,sunset:evening+6*3600,sunrise:evening+18*3600,civilDusk:nil,nauticalDusk:nil,
-                              darkStart:evening+8*3600,darkEnd:evening+16*3600,state:.normal,moon:MoonPhase(fraction:fraction),moonrise:nil,moonset:nil,moonBelowFraction:1,darkHours:8)
+                              darkStart:evening+8*3600,darkEnd:evening+16*3600,state:.normal,moon:MoonPhase(fraction:fraction),moonrise:nil,moonset:nil,moonBelowFraction:0,darkHours:8)
         return Night(park:park,sky:sky,score:DarknessScore(value:score,moonPoints:40,cloudPoints:25,bortlePoints:20,lengthPoints:15,basis:forecast ? .forecast : .usual),cloudCover:forecast ? 10 : nil,forecastUpdated:forecast ? evening : nil)
     }
     @Test func theRingFollowsTheScoresWhileForecastsExist() throws {
@@ -102,6 +102,26 @@ import Testing
         #expect(stretch.kind == .moon && stretch.inMonth)
         #expect(stretch.nights.first?.id==nights[5].id && stretch.nights.count==5)
         #expect(CalendarView.Stretch.Kind.best.title != CalendarView.Stretch.Kind.moon.title)
+    }
+    /// Past the forecasts, real months: the ring counts the moonlight the score counts, not the phase
+    /// alone. At Death Valley in November 2026 the Moon rises in true darkness before dawn on the 6th
+    /// and stays out of it on the 7th to the 11th, so the ring moves to the 7th–11th and holds the best
+    /// night, the 11th; Joshua Tree's stays on the 6th–10th.
+    @Test(arguments:[("deva",7,11),("jotr",6,nil)]) func theMoonRingCountsTheScoredMoonlight(id:String,start:Int,bestDay:Int?) throws {
+        let place=try park(id), first=TripDay(year:2026,month:11,day:1), tonight=first.evening(in:place)
+        let engine=AstronomyEngine()
+        // As the page asks for them: four nights before the month to a week past it, with no forecast.
+        let nights=(-4..<34).map { i in
+            NightPlanner.night(park:place,sky:engine.conditions(for:place,on:first.adding(i).evening(in:place)),forecast:nil,detail:nil,now:tonight)
+        }
+        let stretch=CalendarView.stretch(nights,month:Array(nights[4..<34]),after:tonight)
+        #expect(stretch.kind == .moon && stretch.inMonth)
+        #expect(stretch.nights.map { place.calendar.component(.day,from:$0.id) }==Array(start..<(start+5)))
+        if let bestDay {
+            let best=try #require(NightPlanner.best(Array(nights[4..<(4+NightPlanner.horizon)])))
+            #expect(place.calendar.component(.day,from:best.id)==bestDay)
+            #expect(CalendarView.apart(best:best,from:stretch)==nil)
+        }
     }
     /// A best night outside the ring always says why, for either kind of stretch, in words true of
     /// what its score rests on; one inside the ring needs no reason.

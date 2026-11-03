@@ -52,6 +52,10 @@ nonisolated struct SkyConditions: Sendable {
     /// brightening (`AstronomyEngine.moonlight`). Nil for a hand-built sky, which then falls back
     /// to illumination times the share of darkness with the Moon up.
     var moonlight: Double? = nil
+    /// The moonlight the score counts (`ScoreEngine`), one value for every ranking of the Moon:
+    /// `moonlight` over true darkness (else illumination times the share of it with the Moon up);
+    /// with no true darkness there is no horizon credit, so the whole illumination.
+    var scoredMoonlight: Double { darkHours > 0 ? (moonlight ?? moon.illumination*(1-moonBelowFraction)) : moon.illumination }
     /// Under the midnight sun, when the Sun is lowest (solar midnight); nil on other nights.
     var lowestSun: Date? = nil
     /// The hours whose clouds matter. True darkness when there is any; otherwise sunset
