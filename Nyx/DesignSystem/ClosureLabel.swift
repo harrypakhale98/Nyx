@@ -50,15 +50,36 @@ struct ClosureLabel: View {
         .accessibilityAddTraits(.isStaticText)
     }
     /// The closure in its own words, or after "Closure alert". Under a score the heading is a line of its
-    /// own, held whole on one line, so a narrow column never breaks it inside a word ("Sper-" in German)
-    /// and leaves only that on the first screen.
+    /// own, held whole, so a narrow column never breaks it inside a word ("Sper-" in German) and leaves only
+    /// that on the first screen: on one line at its size or at three quarters of it, else on two lines broken
+    /// at a space at three quarters (two lines at full size would leave the second under an iPhone SE's tab
+    /// bar at the largest size), and only a single word too long for that is made smaller still.
     @ViewBuilder private var words: some View {
         if named && prominence == .hero {
-            VStack(alignment:centered && !typeSize.isAccessibilitySize ? .center : .leading,spacing:2) {
-                Text("Closure alert").fontWeight(.semibold).lineLimit(1).minimumScaleFactor(0.5).allowsTightening(true)
+            let alignment:HorizontalAlignment=centered && !typeSize.isAccessibilitySize ? .center : .leading
+            let heading=String(localized:"Closure alert")
+            VStack(alignment:alignment,spacing:2) {
+                ViewThatFits(in:.horizontal) {
+                    Text(heading).lineLimit(1)
+                    Text(heading).font(.system(size:headingSize*0.75,weight:.semibold)).lineLimit(1)
+                    if let lines=Self.headingLines(heading) {
+                        VStack(alignment:alignment,spacing:0) { Text(lines.0).lineLimit(1); Text(lines.1).lineLimit(1) }.font(.system(size:headingSize*0.75,weight:.semibold))
+                    }
+                    Text(heading).lineLimit(1).minimumScaleFactor(0.5).allowsTightening(true)
+                }.fontWeight(.semibold)
                 Text(closure)
             }
         } else { Text(named ? ClosureLine.spoken(closure) : closure) }
+    }
+    /// The hero's text size (the subheadline style's 15 pt, scaled), for a heading set smaller than it.
+    @ScaledMetric(relativeTo:.subheadline) private var headingSize=15.0
+    /// A heading of more than one word as two lines broken at the space that best balances them, the first
+    /// line the longer on a tie; nil for a single word.
+    nonisolated static func headingLines(_ heading:String)->(String,String)? {
+        let words=heading.split(separator:" ").map(String.init)
+        guard words.count>1 else { return nil }
+        let splits=(1..<words.count).map { (words[..<$0].joined(separator:" "),words[$0...].joined(separator:" ")) }
+        return splits.min { max($0.0.count,$0.1.count)<max($1.0.count,$1.1.count) || max($0.0.count,$0.1.count)==max($1.0.count,$1.1.count) && $0.0.count>$1.0.count }
     }
 }
 

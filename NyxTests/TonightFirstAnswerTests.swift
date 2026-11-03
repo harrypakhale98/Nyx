@@ -363,6 +363,15 @@ import Testing
         #expect(back(170) == (steps: .apart, context: .after))
     }
 
+    /// The closure heading under a landscape score breaks only at a space, into the most even two lines.
+    @Test func theClosureHeadingBreaksAtASpace() {
+        #expect(ClosureLabel.headingLines("Alerte de fermeture").map { [$0.0, $0.1] } == ["Alerte de", "fermeture"])
+        #expect(ClosureLabel.headingLines("Alerta de cierre").map { [$0.0, $0.1] } == ["Alerta de", "cierre"])
+        #expect(ClosureLabel.headingLines("Closure alert").map { [$0.0, $0.1] } == ["Closure", "alert"])
+        #expect(ClosureLabel.headingLines("Sperrungshinweis") == nil)
+        #expect(ClosureLabel.headingLines("閉鎖のアラート") == nil)
+    }
+
     /// At accessibility sizes in landscape, the dial is held to what the page's height leaves its band word.
     @Test func anAccessibleDialFitsThePageWithItsWord() {
         #expect(CelestialGauge.accessibleSide(fitting: .infinity, band: 70) == .infinity)
