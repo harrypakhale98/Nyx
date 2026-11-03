@@ -54,7 +54,10 @@ struct JournalView: View {
                     entryList
                 }
             }.padding(NyxMetrics.pagePadding).readableColumn(wide ? WideLayout.twoColumnMaximum : WideLayout.readableWidth)
-        }.measuringWidth($width).foldSource().background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
+        }.measuringWidth($width).foldSource()
+            // `-nyx-bottom` (DEBUG) opens at the foot of the list, for captures of the last nights' cards.
+            .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
+            .background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
             .tabRootToolbar()
             .toolbar {
                 // Nothing is recorded into a journal that could not be opened: it would be lost. Dimmed by hand, since
