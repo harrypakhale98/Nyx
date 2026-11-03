@@ -467,6 +467,8 @@ struct NightGlance: View {
     /// False on the fixed face, which is one line each: the lines shrink a little rather than wrap
     /// and take the dial's room (a 40 mm watch's "Dark 8:31 PM to 6:42 AM CDT" left it 35 pt).
     var wraps = true
+    /// The serif subheadline's size, for the smaller steps of the dark window (sizes ViewThatFits can measure, which a shrink is not).
+    @ScaledMetric(relativeTo: .subheadline) private var size: CGFloat = 15
     var body: some View {
         let lines: Int? = wraps ? nil : 1, shrink = wraps ? 1 : 0.75
         VStack(spacing: 0) {
@@ -505,7 +507,22 @@ struct NightGlance: View {
             }
             if let start = night.sky.darkStart, let end = night.sky.darkEnd, night.sky.darkHours > 0 {
                 // Park time: the zone rides on the last time where the park's clock is not the watch's.
-                Text("Dark \(night.park.time(start)) to \(night.park.zonedTime(end))").font(.system(.subheadline, design: .serif)).lineLimit(lines).minimumScaleFactor(shrink)
+                let full = Text("Dark \(night.park.time(start)) to \(night.park.zonedTime(end))")
+                if wraps { full.font(.system(.subheadline, design: .serif)) }
+                else {
+                    // One line on the fixed face: the sentence where it fits, else "Dark 18:12–4:41", set a
+                    // little smaller where that keeps one line, and wrapped only where even that does not fit.
+                    // Never shrunk until cut: a cut time is a wrong time.
+                    let range = Text(verbatim: "\(String(localized: "Dark")) \(night.park.time(start))–\(night.park.zonedTime(end))")
+                    ViewThatFits(in: .horizontal) {
+                        full.lineLimit(1)
+                        range.lineLimit(1).accessibilityLabel(full)
+                        range.font(.system(size: size*0.85, design: .serif)).lineLimit(1).accessibilityLabel(full)
+                        range.font(.system(size: size*0.75, design: .serif)).lineLimit(1).accessibilityLabel(full)
+                        range.lineLimit(2).accessibilityLabel(full)
+                    }
+                    .font(.system(.subheadline, design: .serif))
+                }
             } else if wraps {
                 Text(SkyConditions.noDarknessMessage(tonight: isTonight)).font(.footnote)
             } else {
@@ -520,7 +537,22 @@ struct NightGlance: View {
             if isTonight { Text("Turn the Crown to look ahead").font(.caption2).foregroundStyle(palette.muted).lineLimit(lines).minimumScaleFactor(shrink).nonEssential() }
             // An early look is named as the iPhone names it, never "no forecast", and a night that counts
             // no clouds says so (`Night.standaloneBasisLabel`).
-            else if let basis = night.standaloneBasisLabel { Text(basis).font(.caption2).foregroundStyle(palette.muted).lineLimit(lines).minimumScaleFactor(shrink).nonEssential() }
+            // On the fixed face, one line where it fits: else "Usual clouds" for a night scored on them, and
+            // only then wrapped, never cut ("Pronóstico de nubes no disp…").
+            else if let basis = night.standaloneBasisLabel {
+                Group {
+                    if wraps { Text(basis) }
+                    else {
+                        let usual = night.basis == .usual && night.score.cloudPoints != nil
+                        ViewThatFits(in: .horizontal) {
+                            Text(basis).lineLimit(1)
+                            Text(usual ? String(localized: "Usual clouds") : basis).lineLimit(1).accessibilityLabel(basis)
+                            Text(basis).lineLimit(2)
+                        }
+                    }
+                }
+                .font(.caption2).foregroundStyle(palette.muted).nonEssential()
+            }
         }
         .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .combine)
