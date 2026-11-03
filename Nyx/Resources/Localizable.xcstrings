@@ -9518,13 +9518,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Environ %1$lld nuit de %2$@ sur 10 est ici plutôt dégagée."
+                  "value": "En %2$@, environ %1$lld nuit sur 10 est ici plutôt dégagée."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Environ %1$lld nuits de %2$@ sur 10 sont ici plutôt dégagées."
+                  "value": "En %2$@, environ %1$lld nuits sur 10 sont ici plutôt dégagées."
                 }
               }
             }
@@ -72000,7 +72000,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cet indice utilise la nébulosité habituelle à %1$@ en %2$@, autour de la nouvelle lune."
+            "value": "Cet indice utilise la nébulosité habituelle à %1$@ autour de la nouvelle lune qui tombe en %2$@."
           }
         },
         "ja": {
@@ -76556,7 +76556,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nébulosité habituelle en %@, autour de la nouvelle lune"
+            "value": "Nébulosité habituelle autour de la nouvelle lune en %@"
           }
         },
         "ja": {
