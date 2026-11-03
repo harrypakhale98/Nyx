@@ -187,7 +187,7 @@ import Testing
         let none = NightPlanner.night(park: deva, sky: s, forecast: nil, detail: nil, now: middle)
         #expect(none.basis == .usual && none.score.value == far.score.value)
         // Tonight is within any forecast's reach: without one, the forecast is unavailable, not "not yet".
-        #expect(!none.beyondForecast && none.basisCaption() == "Cloud forecast unavailable. This score uses the usual December clouds at Death Valley.")
+        #expect(!none.beyondForecast && none.basisCaption() == "Cloud forecast unavailable. This score uses the usual clouds at Death Valley around the December new moon.")
         #expect(none.basisLabel == "Cloud forecast unavailable" && mid.basisLabel == "Early look" && near.basisLabel == nil)
         let later = NightPlanner.night(park: deva, sky: AstronomyEngine().conditions(for: deva, on: deva.date(s.evening, addingDays: 12)), forecast: nil, detail: nil, now: middle)
         #expect(later.beyondForecast && later.basisCaption()?.hasPrefix("No cloud forecast yet. This score uses the usual") == true && later.basisLabel == "No cloud forecast yet")

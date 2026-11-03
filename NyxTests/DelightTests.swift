@@ -145,7 +145,7 @@ struct DelightTests {
         #expect(draft.start==real.sky.darkStart && draft.end==real.sky.darkEnd && draft.timeZone==grba.timeZone)
         #expect(draft.title==String(localized:"Stargazing at Great Basin"))
         #expect(draft.notes.contains("Wheeler Peak Scenic Drive closed") && draft.notes.contains(String(localized:"Check closures and the forecast before you go.")))
-        #expect(draft.notes.contains(try #require(real.noForecastSentence)) && draft.notes.contains(String(localized:"This score uses the usual October clouds at Great Basin.")))
+        #expect(draft.notes.contains(try #require(real.noForecastSentence)) && draft.notes.contains(String(localized:"This score uses the usual clouds at Great Basin around the October new moon.")))
         #expect(draft.url?.absoluteString=="nyx://whatsup?date=2026-10-10&park=grba")
     }
 

@@ -128,7 +128,7 @@ struct ScoreBreakdownView: View {
         case .darkestHours: String(localized:"With no true darkness, the hourly forecast is averaged over the four darkest hours.")
         }
         let how=switch (usualClouds,context) {
-        case (true,false): String(localized:"Beyond about three days it is eased toward the park's usual clouds for the month; with no forecast, the usual clouds count alone.")
+        case (true,false): String(localized:"Beyond about three days it is eased toward the park's usual clouds around the nearest new moon; with no forecast, the usual clouds count alone.")
         case (true,true): String(localized:"Beyond about three days it is eased toward the park's usual clouds. Model agreement and cloud layers are context; smoke or haze can cap the score.")
         case (false,false): String(localized:"It is counted as it stands: there are no usual clouds for this place. With no forecast, the score counts the Moon and darkness only.")
         case (false,true): String(localized:"It is counted as it stands: there are no usual clouds for this place. Model agreement and cloud layers are context; smoke or haze can cap the score.")

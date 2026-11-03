@@ -14597,37 +14597,37 @@
         }
       }
     },
-    "This score uses the usual %@ clouds at %@.": {
+    "This score uses the usual clouds at %@ around the %@ new moon.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dieser Wert nutzt die übliche Bewölkung im %@ in %@."
+            "value": "Dieser Wert nutzt die übliche Bewölkung in %1$@ um den Neumond im %2$@."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This score uses the usual %@ clouds at %@."
+            "value": "This score uses the usual clouds at %@ around the %@ new moon."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Este índice usa la nubosidad habitual de %@ en %@."
+            "value": "Este índice usa la nubosidad habitual en %1$@ en torno a la luna nueva de %2$@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cet indice utilise la nébulosité habituelle à %2$@ en %1$@."
+            "value": "Cet indice utilise la nébulosité habituelle à %1$@ en %2$@, autour de la nouvelle lune."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "このスコアには、%2$@の%1$@の平年の雲量を使っています。"
+            "value": "このスコアには、%1$@の%2$@の新月ごろの平年の雲量を使っています。"
           }
         }
       }

@@ -115,7 +115,8 @@ struct CloudClimateTests {
     }
     /// Past the forecast the usual cloud, its share of clear nights and the month they are said for all
     /// come from the nearest new Moon: at Saguaro, June 18, 2027 reads June's (new Moon June 4) and the
-    /// 19th, past full Moon, July's (new Moon July 3), so "Usually N%" and the sentence beside it agree.
+    /// 19th, past full Moon, July's (new Moon July 3), so "Usually N%" and the sentence beside it agree,
+    /// and the caption says it is the new Moon's.
     @Test func usualCloudsAndClearNightsShareOneNewMoon() throws {
         let sagu = try park("sagu"), planner = NightPlanner(forecasts: [:])
         let now = try evening(sagu, 2027, 5, 1)
@@ -124,7 +125,9 @@ struct CloudClimateTests {
             let anchor = try #require(CloudClimate.shared.typical(sagu, on: NightPlanner.newMoon(nearest: night.id)))
             #expect(night.basis == .usual && night.usualMonth == month && anchor.month == month)
             #expect(night.usualCloud == anchor.cloud && night.usualClear == anchor.clear)
-            #expect(night.typicalClouds?.contains(name) == true && night.basisCaption()?.contains("usual \(name) clouds") == true, "\(day)")
+            #expect(night.typicalClouds?.contains(name) == true, "\(day)")
+            // The caption names where the usual clouds are read, so a June night saying July is explained.
+            #expect(night.basisCaption() == "No cloud forecast yet. This score uses the usual clouds at Saguaro around the \(name) new moon.", "\(day)")
         }
     }
     /// The nearest new Moon, from either side of the month: 2026's fall on Oct 10, Nov 9 and Dec 9 (UTC).

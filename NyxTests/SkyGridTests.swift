@@ -183,7 +183,7 @@ struct SkyGridTests {
         // the month's 75% eased seven days toward November's 12%.
         let usual = try #require(clouds.usualClouds)
         #expect(usual.month == 12 && usual.clear == 15 && usual.estimated && abs(usual.cloud-Self.decemberAtNewMoon) < 1e-6)
-        #expect(clouds.usualCloudsTitle == "Usual clouds for December" && clouds.usualCloudsLine == "About 2 in 10 December nights here are mostly clear.")
+        #expect(clouds.usualCloudsTitle == "Usual clouds around the December new moon" && clouds.usualCloudsLine == "About 2 in 10 December nights here are mostly clear.")
         #expect(clouds.shower?.detail == bare.shower?.detail && clouds.planets.map(\.spoken) == bare.planets.map(\.spoken))
     }
     /// With the sky layer: the grid's class, said to be a satellite estimate, and tonight scored on the usual clouds.

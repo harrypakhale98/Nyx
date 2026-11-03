@@ -119,11 +119,12 @@ nonisolated struct HomeSky: Sendable {
         return SkyConditions.noDarknessMessage(tonight: true)
     }
     var hasDarkness: Bool { sky.darkHours>0 }
-    /// "Usual clouds for November", the cloud row's title; nil without the grid's clouds. The month is
-    /// the nearest new Moon's, which the cloud and its sentence are read for (`NightPlanner.usual`).
+    /// "Usual clouds around the November new moon", the cloud row's title; nil without the grid's
+    /// clouds. The cloud and its sentence are read at the nearest new Moon (`NightPlanner.usual`), so
+    /// late in a month the title names the next month's.
     var usualCloudsTitle: String? {
         guard let usualClouds else { return nil }
-        return String(localized: "Usual clouds for \(place.monthName(month: usualClouds.month))")
+        return String(localized: "Usual clouds around the \(place.monthName(month: usualClouds.month)) new moon")
     }
     /// "About 8 in 10 November nights here are mostly clear." (an estimate from the grid), for the same month.
     var usualCloudsLine: String? {

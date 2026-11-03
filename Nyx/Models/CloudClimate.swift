@@ -290,9 +290,10 @@ extension Night {
         case .forecast: return nil
         case .blended: return basis.earlyLookCaption(usualClouds: usualCloud != nil)
         case .usual:
-            // Never "Arches's": the park follows the month rather than taking a possessive.
+            // Never "Arches's": the park follows "at" rather than taking a possessive. The new moon is
+            // named because the usual clouds are read there (`NightPlanner.usual`): late in June, July's.
             let line = Sentences.join([opening ? noForecastSentence ?? "" : "", usualCloud == nil ? String(localized: "This score counts the Moon and darkness only.")
-                : String(localized: "This score uses the usual \(usualMonthName) clouds at \(park.shortName).")])
+                : String(localized: "This score uses the usual clouds at \(park.shortName) around the \(usualMonthName) new moon.")])
             return typical ? withTypicalClouds(line) : line
         }
     }
