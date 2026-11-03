@@ -368,6 +368,23 @@ struct JournalCoverTests {
             #expect(try Self.tally(container) == [0, 0, 0, 0])
         }
     }
+    /// A night deleted between reading the journal's identifiers and reading the new one
+    /// (`MomentsWatcher`) reads as nothing, and Nyx carries on.
+    @Test func aDeletedEntryReadsAsNothing() throws {
+        try Self.inPlace { place in
+            let container=try Self.open(place)
+            let context=ModelContext(container)
+            let entry=JournalEntry(date: Self.night, parkID: "jotr")
+            let night=entry.id
+            context.insert(entry)
+            try context.save()
+            let id=try #require(try context.fetchIdentifiers(FetchDescriptor<JournalEntry>()).first)
+            #expect(JournalEntry.id(of: id, in: container) == night)
+            context.delete(entry)
+            try context.save()
+            #expect(JournalEntry.id(of: id, in: container) == nil)
+        }
+    }
     /// Two hundred nights with 150 KB thumbnails: reading them all as the journal list does takes
     /// under 10 MB, and every card's picture read through the cards' own reads under 15 MB more in
     /// all. The least of three runs counts, since other tests share the process.

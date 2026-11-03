@@ -469,3 +469,14 @@ nonisolated enum JournalCovers {
         return cover.data.withUnsafeBytes { Data($0) }
     }
 }
+nonisolated extension JournalEntry {
+    /// The `id` of the entry stored under `persistentID`, read in a context of its own that lets it go;
+    /// nil when the entry is gone (deleted since its identifier was read). Fetched by id, as a cover is
+    /// (`JournalCovers.data`), so a deleted entry reads as nothing instead of stopping the app.
+    static func id(of persistentID: PersistentIdentifier, in container: ModelContainer) -> UUID? {
+        var descriptor=FetchDescriptor<JournalEntry>(predicate: #Predicate { $0.persistentModelID == persistentID })
+        descriptor.fetchLimit=1
+        let context=ModelContext(container)
+        return withExtendedLifetime(context) { try? context.fetch(descriptor).first?.id }
+    }
+}

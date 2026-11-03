@@ -131,8 +131,8 @@ struct MomentsWatcher: View {
         ReviewPrompt.noteJournalEntry(old:old.count,new:now.count)
         let added=now.subtracting(old)
         guard ReviewPrompt.isJournalMoment(old:old.count,new:now.count), added.count==1, let id=added.first,
-              let entry=ModelContext(context.container).model(for:id) as? JournalEntry else { return }
-        ConstellationArrivals.expect(entry.id.uuidString)
+              let entryID=JournalEntry.id(of:id,in:context.container) else { return }
+        ConstellationArrivals.expect(entryID.uuidString)
     }
     private var explainer:some View { RemindersExplainer { granted in notificationsEnabled=granted } }
     /// iOS has not yet asked about notifications.
