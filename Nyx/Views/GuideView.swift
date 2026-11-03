@@ -136,9 +136,6 @@ struct GuideView:View {
             guard requestID>0, requestID != answeredID else {
                 // Opening Ask Nyx makes and warms the session the first question will use.
                 if requestID == 0 { guide.prepare(lookup:tools) }
-                #if DEBUG
-                if requestID == 0, let state=DebugScenario.state, state == "streaming" || state == "answered" { showFixture(checked:state == "answered") }
-                #endif
                 return
             }
             await guide.answer(question:asked.isEmpty ? defaultPrompt : asked,context:(sent ?? records).map(\.text),lookup:tools)
@@ -151,6 +148,13 @@ struct GuideView:View {
         .task(id:mode.isPlanning ? TonightReach.key(model.placesInReach().places,night:model.today) : nil) {
             if mode.isPlanning { await model.prepareReach(model.placesInReach().places) }
         }
+        #if DEBUG
+        // The fixture copies the records, so it waits for the places in reach as a real question does.
+        .task(id:hasRecords) {
+            guard hasRecords, sent == nil, let state=DebugScenario.state, state == "streaming" || state == "answered" else { return }
+            showFixture(checked:state == "answered")
+        }
+        #endif
     }
     #if DEBUG
     /// `-nyx-state streaming|answered`: a question with real lookups from the engine (best nights
