@@ -209,10 +209,13 @@ nonisolated enum NyxSchemaV3: VersionedSchema {
         }
         /// The one way a card's thumbnail is written: the old cover is deleted (its file outside the
         /// store with it), a new one holds `data`, and the V2 column is emptied. A cover replaced or
-        /// cleared without being deleted would stay behind, belonging to no entry.
+        /// cleared without being deleted would stay behind, belonging to no entry. The same picture
+        /// keeps the cover it has (a night whose words alone changed), so no file is written again
+        /// and its card keeps the picture it has drawn.
         func setThumbnail(_ data: Data?, in context: ModelContext) {
             let old=cover
             legacyThumbnail=nil
+            if let data, let old, old.data == data { return }
             if let data {
                 let new=JournalCover(data: data)
                 context.insert(new)

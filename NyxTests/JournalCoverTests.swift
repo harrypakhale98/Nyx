@@ -309,6 +309,35 @@ struct JournalCoverTests {
             #expect(try Self.tally(container) == [0, 0, 0, 0])
         }
     }
+    /// A night whose words alone change keeps its cover record (no new file; its card keeps the
+    /// picture it drew). The thumbnail is scaled again on every save, so this also says the scaling
+    /// gives the same bytes for the same photo. Changing or removing the photo is checked above.
+    @Test func anEditToTheWordsKeepsTheCover() async throws {
+        try await Self.inPlace { place in
+            let container=try Self.open(place)
+            let context=ModelContext(container)
+            // Large enough that the thumbnail really is scaled down, with detail for the JPEG to keep.
+            let format=UIGraphicsImageRendererFormat()
+            format.scale=1
+            let photo=try #require(UIGraphicsImageRenderer(size: CGSize(width: 1_600, height: 1_200), format: format).image { drawing in
+                for row in 0..<12 { for column in 0..<16 {
+                    UIColor(hue: CGFloat(row*16+column)/192, saturation: 0.7, brightness: 0.8, alpha: 1).setFill()
+                    drawing.fill(CGRect(x: column*100, y: row*100, width: 100, height: 100))
+                } }
+            }.jpegData(compressionQuality: 0.9))
+            let editor=JournalEditorModel(restoring: false)
+            editor.date=Self.night; editor.photos=[photo]
+            #expect(await editor.save(context: context, existing: nil))
+            let entry=try #require(try context.fetch(FetchDescriptor<JournalEntry>()).first)
+            let first=try #require(entry.cover?.persistentModelID)
+            let edited=JournalEditorModel(entry: entry, restoring: false)
+            edited.notes="The wind dropped after midnight."
+            #expect(await edited.save(context: context, existing: entry))
+            #expect(entry.notes == "The wind dropped after midnight." && entry.cover?.persistentModelID == first)
+            #expect(JournalCovers.data(first, in: container) == PhotoScaling.jpeg(photo, maxPixels: 900))
+            #expect(try Self.tally(container) == [1, 0, 1, 0])
+        }
+    }
     /// An entry added from Shortcuts with a photo has one cover.
     @Test func anIntentEntryHasOneCover() async throws {
         try await Self.inPlace { place in
