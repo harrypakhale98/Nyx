@@ -56,7 +56,7 @@ struct JournalView: View {
             }.padding(NyxMetrics.pagePadding).readableColumn(wide ? WideLayout.twoColumnMaximum : WideLayout.readableWidth)
         }.measuringWidth($width).foldSource()
             // `-nyx-bottom` (DEBUG) opens at the foot of the list, for captures of the last nights' cards.
-            .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
+            .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : nil)
             .background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
             .tabRootToolbar()
             .toolbar {
