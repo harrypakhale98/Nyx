@@ -379,14 +379,25 @@ import WidgetKit
     /// The watch asked for its context: the same run as opening Nyx (saved parks' clouds when
     /// forecasts are on, then the widget, the watch and reminders), with the hand-over sent even if
     /// unchanged (`WatchBridge` cleared its record). Woken in the background by the request, the
-    /// run asks iOS for time and keeps to `backgroundBudget`, as a background refresh does.
+    /// run asks iOS for time and keeps to `backgroundBudget`, as a background refresh does, or to
+    /// a little less than the time iOS gives. Should that time run out first, the run is cancelled
+    /// and the time handed back at once, so iOS never ends Nyx for keeping it.
     func answerWatch(_ model:PlanModel) async {
         if parkIDs == nil { parkIDs=SharedSettings.read()?.parks.map(\.id) }
         let app=UIApplication.shared
         guard app.applicationState == .background else { await update(model); return }
-        let task=app.beginBackgroundTask(withName:"Update Apple Watch",expirationHandler:nil)
-        await Self.run(within:Self.backgroundBudget) { await self.update(model,background:true) }
-        if task != .invalid { app.endBackgroundTask(task) }
+        let time=BackgroundTime { app.endBackgroundTask($0) }
+        time.began(app.beginBackgroundTask(withName:"Update Apple Watch") { time.expire() })
+        let budget=Self.budget(remaining:app.backgroundTimeRemaining)
+        let run=Task { _=await Self.run(within:budget) { await self.update(model,background:true) } }
+        time.run=run
+        await run.value
+        time.end()
+    }
+    /// `backgroundBudget`, or three seconds short of the background time iOS has left when that is less.
+    static func budget(remaining:TimeInterval)->Duration {
+        let most=Double(backgroundBudget.components.seconds)
+        return .seconds(max(1,min(most,remaining-3)))
     }
     /// The forecast models' range each followed park's dial shows for the week the watch shows
     /// (tonight and six more), keyed by park-local day: only where the iPhone draws one, so only
@@ -531,4 +542,25 @@ private struct SavedUpkeep: ViewModifier {
 extension View {
     /// `SavedUpkeep`, for a scene's saved parks and spots.
     func savedUpkeep(saved: [SavedPark], spots: [SavedSpot]) -> some View { modifier(SavedUpkeep(saved:saved,spots:spots)) }
+}
+/// Background time asked of iOS for one run, ended exactly once: by the run when it is done, or by
+/// iOS's expiration handler when time is up (`expire`), which also cancels the run. Time handed back
+/// before iOS's identifier arrives is handed back the moment it does.
+@MainActor final class BackgroundTime {
+    private let endTask:@MainActor (UIBackgroundTaskIdentifier)->Void
+    private var identifier:UIBackgroundTaskIdentifier = .invalid
+    private(set) var ended=false
+    /// The run cancelled when time is up.
+    var run:Task<Void,Never>?
+    init(end:@escaping @MainActor (UIBackgroundTaskIdentifier)->Void) { endTask=end }
+    func began(_ id:UIBackgroundTaskIdentifier) {
+        guard id != .invalid else { return }
+        if ended { endTask(id) } else { identifier=id }
+    }
+    func expire() { run?.cancel(); end() }
+    func end() {
+        guard !ended else { return }
+        ended=true
+        if identifier != .invalid { endTask(identifier); identifier = .invalid }
+    }
 }

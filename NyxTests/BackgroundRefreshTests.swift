@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import UIKit
 @testable import Nyx
 
 /// A background refresh has about 30 seconds: a cancelled caller stops waiting at once, the
@@ -75,6 +76,31 @@ struct BackgroundRefreshTests {
         #expect(!finished)
         if Bench.enabled { #expect(clock.now-start < .seconds(5)) }
         #expect(await SavedSkySync.run(within: .seconds(5)) {})
+    }
+    /// The background time given for the watch's answer is handed back once: when the run ends, or
+    /// when iOS says time is up (which also cancels the run), whichever comes first, even before
+    /// iOS's identifier arrived. The run keeps three seconds short of what iOS gives, at most 20 s.
+    @MainActor @Test func backgroundTimeEndsOnce() async {
+        var ended:[UIBackgroundTaskIdentifier]=[]
+        let id=UIBackgroundTaskIdentifier(rawValue: 7)
+        let time=BackgroundTime { ended.append($0) }
+        time.began(id)
+        let run=Task { _=try? await Task.sleep(for: .seconds(30)) }
+        time.run=run
+        time.expire(); time.end(); time.expire()
+        #expect(ended == [id] && run.isCancelled)
+        ended=[]
+        let early=BackgroundTime { ended.append($0) }
+        early.end(); early.began(id); early.end()
+        #expect(ended == [id])
+        ended=[]
+        let none=BackgroundTime { ended.append($0) }
+        none.began(.invalid); none.end()
+        #expect(ended.isEmpty)
+        #expect(SavedSkySync.budget(remaining: 30) == .seconds(20))
+        #expect(SavedSkySync.budget(remaining: 10) == .seconds(7))
+        #expect(SavedSkySync.budget(remaining: .greatestFiniteMagnitude) == .seconds(20))
+        #expect(SavedSkySync.budget(remaining: 0) == .seconds(1))
     }
     /// Nights worked out off the main thread (launch, Parks, the calendar's next months) score
     /// exactly as nights worked out on demand.
