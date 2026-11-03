@@ -34,6 +34,19 @@ actor GatedHTTP: HTTPTransport {
     }
     func release() { held?.resume(); held=nil }
 }
+/// Low Data Mode on: a request that may not use a constrained network is held back, as `SafeHTTP` holds it.
+actor LowDataHTTP: HTTPTransport {
+    private(set) var constrained: [Bool]=[]
+    private(set) var urls: [URL]=[]
+    func get(_ url: URL) async throws -> Data { try await get(url, headers: [:], constrained: true) }
+    func get(_ url: URL, headers: [String: String], constrained: Bool) async throws -> Data {
+        urls.append(url); self.constrained.append(constrained)
+        guard constrained else {
+            throw URLError(.notConnectedToInternet, userInfo: [NSURLErrorNetworkUnavailableReasonKey: URLError.NetworkUnavailableReason.constrained.rawValue])
+        }
+        return OpenMeteoEcho.body(for: url)
+    }
+}
 /// Hours that start on the hour, as Open-Meteo returns them.
 private let t0=1_789_999_200.0
 private func hours(_ count: Int) -> [Double] { (0..<count).map { t0+Double($0)*3600 } }
@@ -241,6 +254,20 @@ struct ForecastDetailTests {
         #expect(await inFlight.value[one[0].id]?.air == nil)
         #expect(await service.details(for:one,weather:false,smoke:false)[one[0].id]?.air == nil)
         #expect(await service.details(for:one,weather:false,smoke:true)[one[0].id]?.air != nil)
+    }
+    /// The summit's layers are Haleakalā's clouds, so they come in Low Data Mode, as the parks' clouds
+    /// and Vision Pro's same request do; the whole layers a page reads wait for it to end, and say so.
+    @Test func theSummitLayersComeInLowDataMode() async throws {
+        let hale=try #require(try ParkData.load().first { $0.aboveInversion == true })
+        let http=LowDataHTTP()
+        let service=ForecastDetailService(transport:http,persist:false)
+        let summit=await service.summitLayers(for:[hale])
+        #expect(ForecastDetailService.scoreOnly(summit[hale.id]?.layers))
+        #expect(!(await service.pausedForLowData()))
+        _=await service.details(for:[hale],kinds:[.layers])
+        #expect(await service.pausedForLowData())
+        #expect(await http.constrained == [true,false])
+        #expect(await http.urls.first == SummitLayerService.url(for:[hale]))
     }
     /// A failed refresh keeps the last good detail, and a fresh one is not asked for again.
     @Test func failureKeepsLastGoodDetail() async throws {

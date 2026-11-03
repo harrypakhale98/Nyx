@@ -387,7 +387,9 @@ actor ForecastDetailService: DetailProviding {
     private func fetch(_ kind: Kind, _ parks: [Park], caps: CallBudget.Caps? = nil) async -> [(String, HourlySeries)]? {
         guard !parks.isEmpty, let request=request(kind, parks) else { return [] }
         let data: Data
-        do { data=try await ForecastRequest.get(request.url, transport: transport, constrained: false, backoff: backoff, ledger: ledger, caps: caps ?? budget.essential, clock: clock) } catch {
+        // Low Data Mode is allowed for the summit's layers alone, as for the cloud forecast: they are
+        // that park's clouds (`NightPlanner.night`). Whole layers, models and smoke wait for it to end.
+        do { data=try await ForecastRequest.get(request.url, transport: transport, constrained: kind == .summit, backoff: backoff, ledger: ledger, caps: caps ?? budget.essential, clock: clock) } catch {
             if (error as? HTTPStatusError)?.refusesRequest == true { note(kind, parks.map(\.id), kept: []) }
             return Backoff.constrained(error) ? nil : []
         }
