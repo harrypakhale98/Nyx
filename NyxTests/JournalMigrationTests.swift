@@ -27,7 +27,7 @@ struct JournalMigrationTests {
         let root=try Self.folder("recover"), stash=root.appendingPathComponent("JournalMigration", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
         let url=root.appendingPathComponent("default.store")
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let waiting=JournalEntry(date: .now, parkID: "jotr", notes: "Photos still in the stash.")
         let id=waiting.id
         do {
@@ -55,7 +55,7 @@ struct JournalMigrationTests {
     @Test func aMoveAlreadyAttachedIsNotRepeated() throws {
         let root=try Self.folder("restore"), stash=root.appendingPathComponent("JournalMigration", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let container=try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
         let context=ModelContext(container)
         let entry=JournalEntry(date: .now, parkID: "jotr", notes: "Moved.", photos: [Data([1]), Data([2])])

@@ -313,7 +313,9 @@ struct DataIntegrityTests {
             context.insert(NyxSchemaV0.JournalEntry(date: .now, parkID: "deva", notes: "No photos."))
             try context.save()
         }
-        let opened=JournalStore.open(inMemory: false, url: url)
+        // The stash in this test's own folder, never the app's.
+        let stash=folder.appendingPathComponent("JournalMigration", isDirectory: true)
+        let opened=JournalMigration.$folderOverride.withValue(stash) { JournalStore.open(inMemory: false, url: url) }
         #expect(!opened.failed)
         let container=try #require(opened.container)
         let context=ModelContext(container)
@@ -323,7 +325,7 @@ struct DataIntegrityTests {
         #expect(moved.photos == photos && moved.notes == "Clear and still." && moved.observedBortle == 2)
         #expect(entries.first { $0.id != id }?.photos.isEmpty == true)
         #expect(try context.fetch(FetchDescriptor<SavedPark>()).map(\.parkID) == ["deva"])
-        #expect(JournalMigration.folder.map { !FileManager.default.fileExists(atPath: $0.path) } ?? true)
+        #expect(!FileManager.default.fileExists(atPath: stash.path))
     }
     /// A store that cannot be opened leaves the file untouched and the planner working.
     @MainActor @Test func unreadableStoreKeepsThePlannerWorking() throws {
@@ -344,7 +346,7 @@ struct DataIntegrityTests {
     /// Export, then import into another device's journal: everything arrives once, and importing
     /// again adds nothing.
     @MainActor @Test func journalRoundTrips() throws {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let phone=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
         let entry=JournalEntry(date: Date(timeIntervalSince1970: 1790899200), parkID: "jotr", observedBortle: 2, notes: "Saturn's rings.")
         phone.insert(entry); try phone.save()
@@ -372,7 +374,7 @@ struct DataIntegrityTests {
     /// Two different entries from one night in one archive both arrive; importing the archive again
     /// adds nothing, and an entry already here under another id (same park, moment and words) is not doubled.
     @MainActor @Test func importKeepsEveryEntryOfANight() throws {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let night=Date(timeIntervalSince1970: 1790899200)
         let archive=JournalArchive(manifest: .init(format: 1, exported: night, entries: [
             .init(id: UUID(), date: night, parkID: "jotr", observedBortle: 2, notes: "Saturn first.", photos: []),
@@ -391,7 +393,7 @@ struct DataIntegrityTests {
     /// A damaged or unknown archive is refused before anything is inserted, and a photo that is
     /// missing or is not an image is left out of an otherwise sound entry.
     @MainActor @Test func malformedArchivesInsertNothing() throws {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let context=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
         func package(_ json: String, photos: [String: Data] = [:]) -> FileWrapper {
             let folder=FileWrapper(directoryWithFileWrappers: [:])
@@ -414,7 +416,7 @@ struct DataIntegrityTests {
                                                       photos: ["a.jpg": photo, "b.jpg": Data("not a photo".utf8)]))
         #expect(counts(try sound.merge(into: context)) == [1, 0])
         let kept=try #require(try context.fetch(FetchDescriptor<JournalEntry>()).first)
-        #expect(kept.photos.count == 1 && kept.thumbnail != nil)
+        #expect(kept.photos.count == 1 && kept.cover != nil && kept.legacyThumbnail == nil)
         #expect(try context.fetch(FetchDescriptor<JournalPhoto>()).count == 1)
     }
     /// A journal another app opened in Nyx is a copy in Documents/Inbox: removed once handled, and
@@ -445,7 +447,7 @@ struct DataIntegrityTests {
     /// When the store on disk could not open, Siri and Shortcuts refuse plainly: nothing is written
     /// to the stand-in in memory, which would be gone on the next launch.
     @MainActor @Test func failedStoreRefusesJournalIntents() async throws {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let standIn=try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
         let before=(JournalAccess.container, JournalAccess.unavailable)
         defer { JournalAccess.configure(container: before.0, unavailable: before.1) }
@@ -478,7 +480,7 @@ struct DataIntegrityTests {
     /// The journal's export is gathered on a background context and an import's thumbnails are
     /// drawn as each batch of photos is re-encoded, as the Journal tab does off the main thread: same archive, same cards.
     @MainActor @Test func journalArchiveWorkHappensOffTheMainThread() async throws {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let container=try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
         let photo=try #require(UIGraphicsImageRenderer(size: CGSize(width: 40, height: 30)).image { context in
             UIColor.orange.setFill(); context.fill(CGRect(x: 0, y: 0, width: 40, height: 30))
@@ -496,7 +498,7 @@ struct DataIntegrityTests {
         let thumbnail=try #require(PhotoScaling.keepsake(photo).flatMap { PhotoScaling.jpeg($0, maxPixels: 900) })
         let other=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
         #expect(try await prepared.merge(into: other, batch: 1).added == 1)
-        #expect(try other.fetch(FetchDescriptor<JournalEntry>()).first?.thumbnail == thumbnail)
+        #expect(try other.fetch(FetchDescriptor<JournalEntry>()).first?.cover?.data == thumbnail)
     }
 
     // MARK: Forecasts

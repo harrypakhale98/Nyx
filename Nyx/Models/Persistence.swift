@@ -2,10 +2,11 @@ import Foundation
 import SwiftData
 
 /// The current models. Views and services name these; the versions below say how they came to be.
-typealias SavedPark=NyxSchemaV2.SavedPark
-typealias JournalEntry=NyxSchemaV2.JournalEntry
-typealias JournalPhoto=NyxSchemaV2.JournalPhoto
-typealias SavedSpot=NyxSchemaV2.SavedSpot
+typealias SavedPark=NyxSchemaV3.SavedPark
+typealias JournalEntry=NyxSchemaV3.JournalEntry
+typealias JournalPhoto=NyxSchemaV3.JournalPhoto
+typealias SavedSpot=NyxSchemaV3.SavedSpot
+typealias JournalCover=NyxSchemaV3.JournalCover
 
 /// The store exactly as 1.1 (7) shipped it, unversioned at the time: saved parks, and journal
 /// entries with their photos as one array. Never change these classes; a change belongs in a new
@@ -161,18 +162,125 @@ nonisolated enum NyxSchemaV2: VersionedSchema {
         static func newID() -> String { Park.spotPrefix+UUID().uuidString.lowercased() }
     }
 }
+/// Moves each card's thumbnail out of its entry's row into a record of its own, kept outside the
+/// database: the journal list and `MomentsWatcher` read every entry, and with it every thumbnail.
+/// The other models are V2's, unchanged.
+nonisolated enum NyxSchemaV3: VersionedSchema {
+    static let versionIdentifier=Schema.Version(4,0,0)
+    static var models: [any PersistentModel.Type] { [SavedPark.self, JournalEntry.self, JournalPhoto.self, SavedSpot.self, JournalCover.self] }
+    @Model nonisolated final class SavedPark {
+        @Attribute(.unique) var parkID: String
+        var savedAt: Date
+        init(parkID: String) { self.parkID=parkID; savedAt = .now }
+    }
+    @Model nonisolated final class JournalEntry {
+        var id: UUID
+        var date: Date
+        var parkID: String
+        var observedBortle: Int
+        var notes: String
+        /// In no particular order as stored; `orderedPhotos` reads them in the order they were added.
+        @Relationship(deleteRule: .cascade, inverse: \JournalPhoto.entry) var photoItems: [JournalPhoto] = []
+        /// The card's thumbnail where V2 kept it, in the entry's own row. The store empties it into
+        /// `cover` as it opens (`JournalCovers.move`); read only while that move has not run.
+        @Attribute(originalName: "thumbnail") var legacyThumbnail: Data? = nil
+        /// A small JPEG of the first photo, so the journal list never loads full photos, in a record
+        /// of its own so listing the journal loads none of these either. Written only by `setThumbnail`.
+        @Relationship(deleteRule: .cascade, inverse: \JournalCover.entry) var cover: JournalCover? = nil
+        init(date: Date, parkID: String, observedBortle: Int = 3, notes: String = "", photos: [Data] = []) {
+            id=UUID(); self.date=date; self.parkID=parkID; self.observedBortle=observedBortle; self.notes=notes
+            if !photos.isEmpty { photoItems=photos.enumerated().map { JournalPhoto(index: $0.offset, data: $0.element) } }
+        }
+        var orderedPhotos: [JournalPhoto] { photoItems.sorted { $0.index<$1.index } }
+        /// The photos' data in order. Setting it keeps each photo that is still there (and its
+        /// description), adds new ones and deletes the ones removed.
+        var photos: [Data] {
+            get { orderedPhotos.map(\.data) }
+            set {
+                var pool=photoItems, next: [JournalPhoto]=[]
+                for (index, data) in newValue.enumerated() {
+                    if let match=pool.firstIndex(where: { $0.data == data }) {
+                        let photo=pool.remove(at: match); photo.index=index; next.append(photo)
+                    } else { next.append(JournalPhoto(index: index, data: data)) }
+                }
+                photoItems=next
+                if let modelContext { for photo in pool { modelContext.delete(photo) } }
+            }
+        }
+        /// The one way a card's thumbnail is written: the old cover is deleted (its file outside the
+        /// store with it), a new one holds `data`, and the V2 column is emptied. A cover replaced or
+        /// cleared without being deleted would stay behind, belonging to no entry.
+        func setThumbnail(_ data: Data?, in context: ModelContext) {
+            let old=cover
+            legacyThumbnail=nil
+            if let data {
+                let new=JournalCover(data: data)
+                context.insert(new)
+                cover=new
+            } else { cover=nil }
+            if let old { context.delete(old) }
+        }
+    }
+    @Model nonisolated final class JournalPhoto {
+        /// Position within its entry.
+        var index: Int
+        @Attribute(.externalStorage) var data: Data
+        /// A description for VoiceOver, written by the person.
+        var altText: String?
+        var entry: JournalEntry?
+        init(index: Int, data: Data, altText: String? = nil) { self.index=index; self.data=data; self.altText=altText }
+    }
+    /// A place the person saved themselves: from where they stand,
+    /// typed coordinates or a pin. Scored, forecast and followed like a park (`Place(spot:)`).
+    /// While it is saved, a `SavedPark` row with the same id puts it beside the saved parks, so
+    /// reminders, the widgets, the watch and Plan include it with no change of their own; unsaving
+    /// removes that row only, and deleting the spot removes both (`SavedSpots`).
+    @Model nonisolated final class SavedSpot {
+        /// `pin:` and a lowercase UUID (`PlaceIDText`).
+        @Attribute(.unique) var id: String
+        var name: String
+        /// Exactly where it was saved. Only the forecast request rounds them (to 0.1°, `SpotForecast`).
+        var latitude: Double
+        var longitude: Double
+        /// IANA zone, from the nearest bundled place when it was saved.
+        var timeZoneID: String
+        /// ISO 3166-1 alpha-2, from the nearest bundled place; empty when none was known.
+        var countryCode: String
+        /// The first-level region as `Place.region` writes it, from the nearest bundled place.
+        var region: String
+        var createdAt: Date
+        /// The person's own words about the spot ("north pullout, gate locks at 10").
+        var note: String?
+        init(id: String = SavedSpot.newID(), name: String, latitude: Double, longitude: Double, timeZoneID: String,
+             countryCode: String, region: String, createdAt: Date = .now, note: String? = nil) {
+            self.id=id; self.name=name; self.latitude=latitude; self.longitude=longitude; self.timeZoneID=timeZoneID
+            self.countryCode=countryCode; self.region=region; self.createdAt=createdAt; self.note=note
+        }
+        static func newID() -> String { Park.spotPrefix+UUID().uuidString.lowercased() }
+    }
+    /// A journal card's thumbnail, kept outside the database.
+    @Model nonisolated final class JournalCover {
+        @Attribute(.externalStorage) var data: Data
+        var entry: JournalEntry?
+        init(data: Data) { self.data=data }
+    }
+}
 /// V0 → V1 moves each entry's photo array into photo records. SwiftData cannot read the old
 /// photos and write the new records in one context, so they wait on disk in between: written
 /// before the store changes, attached after, and removed only once saved. If the app stops between
 /// the two, `JournalMigration.recover` finishes the move on the next launch.
+/// V2 → V3 only renames the thumbnail column and adds the cover records, in place; the thumbnails
+/// themselves move into covers once the store is open (`JournalCovers.move`), a batch at a time.
 nonisolated enum NyxMigrationPlan: SchemaMigrationPlan {
-    static var schemas: [any VersionedSchema.Type] { [NyxSchemaV0.self, NyxSchemaV1.self, NyxSchemaV2.self] }
+    static var schemas: [any VersionedSchema.Type] { [NyxSchemaV0.self, NyxSchemaV1.self, NyxSchemaV2.self, NyxSchemaV3.self] }
     static var stages: [MigrationStage] {
         [.custom(fromVersion: NyxSchemaV0.self, toVersion: NyxSchemaV1.self,
                  willMigrate: { context in try JournalMigration.stash(context) },
                  didMigrate: { context in try JournalMigration.restore(context) }),
          // V1 → V2 only adds a model (saved spots): nothing existing changes, so SwiftData's lightweight migration does it.
-         .lightweight(fromVersion: NyxSchemaV1.self, toVersion: NyxSchemaV2.self)]
+         .lightweight(fromVersion: NyxSchemaV1.self, toVersion: NyxSchemaV2.self),
+         // V2 → V3 renames a column and adds a model: SwiftData's lightweight migration does it, and nothing is copied.
+         .lightweight(fromVersion: NyxSchemaV2.self, toVersion: NyxSchemaV3.self)]
     }
 }
 nonisolated enum JournalMigration {
@@ -289,15 +397,69 @@ nonisolated enum JournalMigration {
 /// `shortOfSpace` says the device is too full for the store (or its one-time move) to be trusted to open.
 @MainActor enum JournalStore {
     static func open(inMemory: Bool, url: URL? = nil) -> (container: ModelContainer?, failed: Bool, shortOfSpace: Bool) {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let configuration=url.map { ModelConfiguration(schema: schema, url: $0) } ?? ModelConfiguration(schema: schema, isStoredInMemoryOnly: inMemory)
         do {
             let container=try ModelContainer(for: schema, migrationPlan: NyxMigrationPlan.self, configurations: configuration)
-            if !inMemory { JournalMigration.recover(container) }
+            if !inMemory { JournalMigration.recover(container); JournalCovers.move(container) }
             return (container, false, false)
         } catch {
             let memory=try? ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
             return (memory, true, !inMemory && !JournalMigration.hasRoom(forStoreAt: configuration.url))
         }
+    }
+}
+/// Empties V2's thumbnail column into cover records, 25 entries a save, as the store opens. Each
+/// batch is all or nothing. One that cannot be saved (a full device) stops the move without failing
+/// the open: the rest keep their thumbnails where they were, still shown (`JournalCovers.picture`),
+/// and move on a later launch. Run again, it moves nothing twice; a cover already there is kept.
+nonisolated enum JournalCovers {
+    static let batch=25
+    /// Tests only: the most batches one move saves, for the task that sets it. Nil, no limit.
+    @TaskLocal static var batchLimit: Int?
+    /// The number of entries moved.
+    @discardableResult static func move(_ container: ModelContainer) -> Int {
+        let waiting=#Predicate<JournalEntry> { $0.legacyThumbnail != nil }
+        guard let total=try? ModelContext(container).fetchCount(FetchDescriptor(predicate: waiting)), total>0 else { return 0 }
+        var descriptor=FetchDescriptor(predicate: waiting)
+        descriptor.fetchLimit=batch
+        var moved=0
+        // Never more batches than the rows waiting, whatever a save reports.
+        for done in 0..<(total+batch-1)/batch {
+            if let batchLimit, done>=batchLimit { break }
+            let context=ModelContext(container)
+            context.autosaveEnabled=false
+            guard let rows=try? context.fetch(descriptor), !rows.isEmpty else { break }
+            for entry in rows {
+                if entry.cover == nil, let data=entry.legacyThumbnail, !data.isEmpty {
+                    let cover=JournalCover(data: data)
+                    context.insert(cover)
+                    entry.cover=cover
+                }
+                entry.legacyThumbnail=nil
+            }
+            do { try context.save() } catch { context.rollback(); break }
+            moved+=rows.count
+        }
+        return moved
+    }
+    /// What a journal card shows: its cover, read by id off the main thread (`data`), or the
+    /// thumbnail still in the entry's row while the move has not run.
+    enum Picture: Equatable {
+        case cover(PersistentIdentifier)
+        case inRow(Data)
+    }
+    static func picture(of entry: JournalEntry) -> Picture? {
+        if let cover=entry.cover { return .cover(cover.persistentModelID) }
+        return entry.legacyThumbnail.flatMap { $0.isEmpty ? nil : .inRow($0) }
+    }
+    /// A cover's bytes, read in a context of its own that lets them go, copied out of the store's
+    /// file; nil when the cover is gone (its entry deleted, or its photo changed, since a card asked).
+    /// Fetched by id, never looked up with `model(for:)`, which stops the app on a deleted record.
+    static func data(_ id: PersistentIdentifier, in container: ModelContainer) -> Data? {
+        var descriptor=FetchDescriptor<JournalCover>(predicate: #Predicate { $0.persistentModelID == id })
+        descriptor.fetchLimit=1
+        guard let cover=try? ModelContext(container).fetch(descriptor).first else { return nil }
+        return cover.data.withUnsafeBytes { Data($0) }
     }
 }

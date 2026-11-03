@@ -154,15 +154,15 @@ struct DebugScreen: View {
             let day:TimeInterval=86_400
             let latest=JournalEntry(date:.now,parkID:model.homeID,notes:es ? "La Vía Láctea se extendía sobre la cresta. Una hora tranquila bajo las estrellas." : "The Milky Way stretched above the ridge. A quiet hour under the stars.")
             let oldest=JournalEntry(date:.now-81*day,parkID:"deva",observedBortle:2,notes:es ? "Viento tibio desde las dunas. El núcleo galáctico colgaba bajo en el sur." : "Warm wind off the dunes. The galactic core hung low in the south.")
+            context.insert(latest)
+            context.insert(oldest)
             // A photo and its card thumbnail, as the editor saves them, so the first and last cards show one
             // (the last at the foot of the list with `-nyx-bottom`).
             if let image=samplePhoto(), let photo=PhotoScaling.jpeg(image,maxPixels:2400) {
-                for entry in [latest,oldest] { entry.photos=[photo]; entry.thumbnail=PhotoScaling.jpeg(photo,maxPixels:900) }
+                for entry in [latest,oldest] { entry.photos=[photo]; entry.setThumbnail(PhotoScaling.jpeg(photo,maxPixels:900),in:context) }
             }
-            context.insert(latest)
             context.insert(JournalEntry(date:.now-24*day,parkID:"grba",observedBortle:1,notes:es ? "Sin Luna. Había tantas estrellas que costaba encontrar las constelaciones." : "No moon. The sky was so full of stars the constellations were hard to find."))
             context.insert(JournalEntry(date:.now-52*day,parkID:"brca",observedBortle:2,notes:es ? "Programa de astronomía con guardaparques. Saturno en un telescopio, con anillos y todo." : "Ranger astronomy program. Saturn through a telescope, rings and all."))
-            context.insert(oldest)
             context.insert(SavedPark(parkID:model.homeID))
             try? context.save()
             // `-nyx-star-new 4`: one more night recorded that many seconds in, as a save from the editor

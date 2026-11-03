@@ -258,7 +258,7 @@ struct JournalCard:View {
         let park=model.park(entry.parkID)
         let moon=park.map { model.night($0,on:entry.date).sky.moon }
         Panel { VStack(alignment:.leading,spacing:10) {
-            if let thumbnail=entry.thumbnail { JournalThumbnail(data:thumbnail).padding(.bottom,4) }
+            if let picture=JournalCovers.picture(of:entry) { JournalCardPhoto(picture:picture).padding(.bottom,4) }
             HStack(alignment:.top,spacing:12) {
                 VStack(alignment:.leading,spacing:4) {
                     Text(park?.shortName ?? String(localized:"A night outside")).font(.system(.title2,design:.serif))
@@ -333,13 +333,36 @@ struct PhotoView:View {
         }
     }
 }
-/// A journal card's photo: the stored small thumbnail, so a long journal scrolls smoothly.
+/// A journal card's photo: the stored small thumbnail, so a long journal scrolls smoothly. Without
+/// data yet, the same black frame, so nothing moves when it arrives.
 struct JournalThumbnail:View {
-    let data:Data
+    let data:Data?
     var body:some View {
-        Color.black.frame(height:150).overlay { PhotoView(data:data,maxPixels:900,fill:true) }
+        Color.black.frame(height:150).overlay {
+            if let data { PhotoView(data:data,maxPixels:900,fill:true) } else { Color.black.accessibilityIgnoresInvertColors() }
+        }
             .clipShape(RoundedRectangle(cornerRadius:16))
             .accessibilityHidden(true)
+    }
+}
+/// A card's thumbnail, read off the main thread in a context of its own (`JournalCovers.data`), so
+/// the list never holds every card's picture; its frame is there from the start.
+private struct JournalCardPhoto:View {
+    @Environment(\.modelContext) private var context
+    let picture:JournalCovers.Picture
+    /// The bytes read, with the cover they were read for: a card whose photo changed never shows the old one.
+    @State private var loaded:(id:PersistentIdentifier,data:Data?)?
+    var body:some View {
+        switch picture {
+        case .inRow(let data): JournalThumbnail(data:data)
+        case .cover(let id):
+            JournalThumbnail(data:loaded.flatMap { $0.id == id ? $0.data : nil })
+                .task(id:id) {
+                    let container=context.container
+                    let data=await Task.detached(priority:.utility) { JournalCovers.data(id,in:container) }.value
+                    loaded=(id,data)
+                }
+        }
     }
 }
 @MainActor @Observable final class JournalEditorModel {
@@ -461,14 +484,14 @@ struct JournalThumbnail:View {
         let first=photos.first
         let thumbnail=await Task.detached(priority:.userInitiated) { first.flatMap { PhotoScaling.jpeg($0,maxPixels:900) } }.value
         let entry=existing ?? JournalEntry(date:date,parkID:parkID)
+        if existing==nil { context.insert(entry) }
         entry.date=date;entry.parkID=parkID;entry.observedBortle=observedBortle;entry.notes=notes;entry.photos=photos
         // Only what the person wrote or chose to use is kept; a suggestion never saves itself.
         for (photo,text) in zip(entry.orderedPhotos,Self.aligned(descriptions,to:photos.count)) {
             let trimmed=text.trimmingCharacters(in:.whitespacesAndNewlines)
             photo.altText=trimmed.isEmpty ? nil : trimmed
         }
-        entry.thumbnail=thumbnail
-        if existing==nil { context.insert(entry) }
+        entry.setThumbnail(thumbnail,in:context)
         do { try context.save();saved=true;if existing == nil { Self.forgetKept() };return true } catch { context.rollback();self.error=String(localized:"This night could not be stored. Try again when space is available.");return false }
     }
 }

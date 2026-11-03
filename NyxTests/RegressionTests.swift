@@ -24,7 +24,7 @@ import UniformTypeIdentifiers
                              photos: photos.map { JournalArchive.Photo(file: $0, altText: nil) })
     }
     private static func container() throws -> ModelContainer {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         return try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
     }
     private static func package(_ manifest: JournalArchive.Manifest) throws -> URL {
@@ -86,7 +86,7 @@ import UniformTypeIdentifiers
         let result=try await prepared.merge(into: context, batch: 1)
         #expect(result.added == 2 && result.skipped == 1)
         let stored=try context.fetch(FetchDescriptor<JournalEntry>())
-        #expect(stored.first { $0.notes == "Orange." }?.photoItems.count == 1 && stored.first { $0.notes == "Orange." }?.thumbnail != nil)
+        #expect(stored.first { $0.notes == "Orange." }?.photoItems.count == 1 && stored.first { $0.notes == "Orange." }?.cover != nil)
         #expect(stored.first { $0.notes == "Blue." }?.photoItems.isEmpty == true)
         #expect(stored.first { $0.id == here.id }?.photoItems.isEmpty == true)
     }

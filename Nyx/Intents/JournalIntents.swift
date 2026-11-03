@@ -155,9 +155,9 @@ struct AddJournalEntryIntent: AppIntent {
         // Read and shrunk off the main thread: a photo can be tens of megabytes.
         let scaled=await Task.detached(priority: .userInitiated) { Array(files.lazy.compactMap(keepsake).prefix(PhotoScaling.perEntry)) }.value
         let entry=JournalEntry(date: entryDate(date, park: place, now: .now), parkID: parkID, observedBortle: place?.bortleEstimate ?? 3, notes: notes, photos: scaled)
-        entry.thumbnail=scaled.first.flatMap { PhotoScaling.jpeg($0, maxPixels: 900) }
         let context=store.mainContext
         context.insert(entry)
+        entry.setThumbnail(scaled.first.flatMap { PhotoScaling.jpeg($0, maxPixels: 900) }, in: context)
         do { try context.save() } catch { context.rollback(); throw NyxIntentError.journalUnavailable }
         return JournalEntryEntity(entry, photos: true, snapshot: snapshot)
     }

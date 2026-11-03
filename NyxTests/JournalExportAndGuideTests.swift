@@ -24,7 +24,7 @@ private func jpeg(_ color: UIColor) throws -> Data {
     /// The export written straight to disk, a night's photos at a time, is the same package byte for
     /// byte as the archive made in memory, and it imports.
     @Test func exportOnDiskMatchesTheArchiveAndImports() async throws {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let container=try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
         let phone=container.mainContext
         let first=JournalEntry(date: Date(timeIntervalSince1970: 1_790_899_200.6), parkID: "jotr", observedBortle: 2, notes: "Saturn's rings.")

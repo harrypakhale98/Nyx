@@ -71,7 +71,7 @@ struct SavedSpotTests {
     }
     /// Saving follows the spot; unsaving (the bookmark) keeps the spot; deleting removes both.
     @MainActor @Test func savingFollowsAndDeletingRemovesBoth() throws {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let context=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
         try SavedSpots.save(Self.spot(), in: context)
         try SavedSpots.follow(Self.jotr, in: context)
@@ -268,7 +268,7 @@ struct SavedSpotTests {
     /// every spot arrives unfollowed (an archive never sets up reminders on its own), and importing
     /// twice adds nothing.
     @MainActor @Test func archiveCarriesSpots() throws {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let phone=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
         try SavedSpots.save(Self.spot(note: "North pullout."), in: phone)
         phone.insert(Self.spot(Self.other, latitude: 47.5, longitude: 8.25))
@@ -298,7 +298,7 @@ struct SavedSpotTests {
     /// A journal without spots is written exactly as before (format 1, no spots key), and a
     /// format-1 archive from an earlier version still imports.
     @MainActor @Test func olderArchivesStillImport() throws {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let phone=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
         phone.insert(JournalEntry(date: Date(timeIntervalSince1970: 1_790_899_200), parkID: "jotr", notes: "Saturn."))
         try phone.save()
@@ -319,7 +319,7 @@ struct SavedSpotTests {
     }
     /// A spot whose id or coordinates are not well formed is left out; the entries still arrive.
     @MainActor @Test func malformedSpotsAreLeftOut() throws {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let night=Date(timeIntervalSince1970: 1_790_899_200)
         func spot(_ id: String, _ lat: Double, zone: String="America/Denver") -> JournalArchive.Spot {
             .init(id: id, name: "A", latitude: lat, longitude: -105, timeZoneID: zone, countryCode: "US", region: "CO", created: night, note: nil, saved: true)

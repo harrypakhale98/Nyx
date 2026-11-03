@@ -91,8 +91,8 @@ struct MomentsWatcher: View {
     @Environment(\.modelContext) private var context
     @Query private var saved:[SavedPark]
     /// The journal's entries by identifier only, read again after every save. Never the entries
-    /// themselves: each holds its card's thumbnail, and a query of them all kept every one in
-    /// memory behind the tabs for as long as Nyx ran.
+    /// themselves: a query of them all would keep every one in memory behind the tabs for as long
+    /// as Nyx runs (each once held its card's thumbnail too, before those moved out, `JournalCover`).
     @State private var journal:Set<PersistentIdentifier>?
     @AppStorage("notificationsEnabled") private var notificationsEnabled=false
     @AppStorage("reminderOfferShown") private var offerShown=false

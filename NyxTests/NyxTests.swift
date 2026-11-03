@@ -291,7 +291,7 @@ struct NyxTests {
         editor.photos=[stored]
         #expect(await editor.save(context:ModelContext(container),existing:nil))
         let entry=try #require(try ModelContext(container).fetch(FetchDescriptor<JournalEntry>()).first)
-        let thumbnail=try #require(entry.thumbnail.flatMap { UIImage(data:$0) })
+        let thumbnail=try #require(entry.cover.flatMap { UIImage(data:$0.data) })
         #expect(max(thumbnail.size.width,thumbnail.size.height)<=900)
     }
     @Test func publishedRiseSet() throws {

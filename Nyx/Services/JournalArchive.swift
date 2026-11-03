@@ -407,7 +407,7 @@ nonisolated struct JournalImport: Sendable {
                     context.insert(record)
                     record.entry=entry
                 }
-                entry.thumbnail=night.thumbnail
+                entry.setThumbnail(night.thumbnail, in: context)
                 added+=1
             }
         }

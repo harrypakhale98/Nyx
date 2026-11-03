@@ -64,7 +64,7 @@ struct SecurityGlobalTests {
                             timeZoneID: "America/Los_Angeles", countryCode: "US", region: region, created: Date(timeIntervalSince1970: 1_790_000_000), note: nil, saved: saved)
     }
     @MainActor private static func context() throws -> ModelContext {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         return ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
     }
     private static func folder() throws -> URL {
@@ -258,7 +258,7 @@ struct SecurityGlobalTests {
     // MARK: The journal while locked
 
     @MainActor @Test func aLockedDeviceNeverReadsTheJournal() async throws {
-        let schema=Schema(versionedSchema: NyxSchemaV2.self)
+        let schema=Schema(versionedSchema: NyxSchemaV3.self)
         let store=try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
         let before=(JournalAccess.container, JournalAccess.unavailable, JournalAccess.unlocked)
         defer { JournalAccess.configure(container: before.0, unavailable: before.1); JournalAccess.unlocked=before.2 }

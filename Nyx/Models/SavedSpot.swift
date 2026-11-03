@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 // Saved spots: a place the person saves themselves, from where they
-// stand, typed coordinates or a pin. The record is `SavedSpot` (Persistence.swift, NyxSchemaV2); this
+// stand, typed coordinates or a pin. The record is `SavedSpot` (Persistence.swift, NyxSchemaV3); this
 // file turns it into a `Place` the engine scores, and saves, unsaves and deletes it.
 //
 // One spot, two rows. The spot's own record says where it is. While it is saved, a `SavedPark` row
