@@ -1117,7 +1117,9 @@ actor WeatherService: WeatherProviding {
 /// so nights past its reach use the summit's usual clouds on both. Kept on disk beside the forecast;
 /// a failed request keeps the last layers, and without any the score counts the usual clouds (never
 /// the total cloud, which the low inversion cloud below the summit dominates).
-/// The iPhone never asks for these: its layers come with forecast detail (DataServices.swift).
+/// The iPhone does not use this service. It sends the same request through forecast detail
+/// (`ForecastDetailService.summitLayers`, `Kind.summit` in DataServices.swift) with the clouds,
+/// until a park page asks for the whole layers, which carry these two (`PlanModel`).
 actor SummitLayerService {
     static let keys=["cloud_cover_mid","cloud_cover_high"]
     /// The iPhone's layer freshness (`ForecastDetailService.freshFor`): the layers are the summit's
