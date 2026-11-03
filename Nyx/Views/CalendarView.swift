@@ -649,8 +649,9 @@ struct CalendarView: View {
     }
     /// Why the park's best night is not in the ringed stretch, when it is not: the stretch keeps to
     /// nights a forecast reaches, or it is five nights in a row, which one fine night alone can outscore.
-    /// A moon stretch counts moonlight alone, while a score also counts what the night's clouds are
-    /// known to be, the hours of true darkness and when the Moon is up.
+    /// A moon stretch counts the moonlight the score counts (`SkyConditions.scoredMoonlight`, which
+    /// weighs when the Moon is up), while a score also counts what the night's clouds are known to be
+    /// and the hours of true darkness.
     nonisolated static func apart(best:Night,from stretch:Stretch)->String? {
         guard !stretch.nights.contains(where:{ $0.id==best.id }) else { return nil }
         switch stretch.kind {
@@ -661,8 +662,8 @@ struct CalendarView: View {
             guard !stretch.nights.isEmpty else { return nil }
             // "This stretch", not "the ring": at accessibility sizes the month is a list with no ring.
             if best.basis != .usual { return String(localized:"This stretch has the least moonlight past the forecasts; the best night is one a forecast reaches.") }
-            return best.score.cloudPoints == nil ? String(localized:"This stretch has the least moonlight; the score also counts the hours of true darkness and when the Moon is up.")
-                : String(localized:"This stretch has the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up.")
+            return best.score.cloudPoints == nil ? String(localized:"This stretch has the least moonlight; the score also counts the hours of true darkness.")
+                : String(localized:"This stretch has the least moonlight; the score also counts usual clouds and the hours of true darkness.")
         }
     }
     /// How the ring was chosen, for the key: five nights in a row by score while forecasts reach them,

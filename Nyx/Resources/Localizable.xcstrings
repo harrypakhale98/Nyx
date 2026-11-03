@@ -72081,72 +72081,72 @@
         }
       }
     },
-    "This stretch has the least moonlight; the score also counts the hours of true darkness and when the Moon is up.": {
+    "This stretch has the least moonlight; the score also counts the hours of true darkness.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Diese Serie hat das wenigste Mondlicht; der Wert zählt auch die Stunden echter Dunkelheit und wann der Mond am Himmel steht."
+            "value": "Diese Serie hat das wenigste Mondlicht; der Wert zählt auch die Stunden echter Dunkelheit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This stretch has the least moonlight; the score also counts the hours of true darkness and when the Moon is up."
+            "value": "This stretch has the least moonlight; the score also counts the hours of true darkness."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Esta racha tiene la menor luz de luna; el índice también cuenta las horas de oscuridad total y cuándo está la Luna en el cielo."
+            "value": "Esta racha tiene la menor luz de luna; el índice también cuenta las horas de oscuridad total."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cette série a le moins de clair de lune ; l’indice compte aussi les heures d’obscurité totale et le moment où la Lune est levée."
+            "value": "Cette série a le moins de clair de lune ; l’indice compte aussi les heures d’obscurité totale."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この連夜は月明かりが最も少ない夜です。スコアには、完全に暗い時間の長さと月が出ている時間帯も含まれます。"
+            "value": "この連夜は月明かりが最も少ない夜です。スコアには、完全に暗い時間の長さも含まれます。"
           }
         }
       }
     },
-    "This stretch has the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up.": {
+    "This stretch has the least moonlight; the score also counts usual clouds and the hours of true darkness.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Diese Serie hat das wenigste Mondlicht; der Wert zählt auch die übliche Bewölkung, die Stunden echter Dunkelheit und wann der Mond am Himmel steht."
+            "value": "Diese Serie hat das wenigste Mondlicht; der Wert zählt auch die übliche Bewölkung und die Stunden echter Dunkelheit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This stretch has the least moonlight; the score also counts usual clouds, the hours of true darkness and when the Moon is up."
+            "value": "This stretch has the least moonlight; the score also counts usual clouds and the hours of true darkness."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Esta racha tiene la menor luz de luna; el índice también cuenta las nubes habituales, las horas de oscuridad total y cuándo está la Luna en el cielo."
+            "value": "Esta racha tiene la menor luz de luna; el índice también cuenta las nubes habituales y las horas de oscuridad total."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cette série a le moins de clair de lune ; l’indice compte aussi la nébulosité habituelle, les heures d’obscurité totale et le moment où la Lune est levée."
+            "value": "Cette série a le moins de clair de lune ; l’indice compte aussi la nébulosité habituelle et les heures d’obscurité totale."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この連夜は月明かりが最も少ない夜です。スコアには、平年の雲量、完全に暗い時間の長さ、月が出ている時間帯も含まれます。"
+            "value": "この連夜は月明かりが最も少ない夜です。スコアには、平年の雲量と完全に暗い時間の長さも含まれます。"
           }
         }
       }
