@@ -150,6 +150,19 @@ struct SpotScreensTests {
         #expect(entity.isSpot)
         #expect(!ParkEntity(jotr).isSpot)
     }
+    /// A spot's name can be a home: Siri's suggestions and App Shortcut phrases never carry one, while
+    /// the widgets' and controls' place choice still leads with the person's spots.
+    @Test func spotsStayOutOfSiriSuggestionsButLeadThePlaceChoice() throws {
+        let spot=Self.spot()
+        let jotr=try #require(ParkData.load().first { $0.id == "jotr" })
+        let snapshot=SavedSkySnapshot(parks: [jotr, spot], forecasts: [:])
+        let suggested=try ParkQuery.suggested(snapshot: snapshot)
+        #expect(!suggested.contains { $0.id.hasPrefix(Park.spotPrefix) })
+        let parks=try ParkData.load()
+        #expect(suggested.first?.id == "jotr" && suggested.count == parks.count)
+        let options=try PlaceOptions.places(snapshot: snapshot)
+        #expect(options.first?.id == spot.id && options.count == suggested.count+1)
+    }
     @Test func aSpotNoLongerFollowedIsNotOffered() throws {
         let jotr=try #require(ParkData.load().first { $0.id == "jotr" })
         let snapshot=SavedSkySnapshot(parks: [jotr], forecasts: [:])

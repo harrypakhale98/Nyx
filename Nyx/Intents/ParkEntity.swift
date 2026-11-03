@@ -94,9 +94,14 @@ struct ParkQuery:EntityStringQuery {
     static func unsavedPlace(_ id:String)->Bool {
         (id.hasPrefix(Park.spotPrefix) || id.hasPrefix(Park.catalogPrefix+"Q")) && id.count<=64 && !id.contains(where: { $0.isWhitespace || $0=="/" })
     }
-    /// Saved spots first, then followed places abroad and saved parks (the ones people ask about), then
-    /// the rest of the 63 by name. Never the whole world: a list of 3,400 helps no one choose.
-    func suggestedEntities() async throws -> [ParkEntity] { try ParkLibrary.suggested(snapshot:await SharedSettings.load()).map(ParkEntity.init) }
+    /// Followed places abroad and saved parks (the ones people ask about), then the rest of the 63 by
+    /// name. Never the whole world: a list of 3,400 helps no one choose. Never a saved spot either:
+    /// these become App Shortcut phrases and Siri's suggestions, and a spot's name can be someone's
+    /// home. Shortcuts still finds a spot by name, and the widgets and controls offer spots first (`PlaceOptions`).
+    func suggestedEntities() async throws -> [ParkEntity] { try Self.suggested(snapshot:await SharedSettings.load()) }
+    static func suggested(snapshot:SavedSkySnapshot?) throws -> [ParkEntity] {
+        try ParkLibrary.suggested(snapshot:snapshot).filter { !$0.id.hasPrefix(Park.spotPrefix) }.map(ParkEntity.init)
+    }
     /// The parks and followed places that match, then the world catalogue's best matches (`ParkLibrary.search`).
     func entities(matching string:String) async throws -> [ParkEntity] {
         let known=try ParkLibrary.places(snapshot:await SharedSettings.load()).filter { $0.matches(string) }
@@ -164,6 +169,12 @@ nonisolated enum ParkLibrary {
         return ranked.sorted { ($0.1,$0.0.name,$0.0.id)<($1.1,$1.0.name,$1.0.id) }.prefix(limit).map(\.0)
     }
 }
+/// The widgets' and controls' place choice: saved spots first, then followed places abroad, saved
+/// parks and the rest of the 63 (`ParkLibrary.suggested`). A home screen setting, so a spot may be named here.
+struct PlaceOptions:DynamicOptionsProvider {
+    func results() async throws -> [ParkEntity] { try Self.places(snapshot:await SharedSettings.load()) }
+    static func places(snapshot:SavedSkySnapshot?) throws -> [ParkEntity] { try ParkLibrary.suggested(snapshot:snapshot).map(ParkEntity.init) }
+}
 /// Opens a park in Nyx: a Spotlight result, a snippet's "Open in Nyx", or Shortcuts.
 struct OpenParkIntent:OpenIntent {
     static let title:LocalizedStringResource="Open park"
@@ -217,7 +228,7 @@ nonisolated enum ParkOpenRequest {
 struct TonightWidgetIntent:WidgetConfigurationIntent {
     static let title:LocalizedStringResource="Tonight's sky"
     static let description=IntentDescription("Shows one place's night, or the darkest of your saved places. Saved places carry their cloud forecast.")
-    @Parameter(title:"Place",description:"Leave empty for the darkest of your saved places tonight.") var park:ParkEntity?
+    @Parameter(title:"Place",description:"Leave empty for the darkest of your saved places tonight.",optionsProvider:PlaceOptions()) var park:ParkEntity?
     init() {}
     init(park:ParkEntity?) { self.park=park }
 }
@@ -226,14 +237,14 @@ struct TonightWidgetIntent:WidgetConfigurationIntent {
 struct MoonWidgetIntent:WidgetConfigurationIntent {
     static let title:LocalizedStringResource="The Moon"
     static let description=IntentDescription("Tonight's Moon: its phase, how much is lit, and when it rises or sets at a place.")
-    @Parameter(title:"Place",description:"Leave empty for your first saved place.") var park:ParkEntity?
+    @Parameter(title:"Place",description:"Leave empty for your first saved place.",optionsProvider:PlaceOptions()) var park:ParkEntity?
     init() {}
     init(park:ParkEntity?) { self.park=park }
 }
 /// The Tonight control's setting, as the widget's.
 struct TonightControlIntent:ControlConfigurationIntent {
     static let title:LocalizedStringResource="Tonight's score"
-    @Parameter(title:"Place",description:"Leave empty for the darkest of your saved places tonight.") var park:ParkEntity?
+    @Parameter(title:"Place",description:"Leave empty for the darkest of your saved places tonight.",optionsProvider:PlaceOptions()) var park:ParkEntity?
     init() {}
     init(park:ParkEntity?) { self.park=park }
 }
