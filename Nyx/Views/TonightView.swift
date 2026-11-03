@@ -64,6 +64,8 @@ struct TonightView: View {
     /// What stands above the dial in one column, and a closure under it, measured: an iPhone in
     /// landscape sets the pill beside the dial when they leave it too little room (`pillBeside`).
     @State private var heroFit=HeroFit()
+    /// The column beside the dial, measured there: how the steps and the way back stand (`stepsBeside`).
+    @State private var besideFit=BesideFit()
     /// The dial's band word's size (the title 3 style's 20 pt, scaled), for the smallest landscape dial
     /// that keeps it inside (`CelestialGauge.compactLabelsFrom`).
     @ScaledMetric(relativeTo:.title3) private var bandSize=20.0
@@ -349,6 +351,29 @@ struct TonightView: View {
         let need=min(inside,CelestialGauge.compactCap)
         return (page-stackedTop-12-(closure>0 ? heroSpacing+closure : 0)).rounded(.up)<need
     }
+    /// How the night steps and the way back stand in the column beside the dial: in words, a row each
+    /// (`apart`), or as one row of glyphs (`glyphs`), Previous, the way back and Next.
+    nonisolated enum StepsBeside: Equatable { case apart, glyphs }
+    /// What of the context line stands in the column beside the dial: all of it (`whole`), the night alone
+    /// (`day`, the whole line after the hero), or nothing (`after`, the whole line after the hero).
+    nonisolated enum ContextBeside: Equatable { case whole, day, after }
+    /// Beside the dial, the first arrangement that keeps the column whole above the tab bar's edge (`room`),
+    /// under the pill and any closure (`column`): the steps and the way back in words with the whole context,
+    /// then with the night alone (`day`, its height), then as glyphs with either, and only then with no
+    /// context in the column; else the last. `glyphs` is nil where there are no steps to set as glyphs.
+    /// So the way back and the steps stay on the first screen, and the night in view, wherever they can.
+    nonisolated static func stepsBeside(room:Double,column:Double,context:Double,day:Double,apart:Double,glyphs:Double?)->(steps:StepsBeside,context:ContextBeside) {
+        let order:[(StepsBeside,ContextBeside)]=[(.apart,.whole),(.apart,.day),(.glyphs,.whole),(.glyphs,.day),(.apart,.after),(.glyphs,.after)]
+        let offered=order.filter { $0.0 == .apart || glyphs != nil }
+        guard room>0, let last=offered.last else { return (.apart,.whole) }
+        let fits={ (way:(StepsBeside,ContextBeside)) in
+            let line=switch way.1 { case .whole: context; case .day: day; case .after: 0.0 }
+            let steps=way.0 == .apart ? apart : glyphs ?? apart
+            return (column+(line>0 ? heroSpacing+line : 0)+heroSpacing+steps).rounded(.down)<=room
+        }
+        let way=offered.first(where:fits) ?? last
+        return (way.0,way.1)
+    }
     /// The answer's line, and the way to what it names: a tap moves the page to the starting point and
     /// its radius, which sit below the answer and its alternatives.
     private func reachLine(_ park:Park,day:String)->some View {
@@ -493,27 +518,51 @@ struct TonightView: View {
         let closureLine=closure.map { ClosureLabel($0,prominence:.hero,named:compact && large) }
         let scores=Dictionary(others.map { ($0.park.id,$0.score.value) },uniquingKeysWith:{ first,_ in first })
         // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`), scored for the dial's night.
-        let pill=ParkPillPicker(park:park,others:others.map(\.park),score:{ scores[$0.id] ?? model.night($0).score.value },zoom:zoom,night:later ? park.dayLabel(night.id) : nil,offset:offset)
+        let pill=ParkPillPicker(park:park,others:others.map(\.park),score:{ scores[$0.id] ?? model.night($0).score.value },zoom:zoom,night:later ? park.dayLabel(night.id) : nil,offset:offset,rowHeight:{ besideFit.pill=$0 })
         let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis)
         // An iPhone in landscape: the pill beside the dial when, stacked, the dial that keeps its words inside
         // would not stand whole above the tab bar with any closure under it (`pillBeside`), and always at
         // accessibility sizes, where the wrapped name and its toggle leave the dial no room and a dial small
         // enough to fit would take the numeral under 80 pt.
         let beside=compact && (large || (!wide && Self.pillBeside(page:pageHeight,stackedTop:heroFit.stackedTop,inside:CelestialGauge.compactLabelsFrom(band:bandSize),closure:closure == nil ? 0 : heroFit.closure)))
+        // Beside the dial, the step buttons and the way back follow the context in the column, in words where
+        // the column has the room above the tab bar; short of that, the column keeps only the night of the
+        // context (the whole line after the hero), the steps become one row of glyphs, and last the context
+        // leaves the column, so the way back stays in view (`stepsBeside`).
+        let steps=ready && access.preferSteps
+        let fit=beside && (steps || later) ? Self.stepsBeside(room:pageHeight-heroFit.top-12,column:besideFit.pill+(closure == nil ? 0 : Self.heroSpacing+besideFit.closure),context:besideFit.context,day:besideFit.day,apart:besideFit.apart,glyphs:steps ? besideFit.glyphs : nil) : (steps:StepsBeside.apart,context:ContextBeside.whole)
+        let dayLine=Text(park.dayLabel(night.id)).eyebrow().foregroundStyle(later ? palette.ink : palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
         return VStack(spacing:Self.heroSpacing) {
             if beside {
                 // The pill, any closure and the context on the left, the dial on the right with all the page's
                 // height. Top-aligned, so the list of other parks opening under the pill never moves the dial.
-                // The step buttons and the way back follow the context there, in the room the column leaves
-                // beside the dial, rather than under the whole hero and the tab bar.
-                HStack(alignment:.top,spacing:20) {
-                    VStack(spacing:Self.heroSpacing) {
-                        pill; closureLine; context
-                        if ready && access.preferSteps { dialSteps(offset) }
-                        if later { backToTonight }
-                    }.frame(maxWidth:.infinity)
-                    dial(night,basis:night.basisCaption(),range:range,offset:offset,ready:ready,beside:true,closure:0).frame(maxWidth:.infinity)
+                // VoiceOver and Switch Control read them as stacked, not by where they stand: the pill, the context,
+                // the dial, then its closure, steps and way back, by their sort priorities as siblings in one
+                // container (`BesideDial` sets each in its column, so no column groups them).
+                BesideDial(spacing:Self.heroSpacing,gap:20) {
+                    pill.accessibilityElement(children:.contain).accessibilitySortPriority(5).layoutValue(key:BesideDial.Row.self,value:0)
+                    switch fit.context {
+                    case .whole: context.accessibilitySortPriority(4).layoutValue(key:BesideDial.Row.self,value:2)
+                    case .day: dayLine.accessibilitySortPriority(4).layoutValue(key:BesideDial.Row.self,value:2)
+                    case .after: EmptyView()
+                    }
+                    dial(night,basis:night.basisCaption(),range:range,offset:offset,ready:ready,beside:true,closure:0).frame(maxWidth:.infinity).accessibilitySortPriority(3)
+                    if let closureLine { closureLine.onGeometryChange(for:Double.self) { $0.size.height } action:{ besideFit.closure=$0 }.accessibilitySortPriority(2).layoutValue(key:BesideDial.Row.self,value:1) }
+                    if steps || later { besideSteps(offset,steps:steps,back:later,way:fit.steps).accessibilityElement(children:.contain).accessibilitySortPriority(1).layoutValue(key:BesideDial.Row.self,value:3) }
+                    // Each way of setting the steps, and the context, measured at the column's width.
+                    if steps || later {
+                        VStack(spacing:0) {
+                            context.onGeometryChange(for:Double.self) { $0.size.height } action:{ besideFit.context=$0 }
+                            dayLine.onGeometryChange(for:Double.self) { $0.size.height } action:{ besideFit.day=$0 }
+                            besideSteps(offset,steps:steps,back:later,way:.apart).onGeometryChange(for:Double.self) { $0.size.height } action:{ besideFit.apart=$0 }
+                            if steps { besideSteps(offset,steps:true,back:later,way:.glyphs).onGeometryChange(for:Double.self) { $0.size.height } action:{ besideFit.glyphs=$0 } }
+                        }
+                        .fixedSize(horizontal:false,vertical:true).hidden().accessibilityHidden(true)
+                        .layoutValue(key:BesideDial.Row.self,value:BesideDial.twin)
+                    }
                 }
+                .accessibilityElement(children:.contain)
+                if fit.context != .whole { context }
             } else {
                 if !large { context }
                 pill
@@ -618,6 +667,33 @@ struct TonightView: View {
             }
         }.buttonStyle(.capsuleAction).padding(.top,4)
         .accessibilityInputLabels([Text("Back to tonight"),Text("Tonight")])
+    }
+    /// Beside the dial in landscape: the steps (`steps`) and the way back (`back`) as `stepsBeside` sets
+    /// them. As glyphs, one row of equal buttons, each still named in words for VoiceOver and Voice Control.
+    @ViewBuilder private func besideSteps(_ offset:Int,steps:Bool,back:Bool,way:StepsBeside)->some View {
+        if way == .apart || !steps {
+            VStack(spacing:Self.heroSpacing) {
+                if steps { dialSteps(offset) }
+                if back { backToTonight }
+            }
+        } else {
+            let first=offset<=0, last=offset>=TonightScrub.last
+            HStack(spacing:12) {
+                Button { stepDial(-1) } label:{ glyph("Previous night",symbol:"chevron.backward").foregroundStyle(first ? palette.muted : palette.ink) }.disabled(first)
+                if back {
+                    Button { chooseNight(0) } label:{ glyph("Back to tonight",symbol:"arrow.uturn.backward") }
+                        .accessibilityInputLabels([Text("Back to tonight"),Text("Tonight")])
+                }
+                Button { stepDial(1) } label:{ glyph("Next night",symbol:"chevron.forward").foregroundStyle(last ? palette.muted : palette.ink) }.disabled(last)
+            }
+            .fixedSize(horizontal:false,vertical:true)
+            .secondaryAction().font(.subheadline.weight(.medium))
+            .accessibilityElement(children:.contain)
+        }
+    }
+    /// A step in the row of glyphs beside the dial: the glyph shown, its words its name.
+    private func glyph(_ title:LocalizedStringKey,symbol:String)->some View {
+        Label(title,systemImage:symbol).labelStyle(.iconOnly).frame(maxWidth:.infinity,minHeight:30,maxHeight:.infinity)
     }
     /// Previous and next night as buttons, side by side or stacked at accessibility sizes. A step that
     /// cannot be taken is set in the muted ink, which keeps its contrast in night vision. Side by side the two
@@ -844,6 +920,43 @@ private struct HeroFit: Equatable {
     var top=0.0, context=0.0, pill=0.0, closure=0.0
     /// Where the dial starts with the context and the pill stacked above it.
     var stackedTop: Double { top+context+TonightView.heroSpacing+pill+TonightView.heroSpacing }
+}
+/// Tonight's hero beside the dial on an iPhone in landscape: the views with a `Row` stack down the leading
+/// half in that order, `spacing` apart and each centred; the one without (the dial) stands in the trailing
+/// half; both from the top, `gap` apart. A `twin` row takes the column's width and no room.
+nonisolated private struct BesideDial: Layout {
+    struct Row: LayoutValueKey { static let defaultValue: Int?=nil }
+    /// Hidden twins, measured at the column's width.
+    static let twin=Int.max
+    var spacing: Double
+    var gap: Double
+    private func column(_ subviews:Subviews)->[LayoutSubview] {
+        subviews.filter { $0[Row.self].map { $0 != Self.twin } ?? false }.sorted { ($0[Row.self] ?? 0)<($1[Row.self] ?? 0) }
+    }
+    func sizeThatFits(proposal:ProposedViewSize,subviews:Subviews,cache:inout ())->CGSize {
+        let width=proposal.width ?? 0, half=ProposedViewSize(width:max(0,(width-gap)/2),height:nil)
+        let left=column(subviews).map { $0.sizeThatFits(half).height }
+        let right=subviews.filter { $0[Row.self] == nil }.map { $0.sizeThatFits(half).height }.max() ?? 0
+        return CGSize(width:width,height:max(left.reduce(0,+)+spacing*Double(max(0,left.count-1)),right))
+    }
+    func placeSubviews(in bounds:CGRect,proposal:ProposedViewSize,subviews:Subviews,cache:inout ()) {
+        let side=max(0,(bounds.width-gap)/2), half=ProposedViewSize(width:side,height:nil)
+        var y=bounds.minY
+        for view in column(subviews) {
+            view.place(at:CGPoint(x:bounds.minX+side/2,y:y),anchor:.top,proposal:half)
+            y+=view.sizeThatFits(half).height+spacing
+        }
+        for view in subviews where view[Row.self] == nil || view[Row.self] == Self.twin {
+            let twin=view[Row.self] != nil
+            view.place(at:CGPoint(x:bounds.minX+(twin ? side/2 : side+gap+side/2),y:bounds.minY),anchor:.top,proposal:half)
+        }
+    }
+}
+/// Tonight's column beside the dial on an iPhone in landscape (`TonightView.stepsBeside`): the pill with
+/// its toggle and any closure as they stand there, and at that width the context, its night alone, and each
+/// way of setting the steps and the way back.
+private struct BesideFit: Equatable {
+    var pill=0.0, closure=0.0, context=0.0, day=0.0, apart=0.0, glyphs=0.0
 }
 /// Tonight's answer and the moment "tonight" is judged from: either changing hands the pick on.
 private struct TonightPickKey: Equatable {

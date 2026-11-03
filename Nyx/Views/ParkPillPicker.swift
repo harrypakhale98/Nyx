@@ -19,7 +19,7 @@ struct ParkPillPicker: View {
     var night: String?=nil
     /// Nights after tonight that `night` is, carried by the links (`ZoomRoute.offset`).
     var offset=0
-    /// Told the height of the pill and its toggle, the list left out, below accessibility sizes (Tonight's landscape hero).
+    /// Told the height of the pill and its toggle, the list left out (Tonight's landscape hero).
     var rowHeight: ((Double)->Void)?=nil
     /// `-nyx-pill-open` (DEBUG captures) opens it.
     @State private var open=DebugScenario.isEnabled("pill-open")
@@ -37,8 +37,8 @@ struct ParkPillPicker: View {
             // At accessibility sizes the name takes the full width on a rounded rectangle, with the toggle
             // underneath: a capsule around three wrapped lines becomes an egg, and a narrow one breaks words.
             if large {
-                pill
-                toggle
+                VStack(spacing:10) { pill; toggle }
+                    .onGeometryChange(for:Double.self) { $0.size.height } action:{ rowHeight?($0) }
             } else {
                 HStack(spacing:6) { pill; toggle }
                     .onGeometryChange(for:Double.self) { $0.size.height } action:{ rowHeight?($0) }

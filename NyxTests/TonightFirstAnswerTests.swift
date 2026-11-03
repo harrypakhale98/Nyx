@@ -340,6 +340,29 @@ import Testing
         #expect(TonightView.dialHeight(compact: true, page: 150, top: 8, inside: 190) == 130)
     }
 
+    /// Beside the dial in landscape, the steps and the way back stay above the tab bar's edge: in words with
+    /// the whole context, then with its night alone, then as glyphs, and only then without the context.
+    @Test func theStepsBesideTheDialStayOnTheFirstScreen() {
+        // A pill of 86 pt, a context of 46 pt (its night alone 20 pt); the steps and the way back 120 pt in words, 44 pt as glyphs.
+        let ways={ (room: Double) in TonightView.stepsBeside(room: room, column: 86, context: 46, day: 20, apart: 120, glyphs: 44) }
+        #expect(ways(400) == (steps: .apart, context: .whole))
+        #expect(ways(272) == (steps: .apart, context: .whole))
+        #expect(ways(271) == (steps: .apart, context: .day))
+        #expect(ways(246) == (steps: .apart, context: .day))
+        #expect(ways(245) == (steps: .glyphs, context: .whole))
+        #expect(ways(195) == (steps: .glyphs, context: .day))
+        // Short even for the glyphs with the night: the context leaves the column.
+        #expect(ways(169) == (steps: .glyphs, context: .after))
+        #expect(ways(100) == (steps: .glyphs, context: .after))
+        // A page not yet measured keeps the column as it is.
+        #expect(ways(0) == (steps: .apart, context: .whole))
+        // Only the way back (no steps): a row of its own, with the whole context, the night, or neither.
+        let back={ (room: Double) in TonightView.stepsBeside(room: room, column: 86, context: 46, day: 20, apart: 45, glyphs: nil) }
+        #expect(back(197) == (steps: .apart, context: .whole))
+        #expect(back(171) == (steps: .apart, context: .day))
+        #expect(back(170) == (steps: .apart, context: .after))
+    }
+
     /// At accessibility sizes in landscape, the dial is held to what the page's height leaves its band word.
     @Test func anAccessibleDialFitsThePageWithItsWord() {
         #expect(CelestialGauge.accessibleSide(fitting: .infinity, band: 70) == .infinity)
