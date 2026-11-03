@@ -194,7 +194,7 @@ nonisolated enum Credits {
                 Line(text: String(localized: "Meteor showers: the International Meteor Organization (IMO) calendar."), devices: .all),
                 Line(text: String(localized: "Aurora latitude: computed from the International Geomagnetic Reference Field (IGRF-14, IAGA; coefficients from NOAA NCEI, U.S. Government work)."), devices: .all),
                 Line(text: String(localized: "Aurora forecast: the planetary K-index forecast of NOAA's Space Weather Prediction Center, U.S. Government work."), devices: .all),
-                Line(text: String(localized: "Deep-sky positions and magnitudes: Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalogue."), devices: .all),
+                Line(text: String(localized: "Deep-sky positions and magnitudes: Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalog."), devices: .all),
                 Line(text: String(localized: "Moon names and positions: the IAU Gazetteer of Planetary Nomenclature, USGS (public domain)."), devices: [.phone, .vision]),
             ]
             case .places: [

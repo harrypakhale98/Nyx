@@ -4221,7 +4221,7 @@
         }
       }
     },
-    "Deep-sky positions and magnitudes: Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalogue.": {
+    "Deep-sky positions and magnitudes: Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalog.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -4233,7 +4233,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Deep-sky positions and magnitudes: Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalogue."
+            "value": "Deep-sky positions and magnitudes: Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalog."
           }
         },
         "es": {
