@@ -287,8 +287,9 @@ nonisolated enum JournalMigration {
     enum MigrationError: Error { case notEnoughSpace }
     /// Free space the move leaves untouched beyond the photo copies, so it never fills the device.
     static let headroom: Int64=100_000_000
-    /// Where the photos wait between the two stages: Application Support, unless a test names its own
-    /// folder for the work it runs (`$folderOverride.withValue`), so tests never touch the app's.
+    /// Where the photos wait between the two stages: the app's own Application Support (not the App
+    /// Group container the store lives in, `JournalStore.open`), unless a test names its own folder for
+    /// the work it runs (`$folderOverride.withValue`), so tests never touch the app's.
     static var folder: URL? {
         folderOverride ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent("JournalMigration", isDirectory: true)
     }
@@ -395,6 +396,11 @@ nonisolated enum JournalMigration {
 /// writer checks `failed` (`PlanModel.journalUnavailable`, `JournalAccess.unavailable`), and the saved
 /// parks it reads as empty never reach the widget, the watch or reminders (`SavedSkySync`).
 /// `shortOfSpace` says the device is too full for the store (or its one-time move) to be trusted to open.
+/// The file is where SwiftData puts it by default, which for an app in an App Group is the group's
+/// container, not the app's own: Library/Application Support/default.store there, with its -wal and
+/// -shm and the `.default_SUPPORT` folder of photos and covers kept outside it. Only this app opens it
+/// (no widget, watch or Vision Pro target compiles this file). It stays where it is: moving people's
+/// journals somewhere else would buy nothing and could lose them.
 @MainActor enum JournalStore {
     static func open(inMemory: Bool, url: URL? = nil) -> (container: ModelContainer?, failed: Bool, shortOfSpace: Bool) {
         let schema=Schema(versionedSchema: NyxSchemaV3.self)
