@@ -341,7 +341,8 @@ import Testing
     }
 
     /// Beside the dial in landscape, the steps and the way back stay above the tab bar's edge: in words with
-    /// the whole context, then with its night alone, then as glyphs, and only then without the context.
+    /// the whole context, then with its night alone, then as glyphs, then without the context, and last
+    /// either side of the dial's ring.
     @Test func theStepsBesideTheDialStayOnTheFirstScreen() {
         // A pill of 86 pt, a context of 46 pt (its night alone 20 pt); the steps and the way back 120 pt in words, 44 pt as glyphs.
         let ways={ (room: Double) in TonightView.stepsBeside(room: room, column: 86, context: 46, day: 20, apart: 120, glyphs: 44) }
@@ -361,6 +362,22 @@ import Testing
         #expect(back(197) == (steps: .apart, context: .whole))
         #expect(back(171) == (steps: .apart, context: .day))
         #expect(back(170) == (steps: .apart, context: .after))
+        // Room either side of the dial's ring (accessibility sizes): only a column too full even for the glyphs
+        // sets them there, with the whole context, the night, or neither in the column.
+        let flanked={ (room: Double, context: Double) in TonightView.stepsBeside(room: room, column: 86, context: context, day: 20, apart: 120, glyphs: 44, flank: true) }
+        #expect(flanked(195, 46) == (steps: .glyphs, context: .day))
+        #expect(flanked(140, 46) == (steps: .glyphs, context: .after))
+        #expect(flanked(139, 46) == (steps: .flank, context: .day))
+        #expect(flanked(120, 20) == (steps: .flank, context: .whole))
+        #expect(flanked(100, 46) == (steps: .flank, context: .after))
+        // A name on three lines or a long closure already past the tab bar's edge: still beside the ring.
+        #expect(flanked(80, 46) == (steps: .flank, context: .after))
+        #expect(flanked(0, 46) == (steps: .apart, context: .whole))
+        // The way back alone goes beside the ring as well.
+        let backFlanked={ (room: Double) in TonightView.stepsBeside(room: room, column: 86, context: 46, day: 20, apart: 45, glyphs: nil, flank: true) }
+        #expect(backFlanked(141) == (steps: .apart, context: .after))
+        #expect(backFlanked(140) == (steps: .flank, context: .day))
+        #expect(backFlanked(60) == (steps: .flank, context: .after))
     }
 
     /// The closure heading under a landscape score breaks only at a space, into the most even two lines.

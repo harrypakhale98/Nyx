@@ -154,6 +154,7 @@ struct CelestialGauge: View {
                 let dial=min(Self.accessibleSide(band:bandMetric,width:available),accessibleMax,max(120,Self.accessibleSide(fitting:accessibleHeight,band:bandHeight)))
                 VStack(spacing:16) {
                     ZStack { bezel; drawing; numeral(size:Self.accessibleNumeral(band:bandMetric,side:dial)) }.frame(width:dial,height:dial)
+                        .preference(key:GaugeRingSideKey.self,value:dial)
                     // The ring is open at the bottom: the word sits 16 pt under its rounded ends, not under the square's empty corner.
                     band.onGeometryChange(for:CGFloat.self) { $0.size.height.rounded(.up) } action:{ bandHeight=$0 }
                         .padding(.top,Self.accessibleBandGap(side:dial))
@@ -619,6 +620,12 @@ struct CelestialGauge: View {
             }
         }
     }
+}
+/// The side of a dial's ring at accessibility sizes, 0 at other sizes: for a page that sets controls either
+/// side of it (Tonight's steps on an iPhone in landscape).
+struct GaugeRingSideKey:PreferenceKey {
+    static let defaultValue=0.0
+    static func reduce(value:inout Double,nextValue:()->Double) { value=max(value,nextValue()) }
 }
 /// The dial's numeral. Animatable, so a sweep carries the number on the same spring as the arc
 /// (`DialFace`) and number and needle travel together; the odometer writes its own count and keeps
