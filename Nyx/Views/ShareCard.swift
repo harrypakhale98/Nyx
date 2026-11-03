@@ -181,11 +181,20 @@ nonisolated struct ShareArtwork: Transferable {
                  why ?? "",range.map { "\($0.lowerBound)-\($0.upperBound)" } ?? "",String(Double(scale))]+look).joined(separator:"|")
     }
     @MainActor func png() throws -> Data {
-        if let data=Self.drawn[key] { return data }
-        guard let data=image()?.pngData() else { throw Failure.notDrawn }
-        if Self.drawn.count>=4 { Self.drawn.removeAll() }
-        Self.drawn[key]=data
-        return data
+        try Self.png(key:key) { image().flatMap { $0.size.width>0 && $0.size.height>0 ? $0.pngData() : nil } }
+    }
+    /// The drawing kept for `key`, else a new one. Under heavy load the renderer can hand back
+    /// nothing, so a failed draw is tried again, twice, each time with a fresh renderer (`image()`).
+    /// Only a drawing is kept: a failure is never shared again for the rest of the session.
+    @MainActor static func png(key:String,draw:() -> Data?) throws -> Data {
+        if let data=drawn[key] { return data }
+        for _ in 0..<3 {
+            guard let data=draw() else { continue }
+            if drawn.count>=4 { drawn.removeAll() }
+            drawn[key]=data
+            return data
+        }
+        throw Failure.notDrawn
     }
     /// The card as drawn: still and dark; starlight when exported, the app's palette as a preview.
     @MainActor func image() -> UIImage? {

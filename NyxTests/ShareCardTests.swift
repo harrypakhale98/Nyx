@@ -131,4 +131,20 @@ import UIKit
         }
         #expect(ShareCard.moonSides(.card).first==120)
     }
+    /// A draw that comes back empty is tried again, and only a drawing is kept: a failure is never
+    /// handed out again, and a later share of the same night draws afresh.
+    @Test func failedDrawIsRetriedAndNeverKept() throws {
+        let picture=Data([1,2,3]), key=UUID().uuidString
+        var draws=0
+        let first=try ShareArtwork.png(key:key) { draws+=1; return draws<2 ? nil : picture }
+        #expect(first==picture && draws==2)
+        // Kept: the same night is not drawn again.
+        #expect(try ShareArtwork.png(key:key) { draws+=1; return nil }==picture && draws==2)
+        let other=UUID().uuidString
+        draws=0
+        #expect(throws:(any Error).self) { try ShareArtwork.png(key:other) { draws+=1; return nil } }
+        #expect(draws==3)
+        // The failure was not kept: the next share draws, and keeps what it draws.
+        #expect(try ShareArtwork.png(key:other) { draws+=1; return picture }==picture && draws==4)
+    }
 }
