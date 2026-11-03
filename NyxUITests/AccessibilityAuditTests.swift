@@ -60,25 +60,36 @@ final class AccessibilityAuditTests:XCTestCase {
                 app.terminate()
                 throw XCTSkip("Regular width: the tab bar floats at the top of the window and does not minimise on scroll.")
             }
-            let before=Self.span(app,timeout:10) { !$0.isNull }
-            // A slow simulator may miss the first swipe's scroll: each swipe gets about five seconds
-            // to minimise the bar, and up to three swipes are tried before the bar counts as unchanged.
-            var after=before
-            for _ in 0..<3 where after.isNull || after.width>=before.width {
-                app.swipeUp(velocity:.slow)
-                after=Self.span(app,timeout:5) { !$0.isNull && $0.width<before.width }
-            }
-            print("MINIMISED|\(state)|before \(before)|after \(after)")
-            // The bar's own frame keeps the window's width when it minimises; its tabs do not. A bar that
-            // no longer shrinks fails here rather than being audited at full size.
-            XCTAssertLessThan(after.isNull ? .infinity : after.width,before.width,"The tab bar did not minimise on scrolling Tonight (\(state))")
+            Self.minimiseTabBar(app,state:state)
             let shot=XCTAttachment(screenshot:app.screenshot()); shot.name="minimised-\(state)"; shot.lifetime = .keepAlways; add(shot)
             // The scroll's deceleration and the bar's own animation done before the audit walks the screen.
             Self.settle(app)
-            failures+=try auditOpen(app,screen:"tonight",state:state,pass:"minimised")
+            // Late in a full test run, an audit part here can time out twice in a row (never alone): the app is
+            // started afresh with the same arguments and scrolled down again before that part's last try.
+            let relaunch={
+                app.terminate()
+                app.launch()
+                _=app.wait(for:.runningForeground,timeout:30)
+                Self.minimiseTabBar(app,state:state)
+            }
+            failures+=try auditOpen(app,screen:"tonight",state:state,pass:"minimised",relaunch:relaunch)
             app.terminate()
         }
         XCTAssertTrue(failures.isEmpty,"Accessibility audit issues:\n"+failures.joined(separator:"\n"))
+    }
+    /// Scrolls Tonight up until the tab bar minimises. A slow simulator may miss the first swipe's scroll:
+    /// each swipe gets about five seconds to minimise the bar, and up to three swipes are tried before the
+    /// bar counts as unchanged. The bar's own frame keeps the window's width when it minimises; its tabs do
+    /// not. A bar that no longer shrinks fails here rather than being audited at full size.
+    private static func minimiseTabBar(_ app:XCUIApplication,state:String) {
+        let before=span(app,timeout:10) { !$0.isNull }
+        var after=before
+        for _ in 0..<3 where after.isNull || after.width>=before.width {
+            app.swipeUp(velocity:.slow)
+            after=span(app,timeout:5) { !$0.isNull && $0.width<before.width }
+        }
+        print("MINIMISED|\(state)|before \(before)|after \(after)")
+        XCTAssertLessThan(after.isNull ? .infinity : after.width,before.width,"The tab bar did not minimise on scrolling Tonight (\(state))")
     }
 
     /// `NYX_AUDIT_LANGUAGE` ("de", "ja"…) runs a pass in that language and its region's formats, as the
@@ -176,26 +187,35 @@ final class AccessibilityAuditTests:XCTestCase {
     /// A full audit that times out (seen on a loaded simulator, never alone) is not retried whole: the
     /// screen is left to settle and audited again one audit type at a time, every type the full audit
     /// covers, each a smaller walk that fits the audit's time limit. A part that times out gets one more
-    /// try after the screen settles again; a second timeout fails. Findings are never retried away.
-    private func auditOpen(_ app:XCUIApplication,screen:String,state:String,pass:String,retry:Bool=true) throws->[String] {
+    /// try after the screen settles again; a second timeout fails, unless the caller passes `relaunch`
+    /// (the minimised pass): then the app is started afresh in the same state, the bars are measured
+    /// again, and the part gets a last try after the screen settles; a third timeout fails. Findings are
+    /// never retried away: what the timed-out walks reported stays in the list, once each.
+    private func auditOpen(_ app:XCUIApplication,screen:String,state:String,pass:String,retry:Bool=true,relaunch:(()->Void)?=nil) throws->[String] {
         var failures:[String]=[]
         var unresolved:Set<String>=[]
         let window=app.frame
         // Field mode's milestones fade into the dark above the eye's clock and footer (a scroll-edge fade, by
         // design): the lowest 30% of the window, where cards scroll out under the clock.
         let fieldFade=screen=="field" ? CGRect(x:0,y:window.height*0.7,width:window.width,height:window.height*0.3) : .null
-        let tabBar=app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame : .null
-        let navigationBar=app.navigationBars.firstMatch.exists ? app.navigationBars.firstMatch.frame : .null
-        // What the navigation bar itself shows (its title, search field, buttons), so the bar's own text is never
-        // mistaken for page content scrolled under it.
-        let barLabels:Set<String>=navigationBar.isNull ? [] : Set(app.navigationBars.firstMatch.descendants(matching:.any).allElementsBoundByIndex.map(\.label).filter { !$0.isEmpty })
-        // A field held to the foot of the page (Ask Nyx's question): content scrolling under it and the edge effect
-        // above it (about 28 pt) is dimmed by design, as under the tab bar. Found on iPad at AX5 (2026-10-09), where
-        // the tab bar sits at the top and a citation passed under the field.
-        let footInput=[app.textViews.firstMatch,app.textFields.firstMatch].first { $0.exists && !$0.frame.isEmpty && $0.frame.minY>window.height/2 }
-        let footField=footInput.map { CGRect(x:0,y:$0.frame.minY-28,width:window.width,height:window.height-$0.frame.minY+28) } ?? .null
-        // The bars each pass measured against, so a finding near an edge can be read in context.
-        print("AUDITBARS|\(pass)|\(state)|\(screen)|tabBar \(tabBar)|navigationBar \(navigationBar)|window \(window)")
+        var tabBar=CGRect.null, navigationBar=CGRect.null, footField=CGRect.null
+        var barLabels:Set<String>=[]
+        // Measured again after a relaunch, so findings are excused against the bars of the screen the audit walks.
+        func measureBars() {
+            tabBar=app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame : .null
+            navigationBar=app.navigationBars.firstMatch.exists ? app.navigationBars.firstMatch.frame : .null
+            // What the navigation bar itself shows (its title, search field, buttons), so the bar's own text is never
+            // mistaken for page content scrolled under it.
+            barLabels=navigationBar.isNull ? [] : Set(app.navigationBars.firstMatch.descendants(matching:.any).allElementsBoundByIndex.map(\.label).filter { !$0.isEmpty })
+            // A field held to the foot of the page (Ask Nyx's question): content scrolling under it and the edge effect
+            // above it (about 28 pt) is dimmed by design, as under the tab bar. Found on iPad at AX5 (2026-10-09), where
+            // the tab bar sits at the top and a citation passed under the field.
+            let footInput=[app.textViews.firstMatch,app.textFields.firstMatch].first { $0.exists && !$0.frame.isEmpty && $0.frame.minY>window.height/2 }
+            footField=footInput.map { CGRect(x:0,y:$0.frame.minY-28,width:window.width,height:window.height-$0.frame.minY+28) } ?? .null
+            // The bars each pass measured against, so a finding near an edge can be read in context.
+            print("AUDITBARS|\(pass)|\(state)|\(screen)|tabBar \(tabBar)|navigationBar \(navigationBar)|window \(window)")
+        }
+        measureBars()
         let handler:(XCUIAccessibilityAuditIssue) throws->Bool = { issue in
             let frame=issue.element?.frame ?? .null
             let label=issue.element?.label ?? ""
@@ -216,17 +236,23 @@ final class AccessibilityAuditTests:XCTestCase {
                 do { try app.performAccessibilityAudit(for:part.type,handler) } catch where Self.timedOut(error) {
                     print("AUDITTIMEOUT|\(pass)|\(state)|\(screen)|\(part.name)")
                     Self.settle(app)
-                    try app.performAccessibilityAudit(for:part.type,handler)
+                    do { try app.performAccessibilityAudit(for:part.type,handler) } catch where Self.timedOut(error) && relaunch != nil {
+                        print("AUDITRELAUNCH|\(pass)|\(state)|\(screen)|\(part.name) timed out twice")
+                        relaunch?()
+                        measureBars()
+                        Self.settle(app)
+                        try app.performAccessibilityAudit(for:part.type,handler)
+                    }
                 }
             }
         }
-        // A part tried twice may report the same finding twice: once each.
+        // A part tried more than once may report the same finding more than once: once each.
         var listed:Set<String>=[]
         failures=failures.filter { listed.insert($0).inserted }
         if retry, !failures.isEmpty, failures.allSatisfy(unresolved.contains) {
             print("AUDITRETRY|\(pass)|\(state)|\(screen)|\(failures.count) findings without an element")
             sleep(2)
-            return try auditOpen(app,screen:screen,state:state,pass:pass,retry:false)
+            return try auditOpen(app,screen:screen,state:state,pass:pass,retry:false,relaunch:relaunch)
         }
         // The screen as the audit left it, so a finding can be read against the pixels it was measured on.
         if !failures.isEmpty {
