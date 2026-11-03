@@ -481,7 +481,8 @@ struct OpenMeteoBudgetTests {
         let refusal=try #require(switchedOff)
         #expect(SafeHTTP.refusedBeforeConnecting(refusal) && !SafeHTTP.refusedBeforeConnecting(URLError(.cancelled)))
         let lowData=URLError(.notConnectedToInternet, userInfo: [NSURLErrorNetworkUnavailableReasonKey: URLError.NetworkUnavailableReason.constrained.rawValue])
-        for unsent in [refusal, lowData, URLError(.notConnectedToInternet), URLError(.cannotFindHost), URLError(.cannotConnectToHost), URLError(.dnsLookupFailed)] as [any Error] {
+        for unsent in [refusal, lowData, URLError(.notConnectedToInternet), URLError(.dataNotAllowed), URLError(.internationalRoamingOff), URLError(.callIsActive),
+                       URLError(.cannotFindHost), URLError(.cannotConnectToHost), URLError(.dnsLookupFailed)] as [any Error] {
             #expect(ForecastRequest.unsent(unsent))
             clock.advance(60)
             await http.refuse(unsent)
@@ -491,6 +492,8 @@ struct OpenMeteoBudgetTests {
         for sent in [URLError(.timedOut), URLError(.networkConnectionLost), URLError(.cancelled), URLError(.dataLengthExceedsMaximum)] as [any Error] {
             #expect(!ForecastRequest.unsent(sent))
         }
+        // Cellular data off for Nyx, roaming off abroad, a call holding the line: no connection, as Tonight says it.
+        for code in [URLError.Code.dataNotAllowed, .internationalRoamingOff, .callIsActive] { #expect(ForecastAttempt(URLError(code)) == .offline) }
         // An error answer stays one call.
         clock.advance(60)
         await http.refuse(HTTPStatusError(status: 400))

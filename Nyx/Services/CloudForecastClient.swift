@@ -576,11 +576,13 @@ nonisolated enum ForecastRequest {
     }
     /// Whether a failure proves the request never reached the service: refused before connecting
     /// (`SafeHTTP.refusedBeforeConnecting`), held off a constrained network by Low Data Mode, no
-    /// connection at all, or a host that could not be found or connected to.
+    /// connection at all (cellular data off for Nyx, roaming off abroad, or a call holding the
+    /// line included), or a host that could not be found or connected to.
     static func unsent(_ error: any Error) -> Bool {
         if SafeHTTP.refusedBeforeConnecting(error) || Backoff.constrained(error) { return true }
         guard let code=(error as? URLError)?.code else { return false }
-        return [.notConnectedToInternet, .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed].contains(code)
+        return [.notConnectedToInternet, .dataNotAllowed, .internationalRoamingOff, .callIsActive,
+                .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed].contains(code)
     }
 }
 /// How the last request for the parks' or saved spots' clouds went, as Tonight says it.
@@ -600,7 +602,8 @@ nonisolated enum ForecastAttempt: Sendable, Equatable {
         guard let code=(error as? URLError)?.code else { self = .unusable; return }
         switch code {
         case .cancelled: return nil
-        case .notConnectedToInternet, .timedOut, .networkConnectionLost, .cannotConnectToHost, .dnsLookupFailed, .cannotFindHost: self = .offline
+        case .notConnectedToInternet, .dataNotAllowed, .internationalRoamingOff, .callIsActive,
+             .timedOut, .networkConnectionLost, .cannotConnectToHost, .dnsLookupFailed, .cannotFindHost: self = .offline
         default: self = .unusable
         }
     }
