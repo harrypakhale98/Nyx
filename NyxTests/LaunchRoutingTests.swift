@@ -67,6 +67,33 @@ struct LaunchRoutingTests {
         try await Task.sleep(for: .milliseconds(50))
         #expect(other.homeID == "deva")
     }
+    /// The park beside the Parks list in a wide window: a choice is kept, else the park last open in the
+    /// stack; before either, the starting park, worked out live so it follows a city abroad once the
+    /// catalogue is read, and a starting place abroad waits for it rather than showing the first park.
+    @Test func theParksSplitFollowsTheStartingPointUntilAParkIsChosen() async throws {
+        let sydney=try #require(StartingPlaces.all.first { $0.name == "Sydney" })
+        let model=Self.model()
+        model.choose(sydney)
+        // Before the catalogue: the nearest curated park stands in.
+        let early=try #require(ParksTab.shownPark(chosen: nil, opened: nil, in: model))
+        #expect(early == model.homeID && model.park(early)?.curated == true)
+        await model.catalogReady()
+        for _ in 0..<100 where !model.homeID.hasPrefix(Park.catalogPrefix) { try await Task.sleep(for: .milliseconds(10)) }
+        // After it: the place near Sydney, with nothing stored.
+        let late=try #require(ParksTab.shownPark(chosen: nil, opened: nil, in: model))
+        #expect(late == model.homeID && late != early && model.park(late)?.countryCode == "AU")
+        // A choice, then a park open in the stack, come first.
+        #expect(ParksTab.shownPark(chosen: "deva", opened: "jotr", in: model) == "deva")
+        #expect(ParksTab.shownPark(chosen: nil, opened: "jotr", in: model) == "jotr")
+
+        // A starting place abroad saved from an earlier launch: waited for, never the first park.
+        let abroad=Self.model()
+        abroad.homeID=Self.kruger
+        #expect(ParksTab.shownPark(chosen: nil, opened: nil, in: abroad) == Self.kruger && abroad.awaitsCatalog(Self.kruger))
+        await abroad.catalogReady()
+        let shown=try #require(ParksTab.shownPark(chosen: nil, opened: nil, in: abroad))
+        #expect(shown == Self.kruger && abroad.park(shown) != nil)
+    }
 
     // MARK: Handoff
 

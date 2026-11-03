@@ -12,7 +12,8 @@ struct ParksTab: View {
     /// The tab's own width, measured: it chooses the split (`split`).
     @State private var width=0.0
     @Environment(SceneCommands.self) private var commands: SceneCommands?
-    /// The park beside the list, kept for the window (and restored with it).
+    /// The park chosen beside the list, kept for the window (and restored with it). Only a choice: the
+    /// park shown before one is made is worked out live (`shownPark`), never stored.
     @SceneStorage("parksPark") private var selection: String?
     @State private var path: [Park]=[]
     /// The list's search and filters, here rather than in the list: the split and the stack each build their own list.
@@ -75,7 +76,7 @@ struct ParksTab: View {
             if split && !showsMap {
                 let column=ParksTab.listColumn(atFold:listAtFold,returningFlat:returningFlat)
                 NavigationSplitView(columnVisibility:$columnVisibility) {
-                    ParksView(selection:$selection,narrowing:$narrowing,position:$listPosition)
+                    ParksView(selection:Binding(get:{ shown },set:{ selection=$0 }),narrowing:$narrowing,position:$listPosition)
                         .onGeometryChange(for:Double.self) { $0.frame(in:.global).minX.rounded() } action:{ listMinX=$0 }
                         .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ listWidthSeen=$0 }
                         .modifier(listRefresh).toolbar { mapToggle }.tabRootToolbar()
@@ -88,9 +89,9 @@ struct ParksTab: View {
                         .navigationSplitViewColumnWidth(min:column.min,ideal:column.ideal,max:column.max)
                 } detail: {
                     NavigationStack {
-                        if let park=selection.flatMap({ model.park($0) }) { ParkDetailView(park:park).id(park.id) }
-                        // A place abroad restored with the window, before the world catalogue is read.
-                        else if let selection, model.awaitsCatalog(selection) { ConstellationLoader().frame(maxWidth:.infinity,maxHeight:.infinity).background(NightBackground()) }
+                        if let park=shown.flatMap({ model.park($0) }) { ParkDetailView(park:park).id(park.id) }
+                        // A place abroad restored with the window (or the starting place), before the world catalogue is read.
+                        else if let shown, model.awaitsCatalog(shown) { ConstellationLoader().frame(maxWidth:.infinity,maxHeight:.infinity).background(NightBackground()) }
                         else { CalmState(symbol:"mountain.2",title:"Choose a park",message:"Its sky tonight, and the nights ahead, will open here.").frame(maxHeight:.infinity).background(NightBackground()) }
                     }
                     // The list ends at the fold's near edge; the park starts past its far edge, so its margin,
@@ -119,17 +120,16 @@ struct ParksTab: View {
         // When the fold goes, the list returns to 390 and is then let go within its usual range.
         .onChange(of:listAtFold) { old,new in returningFlat=old != nil && new == nil && abs(listWidthSeen-390)>=1 }
         .onChange(of:listWidthSeen) { _,seen in if returningFlat, abs(seen-390)<1 { returningFlat=false } }
-        // The page never opens empty: the starting park until another is chosen.
         .onAppear {
-            if selection == nil { selection=path.last?.id ?? model.home?.id }
             // A screen route (DEBUG captures and the accessibility audit) opens what it names, not the map or
             // list a previous run left in the window's restored state.
             if DebugScenario.screen != nil { showsMap=DebugScenario.parksMap }
         }
         .onChange(of:split) { old,new in
             guard !showsMap else { return }
-            if old, !new, let park=selection.flatMap({ model.park($0) }) { path=[park] }
-            else if new, let last=path.last { selection=last.id }
+            if old, !new, let park=shown.flatMap({ model.park($0) }) { path=[park] }
+            // Widening keeps the park on screen chosen, unless it is the starting park pushed when the window narrowed.
+            else if new, let last=path.last, selection != nil || last.id != Self.shownPark(chosen:nil,opened:nil,in:model) { selection=last.id }
         }
         // In a wide window the list returns beside the park last opened from the map.
         .onChange(of:showsMap) { _,map in
@@ -146,6 +146,15 @@ struct ParksTab: View {
     /// Unmeasured (0) is a stack, so the first measurement never pushes the chosen park.
     nonisolated static func split(width:Double,largeText:Bool)->Bool { width>0 && WideLayout.columns(width:width,largeText:largeText)==2 }
     private var split:Bool { Self.split(width:width,largeText:typeSize.isAccessibilitySize) }
+    /// The park beside the list: the one chosen here, else the one last open in the stack, else the starting
+    /// park. The page never opens empty. Worked out live, so before a choice it follows the starting point:
+    /// a city abroad chosen before the world catalogue is read has the nearest US park stand in until the
+    /// place nearest it is known, and a starting place abroad shows the loader until the catalogue is read,
+    /// never the first park.
+    static func shownPark(chosen:String?,opened:String?,in model:PlanModel)->String? {
+        chosen ?? opened ?? (model.awaitsCatalog(model.homeID) ? model.homeID : model.home?.id)
+    }
+    private var shown:String? { Self.shownPark(chosen:selection,opened:path.last?.id,in:model) }
     /// ⌘R on the list: its own pull-to-refresh, which lives inside `ParksView`.
     private var listRefresh:RefreshKey { RefreshKey { await model.refresh(model.parks,force:true,parkUpdates:false) } }
     /// List or map: one button that says what it shows next, with a light tick.
