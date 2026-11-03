@@ -65,6 +65,8 @@ struct AssistiveHome: View {
                 // A track that stays distinct from the white thumb once the screen is red.
                 .tint(palette.controlTint)
         }
+        // A readable width on a wide iPad, as the full app's lists (`readableForm`); iPhone is unchanged.
+        .readableForm()
         .navigationTitle("Nyx")
         .task(id: TonightReach.key(model.placesInReach().places, night: model.today)) { await Self.upkeep(model) }
     }
@@ -116,6 +118,8 @@ struct AssistiveTonight: View {
                     }.accessibilityElement(children: .combine)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading).padding(20)
+                // The card keeps a readable column on a wide iPad; the scroll view still spans the window.
+                .readableColumn()
         }
         .navigationTitle("Tonight")
         .assistiveAccessNavigationIcon(systemImage: "moon.stars")
@@ -149,7 +153,7 @@ struct AssistiveSaved: View {
                     Text("No saved places yet. Places you save in Nyx appear here.").font(.title2).frame(maxWidth: .infinity, alignment: .leading)
                 }
                 ForEach(parks) { park in AssistiveParkCard(park: park, reminder: false) }
-            }.padding(20)
+            }.padding(20).readableColumn()
         }
         .navigationTitle("Saved places")
         .assistiveAccessNavigationIcon(systemImage: "star")
