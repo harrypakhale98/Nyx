@@ -512,7 +512,8 @@ struct NightGlance: View {
                 if wraps { full.font(.system(.subheadline, design: .serif)) }
                 else {
                     // One line on the fixed face: the sentence where it fits, else "Dark 18:12–4:41", set a
-                    // little smaller where that keeps one line, and wrapped only where even that does not fit.
+                    // little smaller where that keeps one line, and wrapped at the smallest step only where even
+                    // that does not fit (at full size, a long zoned es-MX range left a 40 mm dial about 65 pt).
                     // Never shrunk until cut: a cut time is a wrong time.
                     let range = Text(verbatim: "\(String(localized: "Dark")) \(night.park.time(start))–\(night.park.zonedTime(end))")
                     ViewThatFits(in: .horizontal) {
@@ -520,7 +521,7 @@ struct NightGlance: View {
                         range.lineLimit(1).accessibilityLabel(full)
                         range.font(.system(size: size*0.85, design: .serif)).lineLimit(1).accessibilityLabel(full)
                         range.font(.system(size: size*0.75, design: .serif)).lineLimit(1).accessibilityLabel(full)
-                        range.lineLimit(2).accessibilityLabel(full)
+                        range.font(.system(size: size*0.75, design: .serif)).lineLimit(2).accessibilityLabel(full)
                     }
                     .font(.system(.subheadline, design: .serif))
                 }
