@@ -30,9 +30,9 @@ struct ClosureLabel: View {
         let large=typeSize.isAccessibilitySize
         let label=HStack(alignment:.firstTextBaseline,spacing:6) {
             // The glyph filled, drawn here rather than through `CautionLabelStyle`, whose icon came out as the outline.
-            Label { words.foregroundStyle(palette.ink) }
+            // The alignment on the words themselves: set on the label, its style put them back at the leading edge.
+            Label { words.multilineTextAlignment(centered && !large ? .center : .leading).foregroundStyle(palette.ink) }
                 icon:{ Image(systemName:"exclamationmark.triangle").symbolVariant(.fill).foregroundStyle(palette.caution) }
-                .multilineTextAlignment(centered && !large ? .center : .leading)
                 .fixedSize(horizontal:false,vertical:true)
             if opens && !large { Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted) }
         }
