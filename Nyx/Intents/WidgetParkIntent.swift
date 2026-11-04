@@ -32,7 +32,8 @@ struct CycleWidgetParkIntent: AppIntent {
 /// both follow the saved places share the choice: a tap on either moves both.
 nonisolated enum WidgetSelection {
     static let kind="TonightWidget"
-    /// The Tonight control's kind (`TonightControl`), reloaded whenever the snapshot changes.
+    /// The Tonight control's kind (`TonightControl`), reloaded whenever the snapshot changes and
+    /// after every background refresh (`SavedSkySync.backgroundRefresh`).
     static let controlKind="TonightScoreControl"
     static let key="widgetPark"
     /// The order the button walks: tonight's best first, as `NightPlanner` ranks nights.

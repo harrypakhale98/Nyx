@@ -25,6 +25,9 @@ import WidgetKit
     private var widgetIDs:[String]?
     /// The places Moon widgets are set to (`widgetPlaces`): they need their Moon pictures, not forecasts.
     private var moonWidgetIDs:[String]=[]
+    /// When the night of a Tonight control in Control Center next turns over, over the coming two
+    /// days, as the last run read the controls (`scheduleRefresh`). Empty with no such control.
+    private static var controlTurnovers:[Date]=[]
     /// What the widget, the watch and reminders were last handed, as `FollowedData` sees it.
     private var published:FollowedData?
     /// A republish waiting for changes made outside a run to settle (`noteChange`).
@@ -87,6 +90,9 @@ import WidgetKit
         if !publishOnly || widgetIDs == nil {
             let places=await Self.widgetPlaces()
             widgetIDs=places.followed; moonWidgetIDs=places.moons
+            let now=Date.now
+            Self.controlTurnovers=Self.controlPlaces(places.controls,saved:current).compactMap { model.park($0) }
+                .flatMap { $0.nightTurnovers(from:now,to:now.addingTimeInterval(2*86400)) }
         }
         // A followed world catalogue place (`wd:`) resolves only once the catalogue is read; it is
         // never dropped from the widget, the watch or reminders for having been asked too early.
@@ -131,7 +137,7 @@ import WidgetKit
         return cancelled ? (publishOnly:true,background:queued.background) : queued
     }
     /// The system's background refresh: saved-park clouds (and alerts when due), the widget's
-    /// snapshot, the watch and reminders, then the next request about six hours on. Same hosts and
+    /// snapshot, the watch and reminders, then the next request (`scheduleRefresh`). Same hosts and
     /// the same requests as in the app; nothing about the person is sent.
     /// iOS allows about 30 seconds: the run stops at `backgroundBudget`, and the next request is
     /// made first, so a run cut short still leaves one.
@@ -147,10 +153,16 @@ import WidgetKit
             // A followed night's Live Activity catches up too: its next moment, or its end at dawn.
             if !Task.isCancelled { await Self.refreshFollowed(model) }
         }
+        // The Tonight control has no timeline: Control Center asks for its value only when Nyx
+        // reloads it. Every run does, so after sunrise it names the coming night even when the
+        // snapshot is unchanged. The next request again, now that this run has read the controls.
+        ControlCenter.shared.reloadControls(ofKind:WidgetSelection.controlKind)
+        Self.scheduleRefresh()
     }
-    /// Whether a background refresh has anyone to serve: reminders, a Nyx widget, a followed night's
-    /// Live Activity or the watch. Unsure counts as yes (a widget list that cannot be read, a watch
-    /// session not yet active), so a person who relies on one never misses a refresh.
+    /// Whether a background refresh has anyone to serve: reminders, a Nyx widget, the Tonight
+    /// control, a followed night's Live Activity or the watch. Unsure counts as yes (a widget or
+    /// control list that cannot be read, a watch session not yet active), so a person who relies on
+    /// one never misses a refresh.
     static func anythingOutsideTheApp() async -> Bool {
         if UserDefaults.standard.bool(forKey:"notificationsEnabled") { return true }
         if !FieldActivities.Item.activities.isEmpty { return true }
@@ -159,8 +171,16 @@ import WidgetKit
             let session=WCSession.default
             if session.activationState != .activated || (session.isPaired && session.isWatchAppInstalled) { return true }
         }
-        guard let widgets=try? await WidgetCenter.shared.currentConfigurations() else { return true }
-        return !widgets.isEmpty
+        let widgets=try? await WidgetCenter.shared.currentConfigurations()
+        let controls=try? await ControlCenter.shared.currentControls()
+        return showsTonight(widgets:widgets?.count,controls:controls?.map(\.kind))
+    }
+    /// Whether a Nyx widget or the Tonight control is in place, from what the system lists: the
+    /// number of widgets and the kinds of Nyx's controls, nil when a list could not be read (which
+    /// counts as yes). Night vision and field mode show no forecast, so those controls alone do not count.
+    nonisolated static func showsTonight(widgets:Int?,controls:[String]?)->Bool {
+        guard let widgets, let controls else { return true }
+        return widgets>0 || controls.contains(WidgetSelection.controlKind)
     }
     /// Brings followed nights' Live Activities up to date with what Nyx knows now: each night's
     /// score and band from the latest forecasts, and its park's closure line once alerts are read.
@@ -184,12 +204,27 @@ import WidgetKit
             return finished
         }
     }
-    /// Asks iOS for the next background refresh, about six hours from now (iOS decides when).
-    static func scheduleRefresh(after delay:TimeInterval=6*3600,now:Date = .now) {
+    /// Asks iOS for the next background refresh (iOS decides when): about six hours from now, or
+    /// sooner a little after a Tonight control's night turns over at sunrise (`refreshDelay`).
+    static func scheduleRefresh(now:Date = .now) {
         let request=BGAppRefreshTaskRequest(identifier:refreshTask)
-        request.earliestBeginDate=now.addingTimeInterval(delay)
+        request.earliestBeginDate=now.addingTimeInterval(refreshDelay(now:now,turnovers:controlTurnovers))
         // Unavailable in the simulator and when Background App Refresh is off; the app then refreshes on open.
         try? BGTaskScheduler.shared.submit(request)
+    }
+    nonisolated static let refreshInterval:TimeInterval=6*3600
+    /// How long until the next background refresh: `refreshInterval`, or ten minutes past the next of
+    /// `turnovers` (when a Tonight control's night turns over) when that is sooner. Never under a
+    /// quarter of an hour, so saved parks whose sunrises fall close together share one refresh.
+    nonisolated static func refreshDelay(now:Date,turnovers:[Date])->TimeInterval {
+        guard let next=turnovers.filter({ $0>now }).min() else { return refreshInterval }
+        return min(refreshInterval,max(15*60,next.timeIntervalSince(now)+10*60))
+    }
+    /// The places the Tonight controls' nights come from, once each: the place each is set to (nil:
+    /// none, so the darkest of the saved places).
+    nonisolated static func controlPlaces(_ controls:[String?],saved:[String])->[String] {
+        var seen=Set<String>()
+        return controls.flatMap { $0.map { [$0] } ?? saved }.filter { seen.insert($0).inserted }
     }
     /// The places whose forecasts and closures the widget, the watch and reminders carry, in order and
     /// once each: the saved places, the starting park, Tonight's answer on this iPhone, the places
@@ -211,14 +246,15 @@ import WidgetKit
     /// The parks the Tonight's sky widgets and the Tonight control are set to (`followed`: their
     /// clouds are fetched and carried), and those the Moon widgets are set to (`moons`: their Moon
     /// pictures are drawn, and no forecast is needed). Empty when none is set or the system cannot
-    /// say (a "darkest saved park" widget follows the saved parks anyway).
-    static func widgetPlaces() async -> (followed:[String],moons:[String]) {
-        guard DebugScenario.screen == nil else { return ([],[]) }
+    /// say (a "darkest saved park" widget follows the saved parks anyway). `controls`: each Tonight
+    /// control in Control Center by the place it is set to (nil: the darkest saved place).
+    static func widgetPlaces() async -> (followed:[String],moons:[String],controls:[String?]) {
+        guard DebugScenario.screen == nil else { return ([],[],[]) }
         let widgets=(try? await WidgetCenter.shared.currentConfigurations()) ?? []
-        let controls=(try? await ControlCenter.shared.currentControls()) ?? []
-        return (widgets.compactMap { $0.widgetConfigurationIntent(of:TonightWidgetIntent.self)?.park?.id }
-                    + controls.compactMap { $0.configurationIntent(of:TonightControlIntent.self)?.park?.id },
-                widgets.compactMap { $0.widgetConfigurationIntent(of:MoonWidgetIntent.self)?.park?.id })
+        let controls=((try? await ControlCenter.shared.currentControls()) ?? []).filter { $0.kind == WidgetSelection.controlKind }
+        let chosen=controls.map { $0.configurationIntent(of:TonightControlIntent.self)?.park?.id }
+        return (widgets.compactMap { $0.widgetConfigurationIntent(of:TonightWidgetIntent.self)?.park?.id } + chosen.compactMap { $0 },
+                widgets.compactMap { $0.widgetConfigurationIntent(of:MoonWidgetIntent.self)?.park?.id },chosen)
     }
     /// Forecasts, smoke, summit layers, closures or the followed places changed in the model. A run
     /// hands over its own changes; outside one (a pull to refresh on Tonight or Parks, a park's page

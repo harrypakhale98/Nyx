@@ -102,6 +102,38 @@ struct BackgroundRefreshTests {
         #expect(SavedSkySync.budget(remaining: .greatestFiniteMagnitude) == .seconds(20))
         #expect(SavedSkySync.budget(remaining: 0) == .seconds(1))
     }
+    /// The Tonight control alone is someone to serve: a background refresh runs, and ends by
+    /// reloading it. Night vision and field mode show no forecast; a list that cannot be read counts.
+    @Test func tonightControlCountsOutsideTheApp() {
+        #expect(!SavedSkySync.showsTonight(widgets: 0, controls: []))
+        #expect(!SavedSkySync.showsTonight(widgets: 0, controls: ["NightVisionControl", "FieldModeControl"]))
+        #expect(SavedSkySync.showsTonight(widgets: 0, controls: ["FieldModeControl", WidgetSelection.controlKind]))
+        #expect(SavedSkySync.showsTonight(widgets: 2, controls: []))
+        #expect(SavedSkySync.showsTonight(widgets: nil, controls: []))
+        #expect(SavedSkySync.showsTonight(widgets: 0, controls: nil))
+    }
+    /// With a Tonight control, the next background refresh is asked for a little after its park's
+    /// sunrise, when "tonight" there becomes the coming night; otherwise about six hours on.
+    @Test func nextRefreshFollowsTheControlsSunrise() throws {
+        let jotr=try park()
+        let now=try #require(jotr.calendar.date(from: DateComponents(year: 2026, month: 11, day: 4, hour: 2)))
+        let turnovers=jotr.nightTurnovers(from: now, to: now.addingTimeInterval(2*86400))
+        let delay=SavedSkySync.refreshDelay(now: now, turnovers: turnovers)
+        #expect(delay < SavedSkySync.refreshInterval)
+        #expect(jotr.currentNight(at: now.addingTimeInterval(delay)) == jotr.date(jotr.currentNight(at: now), addingDays: 1))
+        let sunrise=try #require(turnovers.first)
+        #expect(delay == sunrise.timeIntervalSince(now) + 600)
+        #expect(SavedSkySync.refreshDelay(now: now, turnovers: []) == 6*3600)
+        #expect(SavedSkySync.refreshDelay(now: now, turnovers: [now.addingTimeInterval(-60)]) == 6*3600)
+        #expect(SavedSkySync.refreshDelay(now: now, turnovers: [now.addingTimeInterval(9*3600)]) == 6*3600)
+        // The earliest still ahead, never under a quarter of an hour.
+        #expect(SavedSkySync.refreshDelay(now: now, turnovers: [now.addingTimeInterval(3*3600), now.addingTimeInterval(3600)]) == 3600+600)
+        #expect(SavedSkySync.refreshDelay(now: now, turnovers: [now.addingTimeInterval(120)]) == 15*60)
+        // A control set to a place follows it; one on the darkest saved place follows them all.
+        #expect(SavedSkySync.controlPlaces([nil, "deva", "jotr"], saved: ["jotr", "arch"]) == ["jotr", "arch", "deva"])
+        #expect(SavedSkySync.controlPlaces(["deva"], saved: ["jotr"]) == ["deva"])
+        #expect(SavedSkySync.controlPlaces([], saved: ["jotr"]).isEmpty)
+    }
     /// Nights worked out off the main thread (launch, Parks, the calendar's next months) score
     /// exactly as nights worked out on demand.
     @MainActor @Test func preparedNightsScoreTheSame() async throws {
