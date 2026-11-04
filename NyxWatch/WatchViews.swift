@@ -306,7 +306,8 @@ struct TonightFace: View {
                 let side = typeSize.isAccessibilitySize ? min(112, WKInterfaceDevice.current().screenBounds.width*0.6) : WatchTonightLayout.scrollingDial
                 gauge.frame(width: side, height: side)
                 // At accessibility sizes the band word leaves the dial for this line.
-                if typeSize.isAccessibilitySize { Text(shown.score.band.label).bandWord(.headline, ink: palette.ink) }
+                // VoiceOver hears it once, in the dial's value.
+                if typeSize.isAccessibilitySize { Text(shown.score.band.label).bandWord(.headline, ink: palette.ink).accessibilityHidden(true) }
                 // Directly under the score, as on iPhone and Vision Pro: the one line never to be missed,
                 // and then, if the Park Service refuses requests, that it is an earlier update's.
                 if let closure {
