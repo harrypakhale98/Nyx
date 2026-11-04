@@ -153,6 +153,8 @@ struct ParkNightView: View {
     /// Nights after tonight the dial opens on (a complication's later night), turned with the Crown.
     var startNight = WatchDebug.initialNight
     @State private var page = WatchDebug.initialPage
+    /// The pages' focus: where the Crown goes back to when Tonight's dial lets go of it.
+    @Namespace private var pages
     @Environment(\.watchNow) private var now
     /// The red dark-adaptation screen is up (opened at the root, `AdaptationRequests`).
     private var darkMode: Bool { store.adaptationCover != nil }
@@ -162,16 +164,19 @@ struct ParkNightView: View {
             let night = week.first ?? store.tonight(park, at: now)
             TabView(selection: $page) {
                 // (The DEBUG Always-On override is repeated per page: pages take the scene's value.)
-                TonightFace(night: night, week: week, now: now, context: store.context, moons: store.moons, startNight: startNight).modifier(WatchDebug.AlwaysOn()).tag(0)
+                TonightFace(night: night, week: week, now: now, context: store.context, moons: store.moons, startNight: startNight, pages: pages).modifier(WatchDebug.AlwaysOn()).tag(0)
                 MilestonesPage(night: night, now: now, context: store.context).modifier(WatchDebug.AlwaysOn()).tag(1)
                 // Tonight's pages together: the moments of the night, then what is up in it.
                 WhatsUpPage(night: night).modifier(WatchDebug.AlwaysOn()).tag(2)
                 WeekPage(park: park, nights: week, now: now, isHome: isHome).modifier(WatchDebug.AlwaysOn()).tag(3)
             }
             .tabViewStyle(.verticalPage)
+            // The Crown pages unless the dial holds it.
+            .prefersDefaultFocus(in: pages)
             // A wrist tap as a moment of the night passes, while its countdown is on screen.
             .modifier(MilestoneTap(park: park, next: NightMilestone.next(after: now, in: night.sky), active: page < 2 && !darkMode))
         }
+        .focusScope(pages)
         .nyxTitle(park.shortName, shorter: park.wristName)
         .toolbar {
             if isHome {
@@ -214,6 +219,7 @@ struct TonightFace: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.resetFocus) private var resetFocus
     let night: Night
     let week: [Night]
     let now: Date
@@ -230,12 +236,15 @@ struct TonightFace: View {
     @State private var room = 0.0
     @State private var wordsHeight = 0.0
     @State private var held: WatchTonightLayout?
-    init(night: Night, week: [Night], now: Date, context: WatchContext?, moons: WatchMoons? = nil, startNight: Int = WatchDebug.initialNight) {
+    /// The focus scope of the pages around the face (`ParkNightView`), handed the Crown when the dial lets go.
+    let pages: Namespace.ID?
+    init(night: Night, week: [Night], now: Date, context: WatchContext?, moons: WatchMoons? = nil, startNight: Int = WatchDebug.initialNight, pages: Namespace.ID? = nil) {
         self.night = night
         self.week = week
         self.now = now
         self.context = context
         self.moons = moons
+        self.pages = pages
         _offset = State(initialValue: startNight)
         _engaged = State(initialValue: startNight > 0)
     }
@@ -394,7 +403,11 @@ struct TonightFace: View {
                 if !focused { engaged = false }
             }
             .onChange(of: engaged) { _, on in
-                if !on { scrubbing = false; withAnimation(reduceMotion ? nil : NyxMotion.spring) { offset = 0 } }
+                guard !on else { return }
+                scrubbing = false
+                withAnimation(reduceMotion ? nil : NyxMotion.spring) { offset = 0 }
+                // Nothing else gives the pages the Crown back.
+                if let pages { resetFocus(in: pages) }
             }
             // Focus once the dial has become focusable, after the update that makes it so; a request
             // the focus system drops is made again, for up to a second. Opened on a later night,
