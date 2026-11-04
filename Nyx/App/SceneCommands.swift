@@ -195,13 +195,20 @@ struct WindowSceneReader: View {
     }
     final class ProbeView: UIView {
         weak var commands:SceneCommands?
+        private var geometry:NSKeyValueObservation?
         override init(frame:CGRect) {
             super.init(frame:frame)
             // A turn or a move to another screen (iPhone Duo folded or opened) changes the window's size classes.
             registerForTraitChanges([UITraitHorizontalSizeClass.self,UITraitVerticalSizeClass.self]) { (view:ProbeView,_) in view.report() }
         }
         required init?(coder:NSCoder) { nil }
-        override func didMoveToWindow() { super.didMoveToWindow(); report() }
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            // Folded live, iPhone Duo changes the window's size classes while the scene is still on the open
+            // display, so the screen read then is the old one; the scene's geometry changes once it has moved.
+            geometry=window?.windowScene?.observe(\.effectiveGeometry) { [weak self] _,_ in Task { @MainActor in self?.report() } }
+            report()
+        }
         func report() {
             guard let scene=window?.windowScene, let commands else { return }
             commands.windowScene=scene
