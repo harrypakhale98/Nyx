@@ -330,6 +330,8 @@ struct TonightFace: View {
                 AskIPhoneRow(source: WatchSky.cloudSource(night.park, context: context, now: now))
             }.frame(maxWidth: .infinity)
         }
+        // Still while the dial holds the Crown, so the scroll view never takes the Crown from it.
+        .scrollDisabled(engaged)
     }
     /// `wraps`: every line whole, wrapped rather than shrunk or cut (the large sizes).
     private func fixed(wraps: Bool) -> some View {
@@ -386,16 +388,25 @@ struct TonightFace: View {
             .focused($scrubbing)
             .focusEffectDisabled()
             .digitalCrownRotation(detent: $offset, from: 0, through: max(0, week.count-1), by: 1, sensitivity: .low, isContinuous: false, isHapticFeedbackEnabled: true)
-            .onTapGesture {
-                // Focus once the dial has become focusable, on the next turn of the run loop.
-                if engaged { engaged = false } else { engaged = true; Task { scrubbing = true } }
-            }
+            .onTapGesture { engaged.toggle() }
             // Back to tonight when the Crown is let go of: a second tap, or another page.
             .onChange(of: scrubbing) { _, focused in
                 if !focused { engaged = false }
             }
             .onChange(of: engaged) { _, on in
                 if !on { scrubbing = false; withAnimation(reduceMotion ? nil : NyxMotion.spring) { offset = 0 } }
+            }
+            // Focus once the dial has become focusable, after the update that makes it so; a request
+            // the focus system drops is made again, for up to a second. Opened on a later night,
+            // the dial holds the Crown from the start.
+            .task(id: engaged) {
+                guard engaged else { return }
+                for _ in 0..<20 where !scrubbing {
+                    await Task.yield()
+                    guard !Task.isCancelled else { return }
+                    scrubbing = true
+                    do { try await Task.sleep(for: .milliseconds(50)) } catch { return }
+                }
             }
             .accessibilityAdjustableAction { direction in
                 switch direction {
@@ -404,7 +415,6 @@ struct TonightFace: View {
                 @unknown default: break
                 }
             }
-            .onAppear { if engaged { Task { scrubbing = true } } }
     }
 }
 
