@@ -219,6 +219,7 @@ struct TonightFace: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @Environment(\.resetFocus) private var resetFocus
     let night: Night
     let week: [Night]
@@ -346,7 +347,8 @@ struct TonightFace: View {
         .scrollPosition($position)
         .onScrollGeometryChange(for: Double.self) { $0.contentOffset.y } action: { _, y in scrolled = y }
         // Still while the dial holds the Crown, so the scroll view never takes the Crown from it.
-        .scrollDisabled(engaged)
+        // Not under VoiceOver, which steps the nights on the dial itself and must scroll to the lines below it.
+        .scrollDisabled(engaged && !voiceOver)
         // A finger still reaches the held night's lines below the dial: while the scroll view is still,
         // a drag moves it (the Crown stays on the dial), and the scroll view keeps it within its content.
         .simultaneousGesture(heldDrag, including: engaged ? .all : .subviews)
