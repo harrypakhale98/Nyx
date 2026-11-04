@@ -236,6 +236,10 @@ struct TonightFace: View {
     @State private var room = 0.0
     @State private var wordsHeight = 0.0
     @State private var held: WatchTonightLayout?
+    /// Where the scrolling face is scrolled to, and where a drag over it began while the dial holds the Crown.
+    @State private var position = ScrollPosition()
+    @State private var scrolled = 0.0
+    @State private var dragFrom: Double?
     /// The focus scope of the pages around the face (`ParkNightView`), handed the Crown when the dial lets go.
     let pages: Namespace.ID?
     init(night: Night, week: [Night], now: Date, context: WatchContext?, moons: WatchMoons? = nil, startNight: Int = WatchDebug.initialNight, pages: Namespace.ID? = nil) {
@@ -339,8 +343,27 @@ struct TonightFace: View {
                 AskIPhoneRow(source: WatchSky.cloudSource(night.park, context: context, now: now))
             }.frame(maxWidth: .infinity)
         }
+        .scrollPosition($position)
+        .onScrollGeometryChange(for: Double.self) { $0.contentOffset.y } action: { _, y in scrolled = y }
         // Still while the dial holds the Crown, so the scroll view never takes the Crown from it.
         .scrollDisabled(engaged)
+        // A finger still reaches the held night's lines below the dial: while the scroll view is still,
+        // a drag moves it (the Crown stays on the dial), and the scroll view keeps it within its content.
+        .simultaneousGesture(heldDrag, including: engaged ? .all : .subviews)
+    }
+    private var heldDrag: some Gesture {
+        DragGesture(minimumDistance: 6)
+            .onChanged { drag in
+                let from = dragFrom ?? scrolled
+                dragFrom = from
+                position.scrollTo(y: from - drag.translation.height)
+            }
+            .onEnded { drag in
+                let from = dragFrom ?? scrolled
+                dragFrom = nil
+                // A flick carries on as a scroll would, on the shared spring.
+                withAnimation(reduceMotion ? nil : NyxMotion.spring) { position.scrollTo(y: from - drag.predictedEndTranslation.height) }
+            }
     }
     /// `wraps`: every line whole, wrapped rather than shrunk or cut (the large sizes).
     private func fixed(wraps: Bool) -> some View {
