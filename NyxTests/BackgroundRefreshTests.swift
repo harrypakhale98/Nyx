@@ -134,6 +134,19 @@ struct BackgroundRefreshTests {
         #expect(SavedSkySync.controlPlaces(["deva"], saved: ["jotr"]) == ["deva"])
         #expect(SavedSkySync.controlPlaces([], saved: ["jotr"]).isEmpty)
     }
+    /// A control set to a world catalogue place, read in a cold background launch before the
+    /// catalogue is: its sunrise still times the next refresh, never the flat six hours.
+    @MainActor @Test func worldControlPlaceTimesTheNextRefresh() async throws {
+        let model=PlanModel(weather: WeatherService(transport: StubHTTP([:]), persist: false), parkStore: ParkStore(transport: StubHTTP([:]), persist: false), detail: ForecastDetailService(transport: StubHTTP([:]), persist: false))
+        let place="wd:Q5164083"
+        #expect(model.park(place) == nil)
+        let now=try #require(try park().calendar.date(from: DateComponents(year: 2026, month: 11, day: 4, hour: 2)))
+        let turnovers=await SavedSkySync.turnovers(SavedSkySync.controlPlaces([place], saved: ["jotr"]), model, now: now)
+        let world=try #require(model.park(place))
+        #expect(turnovers == world.nightTurnovers(from: now, to: now.addingTimeInterval(2*86400)))
+        #expect(!turnovers.isEmpty)
+        #expect(SavedSkySync.refreshDelay(now: now, turnovers: turnovers) < SavedSkySync.refreshInterval)
+    }
     /// Nights worked out off the main thread (launch, Parks, the calendar's next months) score
     /// exactly as nights worked out on demand.
     @MainActor @Test func preparedNightsScoreTheSame() async throws {

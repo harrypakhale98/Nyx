@@ -87,18 +87,18 @@ import WidgetKit
     private func runOnce(_ model:PlanModel,background:Bool,publishOnly:Bool) async {
         guard let current=parkIDs else { return }
         // A widget set to a park is followed as a saved park is: its clouds are fetched and carried.
+        var controls:[String]?
         if !publishOnly || widgetIDs == nil {
             let places=await Self.widgetPlaces()
             widgetIDs=places.followed; moonWidgetIDs=places.moons
-            let now=Date.now
-            Self.controlTurnovers=Self.controlPlaces(places.controls,saved:current).compactMap { model.park($0) }
-                .flatMap { $0.nightTurnovers(from:now,to:now.addingTimeInterval(2*86400)) }
+            controls=Self.controlPlaces(places.controls,saved:current)
         }
         // A followed world catalogue place (`wd:`) resolves only once the catalogue is read; it is
         // never dropped from the widget, the watch or reminders for having been asked too early.
         if followedIDs(model).contains(where:{ $0.hasPrefix(Park.catalogPrefix) }) { await model.catalogReady() }
         // "Tonight" as of now, even in a background launch whose model last looked at the clock hours ago.
         model.tick()
+        if let controls { Self.controlTurnovers=await Self.turnovers(controls,model) }
         // Never a snapshot from before the launch's cache reads land (`PlanModel.cachesPending`).
         await model.cachesReady()
         let parks=current.compactMap { model.park($0) }
@@ -219,6 +219,13 @@ import WidgetKit
     nonisolated static func refreshDelay(now:Date,turnovers:[Date])->TimeInterval {
         guard let next=turnovers.filter({ $0>now }).min() else { return refreshInterval }
         return min(refreshInterval,max(15*60,next.timeIntervalSince(now)+10*60))
+    }
+    /// When the nights at `places` (`controlPlaces`) turn over, over the two days from `now`. A world
+    /// catalogue place resolves only once the catalogue is read: it is waited for, so a control set to
+    /// one is refreshed after its sunrise as any other, even in a cold background launch.
+    static func turnovers(_ places:[String],_ model:PlanModel,now:Date = .now) async -> [Date] {
+        if places.contains(where:{ $0.hasPrefix(Park.catalogPrefix) }) { await model.catalogReady() }
+        return places.compactMap { model.park($0) }.flatMap { $0.nightTurnovers(from:now,to:now.addingTimeInterval(2*86400)) }
     }
     /// The places the Tonight controls' nights come from, once each: the place each is set to (nil:
     /// none, so the darkest of the saved places).
