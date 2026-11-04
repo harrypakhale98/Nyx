@@ -391,9 +391,18 @@ struct TonightView: View {
                 answerLine(day:day)
                 if !typeSize.isAccessibilitySize { Image(systemName:"arrow.down").font(.caption2.weight(.semibold)).accessibilityHidden(true) }
             }
-            .padding(.vertical,14).contentShape(Rectangle()).padding(.vertical,-14)
+            .eyebrow().padding(.vertical,14).contentShape(Rectangle()).padding(.vertical,-14)
         }.buttonStyle(.plain)
+        // Outside the eyebrow's capitals, so VoiceOver and Braille get the line and its hint in sentence case.
+        .accessibilityLabel(reachLabel(day:day))
         .accessibilityHint("Shows the starting point and radius.")
+    }
+    /// The answer's line as VoiceOver and Braille read it at every size: the night, then where from, as the
+    /// two lines read at accessibility sizes.
+    private func reachLabel(day:String)->String {
+        let radius=SearchRadius.label(model.radiusMeters)
+        let reach=model.startChosen ? String(localized:"Darkest within \(radius)") : String(localized:"Example: from \(model.originName)")
+        return String(localized:"\(day), \(reach)")
     }
     /// The line above the answer, all data: the night, and where "in reach" is measured from.
     /// Never "nearby" for a starting park or city; an example until a starting point is chosen.
@@ -513,7 +522,7 @@ struct TonightView: View {
         // The first line is the answer's own context: the night, and from where. At accessibility sizes
         // it follows the dial and the closure, so the park, its score and any closure come first.
         // Another night than tonight is said in starlight, so the held night reads as chosen, not as the default.
-        let context=reachLine(park,day:park.dayLabel(night.id)).eyebrow()
+        let context=reachLine(park,day:park.dayLabel(night.id))
             .foregroundStyle(later ? palette.ink : palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
         // A forecast older than the age at which clouds are asked for again says when it is from.
         let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { model.forecastIsStale($0) ? $0 : nil } : nil
