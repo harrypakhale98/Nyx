@@ -412,6 +412,36 @@ final class NyxUITests:XCTestCase {
         XCTAssertTrue(app.navigationBars["Parks"].waitForExistence(timeout:20),"The main window did not come back")
         XCTAssertFalse(app.staticTexts["This spot was deleted"].waitForExistence(timeout:8),"The deleted spot's window came back")
     }
+    /// iPad: a relaunch that restores a park's window alone (it covered the main one) leaves the main window
+    /// unconnected; "Show Main Window" brings that window's own session back (`MainWindows.bringForward`).
+    func testShowMainWindowAfterARelaunch() throws {
+        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad,"iPad only")
+        continueAfterFailure=false
+        XCUIDevice.shared.orientation = .portrait
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","parks","-nyx-state","no-forecast","-nyx-reduce-motion","-nyx-open-window","deva"]
+        app.launch()
+        let show=app.buttons["Show Main Window"]
+        XCTAssertTrue(show.waitForExistence(timeout:30),"The park's window did not open")
+        // To the Home Screen and back, so the system keeps the windows as they stand before the app ends.
+        sleep(2)
+        XCUIDevice.shared.press(.home)
+        sleep(3)
+        app.terminate()
+        app.launchArguments=["-nyx-screen","parks","-nyx-state","no-forecast","-nyx-reduce-motion"]
+        app.launch()
+        XCTAssertTrue(show.waitForExistence(timeout:30),"The park's window did not come back")
+        let bar=app.navigationBars["Parks"]
+        XCTAssertFalse(bar.waitForExistence(timeout:5),"The main window came back with the park's")
+        show.tap()
+        let reachable=NSPredicate(format:"exists == true AND hittable == true")
+        XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:reachable,object:bar)],timeout:20),.completed,"Show Main Window did not bring the main window forward")
+        XCTAssertTrue(app.buttons.matching(identifier:"Tonight").firstMatch.exists,"No tabs in the main window")
+        XCTAssertEqual(app.state,.runningForeground,"Nyx left the screen")
+        // The main window in front when the app ends, so the next launch opens on it.
+        sleep(2)
+        app.terminate()
+    }
     /// The night-vision switch is a lamp (`NightVisionLamp`): a tap turns the red on under a black
     /// cover, two quick taps turn back and forth from wherever the cover is, and once the lamp has
     /// settled the switch shows the stored setting again. Ends with night vision off, as it began.
