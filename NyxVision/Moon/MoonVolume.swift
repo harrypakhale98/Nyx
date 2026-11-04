@@ -39,7 +39,10 @@ struct MoonVolume: View {
         .gesture(DragGesture(minimumDistance: 4).targetedToAnyEntity()
             .onChanged { value in globe.turn(by: Float(value.translation.width)) }
             .onEnded { _ in globe.settle(reduceMotion: reduceMotion) })
-        .ornament(attachmentAnchor: .scene(.bottom), contentAlignment: .top) {
+        // From the volume's front edge, not the middle of its floor: visionOS draws the volume's window bar
+        // there, which lay across an ornament hung from the middle and took the taps meant for its slider.
+        // Exactly at the edge: hung any higher up the front face, the bar is drawn over the ornament again.
+        .ornament(attachmentAnchor: .scene(.bottomFront), contentAlignment: .top) {
             MoonControls(view: view, nights: $nights, offersPlanner: !model.plannerOpen)
                 .environment(\.visionPalette, VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency || contrast == .increased, boldText: legibilityWeight == .bold))
                 .modifier(DebugTypeSize())
@@ -296,7 +299,7 @@ struct MoonControls: View {
     /// The planner is closed: the volume is the only Nyx window left, so it offers the way back.
     var offersPlanner = false
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: typeSize.isAccessibilitySize ? 8 : 12) {
             HStack(spacing: 14) {
                 Button { nights -= 1 } label: { Image(systemName: "chevron.backward") }
                     .disabled(nights == 0)
@@ -320,33 +323,43 @@ struct MoonControls: View {
             .tint(palette.ink)
             .accessibilityValue(Text(title))
             // Kept at every size: the ornament's fixed width (below) lets it measure the wrapped caption at
-            // the width it lays it out, so the title and buttons above and below it stay whole.
+            // the width it lays it out, so the title and buttons above and below it stay whole. At the
+            // accessibility sizes it shows its first sentence only, so the ornament, hung from the volume's
+            // front edge, still ends within a seated view; VoiceOver reads it whole, here and on the Moon.
             if let view {
-                Text(Self.caption(view)).font(.footnote).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+                Text(typeSize.isAccessibilitySize ? Self.shortCaption(view) : Self.caption(view))
+                    .font(.footnote).foregroundStyle(palette.muted).multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel(Text(Self.caption(view)))
             }
             if nights > 0 || offersPlanner {
-                let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 12)) : AnyLayout(HStackLayout(spacing: 12))
-                layout {
-                    if nights > 0 { Button("Back to tonight") { nights = 0 } }
-                    if offersPlanner {
-                        Button { openWindow(id: PlannerWindow.id) } label: { Label("Open planner", systemImage: "list.bullet") }
-                            .accessibilityHint(Text("Opens the window with every park and the night's controls"))
-                    }
+                // Side by side wherever they fit, the largest sizes included, which keeps the ornament short
+                // enough to stay in view below the Moon; stacked only when they do not.
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 12) { actions }
+                    VStack(spacing: 12) { actions }
                 }
                 .buttonStyle(.bordered).buttonBorderShape(.capsule)
             }
         }
         // A fixed content width, not a maximum: an ornament proposes no width of its own, so wrapped
         // text measured against a maximum came out taller or shorter than it was drawn, and clipped.
-        .frame(width: typeSize.isAccessibilitySize ? 588 : 428)
-        .padding(.horizontal, 26).padding(.vertical, 18)
+        // Wider at the accessibility sizes, where every line it saves keeps the ornament within view.
+        .frame(width: typeSize.isAccessibilitySize ? 760 : 428)
+        .padding(.horizontal, 26).padding(.vertical, typeSize.isAccessibilitySize ? 14 : 18)
         .glassBackgroundEffect(displayMode: palette.nightVision || palette.solid ? .never : .always)
         .background {
             if palette.nightVision { RoundedRectangle(cornerRadius: 32).fill(palette.nightPanel) }
             else if palette.solid { RoundedRectangle(cornerRadius: 32).fill(palette.solidPanel) }
         }
         .modifier(NightVisionFilter(enabled: palette.nightVision, red: palette.base.red))
+    }
+    @ViewBuilder private var actions: some View {
+        if nights > 0 { Button("Back to tonight") { nights = 0 } }
+        if offersPlanner {
+            Button { openWindow(id: PlannerWindow.id) } label: { Label("Open planner", systemImage: "list.bullet") }
+                .accessibilityHint(Text("Opens the window with every park and the night's controls"))
+        }
     }
     private var title: String {
         guard let view else { return nights == 0 ? String(localized: "Tonight") : "" }
@@ -355,6 +368,10 @@ struct MoonControls: View {
     /// "As seen from Joshua Tree at 10:42 PM. Drag it to turn it."
     static func caption(_ view: MoonVolumeNight) -> String {
         String(localized: "As seen from \(view.park.shortName) at \(view.park.time(view.moment)), its highest that night. Drag to turn it; it turns back to the face we always see.")
+    }
+    /// The caption's first sentence, for the accessibility sizes.
+    static func shortCaption(_ view: MoonVolumeNight) -> String {
+        String(localized: "As seen from \(view.park.shortName) at \(view.park.time(view.moment)), its highest that night.")
     }
 }
 

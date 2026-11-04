@@ -2261,6 +2261,41 @@
         }
       }
     },
+    "As seen from %@ at %@, its highest that night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "So, wie er von %@ aus um %@ erscheint, an seinem höchsten Punkt in dieser Nacht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As seen from %@ at %@, its highest that night."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista desde %1$@ (%2$@), a su mayor altura esa noche."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vue depuis %1$@ à %2$@, à son plus haut cette nuit-là."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@から%2$@に見た姿。その夜に最も高くなるときです。"
+          }
+        }
+      }
+    },
     "As seen from %@ at %@, its highest that night. Drag to turn it; it turns back to the face we always see.": {
       "extractionState": "manual",
       "localizations": {
