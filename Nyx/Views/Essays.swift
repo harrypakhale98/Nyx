@@ -93,7 +93,7 @@ struct LearnView:View {
                 }.frame(maxHeight:.infinity,alignment:.top) }.frame(maxHeight:.infinity) }.buttonStyle(.plain).hoverEffect(.lift)
             } }.measuringWidth($gridWidth)
             AboutDataLink()
-        }.padding(24).readableColumn(1080) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
+        }.padding(24).readableColumn(1080) }.restsDecorationWhileScrolling().background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
     }
 }
 struct EssayView:View {

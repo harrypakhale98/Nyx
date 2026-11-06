@@ -147,6 +147,7 @@ struct TimeRiver: View {
             release()
         }
         .preference(key:RiverScrubbingKey.self,value:scrubbing==true)
+        .restsDecoration(while:scrubbing==true)
         // Feel the Moon: once a scrub rests on a night, its Moon's phase as a short texture.
         .task(id:felt) {
             guard felt>0, MoonHaptics.enabled, let moon=current?.sky.moon else { return }

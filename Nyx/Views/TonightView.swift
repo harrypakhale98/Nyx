@@ -181,6 +181,7 @@ struct TonightView: View {
             withAnimation(NyxMotion.tracking) { pull.interacting = phase == .interacting }
             if phase == .idle { pull.spent=false }
         }
+        .restsDecorationWhileScrolling()
         // The fold, read on the scroll view itself so the columns keep it however far the page scrolls.
         .foldSource()
         // `-nyx-scroll 0…1` (DEBUG) opens partway down, for review captures of the starting point.

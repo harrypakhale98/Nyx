@@ -64,7 +64,7 @@ struct RealSky: View {
         // At `Decoration.rate`, resting by its one rule (`Decoration.rests`): still, covered, in the
         // background, in Low Power Mode and while the device is hot, as the sensors do.
         TimelineView(.animation(minimumInterval:Decoration.interval,paused:Decoration.rests(still:still,covered:resting,offscreen:scenePhase == .background))) { timeline in
-            let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
+            let t=still ? 0 : Decoration.time(timeline.date)
             let tilt=still ? (x:0.0,y:0.0) : (x:MotionTilt.shared.x,y:MotionTilt.shared.y)
             ZStack {
                 // Twilight's lift, under everything: void at the top to deep indigo low in the sky.

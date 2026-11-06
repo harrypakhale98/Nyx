@@ -4,10 +4,19 @@ import SwiftUI
 
 /// How the phone is tilted, for highlights that catch the light as you move it.
 /// Gravity only: no activity, no location, no permission prompt; nothing leaves the phone.
-/// Runs at 30 Hz only while a view that wants it is on screen, and never under Reduce Motion
+/// Runs only while a view that wants it is on screen, and never under Reduce Motion
 /// or Low Power Mode. Values are read inside per-frame drawing, so they are not observed.
 @MainActor final class MotionTilt {
     static let shared=MotionTilt()
+    /// Samples a second: the dial's glint is drawn at the display's rate on iPhone and iPad, so its
+    /// tilt has to arrive faster than the sky's parallax alone would need.
+    #if os(iOS)
+    nonisolated static let sampleRate=60.0
+    #else
+    nonisolated static let sampleRate=30.0
+    #endif
+    /// How far each sample moves the smoothed tilt: the same time constant at any sample rate.
+    nonisolated static var smoothing: Double { 1-pow(0.8,30/sampleRate) }
     private let manager=CMMotionManager()
     /// Views on screen that want tilt now (`motionTilt(_:)`); a view under Reduce Motion never counts.
     private var clients=0
@@ -42,17 +51,17 @@ import SwiftUI
     }
     private func begin() {
         guard !suspended,!manager.isDeviceMotionActive,!PowerState.shared.lowPower,manager.isDeviceMotionAvailable else { return }
-        manager.deviceMotionUpdateInterval=1/30
+        manager.deviceMotionUpdateInterval=1/Self.sampleRate
         samples=0
         manager.startDeviceMotionUpdates(to:.main) { [weak self] motion,_ in
             guard let gravity=motion?.gravity else { return }
             MainActor.assumeIsolated {
                 guard let self else { return }
-                if self.samples%15==0 { self.turns=self.interfaceTurns?() ?? 0 }
+                if self.samples%Int(Self.sampleRate/2)==0 { self.turns=self.interfaceTurns?() ?? 0 }
                 self.samples+=1
                 let screen=Self.screenGravity(x:gravity.x,y:gravity.y,quarterTurns:self.turns)
-                self.x+=(max(-1,min(1,screen.x))-self.x)*0.2
-                self.y+=(max(-1,min(1,screen.y+0.6))-self.y)*0.2
+                self.x+=(max(-1,min(1,screen.x))-self.x)*Self.smoothing
+                self.y+=(max(-1,min(1,screen.y+0.6))-self.y)*Self.smoothing
             }
         }
     }
@@ -126,20 +135,95 @@ private struct MotionTiltClient: ViewModifier {
     nonisolated static func serious(_ state: ProcessInfo.ThermalState) -> Bool { state == .serious || state == .critical }
 }
 /// One rule for when Nyx's decoration rests, shared by every decorative timeline (the dial's
-/// orbiting stars and glint, the starfield, the real sky behind each screen): it redraws at most
-/// `rate` times a second, and not at all while it is held still (Reduce Motion, reduced
-/// resources), covered (a full-screen sky over the page, `skyResting`), out of view (scrolled
-/// away, Nyx in the background), in Low Power Mode, or while the device is hot (thermal state
-/// serious or critical). Resting keeps the frame on screen; it only stops redrawing it.
+/// orbiting stars and glint, the starfield, the real sky behind each screen). The full-screen skies
+/// redraw at most `rate` times a second; what visibly travels (the dial's stars, the loading sweep)
+/// runs at the display's own rate, `movingInterval`. None of it redraws while it is held still
+/// (Reduce Motion, reduced resources), covered (a full-screen sky over the page, `skyResting`), out
+/// of view (scrolled away, Nyx in the background), while a finger moves the page (`DecorationHold`),
+/// in Low Power Mode, or while the device is hot (thermal state serious or critical). Resting keeps
+/// the frame on screen; it only stops redrawing it.
 @MainActor enum Decoration {
-    /// 30 Hz: twinkle and drift read as continuous at this rate, at a quarter of ProMotion's frames.
+    /// 30 Hz for a full screen of stars: twinkle is a change of brightness and the parallax moves about
+    /// 0.1 pt a frame, so both read as continuous, at a quarter of ProMotion's frames.
     static let rate=30.0
     static var interval: Double { 1/rate }
+    /// Nil is the display's own best rate: 120 Hz on ProMotion, 60 Hz elsewhere. For small things that
+    /// travel far enough to show their steps at 30 Hz (the dial's stars move up to 1.2 pt a frame there).
+    static let movingInterval: Double?=nil
     static func rests(still:Bool,covered:Bool=false,offscreen:Bool=false)->Bool {
-        rests(still:still,covered:covered,offscreen:offscreen,lowPower:PowerState.shared.lowPower,hot:PowerState.shared.thermalSerious)
+        rests(still:still,covered:covered || DecorationHold.shared.holding,offscreen:offscreen,lowPower:PowerState.shared.lowPower,hot:PowerState.shared.thermalSerious)
     }
+    /// The time decoration is drawn at: it stops while held, so a star picks up where it left off.
+    static func time(_ date:Date)->Double { DecorationHold.shared.time(at:date) }
     /// The rule itself, from its inputs (tested).
     nonisolated static func rests(still:Bool,covered:Bool,offscreen:Bool,lowPower:Bool,hot:Bool)->Bool {
         still || covered || offscreen || lowPower || hot
+    }
+}
+
+/// Decoration's clock, which stops while any page is being moved. Twinkle is worked out from the time,
+/// so with an ordinary clock every star would change brightness at once as the page came to rest.
+nonisolated struct DecorationClock {
+    private var holds=0
+    private var since: Date?
+    private var held=0.0
+    var holding: Bool { holds>0 }
+    mutating func hold(at date:Date) {
+        holds+=1
+        if holds==1 { since=date }
+    }
+    mutating func release(at date:Date) {
+        guard holds>0 else { return }
+        holds-=1
+        guard holds==0, let since else { return }
+        held+=max(0,date.timeIntervalSince(since))
+        self.since=nil
+    }
+    func time(at date:Date)->Double { min(date,since ?? date).timeIntervalSinceReferenceDate-held }
+}
+/// A finger moving a page (a scroll, a fling, a scrub of the time river) holds decoration still, so
+/// each of ProMotion's 8 ms frames goes to what is under the finger, not to redrawing the stars.
+@MainActor @Observable final class DecorationHold {
+    static let shared=DecorationHold()
+    private(set) var holding=false
+    @ObservationIgnored private var clock=DecorationClock()
+    func hold() { clock.hold(at:.now); holding=clock.holding }
+    func release() { clock.release(at:.now); holding=clock.holding }
+    func time(at date:Date)->Double { clock.time(at:date) }
+}
+extension View {
+    /// Holds decoration while `active` and this view is on screen; let go when either ends, so a view
+    /// torn down in the middle of a move never leaves the stars stopped.
+    func restsDecoration(while active:Bool)->some View { modifier(DecorationHoldClient(active:active)) }
+    /// Holds decoration while the first scroll view in this hierarchy is moving.
+    func restsDecorationWhileScrolling()->some View { modifier(ScrollDecorationHold()) }
+}
+private struct DecorationHoldClient: ViewModifier {
+    let active: Bool
+    @State private var onScreen=false
+    @State private var claimed=false
+    func body(content:Content)->some View {
+        content
+            .onAppear { onScreen=true; sync(onScreen:true,active:active) }
+            .onDisappear { onScreen=false; sync(onScreen:false,active:active) }
+            .onChange(of:active) { _,now in sync(onScreen:onScreen,active:now) }
+    }
+    private func sync(onScreen:Bool,active:Bool) {
+        let want=onScreen && active
+        guard want != claimed else { return }
+        claimed=want
+        if want { DecorationHold.shared.hold() } else { DecorationHold.shared.release() }
+    }
+}
+private struct ScrollDecorationHold: ViewModifier {
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var scrolling=false
+    func body(content:Content)->some View {
+        content
+            .onScrollPhaseChange { _,phase in scrolling=phase.isScrolling }
+            // No phase arrives for a scroll that ended out of sight: it must not hold on return.
+            .onDisappear { scrolling=false }
+            .onChange(of:scenePhase) { _,phase in if phase == .background { scrolling=false } }
+            .restsDecoration(while:scrolling)
     }
 }

@@ -118,11 +118,11 @@ struct ParkDetailView: View {
                     HStack(alignment:.top,spacing:folded?.gap ?? 0) {
                         ScrollView { VStack(spacing:26) { tonightChapter(proxy) }.padding([.vertical,.leading],24).padding(.trailing,inner) }
                             .contentMargins(.leading,side,for:.scrollContent)
-                            .scrollDisabled(scrubbing || holdingArc).frame(width:folded?.leading ?? WideLayout.leadingWidth(width)+side)
+                            .scrollDisabled(scrubbing || holdingArc).restsDecorationWhileScrolling().frame(width:folded?.leading ?? WideLayout.leadingWidth(width)+side)
                         // The sky arc lives here, so its held finger holds this column still too.
                         ScrollView { VStack(spacing:26) { skyChapter; placeChapter }.padding([.vertical,.trailing],24).padding(.leading,inner) }
                             .contentMargins(.trailing,side,for:.scrollContent)
-                            .scrollDisabled(scrubbing || holdingArc)
+                            .scrollDisabled(scrubbing || holdingArc).restsDecorationWhileScrolling()
                     }
                 } else {
                     ScrollView {
@@ -134,7 +134,7 @@ struct ParkDetailView: View {
                         // Under the pinned index the page's own top margin is half, so the score sits higher.
                         .padding(.horizontal,24).padding(.bottom,24).padding(.top,showsIndex ? 12 : 24).readableColumn()
                     }
-                    .scrollDisabled(scrubbing || holdingArc)
+                    .scrollDisabled(scrubbing || holdingArc).restsDecorationWhileScrolling()
                     .safeAreaBar(edge:.top) { if showsIndex { index(proxy) } }
                 }
             }

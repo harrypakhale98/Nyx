@@ -57,7 +57,7 @@ struct JournalView: View {
         }.measuringWidth($width).foldSource()
             // `-nyx-bottom` (DEBUG) opens at the foot of the list, for captures of the last nights' cards.
             .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : nil)
-            .background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
+            .restsDecorationWhileScrolling().background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
             .tabRootToolbar()
             .toolbar {
                 // Nothing is recorded into a journal that could not be opened: it would be lost. Dimmed by hand, since

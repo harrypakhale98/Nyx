@@ -28,7 +28,7 @@ struct Starfield: View {
         let faint=access.reducedResources ? fewerFaint : faint, bright=access.reducedResources ? fewerBright : bright
         // At `Decoration.rate`, resting by its one rule (`Decoration.rests`).
         TimelineView(.animation(minimumInterval:Decoration.interval,paused:Decoration.rests(still:still,covered:resting,offscreen:scenePhase == .background))) { timeline in
-            let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
+            let t=still ? 0 : Decoration.time(timeline.date)
             ZStack {
                 // The smaller, fainter stars in their own layer: under Increase Contrast they fade out
                 // (rather than pop), leaving a calmer field behind text, and then leave the tree.

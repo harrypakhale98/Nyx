@@ -163,6 +163,7 @@ struct ParksView: View {
         // Once the scroll settles there, so a drag under way is never interrupted.
         .onScrollGeometryChange(for:Bool.self) { $0.contentOffset.y+$0.contentInsets.top<=1 } action:{ _,top in atTop=top; keepTop(top:top,settled:settled) }
         .onScrollPhaseChange { _,phase in settled = phase == .idle; keepTop(top:atTop,settled:phase == .idle) }
+        .restsDecorationWhileScrolling()
         .background(NightBackground(veil:0.45)).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
             .modifier(SystemSearch(text:state.search,focused:$searchFocused,prompt:searchPrompt,enabled:!typeSize.isAccessibilitySize))
     }

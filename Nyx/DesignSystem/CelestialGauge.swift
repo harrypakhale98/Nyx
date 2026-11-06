@@ -561,18 +561,18 @@ struct CelestialGauge: View {
             ambient(displayed)
         }.accessibilityHidden(true)
     }
-    /// The glint, the leading star's pulse and the orbiting stars: decoration, at `Decoration.rate` at
-    /// most, still under Reduce Motion, reduced resources and in exported images, and resting by the
+    /// The glint, the leading star's pulse and the orbiting stars: decoration that travels, at the
+    /// display's rate (`Decoration.movingInterval`), still under Reduce Motion, reduced resources and in exported images, and resting by the
     /// one rule (`Decoration.rests`): covered, scrolled out of view, Low Power Mode, a hot device.
     private func ambient(_ displayed:Double)->some View {
         let still=reduceMotion || export || access.reducedResources
         let rests=Decoration.rests(still:still,covered:resting,offscreen:!onScreen || scenePhase == .background)
         let surges=self.surges, glow=self.glow
-        return TimelineView(.animation(minimumInterval:Decoration.interval,paused:rests)) { timeline in
+        return TimelineView(.animation(minimumInterval:Decoration.movingInterval,paused:rests)) { timeline in
             Canvas { context,size in
                 let dial=min(size.width,size.height), k=DialMetrics.scale(side:dial)
                 let center=CGPoint(x:size.width/2,y:size.height/2), radius=dial/2-DialMetrics.inset(side:dial)
-                let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
+                let t=still ? 0 : Decoration.time(timeline.date)
                 // The leading star: on the night's track, where the night has got to. Without a night to draw (polar night, midnight Sun) there is no star: it would mark the score on the ring.
                 let lead:Double?=night?.ring.now
                 let tip=Angle.degrees(140+260*(lead ?? 0))

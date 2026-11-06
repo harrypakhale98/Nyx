@@ -37,9 +37,9 @@ struct SkeletonRow: View {
         shapes.foregroundStyle(palette.line)
             .overlay {
                 if !still {
-                    TimelineView(.animation(minimumInterval:Decoration.interval,paused:Decoration.rests(still:false))) { timeline in
+                    TimelineView(.animation(minimumInterval:Decoration.movingInterval,paused:Decoration.rests(still:false))) { timeline in
                         GeometryReader { proxy in
-                            let phase=SkeletonRow.sweep(timeline.date.timeIntervalSinceReferenceDate)
+                            let phase=SkeletonRow.sweep(Decoration.time(timeline.date))
                             LinearGradient(colors:[.clear,palette.ink.opacity(0.12),.clear],startPoint:.leading,endPoint:.trailing)
                                 .frame(width:proxy.size.width*0.45)
                                 .offset(x:(phase*1.45-0.45)*proxy.size.width)

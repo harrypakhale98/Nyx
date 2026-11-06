@@ -171,6 +171,43 @@ import Testing
         }
         #expect(Decoration.rate == 30)
     }
+    /// The dial's stars and the loading sweep ask for the display's own rate, not a fixed one.
+    @Test func travellingDecorationRunsAtTheDisplaysRate() {
+        #expect(Decoration.movingInterval == nil)
+    }
+    /// A held clock stops and picks up where it left off, so no star jumps when a page comes to rest.
+    @Test func decorationClockStopsWhileHeld() {
+        let start=Date(timeIntervalSinceReferenceDate:1000)
+        var clock=DecorationClock()
+        #expect(!clock.holding)
+        #expect(clock.time(at:start) == 1000)
+        clock.hold(at:start)
+        #expect(clock.holding)
+        #expect(clock.time(at:start.addingTimeInterval(5)) == 1000)
+        clock.release(at:start.addingTimeInterval(5))
+        #expect(!clock.holding)
+        #expect(clock.time(at:start.addingTimeInterval(5)) == 1000)
+        #expect(clock.time(at:start.addingTimeInterval(6)) == 1001)
+    }
+    /// Two pages moving together (iPad's columns) hold until both have stopped, and a stray release is harmless.
+    @Test func decorationClockCountsItsHolds() {
+        let start=Date(timeIntervalSinceReferenceDate:0)
+        var clock=DecorationClock()
+        clock.release(at:start)
+        #expect(!clock.holding)
+        clock.hold(at:start)
+        clock.hold(at:start.addingTimeInterval(1))
+        clock.release(at:start.addingTimeInterval(2))
+        #expect(clock.holding)
+        #expect(clock.time(at:start.addingTimeInterval(3)) == 0)
+        clock.release(at:start.addingTimeInterval(4))
+        #expect(clock.time(at:start.addingTimeInterval(5)) == 1)
+    }
+    /// The tilt's smoothing keeps its time constant whatever the sample rate.
+    @Test func tiltSmoothingIsTheSameInTime() {
+        let perThirtieth=1-pow(1-MotionTilt.smoothing,MotionTilt.sampleRate/30)
+        #expect(abs(perThirtieth-0.2) < 1e-9)
+    }
     /// The tilt is read as the screen sees it: held at the reading angle in either landscape, the
     /// dial's glint rests where it does in portrait, and tipping the screen's right edge down reads as
     /// right in every orientation (the same quarter turns as the compass's `Pose.turned`).

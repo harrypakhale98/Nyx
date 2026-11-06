@@ -254,7 +254,7 @@ struct CalendarView: View {
                     LongViewLink(park:park); legend(shown)
                 }.padding(.horizontal,24).padding(.top,short ? 16 : 24).padding(.bottom,24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
             } else if waiting { ConstellationLoader().frame(maxWidth:.infinity).padding(.top,80) }
-        }.background(NightBackground(seed:park?.id ?? "nyx",park:park,veil:0.45))
+        }.restsDecorationWhileScrolling().background(NightBackground(seed:park?.id ?? "nyx",park:park,veil:0.45))
             // `-nyx-legend` (DEBUG): the key open, at the foot of the page, for review captures.
             .defaultScrollAnchor(DebugScenario.isEnabled("legend") ? .bottom : nil)
             .background { Color.clear.ignoresSafeArea().onGeometryChange(for:Double.self) { $0.size.height } action:{ screenHeight=$0 } }
@@ -441,6 +441,7 @@ struct CalendarView: View {
             .defaultScrollAnchor(.center,for:.initialOffset)
             .scrollIndicators(.hidden)
             .onScrollPhaseChange { _,phase in if phase == .idle { commit() } }
+            .restsDecorationWhileScrolling()
             // Edge to edge: the page slides under the column's margins instead of being cut at them.
             .padding(.horizontal,-24)
             // A new width rebuilds the pager, which lands on the current month through its initial anchor.
