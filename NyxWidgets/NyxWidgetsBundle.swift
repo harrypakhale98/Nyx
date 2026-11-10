@@ -122,8 +122,9 @@ struct MoonProvider:AppIntentTimelineProvider {
         if let unsaved=TonightProvider.unsaved(configuration.park,snapshot:snapshot) {
             return Timeline(entries:[MoonEntry(date:now,park:nil,nightVision:vision,unsaved:unsaved)],policy:.never)
         }
-        let (dates,end)=MoonEntry.moments(from:now,park:park)
-        return Timeline(entries:dates.map { MoonEntry(date:$0,park:park,nightVision:vision) },policy:.after(end))
+        let nights=park.map(MoonNights.init)
+        let (dates,end)=MoonEntry.moments(from:now,park:park,nights:nights)
+        return Timeline(entries:dates.map { MoonEntry(date:$0,park:park,nightVision:vision,nights:nights) },policy:.after(end))
     }
     /// The chosen park, else the first saved park; with neither, the gallery's preview shows Joshua
     /// Tree (`snapshot`) and a placed widget the phase alone.

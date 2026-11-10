@@ -65,7 +65,8 @@ import UIKit
     private var cloudTextures: [Int: TextureResource] = [:]
     private var cloudPending = Set<Int>()
     private var cloudWanted: (tenths: Int, presence: Double, color: SIMD3<Double>)?
-    private var cloudDrift: Task<Void, Never>?
+    /// Whether the deck drifts: turned by the sky's own frames (`drift(_:)`), never by a timer beside them.
+    private var cloudDrifting = false
     private var cloudYaw: Float = 0
     /// Draw order for what overlaps in the sky: the Milky Way, the stars, the figures, then the
     /// clouds over them, then every label over the clouds, so words are never clouded.
@@ -474,7 +475,7 @@ import UIKit
     private func placeClouds(_ cloud: Double?, light: SkyTextures.Light, palette: VisionPalette, reduceMotion: Bool) {
         guard let cloud, cloud > SkyDome.cloudLayerFrom else {
             cloudWanted = nil; clouds.isEnabled = false
-            cloudDrift?.cancel(); cloudDrift = nil
+            cloudDrifting = false
             return
         }
         let tenths = min(10, max(3, Int((cloud*10).rounded())))
@@ -489,20 +490,14 @@ import UIKit
             }
         }
         paintClouds()
-        if reduceMotion { cloudDrift?.cancel(); cloudDrift = nil }
-        else if cloudDrift == nil {
-            cloudDrift = Task { [weak self] in
-                var last = Date.now
-                while !Task.isCancelled {
-                    try? await Task.sleep(for: .milliseconds(50))
-                    guard let self else { return }
-                    let now = Date.now
-                    self.cloudYaw += Float(now.timeIntervalSince(last))*0.35*Float.pi/180
-                    last = now
-                    self.clouds.orientation = simd_quatf(angle: self.cloudYaw, axis: [0, 1, 0])
-                }
-            }
-        }
+        cloudDrifting = !reduceMotion
+    }
+    /// Moves the cloud deck on by one of the sky's frames, `seconds` long: smooth at the display's rate,
+    /// with no wake-ups of its own. A long gap (the space reopened) moves it no more than a tenth of a second would.
+    func drift(_ seconds: TimeInterval) {
+        guard cloudDrifting else { return }
+        cloudYaw += Float(min(seconds, 0.1))*0.35*Float.pi/180
+        clouds.orientation = simd_quatf(angle: cloudYaw, axis: [0, 1, 0])
     }
     private func paintClouds() {
         // Until its tenth is drawn, the nearest one already drawn stands in.

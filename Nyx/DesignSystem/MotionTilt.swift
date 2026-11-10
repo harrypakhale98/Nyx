@@ -8,15 +8,15 @@ import SwiftUI
 /// or Low Power Mode. Values are read inside per-frame drawing, so they are not observed.
 @MainActor final class MotionTilt {
     static let shared=MotionTilt()
-    /// Samples a second: the dial's glint is drawn at the display's rate on iPhone and iPad, so its
-    /// tilt has to arrive faster than the sky's parallax alone would need.
-    #if os(iOS)
-    nonisolated static let sampleRate=60.0
-    #else
-    nonisolated static let sampleRate=30.0
-    #endif
-    /// How far each sample moves the smoothed tilt: the same time constant at any sample rate.
-    nonisolated static var smoothing: Double { 1-pow(0.8,30/sampleRate) }
+    /// Samples a second: 30 for the sky's parallax (about 0.1 pt a frame), and 60 while a view that
+    /// draws at the display's rate wants it (the dial's glint, `motionTilt(_:fast:)`).
+    nonisolated static let sampleRate=30.0, fastRate=60.0
+    /// How far each sample at `rate` moves the smoothed tilt: the same time constant at any rate.
+    nonisolated static func smoothing(rate:Double)->Double { 1-pow(0.8,30/rate) }
+    /// The rate now: fast while any view that wants it fast is on screen.
+    private var rate: Double { fastClients>0 ? Self.fastRate : Self.sampleRate }
+    /// Of `clients`, those that want the fast rate.
+    private var fastClients=0
     private let manager=CMMotionManager()
     /// Views on screen that want tilt now (`motionTilt(_:)`); a view under Reduce Motion never counts.
     private var clients=0
@@ -40,8 +40,9 @@ import SwiftUI
         if on { manager.stopDeviceMotionUpdates(); x=0; y=0 } else if clients>0 { begin() }
     }
     /// One more view wants tilt. Called by `motionTilt(_:)`, which balances it with `stop()`.
-    func start() {
+    func start(fast:Bool=false) {
         clients+=1
+        if fast { fastClients+=1; if fastClients==1 { manager.deviceMotionUpdateInterval=1/rate } }
         if clients==1 { begin() }
     }
     /// Low Power Mode switched on or off while a view wants tilt.
@@ -51,17 +52,18 @@ import SwiftUI
     }
     private func begin() {
         guard !suspended,!manager.isDeviceMotionActive,!PowerState.shared.lowPower,manager.isDeviceMotionAvailable else { return }
-        manager.deviceMotionUpdateInterval=1/Self.sampleRate
+        manager.deviceMotionUpdateInterval=1/rate
         samples=0
         manager.startDeviceMotionUpdates(to:.main) { [weak self] motion,_ in
             guard let gravity=motion?.gravity else { return }
             MainActor.assumeIsolated {
                 guard let self else { return }
-                if self.samples%Int(Self.sampleRate/2)==0 { self.turns=self.interfaceTurns?() ?? 0 }
+                let rate=self.rate, smoothing=Self.smoothing(rate:rate)
+                if self.samples%Int(rate/2)==0 { self.turns=self.interfaceTurns?() ?? 0 }
                 self.samples+=1
                 let screen=Self.screenGravity(x:gravity.x,y:gravity.y,quarterTurns:self.turns)
-                self.x+=(max(-1,min(1,screen.x))-self.x)*Self.smoothing
-                self.y+=(max(-1,min(1,screen.y+0.6))-self.y)*Self.smoothing
+                self.x+=(max(-1,min(1,screen.x))-self.x)*smoothing
+                self.y+=(max(-1,min(1,screen.y+0.6))-self.y)*smoothing
             }
         }
     }
@@ -76,9 +78,10 @@ import SwiftUI
         default: (x,y)
         }
     }
-    func stop() {
+    func stop(fast:Bool=false) {
         guard clients>0 else { return }
         clients-=1
+        if fast, fastClients>0 { fastClients-=1; if fastClients==0 { manager.deviceMotionUpdateInterval=1/rate } }
         guard clients==0 else { return }
         manager.stopDeviceMotionUpdates()
         x=0; y=0
@@ -88,10 +91,12 @@ extension View {
     /// Holds a claim on the tilt while this view is on screen and `wanted` is true, and lets it go
     /// when the view leaves or stops wanting it (Reduce Motion turned on, scrolled away), so every
     /// view counts on its own and a change of setting takes effect without leaving the screen.
-    func motionTilt(_ wanted:Bool)->some View { modifier(MotionTiltClient(wanted:wanted)) }
+    /// `fast`: this view draws at the display's rate and wants tilt at `MotionTilt.fastRate`.
+    func motionTilt(_ wanted:Bool,fast:Bool=false)->some View { modifier(MotionTiltClient(wanted:wanted,fast:fast)) }
 }
 private struct MotionTiltClient: ViewModifier {
     let wanted: Bool
+    let fast: Bool
     @State private var onScreen=false
     @State private var claimed=false
     func body(content:Content)->some View {
@@ -104,7 +109,7 @@ private struct MotionTiltClient: ViewModifier {
         let want=onScreen && wanted
         guard want != claimed else { return }
         claimed=want
-        if want { MotionTilt.shared.start() } else { MotionTilt.shared.stop() }
+        if want { MotionTilt.shared.start(fast:fast) } else { MotionTilt.shared.stop(fast:fast) }
     }
 }
 

@@ -94,6 +94,27 @@ struct SpeedBenchmarks {
         let result=withUnsafeMutablePointer(to: &info) { $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) { task_info(mach_task_self_, task_flavor_t(TASK_VM_INFO), $0, &count) } }
         return result == KERN_SUCCESS ? Int(info.phys_footprint) : 0
     }
+    /// One pass of Tonight from Joshua Tree, whose reach crosses into Mexico, so every place in range
+    /// counts: it asks for the places in reach about ten times, ranks them, and once they are ready
+    /// looks up 30 nights at each for "Darker on…".
+    @Test func tonightPass() async throws {
+        let defaults=try #require(UserDefaults(suiteName: "nyx-bench-\(UUID().uuidString)"))
+        defaults.set("jotr", forKey: "homePark"); defaults.set(true, forKey: "startChosen")
+        let model=PlanModel(weather: WeatherService(transport: StubHTTP([:]), persist: false), parkStore: ParkStore(transport: StubHTTP([:]), persist: false),
+                            detail: ForecastDetailService(transport: StubHTTP([:]), persist: false), defaults: defaults)
+        await model.catalogReady()
+        let reach=model.placesInReach()
+        print("BENCH|places in reach|\(reach.places.count)")
+        let fresh=time("reach x10, worked out each time (before)") { for _ in 0..<10 { model.reachMemo=[:]; _=model.placesInReach() } }
+        let kept=time("reach x10, kept (after)") { for _ in 0..<10 { _=model.placesInReach() } }
+        let pool=model.ranked(reach.places)
+        _=time("rank the places in reach") { _=model.ranked(reach.places) }
+        let ahead=reach.world ? Array(pool.prefix(TonightReach.aheadSize)) : pool
+        _=ahead.map { model.nights($0, from: model.tonight($0), count: NightPlanner.horizon) }
+        _=time("darker ahead, \(ahead.count) places x 30 nights, kept") { _=ahead.map { model.nights($0, from: model.tonight($0), count: NightPlanner.horizon) } }
+        _=time("reach key x6") { for _ in 0..<6 { _=TonightReach.key(pool) } }
+        #expect(kept<=fresh)
+    }
     /// One night at 3,000 places (the 63 parks' records, moved about), as a catalogue that size would ask.
     @Test func catalog3000() throws {
         let url=try #require(Bundle.main.url(forResource: "parks", withExtension: "json"))

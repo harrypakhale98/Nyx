@@ -28,6 +28,8 @@ import Observation
     private(set) var catalogIsReady=false
     /// `reachCrossesUSEdge`'s last answer, by origin and radius: the outline is tested once per change.
     @ObservationIgnored var edgeMemo:(key:String,crosses:Bool)?
+    /// The places in reach for the last inputs asked about (`placesInReach`): Tonight asks several times a pass.
+    @ObservationIgnored var reachMemo:[ReachKey:(places:[Park],world:Bool)]=[:]
     /// The places in reach whose tonight has been worked out (`TonightReach.key`, `prepareReach`), and the
     /// night it was worked out on (`today`). Observed, so every screen that ranks them moves from waiting to
     /// the answer together, and the places themselves, so a night turning over elsewhere leaves it be (`tick`).
@@ -89,6 +91,9 @@ import Observation
     /// Journal entries' scores, by entry, night and park (`loggedNights`). The score never reads
     /// "now", so only a change of forecasts or detail clears them.
     @ObservationIgnored private var journalScores: [JournalScoreKey:Int?] = [:]
+    /// The evenings the Journal has scored, whose astronomy the nightly trim keeps (`trimPastNights`).
+    @ObservationIgnored private var journalEvenings: Set<JournalEvening> = []
+    nonisolated struct JournalEvening: Hashable { let park: String; let evening: Date }
     nonisolated private struct JournalScoreKey: Hashable, Sendable { let id:UUID; let date:Date; let park:String }
     /// What's up each night. Astronomy only, so never invalidated by a forecast.
     @ObservationIgnored private var skyCache: [SkyKey:WhatsUp] = [:]
@@ -288,7 +293,8 @@ import Observation
     private func trimPastNights() {
         let tonights=Dictionary((places+viewedCatalog).map { ($0.id,tonight($0)) },uniquingKeysWith:{ first,_ in first })
         func current(_ id:String,_ night:Date)->Bool { tonights[id].map { night>=$0 } ?? true }
-        for (id,nights) in conditions { conditions[id]=nights.filter { current(id,$0.key) } }
+        // A recorded night's astronomy never changes: the Journal keeps it rather than working it out again each day.
+        for (id,nights) in conditions { conditions[id]=nights.filter { current(id,$0.key) || journalEvenings.contains(JournalEvening(park:id,evening:$0.key)) } }
         for (id,nights) in outlookCache { outlookCache[id]=nights.filter { current(id,$0.key) } }
         for (id,nights) in nightMemo { nightMemo[id]=nights.filter { current(id,$0.key) } }
         skyCache=skyCache.filter { current($0.key.park,$0.key.night) }
@@ -587,7 +593,10 @@ import Observation
             if kept != nil { _=forecasts[parkID]; _=details[parkID] }
             return kept
         }
-        let score=park(parkID).map { night($0,on:date).score.value }
+        let score=park(parkID).map { place in
+            journalEvenings.insert(JournalEvening(park:place.id,evening:place.evening(date)))
+            return night(place,on:date).score.value
+        }
         journalScores[key]=score
         return score
     }

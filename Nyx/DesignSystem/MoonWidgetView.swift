@@ -15,21 +15,23 @@ struct MoonEntry: TimelineEntry {
     /// Set to a place no longer saved (`TonightProvider.unsaved`): its name, or "" when the setting
     /// kept none. The widget says so rather than showing the Moon from nowhere in particular.
     let unsaved: String?
-    init(date: Date, park: Park?, nightVision: Bool, unsaved: String?=nil) {
+    /// `nights`: the park's nights already worked out for this timeline (`MoonNights`), so its entries share them.
+    init(date: Date, park: Park?, nightVision: Bool, unsaved: String?=nil, nights: MoonNights?=nil) {
         self.date=date; self.park=park; self.nightVision=nightVision; self.unsaved=unsaved
         let night=park.map { $0.currentNight(at: date) }
         // Tonight's Moon: the night's lit fraction, as the Tonight widget shows it, so two widgets
         // never give tonight's Moon two figures; up or down and the next rise or set stay live.
-        moon=MoonNow(at: date, park: park, night: night)
+        let events=park.flatMap { park in nights.map { MoonNow.events(at: park, around: date, sky: $0.sky) } }
+        moon=MoonNow(at: date, park: park, events: events, night: night)
         self.night=night
     }
     /// When a timeline from `now` redraws, through `end`: now, every hour for a day, a second past each
     /// rise and set ("up now" and the next event), and the park's sunrise turnovers, where its night,
     /// and so the night's lit fraction, moves on as the Tonight widget's does (`Park.nightTurnovers`).
-    static func moments(from now: Date, park: Park?) -> (dates: [Date], end: Date) {
+    static func moments(from now: Date, park: Park?, nights: MoonNights?=nil) -> (dates: [Date], end: Date) {
         let hour=Calendar.current.dateInterval(of: .hour, for: now)?.end ?? now.addingTimeInterval(3600)
         let end=hour.addingTimeInterval(23*3600)
-        let events=park.map { MoonNow.events(at: $0, around: now).map(\.date).filter { $0>now && $0<end } } ?? []
+        let events=park.map { MoonNow.events(at: $0, around: now, sky: nights?.sky).map(\.date).filter { $0>now && $0<end } } ?? []
         let turnovers=park?.nightTurnovers(from: now, to: end) ?? []
         return (Set([now]+(0..<24).map { hour.addingTimeInterval(Double($0)*3600) }+events.map { $0.addingTimeInterval(1) }+turnovers).sorted(), end)
     }
@@ -37,6 +39,20 @@ struct MoonEntry: TimelineEntry {
     /// App Group's snapshot (0.8 MB, decoded synchronously, for a shape drawn redacted).
     static func placeholder(at date: Date = .now) -> MoonEntry {
         MoonEntry(date: date, park: (try? ParkData.load())?.first { $0.id == Park.defaultID }, nightVision: false)
+    }
+}
+/// One park's nights for a whole Moon timeline: each of its 25 or so entries finds its rise and set
+/// among the same three or four nights, worked out once here rather than three times an entry.
+nonisolated final class MoonNights {
+    let park: Park
+    private let engine=AstronomyEngine()
+    private var kept: [Date: SkyConditions]=[:]
+    init(park: Park) { self.park=park }
+    func sky(_ evening: Date) -> SkyConditions {
+        if let night=kept[evening] { return night }
+        let night=engine.conditions(for: park, on: evening)
+        kept[evening]=night
+        return night
     }
 }
 struct MoonWidgetView: View {

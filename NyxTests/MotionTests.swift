@@ -171,6 +171,18 @@ import Testing
         }
         #expect(Decoration.rate == 30)
     }
+    /// Tonight's "Darker on…" is worked out once per set of inputs, and again as soon as one moves.
+    @Test func darkerVerdictIsKeptUntilAnInputMoves() {
+        let memo=DarkerMemo(), night=Date(timeIntervalSinceReferenceDate:0)
+        let key=DarkerMemo.Key(pool:"a,b",night:night,park:"a",score:70,revision:1,today:night,minute:0)
+        var runs=0
+        _=memo.verdict(for:key) { runs+=1; return nil }
+        _=memo.verdict(for:key) { runs+=1; return nil }
+        #expect(runs == 1)
+        _=memo.verdict(for:DarkerMemo.Key(pool:"a,b",night:night,park:"a",score:70,revision:2,today:night,minute:0)) { runs+=1; return nil }
+        _=memo.verdict(for:DarkerMemo.Key(pool:"a,b,c",night:night,park:"a",score:70,revision:2,today:night,minute:0)) { runs+=1; return nil }
+        #expect(runs == 3)
+    }
     /// The dial's stars and the loading sweep ask for the display's own rate, not a fixed one.
     @Test func travellingDecorationRunsAtTheDisplaysRate() {
         #expect(Decoration.movingInterval == nil)
@@ -203,10 +215,13 @@ import Testing
         clock.release(at:start.addingTimeInterval(4))
         #expect(clock.time(at:start.addingTimeInterval(5)) == 1)
     }
-    /// The tilt's smoothing keeps its time constant whatever the sample rate.
+    /// The tilt's smoothing keeps its time constant at either sample rate, and only the dial asks for the faster one.
     @Test func tiltSmoothingIsTheSameInTime() {
-        let perThirtieth=1-pow(1-MotionTilt.smoothing,MotionTilt.sampleRate/30)
-        #expect(abs(perThirtieth-0.2) < 1e-9)
+        for rate in [MotionTilt.sampleRate,MotionTilt.fastRate] {
+            let perThirtieth=1-pow(1-MotionTilt.smoothing(rate:rate),rate/30)
+            #expect(abs(perThirtieth-0.2) < 1e-9)
+        }
+        #expect(MotionTilt.sampleRate == 30 && MotionTilt.fastRate == 60)
     }
     /// The tilt is read as the screen sees it: held at the reading angle in either landscape, the
     /// dial's glint rests where it does in portrait, and tipping the screen's right edge down reads as

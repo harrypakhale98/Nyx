@@ -108,16 +108,26 @@ struct SkyMapCanvas: View {
                 }
                 context.stroke(path,with:.color(palette.ink.opacity(palette.highContrast ? 0.8 : 0.5)),style:StrokeStyle(lineWidth:0.8*palette.stroke,lineCap:.round))
             }
-            // Your stars: a soft halo and a bright core, brighter for darker nights.
-            for star in content.stars {
-                let p=screen(star.point), b=star.brightness
-                let born=star.id==arriving ? StarArrival.core(arrival) : 1
-                guard born>0.001 else { continue }
-                let core=(1.2+2.6*b)*born, halo=(1.2+2.6*b)*3.2*(star.id==arriving ? StarArrival.halo(arrival) : 1)
+            // Your stars: a soft halo and a bright core, brighter for darker nights. The halos are blurred a
+            // layer per whole point of blur (four at most), not a layer per star: a journal of hundreds of
+            // nights drew hundreds of blurs a frame while the map drew itself in. The arriving star keeps its own.
+            func halo(_ star:SkyMapContent.Star)->Double { (1.2+2.6*star.brightness)*3.2*(star.id==arriving ? StarArrival.halo(arrival) : 1) }
+            func born(_ star:SkyMapContent.Star)->Double { star.id==arriving ? StarArrival.core(arrival) : 1 }
+            let lit=content.stars.filter { born($0)>0.001 }
+            // In a fixed order (the arriving star last, over the rest), so overlapping halos never swap a frame to the next.
+            let layers=Dictionary(grouping:lit,by:{ $0.id==arriving ? Int.max : Int((halo($0)/2.4).rounded()) }).sorted { $0.key<$1.key }
+            for (blur,stars) in layers {
                 context.drawLayer { glow in
-                    glow.addFilter(.blur(radius:halo/2.4))
-                    glow.fill(Path(ellipseIn:CGRect(x:p.x-halo/2,y:p.y-halo/2,width:halo,height:halo)),with:.color(palette.accent.opacity(0.35+0.4*b)))
+                    glow.addFilter(.blur(radius:blur==Int.max ? halo(stars[0])/2.4 : Double(blur)))
+                    for star in stars {
+                        let p=screen(star.point), size=halo(star)
+                        glow.fill(Path(ellipseIn:CGRect(x:p.x-size/2,y:p.y-size/2,width:size,height:size)),with:.color(palette.accent.opacity(0.35+0.4*star.brightness)))
+                    }
                 }
+            }
+            for star in lit {
+                let p=screen(star.point), b=star.brightness
+                let core=(1.2+2.6*b)*born(star)
                 context.fill(Path(ellipseIn:CGRect(x:p.x-core/2,y:p.y-core/2,width:core,height:core)),with:.color(palette.ink.opacity(0.55+0.45*b)))
                 if star.ringed {
                     context.stroke(Path(ellipseIn:CGRect(x:p.x-9,y:p.y-9,width:18,height:18)),with:.color(palette.accent.opacity(palette.highContrast ? 1 : 0.8)),lineWidth:0.9*palette.stroke)

@@ -13,6 +13,17 @@ extension PlanModel {
     /// (`TonightReach`): from a US starting point with only US places in range, the national parks
     /// exactly as before the world catalogue; otherwise every place in range, catalogue and spots too.
     func placesInReach(radiusMeters:Double?=nil)->(places:[Park],world:Bool) {
+        // Every input is read here, kept or not, so a screen still redraws when one changes (the memo is not observed).
+        let key=ReachKey(latitude:location.latitude,longitude:location.longitude,origin:reachOrigin.map { [$0.latitude,$0.longitude] },
+                         radius:radiusMeters ?? self.radiusMeters,catalog:catalog.count,spots:spots.map { ReachKey.Spot(id:$0.id,latitude:$0.latitude,longitude:$0.longitude) })
+        if let kept=reachMemo[key] { return kept }
+        let found=reach(radiusMeters:radiusMeters)
+        // Two radii at most are asked for at once (the chosen one and the wider offer's); a move starts afresh.
+        if reachMemo.count>=4 { reachMemo=[:] }
+        reachMemo[key]=found
+        return found
+    }
+    private func reach(radiusMeters:Double?)->(places:[Park],world:Bool) {
         let parks=nearby(latitude:location.latitude,longitude:location.longitude,radiusMeters:radiusMeters)
         guard !catalog.isEmpty, let from=reachOrigin else { return (parks,false) }
         let everything=places(near:from.latitude,longitude:from.longitude,radiusMeters:radiusMeters ?? self.radiusMeters)
@@ -71,4 +82,14 @@ extension PlanModel {
     /// Whether a forecast is old enough to say when it is from, and to refresh: older than the age at
     /// which clouds are asked for again (`ForecastReuse.clouds`), measured from `present`.
     func forecastIsStale(_ updated:Date)->Bool { present.timeIntervalSince(updated)>ForecastReuse.clouds }
+}
+/// What the places in reach depend on (`PlanModel.placesInReach`).
+nonisolated struct ReachKey: Hashable {
+    let latitude: Double?
+    let longitude: Double?
+    let origin: [Double]?
+    let radius: Double
+    let catalog: Int
+    let spots: [Spot]
+    struct Spot: Hashable { let id: String; let latitude: Double; let longitude: Double }
 }

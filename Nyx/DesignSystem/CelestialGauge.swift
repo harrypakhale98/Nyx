@@ -207,7 +207,7 @@ struct CelestialGauge: View {
         .sensoryFeedback(.impact(weight:.light),trigger:landed) { _,_ in haptics }
         .onScrollVisibilityChange(threshold:0.02) { onScreen=$0 }
         // Tilt only while the glint can be drawn and the dial is in view.
-        .motionTilt(onScreen && !export && !reduceMotion && !palette.nightVision && !access.reduceHighlighting && !access.reducedResources)
+        .motionTilt(onScreen && !export && !reduceMotion && !palette.nightVision && !access.reduceHighlighting && !access.reducedResources,fast:true)
     }
     /// The label is the settled answer from the first frame (VoiceOver never hears the count),
     /// with the models' range when the dial draws it.

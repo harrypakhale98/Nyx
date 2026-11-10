@@ -92,6 +92,19 @@ import WidgetKit
         #expect(MoonEntry.moments(from: now, park: nil).dates.count == 25)
     }
 
+    /// A timeline's entries share one set of nights (`MoonNights`) and say exactly what each entry
+    /// working out its own nights says, in every park including the far north and the south.
+    @Test func moonTimelineSharesItsNightsWithoutChangingAnEntry() throws {
+        for id in ["jotr", "gaar", "npsa"] {
+            let place = try park(id), nights = MoonNights(park: place)
+            let shared = MoonEntry.moments(from: now, park: place, nights: nights)
+            #expect(shared.dates == MoonEntry.moments(from: now, park: place).dates, "\(id)")
+            for date in shared.dates {
+                let alone = MoonEntry(date: date, park: place, nightVision: false), kept = MoonEntry(date: date, park: place, nightVision: false, nights: nights)
+                #expect(kept.moon.next == alone.moon.next && kept.moon.isUp == alone.moon.isUp && kept.night == alone.night, "\(id) \(date)")
+            }
+        }
+    }
     @Test func moonRectangleFollowsTheReadersPercentAndSaysNoEventItCannotKnow() throws {
         let gaar = try park("gaar")
         let moon = MoonNow(at: now, park: nil)

@@ -54,6 +54,8 @@ struct TonightView: View {
     @State private var widerPrepared:String?
     /// The places' 30 nights behind "Darker on…" (`NightPlanner.horizon`), worked out off the main thread first.
     @State private var aheadPrepared:String?
+    /// "Darker on…" for the inputs it was worked out from (`DarkerMemo`).
+    @State private var darkerMemo=DarkerMemo()
     /// The nearest dark sky when the places in reach are bright or absent (`DarkerSky`), for the
     /// key it was worked out for; worked out off the main thread from the bundled light map.
     @State private var darkerSky:(key:String,offer:DarkerSky.Offer?)?
@@ -921,9 +923,15 @@ struct TonightView: View {
         if aheadPrepared == TonightReach.key(aheadPool) { darkerCapsule(than:tonight) }
     }
     @ViewBuilder private func darkerCapsule(than tonight:Night)->some View {
-        let closures=Dictionary(aheadPool.compactMap { park in model.closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
-        let here=model.nights(tonight.park,from:model.tonight(tonight.park),count:NightPlanner.horizon)
-        let ahead=NightVerdict.darkerAhead(than:tonight,here:here,across:aheadPool.map { model.nights($0,from:model.tonight($0),count:NightPlanner.horizon) },closures:closures)
+        let pool=aheadPool
+        // `dataRevision` moves with every forecast, detail and closure the verdict reads, so a kept verdict is never an old one.
+        let key=DarkerMemo.Key(pool:TonightReach.key(pool),night:tonight.id,park:tonight.park.id,score:tonight.score.value,
+                               revision:model.dataRevision,today:model.today,minute:Int(model.present.timeIntervalSince1970/60))
+        let ahead=darkerMemo.verdict(for:key) {
+            let closures=Dictionary(pool.compactMap { park in model.closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
+            let here=model.nights(tonight.park,from:model.tonight(tonight.park),count:NightPlanner.horizon)
+            return NightVerdict.darkerAhead(than:tonight,here:here,across:pool.map { model.nights($0,from:model.tonight($0),count:NightPlanner.horizon) },closures:closures)
+        }
         if let ahead {
             capsule(text:NightVerdict.capsule(ahead,here:ahead.park.id==tonight.park.id),hint:"Opens that night at the park.") {
                 ParkDetailView(park:ahead.park,initialDate:ahead.id)
@@ -1259,4 +1267,17 @@ struct DialNightsTip: Tip {
     var title: Text { Text("Drag across the dial") }
     var message: Text? { Text("Step through the next two weeks. Each night shows the darkest place in reach.") }
     var image: Image? { Image(systemName:"hand.draw") }
+}
+/// Tonight's "Darker on…" verdict, kept until one of its inputs moves: reading 30 nights at every place
+/// in reach took about 2 ms, and the page redraws on every step of the dial. A plain reference held in
+/// `@State`, so keeping it never redraws the page.
+@MainActor final class DarkerMemo {
+    struct Key: Equatable { let pool: String; let night: Date; let park: String; let score: Int; let revision: Int; let today: Date; let minute: Int }
+    private var kept: (key: Key, verdict: Night?)?
+    func verdict(for key: Key, _ work: () -> Night?) -> Night? {
+        if let kept, kept.key == key { return kept.verdict }
+        let verdict=work()
+        kept=(key, verdict)
+        return verdict
+    }
 }

@@ -29,7 +29,10 @@ struct SkySpace: View {
             }
             // The clock's sweeps and the hand's chase advance with the sky's own frames, so the stars
             // turn in step with what is drawn rather than with a timer beside it.
-            scene.frames = content.subscribe(to: SceneEvents.Update.self) { _ in model.advance(to: .now) }
+            scene.frames = content.subscribe(to: SceneEvents.Update.self) { [weak scene = scene] event in
+                model.advance(to: .now)
+                scene?.drift(event.deltaTime)
+            }
             // VoiceOver's swipe up and down on the sky move the clock half an hour.
             scene.adjustments = [
                 content.subscribe(to: AccessibilityEvents.Increment.self) { _ in Self.step(1800, in: model) },

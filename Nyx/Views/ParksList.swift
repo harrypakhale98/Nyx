@@ -27,6 +27,7 @@ struct ParksView: View {
     var selection: Binding<String?>?=nil
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyxAccess) private var access
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @FocusState private var searchFocused: Bool
     /// The search and the narrowing switches: the tab's (`ParksTab`), so a resize that trades the split for a
     /// stack keeps them; the list's own where nothing hands them in.
@@ -325,6 +326,8 @@ struct ParksView: View {
     struct RotorPark: Identifiable { let id: String; let label: String }
     /// One rotor stop for each park on screen that `label` names, in the order shown.
     private func rotor(_ spots:[Park],_ shown:[Park],_ label:(Park)->String?)->[RotorPark] {
+        // Only VoiceOver reads a rotor: without it, every update would still score and word each row for nothing.
+        guard voiceOver else { return [] }
         let sectioned = showsSavedSection
         let first=sectioned ? model.parks.filter { p in saved.contains { $0.parkID==p.id } } : []
         let rest=shown.filter { p in !(sectioned && saved.contains { $0.parkID==p.id }) }
