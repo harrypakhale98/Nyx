@@ -44,7 +44,7 @@ nonisolated struct NyxPalette: Equatable, Sendable {
     var selectionTint:Color { nightVision ? Color(white:0.22) : Color(red:0.65,green:0.35,blue:0.10) }
     /// Secondary text's opacity over its ink, the one rule for every surface (the app, `NightLook`'s
     /// widgets, Live Activity and Siri cards): starlight at 72%, 90% under Increase Contrast; night
-    /// vision's red, already dim, at 96% (4.5:1 for protan eyes too, `Scripts/contrast.py`) and in full
+    /// vision's red, already dim, at 96% (4.5:1 for protan eyes too) and in full
     /// under Increase Contrast.
     static func mutedOpacity(nightVision: Bool, highContrast: Bool) -> Double {
         nightVision ? (highContrast ? 1 : 0.96) : highContrast ? 0.9 : 0.72
@@ -76,7 +76,7 @@ nonisolated struct NyxPalette: Equatable, Sendable {
 /// protan eyes) is chosen under Increase Contrast or by hand.
 nonisolated enum NightTint: String, Sendable, CaseIterable {
     case standard, brighter
-    /// The multiplier, gamma-encoded sRGB (`Scripts/contrast.py` measures both). The default must pass
+    /// The multiplier, gamma-encoded sRGB (both are measured for contrast). The default must pass
     /// for everyone: Vision Pro has no setting of its own.
     var rgb: SIMD3<Double> { self == .standard ? SIMD3(1,0.36,0.25) : SIMD3(1,0.45,0.32) }
     var color: Color { Color(red:rgb.x,green:rgb.y,blue:rgb.z) }

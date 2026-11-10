@@ -21,7 +21,7 @@ import UniformTypeIdentifiers
 /// over the Milky Way. Tuning: `-nyx-universal-dial 300` (the dial's side in points),
 /// `-nyx-universal-dial-x 0.5` / `-nyx-universal-dial-y 0.5` (its centre within the safe area),
 /// `-nyx-universal-guides` (outlines the safe area, for review only). `-nyx-universal-dial 0` draws the
-/// sky alone, the backdrop `Scripts/make_search_asset.swift` puts a screen on.
+/// sky alone, the backdrop for the search artwork.
 @MainActor enum DebugHeaderExport {
     static let pixels=CGSize(width:3840,height:1646)
     static let universalPixels=CGSize(width:5244,height:2950)

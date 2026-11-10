@@ -267,7 +267,7 @@ private struct GaugeArc: View, Animatable {
             .environment(\.nyx, NyxPalette(nightVision: true, highContrast: false)).modifier(NightVisionFilter(enabled: true))
     }
 }
-/// The night on the dial, for the three states the brief names: a moonlit night with a best window
+/// The night on the dial in its three states: a moonlit night with a best window
 /// (the window stands in for one the hourly clouds would give), a new-moon night, and Always-On.
 /// "Now" is set inside each night so the leading star shows.
 #Preview("Night • moonlit") {

@@ -215,7 +215,7 @@ nonisolated struct SkyAlmanac: Sendable {
         var driftDec: Double?
         let zhr: Double
         var variable: Bool?
-        /// Published peak instants by year, ISO 8601 — preferred over the computed one when present.
+        /// Published peak instants by year, ISO 8601, preferred over the computed one when present.
         var peaks: [String: String]?
         /// Activity profile steepness, ZHR ∝ 10^(−B·|Δλ|) (IMO). Most showers rise and fall over days.
         var profileB: Double?
