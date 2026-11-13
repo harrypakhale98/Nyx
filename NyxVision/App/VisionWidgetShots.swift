@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 /// DEBUG `-nyx-vision-widget-shots`: renders the widget's faces (small, medium, large, simplified) for
 /// tonight and a week on into the app's tmp folder, since the simulator cannot place a widget

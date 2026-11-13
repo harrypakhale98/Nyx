@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import UIKit
 @testable import Nyx
 
 /// Apple Watch's dial face (`WatchDialFace`): the band word clears every tick, gives way before

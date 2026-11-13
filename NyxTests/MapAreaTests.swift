@@ -1,5 +1,6 @@
 import Foundation
 import CoreGraphics
+import SwiftUI
 import UIKit
 import Testing
 @testable import Nyx

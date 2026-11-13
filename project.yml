@@ -8,6 +8,10 @@ options:
     watchOS: "26.0"
     visionOS: "26.0"
   defaultSourceDirectoryType: syncedFolder
+  # The Xcode the project was last checked against (LastUpgradeCheck). Raise it with each new Xcode, after
+  # comparing the settings below with that Xcode's new-project template, so Xcode never offers to
+  # "update to recommended settings" (accepting that rewrites the plists and schemes xcodegen owns).
+  xcodeVersion: "27.2"
   createIntermediateGroups: true
 # Single files shared into the extensions, the watch and Vision Pro carry `group: Shared`. Without it each
 # one builds an intermediate "Nyx" (or "NyxVision", "NyxVisionWidgets") group beside the synchronized folder
@@ -28,6 +32,11 @@ settings:
     SWIFT_EMIT_LOC_STRINGS: YES
     STRING_CATALOG_GENERATE_SYMBOLS: NO
     SWIFT_APPROACHABLE_CONCURRENCY: YES
+    # Xcode 27.2's recommended settings, as in its new-project template.
+    SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: YES
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+    CLANG_CXX_LANGUAGE_STANDARD: gnu++20
+    GCC_C_LANGUAGE_STANDARD: gnu17
   # Warnings fail Debug builds (every local and CI build and test), never a Release archive: a new
   # deprecation in an Xcode point release must not block a launch-day fix.
   configs:

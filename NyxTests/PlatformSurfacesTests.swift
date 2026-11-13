@@ -1,5 +1,7 @@
+import ActivityKit
 import AppIntents
 import CoreLocation
+import CoreSpotlight
 import Foundation
 import GeoToolbox
 import SwiftUI

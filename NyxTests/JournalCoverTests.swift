@@ -3,6 +3,7 @@ import Foundation
 import SwiftData
 import Testing
 import UIKit
+import UniformTypeIdentifiers
 @testable import Nyx
 
 /// The cards' thumbnails moved out of the entries' rows (V3): every way an older store arrives

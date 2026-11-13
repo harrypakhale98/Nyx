@@ -3,6 +3,7 @@ import Foundation
 import SwiftData
 import UIKit
 import Testing
+import UniformTypeIdentifiers
 @testable import Nyx
 
 private func alert(_ id: String, _ title: String, _ category: String, _ code: String) -> String {

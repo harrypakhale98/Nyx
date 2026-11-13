@@ -1,3 +1,4 @@
+import CoreTransferable
 import Foundation
 import Testing
 import UniformTypeIdentifiers

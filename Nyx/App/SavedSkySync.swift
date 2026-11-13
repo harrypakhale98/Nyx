@@ -1,3 +1,5 @@
+import ActivityKit
+import AppIntents
 import BackgroundTasks
 import SwiftData
 import SwiftUI
