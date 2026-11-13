@@ -1,6 +1,50 @@
+Nyx — Proprietary Source-Available Licence
+
 Copyright © 2026 Hardik Pakhale. All rights reserved.
 
-The source code, design, data files and other content in this repository are
-published for reference only. No permission is granted to copy, modify,
-distribute or use any part of it, in whole or in part, without the prior
-written permission of the copyright holder.
+"Nyx" means the app of that name for iPhone, iPad, Apple Watch and Apple
+Vision Pro, and everything in this repository: source code, the Darkness
+Score method and its implementation, bundled data sets and curated place
+lists, designs, shaders, artwork, the app icon, screenshots, text, and the
+website content in docs/ (together, the "Work").
+
+The Work is published so that people can read it and see how Nyx handles
+data. Publication is not a grant of rights.
+
+1. What you may do
+   - Read the Work and view it on GitHub.
+   - Clone it to read it, for personal, non-commercial study only.
+   - Quote short excerpts with credit, for review, criticism or reporting.
+   - Report a problem as described in SECURITY.md.
+
+2. What you may not do without prior written permission
+   - Copy, modify, translate, adapt or create derivative works of the Work.
+   - Distribute, publish, sublicense, sell, rent or host the Work or any
+     part of it, including in a fork made to redistribute or continue it.
+   - Build, compile or submit an app, service, website or product from the
+     Work, or from a substantially similar reimplementation made by copying
+     its structure, data, design or scoring method from the Work.
+   - Use the Work, its data or its designs to train, fine-tune or evaluate a
+     machine-learning model, or to build a dataset, other than for reading.
+   - Use the Nyx name, icon, screenshots or branding in a way that suggests
+     your product is Nyx or is endorsed by it.
+   - Remove or alter this notice or any copyright notice.
+
+3. Third-party material
+   Data and software from others included in or used by the Work (for
+   example NASA, NOAA, NPS, Open-Meteo, Copernicus, DarkSky International,
+   IAGA and the Yale Bright Star Catalogue) keep their own licences and
+   terms, which are stated in README.md and in the app's credits. Nothing
+   here changes them.
+
+4. No warranty
+   The Work is provided "as is", without warranty of any kind. Darkness
+   scores are estimates and are not a safety guarantee. To the extent the
+   law allows, the copyright holder is not liable for any claim arising from
+   the Work.
+
+5. Termination
+   Any breach of this licence ends the permissions in section 1 at once.
+
+6. Permission
+   To ask for permission, email the address in SECURITY.md.

@@ -22,16 +22,11 @@ No account, no ads, no tracking, no backend. Everything is computed on the devic
 
 ## How the score works
 
-| Part | Points |
-|---|---|
-| Moon: how much moonlight falls during true darkness (phase and height) | 40 |
-| Clouds: average cover over the dark window, inverted | 25 |
-| Sky darkness: Bortle class | 20 |
-| Length of astronomical darkness, up to 10 hours | 15 |
+The score blends four things: how much moonlight falls during true darkness, how clear the sky is, how dark the place is (its Bortle class), and how long true darkness lasts. The Moon counts most.
 
 90+ Pristine, 75+ Excellent, 60+ Good, 40+ Fair, below that Poor.
 
-The weakest condition then caps the total, so a moonless night under heavy cloud or next to a city can't score well just because the other parts are good. No true darkness (Alaska in summer) caps a night at 39, a full Moon high through the night caps it near 40, and smoke caps it at Good or Fair. A forecast counts in full for about three days; from there to ten days it is eased toward each place's usual cover for the month (ERA5, 2015–2024), and past that the usual cover counts alone. Where a place has no usual cover on record, an early look counts the forecast as it stands and, past ten days, the score counts the Moon and darkness only. Each night is labelled with which it is. The details are in [`ScoreEngine.swift`](Nyx/Services/ScoreEngine.swift).
+The weakest condition then limits the total, so a moonless night under heavy cloud or next to a city can't score well just because the other parts are good. Where there is no true darkness, or smoke fills the sky, the score is held down to match. A forecast counts in full for the next few days. Further out it is eased toward each place's usual cover for the month, and past the forecast range the score counts the Moon and darkness only. Each night is labelled with which it is.
 
 The astronomy runs on the device: NOAA solar equations for sunrise, sunset and twilight, and a low-precision Meeus lunar model for the Moon. Moonrise and moonset agree with the U.S. Naval Observatory to within a few minutes (under 4 at mid-latitude parks); terrain can shift what you see. Results were checked against USNO data, including polar and tropical cases.
 
@@ -113,6 +108,8 @@ No endorsement by the NPS, NASA or DarkSky International is implied.
 
 Copyright © 2026 Hardik Pakhale. All rights reserved.
 
-The source is public so people can see how Nyx works and what it does with data. It isn't licensed for reuse or redistribution. Bundled third-party data keeps its own licence.
+The source is public so people can see how Nyx works and what it does with data. It is not open source and is not licensed for reuse. You may not copy, fork for redistribution, republish, or build an app or service from the code, the bundled data, the designs, the icon or the screenshots. See [LICENSE](LICENSE) for the full terms. Bundled third-party data keeps its own licence.
+
+To ask for permission, email the address in [SECURITY.md](SECURITY.md).
 
 Security issues: see [SECURITY.md](SECURITY.md).
